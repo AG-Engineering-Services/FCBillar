@@ -1,0 +1,699 @@
+<!DOCTYPE html><html class="js flexbox canvas canvastext webgl no-touch geolocation postmessage no-websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers no-applicationcache svg inlinesvg smil svgclippaths" style=""><!--<![endif]--><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+  <base href="https://www.fcbillar.cat/">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <title>Intranet</title>
+  <!-- Modernizr -->
+  <script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-1MK6B7HBW4&amp;cx=c&amp;_slc=1"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script src="js/libs/modernizr-2.6.2.min.js"></script>
+  <!-- jQuery -->
+  <script src="js/libs/jquery-1.10.2.min.js"></script>
+
+  <!-- framework css --><!--[if gt IE 9]><!-->
+  <link type="text/css" rel="stylesheet" href="css/cssImport.css">
+  <!--<![endif]-->
+  <!--[if lte IE 9]>
+  <link type="text/css" rel="stylesheet" href="css/cssImportAntiguo.css">
+  <![endif]-->
+
+  <script type="text/javascript" src="js/plugins/jquery.cycle2.js"></script>
+  <script type="text/javascript" src="js/groundwork.all.js"></script>
+  <script type="text/javascript" src="js/socialite.min.js"></script>
+  <script type="text/javascript" src="js/jquery.cookie.js"></script>
+  <!--<script type="text/javascript" src="js/jquery.cycle2.min.js"></script>-->
+  <script type="text/javascript" src="js/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="js/jquery.validate.min.js"></script>
+  <script type="text/javascript" src="js/jquery.toast.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="css/jquery.toast.min.css">
+  <link href="http://fonts.googleapis.com/css?family=Abel" rel="stylesheet" type="text/css">
+
+  <link href="rss/allNews" rel="alternate" type="application/rss+xml" title="Canal notícies">
+  <link rel="shortcut icon" href="favicon.ico">
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-40717931-8', 'fcbillar.cat');
+  ga('send', 'pageview');
+  </script>
+<style type="text/css">.fancybox-margin{margin-right:0px;}</style><style type="text/css">  [data-truncated="true"] { overflow: hidden; }  [data-truncated="true"]:after { content: "..."; position: absolute; }</style></head>
+<body style="">
+  <div class="container">
+    <header>
+      <!-- Cabecera -->
+      <div class="row">
+        <div class="one fifth logo">
+          <a href="ca/home"><img src="clipart/fcb-logo.png" alt="Federació Catalana de Billar"></a>
+        </div>
+        <div class="four fifths">
+          <img src="clipart/logo-fcbillar.png" alt="Federació Catalana de Billar">
+          <a href="https://www.ufec.cat/" target="_blank" class="noicon"><img src="clipart/logo-ufec.png" alt="Unió de federacions esportives catalanes"></a><a href="https://web.gencat.cat/ca/inici/" target="_blank" class="noicon"><img src="clipart/logo-generalitat.png" alt="Generalitat de Catalunya"></a><a href="https://esports.gencat.cat/ca/" target="_blank" class="noicon"><img src="clipart/logo-esportcat.png" alt="EsportCat"></a><a href="https://unioesports.cat" target="_blank" class="noicon"><img src="clipart/logo-UEC.png" alt="Unió Esports Catalunya"></a>
+        </div>
+      </div>
+      <!-- Menu principal -->
+      <div class="row marginbottom-15">
+        <nav id="menu" class="nav small-tablet" title="Menú principal"><button class="hamburger"></button>
+          <ul role="menubar">
+            <li class="one seventh" role="menu"><a href="#nowhere" class="noicon" title="Federacio">Federació</a>
+              <ul role="menu">
+                <li><a href="ca/s/5/Federacio" class="noicon" title="Actualitat Federacio">Actualitat</a></li>
+                <li><a href="ca/docs/s/5/Federacio/c/0/15/0" title="Documentació" class="noicon">Documentació</a></li>
+                <li><a href="ca/galeries/s/5/Federacio/c/0/0">Galeries fotogràfiques</a></li>
+                <li><a href="ca/info/view/s/5/Federacio/i/3/Organigrama/c/0/0" title="Organigrama" class="noicon">Organigrama</a></li>
+                <li><a href="ca/info/view/s/5/Federacio/i/4/Estatuts-Federaci-Catalana-de-Billar-2014/c/0/0" title="Estatuts" class="noicon">Estatuts</a></li>
+                <li><a href="ca/info/view/s/5/Federacio/i/6/Localitzaci/c/0/0" title="Localització" class="noicon">Localització</a></li>
+                <li><a href="ca/info/view/s/5/Federacio/i/5/Horaris-Federaci-Catalana-de-Billar/c/0/0" title="Horaris" class="noicon">Horaris</a></li>
+                <li><a href="ca/clubs/5/Federacio" title="Llistat de clubs" class="noicon">Llistat de clubs</a></li>
+                <li><a href="ca/contact/5/Federacio" title="Contactar" class="noicon">Contactar</a></li>
+              </ul>
+            </li>
+            <li class="one seventh" role="menu"><a href="#nowhere" class="noicon" title="Federacio">Seccions</a>
+              <ul role="menu">
+                <li><a href="ca/s/1/Carambola" title="Carambola" class="noicon">Carambola</a></li>
+                <li><a href="ca/s/4/Snooker" title="Snooker" class="noicon">Snooker</a></li>
+                <li><a href="ca/s/2/Pool" title="Pool" class="noicon">Pool</a></li>
+                <li><a href="ca/s/3/Escola" title="Escola de Billar Miquel Espona FCB" class="noicon">Escola</a></li>
+              </ul>
+            </li>
+
+            <li class="one seventh"><a href="ca/home/noticies" title="Notícies Federació Catalana Billar" class="noicon">Notícies</a></li>
+
+                        <li class="one seventh"><a href="https://www.fcbillar.cat/media/2025-2026/CALENDARIS/CALENDARI%20FCB%202025-26%20V-9.pdf" target="_blank" title="Calendari 3 bandes Federació Catalana Billar" class="noicon">Calendari</a></li>
+            <li class="one seventh"><a href="ca/home/competicions" title="Competicions Federació Catalana Billar" class="noicon">Competicions</a></li>
+            <li class="one seventh"><a href="ca/home/ranquings" title="Rànquings Federació Catalana Billar" class="noicon">Rànquings</a></li>
+            <li class="one seventh" role="menu"><a href="#nowhere" class="noicon" title="Intranets">Intranets</a>
+              <ul role="menu">
+                                  <li><a href="ca/club" class="noicon" title="Intranet clubs">Clubs</a></li>
+                                    <li><a href="ca/jugador/home" class="noicon" title="Intranet jugadors">Jugadors</a></li>
+                                </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="row">
+    <aside class="one fourth padded">
+        <nav id="submenu" class="nav small-tablet vertical" title="Subemnú Jugador"><button class="hamburger"></button>
+    <ul role="menu">
+        <li>GÓMEZ AMETLLER, ALBERT</li>
+        <li><hr></li>
+        <li><a href="ca/jugador/perfil" title="perfil" class="noicon">Llicència</a></li>
+        <li><hr></li>
+        <li><h4>Partides</h4></li>
+        <li><hr></li>
+        <li><a href="ca/jugador/dades/lliga" title="Dades partides lliga" class="noicon">Lligues</a></li>
+        <li><a href="ca/jugador/dades/individualsGrup" title="Dades partides individuals grup" class="noicon">Individuals fase de grups</a></li>
+        <li><a href="ca/jugador/dades/individualsEliminatories" title="Dades partides individuals eliminatòries" class="noicon">Individuals eliminatòries</a></li>
+        <li><a href="ca/jugador/dades/copa" title="Dades partides Copa" class="noicon">Copa</a></li>
+        <li><hr></li>
+        <li><h4>Ranking</h4></li>
+        <li><a href="ca/jugador/ranking/historial" title="Ranking dels jugadors" class="noicon">Historial</a></li>
+        <li><hr></li>
+        <li><a href="ca/jugador/logout" title="Logout" class="noicon">Sortir</a></li>
+    </ul>
+</nav>
+<script type="text/javascript">
+function disallowBack(){
+  window.location.hash="red";
+  window.location.hash="Red" //chrome
+  window.onhashchange=function(){window.location.hash="red";}
+}
+
+$(document).ready(function(){
+  disallowBack();
+});
+</script>
+    </aside>
+    <section class="three fourths padded">
+        <p><a href="ca/jugador/home">Panell</a> &gt; Dades últimes partides</p>
+        <h2>Partides &gt; Lligues</h2>
+        <div class="row">
+            <div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2026-04-25<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>LINDO ALVARADO, ENRIC</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>27</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>23</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>MIQUEL PEREZ</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2026-03-28<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>PI VILARDELL, XAVIER</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>29</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>6</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>45</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>TAZA</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2026-03-21<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>19</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>5</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>SANTIGOSA GASSET, DELFÍ</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>26</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>2</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Ralita/Nadal</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2026-02-21<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>MARÍN ROMERA, FELICIÀ</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>26</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>23</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>DIONISIO CHECA</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2026-01-24<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>JIMÉNEZ JIMÉNEZ, JOSÉ</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>21</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>42</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>QUIM</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2026-01-17<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>LÓPEZ BALBOA, ALEJANDRO</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>25</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>44</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>MEGIAS</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2026-01-10<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>26</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GARCÍA OLIVA, ANTONIO MANUEL</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>13</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Carlos</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-12-20<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>26</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>6</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>TAZA GARCÍA, JOAN CARLES</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>5</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>44</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Ramon</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-11-15<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>ORTEGA DIAZ, ALBERTO</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>29</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>24</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>6</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>FERNEY</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-11-08<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>5</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>MARÍN ROMERA, FELICIÀ</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>26</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>41</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Joan</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-11-01<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>MORUNO RAYA, IGNACIO</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>20</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>25</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>RAMON</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div><div class="nine ninths"><b>Observacions</b><br>CAP</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-10-11<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>JIMÉNEZ JIMÉNEZ, JOSÉ</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>21</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>46</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Eduard</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-09-27<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>23</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>LÓPEZ BALBOA, ALEJANDRO</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>45</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Quim</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-04-12<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>26</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>BORT CARIÑENA, SALVADOR</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>42</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Esteve</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-04-05<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>TRULLÁS VERA, YURI</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>18</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>2</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>42</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>No assignat</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div><div class="nine ninths"><b>Observacions</b><br>sense</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-03-15<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>OLIVER SINCA, JORDI</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>21</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>45</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>No assignat</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-03-01<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>21</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>RODRIGUEZ CARRILLO, FRANCISCO </b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>5</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>43</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Eduard</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-02-22<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>QUESADA MARTOS, JOSÉ LUIS</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>21</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>46</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>GASCON</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-02-08<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>MARÍN ROMERA, FELICIÀ</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>18</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>5</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>42</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>josep maria sole</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-01-18<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GAVILAN RAYA, JOSE ANTONIO</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>23</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>46</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Joan</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2025-01-11<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>SALAZAR HERNÁNDEZ, RAFAEL</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>24</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>3</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>48</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>SAURI</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2024-12-21<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>20</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>VÍLCHEZ PARDO, FRANCISCO</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>24</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Albert</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2024-12-14<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>16</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>2</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GIL PÉREZ, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>30</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>41</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Ralita</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2024-11-23<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>MARTÍNEZ PONCE, SERAFIN</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>25</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>2</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>26</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>MANEL</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div><div class="nine ninths"><b>Observacions</b><br>SIN INCIDENCIAS</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2024-11-09<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>13</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>1</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>FONTES FULQUET, MANEL</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>17</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>2</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>Victor</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br><div class="row box padded">
+                            <!-- Data -->
+                            <div class="nine ninths"><b>DATA PARTIDA: </b> 2024-10-05<br><hr></div>
+                            <!-- Local -->
+                            <div class="three ninths"><b>LIMONES VILLALBA, ANTONIO</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>23</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>5</div>
+                            <div class="two ninths"><b>Punts</b> <br>2</div>
+                            <!-- Visitant -->
+                            <div class="three ninths"><b>GÓMEZ AMETLLER, ALBERT</b></div>
+                            <div class="two ninths"><b>Caramboles</b> <br>16</div>
+                            <div class="two ninths"><b>Sèrie major</b> <br>4</div>
+                            <div class="two ninths"><b>Punts</b> <br>0</div>
+                            <!-- otros datos -->
+                            <div class="three ninths"><b>Entrades</b> <br>50</div>
+                            <div class="two ninths"><b>Àrbitre</b> <br>TAZA</div>
+                            <div class="two ninths"><b>Assistència</b> <br> Partit disputat</div><div class="two ninths"><b>Modalitat</b> <br>Tres bandes</div></div><br>        </div>
+    </section>
+</div>
+
+    <footer class="footer align-left">
+      <div class="row equalize">
+        <div class="one fifth padded bordeado equal" style="min-height: 125px;">
+          <h3>Xarxes socials</h3>
+          <ul>
+            <li><a href="https://www.facebook.com/FCBillar/" class="noicon" alt="Facebook Escola Billar" target="_blank"><i class="icon-facebook-sign"></i> Facebook Escola FcBillar</a></li>
+            <li><a href="https://www.facebook.com/catalunyapooltour/" class="noicon" target="_blank"><i class="icon-facebook-sign"></i> Catalunya Pool Tour</a></li>
+            <li><a href="https://www.facebook.com/circuitcatala.desnooker/" class="noicon" target="_blank"><i class="icon-facebook-sign"></i> Circuit català Snooker</a></li>
+          </ul>
+        </div>
+        <div class="one fifth padded bordeado equal" style="min-height: 125px;">
+          <h3>Carambola</h3>
+          <ul>
+            <li><a href="ca/news/s/1/Carambola/c/0/0" class="noicon" alt="Notícies Carambola">Notícies</a></li>
+            <li><a href="ca/agenda/s/1/Carambola/c/0/0" class="noicon" alt="Agenda Carambola">Agenda</a></li>
+            <li><a href="ca/docs/s/1/Carambola/c/0/0" class="noicon" alt="Documentació Carambola">Documentació</a></li>
+          </ul>
+        </div>
+        <div class="one fifth padded bordeado equal" style="min-height: 125px;">
+          <h3>Snooker</h3>
+          <ul>
+            <li><a href="ca/news/s/4/Snooker/c/0/0" class="noicon" alt="Notícies Snooker">Notícies</a></li>
+            <li><a href="ca/agenda/s/4/Snooker/c/0/0" class="noicon" alt="Agenda Snooker">Agenda</a></li>
+            <li><a href="ca/docs/s/4/Snooker/c/0/0" class="noicon" alt="Documentació Snooker">Documentació</a></li>
+          </ul>
+        </div>
+        <div class="one fifth padded bordeado equal" style="min-height: 125px;">
+          <h3>Pool</h3>
+          <ul>
+            <li><a href="ca/news/s/2/Pool/c/0/0" class="noicon" alt="Notícies Pool">Notícies</a></li>
+            <li><a href="ca/agenda/s/2/Pool/c/0/0" class="noicon" alt="Agenda Pool">Agenda</a></li>
+            <li><a href="ca/docs/s/2/Pool/c/0/0" class="noicon" alt="Documentació Pool">Documentació</a></li>
+          </ul>
+        </div>
+        <div class="one fifth padded bordeado equal" style="min-height: 125px;">
+          <h3>Escola Billar</h3>
+          <ul>
+            <li><a href="ca/news/s/3/Escola/c/0/0" class="noicon" alt="Notícies Escola Billar">Notícies</a></li>
+            <li><a href="ca/agenda/s/3/Escola/c/0/0" class="noicon" alt="Agenda Escola Billar">Agenda</a></li>
+            <li><a href="ca/docs/s/3/Escola/c/0/0" class="noicon" alt="Documentació Escola Billar">Documentació</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+    <div class="row footermobile">
+      <div class="one fourth"><a href="ca/s/1/Carambola" alt="Secció Carambola" class="noicon">Carambola</a></div>
+      <div class="one fourth"><a href="ca/s/4/Snooker" alt="Secció Snooker" class="noicon">Snooker</a></div>
+      <div class="one fourth"><a href="ca/s/2/Pool" alt="Pool" class="noicon">Pool</a></div>
+      <div class="one fourth"><a href="ca/s/3/Escola" alt="Escola de Billar Miquel Espona FCB" class="noicon">Escola</a></div>
+    </div>
+    <div class="row copyright padded">
+      <p>© 2026 Federació Catalana de Billar - Rambla Guipúscoa, 23-25, 3er A 08018 Barcelona - Tel. 93 453 53 10 - <a href="mailto:fcbillar@fcbillar.cat">fcbillar@fcbillar.cat</a>
+        <br>NIF - Q - 5855025 - B <a href="https://intranet.laboralrgpd.com/politicaPrivacidad/index.php?sid=T3FaQWx6NkVyOTNDTTUxcHBtdDNrUT09" target="_blank">Política de privacitat</a> - <a href="https://intranet.laboralrgpd.com/aviso-legal/index.php?sid=T3FaQWx6NkVyOTNDTTUxcHBtdDNrUT09" target="_blank">Avís legal</a> - <a href="https://intranet.laboralrgpd.com/politicaCookies/index.php?sid=T3FaQWx6NkVyOTNDTTUxcHBtdDNrUT09" target="_blank">Política de cookies</a>
+        <br>Registre a la Direcció General de l'Esport de la Generalitat Nº 32 de 26 d'abril de 1983
+        <br>Inscripció al Govern Civil de Barcelona en data 08 de juny de 1927, foli 86, nº 13.108 amb el nom de Federación Catalana de Aficionados al Billar</p>
+        <p class="developed">Desenvolupat per <a href="http://www.trescomatres.com" target="_blank">Trescomatres</a></p>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+      var clicat= false;
+
+      $("#secciobanner-carambola").hover(function(){
+        $("#secciobanner-carambola img").attr("src","clipart/fcb-carambola.png");
+      },function(){
+        $("#secciobanner-carambola img").attr("src","clipart/fcb-carambola-off.png");
+      });
+
+      $("#secciobanner-snooker").hover(function(){
+        $("#secciobanner-snooker img").attr("src","clipart/fcb-snooker.png");
+      },function(){
+        $("#secciobanner-snooker img").attr("src","clipart/fcb-snooker-off.png");
+      });
+
+      $("#secciobanner-pool").hover(function(){
+        $("#secciobanner-pool img").attr("src","clipart/fcb-pool.png");
+      },function(){
+        $("#secciobanner-pool img").attr("src","clipart/fcb-pool-off.png");
+      });
+
+      $("#secciobanner-escola").hover(function(){
+        $("#secciobanner-escola img").attr("src","clipart/fcb-escola.png");
+      },function(){
+        $("#secciobanner-escola img").attr("src","clipart/fcb-escola-off.png");
+      });
+
+      if ( $.cookie('fcb_cookie')===undefined ){
+        $.toast("Aquest web utilitza cookies pr&ograve;pies i tercers per oferir una millor experi&egrave;ncia i estad&iacute;stiques. Nevegant, accepta l'&uacute;s de les cookies.",{
+          sticky: true,
+          type: 'info',
+          duration: 20000
+        });
+		  
+	  
+        $.cookie('fcb_cookie', 'acceptacookies', { expires: 31, path: '/' });
+      }
+
+      // Evitamos doble click
+      $('input[type="submit"]').click(function() {
+         // Si ha sido clicado
+         if (clicat){
+           // Si no ha sido clicado
+           return false;
+         } else {
+           // Le decimos que ha sido clicado
+           clicat= true;
+           return true;
+         }
+       });
+
+       // Evitamos Intro para enviar formulario
+       $("input").keydown(function (e){
+         // Capturamos qué telca ha sido
+         var keyCode= e.which;
+         // Si la tecla es el Intro/Enter
+         if (keyCode == 13){
+           // Evitamos que se ejecute eventos
+           event.preventDefault();
+           // Devolvemos falso
+           return false;
+         }
+       });
+
+       // Evitamos Intro para enviar formulario
+       $("textarea").keydown(function (e){
+         // Capturamos qué telca ha sido
+         var keyCode= e.which;
+         // Si la tecla es el Intro/Enter
+         if (keyCode == 13){
+           // Evitamos que se ejecute eventos
+           event.preventDefault();
+           // Devolvemos falso
+           return false;
+         }
+       });
+    });
+  </script>
+
+
+</body></html>

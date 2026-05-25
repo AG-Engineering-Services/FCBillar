@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv/
+
+# Secrets & credentials
+.env
+.env.local
+session/
+*.cookies.json
+
+# Data
+data/fcbillar.db
+data/fcbillar.db-journal
+data/fcbillar.db-wal
+data/fcbillar.db-shm
+data/cache/
+data/exports/
+
+# Logs
+logs/
+*.log
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Pytest / Ruff / mypy
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
