@@ -17,6 +17,8 @@ dependencies = [
     "rich>=13.9",
     "structlog>=24.4",
     "python-dateutil>=2.9",
+    "pyqt6>=6.11.0",
+    "pyqt6-charts>=6.11.0",
 ]
 
 [dependency-groups]
