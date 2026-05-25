@@ -270,8 +270,11 @@ def sync_current_rankings(
     for current in home.rankings:
         latest_db = repo.latest_ranking_num_seq(current.modalitat_codi_fcb) or 0
         if current.num_seq > latest_db:
-            ingest_ranking(client, current.num_seq, current.modalitat_codi_fcb, settings=settings)
-            ingested.append((current.num_seq, current.modalitat_codi_fcb))
+            result = ingest_ranking(
+                client, current.num_seq, current.modalitat_codi_fcb, settings=settings
+            )
+            if result is not None:
+                ingested.append((current.num_seq, current.modalitat_codi_fcb))
         else:
             skipped.append((current.num_seq, current.modalitat_codi_fcb))
     return SyncResult(discovered=home, ingested=ingested, skipped_existing=skipped)

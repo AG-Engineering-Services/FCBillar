@@ -16,6 +16,7 @@ from playwright.sync_api import (
     Playwright,
     sync_playwright,
 )
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from fcbillar.config import Settings, get_settings
 
@@ -141,8 +142,13 @@ class ScraperClient:
         if response is None or response.status >= 400:
             status = response.status if response else "no-response"
             raise RuntimeError(f"Error HTTP {status} en {url}")
-        # Petita espera per assegurar JS d'inicialització
-        self.page.wait_for_load_state("networkidle", timeout=10_000)
+        # Espera oportunista a networkidle: les pàgines públiques tenen widgets
+        # de Facebook/Twitter que mai s'estabilitzen, però el contingut útil ja
+        # és al DOM en aquest punt. Si el timeout salta, continuem igualment.
+        try:
+            self.page.wait_for_load_state("networkidle", timeout=5_000)
+        except PlaywrightTimeoutError:
+            log.debug("networkidle no assolit en 5s a %s — continuant", url)
         html = self.page.content()
 
         if self.settings.cache_html:
