@@ -252,8 +252,11 @@ class Repository:
                                player1_id, player2_id,
                                caramboles1, caramboles2, entrades,
                                mitjana1, mitjana2, serie_max1, serie_max2,
-                               guanyador_id, extras_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                               guanyador_id,
+                               equip1_id, equip2_id, encontre_lliga_id, temporada_id,
+                               arbitre, assistencia,
+                               extras_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 caramboles1 = COALESCE(excluded.caramboles1, games.caramboles1),
                 caramboles2 = COALESCE(excluded.caramboles2, games.caramboles2),
@@ -263,6 +266,12 @@ class Repository:
                 serie_max1 = COALESCE(excluded.serie_max1, games.serie_max1),
                 serie_max2 = COALESCE(excluded.serie_max2, games.serie_max2),
                 guanyador_id = COALESCE(excluded.guanyador_id, games.guanyador_id),
+                equip1_id = COALESCE(excluded.equip1_id, games.equip1_id),
+                equip2_id = COALESCE(excluded.equip2_id, games.equip2_id),
+                encontre_lliga_id = COALESCE(excluded.encontre_lliga_id, games.encontre_lliga_id),
+                temporada_id = COALESCE(excluded.temporada_id, games.temporada_id),
+                arbitre = COALESCE(excluded.arbitre, games.arbitre),
+                assistencia = COALESCE(excluded.assistencia, games.assistencia),
                 extras_json = COALESCE(excluded.extras_json, games.extras_json)
             """,
             (
@@ -280,6 +289,12 @@ class Repository:
                 game.serie_max1,
                 game.serie_max2,
                 guanyador_id,
+                game.equip1_id,
+                game.equip2_id,
+                game.encontre_lliga_id,
+                game.temporada_id,
+                game.arbitre,
+                game.assistencia,
                 extras,
             ),
         )

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -10,13 +11,18 @@ import pytest
 from fcbillar.db.migrations import ensure_schema
 from fcbillar.db.repository import Repository
 from fcbillar.pipeline import (
+    _derive_temporada,
+    _split_equip_nom,
     backfill_historical,
     backfill_modalitat,
     backfill_ranking,
+    ingest_lliga_encontre,
+    ingest_lliga_jornada,
     ingest_partides,
     ingest_ranking,
     sync_current_rankings,
 )
+from fcbillar.scraper.parsers import LligaEncontre
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -271,3 +277,233 @@ def test_backfill_historical_filters_by_modalitat(settings: StubSettings) -> Non
     assert len(res.rankings_processed) == 0
     # 15 entries × 5 modalitats = 75 intents fallats.
     assert len(res.rankings_failed) == 75
+
+
+# ---------------- helpers de lliga ----------------
+
+
+def test_split_equip_nom_with_lletra() -> None:
+    assert _split_equip_nom('C.B. MATARÓ "A"') == ("C.B. MATARÓ", "A")
+    assert _split_equip_nom('SB FOMENT MOLINS "A"') == ("SB FOMENT MOLINS", "A")
+    assert _split_equip_nom('SANT ADRIÀ "B"') == ("SANT ADRIÀ", "B")
+
+
+def test_split_equip_nom_without_lletra_uses_unico() -> None:
+    assert _split_equip_nom("CLUB UNIC SENSE LLETRA") == ("CLUB UNIC SENSE LLETRA", "UNICO")
+
+
+def test_derive_temporada_september_starts_new() -> None:
+    assert _derive_temporada(date(2025, 9, 27)) == "2025-2026"
+    assert _derive_temporada(date(2025, 12, 20)) == "2025-2026"
+    assert _derive_temporada(date(2026, 4, 25)) == "2025-2026"
+    # Juliol cau a la temporada anterior.
+    assert _derive_temporada(date(2025, 7, 15)) == "2024-2025"
+
+
+# ---------------- ingest_lliga_encontre ----------------
+
+
+def test_ingest_lliga_encontre_creates_full_context(settings: StubSettings) -> None:
+    """Ingest d'un encontre amb la fixture real: crea clubs, equips, encontre,
+    i 4 games amb context complet. Salta partides on els jugadors no són a la BD."""
+    fixtures = {
+        # URL de partides del primer encontre de la jornada 01 GRUP A HONOR.
+        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
+            "lliga_3b_encontre_partides.html"
+        ),
+    }
+    client = StubScraperClient(settings, fixtures)
+    encontre = LligaEncontre(
+        lliga_id=36,
+        divisio_id=148,
+        grup_id=316,
+        jornada_id=2593,
+        encontre_id=10939,
+        equip_local='C.B. SANTS "A"',
+        p_parcials_local=5,
+        p_match_local=3,
+        equip_visitant='SB FOMENT MOLINS "A"',
+        p_parcials_visitant=3,
+        p_match_visitant=0,
+    )
+
+    # Pre-popular jugadors perquè el resolver nom→fcb_id funcioni.
+    # La fixture té VARELA LOSADA + PERALES SANZ + MARTÍN LIMA + SÁNCHEZ GALLEGO +
+    # BOTERO BERRIO + FONTANET BELLES + VEIGA CARRETE + SÁNCHEZ BARRERA.
+    conn = ensure_schema(settings.db_path)
+    repo = Repository(conn)
+    from fcbillar.models import Player
+
+    noms_4_partides = [
+        ("60", "VARELA LOSADA, FRANCESC"),
+        ("70", "PERALES SANZ, JOAN"),
+        ("80", "MARTÍN LIMA, MELCHOR"),
+        ("90", "SÁNCHEZ GALLEGO, JOEL"),
+        ("100", "BOTERO BERRIO, CARLOS ALBERTO"),
+        ("110", "FONTANET BELLES, JOAN CARLES"),
+        ("120", "VEIGA CARRETE, DAVID"),
+        ("130", "SÁNCHEZ BARRERA, MIGUEL"),
+    ]
+    for fcb_id, nom in noms_4_partides:
+        repo.upsert_player(Player(fcb_id=fcb_id, nom=nom))
+
+    result = ingest_lliga_encontre(
+        client, encontre, modalitat_codi_fcb=1, data=date(2025, 9, 27), settings=settings
+    )
+
+    assert result.partides_total == 4
+    assert result.games_upserted == 4
+    assert result.games_skipped_missing_player == 0
+
+    counts = repo.counts()
+    assert counts["clubs"] == 2  # C.B. SANTS + SB FOMENT MOLINS
+    assert counts["equips"] == 2  # ambdós amb lletra A
+    assert counts["encontres_lliga"] == 1
+    assert counts["games"] == 4
+    assert counts["temporades"] == 1  # derivada de la data
+
+    # Verifico que tots els games tenen context omplert.
+    row = conn.execute(
+        "SELECT arbitre, equip1_id, equip2_id, encontre_lliga_id, temporada_id, serie_max1 "
+        "FROM games LIMIT 1"
+    ).fetchone()
+    assert row[0] is not None  # arbitre
+    assert row[1] is not None and row[2] is not None  # equips
+    assert row[3] == result.encontre_lliga_id
+    assert row[4] is not None  # temporada derivada de la data
+    assert row[5] is not None  # serie_max1 (camp ric de lliga)
+
+
+def test_ingest_lliga_encontre_skips_unknown_players(settings: StubSettings) -> None:
+    """Sense pre-popular jugadors, totes les 4 partides es salten."""
+    fixtures = {
+        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
+            "lliga_3b_encontre_partides.html"
+        ),
+    }
+    client = StubScraperClient(settings, fixtures)
+    encontre = LligaEncontre(
+        lliga_id=36, divisio_id=148, grup_id=316, jornada_id=2593, encontre_id=10939,
+        equip_local='C.B. SANTS "A"', p_parcials_local=5, p_match_local=3,
+        equip_visitant='SB FOMENT MOLINS "A"', p_parcials_visitant=3, p_match_visitant=0,
+    )
+    result = ingest_lliga_encontre(
+        client, encontre, modalitat_codi_fcb=1, data=date(2025, 9, 27), settings=settings
+    )
+    assert result.games_upserted == 0
+    assert result.games_skipped_missing_player == 4
+    # L'encontre, clubs i equips sí s'han creat (per estar disponibles per a
+    # ingestes posteriors).
+    counts = Repository(ensure_schema(settings.db_path)).counts()
+    assert counts["encontres_lliga"] == 1
+    assert counts["clubs"] == 2
+    assert counts["equips"] == 2
+
+
+def test_ingest_lliga_encontre_enriches_existing_game(settings: StubSettings) -> None:
+    """Si una partida ja venia de partideshome (sense club/àrbitre), ingest_lliga
+    la complementa amb els camps de lliga via COALESCE."""
+    fixtures = {
+        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
+            "lliga_3b_encontre_partides.html"
+        ),
+    }
+    client = StubScraperClient(settings, fixtures)
+
+    # Pre-popular els 2 jugadors de la 1a partida.
+    conn = ensure_schema(settings.db_path)
+    repo = Repository(conn)
+    from datetime import date as _date
+    from fcbillar.models import Game, Player
+
+    repo.upsert_player(Player(fcb_id="60", nom="VARELA LOSADA, FRANCESC"))
+    repo.upsert_player(Player(fcb_id="70", nom="PERALES SANZ, JOAN"))
+    # Crear el game "antic" (com el faria ingest_partides): mínim, sense camps de lliga.
+    old_game = Game(
+        data_partida=_date(2025, 9, 27),
+        competicio_nom="LLIGA",
+        modalitat_codi_fcb=1,
+        player1_fcb_id="60",
+        player2_fcb_id="70",
+        caramboles1=40,
+        caramboles2=24,
+        entrades=40,
+    )
+    repo.upsert_game(old_game)
+
+    encontre = LligaEncontre(
+        lliga_id=36, divisio_id=148, grup_id=316, jornada_id=2593, encontre_id=10939,
+        equip_local='C.B. SANTS "A"', p_parcials_local=5, p_match_local=3,
+        equip_visitant='SB FOMENT MOLINS "A"', p_parcials_visitant=3, p_match_visitant=0,
+    )
+    # Per a aquesta verificació només cal que un dels jugadors resolgui, però
+    # la fixture té 4 partides i 8 jugadors; els altres es saltaran sense impacte.
+    ingest_lliga_encontre(
+        client, encontre, modalitat_codi_fcb=1, data=_date(2025, 9, 27), settings=settings
+    )
+
+    # Verificar que el game existent s'ha enriquit (arbitre + serie_max + equips).
+    row = conn.execute(
+        "SELECT arbitre, serie_max1, serie_max2, equip1_id, equip2_id, temporada_id "
+        "FROM games WHERE id = ?",
+        (old_game.id_natural,),
+    ).fetchone()
+    assert row[0] == "BOTERO"  # arbitre afegit
+    assert row[1] == 6  # serie_max1 afegida
+    assert row[2] == 3
+    assert row[3] is not None and row[4] is not None
+    assert row[5] is not None  # temporada derivada de 2025-09-27 = "2025-2026"
+
+
+# ---------------- ingest_lliga_jornada ----------------
+
+
+def test_ingest_lliga_jornada_processes_all_encontres(settings: StubSettings) -> None:
+    """La jornada té 4 encontres; cadascun amb 4 partides individuals.
+
+    Reutilitzem la mateixa fixture de partides per als 4 encontres (no és exacte,
+    però permet validar el flow end-to-end: 4 encontres × 4 partides = 16 vistes).
+    """
+    fixtures = {
+        "https://www.fcbillar.cat/ca/lligues/encontres/36/148/316/2593": (
+            "lliga_3b_jornada01_encontres.html"
+        ),
+        # Mateixa fixture per als 4 encontres → 16 vistes amb molts noms iguals
+        # (els 8 jugadors de la fixture).
+        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
+            "lliga_3b_encontre_partides.html"
+        ),
+        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10941": (
+            "lliga_3b_encontre_partides.html"
+        ),
+        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10943": (
+            "lliga_3b_encontre_partides.html"
+        ),
+        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10945": (
+            "lliga_3b_encontre_partides.html"
+        ),
+    }
+    client = StubScraperClient(settings, fixtures)
+    # Sense pre-popular jugadors → totes les partides es saltaran. Verifiquem
+    # només l'orquestració d'encontres.
+    result = ingest_lliga_jornada(
+        client,
+        lliga_id=36,
+        divisio_id=148,
+        grup_id=316,
+        jornada_id=2593,
+        modalitat_codi_fcb=1,
+        data=date(2025, 9, 27),
+        settings=settings,
+    )
+    assert result.encontres_processed == 4
+    assert result.encontres_failed == 0
+    assert result.total_games_skipped == 16  # 4 encontres × 4 partides
+    assert result.total_games_upserted == 0
+
+    # Tots els encontres + 8 equips (4 locals + 4 visitants) creats; 7 clubs
+    # perquè SANT ADRIÀ té tant equip A com B → mateix club, dos equips.
+    counts = Repository(ensure_schema(settings.db_path)).counts()
+    assert counts["encontres_lliga"] == 4
+    assert counts["equips"] == 8
+    assert counts["clubs"] == 7

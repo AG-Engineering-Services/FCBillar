@@ -23,6 +23,7 @@ from fcbillar.pipeline import (
     backfill_historical,
     backfill_modalitat,
     fetch_ranking_html,
+    ingest_lliga_jornada,
     ingest_partides,
     ingest_ranking,
     run_status,
@@ -222,6 +223,43 @@ def backfill(
                 f"{result.total_games_upserted} partides desades, "
                 f"{result.total_games_skipped} saltades.[/]"
             )
+
+
+@app.command("ingest-lliga-jornada")
+def ingest_lliga_jornada_cmd(
+    lliga_id: int = typer.Argument(..., help="Id de la lliga (36=TRES BANDES, 37=4 MODALITATS)"),
+    divisio_id: int = typer.Argument(..., help="Id de la divisió"),
+    grup_id: int = typer.Argument(..., help="Id del grup"),
+    jornada_id: int = typer.Argument(..., help="Id de la jornada"),
+    modalitat: int = typer.Option(1, "--modalitat", help="Codi de modalitat (1=tres bandes)"),
+    data: str | None = typer.Option(
+        None,
+        "--data",
+        help="Data de la jornada (YYYY-MM-DD); s'usa per derivar la temporada",
+    ),
+) -> None:
+    """Ingest tots els encontres+partides d'una jornada de lliga."""
+    from datetime import date as _date
+
+    settings = get_settings()
+    data_val = _date.fromisoformat(data) if data else None
+    with ScraperClient(settings) as client:
+        result = ingest_lliga_jornada(
+            client,
+            lliga_id=lliga_id,
+            divisio_id=divisio_id,
+            grup_id=grup_id,
+            jornada_id=jornada_id,
+            modalitat_codi_fcb=modalitat,
+            data=data_val,
+            settings=settings,
+        )
+    console.print(
+        f"[green]OK jornada {lliga_id}/{divisio_id}/{grup_id}/{jornada_id}: "
+        f"{result.encontres_processed} encontres ({result.encontres_failed} fallats), "
+        f"{result.total_games_upserted} partides desades, "
+        f"{result.total_games_skipped} saltades.[/]"
+    )
 
 
 if __name__ == "__main__":

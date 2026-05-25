@@ -78,6 +78,14 @@ class Game:
     serie_max1: int | None = None
     serie_max2: int | None = None
     guanyador_fcb_id: str | None = None
+    # Camps que provenen de pàgines de lliga (no apareixen a partideshome).
+    arbitre: str | None = None
+    assistencia: str | None = None
+    # IDs interns ja resolts pel pipeline (NULL si vénen de partideshome).
+    equip1_id: int | None = None
+    equip2_id: int | None = None
+    encontre_lliga_id: int | None = None
+    temporada_id: int | None = None
     extras: dict = field(default_factory=dict)
 
     @property
