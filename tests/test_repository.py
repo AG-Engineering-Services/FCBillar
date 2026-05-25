@@ -8,16 +8,20 @@ from pathlib import Path
 
 import pytest
 
+from fcbillar.db.migrations import SCHEMA_VERSION, ensure_schema
 from fcbillar.db.repository import Repository
 from fcbillar.models import (
     Club,
     Competicio,
+    EncontreLliga,
+    Equip,
     Game,
     Modalitat,
     Player,
     Ranking,
     RankingEntry,
     RankingGameLink,
+    Temporada,
 )
 
 SCHEMA_PATH = Path(__file__).resolve().parents[1] / "src" / "fcbillar" / "db" / "schema.sql"
@@ -258,6 +262,9 @@ def test_counts_returns_all_tables(repo: Repository) -> None:
         "ranking_entries",
         "games",
         "ranking_game_links",
+        "temporades",
+        "equips",
+        "encontres_lliga",
     }
 
 
@@ -267,3 +274,177 @@ def test_upsert_modalitat_idempotent(repo: Repository) -> None:
     mid2 = repo.upsert_modalitat(Modalitat(codi_fcb=1, nom="Tres bandes"))
     assert mid == mid2
     assert repo.counts()["modalitats"] == 5  # cap nova
+
+
+# ---------------- entitats de lliga (v2) ----------------
+
+
+def test_upsert_temporada_idempotent(repo: Repository) -> None:
+    t1 = repo.upsert_temporada(Temporada(nom="2025-2026"))
+    t2 = repo.upsert_temporada(Temporada(nom="2025-2026"))
+    assert t1 == t2
+    assert repo.counts()["temporades"] == 1
+
+
+def test_upsert_equip_requires_club(repo: Repository) -> None:
+    with pytest.raises(ValueError, match="Club NOEXIST no registrat"):
+        repo.upsert_equip(Equip(club_fcb_id="NOEXIST", lletra="A"))
+
+
+def test_upsert_equip_unique_per_club_and_lletra(repo: Repository) -> None:
+    repo.upsert_club(Club(fcb_id="MATARÓ", nom="C.B. MATARÓ"))
+    e1 = repo.upsert_equip(Equip(club_fcb_id="MATARÓ", lletra="A"))
+    e2 = repo.upsert_equip(Equip(club_fcb_id="MATARÓ", lletra="A"))
+    assert e1 == e2
+    # Lletres diferents → equips diferents
+    e3 = repo.upsert_equip(Equip(club_fcb_id="MATARÓ", lletra="B"))
+    assert e3 != e1
+    assert repo.counts()["equips"] == 2
+
+
+def test_get_equip_id_by_club_and_lletra(repo: Repository) -> None:
+    repo.upsert_club(Club(fcb_id="MATARÓ", nom="C.B. MATARÓ"))
+    eid = repo.upsert_equip(Equip(club_fcb_id="MATARÓ", lletra="A"))
+    assert repo.get_equip_id("MATARÓ", "A") == eid
+    assert repo.get_equip_id("MATARÓ", "C") is None
+    assert repo.get_equip_id("NOEXIST", "A") is None
+
+
+def test_upsert_encontre_lliga_creates_equips_and_temporada(repo: Repository) -> None:
+    repo.upsert_club(Club(fcb_id="MATARÓ", nom="C.B. MATARÓ"))
+    repo.upsert_club(Club(fcb_id="SANTS", nom="C.B. SANTS"))
+    eid = repo.upsert_encontre_lliga(
+        EncontreLliga(
+            lliga_id=36,
+            divisio_id=148,
+            grup_id=316,
+            jornada_id=2593,
+            encontre_id_extern=10939,
+            equip_local=Equip(club_fcb_id="MATARÓ", lletra="A"),
+            equip_visitant=Equip(club_fcb_id="SANTS", lletra="A"),
+            data=date(2025, 9, 27),
+            temporada_nom="2025-2026",
+            p_parcials_local=8,
+            p_match_local=3,
+            p_parcials_visitant=0,
+            p_match_visitant=0,
+        )
+    )
+    assert eid is not None
+    counts = repo.counts()
+    assert counts["equips"] == 2  # MATARÓ A + SANTS A
+    assert counts["temporades"] == 1
+    assert counts["encontres_lliga"] == 1
+
+
+def test_upsert_encontre_lliga_is_idempotent(repo: Repository) -> None:
+    repo.upsert_club(Club(fcb_id="MATARÓ", nom="C.B. MATARÓ"))
+    repo.upsert_club(Club(fcb_id="SANTS", nom="C.B. SANTS"))
+    e = EncontreLliga(
+        lliga_id=36,
+        divisio_id=148,
+        grup_id=316,
+        jornada_id=2593,
+        encontre_id_extern=10939,
+        equip_local=Equip(club_fcb_id="MATARÓ", lletra="A"),
+        equip_visitant=Equip(club_fcb_id="SANTS", lletra="A"),
+    )
+    id1 = repo.upsert_encontre_lliga(e)
+    id2 = repo.upsert_encontre_lliga(e)
+    assert id1 == id2
+
+
+# ---------------- migració v1 → v2 ----------------
+
+
+def test_migration_v1_to_v2_preserves_games(tmp_path: Path) -> None:
+    """Una BD a versió 1 amb dades es migra a v2 sense perdre files.
+
+    Construïm a mà una BD amb l'estructura v1 fidel (totes les columnes
+    que schema.sql v2 referencia, però sense les noves de v2), apliquem
+    ensure_schema, i comprovem que la migració afegeix tot el que falta.
+    """
+    import sqlite3
+
+    db_path = tmp_path / "test_migration.db"
+    conn = sqlite3.connect(db_path, isolation_level=None)
+    conn.executescript(
+        """
+        CREATE TABLE clubs (id INTEGER PRIMARY KEY, fcb_id TEXT UNIQUE NOT NULL, nom TEXT NOT NULL);
+        CREATE TABLE modalitats (id INTEGER PRIMARY KEY, codi_fcb INTEGER UNIQUE NOT NULL, nom TEXT NOT NULL);
+        INSERT INTO modalitats (codi_fcb, nom) VALUES (1, 'Tres bandes');
+        CREATE TABLE players (
+            id INTEGER PRIMARY KEY,
+            fcb_id TEXT UNIQUE NOT NULL,
+            nom TEXT NOT NULL,
+            club_id INTEGER REFERENCES clubs(id),
+            seguiment INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        INSERT INTO players (fcb_id, nom) VALUES ('566', 'VILALTA');
+        INSERT INTO players (fcb_id, nom) VALUES ('424', 'PALLISA');
+        CREATE TABLE competicions (
+            id INTEGER PRIMARY KEY, nom TEXT NOT NULL, temporada TEXT,
+            modalitat_id INTEGER REFERENCES modalitats(id)
+        );
+        CREATE TABLE rankings (
+            id INTEGER PRIMARY KEY, num_seq INTEGER NOT NULL,
+            modalitat_id INTEGER NOT NULL REFERENCES modalitats(id),
+            url TEXT NOT NULL, format_url TEXT NOT NULL,
+            any_pub INTEGER, mes_pub INTEGER,
+            scraped_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE TABLE ranking_entries (
+            id INTEGER PRIMARY KEY,
+            ranking_id INTEGER NOT NULL REFERENCES rankings(id),
+            player_id INTEGER NOT NULL REFERENCES players(id)
+        );
+        CREATE TABLE games (
+            id TEXT PRIMARY KEY,
+            data_partida TEXT NOT NULL,
+            competicio_id INTEGER REFERENCES competicions(id),
+            modalitat_id INTEGER NOT NULL REFERENCES modalitats(id),
+            player1_id INTEGER NOT NULL REFERENCES players(id),
+            player2_id INTEGER NOT NULL REFERENCES players(id),
+            caramboles1 INTEGER, caramboles2 INTEGER,
+            entrades INTEGER, mitjana1 REAL, mitjana2 REAL,
+            serie_max1 INTEGER, serie_max2 INTEGER,
+            guanyador_id INTEGER REFERENCES players(id),
+            extras_json TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        INSERT INTO games (id, data_partida, modalitat_id, player1_id, player2_id, caramboles1, caramboles2)
+            VALUES ('gameold1', '2026-02-01', 1, 1, 2, 200, 53);
+        CREATE TABLE ranking_game_links (
+            ranking_id INTEGER, game_id TEXT, player_id_origen INTEGER,
+            PRIMARY KEY (ranking_id, game_id, player_id_origen)
+        );
+        PRAGMA user_version = 1;
+        """
+    )
+    conn.close()
+
+    # Ara apliquem la migració amb ensure_schema.
+    conn = ensure_schema(db_path)
+    assert conn.execute("PRAGMA user_version").fetchone()[0] == SCHEMA_VERSION
+
+    # Game preservat.
+    n_games = conn.execute("SELECT COUNT(*) FROM games").fetchone()[0]
+    assert n_games == 1
+
+    # Columnes noves presents amb valor NULL.
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(games)").fetchall()}
+    for c in ("equip1_id", "equip2_id", "encontre_lliga_id", "temporada_id", "arbitre", "assistencia"):
+        assert c in cols
+
+    # Taules noves creades.
+    tables = {
+        row[0]
+        for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()
+    }
+    assert "temporades" in tables
+    assert "equips" in tables
+    assert "encontres_lliga" in tables

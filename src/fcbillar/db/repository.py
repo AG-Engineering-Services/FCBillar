@@ -9,12 +9,15 @@ from collections.abc import Iterable
 from fcbillar.models import (
     Club,
     Competicio,
+    EncontreLliga,
+    Equip,
     Game,
     Modalitat,
     Player,
     Ranking,
     RankingEntry,
     RankingGameLink,
+    Temporada,
 )
 
 
@@ -301,6 +304,99 @@ class Repository:
         for p in players:
             self.upsert_player(p)
 
+    # ---------------------- temporades ----------------------
+
+    def upsert_temporada(self, temporada: Temporada) -> int:
+        cur = self.conn.execute(
+            """
+            INSERT INTO temporades (nom) VALUES (?)
+            ON CONFLICT(nom) DO UPDATE SET nom = excluded.nom
+            RETURNING id
+            """,
+            (temporada.nom,),
+        )
+        return cur.fetchone()[0]
+
+    def get_temporada_id_by_nom(self, nom: str) -> int | None:
+        row = self.conn.execute(
+            "SELECT id FROM temporades WHERE nom = ?", (nom,)
+        ).fetchone()
+        return row[0] if row else None
+
+    # ---------------------- equips ----------------------
+
+    def upsert_equip(self, equip: Equip) -> int:
+        club_id = self.get_club_id_by_fcb_id(equip.club_fcb_id)
+        if club_id is None:
+            raise ValueError(f"Club {equip.club_fcb_id} no registrat")
+        cur = self.conn.execute(
+            """
+            INSERT INTO equips (club_id, lletra) VALUES (?, ?)
+            ON CONFLICT(club_id, lletra) DO UPDATE SET lletra = excluded.lletra
+            RETURNING id
+            """,
+            (club_id, equip.lletra),
+        )
+        return cur.fetchone()[0]
+
+    def get_equip_id(self, club_fcb_id: str, lletra: str) -> int | None:
+        row = self.conn.execute(
+            """
+            SELECT e.id FROM equips e
+            JOIN clubs c ON c.id = e.club_id
+            WHERE c.fcb_id = ? AND e.lletra = ?
+            """,
+            (club_fcb_id, lletra),
+        ).fetchone()
+        return row[0] if row else None
+
+    # ---------------------- encontres_lliga ----------------------
+
+    def upsert_encontre_lliga(self, encontre: EncontreLliga) -> int:
+        local_id = self.upsert_equip(encontre.equip_local)
+        visitant_id = self.upsert_equip(encontre.equip_visitant)
+        temporada_id: int | None = None
+        if encontre.temporada_nom:
+            temporada_id = self.upsert_temporada(Temporada(nom=encontre.temporada_nom))
+        cur = self.conn.execute(
+            """
+            INSERT INTO encontres_lliga (
+                lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern,
+                data, temporada_id,
+                equip_local_id, equip_visitant_id,
+                p_parcials_local, p_match_local,
+                p_parcials_visitant, p_match_visitant
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern)
+            DO UPDATE SET
+                data = COALESCE(excluded.data, encontres_lliga.data),
+                temporada_id = COALESCE(excluded.temporada_id, encontres_lliga.temporada_id),
+                equip_local_id = excluded.equip_local_id,
+                equip_visitant_id = excluded.equip_visitant_id,
+                p_parcials_local = COALESCE(excluded.p_parcials_local, encontres_lliga.p_parcials_local),
+                p_match_local = COALESCE(excluded.p_match_local, encontres_lliga.p_match_local),
+                p_parcials_visitant = COALESCE(excluded.p_parcials_visitant, encontres_lliga.p_parcials_visitant),
+                p_match_visitant = COALESCE(excluded.p_match_visitant, encontres_lliga.p_match_visitant)
+            RETURNING id
+            """,
+            (
+                encontre.lliga_id,
+                encontre.divisio_id,
+                encontre.grup_id,
+                encontre.jornada_id,
+                encontre.encontre_id_extern,
+                encontre.data.isoformat() if encontre.data else None,
+                temporada_id,
+                local_id,
+                visitant_id,
+                encontre.p_parcials_local,
+                encontre.p_match_local,
+                encontre.p_parcials_visitant,
+                encontre.p_match_visitant,
+            ),
+        )
+        return cur.fetchone()[0]
+
     # ---------------------- status ----------------------
 
     def counts(self) -> dict[str, int]:
@@ -314,6 +410,9 @@ class Repository:
             "ranking_entries",
             "games",
             "ranking_game_links",
+            "temporades",
+            "equips",
+            "encontres_lliga",
         ]:
             out[table] = self.conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
         return out

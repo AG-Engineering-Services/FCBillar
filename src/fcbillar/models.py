@@ -105,3 +105,38 @@ class RankingGameLink:
     ranking_modalitat: int
     game_id: str
     player_fcb_id_origen: str
+
+
+# ---------- entitats de lliga catalana (schema v2) ----------
+
+
+@dataclass(frozen=True, slots=True)
+class Temporada:
+    nom: str  # p.ex. "2025-2026"
+
+
+@dataclass(frozen=True, slots=True)
+class Equip:
+    """Un equip d'un club a una competició; identificat per (club, lletra)."""
+
+    club_fcb_id: str
+    lletra: str  # "A", "B", "C", "UNICO", ...
+
+
+@dataclass(frozen=True, slots=True)
+class EncontreLliga:
+    """Un encontre equip-vs-equip d'una jornada de lliga."""
+
+    lliga_id: int
+    divisio_id: int
+    grup_id: int
+    jornada_id: int
+    encontre_id_extern: int
+    equip_local: Equip
+    equip_visitant: Equip
+    data: date | None = None
+    temporada_nom: str | None = None
+    p_parcials_local: int | None = None
+    p_match_local: int | None = None
+    p_parcials_visitant: int | None = None
+    p_match_visitant: int | None = None

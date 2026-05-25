@@ -68,6 +68,42 @@ CREATE TABLE IF NOT EXISTS ranking_entries (
 );
 CREATE INDEX IF NOT EXISTS ix_entries_player ON ranking_entries(player_id);
 
+CREATE TABLE IF NOT EXISTS temporades (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom         TEXT NOT NULL UNIQUE  -- p.ex. "2025-2026"
+);
+
+CREATE TABLE IF NOT EXISTS equips (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    club_id     INTEGER NOT NULL REFERENCES clubs(id) ON DELETE CASCADE,
+    lletra      TEXT NOT NULL,  -- "A", "B", "C", o variant ("UNICO", etc.)
+    UNIQUE(club_id, lletra)
+);
+CREATE INDEX IF NOT EXISTS ix_equips_club ON equips(club_id);
+
+CREATE TABLE IF NOT EXISTS encontres_lliga (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    -- Identificadors derivats de la URL del portal (composta única):
+    lliga_id                INTEGER NOT NULL,
+    divisio_id              INTEGER NOT NULL,
+    grup_id                 INTEGER NOT NULL,
+    jornada_id              INTEGER NOT NULL,
+    encontre_id_extern      INTEGER NOT NULL,
+    --
+    data                    TEXT,
+    temporada_id            INTEGER REFERENCES temporades(id),
+    equip_local_id          INTEGER NOT NULL REFERENCES equips(id),
+    equip_visitant_id       INTEGER NOT NULL REFERENCES equips(id),
+    p_parcials_local        INTEGER,
+    p_match_local           INTEGER,
+    p_parcials_visitant     INTEGER,
+    p_match_visitant        INTEGER,
+    UNIQUE(lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern)
+);
+CREATE INDEX IF NOT EXISTS ix_encontres_data ON encontres_lliga(data);
+CREATE INDEX IF NOT EXISTS ix_encontres_local ON encontres_lliga(equip_local_id);
+CREATE INDEX IF NOT EXISTS ix_encontres_visitant ON encontres_lliga(equip_visitant_id);
+
 CREATE TABLE IF NOT EXISTS games (
     id                      TEXT PRIMARY KEY,  -- id_natural (hash determinista)
     data_partida            TEXT NOT NULL,
@@ -83,6 +119,13 @@ CREATE TABLE IF NOT EXISTS games (
     serie_max1              INTEGER,
     serie_max2              INTEGER,
     guanyador_id            INTEGER REFERENCES players(id),
+    -- Camps afegits a v2: trasllat de "club per-partida".
+    equip1_id               INTEGER REFERENCES equips(id),
+    equip2_id               INTEGER REFERENCES equips(id),
+    encontre_lliga_id       INTEGER REFERENCES encontres_lliga(id),
+    temporada_id            INTEGER REFERENCES temporades(id),
+    arbitre                 TEXT,
+    assistencia             TEXT,
     extras_json             TEXT,
     created_at              TEXT NOT NULL DEFAULT (datetime('now'))
 );
