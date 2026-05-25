@@ -395,5 +395,32 @@ def clubs_alias_cmd(
     )
 
 
+@clubs_app.command("merge")
+def clubs_merge_cmd(
+    source: str = typer.Argument(..., help="fcb_id del club que es vol fusionar (s'eliminarà)"),
+    target: str = typer.Argument(..., help="fcb_id del club canònic que rebrà tot"),
+) -> None:
+    """Fusiona dos clubs duplicats en un de sol.
+
+    Mou tots els equips, jugadors i aliases del 'source' al 'target', crea
+    automàticament un alias amb el nom del 'source' i esborra el 'source'.
+    """
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    repo = Repository(conn)
+    try:
+        moved = repo.merge_clubs(source, target)
+    except ValueError as e:
+        console.print(f"[red]{e}[/]")
+        raise typer.Exit(1) from e
+    console.print(
+        f"[green]OK fusionat '{source}' → '{target}': "
+        f"{moved['equips_moved']} equips, "
+        f"{moved['players_moved']} jugadors, "
+        f"{moved['aliases_moved']} aliases moguts. "
+        f"L'alias '{source}' apunta ara a '{target}'.[/]"
+    )
+
+
 if __name__ == "__main__":
     app()

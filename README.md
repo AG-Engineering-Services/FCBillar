@@ -60,11 +60,23 @@ uv run fcbillar ingest-ranking 121 2
 # Ingest puntual de les partides d'un jugador en un rànquing
 uv run fcbillar ingest-partides 121 2 566
 
-# Ingest d'una jornada de lliga catalana (encontres + partides amb club/equip)
+# Descobrir l'estructura d'una lliga sense ingerir (mostra IDs)
+uv run fcbillar discover-lliga 36 --depth 2   # divisions + grups
+uv run fcbillar discover-lliga 36 --depth 3   # + jornades amb dates
+
+# Ingest d'una jornada de lliga (encontres + partides amb club/equip/sèrie major/àrbitre)
 #   <lliga> <divisio> <grup> <jornada> [--modalitat N] [--data YYYY-MM-DD]
-#   IMPORTANT: cal haver fet ingest-ranking abans per a la mateixa modalitat
-#   (els noms dels jugadors es resolen a fcb_id contra la BD).
+#   Sense pre-popular jugadors, afegeix --create-missing-players (placeholders
+#   que es fusionaran automàticament quan facis ingest-ranking després).
 uv run fcbillar ingest-lliga-jornada 36 148 316 2593 --modalitat 1 --data 2025-09-27
+
+# Ingest de totes les jornades d'un grup (descobreix automàticament)
+uv run fcbillar ingest-lliga-grup 36 148 316 --modalitat 1 --create-missing-players
+
+# Clubs: import del listing oficial i gestió d'aliases
+uv run fcbillar import-clubs                         # 1-shot: 41 clubs oficials
+uv run fcbillar clubs list                           # taula amb aliases
+uv run fcbillar clubs alias "SB FOMENT MOLINS" "S.B.F.MOLINS"
 
 # Estat de la BD
 uv run fcbillar status
@@ -76,15 +88,22 @@ uv run fcbillar status
 # 1. Login si no tens sessió desada
 uv run fcbillar login
 
-# 2. Ingest dels rànquings actuals de totes les modalitats (alimenta la BD de jugadors)
+# 2. Pre-popular clubs amb noms canònics + aliases per a casos coneguts
+uv run fcbillar import-clubs
+uv run fcbillar clubs alias "SANT ADRIÀ" "C.B.SANT ADRIÀ"
+uv run fcbillar clubs alias "SB FOMENT MOLINS" "S.B.F.MOLINS"
+
+# 3. Ingest dels rànquings actuals de totes les modalitats (alimenta la BD de jugadors)
 uv run fcbillar sync
 
-# 3. Ingest dels rànquings històrics (15 més recents al portal)
+# 4. Ingest dels rànquings històrics (15 més recents al portal)
 uv run fcbillar backfill 0 --historical
 
-# 4. Per a cada jornada de lliga que vulguis ingerir (manualment de moment):
-uv run fcbillar ingest-lliga-jornada 36 148 316 2593 --modalitat 1 --data 2025-09-27
-# ... una crida per jornada
+# 5. Descobrir IDs de jornades / grups que ens interessen
+uv run fcbillar discover-lliga 36 --depth 3
+
+# 6. Backfill complet d'un grup de lliga
+uv run fcbillar ingest-lliga-grup 36 148 316 --modalitat 1
 ```
 
 ## Identificadors
@@ -94,10 +113,20 @@ no el codi federatiu real. És aquest id el que apareix a les URLs `partideshome
 Si en algun moment volem el codi federatiu real, s'haurà d'extreure del perfil
 individual i afegir com a columna addicional.
 
-Per a **clubs** el portal no exposa cap id intern. Fem servir el nom del club tal
-com surt al text de l'equip a les pàgines de lliga ("C.B. SANTS") com a `fcb_id`
-del club. La pàgina pública `/clubs/5/Federacio` fa servir noms lleugerament
-diferents ("C.B.SANTS" sense espai); unificació fuzzy queda pendent.
+Per a **clubs** el portal no exposa cap id intern. Fem servir el nom del club
+com a `fcb_id`. La resolució a 3 nivells (`Repository.resolve_club_id_by_nom`)
+unifica noms variants entre pàgines:
+
+1. **Match exacte** — `fcb_id` == nom rebut.
+2. **Match normalitzat** — minúscules, sense espais/punts/accents.
+   Reconeix `"C.B. SANTS"` (lliga) ↔ `"C.B.SANTS"` (listing oficial)
+   automàticament.
+3. **Aliases manuals** (`club_aliases`) — per a abreviacions diferents que
+   la normalització no captura, com `"SB FOMENT MOLINS"` ↔ `"S.B.F.MOLINS"`.
+   Es registren amb `fcbillar clubs alias <variant> <canonical_fcb_id>`.
+
+Recomanat: fer `import-clubs` primer (carrega els 41 clubs oficials), després
+afegir aliases coneguts, i només llavors ingerir lliga.
 
 ## Semàntica del rànquing
 
@@ -117,24 +146,26 @@ src/fcbillar/
 │   ├── client.py     # Playwright + caché + rate limit, networkidle no-fatal
 │   ├── url_builder.py # URLs de rànquing (formats 'data' / 'datahome')
 │   └── parsers.py    # parse_ranking, parse_partides_jugador, parse_home,
-│                     # parse_historial, parse_lliga_* (grups/jornades/encontres/partides)
+│                     # parse_historial, parse_lliga_* (divisions/grups/
+│                     # jornades/encontres/partides), parse_clubs_listing
 ├── db/
-│   ├── schema.sql    # Schema v2: rànquings + lliga (clubs/equips/encontres/temporades)
+│   ├── schema.sql    # Schema v3
 │   ├── migrations.py # SCHEMA_VERSION + _migrate_v1_to_v2
-│   └── repository.py # Upserts idempotents, dedup, FK enforced
+│   └── repository.py # Upserts idempotents, dedup, FK, resolve_club_id_by_nom
 ├── models.py         # Dataclasses (Player, Game amb id_natural per dedup,
 │                     # Club, Equip, Temporada, EncontreLliga, ...)
 ├── pipeline.py       # ingest_ranking, ingest_partides, sync, backfill (+ historical),
-│                     # ingest_lliga_encontre, ingest_lliga_jornada
-└── cli.py            # CLI Typer
+│                     # ingest_lliga_encontre/jornada/grup, discover_lliga,
+│                     # import_clubs_oficials
+└── cli.py            # CLI Typer (14 comandes)
 ```
 
-## Esquema de la BD (v2)
+## Esquema de la BD (v3)
 
 ```text
 clubs ─< equips ─< encontres_lliga ─< games
-                                       │
-players ───────────────────────────────┤
+  │                                    │
+  └─< club_aliases       players ──────┤
                                        │
 modalitats ─< rankings ─< ranking_entries
                                   │
@@ -150,6 +181,8 @@ temporades ───< games
   COALESCE a `upsert_game`.
 - `ranking_game_links` és la traçabilitat: en quin rànquing va aparèixer una
   partida i vista des de quin jugador.
+- `club_aliases` mapeja noms variants de club al club canònic; resolt a 3
+  nivells (exact → normalitzat → alias) per `resolve_club_id_by_nom`.
 
 ## Notes
 

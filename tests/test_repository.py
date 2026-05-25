@@ -375,6 +375,96 @@ def test_add_club_alias_is_upsert(repo: Repository) -> None:
     assert repo.counts()["club_aliases"] == 1
 
 
+def test_merge_clubs_rejects_same(repo: Repository) -> None:
+    repo.upsert_club(Club(fcb_id="A", nom="A"))
+    with pytest.raises(ValueError, match="source i target"):
+        repo.merge_clubs("A", "A")
+
+
+def test_merge_clubs_rejects_missing(repo: Repository) -> None:
+    repo.upsert_club(Club(fcb_id="A", nom="A"))
+    with pytest.raises(ValueError, match="source"):
+        repo.merge_clubs("MISSING", "A")
+    with pytest.raises(ValueError, match="target"):
+        repo.merge_clubs("A", "MISSING")
+
+
+def test_merge_clubs_moves_equips_and_creates_alias(repo: Repository) -> None:
+    """Fusió bàsica: source té equip A; target no en té. L'equip passa a target."""
+    repo.upsert_club(Club(fcb_id="SOURCE", nom="SOURCE"))
+    repo.upsert_club(Club(fcb_id="TARGET", nom="TARGET"))
+    src_eq = repo.upsert_equip(Equip(club_fcb_id="SOURCE", lletra="A"))
+
+    moved = repo.merge_clubs("SOURCE", "TARGET")
+    assert moved["equips_moved"] == 1
+
+    # SOURCE ha desaparegut.
+    assert repo.get_club_id_by_fcb_id("SOURCE") is None
+    # L'equip ara pertany a TARGET.
+    target_id = repo.get_club_id_by_fcb_id("TARGET")
+    row = repo.conn.execute("SELECT club_id FROM equips WHERE id = ?", (src_eq,)).fetchone()
+    assert row[0] == target_id
+    # Alias 'SOURCE' creat apuntant a TARGET.
+    assert repo.resolve_club_id_by_nom("SOURCE") == target_id
+
+
+def test_merge_clubs_collapses_duplicate_equips(repo: Repository) -> None:
+    """Si target ja té equip A i source també, els games del source es reassignen."""
+    from datetime import date as _date
+    from fcbillar.models import Game, Player
+
+    repo.upsert_club(Club(fcb_id="SOURCE", nom="SOURCE"))
+    repo.upsert_club(Club(fcb_id="TARGET", nom="TARGET"))
+    src_eq = repo.upsert_equip(Equip(club_fcb_id="SOURCE", lletra="A"))
+    tgt_eq = repo.upsert_equip(Equip(club_fcb_id="TARGET", lletra="A"))
+
+    # Crear un game referenciant src_eq.
+    repo.upsert_player(Player(fcb_id="1", nom="J1"))
+    repo.upsert_player(Player(fcb_id="2", nom="J2"))
+    game = Game(
+        data_partida=_date(2026, 1, 1),
+        competicio_nom="LLIGA",
+        modalitat_codi_fcb=1,
+        player1_fcb_id="1",
+        player2_fcb_id="2",
+        equip1_id=src_eq,
+    )
+    repo.upsert_game(game)
+
+    moved = repo.merge_clubs("SOURCE", "TARGET")
+    assert moved["equips_moved"] == 1
+    # src_eq ha desaparegut; el game ara apunta a tgt_eq.
+    assert repo.conn.execute("SELECT id FROM equips WHERE id = ?", (src_eq,)).fetchone() is None
+    row = repo.conn.execute(
+        "SELECT equip1_id FROM games WHERE id = ?", (game.id_natural,)
+    ).fetchone()
+    assert row[0] == tgt_eq
+    assert repo.counts()["equips"] == 1
+
+
+def test_merge_clubs_moves_aliases_and_players(repo: Repository) -> None:
+    """Aliases i players del source es reassignen al target."""
+    from fcbillar.models import Player
+
+    repo.upsert_club(Club(fcb_id="SOURCE", nom="SOURCE"))
+    repo.upsert_club(Club(fcb_id="TARGET", nom="TARGET"))
+    repo.add_club_alias("ALIAS_SRC", "SOURCE")
+    repo.upsert_player(Player(fcb_id="1", nom="J1", club_fcb_id="SOURCE"))
+
+    moved = repo.merge_clubs("SOURCE", "TARGET")
+    assert moved["players_moved"] == 1
+    assert moved["aliases_moved"] == 1
+
+    target_id = repo.get_club_id_by_fcb_id("TARGET")
+    # Player reassignat
+    row = repo.conn.execute("SELECT club_id FROM players WHERE fcb_id = '1'").fetchone()
+    assert row[0] == target_id
+    # Alias original reassignat
+    assert repo.resolve_club_id_by_nom("ALIAS_SRC") == target_id
+    # I el nou alias del source name també hi és.
+    assert repo.resolve_club_id_by_nom("SOURCE") == target_id
+
+
 def test_list_clubs_with_aliases(repo: Repository) -> None:
     repo.upsert_club(Club(fcb_id="C.B.SANTS", nom="C.B.SANTS"))
     repo.upsert_club(Club(fcb_id="C.B.MATARÓ", nom="C.B.MATARÓ"))

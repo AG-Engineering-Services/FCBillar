@@ -109,6 +109,99 @@ class Repository:
         )
         return cur.fetchone()[0]
 
+    def merge_clubs(self, source_fcb_id: str, target_fcb_id: str) -> dict[str, int]:
+        """Fusiona el club `source` dins de `target`.
+
+        - Reassigna `equips.club_id` i `players.club_id` de source → target.
+        - Reassigna `club_aliases.club_id` de source → target.
+        - Crea un alias amb el nom del source apuntant a target (per preservar
+          la possibilitat de resolució futura).
+        - Esborra el club source.
+
+        Retorna comptadors de què s'ha mogut. Llença ValueError si source==target
+        o si algun dels dos no existeix.
+        """
+        if source_fcb_id == target_fcb_id:
+            raise ValueError("source i target no poden ser el mateix club")
+        source_id = self.get_club_id_by_fcb_id(source_fcb_id)
+        target_id = self.get_club_id_by_fcb_id(target_fcb_id)
+        if source_id is None:
+            raise ValueError(f"Club source {source_fcb_id} no registrat")
+        if target_id is None:
+            raise ValueError(f"Club target {target_fcb_id} no registrat")
+
+        # Si ja hi ha equips iguals (mateixa lletra) a target, els del source
+        # caldria reassignar-los; podríen colidir amb UNIQUE(club_id, lletra).
+        # Solució: per cada (target_id, lletra) ja existent, els games i
+        # encontres del source.equip cal redirigir a l'equip target.lletra
+        # equivalent abans d'esborrar el source.equip.
+        source_equips = self.conn.execute(
+            "SELECT id, lletra FROM equips WHERE club_id = ?", (source_id,)
+        ).fetchall()
+        equips_moved = 0
+        for src_eq_id, lletra in source_equips:
+            existing_target_eq = self.conn.execute(
+                "SELECT id FROM equips WHERE club_id = ? AND lletra = ?",
+                (target_id, lletra),
+            ).fetchone()
+            if existing_target_eq is not None:
+                # Reassignar games i encontres a l'equip target existent + esborrar el source.equip
+                tgt_eq_id = existing_target_eq[0]
+                self.conn.execute(
+                    "UPDATE games SET equip1_id = ? WHERE equip1_id = ?",
+                    (tgt_eq_id, src_eq_id),
+                )
+                self.conn.execute(
+                    "UPDATE games SET equip2_id = ? WHERE equip2_id = ?",
+                    (tgt_eq_id, src_eq_id),
+                )
+                self.conn.execute(
+                    "UPDATE encontres_lliga SET equip_local_id = ? WHERE equip_local_id = ?",
+                    (tgt_eq_id, src_eq_id),
+                )
+                self.conn.execute(
+                    "UPDATE encontres_lliga SET equip_visitant_id = ? WHERE equip_visitant_id = ?",
+                    (tgt_eq_id, src_eq_id),
+                )
+                self.conn.execute("DELETE FROM equips WHERE id = ?", (src_eq_id,))
+            else:
+                # Reassignar simple: el source.equip passa a pertànyer al target.club
+                self.conn.execute(
+                    "UPDATE equips SET club_id = ? WHERE id = ?",
+                    (target_id, src_eq_id),
+                )
+            equips_moved += 1
+
+        # Players: reassignar de source → target
+        cur = self.conn.execute(
+            "UPDATE players SET club_id = ? WHERE club_id = ?",
+            (target_id, source_id),
+        )
+        players_moved = cur.rowcount
+
+        # Aliases: reassignar de source → target
+        cur = self.conn.execute(
+            "UPDATE club_aliases SET club_id = ? WHERE club_id = ?",
+            (target_id, source_id),
+        )
+        aliases_moved = cur.rowcount
+
+        # Crear alias per preservar el nom del source.
+        # INSERT OR IGNORE perquè potser ja existeix com a alias.
+        self.conn.execute(
+            "INSERT OR IGNORE INTO club_aliases (alias_nom, club_id) VALUES (?, ?)",
+            (source_fcb_id, target_id),
+        )
+
+        # Esborrar el club source.
+        self.conn.execute("DELETE FROM clubs WHERE id = ?", (source_id,))
+
+        return {
+            "equips_moved": equips_moved,
+            "players_moved": players_moved,
+            "aliases_moved": aliases_moved,
+        }
+
     def list_clubs_with_aliases(self) -> list[tuple[str, list[str]]]:
         """Llista (club_fcb_id, [alias_nom, ...]) ordenat per nom de club."""
         rows = self.conn.execute(
