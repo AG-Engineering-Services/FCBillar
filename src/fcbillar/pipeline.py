@@ -1037,6 +1037,136 @@ def ingest_lliga_grup(
     )
 
 
+# --------------------------- macro: import_temporada ---------------------------
+
+
+# Modalitats canòniques: les 5 que apareixen actualment a la home + historial.
+_MODALITATS_CANONIQUES = (1, 2, 3, 4, 6)
+
+
+@dataclass
+class ImportTemporadaResult:
+    clubs_imported: int
+    sync_ingested: list[tuple[int, int]]
+    historical_processed: int
+    historical_failed: int
+    historical_games_upserted: int
+
+
+def import_temporada(
+    client: ScraperClient,
+    *,
+    include_clubs: bool = True,
+    include_sync: bool = True,
+    include_historical: bool = False,
+    historical_top_n: int | None = 0,
+    only_followed: bool = False,
+    modalitats: tuple[int, ...] = _MODALITATS_CANONIQUES,
+    settings: Settings | None = None,
+) -> ImportTemporadaResult:
+    """Macro-orquestració del flux d'import d'una temporada.
+
+    Encadena import-clubs → sync → backfill --historical, amb flags per
+    seleccionar parts. Per defecte:
+      - inclou clubs i sync (ràpid)
+      - NO inclou historical (cal opt-in amb include_historical)
+      - quan historical=True, historical_top_n=0 → només rànquings, sense
+        partides. Posa a None per a TOTES les partides (lent, ~hores).
+    """
+    settings = settings or client.settings
+    clubs_imported = 0
+    sync_ingested: list[tuple[int, int]] = []
+    historical_processed = 0
+    historical_failed = 0
+    historical_games = 0
+
+    if include_clubs:
+        res = import_clubs_oficials(client, settings=settings)
+        clubs_imported = res.imported
+
+    if include_sync:
+        sync_res = sync_current_rankings(client, settings=settings)
+        sync_ingested = sync_res.ingested
+
+    if include_historical:
+        for mod in modalitats:
+            try:
+                hist = backfill_historical(
+                    client,
+                    modalitat_codi_fcb=mod,
+                    top_n=historical_top_n,
+                    only_followed=only_followed,
+                    settings=settings,
+                )
+            except Exception as e:
+                log.warning("Historical mod %s: error %s", mod, e)
+                continue
+            historical_processed += len(hist.rankings_processed)
+            historical_failed += len(hist.rankings_failed)
+            historical_games += hist.total_games_upserted
+
+    return ImportTemporadaResult(
+        clubs_imported=clubs_imported,
+        sync_ingested=sync_ingested,
+        historical_processed=historical_processed,
+        historical_failed=historical_failed,
+        historical_games_upserted=historical_games,
+    )
+
+
+def find_club_grups(
+    repo: Repository, club_fcb_id: str
+) -> list[tuple[int, int, int]]:
+    """Llista (lliga_id, divisio_id, grup_id) on hi ha equip d'un club.
+
+    Requereix que prèviament s'hagi fet ingest dels grups de lliga amb
+    encontres (ingest_lliga_jornada/grup) — l'identificador `equips.club_id`
+    s'omple via _ensure_club_equip durant aquell ingest.
+    """
+    cid = repo.get_club_id_by_fcb_id(club_fcb_id)
+    if cid is None:
+        return []
+    rows = repo.conn.execute(
+        """
+        SELECT DISTINCT enc.lliga_id, enc.divisio_id, enc.grup_id
+        FROM encontres_lliga enc
+        WHERE enc.equip_local_id IN (SELECT id FROM equips WHERE club_id = ?)
+           OR enc.equip_visitant_id IN (SELECT id FROM equips WHERE club_id = ?)
+        ORDER BY enc.lliga_id, enc.divisio_id, enc.grup_id
+        """,
+        (cid, cid),
+    ).fetchall()
+    return [(r[0], r[1], r[2]) for r in rows]
+
+
+def find_club_players(
+    repo: Repository, club_fcb_id: str
+) -> list[tuple[str, str]]:
+    """Llista (fcb_id, nom) dels jugadors que han jugat amb equip d'aquest club.
+
+    Es deriva dels games (no de players.club_id, que pot estar buit).
+    """
+    cid = repo.get_club_id_by_fcb_id(club_fcb_id)
+    if cid is None:
+        return []
+    rows = repo.conn.execute(
+        """
+        SELECT DISTINCT p.fcb_id, p.nom
+        FROM games g
+        JOIN equips e ON e.id IN (g.equip1_id, g.equip2_id)
+        JOIN players p ON p.id IN (g.player1_id, g.player2_id)
+        WHERE e.club_id = ?
+          AND (
+            (e.id = g.equip1_id AND p.id = g.player1_id)
+            OR (e.id = g.equip2_id AND p.id = g.player2_id)
+          )
+        ORDER BY p.nom
+        """,
+        (cid,),
+    ).fetchall()
+    return [(r[0], r[1]) for r in rows]
+
+
 def run_status(settings: Settings | None = None) -> dict[str, int]:
     settings = settings or get_settings()
     conn = ensure_schema(settings.db_path)

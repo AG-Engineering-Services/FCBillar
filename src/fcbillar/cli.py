@@ -27,7 +27,10 @@ from fcbillar.pipeline import (
     backfill_modalitat,
     discover_lliga,
     fetch_ranking_html,
+    find_club_grups,
+    find_club_players,
     import_clubs_oficials,
+    import_temporada,
     ingest_lliga_grup,
     ingest_lliga_jornada,
     ingest_partides,
@@ -420,6 +423,96 @@ def clubs_merge_cmd(
         f"{moved['aliases_moved']} aliases moguts. "
         f"L'alias '{source}' apunta ara a '{target}'.[/]"
     )
+
+
+@app.command("import-temporada")
+def import_temporada_cmd(
+    no_clubs: bool = typer.Option(False, "--no-clubs", help="No fer import-clubs"),
+    no_sync: bool = typer.Option(False, "--no-sync", help="No fer sync"),
+    historical: bool = typer.Option(
+        False, "--historical", help="Incloure backfill històric (~2 min sense partides)"
+    ),
+    historical_top: int | None = typer.Option(
+        0, "--historical-top",
+        help="Top N per modalitat al backfill històric (0=cap, None=tots, lent)",
+    ),
+    only_followed: bool = typer.Option(
+        False, "--only-followed", help="Al historical, només seguits"
+    ),
+) -> None:
+    """Macro: orquestra import-clubs + sync + backfill --historical en una crida."""
+    settings = get_settings()
+    with ScraperClient(settings) as client:
+        result = import_temporada(
+            client,
+            include_clubs=not no_clubs,
+            include_sync=not no_sync,
+            include_historical=historical,
+            historical_top_n=historical_top,
+            only_followed=only_followed,
+            settings=settings,
+        )
+    console.print(
+        f"[green]OK import-temporada: {result.clubs_imported} clubs, "
+        f"{len(result.sync_ingested)} rànquings sync, "
+        f"{result.historical_processed} rànquings històrics "
+        f"({result.historical_failed} fallats), "
+        f"{result.historical_games_upserted} partides desades.[/]"
+    )
+
+
+@clubs_app.command("grups")
+def clubs_grups_cmd(
+    club_fcb_id: str = typer.Argument(..., help="fcb_id del club (ex: 'C.B.BANYOLES')"),
+) -> None:
+    """Llista grups de lliga on hi ha equip d'aquest club (requereix ingest previ)."""
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    repo = Repository(conn)
+    grups = find_club_grups(repo, club_fcb_id)
+    if not grups:
+        console.print(
+            f"[yellow]Cap grup trobat per '{club_fcb_id}'. "
+            f"Has fet `ingest-lliga-grup` o `ingest-lliga-jornada` abans?[/]"
+        )
+        return
+    table = Table(title=f"Grups de lliga amb equip de '{club_fcb_id}' ({len(grups)})")
+    table.add_column("lliga_id", justify="right")
+    table.add_column("divisio_id", justify="right")
+    table.add_column("grup_id", justify="right")
+    for lliga, div, grup in grups:
+        table.add_row(str(lliga), str(div), str(grup))
+    console.print(table)
+
+
+@clubs_app.command("players")
+def clubs_players_cmd(
+    club_fcb_id: str = typer.Argument(..., help="fcb_id del club"),
+    follow: bool = typer.Option(False, "--follow", help="Marca tots com a seguits"),
+) -> None:
+    """Llista jugadors que han jugat amb equip d'aquest club (derivat de games)."""
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    repo = Repository(conn)
+    players = find_club_players(repo, club_fcb_id)
+    if not players:
+        console.print(
+            f"[yellow]Cap jugador trobat per '{club_fcb_id}'. "
+            f"Cal ingest previ de lliga.[/]"
+        )
+        return
+    table = Table(title=f"Jugadors amb equip de '{club_fcb_id}' ({len(players)})")
+    table.add_column("fcb_id", style="dim", justify="right")
+    table.add_column("Nom", style="cyan")
+    n_followed = 0
+    for fcb_id, nom in players:
+        table.add_row(fcb_id, nom)
+        if follow:
+            if repo.set_seguiment(fcb_id, True):
+                n_followed += 1
+    console.print(table)
+    if follow:
+        console.print(f"[green]OK {n_followed} jugadors marcats com a seguits.[/]")
 
 
 if __name__ == "__main__":
