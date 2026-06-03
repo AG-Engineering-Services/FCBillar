@@ -1,0 +1,1771 @@
+"""Live-tournament scraper for Opens currently being played.
+
+Unlike `classificacio.py` which scrapes the final classification once the
+Open is closed, this module walks the in-progress structure:
+
+    divisions/{div}                  → top-level Open page
+    fases/{div}/{phase}              → list of group-phases + KO rounds
+    grups/{div}/{phase}/{subphase}   → list of groups in a phase
+    partidesgrups/{div}/{phase}/{subphase}/{group_id}  → one group's standings + matches
+    partideseliminatoria/{div}/{phase}/{elim_id}       → one KO round's matches
+
+The page markup is consistent across Opens. We reuse the shared HTTP cache
+from `scraper/http.py`, which means a full refresh is one HTTP round-trip
+per unique page (no re-parsing after the first scrape within the 1h TTL).
+"""
+
+from __future__ import annotations
+
+import re
+import unicodedata
+from collections.abc import Iterable
+from dataclasses import dataclass, field
+
+from bs4 import BeautifulSoup
+
+from .http import fetch, fetch_binary
+
+BASE = "https://www.fcbillar.cat/ca"
+LLISTAT_URL = f"{BASE}/individuals/llistat"
+# Docs listing for the "Opens" subcategory of Carambola. The trailing segment
+# is the zero-based offset (20 per page). Season id 15 = 2025-26.
+DOCS_OPENS_BASE = f"{BASE}/docs/s/1/Carambola/c/68/15"
+
+# Live tournament data changes as matches are played. 60 s is a good trade-off
+# between "fresh" and "not hammering the FCB on every client poll". Static
+# metadata (division/fases layout, docs listings) keeps the default 1 h TTL.
+LIVE_TTL_S = 60
+
+
+# --------------------------------------------------------------------------- #
+# Dataclasses
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(frozen=True)
+class PhaseRef:
+    """Reference to a group-phase (grups) or a KO round (partideseliminatoria)."""
+
+    label: str                       # e.g. "PRÈVIA", "SETZENS"
+    kind: str                        # "group" | "ko"
+    url: str                         # path after BASE, e.g. "/individuals/grups/206/443/785"
+    group_ids: tuple[int, ...] = ()  # populated for kind="group" after fetch_phase_detail
+
+
+@dataclass(frozen=True)
+class DocEntry:
+    """One document from the FCB 'Competició Opens' documents section.
+
+    Each entry has a title, publication date and a VIEW url (HTML page that
+    links to the actual PDF). We don't follow through to the PDF by default —
+    that's up to the frontend or a second-pass enrichment.
+    """
+
+    doc_id: int
+    title: str
+    date: str       # "DD/MM/YYYY" as printed by FCB
+    view_url: str   # absolute URL of the view page
+
+
+_DOC_VIEW_RE = re.compile(
+    r"/docs/view/s/1/Carambola/d/(\d+)/([^/]+)/c/\d+/\d+/\d+"
+)
+_DOC_DATE_RE = re.compile(r"Data:\s*(\d{2}/\d{2}/\d{4})")
+
+
+def parse_opens_docs(html: str) -> tuple[DocEntry, ...]:
+    """Parse one page of the Opens documents listing."""
+    soup = BeautifulSoup(html, "lxml")
+    out: list[DocEntry] = []
+    for block in soup.find_all("div", class_="row noticies"):
+        link = block.find("a")
+        if link is None:
+            continue
+        href = link.get("href") or ""
+        m = _DOC_VIEW_RE.search(href)
+        if not m:
+            continue
+        doc_id = int(m.group(1))
+        title = link.get_text(strip=True)
+        # Date is in a sibling <p><span class='meta'>Data: DD/MM/YYYY</span>...
+        date_match = _DOC_DATE_RE.search(block.get_text())
+        date = date_match.group(1) if date_match else ""
+        out.append(DocEntry(
+            doc_id=doc_id,
+            title=title,
+            date=date,
+            view_url=_abs(href),
+        ))
+    return tuple(out)
+
+
+_DOC_PDF_RE = re.compile(
+    r"""href=['"]([^'"]*\.pdf)['"]""",
+    re.IGNORECASE,
+)
+
+
+def doc_view_url(doc_id: int, slug: str = "x") -> str:
+    """Build the canonical view URL for a document id. The slug in the URL
+    is decorative — FCB ignores it as long as the doc id is correct."""
+    return f"{BASE}/docs/view/s/1/Carambola/d/{doc_id}/{slug}/c/68/15/0"
+
+
+def parse_doc_pdf_url(html: str) -> str | None:
+    """Extract the underlying PDF URL from a document's view page.
+
+    The view page has a link to `/media/.../<filename>.pdf`. There are many
+    other PDF links on the layout (calendar banner, etc.) so we take the
+    LAST one inside the main content area: the main PDF is rendered after
+    the page title, and the header/footer links appear before it.
+    """
+    soup = BeautifulSoup(html, "lxml")
+    # Search the main section; fall back to whole document if not found.
+    section = soup.find("section", class_="three fourths padded") or soup
+    candidates: list[str] = []
+    for link in section.find_all("a"):
+        href = link.get("href") or ""
+        if href.lower().endswith(".pdf"):
+            candidates.append(href)
+    if not candidates:
+        return None
+    # FCB stores doc PDFs under /media/{season}/COMPETICIO/OPENS/...
+    # Prefer any PDF under /COMPETICIO/OPENS/; otherwise take the last link
+    # (main content PDF, not header banners).
+    for url in candidates:
+        if "/COMPETICIO/OPENS/" in url.upper():
+            return url
+    return candidates[-1]
+
+
+def fetch_doc_pdf(doc_id: int, *, force: bool = False) -> tuple[bytes, str]:
+    """Fetch a document's PDF as bytes + filename.
+
+    Two-step fetch: first the view page (cached), then the PDF itself
+    (cached separately as a .pdf file).
+    """
+    from urllib.parse import unquote
+
+    html = fetch(doc_view_url(doc_id), force=force)
+    pdf_url = parse_doc_pdf_url(html)
+    if pdf_url is None:
+        raise ValueError(f"No PDF link found in view page for doc {doc_id}")
+    # Derive a clean filename from the URL
+    filename = unquote(pdf_url.rsplit("/", 1)[-1])
+    pdf_bytes = fetch_binary(pdf_url, force=force, suffix=".pdf")
+    return pdf_bytes, filename
+
+
+def fetch_opens_docs(*, pages: int = 3, force: bool = False) -> tuple[DocEntry, ...]:
+    """Fetch all pages of the Opens docs listing. `pages=3` covers up to 60
+    docs (current season tops at ~35). Each page is cached individually."""
+    collected: list[DocEntry] = []
+    seen_ids: set[int] = set()
+    for page in range(pages):
+        offset = page * 20
+        url = f"{DOCS_OPENS_BASE}/{offset}"
+        try:
+            html = fetch(url, force=force)
+        except Exception:  # noqa: BLE001
+            break
+        batch = parse_opens_docs(html)
+        if not batch:
+            break
+        new_this_page = 0
+        for doc in batch:
+            if doc.doc_id in seen_ids:
+                continue
+            seen_ids.add(doc.doc_id)
+            collected.append(doc)
+            new_this_page += 1
+        # If this page returned zero new entries, we've reached the end.
+        if new_this_page == 0:
+            break
+    return tuple(collected)
+
+
+# --------------------------------------------------------------------------- #
+# Doc linking: associate docs to Open divisions via title keywords
+# --------------------------------------------------------------------------- #
+
+# Alias tokens that identify a specific Open in doc titles. The official
+# "OPEN TRES BANDES X" name doesn't always appear — some Opens use memorial /
+# sponsor names (e.g. Sants 2026 = "30e Memorial Joaquim Domingo"). We match
+# case-insensitively using `token in title.upper()`.
+OPEN_TITLE_ALIASES: dict[int, tuple[str, ...]] = {
+    206: ("SANTS", "JOAQUIM DOMINGO"),
+    204: ("MANRESA", "JAUME ARNAU"),
+    196: ("SANT ADRIA", "SANT ADRIÀ"),
+    189: ("LLINARS", "XAVI MARTINEZ"),
+    187: ("MATARO", "MATARÓ", "LES SANTES"),
+    186: ("COSTA DAURADA",),
+}
+
+
+def filter_docs_for_division(
+    docs: Iterable[DocEntry],
+    division_id: int,
+    division_name: str,
+) -> tuple[DocEntry, ...]:
+    """Return the subset of docs whose title matches the given Open.
+
+    Matching is a case-insensitive substring check against either an entry in
+    OPEN_TITLE_ALIASES[division_id] or a key token of the division's name
+    (stripped of generic prefixes like 'OPEN TRES BANDES').
+    """
+    aliases = set(OPEN_TITLE_ALIASES.get(division_id, ()))
+    # Derive a fallback alias from the division name.
+    cleaned = (
+        division_name.upper()
+        .replace("OPEN", "")
+        .replace("TRES BANDES", "")
+        .replace("FEMENI", "")
+        .strip()
+    )
+    if cleaned:
+        aliases.add(cleaned)
+
+    upper_aliases = {a.upper() for a in aliases if a}
+    matched: list[DocEntry] = []
+    for d in docs:
+        title_upper = d.title.upper()
+        if any(alias in title_upper for alias in upper_aliases):
+            matched.append(d)
+    return tuple(matched)
+
+
+@dataclass(frozen=True)
+class CompetitionIndexEntry:
+    """Entry from the /individuals/llistat index page.
+
+    The FCB lists current-season competitions in reverse-chronological order
+    (most recent first). Not all are Tres Bandes Opens — includes other
+    disciplines (QUADRE, SNOOKER, etc.) and modalities (FEMENI, JUNIOR).
+    """
+
+    division_id: int
+    name: str
+    index: int  # position in the list, 0 = most recent
+
+
+_DIVISION_LINK_RE = re.compile(r"/individuals/divisions/(\d+)")
+
+
+def parse_individuals_llistat(html: str) -> tuple[CompetitionIndexEntry, ...]:
+    """Parse the /individuals/llistat page into an ordered list of competitions."""
+    soup = BeautifulSoup(html, "lxml")
+    out: list[CompetitionIndexEntry] = []
+    seen: set[int] = set()
+
+    for link in soup.find_all("a", class_="button"):
+        href = link.get("href") or ""
+        m = _DIVISION_LINK_RE.search(href)
+        if not m:
+            continue
+        div_id = int(m.group(1))
+        if div_id in seen:
+            continue
+        seen.add(div_id)
+        name = link.get_text(strip=True)
+        out.append(CompetitionIndexEntry(
+            division_id=div_id,
+            name=name,
+            index=len(out),
+        ))
+    return tuple(out)
+
+
+def fetch_individuals_llistat(*, force: bool = False) -> tuple[CompetitionIndexEntry, ...]:
+    html = fetch(LLISTAT_URL, force=force)
+    return parse_individuals_llistat(html)
+
+
+@dataclass(frozen=True)
+class OpenStructure:
+    """Top-level layout of a single Open competition."""
+
+    division_id: int
+    name: str
+    phase_id: int | None     # e.g. 443 for Sants — the "fases" id, if any
+    phases: tuple[PhaseRef, ...]
+
+
+@dataclass(frozen=True)
+class GroupStanding:
+    """One row in a group's standings table."""
+
+    player_name: str
+    club: str
+    punts: int       # match points (2 per win)
+    mitjana: float   # group-level average
+
+
+@dataclass(frozen=True)
+class ProvisionalQualifier:
+    """A player we COMPUTE to be advancing from a group, based on current
+    standings. This is an internal projection, not FCB-official data —
+    the UI must visually distinguish it from data fetched from the FCB site.
+    """
+
+    group_label: str
+    position_in_group: int   # 1 = group winner, 2 = runner-up, ...
+    player_name: str
+    club: str
+    punts: int
+    mitjana: float
+    serie_major: int = 0     # max SM across the player's group matches
+
+
+@dataclass(frozen=True)
+class MatchResult:
+    """One match within a group or KO round."""
+
+    player_a: str
+    player_b: str
+    punts_a: int
+    punts_b: int
+    caramboles_a: int
+    caramboles_b: int
+    serie_major_a: int
+    serie_major_b: int
+    entrades: int | None
+    arbitre: str | None
+    # Free-text "Observacions" cell — typically used by FCB to record
+    # tie-break results in KO matches when the scoreboard ends 1-1.
+    observations: str | None = None
+
+    @property
+    def is_played(self) -> bool:
+        return self.entrades is not None and self.entrades > 0
+
+
+@dataclass(frozen=True)
+class Group:
+    """One group: standings + matches."""
+
+    label: str                               # e.g. "Grup A"
+    url: str
+    venue: str | None = None
+    standings: tuple[GroupStanding, ...] = ()
+    matches: tuple[MatchResult, ...] = ()
+
+
+@dataclass(frozen=True)
+class AdvancingPlayer:
+    """A player advancing INTO a KO round, with the seeding stats used to
+    sort them. Surfaced on PhaseDetail.provisional_players so the UI can
+    list expected participants even when we can't compute the bracket yet
+    (e.g. unresolved ties in the previous round)."""
+
+    name: str
+    club: str = ""
+    mitjana: float = 0.0
+    serie_major: int = 0
+    source: str = "winner"  # "winner" | "reservat" | "previous_winner"
+
+
+@dataclass(frozen=True)
+class PhaseDetail:
+    """A phase with its resolved content."""
+
+    ref: PhaseRef
+    groups: tuple[Group, ...] = ()     # for kind="group"
+    ko_matches: tuple[MatchResult, ...] = ()  # for kind="ko"
+    provisional_qualifiers: tuple[ProvisionalQualifier, ...] = ()  # computed
+    provisional_matches: tuple[MatchResult, ...] = ()  # computed KO pairings
+    provisional_players: tuple[AdvancingPlayer, ...] = ()  # advancers list
+
+
+@dataclass
+class OpenLiveState:
+    """Full snapshot of an ongoing Open."""
+
+    structure: OpenStructure
+    phases: list[PhaseDetail] = field(default_factory=list)
+
+
+# --------------------------------------------------------------------------- #
+# URL helpers
+# --------------------------------------------------------------------------- #
+
+
+def division_url(division_id: int) -> str:
+    return f"{BASE}/individuals/divisions/{division_id}"
+
+
+def _abs(path: str) -> str:
+    """Turn a relative FCB path (e.g. 'ca/individuals/...') into an absolute URL."""
+    path = path.lstrip("/")
+    if path.startswith("http"):
+        return path
+    if path.startswith("ca/"):
+        return f"https://www.fcbillar.cat/{path}"
+    return f"{BASE}/{path}"
+
+
+# --------------------------------------------------------------------------- #
+# Parsers
+# --------------------------------------------------------------------------- #
+
+
+_PHASE_ID_RE = re.compile(r"/individuals/fases/\d+/(\d+)")
+_KO_LABELS = {
+    "SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "FINAL",
+    "32ENS", "16ENS",
+}
+
+
+def parse_division_page(html: str, division_id: int) -> OpenStructure:
+    """Parse the Open's landing page to extract name and the `fases` phase id."""
+    soup = BeautifulSoup(html, "lxml")
+
+    # The first h2 is the submenu label ("Competicions"). The real Open name
+    # is the first h2 WITHOUT class attributes, inside the main content section.
+    name = "UNKNOWN"
+    for h2 in soup.find_all("h2"):
+        if not h2.get("class"):
+            text = h2.get_text(strip=True)
+            if text:
+                name = text
+                break
+
+    phase_id: int | None = None
+    for link in soup.find_all("a"):
+        href = link.get("href") or ""
+        m = _PHASE_ID_RE.search(href)
+        if m:
+            phase_id = int(m.group(1))
+            break
+
+    return OpenStructure(
+        division_id=division_id,
+        name=name,
+        phase_id=phase_id,
+        phases=(),
+    )
+
+
+def parse_has_final_classification(html: str) -> bool:
+    """Check whether the division's landing page exposes a 'Classificació final'
+    link. The FCB adds this link only once the tournament has been completed
+    and a final ranking has been published. Detecting its presence is the
+    lightest possible signal for 'completed vs ongoing'."""
+    return "/individuals/classificaciofinal/" in html
+
+
+_FINAL_CLF_ID_RE = re.compile(r"/individuals/classificaciofinal/\d+/(\d+)")
+
+
+def parse_final_classification_id(html: str) -> int | None:
+    """Extract the FCB classification id from the division's landing
+    page when a final ranking is published. Returns None if the link
+    isn't there yet."""
+    m = _FINAL_CLF_ID_RE.search(html)
+    return int(m.group(1)) if m else None
+
+
+def fetch_has_final_classification(division_id: int, *, force: bool = False) -> bool:
+    html = fetch(division_url(division_id), force=force)
+    return parse_has_final_classification(html)
+
+
+def fetch_final_classification_id(
+    division_id: int, *, force: bool = False
+) -> int | None:
+    html = fetch(division_url(division_id), force=force)
+    return parse_final_classification_id(html)
+
+
+def parse_fases_page(html: str) -> tuple[PhaseRef, ...]:
+    """Parse the fases page to extract the ordered list of group and KO phases."""
+    soup = BeautifulSoup(html, "lxml")
+    phases: list[PhaseRef] = []
+
+    for link in soup.find_all("a", class_="button"):
+        href = link.get("href") or ""
+        label = link.get_text(strip=True)
+        if not href or not label:
+            continue
+        if "/individuals/grups/" in href:
+            phases.append(PhaseRef(label=label, kind="group", url=_abs(href)))
+        elif "/individuals/partideseliminatoria/" in href:
+            phases.append(PhaseRef(label=label, kind="ko", url=_abs(href)))
+
+    return tuple(phases)
+
+
+_GROUP_LINK_RE = re.compile(
+    r"/individuals/partidesgrups/\d+/\d+/\d+/(\d+)"
+)
+_GROUP_VENUE_RE = re.compile(r"(Grup [A-Z]+|RESERVATS)(?:\s*\|\s*Es juga a:\s*(.+))?", re.I)
+
+
+def parse_grups_page(html: str) -> tuple[Group, ...]:
+    """Parse a /grups/{div}/{phase}/{subphase} page to extract group links + venues.
+    Returns Group objects with url + label + venue only (standings/matches empty).
+    """
+    soup = BeautifulSoup(html, "lxml")
+    groups: list[Group] = []
+
+    for link in soup.find_all("a", class_="button"):
+        href = link.get("href") or ""
+        if not _GROUP_LINK_RE.search(href):
+            continue
+        text = link.get_text(strip=True)
+        m = _GROUP_VENUE_RE.match(text)
+        if not m:
+            continue
+        label = m.group(1)
+        venue = m.group(2).strip() if m.group(2) else None
+        groups.append(Group(label=label, url=_abs(href), venue=venue))
+
+    return tuple(groups)
+
+
+def parse_group_page(html: str, label: str, url: str, venue: str | None = None) -> Group:
+    """Parse a /partidesgrups page: standings + match results."""
+    soup = BeautifulSoup(html, "lxml")
+
+    standings = _parse_group_standings(soup)
+    matches = _parse_group_matches(soup)
+
+    return Group(
+        label=label,
+        url=url,
+        venue=venue,
+        standings=standings,
+        matches=matches,
+    )
+
+
+def _parse_group_standings(soup: BeautifulSoup) -> tuple[GroupStanding, ...]:
+    """The standings are inside <div id="classificacio">, in 4 cells per row:
+    jugador | club | punts | mitjana."""
+    block = soup.find("div", id="classificacio")
+    if block is None:
+        return ()
+
+    cells = [d.get_text(strip=True) for d in block.find_all("div")]
+    # Skip the header row (JUGADOR, CLUB, PUNTS, MITJANA)
+    rows: list[GroupStanding] = []
+    # Find the start by locating "JUGADOR" then advance past header cells
+    start = 0
+    for i, c in enumerate(cells):
+        if c.upper() == "JUGADOR":
+            start = i + 4
+            break
+
+    for i in range(start, len(cells) - 3, 4):
+        name = cells[i]
+        club = cells[i + 1]
+        punts_raw = cells[i + 2]
+        mitjana_raw = cells[i + 3]
+        if not name:
+            continue
+        try:
+            punts = int(punts_raw) if punts_raw else 0
+        except ValueError:
+            punts = 0
+        try:
+            mitjana = float(mitjana_raw) if mitjana_raw else 0.0
+        except ValueError:
+            mitjana = 0.0
+        rows.append(GroupStanding(
+            player_name=name,
+            club=club,
+            punts=punts,
+            mitjana=mitjana,
+        ))
+    return tuple(rows)
+
+
+_HEADER_COLS = ("PUNTS", "SÈRIE MAJOR", "CARAMBOLES")
+
+
+def _parse_group_matches(soup: BeautifulSoup) -> tuple[MatchResult, ...]:
+    """Parse the match rows of a group/KO page.
+
+    The FCB renders each match as a sequence of `<div class='row padded'>`
+    blocks under a `<div class='row box black'>` header:
+
+        [HEADER]    PUNTS  SÈRIE MAJOR  CARAMBOLES
+        [PADDED 1]  PLAYER_A_NAME  PUNTS  SM  CARAMBOLES         (4 cells)
+        [PADDED 2]  PLAYER_B_NAME  PUNTS  SM  CARAMBOLES         (4 cells)
+        [PADDED 3]  Àrbitre:NAME   Entrades:N                    (2 cells)
+
+    Older Opens shipped with a single fat `row padded` containing both
+    players (≥ 8 cells); we still accept that shape as a fallback so we
+    don't regress on cached pages.
+    """
+    matches: list[MatchResult] = []
+    paddeds = soup.find_all("div", class_="row padded")
+    cell_lists: list[list[str]] = [
+        [d.get_text(strip=True) for d in p.find_all("div")] for p in paddeds
+    ]
+
+    i = 0
+    while i < len(cell_lists):
+        cells = cell_lists[i]
+
+        # Single-block layout (legacy): all 8 player cells in one row.
+        if len(cells) >= 8 and not _looks_like_meta_row(cells):
+            try:
+                name_a = cells[0]
+                punts_a = int(cells[1]) if cells[1] else 0
+                sm_a = int(cells[2]) if cells[2] else 0
+                car_a = int(cells[3]) if cells[3] else 0
+                name_b = cells[4]
+                punts_b = int(cells[5]) if cells[5] else 0
+                sm_b = int(cells[6]) if cells[6] else 0
+                car_b = int(cells[7]) if cells[7] else 0
+            except (ValueError, IndexError):
+                i += 1
+                continue
+            arbitre, entrades, observations = _extract_meta(cells[8:])
+            if name_a and name_b:
+                matches.append(MatchResult(
+                    player_a=name_a, player_b=name_b,
+                    punts_a=punts_a, punts_b=punts_b,
+                    caramboles_a=car_a, caramboles_b=car_b,
+                    serie_major_a=sm_a, serie_major_b=sm_b,
+                    entrades=entrades, arbitre=arbitre,
+                    observations=observations,
+                ))
+            i += 1
+            continue
+
+        # Per-player layout (current): one row per player, 4 cells each.
+        if len(cells) == 4 and not _looks_like_meta_row(cells) and i + 1 < len(cell_lists):
+            next_cells = cell_lists[i + 1]
+            if len(next_cells) == 4 and not _looks_like_meta_row(next_cells):
+                try:
+                    name_a = cells[0]
+                    punts_a = int(cells[1]) if cells[1] else 0
+                    sm_a = int(cells[2]) if cells[2] else 0
+                    car_a = int(cells[3]) if cells[3] else 0
+                    name_b = next_cells[0]
+                    punts_b = int(next_cells[1]) if next_cells[1] else 0
+                    sm_b = int(next_cells[2]) if next_cells[2] else 0
+                    car_b = int(next_cells[3]) if next_cells[3] else 0
+                except (ValueError, IndexError):
+                    i += 1
+                    continue
+                # Optional third row with arbitre/entrades/observacions meta.
+                arbitre: str | None = None
+                entrades: int | None = None
+                observations: str | None = None
+                if i + 2 < len(cell_lists):
+                    third = cell_lists[i + 2]
+                    if _looks_like_meta_row(third):
+                        arbitre, entrades, observations = _extract_meta(third)
+                        i += 3
+                    else:
+                        i += 2
+                else:
+                    i += 2
+                if name_a and name_b:
+                    matches.append(MatchResult(
+                        player_a=name_a, player_b=name_b,
+                        punts_a=punts_a, punts_b=punts_b,
+                        caramboles_a=car_a, caramboles_b=car_b,
+                        serie_major_a=sm_a, serie_major_b=sm_b,
+                        entrades=entrades, arbitre=arbitre,
+                        observations=observations,
+                    ))
+                continue
+
+        i += 1
+
+    return tuple(matches)
+
+
+def _looks_like_meta_row(cells: list[str]) -> bool:
+    """A "meta" row is one that holds only Àrbitre / Entrades / Observacions
+    labels — i.e. its FIRST cell is one of those labels. The legacy single-
+    block layout has metadata cells appended after the 8 player cells; those
+    rows shouldn't be classified as meta because cells[0] is a name."""
+    if not cells:
+        return False
+    first = cells[0]
+    return (
+        "Àrbitre" in first
+        or "Arbitre" in first
+        or "Entrades" in first
+        or "Observacions" in first
+    )
+
+
+def _extract_meta(cells: list[str]) -> tuple[str | None, int | None, str | None]:
+    """Pull arbitre + entrades + observacions out of the metadata cells."""
+    arbitre: str | None = None
+    entrades: int | None = None
+    observations: str | None = None
+    for c in cells:
+        if "Àrbitre" in c or "Arbitre" in c:
+            if ":" in c:
+                arbitre = c.split(":", 1)[1].strip() or None
+        elif "Entrades" in c:
+            if ":" in c:
+                try:
+                    entrades = int(c.split(":", 1)[1].strip())
+                except ValueError:
+                    entrades = None
+        elif "Observacions" in c:
+            if ":" in c:
+                observations = c.split(":", 1)[1].strip() or None
+    return arbitre, entrades, observations
+
+
+_KO_LABEL_TO_MATCHES = {
+    "TRENTADOSENS": 32,
+    "SETZENS": 16,
+    "VUITENS": 8,
+    "QUARTS": 4,
+    "SEMIFINALS": 2,
+    "FINAL": 1,
+}
+
+
+def _is_round_fully_scheduled(phase: "PhaseDetail") -> bool:
+    """A round is "fully scheduled" when FCB has published the expected
+    number of pairings for its label (8 for vuitens, 4 for quarts, …).
+    Used to decide whether we can safely chain projections to the next
+    round: if prev's schedule is partial, we don't yet know all winners."""
+    expected = _KO_LABEL_TO_MATCHES.get(phase.ref.label.upper())
+    if expected is None:
+        return True  # unknown label, assume complete
+    return len(phase.ko_matches) >= expected
+
+
+def _expected_ko_slots(ref: PhaseRef, played_count: int) -> int:
+    """Expected number of player slots going INTO a KO round.
+
+    Uses the round label when known (setzens → 32, vuitens → 16, ...).
+    Falls back to 2× the number of matches already scraped.
+    """
+    n_matches = _KO_LABEL_TO_MATCHES.get(ref.label.upper())
+    if n_matches is None:
+        n_matches = played_count
+    return n_matches * 2 if n_matches else 0
+
+
+def _qualifiers_per_group(current: PhaseDetail, next_slots: int) -> int:
+    """Given the current group phase has N groups and the next phase needs K
+    slots, how many players advance per group?"""
+    if not current.groups:
+        return 0
+    # Ignore RESERVES and ad-hoc groups (lowercase or non-letter labels) for
+    # slot-count purposes. They don't typically feed the next phase.
+    regular = [g for g in current.groups if _is_regular_group(g.label)]
+    n = len(regular) or len(current.groups)
+    if next_slots <= 0 or n == 0:
+        return 1
+    return max(1, next_slots // n)
+
+
+def _is_regular_group(label: str) -> bool:
+    """A 'regular' group label is 'Grup X' where X is one or more uppercase
+    letters. RESERVATS and lowercase ad-hoc groups (like 'Grup ww') are not
+    counted for qualifier arithmetic."""
+    import re as _re
+    return bool(_re.fullmatch(r"Grup [A-Z]+", label.strip()))
+
+
+def compute_provisional_qualifiers(
+    current: PhaseDetail,
+    next_slots: int,
+) -> tuple[ProvisionalQualifier, ...]:
+    """Compute the provisional qualifiers from each group's standings.
+
+    Takes the top-N from every group ordered by (punts DESC, mitjana DESC).
+    N is determined from `next_slots / n_regular_groups`.
+    Returns an empty tuple if the phase has no groups or no standings.
+    """
+    n = _qualifiers_per_group(current, next_slots)
+    out: list[ProvisionalQualifier] = []
+    for group in current.groups:
+        # Only regular groups (Grup A..P) feed the next phase. RESERVATS and
+        # ad-hoc lowercase groups (like 'Grup ww') are excluded.
+        if not _is_regular_group(group.label):
+            continue
+        if not group.standings:
+            continue
+        # Per-Open tiebreak inside a group: punts → promig (mitjana) → sèrie
+        # major. The standings table doesn't carry SM, so we derive max-SM
+        # per player from the group's match results.
+        max_sm_by_player: dict[str, int] = {}
+        for m in group.matches:
+            if m.player_a:
+                max_sm_by_player[m.player_a] = max(
+                    max_sm_by_player.get(m.player_a, 0), m.serie_major_a
+                )
+            if m.player_b:
+                max_sm_by_player[m.player_b] = max(
+                    max_sm_by_player.get(m.player_b, 0), m.serie_major_b
+                )
+        ordered = sorted(
+            group.standings,
+            key=lambda s: (
+                -s.punts,
+                -s.mitjana,
+                -max_sm_by_player.get(s.player_name, 0),
+                s.player_name,
+            ),
+        )
+        for idx, s in enumerate(ordered[:n]):
+            out.append(
+                ProvisionalQualifier(
+                    group_label=group.label,
+                    position_in_group=idx + 1,
+                    player_name=s.player_name,
+                    club=s.club,
+                    punts=s.punts,
+                    mitjana=s.mitjana,
+                    serie_major=max_sm_by_player.get(s.player_name, 0),
+                )
+            )
+    return tuple(out)
+
+
+@dataclass
+class _PlayerStats:
+    """Cumulative caramboles / entrades / best-serie across every played
+    match a player has appeared in. Used to seed deeper KO rounds."""
+
+    name: str
+    caramboles: int = 0
+    entrades: int = 0
+    serie_major: int = 0  # max across the player's matches
+
+    @property
+    def mitjana(self) -> float:
+        return (self.caramboles / self.entrades) if self.entrades else 0.0
+
+
+def _accumulate_match(
+    stats: dict[str, _PlayerStats],
+    name: str,
+    caramboles: int,
+    entrades: int | None,
+    serie_major: int,
+) -> None:
+    if not name:
+        return
+    s = stats.get(name) or _PlayerStats(name=name)
+    s.caramboles += int(caramboles or 0)
+    s.entrades += int(entrades or 0)
+    s.serie_major = max(s.serie_major, int(serie_major or 0))
+    stats[name] = s
+
+
+def _collect_player_stats_up_to(
+    phases: list["PhaseDetail"], stop_idx: int
+) -> dict[str, _PlayerStats]:
+    """Aggregate per-player stats from every played match in phases
+    `[0, stop_idx)`. Used as the seeding key for KO rounds beyond the
+    first: the deeper into the Open you are, the more matches feed into
+    the player's mitjana."""
+    stats: dict[str, _PlayerStats] = {}
+    for i in range(min(stop_idx, len(phases))):
+        phase = phases[i]
+        for g in phase.groups:
+            for m in g.matches:
+                if not m.is_played:
+                    continue
+                _accumulate_match(stats, m.player_a, m.caramboles_a, m.entrades, m.serie_major_a)
+                _accumulate_match(stats, m.player_b, m.caramboles_b, m.entrades, m.serie_major_b)
+        for m in phase.ko_matches:
+            if not m.is_played:
+                continue
+            _accumulate_match(stats, m.player_a, m.caramboles_a, m.entrades, m.serie_major_a)
+            _accumulate_match(stats, m.player_b, m.caramboles_b, m.entrades, m.serie_major_b)
+    return stats
+
+
+def _strip_diacritics(s: str) -> str:
+    return "".join(
+        c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn"
+    )
+
+
+def _winner_from_observations(
+    obs: str | None, name_a: str, name_b: str
+) -> str | None:
+    """When a KO match ends 1-1, FCB writes the tie-break winner in the
+    Observacions cell (e.g. 'GANA JIMÉNEZ POR 1-0…'). Heuristic: count how
+    many tokens of each player's normalized name appear in the (also
+    normalized) observations text. Whichever player has more matches wins.
+    Returns None when the heuristic can't decide.
+    """
+    if not obs:
+        return None
+    norm = _strip_diacritics(obs.upper())
+
+    def hits(name: str) -> int:
+        tokens = [t for t in _strip_diacritics(name.upper()).split() if len(t) > 2]
+        return sum(1 for t in tokens if t in norm)
+
+    a_hits = hits(name_a)
+    b_hits = hits(name_b)
+    if a_hits > b_hits:
+        return name_a
+    if b_hits > a_hits:
+        return name_b
+    return None
+
+
+def _winners_of(matches: tuple["MatchResult", ...]) -> list[str] | None:
+    """Return the list of winners of a played KO round, or None if any
+    match is unplayed or has an unresolvable tie. Tied matches whose
+    Observacions field names a winner are resolved via that text."""
+    winners: list[str] = []
+    for m in matches:
+        if not m.is_played:
+            return None
+        if m.punts_a > m.punts_b:
+            winners.append(m.player_a)
+        elif m.punts_b > m.punts_a:
+            winners.append(m.player_b)
+        else:
+            tie_winner = _winner_from_observations(
+                m.observations, m.player_a, m.player_b
+            )
+            if tie_winner is None:
+                return None
+            winners.append(tie_winner)
+    return winners
+
+
+def compute_next_ko_round(
+    phases: list["PhaseDetail"], idx: int
+) -> tuple["MatchResult", ...]:
+    """Provisional bracket for KO phase `phases[idx]` derived from the
+    immediately preceding KO phase's winners.
+
+    Re-seeding rule (per FCB practice): the qualifiers are sorted by
+    cumulative mitjana DESC, then sèrie major DESC, then name. They
+    then play 1st-vs-Nth, 2nd-vs-(N-1)th, … 1-vs-N pyramid.
+
+    Returns () if the previous round can't be resolved (any match
+    unplayed or tied) or if the index doesn't fit (no previous KO).
+    """
+    if idx <= 0 or idx >= len(phases):
+        return ()
+    prev = phases[idx - 1]
+    if prev.ref.kind != "ko":
+        return ()
+    winners = _winners_of(prev.ko_matches)
+    if winners is None or len(winners) < 2:
+        return ()
+    stats = _collect_player_stats_up_to(phases, idx)
+
+    def sort_key(name: str) -> tuple[float, int, str]:
+        s = stats.get(name) or _PlayerStats(name=name)
+        return (-s.mitjana, -s.serie_major, name)
+
+    seeded = sorted(winners, key=sort_key)
+    return _pair_pyramid(seeded)
+
+
+def compute_advancing_players(
+    phases: list["PhaseDetail"],
+    idx: int,
+    last_group_idx: int,
+) -> tuple[AdvancingPlayer, ...]:
+    """Return the players advancing INTO `phases[idx]` (a KO round),
+    sorted by mitjana DESC, sèrie major DESC, name.
+
+    Used for display when we CAN'T form the pairings (e.g. the previous
+    round has unresolved ties). When we CAN form pairings, this list is
+    still populated so the UI can render both the bracket and the seeded
+    participants list.
+
+    Sources:
+      • First KO after the last group phase → group winners + RESERVATS.
+      • Any subsequent KO → winners of the previous KO (real or computed),
+        with cumulative stats from every played match so far.
+    """
+    if idx <= last_group_idx or idx >= len(phases):
+        return ()
+
+    # First KO right after the group phase.
+    if idx == last_group_idx + 1:
+        last_group = phases[last_group_idx]
+        out: list[AdvancingPlayer] = []
+        # Winners come with their PRÈVIA group mitjana + sèrie major.
+        for q in last_group.provisional_qualifiers:
+            if q.position_in_group != 1:
+                continue
+            out.append(AdvancingPlayer(
+                name=q.player_name,
+                club=q.club,
+                mitjana=q.mitjana,
+                serie_major=q.serie_major,
+                source="winner",
+            ))
+        # Reservats: pull their mitjana from the RESERVATS standings, and
+        # their sèrie major from any RESERVATS-group matches if available.
+        reservats_group = next(
+            (g for g in last_group.groups if g.label.upper() == "RESERVATS"),
+            None,
+        )
+        if reservats_group is not None:
+            sm_by_player: dict[str, int] = {}
+            for m in reservats_group.matches:
+                if m.player_a:
+                    sm_by_player[m.player_a] = max(
+                        sm_by_player.get(m.player_a, 0), m.serie_major_a
+                    )
+                if m.player_b:
+                    sm_by_player[m.player_b] = max(
+                        sm_by_player.get(m.player_b, 0), m.serie_major_b
+                    )
+            for s in reservats_group.standings:
+                out.append(AdvancingPlayer(
+                    name=s.player_name,
+                    club=s.club,
+                    mitjana=s.mitjana,
+                    serie_major=sm_by_player.get(s.player_name, 0),
+                    source="reservat",
+                ))
+        out.sort(key=lambda p: (-p.mitjana, -p.serie_major, p.name))
+        return tuple(out)
+
+    # Subsequent KO: collect every known winner from the previous round,
+    # even if that round is partial / incomplete. A "known winner" is one
+    # whose match has been played and has a clear (or tie-break-resolved)
+    # result. The third pass uses pool-size to decide whether to actually
+    # form pairings or just expose the list of qualifiers.
+    prev = phases[idx - 1]
+    if prev.ref.kind != "ko":
+        return ()
+    source_matches = prev.ko_matches if prev.ko_matches else prev.provisional_matches
+    winners: list[str] = []
+    for m in source_matches:
+        if not m.is_played:
+            continue
+        if m.punts_a > m.punts_b:
+            winners.append(m.player_a)
+        elif m.punts_b > m.punts_a:
+            winners.append(m.player_b)
+        else:
+            tw = _winner_from_observations(m.observations, m.player_a, m.player_b)
+            if tw is not None:
+                winners.append(tw)
+    if not winners:
+        return ()
+    stats = _collect_player_stats_up_to(phases, idx)
+    out = []
+    for name in winners:
+        s = stats.get(name)
+        out.append(AdvancingPlayer(
+            name=name,
+            mitjana=s.mitjana if s else 0.0,
+            serie_major=s.serie_major if s else 0,
+            source="previous_winner",
+        ))
+    out.sort(key=lambda p: (-p.mitjana, -p.serie_major, p.name))
+    return tuple(out)
+
+
+def _pair_pyramid(names: list[str]) -> tuple[MatchResult, ...]:
+    """Pyramid pairing: 1st vs Nth, 2nd vs (N-1)th, … Returns () if the
+    pool has fewer than 2 names."""
+    n = len(names)
+    if n < 2:
+        return ()
+    pairs = n // 2
+    return tuple(
+        MatchResult(
+            player_a=names[i],
+            player_b=names[n - 1 - i],
+            punts_a=0, punts_b=0,
+            caramboles_a=0, caramboles_b=0,
+            serie_major_a=0, serie_major_b=0,
+            entrades=None, arbitre=None,
+        )
+        for i in range(pairs)
+    )
+
+
+def compute_provisional_ko_matches(
+    last_group_phase: PhaseDetail,
+) -> tuple[MatchResult, ...]:
+    """Generate the provisional first-KO-round pairings from the last group
+    phase's winners and the RESERVATS group.
+
+    Unified pyramid pairing: pool group winners + reservats, sort by
+    (mitjana DESC, sèrie major DESC, name ASC), then pair 1st-vs-Nth,
+    2nd-vs-(N-1)th, …  Returns () if the pool has fewer than 2 players.
+    """
+    pool: list[tuple[float, int, str]] = []  # (mitjana, sm, name)
+    for q in last_group_phase.provisional_qualifiers:
+        if q.position_in_group != 1:
+            continue
+        pool.append((q.mitjana, q.serie_major, q.player_name))
+
+    reservats_group = next(
+        (g for g in last_group_phase.groups if g.label.upper() == "RESERVATS"),
+        None,
+    )
+    if reservats_group is not None:
+        sm_by_player: dict[str, int] = {}
+        for m in reservats_group.matches:
+            if m.player_a:
+                sm_by_player[m.player_a] = max(
+                    sm_by_player.get(m.player_a, 0), m.serie_major_a
+                )
+            if m.player_b:
+                sm_by_player[m.player_b] = max(
+                    sm_by_player.get(m.player_b, 0), m.serie_major_b
+                )
+        for s in reservats_group.standings:
+            pool.append((
+                s.mitjana,
+                sm_by_player.get(s.player_name, 0),
+                s.player_name,
+            ))
+
+    if len(pool) < 2:
+        return ()
+    pool.sort(key=lambda t: (-t[0], -t[1], t[2]))
+    return _pair_pyramid([t[2] for t in pool])
+
+
+# --------------------------------------------------------------------------- #
+# Open classification (eliminated-players ranking with Art. XVII points)
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(frozen=True)
+class OpenClassificationRow:
+    """One row of the Open's eliminated-players classification.
+
+    `position` follows FCB convention: the deeper a player progressed, the
+    lower their position number. Within an elimination round, players are
+    ordered by (mitjana DESC, sèrie major DESC). Points come from Art. XVII
+    via `reglament.puntuacio.points_for_position`.
+
+    `is_provisional_position` flags rows whose position is doubly tentative
+    — projected finalists for instance: the final hasn't been played yet,
+    so we don't know who will be 1st vs 2nd. We display them tied at 1-2
+    but mark them so the UI can render a "provisional" badge per row.
+    """
+
+    position: int
+    player_name: str
+    club: str
+    round_label: str
+    mitjana: float
+    serie_major: int
+    open_points: int
+    is_provisional_position: bool = False
+
+
+def _phase_player_stats(
+    phase: PhaseDetail,
+) -> dict[str, tuple[float, int, str]]:
+    """Per-player (mitjana, sèrie major, club) for a single phase.
+
+    For groups: mitjana from standings (caramboles/entrades summed over
+    the round's matches), sèrie major = max across the player's group
+    matches, club from standings.
+
+    For KO rounds: mitjana = caramboles/entrades for the match, sèrie
+    major = the player's SM in that match, club is unknown at this layer
+    (resolved later via cross-phase lookup). Only PLAYED matches
+    contribute; pending pairings don't count.
+    """
+    out: dict[str, tuple[float, int, str]] = {}
+    if phase.ref.kind == "group":
+        for g in phase.groups:
+            sm_by_name: dict[str, int] = {}
+            for m in g.matches:
+                if m.player_a:
+                    sm_by_name[m.player_a] = max(
+                        sm_by_name.get(m.player_a, 0), m.serie_major_a
+                    )
+                if m.player_b:
+                    sm_by_name[m.player_b] = max(
+                        sm_by_name.get(m.player_b, 0), m.serie_major_b
+                    )
+            for s in g.standings:
+                out[s.player_name] = (
+                    s.mitjana,
+                    sm_by_name.get(s.player_name, 0),
+                    s.club,
+                )
+    else:  # ko
+        for m in phase.ko_matches:
+            if not m.is_played or not m.entrades:
+                continue
+            avg_a = m.caramboles_a / m.entrades
+            avg_b = m.caramboles_b / m.entrades
+            if m.player_a:
+                out[m.player_a] = (avg_a, m.serie_major_a, "")
+            if m.player_b:
+                out[m.player_b] = (avg_b, m.serie_major_b, "")
+    return out
+
+
+def _phase_punts_lookup(phase: PhaseDetail) -> dict[str, int]:
+    """Per-player match-points within a group phase (used for sorting
+    eliminated group players)."""
+    if phase.ref.kind != "group":
+        return {}
+    out: dict[str, int] = {}
+    for g in phase.groups:
+        for s in g.standings:
+            out[s.player_name] = s.punts
+    return out
+
+
+def _phase_position_in_group_lookup(phase: PhaseDetail) -> dict[str, int]:
+    """Per-player position WITHIN their FCB group standings (1-based).
+
+    The standings table at FCB is already ordered by the round's tiebreak
+    rules — including special-case handling for no-shows in 3-player
+    groups (the no-show is placed 2nd, the other non-winner 3rd). Trust
+    that order when ranking eliminated players: 2nds first, then 3rds,
+    then 4ths, …
+    """
+    if phase.ref.kind != "group":
+        return {}
+    out: dict[str, int] = {}
+    for g in phase.groups:
+        for idx, s in enumerate(g.standings, start=1):
+            out[s.player_name] = idx
+    return out
+
+
+def _phase_capacity(phase: PhaseDetail) -> int:
+    """Number of player slots a phase has (or is expected to have).
+
+    KO rounds use the round-label's expected match count when known,
+    falling back to the actual number of pairings. Group phases sum
+    standings sizes across all groups.
+    """
+    if phase.ref.kind == "ko":
+        n = _KO_LABEL_TO_MATCHES.get(phase.ref.label.upper())
+        if n is not None:
+            return n * 2
+        return len(phase.ko_matches) * 2
+    return sum(len(g.standings) for g in phase.groups)
+
+
+def _confirmed_advancers(
+    phase: PhaseDetail,
+    later_known: set[str],
+) -> set[str]:
+    """Players who DEFINITELY advanced past `phase`.
+
+    For KO phases: winners of every played match (with tie-break-resolved
+    ties counted as wins for the named player). For group phases:
+    1st-of-each-group from `provisional_qualifiers`, plus anyone whose
+    name shows up in a later phase's data (handles pre-prèvia → prèvia
+    where multiple players advance per group)."""
+    if phase.ref.kind == "ko":
+        winners: set[str] = set()
+        for m in phase.ko_matches:
+            if not m.is_played:
+                continue
+            if m.punts_a > m.punts_b:
+                winners.add(m.player_a)
+            elif m.punts_b > m.punts_a:
+                winners.add(m.player_b)
+            else:
+                tw = _winner_from_observations(
+                    m.observations, m.player_a, m.player_b
+                )
+                if tw is not None:
+                    winners.add(tw)
+        return winners
+    # group
+    adv: set[str] = set()
+    for q in phase.provisional_qualifiers:
+        if q.position_in_group == 1:
+            adv.add(q.player_name)
+    # Cross-reference with later phases (catches multi-advance group phases).
+    return adv | later_known
+
+
+def compute_open_classification(
+    state: "OpenLiveState",
+) -> tuple[OpenClassificationRow, ...]:
+    """Build the eliminated-players classification of an in-progress Open.
+
+    Always provisional — FCB publishes the canonical PDF only when the
+    Open has finished. While running, we identify confirmed advancers
+    (KO match winners + group 1st / cross-referenced) and confirmed
+    eliminated (everyone else in that phase whose name doesn't appear in
+    any later phase). Players in still-pending matches contribute to
+    neither set yet.
+
+    Position numbering is structural: each round occupies a fixed band
+    (final loser = 2nd, semis = 3-4, quarts = 5-8, vuitens = 9-16, …),
+    which means a partial round can be "closed" for its known losers
+    even if some matches are still pending.
+
+    Sort within a band:
+      • Group phases (PRÈVIA and earlier): (punts DESC, mitjana DESC,
+        sèrie major DESC, name).
+      • KO phases: (mitjana DESC, sèrie major DESC, name) — only one
+        match per player, so punts is always 0.
+
+    Club: groups carry it explicitly; KO rows resolve it from the most
+    recent group phase where the player appears. Points come from Art.
+    XVII via `points_for_position`.
+    """
+    from ..reglament.puntuacio import points_for_position
+
+    phases = state.phases
+    if not phases:
+        return ()
+
+    phase_stats: list[dict[str, tuple[float, int, str]]] = [
+        _phase_player_stats(p) for p in phases
+    ]
+
+    # Cross-phase club lookup: for KO players we don't have a club in the
+    # match data, so reach back to the deepest group phase where the
+    # player has standings.
+    club_by_player: dict[str, str] = {}
+    for phase in phases:
+        if phase.ref.kind != "group":
+            continue
+        for g in phase.groups:
+            for s in g.standings:
+                if s.club:
+                    club_by_player[s.player_name] = s.club
+
+    # Pre-compute eliminated + sorted name list per phase. Sort key differs
+    # for KO (mitjana/SM only — single match) vs group (punts first).
+    eliminated_per_phase: list[list[str]] = []
+    for i, phase in enumerate(phases):
+        later_known: set[str] = set()
+        for j in range(i + 1, len(phases)):
+            later_known.update(phase_stats[j].keys())
+        advancers = _confirmed_advancers(phase, later_known)
+        elim = [
+            n for n in phase_stats[i]
+            if n not in advancers and n not in later_known
+        ]
+        if phase.ref.kind == "group":
+            punts_lookup = _phase_punts_lookup(phase)
+            position_lookup = _phase_position_in_group_lookup(phase)
+            # Sort by FCB's in-group position FIRST (so all 2nds-of-group
+            # come before 3rds, then 4ths, …), then by stats within tier.
+            # FCB's standings order encodes the no-show convention for
+            # 3-player groups (no-show ranked 2nd, the other non-winner
+            # ranked 3rd), so we just trust it.
+            elim.sort(
+                key=lambda n: (
+                    position_lookup.get(n, 999),
+                    -punts_lookup.get(n, 0),
+                    -phase_stats[i][n][0],
+                    -phase_stats[i][n][1],
+                    n,
+                )
+            )
+        else:
+            elim.sort(
+                key=lambda n: (
+                    -phase_stats[i][n][0],
+                    -phase_stats[i][n][1],
+                    n,
+                )
+            )
+        eliminated_per_phase.append(elim)
+
+    rows: list[OpenClassificationRow] = []
+
+    # KO bands keep their structural depth-based positions: a final loser
+    # is always 2nd, semis losers 3-4, quarts 5-8, vuitens 9-16, setzens
+    # 17-32, regardless of how many group phases came before.
+    for i, phase in enumerate(phases):
+        if phase.ref.kind != "ko":
+            continue
+        n_above = (
+            _phase_capacity(phases[i + 1]) if i + 1 < len(phases) else 1
+        )
+        for rank, name in enumerate(eliminated_per_phase[i], start=1):
+            mg, sm, club = phase_stats[i][name]
+            if not club:
+                club = club_by_player.get(name, "")
+            position = n_above + rank
+            rows.append(
+                OpenClassificationRow(
+                    position=position,
+                    player_name=name,
+                    club=club,
+                    round_label=phase.ref.label,
+                    mitjana=mg,
+                    serie_major=sm,
+                    open_points=points_for_position(position),
+                )
+            )
+
+    # Group bands come AFTER the deepest KO band. Walk groups in reverse
+    # phase order (PRÈVIA → pre-prèvia → pre-pre-prèvia, deepest first)
+    # and assign positions sequentially. This avoids the band-size
+    # collisions you get when relying on capacity-of-next-phase.
+    next_position = max(
+        (r.position for r in rows), default=0
+    ) + 1
+    if next_position < 2:
+        next_position = 2  # leave 1 for champion / projected finalist
+    for i in range(len(phases) - 1, -1, -1):
+        phase = phases[i]
+        if phase.ref.kind != "group":
+            continue
+        for name in eliminated_per_phase[i]:
+            mg, sm, club = phase_stats[i][name]
+            if not club:
+                club = club_by_player.get(name, "")
+            rows.append(
+                OpenClassificationRow(
+                    position=next_position,
+                    player_name=name,
+                    club=club,
+                    round_label=phase.ref.label,
+                    mitjana=mg,
+                    serie_major=sm,
+                    open_points=points_for_position(next_position),
+                )
+            )
+            next_position += 1
+
+    # Final-phase head: position 1 (and 2) get filled by, in priority order:
+    #   1. Champion if the final has been played.
+    #   2. Confirmed semi-winners going to the final (1 or 2 of them) marked
+    #      as provisional. This covers the in-progress case where the final
+    #      pairing isn't fully known yet but at least one finalist is.
+    last = phases[-1]
+    if last.ref.kind == "ko" and last.ref.label.upper() == "FINAL":
+        if last.ko_matches and last.ko_matches[0].is_played:
+            fm = last.ko_matches[0]
+            winner_name: str | None = None
+            if fm.punts_a > fm.punts_b:
+                winner_name = fm.player_a
+            elif fm.punts_b > fm.punts_a:
+                winner_name = fm.player_b
+            else:
+                winner_name = _winner_from_observations(
+                    fm.observations, fm.player_a, fm.player_b
+                )
+            if winner_name:
+                if fm.entrades:
+                    won_by_a = winner_name == fm.player_a
+                    car = fm.caramboles_a if won_by_a else fm.caramboles_b
+                    sm_w = fm.serie_major_a if won_by_a else fm.serie_major_b
+                    mg_w = car / fm.entrades
+                else:
+                    mg_w = 0.0
+                    sm_w = 0
+                rows.append(
+                    OpenClassificationRow(
+                        position=1,
+                        player_name=winner_name,
+                        club=club_by_player.get(winner_name, ""),
+                        round_label="CAMPIÓ",
+                        mitjana=mg_w,
+                        serie_major=sm_w,
+                        open_points=points_for_position(1),
+                    )
+                )
+        elif last.provisional_players:
+            # 1 or 2 semi-winners. provisional_players is already sorted by
+            # cumulative (mitjana DESC, sèrie major DESC, name).
+            for rank, p in enumerate(list(last.provisional_players)[:2], start=1):
+                rows.append(
+                    OpenClassificationRow(
+                        position=rank,
+                        player_name=p.name,
+                        club=club_by_player.get(p.name, p.club or ""),
+                        round_label=last.ref.label,
+                        mitjana=p.mitjana,
+                        serie_major=p.serie_major,
+                        open_points=points_for_position(rank),
+                        is_provisional_position=True,
+                    )
+                )
+
+    rows.sort(key=lambda r: r.position)
+    return tuple(rows)
+
+
+_PDF_MATCH_LINE_A = re.compile(
+    r"^Billar\s+(\d+)\s+#+\s+(\S+)\s+(.+?)\s*$",
+    re.IGNORECASE,
+)
+_PDF_MATCH_LINE_B = re.compile(
+    r"^(\d{1,2}:\d{2})\s*h\.?\s+#+\s+(\S+)\s+(.+?)\s*$",
+    re.IGNORECASE,
+)
+
+
+def parse_ko_pdf(pdf_bytes: bytes) -> tuple[MatchResult, ...]:
+    """Parse an Opens KO-round PDF (SETZENS, VUITENS, …) into matches.
+
+    FCB publishes the bracket as a PDF some time before match day. Each
+    match is rendered as two consecutive lines:
+
+        Billar 8 ##### 16 GARCIA ALARCÓN, RICARDO
+        10:00 h. ##### 1-P MAS CANADELL, JOSEP Mª
+
+    where the seed on the first line is the reservat number and the seed on
+    the second is the prèvia classification position suffixed with 'P'. We
+    don't need the seeds downstream — just the two player names.
+    """
+    import io
+
+    import pdfplumber
+
+    matches: list[MatchResult] = []
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        for page in pdf.pages:
+            raw = page.extract_text() or ""
+            lines = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+            i = 0
+            while i < len(lines) - 1:
+                m_a = _PDF_MATCH_LINE_A.match(lines[i])
+                m_b = _PDF_MATCH_LINE_B.match(lines[i + 1]) if m_a else None
+                if m_a and m_b:
+                    # Strip trailing commas/whitespace from names; names come
+                    # as "SURNAME, GIVEN" and the regex captures the trailing
+                    # whitespace up to end-of-line cleanly.
+                    name_a = m_a.group(3).strip().rstrip(",").strip()
+                    name_b = m_b.group(3).strip().rstrip(",").strip()
+                    matches.append(MatchResult(
+                        player_a=name_a,
+                        player_b=name_b,
+                        punts_a=0,
+                        punts_b=0,
+                        caramboles_a=0,
+                        caramboles_b=0,
+                        serie_major_a=0,
+                        serie_major_b=0,
+                        entrades=None,
+                        arbitre=None,
+                    ))
+                    i += 2
+                else:
+                    i += 1
+    return tuple(matches)
+
+
+# Terms that signal a NARROWER round label and must be absent from the title
+# for a looser round to match. Example: "SETZENS DE FINAL" contains "FINAL",
+# so when we're looking for the final round we must exclude setzens/vuitens/etc.
+_ROUND_EXCLUSIONS: dict[str, tuple[str, ...]] = {
+    "FINAL": ("SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "DE FINAL"),
+    "SEMIFINALS": ("SETZENS", "VUITENS", "QUARTS"),
+    "QUARTS": ("SETZENS", "VUITENS"),
+    "VUITENS": ("SETZENS",),
+}
+
+
+def _find_ko_doc_for_round(
+    docs: Iterable[DocEntry],
+    aliases: set[str],
+    round_label: str,
+) -> int | None:
+    """Return the doc id of a published KO-round PDF for this Open.
+
+    Title conventions seen on FCB:
+        "SETZENS DE FINAL <OPEN NAME>"
+        "VUITENS DE FINAL <OPEN NAME>"
+        "QUARTS DE FINAL <OPEN NAME>"
+        "SEMIFINALS <OPEN NAME>"
+        "FINAL <OPEN NAME>"
+
+    Because narrower round labels include the token "FINAL", matching must
+    exclude narrower labels when looking for a looser one.
+    """
+    label_upper = round_label.upper()
+    exclusions = _ROUND_EXCLUSIONS.get(label_upper, ())
+    alias_upper = {a.upper() for a in aliases if a}
+    for d in docs:
+        title_upper = d.title.upper()
+        if label_upper not in title_upper:
+            continue
+        if any(excl in title_upper for excl in exclusions):
+            continue
+        if not any(alias in title_upper for alias in alias_upper):
+            continue
+        return d.doc_id
+    return None
+
+
+def parse_ko_page(html: str) -> tuple[MatchResult, ...]:
+    """Parse a KO round page. Same match-row structure as groups, without a
+    group-level standings block. Returns () if 'No hi ha registres disponibles'."""
+    if "No hi ha registres disponibles" in html:
+        return ()
+    soup = BeautifulSoup(html, "lxml")
+    return _parse_group_matches(soup)
+
+
+# --------------------------------------------------------------------------- #
+# Orchestrator
+# --------------------------------------------------------------------------- #
+
+
+def fetch_live_state(division_id: int, *, force: bool = False) -> OpenLiveState:
+    """Fetch the complete live state of an ongoing Open.
+
+    Args:
+        division_id: FCB division id, e.g. 206 for Sants.
+        force: bypass the HTTP cache for every page.
+
+    Returns:
+        OpenLiveState with phases fully populated. KO rounds that haven't
+        been played yet will have empty ko_matches.
+    """
+    # 1) Landing page → name + phase_id
+    div_html = fetch(division_url(division_id), force=force)
+    structure = parse_division_page(div_html, division_id)
+    if structure.phase_id is None:
+        return OpenLiveState(structure=structure, phases=[])
+
+    # 2) Fases page → list of phase refs
+    fases_url = f"{BASE}/individuals/fases/{division_id}/{structure.phase_id}"
+    fases_html = fetch(fases_url, force=force)
+    phase_refs = parse_fases_page(fases_html)
+    structure_full = OpenStructure(
+        division_id=division_id,
+        name=structure.name,
+        phase_id=structure.phase_id,
+        phases=phase_refs,
+    )
+
+    # 3) For each phase ref, fetch details. Use a short TTL for the match-
+    #    level pages (group standings, KO pairings) since those change as
+    #    matches are played. The phase list itself is stable during a day.
+    # KO rounds have TWO potential sources: the /partideseliminatoria HTML
+    # (filled in once matches are PLAYED) and a published PDF bracket
+    # (available days before match day). We prefer HTML; fall back to PDF.
+    ko_docs_cache: tuple[DocEntry, ...] | None = None
+    details: list[PhaseDetail] = []
+    for ref in phase_refs:
+        if ref.kind == "group":
+            grups_html = fetch(ref.url, force=force)
+            group_stubs = parse_grups_page(grups_html)
+            groups: list[Group] = []
+            for stub in group_stubs:
+                group_html = fetch(stub.url, force=force, cache_ttl_s=LIVE_TTL_S)
+                group = parse_group_page(
+                    group_html, label=stub.label, url=stub.url, venue=stub.venue
+                )
+                groups.append(group)
+            details.append(PhaseDetail(ref=ref, groups=tuple(groups)))
+        else:  # ko
+            ko_html = fetch(ref.url, force=force, cache_ttl_s=LIVE_TTL_S)
+            matches = parse_ko_page(ko_html)
+            if not matches:
+                # Try to find and parse a published PDF bracket for this round.
+                # Docs list is fetched once and reused across all KO rounds.
+                if ko_docs_cache is None:
+                    try:
+                        ko_docs_cache = fetch_opens_docs(force=force)
+                    except Exception:  # noqa: BLE001
+                        ko_docs_cache = ()
+                aliases = set(OPEN_TITLE_ALIASES.get(division_id, ()))
+                # Also accept tokens from the division's own name (sans
+                # generic prefixes like 'OPEN TRES BANDES').
+                cleaned = (
+                    structure.name.upper()
+                    .replace("OPEN", "")
+                    .replace("TRES BANDES", "")
+                    .replace("FEMENI", "")
+                    .strip()
+                )
+                if cleaned:
+                    aliases.add(cleaned)
+                doc_id = _find_ko_doc_for_round(ko_docs_cache, aliases, ref.label)
+                if doc_id is not None:
+                    try:
+                        pdf_bytes, _ = fetch_doc_pdf(doc_id, force=force)
+                        matches = parse_ko_pdf(pdf_bytes)
+                    except Exception:  # noqa: BLE001
+                        matches = ()
+            details.append(PhaseDetail(ref=ref, ko_matches=matches))
+
+    # 4) Second pass: compute provisional qualifiers per group phase.
+    #    Rule (per FCB defaults): the 1st of each regular group always
+    #    advances. 2nd-placed players occasionally fill seats in early phases
+    #    (pre-pre-prèvia, pre-prèvia) but NEVER from the last group phase
+    #    feeding the KO. Since we can't reliably detect the "eventually 2nd"
+    #    case without Open-specific rules, we default to top-1 everywhere.
+    #    The remaining KO slots are filled by seeded players (caps de sèrie)
+    #    whom we can't identify from the scraped data.
+    enriched: list[PhaseDetail] = []
+    for d in details:
+        if d.ref.kind != "group":
+            enriched.append(d)
+            continue
+        n_regular = sum(1 for g in d.groups if _is_regular_group(g.label))
+        qualifiers = compute_provisional_qualifiers(d, next_slots=n_regular)
+        enriched.append(
+            PhaseDetail(
+                ref=d.ref,
+                groups=d.groups,
+                ko_matches=d.ko_matches,
+                provisional_qualifiers=qualifiers,
+            )
+        )
+
+    # 5) Third pass: derive provisional KO brackets when the FCB hasn't
+    #    published them yet — including PARTIAL publication (some pairings
+    #    listed, others missing).  For each KO round:
+    #      • compute the expected pool of advancers (group winners +
+    #        reservats for the first KO; previous-round winners later);
+    #      • subtract players already paired in the official `ko_matches`;
+    #      • pyramid-pair the leftovers (1st-vs-Nth on mitjana/SM seed).
+    #    `provisional_matches` therefore holds ONLY the missing pairings,
+    #    so the UI can render them alongside the official ones with a
+    #    "calculat" marker.
+    final = list(enriched)
+    last_group_idx = next(
+        (i for i in range(len(final) - 1, -1, -1) if final[i].ref.kind == "group"),
+        None,
+    )
+    if last_group_idx is not None:
+        for i in range(last_group_idx + 1, len(final)):
+            d = final[i]
+            if d.ref.kind != "ko":
+                continue
+
+            advancing = compute_advancing_players(final, i, last_group_idx)
+            paired: set[str] = set()
+            for m in d.ko_matches:
+                if m.player_a:
+                    paired.add(m.player_a)
+                if m.player_b:
+                    paired.add(m.player_b)
+
+            # Only form pairings when the full expected pool is known;
+            # for partial pools we keep `advancing` (so the UI shows the
+            # already-qualified players) but skip pairing.
+            expected_n_matches = _KO_LABEL_TO_MATCHES.get(d.ref.label.upper())
+            expected_pool_size = expected_n_matches * 2 if expected_n_matches else None
+            pool_complete = (
+                expected_pool_size is None or len(advancing) >= expected_pool_size
+            )
+            if advancing and pool_complete:
+                leftover_names = [p.name for p in advancing if p.name not in paired]
+                prov = _pair_pyramid(leftover_names)
+            else:
+                prov = ()
+
+            if prov or advancing:
+                final[i] = PhaseDetail(
+                    ref=d.ref,
+                    groups=d.groups,
+                    ko_matches=d.ko_matches,
+                    provisional_qualifiers=d.provisional_qualifiers,
+                    provisional_matches=prov,
+                    provisional_players=advancing,
+                )
+
+    return OpenLiveState(structure=structure_full, phases=final)

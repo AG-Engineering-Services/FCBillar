@@ -93,13 +93,15 @@ class ClubsView(QWidget):
         if not fcb_id:
             return
         self._selected_club = fcb_id
-        self._right_title.setText(f"Jugadors de '{fcb_id}' (carregant…)")
-        self._controller.request_club_players(fcb_id)
+        self._right_title.setText(f"Jugadors de '{fcb_id}' temporada actual (carregant…)")
+        self._controller.request_club_players(fcb_id, current_season_only=True)
 
     def _on_club_players_loaded(self, club_fcb_id: str, players: list[PlayerKpi]) -> None:
         if club_fcb_id != self._selected_club:
             return  # selecció ha canviat mentrestant
-        self._right_title.setText(f"Jugadors de '{club_fcb_id}' ({len(players)})")
+        self._right_title.setText(
+            f"Jugadors de '{club_fcb_id}' temporada actual ({len(players)})"
+        )
         rows = [
             [p.fcb_id, p.nom, p.num_partides, "★" if p.seguiment else ""]
             for p in players

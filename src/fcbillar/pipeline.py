@@ -15,23 +15,32 @@ from fcbillar.models import (
     EncontreLliga,
     Equip,
     Game,
+    Player,
     Ranking,
     RankingGameLink,
     Temporada,
+    TorneigIndividualRecord,
+    TorneigParticipantRecord,
 )
 from fcbillar.scraper.client import ScraperClient
 from fcbillar.scraper.parsers import (
     ClubOficial,
     HistorialEntry,
     HomeRankingsResult,
+    IndividualDivisio,
+    IndividualParticipant,
     LligaDivisio,
     LligaEncontre,
     LligaGrup,
     LligaJornadaLink,
     LligaPartidaRow,
     RawGameRow,
+    TorneigIndividual,
     parse_clubs_listing,
     parse_home_current_rankings,
+    parse_individuals_classificaciofinal,
+    parse_individuals_divisions,
+    parse_individuals_torneigs_list,
     parse_lliga_divisions,
     parse_lliga_encontres,
     parse_lliga_grups,
@@ -559,18 +568,35 @@ def set_follow(fcb_id: str, follow: bool, *, settings: Settings | None = None) -
 # --------------------------- ingest de lliga catalana ---------------------------
 
 
-# Patró d'un nom d'equip a la lliga: `<NOM_CLUB> "<LLETRA>"`.
-_EQUIP_NOM_RE = re.compile(r'^(.+?)\s*"([A-Z0-9]+)"\s*$')
+# Patrons per parsejar el nom d'equip a la lliga.
+# El portal usa múltiples formats que cal cobrir:
+# - C.B. MATARÓ "A"          (cometes ASCII)
+# - C.B. MATARÓ "A"          (cometes tipogràfiques)
+# - 01 C.B. BARCELONA A      (prefix numèric per ordre + lletra sense cometes)
+# - SANT ADRIÀ A             (sense cometes ni prefix)
+# - C.B.SANTS                (sense lletra → equip únic)
+_EQUIP_PREFIX_NUM_RE = re.compile(r"^\d{1,3}\s+")
+_QUOTES = r"['‘’\"“”]"
+# Exigim espai O cometa abans de la lletra final per no malinterpretar
+# noms que simplement acaben en lletra (BANYOLES, MATADEPERA, etc.).
+_EQUIP_NOM_RE = re.compile(
+    rf"^(.+?)(?:\s+|{_QUOTES}\s*)([ABCDEFGH])\s*{_QUOTES}?\s*$"
+)
 
 
 def _split_equip_nom(equip_nom: str) -> tuple[str, str]:
-    """Separa "C.B. MATARÓ \"A\"" en ("C.B. MATARÓ", "A").
+    """Separa el nom d'equip en (club_nom, lletra).
 
-    Si el nom no segueix el patró amb cometes, retornem (nom_complet, "UNICO").
+    Cobreix les variants observades al portal: cometes ASCII, cometes
+    tipogràfiques, prefix numèric "01 ", lletra sense cometes, sense lletra.
+    Si no hi ha lletra detectable, retorna (nom, "UNICO").
     """
-    m = _EQUIP_NOM_RE.match(equip_nom.strip())
+    s = equip_nom.strip()
+    # Treure prefix d'ordre tipus "01 ", "12 " si n'hi ha.
+    s = _EQUIP_PREFIX_NUM_RE.sub("", s)
+    m = _EQUIP_NOM_RE.match(s)
     if m is None:
-        return equip_nom.strip(), "UNICO"
+        return s, "UNICO"
     return m.group(1).strip(), m.group(2).strip()
 
 
@@ -1165,6 +1191,144 @@ def find_club_players(
         (cid,),
     ).fetchall()
     return [(r[0], r[1]) for r in rows]
+
+
+# --------------------------- ingest individuals ---------------------------
+
+
+@dataclass
+class IngestIndividualsResult:
+    torneigs_processed: int
+    torneigs_failed: int
+    total_participants: int
+
+
+def _individuals_llistat_url(base_url: str, temporada: str | None) -> str:
+    if temporada is None or temporada == "current":
+        return f"{base_url.rstrip('/')}/ca/individuals/llistat"
+    return f"{base_url.rstrip('/')}/ca/historial/llistatIndividual/{temporada}"
+
+
+def ingest_individuals_temporada(
+    client: ScraperClient,
+    *,
+    temporada: str | None = None,
+    create_missing_players: bool = True,
+    settings: Settings | None = None,
+) -> IngestIndividualsResult:
+    """Ingest dels torneigs individuals d'una temporada.
+
+    `temporada=None` o `'current'` → temporada actual (`/ca/individuals/llistat`).
+    Per cada torneig, descobreix divisions i ingest classificació final.
+    """
+    settings = settings or client.settings
+    base = settings.base_url.rstrip("/")
+    conn = ensure_schema(settings.db_path)
+    repo = Repository(conn)
+
+    # Si temporada no és string, deduïm de l'historial
+    temporada_nom = temporada
+    if temporada_nom is None:
+        # Per a "current", agafem la temporada actual del context (deriva de data avui).
+        from datetime import date as _date
+        today = _date.today()
+        if today.month >= 8:
+            temporada_nom = f"{today.year}-{today.year + 1}"
+        else:
+            temporada_nom = f"{today.year - 1}-{today.year}"
+
+    # 1. Fetch llistat de torneigs
+    url = _individuals_llistat_url(base, temporada)
+    try:
+        html = client.fetch_html(url)
+    except Exception as e:
+        log.error("FAIL fetch individuals llistat: %s", e)
+        return IngestIndividualsResult(0, 0, 0)
+    torneigs = parse_individuals_torneigs_list(html)
+    log.info("Individuals %s: %d torneigs descoberts", temporada_nom, len(torneigs))
+
+    processed = 0
+    failed = 0
+    total_part = 0
+    for torneig in torneigs:
+        torneig_url = f"{base}/ca/individuals/divisions/{torneig.torneig_id_extern}"
+        try:
+            torneig_html = client.fetch_html(torneig_url)
+        except Exception as e:
+            log.warning("FAIL torneig %s: %s", torneig.nom, e)
+            failed += 1
+            continue
+        divisions = parse_individuals_divisions(torneig_html)
+        if not divisions:
+            log.info("  %s: sense divisions parsejables", torneig.nom)
+            failed += 1
+            continue
+        for div in divisions:
+            classif_href = div.classif_href or (
+                f"ca/individuals/classificaciofinal/{div.torneig_id}/{div.divisio_id_extern}"
+            )
+            classif_url = f"{base}/{classif_href.lstrip('/')}"
+            try:
+                classif_html = client.fetch_html(classif_url)
+            except Exception as e:
+                log.warning("    FAIL classif %s %s: %s", torneig.nom, div.nom, e)
+                continue
+            participants = parse_individuals_classificaciofinal(classif_html)
+            # Nom complet del torneig: "TRES BANDES - 1A DIVISIÓ"
+            nom_complet = (
+                torneig.nom if div.nom == "UNICA" else f"{torneig.nom} - {div.nom}"
+            )
+            try:
+                repo.upsert_torneig_individual(
+                    TorneigIndividualRecord(
+                        torneig_id_extern=torneig.torneig_id_extern,
+                        divisio_id_extern=div.divisio_id_extern,
+                        nom=nom_complet,
+                        temporada_nom=temporada_nom,
+                    )
+                )
+            except Exception as e:
+                log.warning("    FAIL upsert torneig %s: %s", nom_complet, e)
+                continue
+            # Participants
+            n_ok = 0
+            for p in participants:
+                # Resoldre player_fcb_id
+                fcb_id = repo.get_player_fcb_id_by_nom(p.jugador_nom)
+                if fcb_id is None:
+                    if create_missing_players:
+                        fcb_id = repo.resolve_or_create_player_by_nom(p.jugador_nom)
+                    else:
+                        continue
+                try:
+                    repo.upsert_torneig_participant(
+                        TorneigParticipantRecord(
+                            torneig_id_extern=torneig.torneig_id_extern,
+                            divisio_id_extern=div.divisio_id_extern,
+                            player_fcb_id=fcb_id,
+                            posicio=p.posicio,
+                            partides_jugades=p.partides_jugades,
+                            punts=p.punts,
+                            caramboles=p.caramboles,
+                            entrades=p.entrades,
+                            mitjana_general=p.mitjana_general,
+                            mitjana_particular=p.mitjana_particular,
+                            serie_max=p.serie_max,
+                            club_text=p.club,
+                        ),
+                        temporada_nom=temporada_nom,
+                    )
+                    n_ok += 1
+                except Exception as e:
+                    log.debug("FAIL participant %s: %s", p.jugador_nom, e)
+            total_part += n_ok
+            log.info("    %s %s: %d participants", torneig.nom, div.nom, n_ok)
+        processed += 1
+    return IngestIndividualsResult(
+        torneigs_processed=processed,
+        torneigs_failed=failed,
+        total_participants=total_part,
+    )
 
 
 def run_status(settings: Settings | None = None) -> dict[str, int]:

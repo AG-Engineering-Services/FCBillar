@@ -266,6 +266,8 @@ def test_counts_returns_all_tables(repo: Repository) -> None:
         "equips",
         "encontres_lliga",
         "club_aliases",
+        "torneigs_individuals",
+        "torneig_participants",
     }
 
 

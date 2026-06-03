@@ -8,7 +8,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
 
 from desktop.controllers import MainController
@@ -19,8 +18,7 @@ STYLES_PATH = Path(__file__).resolve().parent / "styles" / "theme.qss"
 
 
 def main() -> int:
-    # High-DPI rendering correcte a Windows; cal abans del QApplication.
-    QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
+    # High-DPI ja és default a PyQt6 (no cal AA_UseHighDpiPixmaps).
     app = QApplication(sys.argv)
     app.setApplicationName("FCBillar Dashboard")
     app.setOrganizationName("FCBillar")

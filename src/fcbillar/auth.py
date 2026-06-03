@@ -83,8 +83,17 @@ def _wait_for_login_confirmed(page) -> bool:
     deadline = time.monotonic() + LOGIN_OVERALL_TIMEOUT_SEC
     confirmed_streak = 0
     while time.monotonic() < deadline:
-        form_absent = page.query_selector(LOGIN_FORM_SELECTOR) is None
-        url_ok = "/login" not in page.url
+        # El query_selector pot petar amb "Execution context was destroyed"
+        # si la pàgina està navegant just en aquest instant (típic durant el
+        # login). No és un error real: ho tractem com a "estat indeterminat"
+        # i reintentem al següent tick.
+        try:
+            form_absent = page.query_selector(LOGIN_FORM_SELECTOR) is None
+            url_ok = "/login" not in page.url
+        except Exception:  # noqa: BLE001 — navegació en curs; reintenta
+            confirmed_streak = 0
+            time.sleep(LOGIN_POLL_INTERVAL_SEC)
+            continue
         if form_absent and url_ok:
             confirmed_streak += 1
             if confirmed_streak >= LOGIN_STABLE_ABSENT_TICKS:

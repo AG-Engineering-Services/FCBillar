@@ -5,6 +5,12 @@ from desktop.models.data_source import (
     GameRow,
     PlayerKpi,
     RankingEntry,
+    StandingRow,
+    TorneigRow,
+    VirtualClub,
 )
 
-__all__ = ["DataSource", "Counts", "ClubKpi", "PlayerKpi", "RankingEntry", "GameRow"]
+__all__ = [
+    "DataSource", "Counts", "ClubKpi", "PlayerKpi", "RankingEntry", "GameRow",
+    "VirtualClub", "StandingRow", "TorneigRow",
+]

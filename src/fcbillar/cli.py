@@ -31,6 +31,7 @@ from fcbillar.pipeline import (
     find_club_players,
     import_clubs_oficials,
     import_temporada,
+    ingest_individuals_temporada,
     ingest_lliga_grup,
     ingest_lliga_jornada,
     ingest_partides,
@@ -87,6 +88,41 @@ def init_db() -> None:
     settings = get_settings()
     ensure_schema(settings.db_path)
     console.print(f"[green]✓ Esquema verificat a {settings.db_path}[/]")
+
+
+@app.command("fix-winners")
+def fix_winners_cmd(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Només mostra, no escriu"),
+) -> None:
+    """Recalcula el guanyador de cada partida des de les caramboles.
+
+    A la caràmbola guanya qui fa més caramboles (empat = sense guanyador). Algunes
+    partides poden tenir el guanyador inconsistent (p.ex. residu de col·lisions de
+    deduplicació anteriors); aquesta comanda ho corregeix de forma determinista.
+    """
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    bad = conn.execute(
+        """
+        SELECT id, player1_id, player2_id, caramboles1, caramboles2
+        FROM games
+        WHERE caramboles1 IS NOT NULL AND caramboles2 IS NOT NULL
+          AND caramboles1 <> caramboles2
+          AND (
+            guanyador_id IS NULL
+            OR (caramboles1 > caramboles2 AND guanyador_id <> player1_id)
+            OR (caramboles2 > caramboles1 AND guanyador_id <> player2_id)
+          )
+        """
+    ).fetchall()
+    for r in bad:
+        correct = r["player1_id"] if r["caramboles1"] > r["caramboles2"] else r["player2_id"]
+        if not dry_run:
+            conn.execute("UPDATE games SET guanyador_id = ? WHERE id = ?", (correct, r["id"]))
+    if not dry_run:
+        conn.commit()
+    verb = "es corregirien" if dry_run else "corregides"
+    console.print(f"[green]OK {len(bad)} partides {verb}.[/]")
 
 
 @app.command()
@@ -349,6 +385,50 @@ def discover_lliga_cmd(
                         )
 
 
+@app.command("discover-lliga-noms")
+def discover_lliga_noms_cmd(
+    lligues: list[int] = typer.Argument(
+        None, help="Ids de lligues a descobrir (per defecte 36 i 37)"
+    ),
+) -> None:
+    """Descobreix i desa els noms de divisions i grups de lliga (taula lliga_noms).
+
+    Els encontres només desen ids numèrics; aquesta comanda omple els noms
+    llegibles perquè la web app mostri les classificacions per categoria amb
+    noms reals. Executa-la un cop per temporada (pàgines públiques, sense login).
+    """
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    targets = lligues or [36, 37]
+    total = 0
+    with ScraperClient(settings) as client:
+        for lliga_id in targets:
+            try:
+                tree = discover_lliga(client, lliga_id, depth=2)
+            except Exception as e:  # noqa: BLE001
+                console.print(f"[red]FAIL lliga {lliga_id}: {e}[/]")
+                continue
+            for div in tree.divisions:
+                conn.execute(
+                    "INSERT OR REPLACE INTO lliga_noms (lliga_id, divisio_id, grup_id, nom) "
+                    "VALUES (?, ?, 0, ?)",
+                    (lliga_id, div.divisio_id, div.nom),
+                )
+                total += 1
+                for grup in tree.grups_by_div.get(div.divisio_id, []):
+                    conn.execute(
+                        "INSERT OR REPLACE INTO lliga_noms (lliga_id, divisio_id, grup_id, nom) "
+                        "VALUES (?, ?, ?, ?)",
+                        (lliga_id, div.divisio_id, grup.grup_id, grup.nom),
+                    )
+                    total += 1
+            console.print(
+                f"[green]Lliga {lliga_id}: {len(tree.divisions)} divisions desades[/]"
+            )
+    conn.commit()
+    console.print(f"[green]OK {total} noms de lliga desats a lliga_noms.[/]")
+
+
 @app.command("import-clubs")
 def import_clubs_cmd() -> None:
     """Descarrega el listing oficial de clubs (/ca/clubs/5/Federacio) i els desa."""
@@ -513,6 +593,86 @@ def clubs_players_cmd(
     console.print(table)
     if follow:
         console.print(f"[green]OK {n_followed} jugadors marcats com a seguits.[/]")
+
+
+@app.command("ingest-individuals")
+def ingest_individuals_cmd(
+    temporada: str = typer.Option(
+        "current", "--temporada",
+        help="Temporada (ex: '2024-2025') o 'current' per a l'actual",
+    ),
+) -> None:
+    """Ingest dels torneigs individuals (opens, catalans, etc.) per temporada."""
+    settings = get_settings()
+    with ScraperClient(settings) as client:
+        result = ingest_individuals_temporada(
+            client,
+            temporada=None if temporada == "current" else temporada,
+            create_missing_players=True,
+            settings=settings,
+        )
+    console.print(
+        f"[green]OK individuals temporada {temporada}: "
+        f"{result.torneigs_processed} torneigs ({result.torneigs_failed} fallats), "
+        f"{result.total_participants} participants[/]"
+    )
+
+
+@app.command("open-import-inscrits")
+def open_import_inscrits_cmd(
+    pdf: str = typer.Argument(..., help="Ruta al PDF 'LLISTAT D'INSCRITS PER CLUBS'"),
+    season: str = typer.Option("2025-2026", "--season", help="Temporada de l'Open"),
+    name: str = typer.Option(
+        "", "--name",
+        help="Nom de l'Open (per defecte, el llegit del PDF)",
+    ),
+) -> None:
+    """Importa el llistat d'inscrits d'un Open i en genera el quadre projectat.
+
+    Sembra el camp segons l'Art. XVIII i construeix l'estructura de fases/grups
+    (Art. VIII-IX) abans que la federació publiqui els grups. El resultat es
+    desa a la BD d'opens (data/fcb_opens.db) i es veu a la pestanya Opens.
+    """
+    from datetime import datetime, timezone
+    import json as _json
+
+    from fcb_opens import db as _odb
+    from fcb_opens.paths import resolve_db_path
+    from fcb_opens.projection import build_projection
+    from fcb_opens.scraper.inscrits_pdf import parse_inscrits_pdf
+
+    inscrits = parse_inscrits_pdf(pdf)
+    if not inscrits.entries:
+        console.print("[red]No s'ha pogut llegir cap inscrit del PDF.[/]")
+        raise typer.Exit(code=1)
+
+    proj = build_projection(inscrits, season=season)
+    open_name = name or proj["name"]
+    proj["name"] = open_name
+
+    db_path = resolve_db_path()
+    _odb.init_db(db_path)
+    conn = _odb.connect(db_path)
+    try:
+        existing = _odb.find_projection_by_name(conn, open_name)
+        proj_id = _odb.save_projection(
+            conn,
+            name=open_name,
+            season=season,
+            num_inscriptions=proj["num_inscriptions"],
+            source_pdf=pdf,
+            payload_json=_json.dumps(proj, ensure_ascii=False),
+            created_at=datetime.now(timezone.utc).isoformat(),
+            replace_id=existing["id"] if existing else None,
+        )
+    finally:
+        conn.close()
+
+    struct = ", ".join(f"{k}={v}" for k, v in proj["structure"].items())
+    console.print(
+        f"[green]OK '{open_name}': {proj['num_inscriptions']} inscrits "
+        f"(estructura {struct}) → projecció #{proj_id} desada.[/]"
+    )
 
 
 if __name__ == "__main__":

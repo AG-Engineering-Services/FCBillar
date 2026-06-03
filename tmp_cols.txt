@@ -1,0 +1,1 @@
+COLS: ['torneig_id', 'player_id', 'posicio', 'partides_jugades', 'punts', 'caramboles', 'entrades', 'mitjana_general', 'mitjana_particular', 'serie_max', 'club_text']

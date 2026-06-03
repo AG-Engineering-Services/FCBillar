@@ -37,6 +37,26 @@ QMainWindow, QStackedWidget {
     color: #f0f3f8;
     padding: 4px 0 8px 0;
 }
+#subSectionTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #c0c6cf;
+    padding: 4px 0 4px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+#scrapingStatus {
+    color: #93a0b3;
+    font-style: italic;
+}
+QPlainTextEdit#scrapingLog {
+    background-color: #0f1216;
+    color: #c9d1d9;
+    border: 1px solid #2a2f37;
+    border-radius: 6px;
+    padding: 8px;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+}
 
 #kpiCard {
     background-color: #272d36;
@@ -126,6 +146,68 @@ QPushButton:hover {
 }
 QPushButton:pressed {
     background-color: #1e58c5;
+}
+
+QPushButton#ghost {
+    background-color: transparent;
+    color: #c0c6cf;
+    border: 1px solid #353c47;
+}
+QPushButton#ghost:hover {
+    background-color: #232932;
+    border-color: #4a5468;
+}
+QPushButton:disabled {
+    background-color: #2a3038;
+    color: #6b7585;
+}
+
+QComboBox {
+    background-color: #272d36;
+    border: 1px solid #353c47;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #f0f3f8;
+    min-width: 120px;
+}
+QComboBox:hover {
+    border-color: #4a5468;
+}
+QComboBox:focus {
+    border-color: #2d6cdf;
+}
+QComboBox::drop-down {
+    border: none;
+    width: 22px;
+}
+QComboBox QAbstractItemView {
+    background-color: #21262e;
+    color: #e4e7ec;
+    border: 1px solid #353c47;
+    selection-background-color: #2d6cdf;
+    selection-color: #ffffff;
+    outline: none;
+}
+
+QCheckBox {
+    color: #c0c6cf;
+    spacing: 8px;
+}
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #4a5468;
+    border-radius: 4px;
+    background-color: #272d36;
+}
+QCheckBox::indicator:checked {
+    background-color: #2d6cdf;
+    border-color: #2d6cdf;
+}
+
+QScrollArea {
+    border: none;
+    background-color: #1f2329;
 }
 
 QStatusBar {

@@ -1,0 +1,2 @@
+total_games=49 with_mitjana=0 null_mitjana=49
+sample=[(None, 23, 45), (None, 30, 46), (None, 30, 41), (None, 26, 44), (None, 26, 50), (None, 19, 50), (None, 13, 50), (None, 16, 41)]

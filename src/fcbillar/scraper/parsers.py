@@ -458,6 +458,241 @@ class ClubOficial:
     web: str | None = None
 
 
+# --------------------------- individuals (opens, catalans, etc) ---------------------------
+
+
+@dataclass(frozen=True)
+class TorneigIndividual:
+    """Un torneig individual (ex: OPEN TRES BANDES SANTS, TRES BANDES, etc.)."""
+
+    torneig_id_extern: int
+    nom: str
+
+
+@dataclass(frozen=True)
+class IndividualFaseLink:
+    """Una fase d'un torneig individual: grups round-robin o eliminatòries."""
+
+    torneig_id: int
+    fase_id_extern: int
+    nom: str  # "PRÈVIA", "QUARTS", "FINAL", etc.
+    tipus: str  # "grups" o "ko"
+    href: str  # URL relativa per a poder descarregar la classif o partides
+
+
+@dataclass(frozen=True)
+class IndividualParticipant:
+    """Una entrada de la classificació final d'una fase de torneig individual."""
+
+    posicio: int
+    jugador_nom: str
+    club: str | None
+    partides_jugades: int | None
+    punts: int | None
+    caramboles: int | None
+    entrades: int | None
+    mitjana_general: float | None
+    mitjana_particular: float | None
+    serie_max: int | None
+
+
+_INDIVIDUALS_DIV_HREF_RE = re.compile(r"individuals/divisions/(\d+)")
+_INDIVIDUALS_FASE_HREF_RE = re.compile(r"individuals/fases/(\d+)/(\d+)")
+_INDIVIDUALS_GRUPS_HREF_RE = re.compile(r"individuals/grups/(\d+)/(\d+)/(\d+)")
+_INDIVIDUALS_KO_HREF_RE = re.compile(
+    r"individuals/partideseliminatoria/(\d+)/(\d+)/(\d+)"
+)
+_INDIVIDUALS_CLASSIF_HREF_RE = re.compile(
+    r"individuals/classificaciofinal/(\d+)/(\d+)"
+)
+
+
+@dataclass(frozen=True)
+class IndividualDivisio:
+    """Una divisió dins d'un torneig individual (HONOR, 1a, 2a...)."""
+
+    torneig_id: int
+    divisio_id_extern: int
+    nom: str
+    classif_href: str | None = None
+
+
+def parse_individuals_divisions(html: str) -> list[IndividualDivisio]:
+    """Parseja /ca/individuals/divisions/{torneig_id} → llista de divisions.
+
+    Si el torneig no té divisions múltiples (un sol bloc), retornem la 'UNICA'
+    com a entrada única.
+    """
+    soup = BeautifulSoup(html, "lxml")
+    section = soup.select_one("section.three.fourths.padded")
+    if section is None:
+        return []
+    # Cada divisió té un link a 'fases' + (opcionalment) un link a 'classificaciofinal'
+    out: dict[tuple[int, int], IndividualDivisio] = {}
+    for link in section.select("a[href]"):
+        href = link["href"]
+        m = _INDIVIDUALS_FASE_HREF_RE.search(href)
+        if m:
+            key = (int(m.group(1)), int(m.group(2)))
+            if key not in out:
+                out[key] = IndividualDivisio(
+                    torneig_id=key[0],
+                    divisio_id_extern=key[1],
+                    nom=_text(link).upper(),
+                )
+            continue
+        m2 = _INDIVIDUALS_CLASSIF_HREF_RE.search(href)
+        if m2:
+            key = (int(m2.group(1)), int(m2.group(2)))
+            existing = out.get(key)
+            if existing is None:
+                out[key] = IndividualDivisio(
+                    torneig_id=key[0], divisio_id_extern=key[1],
+                    nom="UNICA", classif_href=href,
+                )
+            else:
+                out[key] = IndividualDivisio(
+                    torneig_id=existing.torneig_id,
+                    divisio_id_extern=existing.divisio_id_extern,
+                    nom=existing.nom,
+                    classif_href=href,
+                )
+    return list(out.values())
+
+
+def parse_individuals_torneigs_list(html: str) -> list[TorneigIndividual]:
+    """Parseja /ca/individuals/llistat (temporada actual) i retorna torneigs."""
+    soup = BeautifulSoup(html, "lxml")
+    section = soup.select_one("section.three.fourths.padded")
+    if section is None:
+        # Fallback: la pàgina pot tenir layout diferent
+        section = soup
+    out: list[TorneigIndividual] = []
+    for link in section.select("a[href]"):
+        m = _INDIVIDUALS_DIV_HREF_RE.search(link["href"])
+        if m is None:
+            continue
+        out.append(
+            TorneigIndividual(
+                torneig_id_extern=int(m.group(1)),
+                nom=_text(link).upper(),
+            )
+        )
+    return out
+
+
+def parse_individuals_fases(html: str) -> list[IndividualFaseLink]:
+    """Parseja /ca/individuals/divisions/{id} (llista de fases d'un torneig).
+
+    Pot també parsejar /ca/individuals/fases/{id}/{div_id} (sub-fases d'una
+    divisió de torneig amb estructura encara més profunda).
+    """
+    soup = BeautifulSoup(html, "lxml")
+    section = soup.select_one("section.three.fourths.padded")
+    if section is None:
+        return []
+    out: list[IndividualFaseLink] = []
+    for link in section.select("a[href]"):
+        href = link["href"]
+        m_grups = _INDIVIDUALS_GRUPS_HREF_RE.search(href)
+        if m_grups:
+            out.append(
+                IndividualFaseLink(
+                    torneig_id=int(m_grups.group(1)),
+                    fase_id_extern=int(m_grups.group(3)),
+                    nom=_text(link).upper(),
+                    tipus="grups",
+                    href=href,
+                )
+            )
+            continue
+        m_ko = _INDIVIDUALS_KO_HREF_RE.search(href)
+        if m_ko:
+            out.append(
+                IndividualFaseLink(
+                    torneig_id=int(m_ko.group(1)),
+                    fase_id_extern=int(m_ko.group(3)),
+                    nom=_text(link).upper(),
+                    tipus="ko",
+                    href=href,
+                )
+            )
+    return out
+
+
+@dataclass(frozen=True)
+class IndividualGrupMembre:
+    """Assignació d'un jugador a un grup dins d'una fase de grups."""
+
+    jugador_nom: str
+    grup_nom: str
+
+
+def parse_individuals_grups_membership(html: str) -> list[IndividualGrupMembre]:
+    """Parseja /ca/individuals/grups/{tor}/{div}/{fase}.
+
+    Aquestes pàgines NO tenen classificació amb punts: només l'assignació de
+    cada jugador al seu grup (capçalera JUGADOR | GRUP). Hi ha dues vistes
+    equivalents (ordenat per nom / per grup); n'agafem la primera.
+    """
+    section = _copa_section(html)
+    if section is None:
+        return []
+    for row in section.select("div.row"):
+        headers = [_text(b).upper() for b in row.find_all("b")]
+        if "JUGADOR" not in headers or "GRUP" not in headers:
+            continue
+        cells = row.find_all("div", recursive=False)
+        vals = [_text(c) for c in cells if c.find("b") is None]
+        out: list[IndividualGrupMembre] = []
+        for i in range(0, len(vals) - 1, 2):
+            jugador = vals[i].strip()
+            grup = vals[i + 1].strip()
+            if jugador and grup:
+                out.append(IndividualGrupMembre(jugador_nom=jugador, grup_nom=grup))
+        if out:
+            return out
+    return []
+
+
+def parse_individuals_classificaciofinal(html: str) -> list[IndividualParticipant]:
+    """Parseja /ca/individuals/classificaciofinal/{tor}/{fase_id} → participants."""
+    soup = BeautifulSoup(html, "lxml")
+    section = soup.select_one("section.three.fourths.padded")
+    if section is None:
+        return []
+    table = section.find("table")
+    if table is None:
+        return []
+    out: list[IndividualParticipant] = []
+    for tr in table.find_all("tr"):
+        cells = tr.find_all("td")
+        # Header és <th>, files de dades són <td>; esperem 10 columnes
+        if len(cells) < 10:
+            continue
+        try:
+            posicio = _parse_int(_text(cells[0]))
+            if posicio is None:
+                continue
+            out.append(
+                IndividualParticipant(
+                    posicio=posicio,
+                    jugador_nom=_text(cells[1]),
+                    club=_text(cells[2]) or None,
+                    partides_jugades=_parse_int(_text(cells[3])),
+                    punts=_parse_int(_text(cells[4])),
+                    caramboles=_parse_int(_text(cells[5])),
+                    entrades=_parse_int(_text(cells[6])),
+                    mitjana_general=_parse_float(_text(cells[7])),
+                    mitjana_particular=_parse_float(_text(cells[8])),
+                    serie_max=_parse_int(_text(cells[9])),
+                )
+            )
+        except (ValueError, IndexError):
+            continue
+    return out
+
+
 def parse_clubs_listing(html: str) -> list[ClubOficial]:
     """Parseja /ca/clubs/5/Federacio → llista de clubs amb dades de contacte.
 
@@ -747,3 +982,247 @@ def _parse_partida_row(cells: list[Tag], competicio: str) -> RawGameRow:
         visitant_caramboles=_parse_int(_text(cells[6])),
         entrades=_parse_int(_text(cells[7])),
     )
+
+
+# ======================================================================
+# COPA — estructura: edició → jornades → grups → encontres → partides
+# Les pàgines de copa són públiques i fan servir divs (.twelfths), no taules.
+#   /ca/copa/faseGrups/{ed}                      → jornades (links grups/{ed}/{jor})
+#   /ca/copa/grups/{ed}/{jor}                    → grups   (links encontresGrup/...)
+#   /ca/copa/encontresGrup/{ed}/{jor}/{grup}     → classificació + encontres
+#   /ca/copa/partidesGrup/{ed}/{jor}/{grup}/{enc}/{ta}/{tb}  → partides
+# ======================================================================
+
+_COPA_GRUPS_HREF_RE = re.compile(r"copa/grups/(\d+)/(\d+)")
+_COPA_ENCGRUP_HREF_RE = re.compile(r"copa/encontresGrup/(\d+)/(\d+)/(\d+)")
+_COPA_PARTIDES_HREF_RE = re.compile(
+    r"copa/partidesGrup/(\d+)/(\d+)/(\d+)/(\d+)/(\d+)/(\d+)"
+)
+# "TEAM A (3) - (0) TEAM B"
+_COPA_ENC_RESULT_RE = re.compile(r"^(.*?)\((\d+)\)\s*-\s*\((\d+)\)(.*)$", re.DOTALL)
+# "NOM JUGADOR Caramboles: 30 - Sèrie Major: 4"
+_COPA_PLAYER_RE = re.compile(
+    r"^(.*?)Caramboles:\s*(\d+)\s*-\s*S[èe]rie\s*Major:\s*(\d+)", re.IGNORECASE | re.DOTALL
+)
+
+
+@dataclass(frozen=True)
+class CopaJornadaLink:
+    edicio_id: int
+    jornada: int
+    nom: str
+
+
+@dataclass(frozen=True)
+class CopaGrupLink:
+    edicio_id: int
+    jornada: int
+    grup_id: int
+    nom: str
+
+
+@dataclass(frozen=True)
+class CopaClassifRow:
+    posicio: int
+    equip: str
+    punts: int | None
+    parcials: int | None
+    mitjana: float | None
+
+
+@dataclass(frozen=True)
+class CopaEncontreLink:
+    edicio_id: int
+    jornada: int
+    grup_id: int
+    enc_id_extern: int
+    team_a_extern: int
+    team_b_extern: int
+    equip_local: str
+    equip_visitant: str
+    p_match_local: int | None
+    p_match_visitant: int | None
+
+
+@dataclass(frozen=True)
+class CopaGrupData:
+    grup_nom: str
+    classificacio: list[CopaClassifRow]
+    encontres: list[CopaEncontreLink]
+
+
+@dataclass(frozen=True)
+class CopaPartidaRow:
+    ordre: int
+    local_nom: str
+    local_caramboles: int | None
+    local_serie: int | None
+    visitant_nom: str
+    visitant_caramboles: int | None
+    visitant_serie: int | None
+    entrades: int | None
+    punts_local: int | None
+    punts_visitant: int | None
+
+
+def _copa_section(html: str) -> Tag | None:
+    soup = BeautifulSoup(html, "lxml")
+    return soup.select_one("section.three.fourths.padded") or soup.select_one("section")
+
+
+def parse_copa_jornades(html: str) -> list[CopaJornadaLink]:
+    """Parseja /ca/copa/faseGrups/{ed} → jornades (1a Jornada, 2a Jornada...)."""
+    section = _copa_section(html)
+    if section is None:
+        return []
+    out: list[CopaJornadaLink] = []
+    seen: set[int] = set()
+    for link in section.select("a[href]"):
+        m = _COPA_GRUPS_HREF_RE.search(link["href"])
+        if not m:
+            continue
+        jor = int(m.group(2))
+        if jor in seen:
+            continue
+        seen.add(jor)
+        out.append(
+            CopaJornadaLink(edicio_id=int(m.group(1)), jornada=jor, nom=_text(link))
+        )
+    return out
+
+
+def parse_copa_grups(html: str) -> list[CopaGrupLink]:
+    """Parseja /ca/copa/grups/{ed}/{jor} → grups (GRUP A, GRUP B...)."""
+    section = _copa_section(html)
+    if section is None:
+        return []
+    out: list[CopaGrupLink] = []
+    seen: set[int] = set()
+    for link in section.select("a[href]"):
+        m = _COPA_ENCGRUP_HREF_RE.search(link["href"])
+        if not m:
+            continue
+        grup = int(m.group(3))
+        if grup in seen:
+            continue
+        seen.add(grup)
+        out.append(
+            CopaGrupLink(
+                edicio_id=int(m.group(1)),
+                jornada=int(m.group(2)),
+                grup_id=grup,
+                nom=_text(link),
+            )
+        )
+    return out
+
+
+def parse_copa_encontresgrup(html: str) -> CopaGrupData:
+    """Parseja /ca/copa/encontresGrup/{ed}/{jor}/{grup} → classificació + encontres."""
+    section = _copa_section(html)
+    if section is None:
+        return CopaGrupData("", [], [])
+
+    h2 = section.find("h2")
+    grup_nom = _text(h2).replace("Encontres", "").strip() if h2 else ""
+
+    # --- Classificació: dins de div.row.marginbottom-15 hi ha un div.row amb
+    #     cel·les en .twelfths. Les 4 primeres són capçalera (<b>); després
+    #     grups de 4: equip, punts, parcials, mitjana.
+    classif: list[CopaClassifRow] = []
+    wrap = section.select_one("div.row.marginbottom-15 div.row")
+    if wrap is not None:
+        cells = wrap.find_all("div", recursive=False)
+        vals = [
+            _text(c) for c in cells if c.find("b") is None and _text(c) != ""
+        ]
+        for i in range(0, len(vals) - 3, 4):
+            equip = vals[i]
+            if not equip:
+                continue
+            classif.append(
+                CopaClassifRow(
+                    posicio=len(classif) + 1,
+                    equip=equip,
+                    punts=_parse_int(vals[i + 1]),
+                    parcials=_parse_int(vals[i + 2]),
+                    mitjana=_parse_float(vals[i + 3]),
+                )
+            )
+
+    # --- Encontres: div.row.box (sense .black) amb a.button.info i href partidesGrup
+    encontres: list[CopaEncontreLink] = []
+    for link in section.select("a.button.info[href]"):
+        m = _COPA_PARTIDES_HREF_RE.search(link["href"])
+        if not m:
+            continue
+        rm = _COPA_ENC_RESULT_RE.match(_text(link))
+        if not rm:
+            continue
+        encontres.append(
+            CopaEncontreLink(
+                edicio_id=int(m.group(1)),
+                jornada=int(m.group(2)),
+                grup_id=int(m.group(3)),
+                enc_id_extern=int(m.group(4)),
+                team_a_extern=int(m.group(5)),
+                team_b_extern=int(m.group(6)),
+                equip_local=rm.group(1).strip(),
+                p_match_local=int(rm.group(2)),
+                p_match_visitant=int(rm.group(3)),
+                equip_visitant=rm.group(4).strip(),
+            )
+        )
+    return CopaGrupData(grup_nom=grup_nom, classificacio=classif, encontres=encontres)
+
+
+def _parse_copa_player_cell(text: str) -> tuple[str, int | None, int | None]:
+    m = _COPA_PLAYER_RE.match(text)
+    if not m:
+        return text.strip(), None, None
+    return m.group(1).strip(), _parse_int(m.group(2)), _parse_int(m.group(3))
+
+
+def parse_copa_partides(html: str) -> list[CopaPartidaRow]:
+    """Parseja /ca/copa/partidesGrup/... → partides individuals de l'encontre.
+
+    Files = div.row.box (la capçalera és div.row.box.black). Cada fila té
+    four.twelfths (local), four.twelfths (visitant), two.twelfths (entrades),
+    two.twelfths (punts 'x - y'). No hi ha data per partida.
+    """
+    section = _copa_section(html)
+    if section is None:
+        return []
+    out: list[CopaPartidaRow] = []
+    for box in section.select("div.row.box"):
+        classes = box.get("class", [])
+        if "black" in classes:
+            continue  # capçalera
+        cells = box.find_all("div", recursive=False)
+        if len(cells) < 4:
+            continue
+        local_nom, lcar, lser = _parse_copa_player_cell(_text(cells[0]))
+        visit_nom, vcar, vser = _parse_copa_player_cell(_text(cells[1]))
+        if not local_nom and not visit_nom:
+            continue
+        entrades = _parse_int(_text(cells[2]))
+        punts_txt = _text(cells[3])
+        pl = pv = None
+        pm = re.match(r"(\d+)\s*-\s*(\d+)", punts_txt)
+        if pm:
+            pl, pv = int(pm.group(1)), int(pm.group(2))
+        out.append(
+            CopaPartidaRow(
+                ordre=len(out) + 1,
+                local_nom=local_nom,
+                local_caramboles=lcar,
+                local_serie=lser,
+                visitant_nom=visit_nom,
+                visitant_caramboles=vcar,
+                visitant_serie=vser,
+                entrades=entrades,
+                punts_local=pl,
+                punts_visitant=pv,
+            )
+        )
+    return out

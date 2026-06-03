@@ -22,6 +22,38 @@ CREATE TABLE IF NOT EXISTS players (
 CREATE INDEX IF NOT EXISTS ix_players_club ON players(club_id);
 CREATE INDEX IF NOT EXISTS ix_players_seguiment ON players(seguiment) WHERE seguiment = 1;
 
+-- v4: Torneigs individuals (opens, catalans, etc.).
+-- El portal els organitza per `divisions/{torneig_id}` i cada torneig té diverses
+-- divisions (HONOR, 1a, 2a...). Per cada divisió hi ha una classificació final
+-- amb participants. Aquí desem els torneigs + participants per saber
+-- "el jugador X va participar al torneig Y a la temporada Z".
+CREATE TABLE IF NOT EXISTS torneigs_individuals (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    torneig_id_extern       INTEGER NOT NULL,  -- id del portal (192, 206...)
+    divisio_id_extern       INTEGER NOT NULL,  -- id divisió interna (417, 418...)
+    nom                     TEXT NOT NULL,     -- "TRES BANDES - 1A DIVISIÓ"
+    modalitat_id            INTEGER REFERENCES modalitats(id),
+    temporada_id            INTEGER REFERENCES temporades(id),
+    UNIQUE(torneig_id_extern, divisio_id_extern, temporada_id)
+);
+CREATE INDEX IF NOT EXISTS ix_torneigs_ind_temp ON torneigs_individuals(temporada_id);
+
+CREATE TABLE IF NOT EXISTS torneig_participants (
+    torneig_id              INTEGER NOT NULL REFERENCES torneigs_individuals(id) ON DELETE CASCADE,
+    player_id               INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+    posicio                 INTEGER,
+    partides_jugades        INTEGER,
+    punts                   INTEGER,
+    caramboles              INTEGER,
+    entrades                INTEGER,
+    mitjana_general         REAL,
+    mitjana_particular      REAL,
+    serie_max               INTEGER,
+    club_text               TEXT,  -- nom del club tal com surt a la classificació
+    PRIMARY KEY (torneig_id, player_id)
+);
+CREATE INDEX IF NOT EXISTS ix_torneig_part_player ON torneig_participants(player_id);
+
 -- Alias per a noms alternatius de clubs (v3). El portal usa convencions
 -- diferents segons la pàgina (p.ex. "C.B.SANTS" al listing oficial vs
 -- "C.B. SANTS" a la lliga); aquesta taula permet mapejar-los al mateix
@@ -153,3 +185,115 @@ CREATE TABLE IF NOT EXISTS ranking_game_links (
     PRIMARY KEY (ranking_id, game_id, player_id_origen)
 );
 CREATE INDEX IF NOT EXISTS ix_rgl_game ON ranking_game_links(game_id);
+
+-- v5: Clubs virtuals. Una agrupació arbitrària de jugadors que NO depèn d'un
+-- club real federat (p.ex. "Club Foment Martinenc": jugadors que juguen per
+-- altres clubs però que es plantegen muntar un club federat). Permet aplicar
+-- les mateixes vistes de "focus de club" (KPIs, evolució d'ordre al rànquing,
+-- millors/pitjors partides) a una selecció manual de jugadors.
+CREATE TABLE IF NOT EXISTS virtual_clubs (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom         TEXT NOT NULL UNIQUE,
+    descripcio  TEXT,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS virtual_club_members (
+    virtual_club_id INTEGER NOT NULL REFERENCES virtual_clubs(id) ON DELETE CASCADE,
+    player_id       INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+    PRIMARY KEY (virtual_club_id, player_id)
+);
+CREATE INDEX IF NOT EXISTS ix_vcm_player ON virtual_club_members(player_id);
+
+-- v6: Noms de divisions i grups de lliga. El portal no els desa als encontres
+-- (només ids numèrics a la URL); aquesta taula mapeja (lliga, divisio, grup) →
+-- nom llegible, descobert via `discover_lliga` (pàgines públiques). grup_id = 0
+-- significa "nom de la divisió/categoria". Permet mostrar les classificacions
+-- agrupades per categoria amb noms reals enlloc d'ids.
+CREATE TABLE IF NOT EXISTS lliga_noms (
+    lliga_id    INTEGER NOT NULL,
+    divisio_id  INTEGER NOT NULL,
+    grup_id     INTEGER NOT NULL DEFAULT 0,  -- 0 = nom de la divisió/categoria
+    nom         TEXT NOT NULL,
+    PRIMARY KEY (lliga_id, divisio_id, grup_id)
+);
+
+-- v7: Estructura de la COPA. El portal serveix la classificació de cada grup de
+-- cada jornada (no es computa com a la lliga: els grups es refan cada jornada).
+-- Pàgines públiques. ids "extern" = ids numèrics de les URLs del portal.
+CREATE TABLE IF NOT EXISTS copa_jornades (
+    edicio_id   INTEGER NOT NULL,
+    jornada     INTEGER NOT NULL,        -- id extern de la jornada (URL)
+    ordre       INTEGER,                 -- 1a, 2a, 3a... dins l'edició
+    nom         TEXT,
+    PRIMARY KEY (edicio_id, jornada)
+);
+
+CREATE TABLE IF NOT EXISTS copa_encontres (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    edicio_id       INTEGER NOT NULL,
+    jornada         INTEGER NOT NULL,
+    grup_id         INTEGER NOT NULL,
+    grup_nom        TEXT,
+    enc_id_extern   INTEGER NOT NULL,
+    team_a_extern   INTEGER NOT NULL,
+    team_b_extern   INTEGER NOT NULL,
+    equip_local     TEXT,
+    equip_visitant  TEXT,
+    p_match_local   INTEGER,
+    p_match_visitant INTEGER,
+    UNIQUE (edicio_id, jornada, grup_id, enc_id_extern, team_a_extern, team_b_extern)
+);
+CREATE INDEX IF NOT EXISTS ix_copa_enc_grup ON copa_encontres(edicio_id, jornada, grup_id);
+
+CREATE TABLE IF NOT EXISTS copa_classificacio (
+    edicio_id   INTEGER NOT NULL,
+    jornada     INTEGER NOT NULL,
+    grup_id     INTEGER NOT NULL,
+    grup_nom    TEXT,
+    posicio     INTEGER,
+    equip       TEXT NOT NULL,
+    punts       INTEGER,
+    parcials    INTEGER,
+    mitjana     REAL,
+    PRIMARY KEY (edicio_id, jornada, grup_id, equip)
+);
+
+CREATE TABLE IF NOT EXISTS copa_partides (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    encontre_copa_id  INTEGER NOT NULL REFERENCES copa_encontres(id) ON DELETE CASCADE,
+    ordre             INTEGER,
+    local_nom         TEXT,
+    local_caramboles  INTEGER,
+    local_serie       INTEGER,
+    visitant_nom      TEXT,
+    visitant_caramboles INTEGER,
+    visitant_serie    INTEGER,
+    entrades          INTEGER,
+    punts_local       INTEGER,
+    punts_visitant    INTEGER
+);
+CREATE INDEX IF NOT EXISTS ix_copa_part_enc ON copa_partides(encontre_copa_id);
+
+-- v7/v8: Fases de grups dels torneigs individuals (PRÈVIA, QUALIFICACIÓ...).
+-- El portal NO publica classificacions amb punts per a aquestes fases: només
+-- l'assignació de cada jugador al seu grup. La classificació rica (PJ, punts,
+-- mitjanes...) només existeix a la final → torneig_participants. Aquí desem la
+-- composició de grups de cada fase.
+CREATE TABLE IF NOT EXISTS torneig_fases (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    torneig_id      INTEGER NOT NULL REFERENCES torneigs_individuals(id) ON DELETE CASCADE,
+    fase_id_extern  INTEGER NOT NULL,
+    nom             TEXT,
+    tipus           TEXT,                -- 'grups' | 'ko'
+    ordre           INTEGER,
+    UNIQUE (torneig_id, fase_id_extern)
+);
+
+CREATE TABLE IF NOT EXISTS torneig_fase_grups (
+    fase_id      INTEGER NOT NULL REFERENCES torneig_fases(id) ON DELETE CASCADE,
+    grup_nom     TEXT,
+    jugador_nom  TEXT,
+    ordre        INTEGER
+);
+CREATE INDEX IF NOT EXISTS ix_tfg_fase ON torneig_fase_grups(fase_id);

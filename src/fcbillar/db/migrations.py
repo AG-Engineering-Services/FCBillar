@@ -8,6 +8,16 @@ Versions:
      arbitre, assistencia).
 - 3: unificació de noms de clubs — taula club_aliases per mapejar noms
      alternatius a un mateix club canònic.
+- 4: torneigs individuals (opens, catalans, etc.) — taules torneigs_individuals
+     i torneig_participants per saber quin jugador va participar a quin torneig
+     per temporada.
+- 5: clubs virtuals (virtual_clubs, virtual_club_members).
+- 6: lliga_noms — noms llegibles de divisions/grups de lliga.
+- 7: estructura de la COPA (copa_jornades, copa_encontres, copa_classificacio,
+     copa_partides) i fases dels individuals (torneig_fases). Taules noves.
+- 8: composició de grups de les fases d'individuals (torneig_fase_grups). El
+     portal no publica classificacions amb punts per fase, només l'assignació
+     jugador→grup. S'elimina la taula buida torneig_fase_classif del v7.
 """
 
 from __future__ import annotations
@@ -19,7 +29,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 8
 
 
 def _read_schema_sql() -> str:
@@ -67,8 +77,13 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # BD existent: aplicar migracions incrementals abans del executescript.
     if 1 <= version < 2:
         _migrate_v1_to_v2(conn)
+    # v7 → v8: la taula torneig_fase_classif (mai poblada) es substitueix per
+    # torneig_fase_grups. La fem fora; executescript crearà la nova.
+    if version == 7:
+        conn.execute("DROP TABLE IF EXISTS torneig_fase_classif")
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
+    # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).
 
     # executescript és idempotent (CREATE TABLE IF NOT EXISTS, INSERT OR IGNORE,
     # CREATE INDEX IF NOT EXISTS) — segur per a BDs noves i ja migrades.

@@ -91,8 +91,18 @@ class Game:
     @property
     def id_natural(self) -> str:
         # Ordenem els ids dels jugadors perquè la mateixa partida vista des dels
-        # dos jugadors produeixi el mateix hash.
+        # dos jugadors produeixi el mateix hash. Incloem el resultat (caramboles
+        # alineades als jugadors ordenats + entrades) perquè dos enfrontaments
+        # el mateix dia/competició entre els mateixos jugadors (p.ex. anada i
+        # tornada quan en un grup de tres un no es presenta) NO es fusionin.
+        # El resultat és simètric respecte de qui mira la partida: a partideshome
+        # la fila és sempre el fixture real (local/visitant fixos), així que la
+        # deduplicació entre jugadors i entre rànquings consecutius es manté.
         a, b = sorted([self.player1_fcb_id, self.player2_fcb_id])
+        if a == self.player1_fcb_id:
+            car_a, car_b = self.caramboles1, self.caramboles2
+        else:
+            car_a, car_b = self.caramboles2, self.caramboles1
         key = "|".join(
             [
                 self.data_partida.isoformat(),
@@ -100,6 +110,9 @@ class Game:
                 str(self.modalitat_codi_fcb),
                 a,
                 b,
+                "" if car_a is None else str(car_a),
+                "" if car_b is None else str(car_b),
+                "" if self.entrades is None else str(self.entrades),
             ]
         )
         return hashlib.sha1(key.encode("utf-8")).hexdigest()[:20]
@@ -129,6 +142,35 @@ class Equip:
 
     club_fcb_id: str
     lletra: str  # "A", "B", "C", "UNICO", ...
+
+
+@dataclass(frozen=True, slots=True)
+class TorneigIndividualRecord:
+    """Un torneig individual a la BD (id extern + divisió + temporada)."""
+
+    torneig_id_extern: int
+    divisio_id_extern: int
+    nom: str
+    modalitat_codi_fcb: int | None = None
+    temporada_nom: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class TorneigParticipantRecord:
+    """Una entrada de participant a la classificació d'un torneig."""
+
+    torneig_id_extern: int
+    divisio_id_extern: int
+    player_fcb_id: str
+    posicio: int | None = None
+    partides_jugades: int | None = None
+    punts: int | None = None
+    caramboles: int | None = None
+    entrades: int | None = None
+    mitjana_general: float | None = None
+    mitjana_particular: float | None = None
+    serie_max: int | None = None
+    club_text: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

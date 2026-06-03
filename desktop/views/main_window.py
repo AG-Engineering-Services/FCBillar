@@ -1,31 +1,38 @@
 """Finestra principal amb sidebar de navegació + stack de vistes."""
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QHBoxLayout,
-    QLabel,
     QListWidget,
     QListWidgetItem,
     QMainWindow,
     QMessageBox,
     QStackedWidget,
     QStatusBar,
-    QVBoxLayout,
     QWidget,
 )
 
 from desktop.controllers import MainController
-from desktop.views.banyoles_view import BanyolesView
+from desktop.views.club_focus_view import ClubFocusView
 from desktop.views.clubs_view import ClubsView
 from desktop.views.overview_view import OverviewView
+from desktop.views.partides_view import PartidesView
 from desktop.views.players_view import PlayersView
+from desktop.views.rankings_view import RankingsView
+from desktop.views.results_view import ResultsView
+from desktop.views.scraping_view import ScrapingView
+from desktop.views.virtual_clubs_view import VirtualClubsView
 
 SIDEBAR_ITEMS = [
     ("Inici", "🏠"),
-    ("Clubs", "🏛"),
+    ("Rànquings", "🏆"),
     ("Jugadors", "👤"),
-    ("Banyoles", "⭐"),
+    ("Partides", "🎱"),
+    ("Resultats", "📊"),
+    ("Clubs", "🏛"),
+    ("Focus club", "⭐"),
+    ("Clubs virtuals", "🧩"),
+    ("Scraping", "🔄"),
 ]
 
 
@@ -34,7 +41,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self._controller = controller
         self.setWindowTitle("FCBillar — Dashboard")
-        self.resize(1280, 800)
+        self.resize(1360, 860)
         self._build_ui()
         # Errors centralitzats
         self._controller.error_occurred.connect(self._on_error)
@@ -51,7 +58,7 @@ class MainWindow(QMainWindow):
         # Sidebar
         self._sidebar = QListWidget()
         self._sidebar.setObjectName("sidebar")
-        self._sidebar.setFixedWidth(200)
+        self._sidebar.setFixedWidth(210)
         self._sidebar.setSpacing(2)
         for label, icon in SIDEBAR_ITEMS:
             item = QListWidgetItem(f"  {icon}   {label}")
@@ -59,16 +66,21 @@ class MainWindow(QMainWindow):
         self._sidebar.currentRowChanged.connect(self._on_nav_changed)
         root.addWidget(self._sidebar)
 
-        # Stack
+        # Stack — mateix ordre que SIDEBAR_ITEMS
         self._stack = QStackedWidget()
-        self._overview = OverviewView(self._controller)
-        self._clubs = ClubsView(self._controller)
-        self._players = PlayersView(self._controller)
-        self._banyoles = BanyolesView(self._controller)
-        self._stack.addWidget(self._overview)
-        self._stack.addWidget(self._clubs)
-        self._stack.addWidget(self._players)
-        self._stack.addWidget(self._banyoles)
+        self._views = [
+            OverviewView(self._controller),
+            RankingsView(self._controller),
+            PlayersView(self._controller),
+            PartidesView(self._controller),
+            ResultsView(self._controller),
+            ClubsView(self._controller),
+            ClubFocusView(self._controller),
+            VirtualClubsView(self._controller),
+            ScrapingView(),
+        ]
+        for view in self._views:
+            self._stack.addWidget(view)
         root.addWidget(self._stack, stretch=1)
 
         self.setCentralWidget(central)

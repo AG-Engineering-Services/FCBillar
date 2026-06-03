@@ -20,6 +20,8 @@ from fcbillar.models import (
     RankingEntry,
     RankingGameLink,
     Temporada,
+    TorneigIndividualRecord,
+    TorneigParticipantRecord,
 )
 
 
@@ -648,6 +650,74 @@ class Repository:
         )
         return cur.fetchone()[0]
 
+    # ---------------------- torneigs individuals (v4) ----------------------
+
+    def upsert_torneig_individual(self, t: TorneigIndividualRecord) -> int:
+        modalitat_id: int | None = None
+        if t.modalitat_codi_fcb is not None:
+            modalitat_id = self.get_modalitat_id_by_codi_fcb(t.modalitat_codi_fcb)
+        temporada_id: int | None = None
+        if t.temporada_nom:
+            temporada_id = self.upsert_temporada(Temporada(nom=t.temporada_nom))
+        cur = self.conn.execute(
+            """
+            INSERT INTO torneigs_individuals
+                (torneig_id_extern, divisio_id_extern, nom, modalitat_id, temporada_id)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(torneig_id_extern, divisio_id_extern, temporada_id)
+            DO UPDATE SET nom = excluded.nom,
+                          modalitat_id = COALESCE(excluded.modalitat_id, torneigs_individuals.modalitat_id)
+            RETURNING id
+            """,
+            (t.torneig_id_extern, t.divisio_id_extern, t.nom, modalitat_id, temporada_id),
+        )
+        return cur.fetchone()[0]
+
+    def upsert_torneig_participant(self, p: TorneigParticipantRecord, temporada_nom: str | None = None) -> None:
+        # Resoldre torneig_id intern via clau composta
+        temporada_id: int | None = None
+        if temporada_nom:
+            temporada_id = self.upsert_temporada(Temporada(nom=temporada_nom))
+        torneig_row = self.conn.execute(
+            """
+            SELECT id FROM torneigs_individuals
+            WHERE torneig_id_extern = ? AND divisio_id_extern = ?
+              AND COALESCE(temporada_id, -1) = COALESCE(?, -1)
+            """,
+            (p.torneig_id_extern, p.divisio_id_extern, temporada_id),
+        ).fetchone()
+        if torneig_row is None:
+            raise ValueError(
+                f"Torneig ({p.torneig_id_extern}, {p.divisio_id_extern}, {temporada_nom}) no registrat"
+            )
+        player_id = self.get_player_id_by_fcb_id(p.player_fcb_id)
+        if player_id is None:
+            raise ValueError(f"Player {p.player_fcb_id} no registrat")
+        self.conn.execute(
+            """
+            INSERT INTO torneig_participants
+                (torneig_id, player_id, posicio, partides_jugades, punts,
+                 caramboles, entrades, mitjana_general, mitjana_particular,
+                 serie_max, club_text)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(torneig_id, player_id) DO UPDATE SET
+                posicio = COALESCE(excluded.posicio, torneig_participants.posicio),
+                partides_jugades = COALESCE(excluded.partides_jugades, torneig_participants.partides_jugades),
+                punts = COALESCE(excluded.punts, torneig_participants.punts),
+                caramboles = COALESCE(excluded.caramboles, torneig_participants.caramboles),
+                entrades = COALESCE(excluded.entrades, torneig_participants.entrades),
+                mitjana_general = COALESCE(excluded.mitjana_general, torneig_participants.mitjana_general),
+                mitjana_particular = COALESCE(excluded.mitjana_particular, torneig_participants.mitjana_particular),
+                serie_max = COALESCE(excluded.serie_max, torneig_participants.serie_max),
+                club_text = COALESCE(excluded.club_text, torneig_participants.club_text)
+            """,
+            (
+                torneig_row[0], player_id, p.posicio, p.partides_jugades, p.punts,
+                p.caramboles, p.entrades, p.mitjana_general, p.mitjana_particular,
+                p.serie_max, p.club_text,
+            ),
+        )
+
     # ---------------------- status ----------------------
 
     def counts(self) -> dict[str, int]:
@@ -665,6 +735,8 @@ class Repository:
             "equips",
             "encontres_lliga",
             "club_aliases",
+            "torneigs_individuals",
+            "torneig_participants",
         ]:
             out[table] = self.conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
         return out
