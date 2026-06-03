@@ -65,9 +65,21 @@ def main(verbose: bool = typer.Option(False, "--verbose", "-v", help="Logs detal
 
 
 @app.command()
-def login() -> None:
-    """Obre un navegador visible per fer login manual (resol captcha) i desa la sessió."""
-    ok = interactive_login()
+def login(
+    auto: bool = typer.Option(
+        False, "--auto",
+        help="Login desatès: resol el captcha amb OCR (Tesseract). Cal FCB_USER/FCB_PASSWORD.",
+    ),
+) -> None:
+    """Login a la intranet i desa la sessió.
+
+    Per defecte obre un navegador visible per resoldre el captcha manualment.
+    Amb --auto, fa el login headless resolent el captcha amb OCR local (per a
+    l'actualització automàtica programada).
+    """
+    from fcbillar.auth import automated_login
+
+    ok = automated_login() if auto else interactive_login()
     raise typer.Exit(code=0 if ok else 1)
 
 

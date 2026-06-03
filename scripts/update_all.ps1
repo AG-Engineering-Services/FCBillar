@@ -54,6 +54,7 @@ function Invoke-Step($name, [string[]]$cmd) {
 
 Write-Log "Inici actualització (repo=$repo, copa edició=$CopaEdicio, dryrun=$DryRun)"
 
+Invoke-Step 'login automàtic (captcha OCR)'             @('uv','run','fcbillar','login','--auto')
 Invoke-Step 'import-temporada (clubs + sync rànquings)' @('uv','run','fcbillar','import-temporada')
 Invoke-Step 'ingest-individuals (opens)'                @('uv','run','fcbillar','ingest-individuals')
 Invoke-Step 'ingest-copa'                               @('uv','run','fcbillar','ingest-copa',"$CopaEdicio")
