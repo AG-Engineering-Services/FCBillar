@@ -88,6 +88,19 @@ def main() -> int:
         check("Caps de sèrie tab lists the top seed", "MORENO" in pg.inner_text("body"))
         pg.screenshot(path=str(SHOTS / "projection.png"), full_page=True)
 
+        # 2b) Click a player -> player profile, then Back -> returns to projection
+        print("\nplayer click-through + back")
+        proj_url = pg.url
+        pg.locator("table tbody tr").first.get_by_role("link").first.click()
+        pg.wait_for_url("**/players/**")
+        check("clicking a player opens /players/<id>", "/players/" in pg.url)
+        pg.get_by_role("button", name="Enrere").wait_for()  # player profile loaded
+        check("player profile rendered", "/players/" in pg.url)
+        pg.screenshot(path=str(SHOTS / "player.png"), full_page=True)
+        pg.get_by_role("button", name="Enrere").click()
+        pg.wait_for_url("**/opens/projection/**")
+        check("Back returns to the opens projection", pg.url.rstrip("/") == proj_url.rstrip("/"))
+
         # 3) Ranking
         print("\n/opens/ranking")
         pg.goto(f"{front}/opens/ranking", wait_until="commit")
