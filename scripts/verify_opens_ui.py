@@ -80,12 +80,17 @@ def main() -> int:
         check("projection shows Prèvies phase", "Prèvies" in det)
         check("projection shows Pre-prèvies phase", "Pre-prèvies" in det)
         check("projection shows Grup A", "Grup A" in det)
+        check("projection shows warnings banner", "sense posició al rànquing" in det)
         pg.get_by_role("button", name="Fase Final").click()
         pg.wait_for_timeout(500)
         check("Fase Final tab shows group winners", "Guanyador Grup" in pg.inner_text("body"))
+        pg.get_by_role("button", name="Per club").click()
+        pg.wait_for_timeout(400)
+        check("Per club tab groups by club", "LLEIDA" in pg.inner_text("body"))
         pg.get_by_role("button", name="Caps de sèrie").click()
         pg.wait_for_timeout(500)
         check("Caps de sèrie tab lists the top seed", "MORENO" in pg.inner_text("body"))
+        check("seeds tab shows opens-points column", "punts opens" in pg.inner_text("body").lower())
         pg.screenshot(path=str(SHOTS / "projection.png"), full_page=True)
 
         # 2b) Click a player -> player profile, then Back -> returns to projection
@@ -96,6 +101,8 @@ def main() -> int:
         check("clicking a player opens /players/<id>", "/players/" in pg.url)
         pg.get_by_role("button", name="Enrere").wait_for()  # player profile loaded
         check("player profile rendered", "/players/" in pg.url)
+        pg.wait_for_timeout(900)
+        check("player profile shows opens-ranking block", "Rànquing Català d'Opens" in pg.inner_text("body"))
         pg.screenshot(path=str(SHOTS / "player.png"), full_page=True)
         pg.get_by_role("button", name="Enrere").click()
         pg.wait_for_url("**/opens/projection/**")

@@ -94,6 +94,16 @@ export const api = {
 	getProjection: (id: number, fetchFn?: typeof fetch) =>
 		request<ProjectionDetail>(`/opens/projections/${id}`, {}, fetchFn),
 
+	linkProjection: (id: number, divisionId: number, fetchFn?: typeof fetch) =>
+		request<{ ok: boolean }>(
+			`/opens/projections/${id}/link?fcb_division_id=${divisionId}`,
+			{ method: 'POST' },
+			fetchFn
+		),
+
+	compareProjection: (id: number, fetchFn?: typeof fetch) =>
+		request<any>(`/opens/projections/${id}/compare`, {}, fetchFn),
+
 	getOpenLive: (
 		divisionId: number,
 		opts?: { force?: boolean; persist?: boolean },
@@ -420,4 +430,53 @@ export function parseInscriptionFile(
 	const delim = detectDelimiter(content);
 	if (delim) return extractFromDelimited(content, delim);
 	return null;
+}
+
+// --- FCBillar main-app endpoints (/api, not the mounted opens sub-app) ---
+
+/** Map opens player names → FCBillar fcb_id (null when absent/ambiguous). */
+export async function resolvePlayers(
+	names: string[],
+	fetchFn: typeof fetch = fetch
+): Promise<Record<string, string | null>> {
+	if (!names.length) return {};
+	const res = await fetchFn('/api/opens/resolve-players', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ names })
+	});
+	return res.ok ? res.json() : {};
+}
+
+/** Players flagged as 'seguiment' in FCBillar. */
+export async function followedPlayers(
+	fetchFn: typeof fetch = fetch
+): Promise<{ fcb_id: string; nom: string }[]> {
+	const res = await fetchFn('/api/opens/followed-players');
+	return res.ok ? res.json() : [];
+}
+
+/** Upload an inscrits PDF (raw body) and build/save its projection. */
+export async function importInscrits(
+	file: File,
+	opts: { name?: string; season?: string } = {}
+): Promise<{ id: number; name: string; num_inscriptions: number; structure: Record<string, number>; n_linked: number }> {
+	const qs = new URLSearchParams();
+	if (opts.name) qs.set('name', opts.name);
+	if (opts.season) qs.set('season', opts.season);
+	const res = await fetch(`/api/opens/import-inscrits?${qs}`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/pdf' },
+		body: file
+	});
+	if (!res.ok) {
+		let detail = res.statusText;
+		try {
+			detail = (await res.json())?.detail ?? detail;
+		} catch {
+			/* ignore */
+		}
+		throw new Error(detail);
+	}
+	return res.json();
 }

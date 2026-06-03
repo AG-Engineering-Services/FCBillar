@@ -657,3 +657,14 @@ def get_projection(conn: sqlite3.Connection, projection_id: int) -> sqlite3.Row 
 def delete_projection(conn: sqlite3.Connection, projection_id: int) -> None:
     conn.execute("DELETE FROM open_projections WHERE id = ?", (projection_id,))
     conn.commit()
+
+
+def set_projection_division(
+    conn: sqlite3.Connection, projection_id: int, fcb_division_id: int | None
+) -> None:
+    """Link a projection to the live federation division (once groups publish)."""
+    conn.execute(
+        "UPDATE open_projections SET fcb_division_id = ? WHERE id = ?",
+        (fcb_division_id, projection_id),
+    )
+    conn.commit()

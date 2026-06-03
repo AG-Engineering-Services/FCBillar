@@ -141,6 +141,52 @@ class DataSource:
                 temporades=n("temporades"),
             )
 
+    # ------------- opens integration helpers -------------
+
+    def resolve_player_fcb_ids(self, names: list[str]) -> dict[str, str | None]:
+        """Map player names → fcb_id of the existing profile (None if absent/ambiguous).
+
+        Tries the name as-is and a comma-spacing-normalised variant ("A,B" → "A, B"),
+        since the inscrits/live sources are not always consistent. Returns an fcb_id
+        only when exactly one player matches (avoids mis-linking homonyms).
+        """
+        import re
+
+        uniq = {n for n in names if n}
+        if not uniq:
+            return {}
+        norm = {n: re.sub(r",\s*", ", ", n) for n in uniq}
+        variants = set(uniq) | set(norm.values())
+        placeholders = ",".join("?" * len(variants))
+        with self._conn() as c:
+            rows = c.execute(
+                f"SELECT nom, fcb_id FROM players WHERE nom IN ({placeholders})",
+                tuple(variants),
+            ).fetchall()
+        by_nom: dict[str, list[str]] = {}
+        for r in rows:
+            by_nom.setdefault(r["nom"], []).append(r["fcb_id"])
+        out: dict[str, str | None] = {}
+        for n in uniq:
+            ids = by_nom.get(n) or by_nom.get(norm[n])
+            out[n] = ids[0] if ids and len(ids) == 1 else None
+        return out
+
+    def followed_player_names(self) -> list[dict]:
+        """Players flagged as 'seguiment' — used to pre-filter the live opens view."""
+        with self._conn() as c:
+            rows = c.execute(
+                "SELECT fcb_id, nom FROM players WHERE seguiment = 1 ORDER BY nom"
+            ).fetchall()
+        return [{"fcb_id": r["fcb_id"], "nom": r["nom"]} for r in rows]
+
+    def player_nom(self, fcb_id: str) -> str | None:
+        with self._conn() as c:
+            row = c.execute(
+                "SELECT nom FROM players WHERE fcb_id = ?", (fcb_id,)
+            ).fetchone()
+        return row["nom"] if row else None
+
     # ------------- modalitats / rànquings -------------
 
     def modalitats(self) -> list[tuple[int, str]]:

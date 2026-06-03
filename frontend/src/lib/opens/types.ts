@@ -727,6 +727,7 @@ export interface ProjectionSeed {
 	ranquing_estat: string;
 	entry_phase: string;
 	fcb_id: string | null;
+	opens_points: number | null;
 }
 
 export interface ProjectionSlot {
@@ -739,9 +740,15 @@ export interface ProjectionSlot {
 	mitjana?: number;
 	ranquing_estat?: string;
 	fcb_id?: string | null;
+	opens_points?: number | null;
 	placeholder?: string;
 	label?: string;
 	group?: string;
+}
+
+export interface ProjectionWarning {
+	level: 'error' | 'warning' | 'info';
+	message: string;
 }
 
 export interface ProjectionGroup {
@@ -769,6 +776,7 @@ export interface ProjectionDetail {
 	num_inscriptions: number;
 	declared_total: number | null;
 	structure: Record<string, number>;
+	warnings: ProjectionWarning[];
 	seeds: ProjectionSeed[];
 	phases: ProjectionPhase[];
 	fase_final: {

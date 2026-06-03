@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { api } from '$lib/opens/api';
+	import { api, resolvePlayers, followedPlayers } from '$lib/opens/api';
 	import { page } from '$app/stores';
 	import Bracket from '$lib/components/Bracket.svelte';
 	import type {
@@ -26,6 +26,42 @@
 	const FAV_KEY = 'fcb_open_live_favorites';
 	let favorites = $state<Set<string>>(new Set());
 	let onlyFavorites = $state(false);
+
+	// name -> FCBillar fcb_id, so live player names link to their profile.
+	let fcbMap = $state<Record<string, string | null>>({});
+
+	function playerHref(name: string): string {
+		const id = fcbMap[name];
+		return id ? `/players/${encodeURIComponent(id)}` : `/players?q=${encodeURIComponent(name)}`;
+	}
+
+	function collectNames(data: LiveOpenResponse): string[] {
+		const s = new Set<string>();
+		for (const ph of data.phases) {
+			for (const g of ph.groups ?? []) {
+				for (const st of g.standings ?? []) s.add(st.player_name);
+				for (const m of g.matches ?? []) {
+					if (m.player_a) s.add(m.player_a);
+					if (m.player_b) s.add(m.player_b);
+				}
+			}
+		}
+		return [...s];
+	}
+
+	// Merge the user's followed players (FCBillar 'seguiment') into the favourites
+	// set so the "Només ★" filter can focus the live view on them.
+	async function loadFollowed() {
+		try {
+			const f = await followedPlayers();
+			if (f.length) {
+				for (const p of f) favorites.add(normalizeFav(p.nom));
+				favorites = new Set(favorites);
+			}
+		} catch {
+			// ignore — followed list is best-effort
+		}
+	}
 
 	function normalizeFav(name: string): string {
 		return name.trim().toUpperCase();
@@ -71,6 +107,9 @@
 			const data = await api.getOpenLive(id, { force, persist: force });
 			liveData = data;
 			error = null;
+			resolvePlayers(collectNames(data))
+				.then((m) => (fcbMap = { ...fcbMap, ...m }))
+				.catch(() => {});
 			// Default to the first active phase if nothing selected yet
 			if (selectedPhase === null) {
 				const active = data.phases.findIndex((p) => p.is_active);
@@ -129,6 +168,7 @@
 
 	$effect(() => {
 		loadFavorites();
+		loadFollowed();
 		load(false);
 		// Poll every 2 minutes while tab is active
 		pollTimer = setInterval(() => {
@@ -210,7 +250,7 @@
 			/>
 			<label class="flex items-center gap-1 text-sm text-slate-600">
 				<input type="checkbox" bind:checked={onlyFavorites} />
-				Només ★ ({favorites.size})
+				Només ★ i seguits ({favorites.size})
 			</label>
 			<button
 				class="rounded bg-slate-800 px-3 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-50"
@@ -529,7 +569,7 @@
 										>
 											{isWinner ? '▸' : isRunnerUp ? '·' : idx + 1}
 										</span>
-										<span class="flex-1 truncate">{s.player_name}</span>
+										<a href={playerHref(s.player_name)} class="flex-1 truncate hover:underline">{s.player_name}</a>
 										<span
 											role="button"
 											tabindex="0"

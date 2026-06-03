@@ -66,17 +66,55 @@ def _placeholder_label(slot: GroupSlot) -> str:
     return f"Guanyador {_ordinal_ca(slot.placeholder_rank or 0)} de {phase}"
 
 
+def _build_warnings(ordered: list[InscritEntry], inscrits: InscritsList, n: int) -> list[dict]:
+    """Lightweight inscription checks surfaced to the organiser (validator-lite)."""
+    warnings: list[dict] = []
+    if inscrits.declared_total is not None and inscrits.declared_total != n:
+        warnings.append({
+            "level": "error",
+            "message": f"El PDF declara {inscrits.declared_total} inscrits però se n'han llegit {n}.",
+        })
+    # Provisionals amb posició al rànquing d'opens (Art. XVIII: els provisionals
+    # no haurien de tenir punts/posició d'opens consolidats).
+    prov_ranked = [
+        e.player_name for e in ordered
+        if e.seed_position is not None and e.ranquing_estat.upper().startswith("PROV")
+    ]
+    for nom in prov_ranked:
+        warnings.append({
+            "level": "warning",
+            "message": f"{nom}: provisional però amb posició al rànquing d'opens.",
+        })
+    # Homònims dins la mateixa llista (poden enganyar el sembrat i la resolució).
+    seen: dict[str, int] = {}
+    for e in ordered:
+        seen[e.player_name] = seen.get(e.player_name, 0) + 1
+    for nom, c in seen.items():
+        if c > 1:
+            warnings.append({"level": "warning", "message": f"{nom}: apareix {c} cops a la llista."})
+    n_new = sum(1 for e in ordered if e.seed_position is None)
+    if n_new:
+        warnings.append({
+            "level": "info",
+            "message": f"{n_new} jugadors sense posició al rànquing d'opens (sembrats per mitjana al final).",
+        })
+    return warnings
+
+
 def build_projection(
     inscrits: InscritsList,
     *,
     season: str | None = None,
     resolve_fcb_id: Callable[[str], str | None] | None = None,
+    opens_points_by_name: dict[str, int] | None = None,
 ) -> dict:
     """Compute the full projected bracket payload from a parsed inscrits list.
 
     ``resolve_fcb_id`` maps a player name to the FCBillar ``fcb_id`` of the
     existing player profile (or None). When provided, every player reference in
     the payload carries an ``fcb_id`` so the UI can link to that player's page.
+    ``opens_points_by_name`` attaches each player's current Catalan-Opens
+    ranking points (sum of the last 5 opens) for context.
     """
     ordered = order_inscrits(list(inscrits.entries))
     n = len(ordered)
@@ -90,6 +128,8 @@ def build_projection(
             if e.player_name not in fcb_ids:
                 fcb_ids[e.player_name] = resolve_fcb_id(e.player_name)
 
+    points = opens_points_by_name or {}
+
     # position (1-indexed) -> seed dict, for resolving direct slots.
     def seed_dict(position: int) -> dict:
         e = ordered[position - 1]
@@ -101,6 +141,7 @@ def build_projection(
             "mitjana": e.mitjana,
             "ranquing_estat": e.ranquing_estat,
             "fcb_id": fcb_ids.get(e.player_name),
+            "opens_points": points.get(e.player_name),
         }
 
     # Which phase each seed *enters*. Direct slots in a phase reveal this;
@@ -160,6 +201,7 @@ def build_projection(
         "num_inscriptions": n,
         "declared_total": inscrits.declared_total,
         "structure": {name: len(tournament.phases[name].groups) for name in tournament.phases},
+        "warnings": _build_warnings(ordered, inscrits, n),
         "seeds": seeds_out,
         "phases": phases_out,
         "fase_final": {

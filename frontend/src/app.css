@@ -61,3 +61,10 @@
     @apply badge bg-emerald-100 text-emerald-800;
   }
 }
+
+/* Print: hide interactive chrome so the projected bracket prints cleanly. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

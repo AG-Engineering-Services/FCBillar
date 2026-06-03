@@ -81,6 +81,33 @@ def test_build_projection_costa_daurada():
     assert setzens[-1]["b"]["group"] == "P"
 
 
+def test_build_projection_enrichment():
+    """fcb_id, opens points and warnings are attached when inputs are provided."""
+    inscrits = parse_inscrits_pdf(PDF)
+    first = inscrits.entries[0].player_name
+    proj = build_projection(
+        inscrits,
+        season="2025-2026",
+        resolve_fcb_id=lambda n: f"FID:{n}",
+        opens_points_by_name={first: 999},
+    )
+    # Every player reference resolves to a (fake) profile id.
+    assert all(s["fcb_id"] == f"FID:{s['player_name']}" for s in proj["seeds"])
+    # Opens points are surfaced where provided.
+    assert any(s["opens_points"] == 999 for s in proj["seeds"])
+    # Newcomers (no opens position) generate an informational warning.
+    assert any("sense posició" in w["message"] for w in proj["warnings"])
+
+
+def test_generator_rejects_out_of_range():
+    """N outside [64,128] or odd is unsupported and must raise (not crash callers)."""
+    from fcb_opens.generator import generate_tournament
+
+    for bad in (50, 130, 77):  # too few · too many · odd
+        with pytest.raises(NotImplementedError):
+            generate_tournament(bad)
+
+
 def test_generator_phase_scaling_examples():
     """The closed-form phase scaling for representative N (Art. VIII-IX)."""
     from fcb_opens.generator import generate_tournament

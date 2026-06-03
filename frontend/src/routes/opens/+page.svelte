@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { api } from '$lib/opens/api';
+	import { api, importInscrits } from '$lib/opens/api';
 	import type { ProjectionSummary, LiveIndexEntry } from '$lib/opens/types';
 
 	let projections = $state<ProjectionSummary[]>([]);
@@ -8,6 +8,38 @@
 	let loadingLive = $state(true);
 	let projError = $state<string | null>(null);
 	let liveError = $state<string | null>(null);
+
+	// Inscrits PDF upload (#8)
+	let showUpload = $state(false);
+	let upFile = $state<FileList | null>(null);
+	let upName = $state('');
+	let upSeason = $state('2025-2026');
+	let uploading = $state(false);
+	let upMsg = $state<string | null>(null);
+	let upErr = $state<string | null>(null);
+
+	function refreshProjections() {
+		api.listProjections()
+			.then((p) => (projections = p))
+			.catch((e) => (projError = e.message));
+	}
+
+	async function doUpload() {
+		const f = upFile?.[0];
+		if (!f) return;
+		uploading = true;
+		upMsg = null;
+		upErr = null;
+		try {
+			const r = await importInscrits(f, { name: upName, season: upSeason });
+			upMsg = `Importat «${r.name}»: ${r.num_inscriptions} inscrits, ${r.n_linked} enllaçats.`;
+			refreshProjections();
+		} catch (e) {
+			upErr = (e as Error).message;
+		} finally {
+			uploading = false;
+		}
+	}
 
 	$effect(() => {
 		api.listProjections()
@@ -28,12 +60,43 @@
 			Seguiment d'opens: quadre projectat a partir dels inscrits i resultats en directe.
 		</p>
 	</div>
-	<nav class="flex gap-2 text-sm">
+	<nav class="flex flex-wrap gap-2 text-sm">
+		<button class="btn-secondary" onclick={() => (showUpload = !showUpload)}>+ Importar inscrits</button>
 		<a href="/opens/ranking" class="btn-secondary">Rànquing d'opens</a>
+		<a href="/opens/diff" class="btn-secondary">Diff oficial</a>
 		<a href="/opens/historic" class="btn-secondary">Opens històrics</a>
 		<a href="/opens/live" class="btn-secondary">Tots els directes</a>
 	</nav>
 </div>
+
+{#if showUpload}
+	<div class="card mb-6">
+		<h2 class="mb-2 text-base font-semibold">Importar llistat d'inscrits (PDF)</h2>
+		<p class="mb-3 text-sm text-slate-500">
+			Puja el PDF «LLISTAT D'INSCRITS PER CLUBS» de la federació. Es calcularà el quadre
+			projectat (sembrat + fases) i s'enllaçaran els jugadors a la seva fitxa.
+		</p>
+		<div class="flex flex-wrap items-end gap-3">
+			<label class="text-sm">
+				<span class="mb-1 block text-slate-600">PDF</span>
+				<input type="file" accept="application/pdf,.pdf" bind:files={upFile} class="text-sm" />
+			</label>
+			<label class="text-sm">
+				<span class="mb-1 block text-slate-600">Nom (opcional)</span>
+				<input class="rounded-md border border-slate-300 px-3 py-1.5 text-sm" placeholder="del PDF" bind:value={upName} />
+			</label>
+			<label class="text-sm">
+				<span class="mb-1 block text-slate-600">Temporada</span>
+				<input class="w-28 rounded-md border border-slate-300 px-3 py-1.5 text-sm" bind:value={upSeason} />
+			</label>
+			<button class="btn-primary" onclick={doUpload} disabled={uploading || !upFile?.length}>
+				{uploading ? 'Important…' : 'Importar i projectar'}
+			</button>
+		</div>
+		{#if upMsg}<p class="mt-2 text-sm text-emerald-700">{upMsg}</p>{/if}
+		{#if upErr}<p class="mt-2 text-sm text-red-700">{upErr}</p>{/if}
+	</div>
+{/if}
 
 <!-- Quadre projectat (pre-publicació) -->
 <section class="mb-8">

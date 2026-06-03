@@ -55,6 +55,15 @@
 		mitjana: number | null;
 		posicio: number | null;
 	}
+	interface OpensStanding {
+		in_ranking: boolean;
+		nom: string;
+		position?: number;
+		total_points?: number;
+		opens_played?: number;
+		max_single_open?: number;
+		breakdown?: { name: string; season: string; points: number | null }[];
+	}
 
 	// ── State ────────────────────────────────────────────────────────────────
 	$: fcbId = $page.params.fcb_id;
@@ -65,6 +74,7 @@
 	let modalitats: Modalitat[] = [];
 	let selectedMod: number | null = null;
 	let history: HistoryPoint[] = [];
+	let opensStanding: OpensStanding | null = null;
 
 	let loading = true;
 	let notFound = false;
@@ -151,6 +161,7 @@
 			chartMod = mods.length ? mods[0].codi_fcb : null;
 			await loadFiltered();
 			await loadHistory();
+			loadOpens();
 		} catch (e) {
 			console.error(e);
 		} finally {
@@ -195,6 +206,16 @@
 		}
 	}
 
+	async function loadOpens() {
+		if (!fcbId) return;
+		opensStanding = null;
+		try {
+			opensStanding = await api<OpensStanding>(`/api/players/${fcbId}/opens`);
+		} catch {
+			opensStanding = null;
+		}
+	}
+
 	onMount(() => {
 		// loadAll is triggered reactively via $: fcbId, loadAll()
 		// but we also call it explicitly in case the reactive block
@@ -215,6 +236,20 @@
 			>{summary.fcb_id}</span
 		>
 	</h1>
+
+	{#if opensStanding?.in_ranking}
+		<div class="card mb-4 border-blue-200 bg-blue-50">
+			<div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+				<span class="font-semibold text-blue-900">Rànquing Català d'Opens</span>
+				<span>Posició <strong>#{opensStanding.position}</strong></span>
+				<span><strong>{opensStanding.total_points}</strong> punts (últims 5 opens)</span>
+				<span class="text-slate-500"
+					>{opensStanding.opens_played} opens jugats · millor prova {opensStanding.max_single_open}</span
+				>
+				<a href="/opens/ranking" class="ml-auto text-blue-700 hover:underline">Veure rànquing d'opens →</a>
+			</div>
+		</div>
+	{/if}
 
 	<!-- ── Filtre global de modalitat (afecta KPIs i llistes) ─────────────── -->
 	<div class="flex items-center gap-3 mb-4">

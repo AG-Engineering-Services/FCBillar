@@ -14,7 +14,7 @@
 	let proj = $state<ProjectionDetail | null>(null);
 	let error = $state<string | null>(null);
 	let loading = $state(true);
-	let tab = $state<'groups' | 'final' | 'seeds'>('groups');
+	let tab = $state<'groups' | 'final' | 'seeds' | 'clubs'>('groups');
 	let search = $state('');
 
 	const id = $derived(Number($page.params.id));
@@ -37,6 +37,48 @@
 	const structureLabel = $derived(
 		proj ? Object.entries(proj.structure).map(([k, v]) => `${v} ${k}`).join(' · ') : ''
 	);
+
+	// Per-club grouping (#5): seeds bucketed by club, each sorted by seed order.
+	const byClub = $derived.by(() => {
+		const m = new Map<string, ProjectionSeed[]>();
+		for (const s of proj?.seeds ?? []) {
+			const key = s.club ?? '—';
+			if (!m.has(key)) m.set(key, []);
+			m.get(key)!.push(s);
+		}
+		return [...m.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+	});
+
+	// Compare with the real draw (#1) — only meaningful once linked & published.
+	let divInput = $state('');
+	let linking = $state(false);
+	let comparison = $state<any>(null);
+	let comparing = $state(false);
+
+	async function linkDivision() {
+		const n = Number(divInput);
+		if (!n || !proj) return;
+		linking = true;
+		try {
+			await api.linkProjection(proj.id, n);
+			proj = await api.getProjection(id);
+		} catch (e) {
+			error = (e as Error).message;
+		} finally {
+			linking = false;
+		}
+	}
+	async function runCompare() {
+		if (!proj) return;
+		comparing = true;
+		try {
+			comparison = await api.compareProjection(proj.id);
+		} catch (e) {
+			comparison = { published: false, reason: (e as Error).message };
+		} finally {
+			comparing = false;
+		}
+	}
 </script>
 
 <BackButton fallback="/opens" />
@@ -46,7 +88,7 @@
 {:else if error}
 	<div class="card mt-4 border-red-200 bg-red-50 text-red-800">{error}</div>
 {:else if proj}
-	<header class="mb-4 mt-2">
+	<header class="mb-4 mt-2 flex flex-wrap items-start justify-between gap-2"><div>
 		<div class="flex flex-wrap items-center gap-2">
 			<h1 class="text-2xl font-semibold">{proj.name}</h1>
 			<span class="badge-info">Projecció provisional</span>
@@ -57,7 +99,7 @@
 		<p class="mt-1 text-sm text-slate-500">
 			{proj.season ?? ''} · {proj.num_inscriptions} inscrits · estructura: {structureLabel} + Fase Final
 		</p>
-	</header>
+	</div><button type="button" class="btn-secondary no-print" onclick={() => window.print()}>🖨 Imprimeix</button></header>
 
 	<div class="card mb-4 border-blue-200 bg-blue-50 text-sm text-blue-900">
 		Aquest és el quadre <strong>projectat</strong> calculat a partir del llistat d'inscrits
@@ -65,7 +107,17 @@
 		quan la federació publiqui els grups reals, es podrà comparar amb el seguiment en directe.
 	</div>
 
-	<div class="mb-4 flex flex-wrap items-center gap-2">
+	{#if proj.warnings && proj.warnings.length}
+			<div class="mb-4 space-y-1">
+				{#each proj.warnings as w}
+					<div class="rounded-md px-3 py-1.5 text-sm {w.level === 'error' ? 'bg-red-50 text-red-800' : w.level === 'warning' ? 'bg-amber-50 text-amber-800' : 'bg-slate-100 text-slate-600'}">
+						{w.level === 'error' ? '⛔' : w.level === 'warning' ? '⚠️' : 'ℹ️'} {w.message}
+					</div>
+				{/each}
+			</div>
+		{/if}
+
+		<div class="mb-4 flex flex-wrap items-center gap-2 no-print">
 		<div class="flex gap-1 rounded-lg bg-slate-100 p-1 text-sm">
 			<button
 				class="rounded-md px-3 py-1.5 {tab === 'groups' ? 'bg-white shadow-sm' : 'text-slate-600'}"
@@ -76,6 +128,9 @@
 			<button
 				class="rounded-md px-3 py-1.5 {tab === 'seeds' ? 'bg-white shadow-sm' : 'text-slate-600'}"
 				onclick={() => (tab = 'seeds')}>Caps de sèrie</button>
+				<button
+					class="rounded-md px-3 py-1.5 {tab === 'clubs' ? 'bg-white shadow-sm' : 'text-slate-600'}"
+					onclick={() => (tab = 'clubs')}>Per club</button>
 		</div>
 		<input
 			class="ml-auto w-56 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
@@ -141,6 +196,25 @@
 				{/each}
 			</div>
 		</section>
+	{:else if tab === 'clubs'}
+		<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+			{#each byClub as [club, members]}
+				<div class="card p-3">
+					<div class="mb-2 flex items-center justify-between">
+						<span class="text-sm font-semibold text-slate-700">{club}</span>
+						<span class="text-xs text-slate-400">{members.length}</span>
+					</div>
+					<ul class="space-y-1">
+						{#each members as s}
+							<li class="flex items-center justify-between gap-2 text-sm {q && norm(s.player_name).includes(q) ? 'rounded bg-yellow-100 px-1' : ''}">
+								<a href={playerHref(s)} class="truncate hover:underline">{s.player_name}</a>
+								<span class="shrink-0 font-mono text-xs text-slate-400">{s.ranking_position ? '#' + s.ranking_position : s.ranquing_estat}</span>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/each}
+		</div>
 	{:else}
 		<section class="card p-0">
 			<table class="table-clean">
@@ -151,6 +225,7 @@
 						<th>Club</th>
 						<th class="text-right">Pos. rànq.</th>
 						<th class="text-right">Mitjana</th>
+						<th class="text-right">Punts opens</th>
 						<th>Entra a</th>
 					</tr>
 				</thead>
@@ -168,6 +243,7 @@
 								{/if}
 							</td>
 							<td class="text-right font-mono">{s.mitjana.toFixed(3)}</td>
+								<td class="text-right font-mono text-slate-600">{s.opens_points ?? '—'}</td>
 							<td class="text-slate-600">{s.entry_phase}</td>
 						</tr>
 					{/each}
@@ -175,4 +251,47 @@
 			</table>
 		</section>
 	{/if}
+
+	<section class="mt-8 no-print">
+		<h2 class="mb-2 text-lg font-semibold">Comparació amb el sorteig real</h2>
+		{#if proj.fcb_division_id}
+			<p class="mb-2 text-sm text-slate-500">
+				Vinculat a la divisió #{proj.fcb_division_id}.
+				<a href="/opens/live/{proj.fcb_division_id}" class="text-blue-700 hover:underline">Veure en directe →</a>
+			</p>
+			<button class="btn-secondary" onclick={runCompare} disabled={comparing}>
+				{comparing ? 'Comparant…' : 'Comparar amb el sorteig publicat'}
+			</button>
+			{#if comparison}
+				{#if comparison.published}
+					<p class="mt-3 text-sm text-slate-600">{comparison.n_matched} jugadors localitzats al sorteig real.</p>
+					<div class="card mt-2 p-0">
+						<table class="table-clean">
+							<thead><tr><th>Jugador</th><th>Projectat</th><th>Real</th></tr></thead>
+							<tbody>
+								{#each comparison.moves as mv}
+									<tr><td>{mv.player}</td><td class="text-slate-500">{mv.projected}</td><td>{mv.real}</td></tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				{:else}
+					<p class="mt-3 text-sm text-amber-700">Encara no hi ha grups publicats per comparar.</p>
+				{/if}
+			{/if}
+		{:else}
+			<p class="mb-2 text-sm text-slate-500">
+				Quan la federació publiqui els grups, vincula aquesta projecció a la divisió FCB per comparar el sorteig real amb el projectat.
+			</p>
+			<div class="flex items-center gap-2">
+				<input
+					class="w-40 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+					placeholder="ID divisió FCB"
+					bind:value={divInput} />
+				<button class="btn-secondary" onclick={linkDivision} disabled={linking}>
+					{linking ? 'Vinculant…' : 'Vincular'}
+				</button>
+			</div>
+		{/if}
+	</section>
 {/if}

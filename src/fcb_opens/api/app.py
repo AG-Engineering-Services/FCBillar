@@ -495,6 +495,85 @@ def register_routes(app: FastAPI) -> None:
         payload["fcb_division_id"] = row["fcb_division_id"]
         return payload
 
+    @app.post("/api/opens/projections/{projection_id}/link")
+    def link_projection_division(
+        projection_id: int, fcb_division_id: int,
+        conn: sqlite3.Connection = Depends(get_connection),
+    ):
+        """Link a projection to its live federation division (once groups publish)."""
+        if db.get_projection(conn, projection_id) is None:
+            raise HTTPException(status_code=404, detail="Projecció no trobada")
+        db.set_projection_division(conn, projection_id, fcb_division_id)
+        return {"ok": True, "projection_id": projection_id, "fcb_division_id": fcb_division_id}
+
+    @app.get("/api/opens/projections/{projection_id}/compare")
+    def compare_projection_with_live(
+        projection_id: int, force: bool = False,
+        conn: sqlite3.Connection = Depends(get_connection),
+    ):
+        """Compare the projected group placement against the real published draw.
+
+        Returns {"published": false} until the projection is linked to a live
+        division and that division exposes group data on fcbillar.cat.
+        """
+        import json as _json
+        import re
+
+        row = db.get_projection(conn, projection_id)
+        if row is None:
+            raise HTTPException(status_code=404, detail="Projecció no trobada")
+        division_id = row["fcb_division_id"]
+        if not division_id:
+            return {"published": False, "reason": "no_division_linked"}
+
+        def _norm(s: str) -> str:
+            return re.sub(r",\s*", ", ", s or "").strip().upper()
+
+        # Projected placement: player name -> "phase · group".
+        payload = _json.loads(row["payload_json"])
+        projected: dict[str, str] = {}
+        for ph in payload.get("phases", []):
+            for g in ph.get("groups", []):
+                for p in g.get("players", []):
+                    if p.get("kind") == "player" and p.get("player_name"):
+                        projected[_norm(p["player_name"])] = f"{ph['title']} · Grup {g['label']}"
+
+        try:
+            state = fetch_live_state(division_id, force=force)
+        except Exception as exc:  # noqa: BLE001
+            return {"published": False, "reason": "live_unreachable", "error": str(exc)}
+
+        real: dict[str, str] = {}
+        real_phases = []
+        for ph in state.phases:
+            if ph.ref.kind != "group":
+                continue
+            groups_out = []
+            for g in ph.groups:
+                names = [s.player_name for s in g.standings]
+                groups_out.append({"label": g.label, "players": names})
+                for s in g.standings:
+                    real[_norm(s.player_name)] = f"{ph.ref.label} · {g.label}"
+            real_phases.append({"label": ph.ref.label, "groups": groups_out})
+
+        if not real:
+            return {"published": False, "reason": "no_real_groups_yet", "real_phases": real_phases}
+
+        moves = []
+        for name_norm, proj_loc in projected.items():
+            if name_norm in real:
+                moves.append({
+                    "player": name_norm,
+                    "projected": proj_loc,
+                    "real": real[name_norm],
+                })
+        return {
+            "published": True,
+            "n_matched": len(moves),
+            "moves": sorted(moves, key=lambda m: m["player"]),
+            "real_phases": real_phases,
+        }
+
     @app.get("/api/opens/live", response_model=list[LiveIndexEntry])
     def list_live_competitions(
         force: bool = False,

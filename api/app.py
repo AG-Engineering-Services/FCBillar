@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -49,6 +49,144 @@ except Exception as exc:  # noqa: BLE001 — never let opens break the core API
     import logging
 
     logging.getLogger(__name__).warning("Opens sub-app not mounted: %s", exc)
+
+
+# These opens helpers live on the MAIN app (not the mounted sub-app) because they
+# need FCBillar's own DB (player resolution, followed flag, inscrits import).
+
+
+class _NamesBody(BaseModel):
+    names: list[str]
+
+
+@app.post("/api/opens/resolve-players")
+def opens_resolve_players(body: _NamesBody) -> dict:
+    """Map opens player names → FCBillar fcb_id (for linking to player profiles)."""
+    return ds().resolve_player_fcb_ids(body.names)
+
+
+@app.get("/api/opens/followed-players")
+def opens_followed_players() -> list[dict]:
+    """Players marked as 'seguiment' — used to pre-filter the live opens view."""
+    return ds().followed_player_names()
+
+
+@app.get("/api/players/{fcb_id}/opens")
+def player_opens(fcb_id: str) -> dict:
+    """The player's standing in the Catalan Opens ranking (sum of last 5 opens)."""
+    nom = ds().player_nom(fcb_id)
+    if not nom:
+        raise HTTPException(status_code=404, detail="Jugador no trobat")
+    try:
+        import re
+
+        from fcb_opens.db import connect as _connect
+        from fcb_opens.paths import resolve_db_path
+        from fcb_opens.reglament.ranquing_opens import compute_opens_ranking
+
+        conn = _connect(resolve_db_path())
+        ranking = list(compute_opens_ranking(conn))
+        conn.close()
+    except Exception:  # noqa: BLE001
+        return {"in_ranking": False, "nom": nom}
+
+    def _norm(s: str) -> str:
+        return re.sub(r",\s*", ", ", s).strip().upper()
+
+    target = _norm(nom)
+    for i, e in enumerate(ranking):
+        if _norm(e.display_name) == target:
+            return {
+                "in_ranking": True,
+                "nom": nom,
+                "position": i + 1,
+                "total_points": e.total_points,
+                "opens_played": e.opens_played,
+                "max_single_open": e.max_single_open,
+                "breakdown": [
+                    {"name": b.name, "season": b.season, "points": b.points}
+                    for b in e.breakdown
+                ],
+            }
+    return {"in_ranking": False, "nom": nom}
+
+
+@app.post("/api/opens/import-inscrits")
+async def opens_import_inscrits(
+    request: Request, name: str = "", season: str = "2025-2026"
+) -> dict:
+    """Import an inscrits PDF (raw body) and build/save its projected bracket."""
+    import json as _json
+    import os
+    import tempfile
+    from datetime import datetime, timezone
+
+    from fcb_opens import db as _odb
+    from fcb_opens.paths import resolve_db_path
+    from fcb_opens.projection import build_projection
+    from fcb_opens.scraper.inscrits_pdf import parse_inscrits_pdf
+
+    data = await request.body()
+    if not data:
+        raise HTTPException(status_code=400, detail="Cos buit: cal el PDF al body")
+
+    tmp = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+    try:
+        tmp.write(data)
+        tmp.close()
+        inscrits = parse_inscrits_pdf(tmp.name)
+        if not inscrits.entries:
+            raise HTTPException(status_code=400, detail="No s'ha pogut llegir cap inscrit del PDF")
+
+        mapping = ds().resolve_player_fcb_ids([e.player_name for e in inscrits.entries])
+        points: dict[str, int] = {}
+        try:
+            from fcb_opens.db import connect as _connect
+            from fcb_opens.reglament.ranquing_opens import compute_opens_ranking
+
+            rconn = _connect(resolve_db_path())
+            for entry in compute_opens_ranking(rconn):
+                points[entry.display_name] = entry.total_points
+            rconn.close()
+        except Exception:  # noqa: BLE001
+            points = {}
+
+        try:
+            proj = build_projection(
+                inscrits, season=season,
+                resolve_fcb_id=lambda n: mapping.get(n),
+                opens_points_by_name=points,
+            )
+        except NotImplementedError as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Estructura no suportada per a {len(inscrits.entries)} inscrits: {exc}",
+            ) from exc
+        open_name = name or proj["name"]
+        proj["name"] = open_name
+
+        db_path = resolve_db_path()
+        _odb.init_db(db_path)
+        conn = _odb.connect(db_path)
+        try:
+            existing = _odb.find_projection_by_name(conn, open_name)
+            proj_id = _odb.save_projection(
+                conn, name=open_name, season=season,
+                num_inscriptions=proj["num_inscriptions"], source_pdf="(upload)",
+                payload_json=_json.dumps(proj, ensure_ascii=False),
+                created_at=datetime.now(timezone.utc).isoformat(),
+                replace_id=existing["id"] if existing else None,
+            )
+        finally:
+            conn.close()
+        return {
+            "id": proj_id, "name": open_name,
+            "num_inscriptions": proj["num_inscriptions"],
+            "structure": proj["structure"],
+            "n_linked": sum(1 for s in proj["seeds"] if s.get("fcb_id")),
+        }
+    finally:
+        os.unlink(tmp.name)
 
 
 # ======================================================================

@@ -661,15 +661,40 @@ def open_import_inscrits_cmd(
         alt = _re.sub(r",\s*", ", ", nom)
         return repo.get_player_fcb_id_by_nom(alt) if alt != nom else None
 
-    proj = build_projection(inscrits, season=season, resolve_fcb_id=_resolve_fcb_id)
+    # Punts actuals al Rànquing Català d'Opens (suma dels últims 5 opens) per nom,
+    # per donar context a cada cap de sèrie. Best-effort: si la BD d'opens no en té,
+    # el mapa queda buit i no passa res.
+    db_path = resolve_db_path()
+    _odb.init_db(db_path)
+    conn = _odb.connect(db_path)
+    points_by_name: dict[str, int] = {}
+    try:
+        from fcb_opens.reglament.ranquing_opens import compute_opens_ranking
+
+        for entry in compute_opens_ranking(conn):
+            points_by_name[entry.display_name] = entry.total_points
+    except Exception:  # noqa: BLE001 — context only, never block the import
+        points_by_name = {}
+
+    try:
+        proj = build_projection(
+            inscrits,
+            season=season,
+            resolve_fcb_id=_resolve_fcb_id,
+            opens_points_by_name=points_by_name,
+        )
+    except NotImplementedError as exc:
+        fcb_conn.close()
+        conn.close()
+        console.print(
+            f"[red]No es pot generar el quadre per a {len(inscrits.entries)} inscrits: {exc}[/]"
+        )
+        raise typer.Exit(code=1) from exc
     fcb_conn.close()
     n_linked = sum(1 for s in proj["seeds"] if s.get("fcb_id"))
     open_name = name or proj["name"]
     proj["name"] = open_name
 
-    db_path = resolve_db_path()
-    _odb.init_db(db_path)
-    conn = _odb.connect(db_path)
     try:
         existing = _odb.find_projection_by_name(conn, open_name)
         proj_id = _odb.save_projection(

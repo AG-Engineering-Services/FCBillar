@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { api } from '$lib/opens/api';
+	import { api, resolvePlayers } from '$lib/opens/api';
 	import { page } from '$app/stores';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import type { OpenDetail } from '$lib/opens/types';
 
 	let detail = $state<OpenDetail | null>(null);
 	let error = $state<string | null>(null);
 	let loading = $state(true);
+	let fcbMap = $state<Record<string, string | null>>({});
 
 	$effect(() => {
 		const id = Number($page.params.id);
@@ -15,10 +17,19 @@
 			return;
 		}
 		api.getOpen(id)
-			.then((d) => (detail = d))
+			.then(async (d) => {
+				detail = d;
+				fcbMap = await resolvePlayers(d.classification.map((r) => r.player_name));
+			})
 			.catch((e) => (error = e.message))
 			.finally(() => (loading = false));
 	});
+
+	// Link to the existing FCBillar player profile, or a name-prefilled search.
+	function playerHref(name: string): string {
+		const id = fcbMap[name];
+		return id ? `/players/${encodeURIComponent(id)}` : `/players?q=${encodeURIComponent(name)}`;
+	}
 </script>
 
 {#if loading}
@@ -36,7 +47,7 @@
 				{/if}
 			</p>
 		</div>
-		<a href="/opens" class="text-sm text-slate-600 hover:underline">← Tots els Opens</a>
+		<BackButton fallback="/opens" />
 	</div>
 
 	<div class="card p-0">
@@ -57,7 +68,7 @@
 					<tr>
 						<td class="font-mono text-slate-500">{row.position}</td>
 						<td>
-							<a href="/players/{row.player_id}" class="hover:underline">
+							<a href={playerHref(row.player_name)} class="hover:underline">
 								{row.player_name}
 							</a>
 						</td>
