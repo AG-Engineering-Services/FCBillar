@@ -28,11 +28,11 @@
 			</svg>
 			<span class="text-base font-bold tracking-tight">FCBillar</span>
 		</div>
-		<nav class="flex gap-1 overflow-x-auto px-3 pt-2 [scrollbar-width:none]">
+		<nav class="flex flex-wrap gap-x-1 gap-y-0 px-3 pt-2">
 			{#each tabs as t}
 				<a
 					href={t.href}
-					class="-mb-px shrink-0 rounded-t-lg px-3 py-2 text-sm font-medium {t.match(path)
+					class="-mb-px rounded-t-lg px-3 py-2 text-sm font-medium {t.match(path)
 						? 'border-b-2 border-slate-900 text-slate-900'
 						: 'text-slate-400'}">{t.label}</a>
 			{/each}

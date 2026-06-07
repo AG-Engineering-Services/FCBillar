@@ -167,12 +167,22 @@ def publish_games(
     conn.row_factory = sqlite3.Row
     sb = get_client()
 
+    # Lligues multi-modalitat (4 modalitats / Catalana) vs 3 bandes pures.
+    multimod = {3, 7, 9, 13, 18, 22, 25, 27, 31, 33, 35, 37}
+
+    def comp_label(comp, lliga_id):
+        if comp == "LLIGA":
+            if lliga_id in multimod:
+                return "Lliga 4 Modalitats"
+            return "Lliga 3 Bandes"
+        return comp
+
     games = [
         {
             "id": r["id"],
             "data_partida": r["data_partida"],
             "modalitat_codi": r["modalitat_codi"],
-            "competicio": r["competicio"],
+            "competicio": comp_label(r["competicio"], r["lliga_id"]),
             "player1_fcb_id": r["player1_fcb_id"],
             "player1_nom": r["player1_nom"],
             "caramboles1": r["caramboles1"],
@@ -187,7 +197,7 @@ def publish_games(
         for r in conn.execute(
             """
             SELECT g.id, g.data_partida, m.codi_fcb AS modalitat_codi,
-                   comp.nom AS competicio,
+                   comp.nom AS competicio, en.lliga_id AS lliga_id,
                    p1.fcb_id AS player1_fcb_id, p1.nom AS player1_nom,
                    g.caramboles1, g.serie_max1,
                    p2.fcb_id AS player2_fcb_id, p2.nom AS player2_nom,
@@ -196,6 +206,7 @@ def publish_games(
             FROM games g
             JOIN modalitats m ON m.id = g.modalitat_id
             LEFT JOIN competicions comp ON comp.id = g.competicio_id
+            LEFT JOIN encontres_lliga en ON en.id = g.encontre_lliga_id
             JOIN players p1 ON p1.id = g.player1_id
             JOIN players p2 ON p2.id = g.player2_id
             LEFT JOIN players pw ON pw.id = g.guanyador_id
