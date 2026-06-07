@@ -12,8 +12,14 @@
 	let pranks = $state<PlayerRankRow[]>([]);
 	let selJornada = $state<number | null>(null);
 	let mode = $state<'equips' | 'jugadors'>('equips');
+	let q = $state('');
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+
+	function norm(s: string): string {
+		return (s ?? '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+	}
+	const matchQ = (s: string | null) => !q.trim() || norm(s ?? '').includes(norm(q.trim()));
 
 	onMount(async () => {
 		try {
@@ -58,7 +64,7 @@
 
 	function rows(gid: number): CopaStanding[] {
 		return standings
-			.filter((s) => s.jornada === selJornada && s.grup_id === gid)
+			.filter((s) => s.jornada === selJornada && s.grup_id === gid && matchQ(s.equip))
 			.sort((a, b) => (a.posicio ?? 99) - (b.posicio ?? 99));
 	}
 	function playerRows(gid: number): PlayerRankRow[] {
@@ -70,7 +76,9 @@
 		return rows(gid).length;
 	}
 	// Rànquing de tota la competició (jornada=0, grup=0 sentinella).
-	const compPlayers = $derived([...pranks].sort((a, b) => (a.posicio ?? 99) - (b.posicio ?? 99)));
+	const compPlayers = $derived(
+		pranks.filter((p) => matchQ(p.jugador)).sort((a, b) => (a.posicio ?? 99) - (b.posicio ?? 99))
+	);
 
 	let collapsed = $state(new Set<number>());
 	function toggle(id: number) {
@@ -98,6 +106,13 @@
 			class="rounded-md px-3 py-1 font-medium {mode === 'jugadors' ? 'bg-white shadow-sm' : 'text-slate-500'}"
 			>Jugadors</button>
 	</div>
+
+	<input
+		bind:value={q}
+		inputmode="search"
+		placeholder={mode === 'equips' ? 'Filtra equip…' : 'Filtra jugador…'}
+		class="mb-3 w-full rounded-lg border-slate-300 bg-white py-2 px-3 text-sm shadow-sm"
+	/>
 
 	{#if mode === 'jugadors'}
 		<!-- Rànquing de tota la competició -->

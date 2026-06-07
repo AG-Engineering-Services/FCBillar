@@ -199,8 +199,8 @@
 					<div class="flex items-center gap-2 border-y border-slate-100 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400">
 						<span class="w-5 text-center">#</span>
 						<span class="flex-1">Jugador</span>
-						<span class="w-12 text-right">Mitj.</span>
-						<span class="w-8 text-right">Pts</span>
+						<span class="w-6 text-center">PJ</span> <span class="w-11 text-right">Mitj.</span>
+						<span class="w-7 text-right">Pts</span>
 					</div>
 					<ul>
 						{#each playerRows(g.grup_id) as r (r.player_fcb_id)}
@@ -210,8 +210,8 @@
 									<a href="/jugador/{r.player_fcb_id}" class="block truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
 									{#if r.club}<div class="truncate text-[11px] text-slate-400">{r.club}</div>{/if}
 								</div>
-								<span class="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
-								<span class="w-8 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
+								<span class="w-6 shrink-0 text-center text-xs tabular-nums text-slate-500">{r.partides}</span> <span class="w-11 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
+								<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
 							</li>
 						{/each}
 					</ul>
