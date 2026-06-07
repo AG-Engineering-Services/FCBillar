@@ -167,14 +167,49 @@ def publish_games(
     conn.row_factory = sqlite3.Row
     sb = get_client()
 
+    import re as _re
+    import unicodedata as _ud
+
+    def _nm(s):
+        s = "".join(c for c in _ud.normalize("NFD", s or "") if _ud.category(c) != "Mn")
+        return " ".join(s.strip().lower().split())
+
     # Lligues multi-modalitat (4 modalitats / Catalana) vs 3 bandes pures.
     multimod = {3, 7, 9, 13, 18, 22, 25, 27, 31, 33, 35, 37}
 
-    def comp_label(comp, lliga_id):
+    # Signatura de partida d'open → nom de l'open (per etiquetar les INDIVIDUAL).
+    open_nom = {
+        (r["torneig_id_extern"], r["divisio_id_extern"]): r["nom"]
+        for r in conn.execute(
+            "SELECT torneig_id_extern, divisio_id_extern, nom FROM torneigs_individuals"
+        )
+    }
+    open_sig: dict = {}
+    try:
+        tp_rows = conn.execute("SELECT * FROM torneig_partides").fetchall()
+    except sqlite3.OperationalError:
+        tp_rows = []
+    for r in tp_rows:
+        nom = open_nom.get((r["torneig_id_extern"], r["divisio_id_extern"]))
+        if not nom:
+            continue
+        nom = _re.sub(r"\s*-\s*[ÚU]NICA\s*$", "", nom, flags=_re.I).strip()
+        key = (
+            frozenset({(_nm(r["player1_nom"]), r["caramboles1"]), (_nm(r["player2_nom"]), r["caramboles2"])}),
+            r["entrades"],
+        )
+        open_sig[key] = nom
+
+    def comp_label(r):
+        comp, lliga_id = r["competicio"], r["lliga_id"]
         if comp == "LLIGA":
-            if lliga_id in multimod:
-                return "Lliga 4 Modalitats"
-            return "Lliga 3 Bandes"
+            return "Lliga 4 Modalitats" if lliga_id in multimod else "Lliga 3 Bandes"
+        if comp == "INDIVIDUAL":
+            key = (
+                frozenset({(_nm(r["player1_nom"]), r["caramboles1"]), (_nm(r["player2_nom"]), r["caramboles2"])}),
+                r["entrades"],
+            )
+            return open_sig.get(key, comp)
         return comp
 
     games = [
@@ -182,7 +217,7 @@ def publish_games(
             "id": r["id"],
             "data_partida": r["data_partida"],
             "modalitat_codi": r["modalitat_codi"],
-            "competicio": comp_label(r["competicio"], r["lliga_id"]),
+            "competicio": comp_label(r),
             "player1_fcb_id": r["player1_fcb_id"],
             "player1_nom": r["player1_nom"],
             "caramboles1": r["caramboles1"],
