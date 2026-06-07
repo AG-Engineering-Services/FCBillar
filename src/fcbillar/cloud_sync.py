@@ -872,9 +872,20 @@ def publish_open_ranking(
         parts[r["oid"]].append((r["fcb_id"], r["nom"], r["club_text"], r["posicio"]))
 
     # GENERAL = opens NO femenins (els femenins tenen taula de punts pròpia, pendent).
-    textid = {o["id"]: o["torneig_id_extern"] for o in open_rows}
+    # Cronologia: divisio_id_extern (la FCB l'assigna creixent per cada open disputat).
+    divid = {o["id"]: o["divisio_id_extern"] for o in open_rows}
     gen_ids = [o["id"] for o in open_rows if "FEMENI" not in (o["nom"] or "").upper()]
-    ordered = sorted(gen_ids, key=lambda t: textid.get(t, 0))  # cronològic global (id_extern)
+    ordered = sorted(gen_ids, key=lambda t: divid.get(t, 0))
+
+    # Desempat #3 (Art. XVIII): mitjana 3 bandes més recent per jugador.
+    mitj: dict = {}
+    for r in conn.execute(
+        """SELECT p.fcb_id, re.mitjana_general FROM ranking_entries re
+        JOIN rankings rk ON rk.id = re.ranking_id JOIN players p ON p.id = re.player_id
+        JOIN modalitats m ON m.id = rk.modalitat_id WHERE m.codi_fcb = 1 ORDER BY rk.num_seq DESC"""
+    ):
+        if r["fcb_id"] not in mitj and r["mitjana_general"] is not None:
+            mitj[r["fcb_id"]] = r["mitjana_general"]
 
     def _ddet(oid, pos, pp):
         return {"open": onom.get(oid), "temp": tnom.get(oid), "data": open_date.get(oid) or None, "pos": pos, "punts": pp}
@@ -892,18 +903,20 @@ def publish_open_ranking(
         last_open = ordered[i - 1]
         rows_r = []
         for fcb, (nom, club) in info.items():
-            det, total, njug = [], 0, 0
+            det, total, njug, maxs = [], 0, 0, 0
             for oid in window:  # tots els opens de la finestra (0 si no hi participa)
                 if oid in pp_player[fcb]:
                     pos, pp = pp_player[fcb][oid]
                     det.append(_ddet(oid, pos, pp))
                     total += pp
                     njug += 1
+                    maxs = max(maxs, pp)
                 else:
                     det.append(_ddet(oid, None, 0))
-            rows_r.append((fcb, nom, club, total, njug, det))
-        rows_r.sort(key=lambda x: -x[3])
-        for posicio, (fcb, nom, club, total, njug, det) in enumerate(rows_r, start=1):
+            rows_r.append((fcb, nom, club, total, njug, det, maxs))
+        # Desempat: punts ↓, millor open ↓, mitjana ↓, nom ↑
+        rows_r.sort(key=lambda x: (-x[3], -x[6], -mitj.get(x[0], 0.0), x[1] or ""))
+        for posicio, (fcb, nom, club, total, njug, det, maxs) in enumerate(rows_r, start=1):
             all_rows.append({
                 "genere": "general", "ronda": i, "ronda_nom": onom.get(last_open),
                 "ronda_data": open_date.get(last_open) or None, "ronda_temp": tnom.get(last_open),
