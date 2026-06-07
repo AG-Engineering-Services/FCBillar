@@ -358,6 +358,7 @@ def publish_copa(
             """,
             (edicio,),
         )
+        if r["equip"] and str(r["equip"]).strip() not in ("0", "")
     ]
 
     counts = {}
@@ -516,11 +517,12 @@ def publish_copa_player_rankings(
     edicio = ed_row["m"] if ed_row else None
     name_to_fcb = {r["nom"]: r["fcb_id"] for r in conn.execute("SELECT nom, fcb_id FROM players")}
 
+    # Rànquing de TOTA la competició (no per grup): s'agrega per jugador i es
+    # desa amb jornada=0, grup_id=0 com a sentinella de "competició sencera".
     acc: dict = {}
     for r in conn.execute(
         """
-        SELECT ce.jornada AS jornada, ce.grup_id AS grup,
-               cp.local_nom AS ln, cp.local_caramboles AS lc, cp.punts_local AS lp,
+        SELECT cp.local_nom AS ln, cp.local_caramboles AS lc, cp.punts_local AS lp,
                cp.visitant_nom AS vn, cp.visitant_caramboles AS vc, cp.punts_visitant AS vp,
                cp.entrades AS e
         FROM copa_partides cp JOIN copa_encontres ce ON ce.id = cp.encontre_copa_id
@@ -531,19 +533,28 @@ def publish_copa_player_rankings(
         if not r["e"]:
             continue
         for nom, car, pu in ((r["ln"], r["lc"], r["lp"]), (r["vn"], r["vc"], r["vp"])):
-            a = acc.setdefault((r["jornada"], r["grup"], nom), {"pj": 0, "punts": 0, "car": 0, "ent": 0})
+            if not nom or str(nom).strip() in ("0", ""):
+                continue
+            a = acc.setdefault(nom, {"pj": 0, "punts": 0, "car": 0, "ent": 0})
             a["pj"] += 1
             a["punts"] += pu or 0
             a["car"] += car or 0
             a["ent"] += r["e"] or 0
 
+    ranked = sorted(
+        acc.items(),
+        key=lambda kv: (kv[1]["punts"], (kv[1]["car"] / kv[1]["ent"]) if kv[1]["ent"] else 0),
+        reverse=True,
+    )
     rows = []
-    for (jornada, grup), pos, nom, a in _rank_players(acc):
+    pos = 0
+    for nom, a in ranked:
         fcb = name_to_fcb.get(nom)
         if not fcb:
             continue
+        pos += 1
         rows.append({
-            "edicio_id": edicio, "jornada": jornada, "grup_id": grup, "posicio": pos,
+            "edicio_id": edicio, "jornada": 0, "grup_id": 0, "posicio": pos,
             "player_fcb_id": fcb, "jugador": nom, "club": None,
             "partides": a["pj"], "punts": a["punts"], "caramboles": a["car"], "entrades": a["ent"],
             "mitjana": (a["car"] / a["ent"]) if a["ent"] else None,

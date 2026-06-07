@@ -67,8 +67,10 @@
 			.sort((a, b) => (a.posicio ?? 99) - (b.posicio ?? 99));
 	}
 	function count(gid: number): number {
-		return mode === 'equips' ? rows(gid).length : playerRows(gid).length;
+		return rows(gid).length;
 	}
+	// Rànquing de tota la competició (jornada=0, grup=0 sentinella).
+	const compPlayers = $derived([...pranks].sort((a, b) => (a.posicio ?? 99) - (b.posicio ?? 99)));
 
 	let collapsed = $state(new Set<number>());
 	function toggle(id: number) {
@@ -85,17 +87,6 @@
 {:else if phases.length === 0}
 	<p class="py-6 text-center text-sm text-slate-400">Sense classificacions de copa.</p>
 {:else}
-	<!-- Fases: xips -->
-	<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
-		{#each phases as f}
-			<button
-				onclick={() => (selJornada = f.jornada)}
-				class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium {f.jornada === selJornada
-					? 'bg-slate-900 text-white'
-					: 'bg-white text-slate-600 ring-1 ring-slate-200'}">{f.nom}</button>
-		{/each}
-	</div>
-
 	<!-- Toggle Equips / Jugadors -->
 	<div class="mb-3 inline-flex rounded-lg bg-slate-100 p-0.5 text-sm">
 		<button
@@ -108,7 +99,44 @@
 			>Jugadors</button>
 	</div>
 
-	{#each phaseGroups as g (g.grup_id)}
+	{#if mode === 'jugadors'}
+		<!-- Rànquing de tota la competició -->
+		<section class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+			<header class="border-b border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+				Rànquing de la Copa · {compPlayers.length} jugadors
+			</header>
+			<div class="flex items-center gap-2 border-b border-slate-100 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400">
+				<span class="w-6 text-center">#</span>
+				<span class="flex-1">Jugador</span>
+				<span class="w-6 text-center">PJ</span>
+				<span class="w-11 text-right">Mitj.</span>
+				<span class="w-7 text-right">Pts</span>
+			</div>
+			<ul>
+				{#each compPlayers as r (r.player_fcb_id)}
+					<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
+						<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500' : 'text-slate-400'}">{r.posicio}</span>
+						<a href="/jugador/{r.player_fcb_id}" class="min-w-0 flex-1 truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
+						<span class="w-6 shrink-0 text-center text-xs tabular-nums text-slate-500">{r.partides}</span>
+						<span class="w-11 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
+						<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
+					</li>
+				{/each}
+			</ul>
+		</section>
+	{:else}
+		<!-- Fases: xips (només equips) -->
+		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
+			{#each phases as f}
+				<button
+					onclick={() => (selJornada = f.jornada)}
+					class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium {f.jornada === selJornada
+						? 'bg-slate-900 text-white'
+						: 'bg-white text-slate-600 ring-1 ring-slate-200'}">{f.nom}</button>
+			{/each}
+		</div>
+
+		{#each phaseGroups as g (g.grup_id)}
 		<section class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
 			<button
 				onclick={() => toggle(g.grup_id)}
@@ -157,4 +185,5 @@
 			{/if}
 		</section>
 	{/each}
+	{/if}
 {/if}

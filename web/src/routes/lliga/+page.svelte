@@ -8,8 +8,14 @@
 	let selDiv = $state<number | null>(null);
 	let mode = $state<'equips' | 'jugadors'>('equips');
 	let scope = $state<'grup' | 'categoria'>('grup');
+	let q = $state('');
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+
+	function norm(s: string): string {
+		return (s ?? '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+	}
+	const matchQ = (s: string | null) => !q.trim() || norm(s ?? '').includes(norm(q.trim()));
 
 	onMount(async () => {
 		try {
@@ -54,12 +60,12 @@
 
 	function teamRows(gid: number): StandingRow[] {
 		return standings
-			.filter((s) => s.divisio_id === selDiv && s.grup_id === gid)
+			.filter((s) => s.divisio_id === selDiv && s.grup_id === gid && matchQ(s.equip))
 			.sort((a, b) => (a.posicio ?? 99) - (b.posicio ?? 99));
 	}
 	function playerRows(gid: number): PlayerRankRow[] {
 		return pranks
-			.filter((s) => s.divisio_id === selDiv && s.grup_id === gid)
+			.filter((s) => s.divisio_id === selDiv && s.grup_id === gid && matchQ(s.jugador))
 			.sort((a, b) => (a.posicio ?? 99) - (b.posicio ?? 99));
 	}
 	function count(gid: number): number {
@@ -68,7 +74,7 @@
 	// Rànquing individual de tota la categoria (tots els grups de la divisió, reordenats).
 	const divPlayers = $derived(
 		pranks
-			.filter((p) => p.divisio_id === selDiv)
+			.filter((p) => p.divisio_id === selDiv && matchQ(p.jugador))
 			.sort((a, b) => (b.punts ?? 0) - (a.punts ?? 0) || (b.mitjana ?? 0) - (a.mitjana ?? 0))
 	);
 
@@ -109,6 +115,13 @@
 			class="rounded-md px-3 py-1 font-medium {mode === 'jugadors' ? 'bg-white shadow-sm' : 'text-slate-500'}"
 			>Jugadors</button>
 	</div>
+
+	<input
+		bind:value={q}
+		inputmode="search"
+		placeholder={mode === 'equips' ? 'Filtra equip…' : 'Filtra jugador…'}
+		class="mb-3 w-full rounded-lg border-slate-300 bg-white py-2 px-3 text-sm shadow-sm"
+	/>
 
 	{#if mode === 'jugadors'}
 		<div class="mb-3 ml-2 inline-flex rounded-lg bg-slate-100 p-0.5 text-xs">
