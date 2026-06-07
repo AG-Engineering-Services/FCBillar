@@ -3,10 +3,23 @@
 	import { supabase, type Open } from '$lib/supabase';
 
 	let opens = $state<Open[]>([]);
+	let ranking = $state<any[]>([]);
+	let ronda = $state<number | null>(null);
 	let q = $state('');
-	let cat = $state<'opens' | 'camp'>('opens');
+	let cat = $state<'opens' | 'camp' | 'ranking'>('opens');
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+
+	const rondes = $derived([...new Set(ranking.map((r) => r.ronda as number))].sort((a, b) => a - b));
+	$effect(() => {
+		if (ronda == null && rondes.length) ronda = rondes[rondes.length - 1];
+	});
+	const rondaRows = $derived(ranking.filter((r) => r.ronda === ronda).sort((a, b) => a.posicio - b.posicio));
+	const rondaInfo = $derived(ranking.find((r) => r.ronda === ronda));
+	function stepRonda(d: number) {
+		const i = rondes.indexOf(ronda as number);
+		ronda = rondes[Math.min(rondes.length - 1, Math.max(0, i + d))];
+	}
 
 	function norm(s: string): string {
 		return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
@@ -16,9 +29,13 @@
 
 	onMount(async () => {
 		try {
-			const { data, error: e } = await supabase.from('opens').select('*').order('nom');
+			const [{ data, error: e }, { data: rk }] = await Promise.all([
+				supabase.from('opens').select('*').order('nom'),
+				supabase.from('open_ranking').select('*')
+			]);
 			if (e) throw e;
 			opens = (data ?? []) as Open[];
+			ranking = rk ?? [];
 		} catch (e) {
 			error = (e as Error).message;
 		} finally {
@@ -43,6 +60,10 @@
 		onclick={() => (cat = 'camp')}
 		class="rounded-md px-3 py-1 font-medium {cat === 'camp' ? 'bg-white shadow-sm' : 'text-slate-500'}"
 		>Camp. Catalunya</button>
+	<button
+		onclick={() => (cat = 'ranking')}
+		class="rounded-md px-3 py-1 font-medium {cat === 'ranking' ? 'bg-white shadow-sm' : 'text-slate-500'}"
+		>Rànquing</button>
 </div>
 
 <input

@@ -804,41 +804,86 @@ def publish_open_ranking(
     conn.row_factory = sqlite3.Row
     sb = get_client()
 
-    opens = [
-        r["id"]
-        for r in conn.execute(
-            "SELECT id FROM torneigs_individuals WHERE UPPER(nom) LIKE '%OPEN%' AND UPPER(nom) LIKE '%TRES BANDES%'"
-        )
-    ]
-    if not opens:
+    import unicodedata as _ud
+
+    def _nm(s):
+        s = "".join(c for c in _ud.normalize("NFD", s or "") if _ud.category(c) != "Mn")
+        return " ".join(s.strip().lower().split())
+
+    def _sig(p1, c1, p2, c2, e):
+        return (frozenset({(_nm(p1), c1), (_nm(p2), c2)}), e)
+
+    open_rows = conn.execute(
+        "SELECT id, nom FROM torneigs_individuals WHERE UPPER(nom) LIKE '%OPEN%' AND UPPER(nom) LIKE '%TRES BANDES%'"
+    ).fetchall()
+    if not open_rows:
         conn.close()
         return {"open_ranking": 0}
-    ph = ",".join("?" * len(opens))
-    pts: dict = defaultdict(list)
-    noms: dict = {}
-    clubs: dict = {}
+    open_ids = {o["id"] for o in open_rows}
+
+    # Data de cada partida individual (per signatura) → data de cada open.
+    gdate: dict = {}
+    for r in conn.execute(
+        """
+        SELECT g.data_partida d, p1.nom n1, g.caramboles1 c1, p2.nom n2, g.caramboles2 c2, g.entrades e
+        FROM games g JOIN competicions comp ON comp.id = g.competicio_id
+        JOIN players p1 ON p1.id = g.player1_id JOIN players p2 ON p2.id = g.player2_id
+        WHERE comp.nom = 'INDIVIDUAL'
+        """
+    ):
+        gdate[_sig(r["n1"], r["c1"], r["n2"], r["c2"], r["e"])] = r["d"]
+    idmap = {
+        (r["torneig_id_extern"], r["divisio_id_extern"]): r["id"]
+        for r in conn.execute("SELECT id, torneig_id_extern, divisio_id_extern FROM torneigs_individuals")
+    }
+    open_date: dict = defaultdict(str)
+    for r in conn.execute("SELECT * FROM torneig_partides"):
+        tid = idmap.get((r["torneig_id_extern"], r["divisio_id_extern"]))
+        if tid not in open_ids:
+            continue
+        d = gdate.get(_sig(r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"]))
+        if d and d > open_date[tid]:
+            open_date[tid] = d
+
+    import re as _re
+
+    onom = {
+        o["id"]: _re.sub(r"\s*-\s*[ÚU]NICA\s*$", "", o["nom"], flags=_re.I).strip() for o in open_rows
+    }
+    ordered = sorted(open_ids, key=lambda t: open_date.get(t, ""))  # cronològic ascendent
+
+    # Participants per open
+    parts: dict = defaultdict(list)
+    ph = ",".join("?" * len(open_ids))
     for r in conn.execute(
         f"""
-        SELECT p.fcb_id, p.nom, tp.posicio, tp.club_text
+        SELECT tp.torneig_id AS oid, p.fcb_id, p.nom, tp.posicio, tp.club_text
         FROM torneig_participants tp JOIN players p ON p.id = tp.player_id
         WHERE tp.torneig_id IN ({ph}) AND tp.posicio IS NOT NULL
         """,
-        opens,
+        list(open_ids),
     ):
-        pts[r["fcb_id"]].append(points_for_position(r["posicio"]))
-        noms[r["fcb_id"]] = r["nom"]
-        clubs[r["fcb_id"]] = r["club_text"]
+        parts[r["oid"]].append((r["fcb_id"], r["nom"], r["club_text"], r["posicio"]))
 
-    rows = [
-        {
-            "player_fcb_id": fcb, "jugador": noms[fcb], "club": clubs.get(fcb),
-            "opens_jugats": len(plist), "punts": sum(sorted(plist, reverse=True)[:5]),
-        }
-        for fcb, plist in pts.items()
-    ]
-    rows.sort(key=lambda x: -x["punts"])
-    for i, r in enumerate(rows, start=1):
-        r["posicio"] = i
-    n = _upsert(sb, "open_ranking", rows, "player_fcb_id", prog)
+    # Un snapshot per ronda: finestra mòbil dels últims 5 opens fins a la ronda i.
+    all_rows = []
+    for i in range(1, len(ordered) + 1):
+        window = ordered[max(0, i - 5):i]
+        acc: dict = {}
+        for oid in window:
+            for fcb, nom, club, pos in parts.get(oid, []):
+                a = acc.setdefault(fcb, {"pts": 0, "n": 0, "nom": nom, "club": club})
+                a["pts"] += points_for_position(pos)
+                a["n"] += 1
+        last_open = ordered[i - 1]
+        ranked = sorted(acc.items(), key=lambda kv: -kv[1]["pts"])
+        for posicio, (fcb, a) in enumerate(ranked, start=1):
+            all_rows.append({
+                "ronda": i, "ronda_nom": onom.get(last_open),
+                "ronda_data": open_date.get(last_open) or None,
+                "posicio": posicio, "player_fcb_id": fcb, "jugador": a["nom"],
+                "club": a["club"], "opens_jugats": a["n"], "punts": a["pts"],
+            })
+    n = _upsert(sb, "open_ranking", all_rows, "ronda,player_fcb_id", prog)
     conn.close()
     return {"open_ranking": n}
