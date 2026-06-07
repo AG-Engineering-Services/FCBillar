@@ -814,7 +814,7 @@ def publish_open_ranking(
         return (frozenset({(_nm(p1), c1), (_nm(p2), c2)}), e)
 
     open_rows = conn.execute(
-        "SELECT id, nom FROM torneigs_individuals WHERE UPPER(nom) LIKE '%OPEN%' AND UPPER(nom) LIKE '%TRES BANDES%'"
+        "SELECT id, nom, torneig_id_extern FROM torneigs_individuals WHERE UPPER(nom) LIKE '%OPEN%' AND UPPER(nom) LIKE '%TRES BANDES%'"
     ).fetchall()
     if not open_rows:
         conn.close()
