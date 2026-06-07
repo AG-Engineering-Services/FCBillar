@@ -9,6 +9,7 @@
 	let games = $state<GameRow[]>([]);
 	let modalitats = $state<{ codi: number; nom: string }[]>([]);
 	let selMod = $state<number | null>(null);
+	let shown = $state(60);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
@@ -170,7 +171,7 @@
 		const line = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
 		const base = (VBH - PAD).toFixed(1);
 		const area = `${pts[0].x.toFixed(1)},${base} ${line} ${pts.at(-1)!.x.toFixed(1)},${base}`;
-		return { line, area, lo, hi, last: pts.at(-1)!, n: valid.length };
+		return { line, area, lo, hi, last: pts.at(-1)!, n: valid.length, pts };
 	}
 	const mitjanaChart = $derived(chartData(rankHist.map((r) => r.mitjana)));
 	const posChart = $derived(chartData(rankHist.map((r) => r.posicio), true));
@@ -200,7 +201,10 @@
 		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
 			{#each modalitats as m}
 				<button
-					onclick={() => (selMod = m.codi)}
+					onclick={() => {
+						selMod = m.codi;
+						shown = 60;
+					}}
 					class="shrink-0 rounded-full px-3 py-1 text-sm font-medium {m.codi === selMod
 						? 'bg-slate-900 text-white'
 						: 'bg-white text-slate-600 ring-1 ring-slate-200'}"
@@ -312,7 +316,7 @@
 
 		<!-- Partides recents -->
 		<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
-			{#each modGames.slice(0, 60) as g (g.id)}
+			{#each modGames.slice(0, shown) as g (g.id)}
 				{@const p = persp(g)}
 				<li class="flex items-center gap-3 border-b border-slate-100 px-3 py-2 last:border-0">
 					<span
@@ -341,10 +345,15 @@
 				</li>
 			{/each}
 		</ul>
-		{#if modGames.length > 60}
-			<p class="px-1 py-3 text-center text-[11px] text-slate-400">
-				Mostrant 60 de {modGames.length} partides
-			</p>
+		{#if modGames.length > shown}
+			<button
+				onclick={() => (shown += 60)}
+				class="mt-2 w-full rounded-lg bg-white py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 active:bg-slate-50"
+			>
+				Carregar més ({shown} de {modGames.length})
+			</button>
+		{:else if modGames.length > 60}
+			<p class="px-1 py-3 text-center text-[11px] text-slate-400">{modGames.length} partides</p>
 		{/if}
 	{/if}
 {/if}
