@@ -1,9 +1,13 @@
 """Ingest dels resultats reals (partides) dels opens/campionats individuals.
 
-Recorre cada (torneig, divisió), llegeix la pàgina de fases, en treu les URLs
-d'eliminatòria i parseja cada partit (jugadors + caramboles + entrades). Desa a
-`torneig_partides`. Els resultats de la fase de grups NO surten a la web (només
-composició), així que es capturen les eliminatòries (la part principal).
+Per cada (torneig, divisió):
+  - fases → eliminatòries  (/individuals/partideseliminatoria/t/d/fase)
+  - fases → grups → partides de grup (/individuals/partidesgrups/t/d/fase/grup)
+
+Dos formats de partit:
+  - eliminatòria: capçalera + 2 files (1 jugador cadascuna) + fila àrbitre/entrades
+  - grup: capçalera + 1 fila amb els dos jugadors + àrbitre/entrades
+El parser unificat detecta quants jugadors hi ha a la primera fila.
 """
 
 from __future__ import annotations
@@ -17,36 +21,42 @@ from fcbillar.config import get_settings
 from fcbillar.scraper.client import ScraperClient
 
 BASE = "https://www.fcbillar.cat"
+_PLAYER_RE = re.compile(r"(.+?)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?=\s|$)")
 
 
-def _parse_player(txt: str):
-    m = re.match(r"^(.*?)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s*$", txt)
-    if not m:
-        return None
-    return (m.group(1).strip(), int(m.group(2)), int(m.group(3)), int(m.group(4)))
+def _players(txt: str):
+    core = re.split(r"\bÀrbitre|\bArbitre", txt)[0]
+    return _PLAYER_RE.findall(core)
 
 
 def parse_partides(html: str):
     soup = BeautifulSoup(html, "lxml")
     out = []
     for box in soup.select("div.row.box.black"):
-        sibs = []
-        sib = box
-        for _ in range(3):
-            sib = sib.find_next_sibling("div")
-            if sib is None:
-                break
-            sibs.append(sib)
-        if len(sibs) < 3:
+        sib1 = box.find_next_sibling("div")
+        if sib1 is None:
             continue
-        p1 = _parse_player(sibs[0].get_text(" ", strip=True))
-        p2 = _parse_player(sibs[1].get_text(" ", strip=True))
-        em = re.search(r"Entrades:\s*(\d+)", sibs[2].get_text(" ", strip=True))
-        if not p1 or not p2:
+        txt1 = sib1.get_text(" ", strip=True)
+        pls = _players(txt1)
+        ent_txt = txt1
+        if len(pls) >= 2:
+            p1, p2 = pls[0], pls[1]
+        elif len(pls) == 1:
+            sib2 = sib1.find_next_sibling("div")
+            if sib2 is None:
+                continue
+            m2 = _players(sib2.get_text(" ", strip=True))
+            if not m2:
+                continue
+            p1, p2 = pls[0], m2[0]
+            sib3 = sib2.find_next_sibling("div")
+            ent_txt = sib3.get_text(" ", strip=True) if sib3 else ""
+        else:
             continue
+        em = re.search(r"Entrades:\s*(\d+)", ent_txt)
         out.append({
-            "p1": p1[0], "punts1": p1[1], "serie1": p1[2], "car1": p1[3],
-            "p2": p2[0], "punts2": p2[1], "serie2": p2[2], "car2": p2[3],
+            "p1": p1[0].strip(), "punts1": int(p1[1]), "serie1": int(p1[2]), "car1": int(p1[3]),
+            "p2": p2[0].strip(), "punts2": int(p2[1]), "serie2": int(p2[2]), "car2": int(p2[3]),
             "entrades": int(em.group(1)) if em else None,
         })
     return out
@@ -71,18 +81,34 @@ def main() -> None:
                 print(f"[{i}/{len(opens)}] {t}/{d}: FAIL fases {e}", flush=True)
                 continue
             soup = BeautifulSoup(fases_html, "lxml")
-            elim = []
+            elim, grupfases = set(), set()
             for a in soup.select("a"):
                 h = a.get("href", "")
-                m = re.search(r"partideseliminatoria/(\d+)/(\d+)/(\d+)", h)
+                m = re.search(r"partideseliminatoria/\d+/\d+/(\d+)", h)
                 if m:
-                    elim.append(int(m.group(3)))
-            n = 0
-            for fase_id in sorted(set(elim)):
+                    elim.add(int(m.group(1)))
+                m = re.search(r"/individuals/grups/\d+/\d+/(\d+)", h)
+                if m:
+                    grupfases.add(int(m.group(1)))
+
+            pages: list[tuple[int, str]] = []  # (fase_id, url)
+            for f in sorted(elim):
+                pages.append((f, f"{BASE}/ca/individuals/partideseliminatoria/{t}/{d}/{f}"))
+            for f in sorted(grupfases):
                 try:
-                    html = cl.fetch_html(
-                        f"{BASE}/ca/individuals/partideseliminatoria/{t}/{d}/{fase_id}"
-                    )
+                    ghtml = cl.fetch_html(f"{BASE}/ca/individuals/grups/{t}/{d}/{f}")
+                except Exception:  # noqa: BLE001
+                    continue
+                for a in BeautifulSoup(ghtml, "lxml").select("a"):
+                    m = re.search(r"partidesgrups/\d+/\d+/\d+/(\d+)", a.get("href", ""))
+                    if m:
+                        gid = int(m.group(1))
+                        pages.append((gid, f"{BASE}/ca/individuals/partidesgrups/{t}/{d}/{f}/{gid}"))
+
+            n = 0
+            for fase_id, url in pages:
+                try:
+                    html = cl.fetch_html(url)
                 except Exception:  # noqa: BLE001
                     continue
                 for g in parse_partides(html):
