@@ -7,6 +7,7 @@
 	let pranks = $state<PlayerRankRow[]>([]);
 	let selDiv = $state<number | null>(null);
 	let mode = $state<'equips' | 'jugadors'>('equips');
+	let scope = $state<'grup' | 'categoria'>('grup');
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
@@ -64,6 +65,12 @@
 	function count(gid: number): number {
 		return mode === 'equips' ? teamRows(gid).length : playerRows(gid).length;
 	}
+	// Rànquing individual de tota la categoria (tots els grups de la divisió, reordenats).
+	const divPlayers = $derived(
+		pranks
+			.filter((p) => p.divisio_id === selDiv)
+			.sort((a, b) => (b.punts ?? 0) - (a.punts ?? 0) || (b.mitjana ?? 0) - (a.mitjana ?? 0))
+	);
 
 	let collapsed = $state(new Set<number>());
 	function toggle(id: number) {
@@ -103,7 +110,46 @@
 			>Jugadors</button>
 	</div>
 
-	{#each divGroups as g (g.grup_id)}
+	{#if mode === 'jugadors'}
+		<div class="mb-3 ml-2 inline-flex rounded-lg bg-slate-100 p-0.5 text-xs">
+			<button
+				onclick={() => (scope = 'grup')}
+				class="rounded-md px-2.5 py-1 font-medium {scope === 'grup' ? 'bg-white shadow-sm' : 'text-slate-500'}"
+				>Per grup</button>
+			<button
+				onclick={() => (scope = 'categoria')}
+				class="rounded-md px-2.5 py-1 font-medium {scope === 'categoria' ? 'bg-white shadow-sm' : 'text-slate-500'}"
+				>Tota la categoria</button>
+		</div>
+	{/if}
+
+	{#if mode === 'jugadors' && scope === 'categoria'}
+		<section class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+			<header class="border-b border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+				Categoria sencera · {divPlayers.length} jugadors
+			</header>
+			<div class="flex items-center gap-2 border-b border-slate-100 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400">
+				<span class="w-6 text-center">#</span>
+				<span class="flex-1">Jugador</span>
+				<span class="w-12 text-right">Mitj.</span>
+				<span class="w-8 text-right">Pts</span>
+			</div>
+			<ul>
+				{#each divPlayers as r, i (r.player_fcb_id)}
+					<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
+						<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {i === 0 ? 'text-amber-500' : 'text-slate-400'}">{i + 1}</span>
+						<div class="min-w-0 flex-1">
+							<a href="/jugador/{r.player_fcb_id}" class="block truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
+							{#if r.club}<div class="truncate text-[11px] text-slate-400">{r.club}</div>{/if}
+						</div>
+						<span class="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
+						<span class="w-8 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
+					</li>
+				{/each}
+			</ul>
+		</section>
+	{:else}
+		{#each divGroups as g (g.grup_id)}
 		<section class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
 			<button
 				onclick={() => toggle(g.grup_id)}
@@ -157,5 +203,6 @@
 				{/if}
 			{/if}
 		</section>
-	{/each}
+		{/each}
+	{/if}
 {/if}
