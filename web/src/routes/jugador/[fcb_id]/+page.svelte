@@ -125,6 +125,7 @@
 			posicio: r.posicio,
 			mitjana: r.mitjana_general
 		}));
+		selIdx = null;
 	}
 	// Marques de l'eix X (divisions) amb el número de rànquing de referència.
 	const xTicks = $derived.by(() => {
@@ -175,6 +176,17 @@
 	}
 	const mitjanaChart = $derived(chartData(rankHist.map((r) => r.mitjana)));
 	const posChart = $derived(chartData(rankHist.map((r) => r.posicio), true));
+
+	// Selecció de punt (clic): mostra els valors del punt més proper als dos gràfics.
+	let selIdx = $state<number | null>(null);
+	function pickPoint(ev: MouseEvent) {
+		const el = ev.currentTarget as Element;
+		const rect = el.getBoundingClientRect();
+		const n = rankHist.length;
+		if (n < 2) return;
+		const frac = (ev.clientX - rect.left) / rect.width;
+		selIdx = Math.max(0, Math.min(n - 1, Math.round(frac * (n - 1))));
+	}
 
 	function fmtDate(d: string | null): string {
 		if (!d) return '';
@@ -231,6 +243,15 @@
 
 		<!-- Evolució al rànquing -->
 		{#if mitjanaChart}
+			{#if selIdx != null && rankHist[selIdx]}
+				<div class="mb-2 flex items-center justify-center gap-3 rounded-lg bg-slate-900 px-3 py-1.5 text-xs text-white">
+					<span class="font-semibold">Rànquing #{rankHist[selIdx].num_seq}</span>
+					<span>mitjana <span class="font-mono font-bold">{rankHist[selIdx].mitjana?.toFixed(3) ?? '—'}</span></span>
+					<span>posició <span class="font-mono font-bold">#{rankHist[selIdx].posicio ?? '—'}</span></span>
+				</div>
+			{:else}
+				<p class="mb-2 text-center text-[11px] text-slate-400">Toca un gràfic per veure els valors d'un rànquing</p>
+			{/if}
 			<div class="mb-4 space-y-3">
 				<!-- Mitjana -->
 				<div class="rounded-xl bg-white p-3 ring-1 ring-slate-200">
@@ -252,7 +273,7 @@
 							</div>
 						</div>
 					</div>
-					<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" class="h-20 w-full">
+					<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickPoint} role="presentation" class="h-20 w-full cursor-pointer">
 						{#each xTicks as t}
 							<line x1={t.x} y1="2" x2={t.x} y2={VBH - 2} stroke="#e2e8f0" stroke-width="1" vector-effect="non-scaling-stroke" />
 						{/each}
@@ -265,6 +286,10 @@
 							stroke-linejoin="round"
 							vector-effect="non-scaling-stroke" />
 						<circle cx={mitjanaChart.last.x} cy={mitjanaChart.last.y} r="3" fill="#0f172a" />
+							{#if selIdx != null && mitjanaChart.pts[selIdx]}
+								<line x1={mitjanaChart.pts[selIdx].x} y1="2" x2={mitjanaChart.pts[selIdx].x} y2={VBH - 2} stroke="#0f172a" stroke-width="1" vector-effect="non-scaling-stroke" />
+								<circle cx={mitjanaChart.pts[selIdx].x} cy={mitjanaChart.pts[selIdx].y} r="4" fill="#0f172a" stroke="#fff" stroke-width="1.5" />
+							{/if}
 					</svg>
 					<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300">
 						{#each xTicks as t}<span>{t.label}</span>{/each}
@@ -291,7 +316,7 @@
 						</div>
 					</div>
 					{#if posChart}
-						<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" class="h-20 w-full">
+						<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickPoint} role="presentation" class="h-20 w-full cursor-pointer">
 							{#each xTicks as t}
 								<line x1={t.x} y1="2" x2={t.x} y2={VBH - 2} stroke="#fde68a" stroke-width="1" vector-effect="non-scaling-stroke" />
 							{/each}
@@ -304,6 +329,10 @@
 								stroke-linejoin="round"
 								vector-effect="non-scaling-stroke" />
 							<circle cx={posChart.last.x} cy={posChart.last.y} r="3" fill="#f59e0b" />
+								{#if selIdx != null && posChart.pts[selIdx]}
+									<line x1={posChart.pts[selIdx].x} y1="2" x2={posChart.pts[selIdx].x} y2={VBH - 2} stroke="#b45309" stroke-width="1" vector-effect="non-scaling-stroke" />
+									<circle cx={posChart.pts[selIdx].x} cy={posChart.pts[selIdx].y} r="4" fill="#f59e0b" stroke="#fff" stroke-width="1.5" />
+								{/if}
 						</svg>
 						<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300">
 							{#each xTicks as t}<span>{t.label}</span>{/each}
