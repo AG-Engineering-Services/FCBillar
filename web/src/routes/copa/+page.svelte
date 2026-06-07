@@ -23,18 +23,24 @@
 
 	onMount(async () => {
 		try {
-			const [{ data: g, error: eg }, { data: s, error: es }, { data: pr, error: ep }] =
-				await Promise.all([
-					supabase.from('copa_groups').select('*'),
-					supabase.from('copa_standings').select('*').order('posicio'),
-					supabase.from('copa_player_rankings').select('*').order('posicio')
-				]);
+			const [
+				{ data: g, error: eg },
+				{ data: s, error: es },
+				{ data: pr, error: ep },
+				{ data: enc }
+			] = await Promise.all([
+				supabase.from('copa_groups').select('*'),
+				supabase.from('copa_standings').select('*').order('posicio'),
+				supabase.from('copa_player_rankings').select('*').order('posicio'),
+				supabase.from('copa_encontres').select('*')
+			]);
 			if (eg) throw eg;
 			if (es) throw es;
 			if (ep) throw ep;
 			groups = (g ?? []) as CopaGroup[];
 			standings = (s ?? []) as CopaStanding[];
 			pranks = (pr ?? []) as PlayerRankRow[];
+			encontres = enc ?? [];
 		} catch (e) {
 			error = (e as Error).message;
 		} finally {
@@ -85,6 +91,32 @@
 		const s = new Set(collapsed);
 		s.has(id) ? s.delete(id) : s.add(id);
 		collapsed = s;
+	}
+
+	// Resultats (encontres) per grup
+	let encontres = $state<any[]>([]);
+	let partidesCache = $state<Record<number, any[]>>({});
+	let expandedEnc = $state(new Set<number>());
+	function encOf(gid: number): any[] {
+		return encontres.filter((e) => e.jornada === selJornada && e.grup_id === gid);
+	}
+	async function toggleEnc(encId: number) {
+		const s = new Set(expandedEnc);
+		if (s.has(encId)) {
+			s.delete(encId);
+			expandedEnc = s;
+			return;
+		}
+		s.add(encId);
+		expandedEnc = s;
+		if (!partidesCache[encId]) {
+			const { data } = await supabase
+				.from('copa_partides')
+				.select('*')
+				.eq('encontre_id', encId)
+				.order('ordre');
+			partidesCache = { ...partidesCache, [encId]: data ?? [] };
+		}
 	}
 </script>
 

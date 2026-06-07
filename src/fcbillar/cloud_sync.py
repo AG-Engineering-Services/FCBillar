@@ -562,3 +562,125 @@ def publish_copa_player_rankings(
     n = _upsert(sb, "copa_player_rankings", rows, "edicio_id,jornada,grup_id,player_fcb_id", prog)
     conn.close()
     return {"copa_player_rankings": n}
+
+
+def publish_lliga_encontres(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Encontres de lliga 3 bandes (per jornada) + les seves partides individuals."""
+    from collections import defaultdict
+
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    tr = conn.execute("SELECT id FROM temporades ORDER BY nom DESC LIMIT 1").fetchone()
+    season_id = tr["id"] if tr else None
+    equips = {
+        r["id"]: (r["nom"], r["lletra"])
+        for r in conn.execute("SELECT e.id, c.nom, e.lletra FROM equips e JOIN clubs c ON c.id = e.club_id")
+    }
+
+    def eqname(eid):
+        nom, lletra = equips.get(eid, ("?", ""))
+        return nom if (lletra or "").strip().upper() in ("", "UNICO") else f"{nom} {lletra}".strip()
+
+    encs = conn.execute(
+        """
+        SELECT id, divisio_id, grup_id, jornada_id, data,
+               equip_local_id, equip_visitant_id, p_match_local, p_match_visitant
+        FROM encontres_lliga WHERE lliga_id = ? AND temporada_id = ?
+        """,
+        (LLIGA_3B_ID, season_id),
+    ).fetchall()
+
+    # Ordre de jornada per grup: rang del jornada_id per data mínima.
+    jdates: dict = defaultdict(dict)
+    for e in encs:
+        key = (e["divisio_id"], e["grup_id"])
+        cur = jdates[key].get(e["jornada_id"])
+        if cur is None or (e["data"] and e["data"] < cur):
+            jdates[key][e["jornada_id"]] = e["data"]
+    jorder: dict = {}
+    for (div, grup), jmap in jdates.items():
+        for i, (jid, _) in enumerate(sorted(jmap.items(), key=lambda kv: (kv[1] or "")), start=1):
+            jorder[(div, grup, jid)] = i
+
+    enc_rows = [{
+        "encontre_id": e["id"], "divisio_id": e["divisio_id"], "grup_id": e["grup_id"],
+        "jornada": jorder.get((e["divisio_id"], e["grup_id"], e["jornada_id"])),
+        "data": e["data"], "equip_local": eqname(e["equip_local_id"]),
+        "equip_visitant": eqname(e["equip_visitant_id"]),
+        "gols_local": e["p_match_local"], "gols_visitant": e["p_match_visitant"],
+    } for e in encs]
+
+    part_rows = []
+    counter: dict = defaultdict(int)
+    for r in conn.execute(
+        """
+        SELECT g.encontre_lliga_id AS eid, m.codi_fcb AS mod,
+               p1.nom AS j1, g.caramboles1 AS c1, p2.nom AS j2, g.caramboles2 AS c2, g.entrades AS e
+        FROM games g JOIN encontres_lliga en ON en.id = g.encontre_lliga_id
+        JOIN modalitats m ON m.id = g.modalitat_id
+        JOIN players p1 ON p1.id = g.player1_id JOIN players p2 ON p2.id = g.player2_id
+        WHERE en.lliga_id = ? AND en.temporada_id = ?
+        ORDER BY g.encontre_lliga_id, m.codi_fcb
+        """,
+        (LLIGA_3B_ID, season_id),
+    ):
+        counter[r["eid"]] += 1
+        part_rows.append({
+            "encontre_id": r["eid"], "ordre": counter[r["eid"]], "modalitat_codi": r["mod"],
+            "jugador_local": r["j1"], "caramboles_local": r["c1"],
+            "jugador_visitant": r["j2"], "caramboles_visitant": r["c2"], "entrades": r["e"],
+        })
+
+    counts = {}
+    counts["lliga_encontres"] = _upsert(sb, "lliga_encontres", enc_rows, "encontre_id", prog)
+    counts["lliga_partides"] = _upsert(sb, "lliga_partides", part_rows, "encontre_id,ordre", prog)
+    conn.close()
+    return counts
+
+
+def publish_copa_encontres(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Encontres de copa (edició actual) + les seves partides individuals."""
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    ed = conn.execute("SELECT MAX(edicio_id) AS m FROM copa_encontres").fetchone()["m"]
+    enc_rows = [{
+        "encontre_id": r["id"], "jornada": r["jornada"], "grup_id": r["grup_id"], "grup_nom": r["grup_nom"],
+        "equip_local": r["equip_local"], "equip_visitant": r["equip_visitant"],
+        "gols_local": r["p_match_local"], "gols_visitant": r["p_match_visitant"],
+    } for r in conn.execute(
+        """
+        SELECT id, jornada, grup_id, grup_nom, equip_local, equip_visitant,
+               p_match_local, p_match_visitant
+        FROM copa_encontres WHERE edicio_id = ?
+        """, (ed,))
+    ]
+    part_rows = [{
+        "encontre_id": r["encontre_copa_id"], "ordre": r["ordre"],
+        "jugador_local": r["local_nom"], "caramboles_local": r["local_caramboles"],
+        "jugador_visitant": r["visitant_nom"], "caramboles_visitant": r["visitant_caramboles"],
+        "entrades": r["entrades"],
+    } for r in conn.execute(
+        """
+        SELECT cp.encontre_copa_id, cp.ordre, cp.local_nom, cp.local_caramboles,
+               cp.visitant_nom, cp.visitant_caramboles, cp.entrades
+        FROM copa_partides cp JOIN copa_encontres ce ON ce.id = cp.encontre_copa_id
+        WHERE ce.edicio_id = ?
+        """, (ed,))
+    ]
+    counts = {}
+    counts["copa_encontres"] = _upsert(sb, "copa_encontres", enc_rows, "encontre_id", prog)
+    counts["copa_partides"] = _upsert(sb, "copa_partides", part_rows, "encontre_id,ordre", prog)
+    conn.close()
+    return counts

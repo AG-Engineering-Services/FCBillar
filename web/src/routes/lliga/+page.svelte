@@ -19,18 +19,24 @@
 
 	onMount(async () => {
 		try {
-			const [{ data: g, error: eg }, { data: s, error: es }, { data: pr, error: ep }] =
-				await Promise.all([
-					supabase.from('lliga_groups').select('*'),
-					supabase.from('lliga_standings').select('*').order('posicio'),
-					supabase.from('lliga_player_rankings').select('*').order('posicio')
-				]);
+			const [
+				{ data: g, error: eg },
+				{ data: s, error: es },
+				{ data: pr, error: ep },
+				{ data: enc }
+			] = await Promise.all([
+				supabase.from('lliga_groups').select('*'),
+				supabase.from('lliga_standings').select('*').order('posicio'),
+				supabase.from('lliga_player_rankings').select('*').order('posicio'),
+				supabase.from('lliga_encontres').select('*')
+			]);
 			if (eg) throw eg;
 			if (es) throw es;
 			if (ep) throw ep;
 			groups = (g ?? []) as LligaGroup[];
 			standings = (s ?? []) as StandingRow[];
 			pranks = (pr ?? []) as PlayerRankRow[];
+			encontres = enc ?? [];
 		} catch (e) {
 			error = (e as Error).message;
 		} finally {
@@ -83,6 +89,56 @@
 		const s = new Set(collapsed);
 		s.has(id) ? s.delete(id) : s.add(id);
 		collapsed = s;
+	}
+
+	// Resultats per jornada
+	let encontres = $state<any[]>([]);
+	let jornadaSel = $state<Record<number, number>>({});
+	let partidesCache = $state<Record<number, any[]>>({});
+	let expandedEnc = $state(new Set<number>());
+
+	function gJornades(gid: number): number[] {
+		return [
+			...new Set(
+				encontres
+					.filter((e) => e.grup_id === gid && e.divisio_id === selDiv && e.jornada != null)
+					.map((e) => e.jornada as number)
+			)
+		].sort((a, b) => a - b);
+	}
+	function curJornada(gid: number): number | null {
+		const js = gJornades(gid);
+		if (!js.length) return null;
+		return jornadaSel[gid] ?? js[js.length - 1];
+	}
+	function encOf(gid: number): any[] {
+		const j = curJornada(gid);
+		return encontres.filter(
+			(e) => e.grup_id === gid && e.divisio_id === selDiv && e.jornada === j
+		);
+	}
+	function stepJornada(gid: number, dir: number) {
+		const js = gJornades(gid);
+		const i = js.indexOf(curJornada(gid) ?? js[js.length - 1]);
+		jornadaSel = { ...jornadaSel, [gid]: js[Math.min(js.length - 1, Math.max(0, i + dir))] };
+	}
+	async function toggleEnc(encId: number) {
+		const s = new Set(expandedEnc);
+		if (s.has(encId)) {
+			s.delete(encId);
+			expandedEnc = s;
+			return;
+		}
+		s.add(encId);
+		expandedEnc = s;
+		if (!partidesCache[encId]) {
+			const { data } = await supabase
+				.from('lliga_partides')
+				.select('*')
+				.eq('encontre_id', encId)
+				.order('ordre');
+			partidesCache = { ...partidesCache, [encId]: data ?? [] };
+		}
 	}
 </script>
 
@@ -215,6 +271,40 @@
 							</li>
 						{/each}
 					</ul>
+				{/if}
+
+				<!-- Resultats per jornada -->
+				{#if gJornades(g.grup_id).length}
+					<div class="border-t border-slate-100 bg-slate-50/60 p-2">
+						<div class="mb-2 flex items-center justify-between">
+							<button onclick={() => stepJornada(g.grup_id, -1)} class="rounded-md px-3 py-1 text-base text-slate-500 active:bg-slate-200" aria-label="anterior">‹</button>
+							<span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Jornada {curJornada(g.grup_id)}</span>
+							<button onclick={() => stepJornada(g.grup_id, 1)} class="rounded-md px-3 py-1 text-base text-slate-500 active:bg-slate-200" aria-label="seguent">›</button>
+						</div>
+						<ul class="space-y-1">
+							{#each encOf(g.grup_id) as e (e.encontre_id)}
+								<li class="overflow-hidden rounded-lg bg-white ring-1 ring-slate-200">
+									<button onclick={() => toggleEnc(e.encontre_id)} class="flex w-full items-center gap-2 px-2 py-1.5 text-xs">
+										<span class="flex-1 truncate text-left font-medium">{e.equip_local}</span>
+										<span class="shrink-0 rounded bg-slate-100 px-1.5 font-mono font-bold tabular-nums">{e.gols_local}–{e.gols_visitant}</span>
+										<span class="flex-1 truncate text-right font-medium">{e.equip_visitant}</span>
+									</button>
+									{#if expandedEnc.has(e.encontre_id)}
+										<div class="border-t border-slate-100 px-2 py-1">
+											{#each partidesCache[e.encontre_id] ?? [] as p}
+												<div class="flex items-center gap-2 py-0.5 text-[11px]">
+													<span class="flex-1 truncate text-left">{p.jugador_local}</span>
+													<span class="shrink-0 font-mono tabular-nums">{p.caramboles_local}–{p.caramboles_visitant}</span>
+													<span class="flex-1 truncate text-right">{p.jugador_visitant}</span>
+													<span class="w-12 shrink-0 text-right text-slate-400">{p.entrades} ent</span>
+												</div>
+											{/each}
+										</div>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					</div>
 				{/if}
 			{/if}
 		</section>
