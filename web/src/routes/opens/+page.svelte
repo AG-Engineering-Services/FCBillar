@@ -82,8 +82,8 @@
 		<div class="mb-3 flex items-center justify-between gap-2 rounded-lg bg-slate-900 px-2 py-2 text-white">
 			<button onclick={() => stepRonda(-1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="anterior">‹</button>
 			<div class="min-w-0 text-center">
-				<div class="truncate text-xs font-semibold">{rondaInfo?.ronda_nom ?? ''}</div>
-				<div class="text-[10px] text-slate-300">{rondaInfo?.ronda_data ?? ''} · ronda {ronda}/{rondes.length}</div>
+				<div class="truncate text-xs font-semibold">Fins a {rondaInfo?.ronda_nom ?? ''}</div>
+				<div class="text-[10px] text-slate-300">{rondaInfo?.ronda_temp ?? ''} · ronda {ronda}/{rondes.length}</div>
 			</div>
 			<button onclick={() => stepRonda(1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="següent">›</button>
 		</div>
@@ -115,8 +115,10 @@
 						{#if expandedPlayer === r.player_fcb_id && r.detall?.length}
 							<div class="space-y-0.5 bg-slate-50 px-3 pb-2 pl-11 pt-1">
 								{#each r.detall as d}
-									<div class="flex items-center justify-between gap-2 text-[11px]">
-										<span class="min-w-0 truncate text-slate-500">{d.open} · {d.pos}è</span>
+									<div class="flex items-center justify-between gap-2 text-[11px] {d.pos ? '' : 'opacity-50'}">
+										<span class="min-w-0 truncate text-slate-500">
+											{d.open}{d.temp ? ` ${d.temp}` : ''} · {d.pos ? `${d.pos}è` : 'no hi va jugar'}
+										</span>
 										<span class="shrink-0 font-mono font-semibold text-slate-700">{d.punts}</span>
 									</div>
 								{/each}
