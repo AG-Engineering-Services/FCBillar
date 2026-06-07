@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { supabase, type GameRow } from '$lib/supabase';
+	import { follows, toggleFollow } from '$lib/follows';
 
 	const fcbId = $derived($page.params.fcb_id);
 
@@ -206,8 +207,20 @@
 {#if error}
 	<div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
 {:else}
-	<h1 class="text-lg font-bold leading-tight">{nom}</h1>
-	{#if club}<p class="mb-3 text-sm text-slate-400">{club}</p>{/if}
+	<div class="mb-3 flex items-start justify-between gap-3">
+		<div class="min-w-0">
+			<h1 class="text-lg font-bold leading-tight">{nom}</h1>
+			{#if club}<p class="text-sm text-slate-400">{club}</p>{/if}
+		</div>
+		<button
+			onclick={() => toggleFollow(fcbId)}
+			class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium {$follows.includes(fcbId)
+				? 'bg-amber-100 text-amber-700 ring-1 ring-amber-300'
+				: 'bg-slate-900 text-white'}"
+		>
+			{$follows.includes(fcbId) ? '★ Seguint' : '☆ Seguir'}
+		</button>
+	</div>
 
 	{#if modalitats.length > 1}
 		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">

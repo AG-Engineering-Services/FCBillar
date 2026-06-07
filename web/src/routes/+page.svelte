@@ -28,7 +28,11 @@
 	}
 	const filtered = $derived(
 		search.trim()
-			? rows.filter((r) => norm(r.jugador).includes(norm(search.trim())))
+			? rows.filter(
+					(r) =>
+						norm(r.jugador).includes(norm(search.trim())) ||
+						norm(r.club ?? '').includes(norm(search.trim()))
+				)
 			: rows
 	);
 
@@ -132,7 +136,7 @@
 	<input
 		bind:value={search}
 		inputmode="search"
-		placeholder="Cerca jugador…"
+		placeholder="Cerca jugador o club…"
 		class="min-w-0 flex-1 rounded-lg border-slate-300 bg-white py-2 px-3 text-sm shadow-sm"
 	/>
 </div>
