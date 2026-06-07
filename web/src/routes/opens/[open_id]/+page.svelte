@@ -10,7 +10,6 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let q = $state('');
-	const norm = (s: string | null) => (s ?? '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 	const filteredRows = $derived(
 		q.trim() ? rows.filter((r) => norm(r.jugador).includes(norm(q.trim()))) : rows
 	);
@@ -82,6 +81,14 @@
 	{:else if rows.length === 0}
 		<p class="py-6 text-center text-sm text-slate-400">Sense classificació disponible.</p>
 	{:else}
+		{#if rows.length > 10}
+			<input
+				bind:value={q}
+				inputmode="search"
+				placeholder="Cerca jugador…"
+				class="mb-3 w-full rounded-lg border-slate-300 bg-white py-2 px-3 text-sm shadow-sm"
+			/>
+		{/if}
 		<div class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
 			<div class="flex items-center gap-2 border-b border-slate-100 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400">
 				<span class="w-5 text-center">#</span>
@@ -91,7 +98,7 @@
 				<span class="w-8 text-right">Pts</span>
 			</div>
 			<ul>
-				{#each rows as r (r.player_fcb_id)}
+				{#each filteredRows as r (r.player_fcb_id)}
 					<li class="border-b border-slate-100 last:border-0">
 						<button onclick={() => toggle(r.jugador ?? '')} class="flex w-full items-center gap-2 px-3 py-2 text-left active:bg-slate-50">
 							<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500' : 'text-slate-400'}">{r.posicio}</span>
