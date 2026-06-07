@@ -619,6 +619,27 @@ def ingest_individuals_cmd(
     )
 
 
+@app.command("publish-cloud")
+def publish_cloud_cmd() -> None:
+    """Publica la BD local a Supabase (schema fcbillar) per al frontend de Vercel.
+
+    FASE 1: rànquings. Cal SUPABASE_URL i SUPABASE_SERVICE_ROLE_KEY (al .env o a
+    l'entorn). Idempotent: es pot reexecutar després de cada actualització.
+    """
+    from fcbillar.cloud_sync import publish_rankings
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"[dim]  {msg}[/]" if level == "ok" else f"[yellow]{msg}[/]")
+
+    try:
+        counts = publish_rankings(on_progress=_prog)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]Error publicant al núvol: {exc}[/]")
+        raise typer.Exit(code=1) from exc
+    total = ", ".join(f"{k}={v}" for k, v in counts.items())
+    console.print(f"[green]OK publicat a Supabase (fcbillar): {total}[/]")
+
+
 @app.command("ingest-copa")
 def ingest_copa_cmd(
     edicio: int = typer.Argument(..., help="ID d'edició de la Copa (ex: 7)"),

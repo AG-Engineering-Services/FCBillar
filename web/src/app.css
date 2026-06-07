@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	html {
+		-webkit-text-size-adjust: 100%;
+	}
+	body {
+		/* respect iOS safe areas (notch) for a true mobile feel */
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+}

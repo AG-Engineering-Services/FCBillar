@@ -1120,11 +1120,24 @@ class DataSource:
                     (club_id,),
                 ).fetchall()
             }
+            # També els assignats oficialment a aquest club (players.club_id),
+            # encara que no tinguin cap partida d'equip registrada (p.ex. jugadors
+            # històrics amb rànquing però sense partides ingerides, com els que no
+            # han fitxat mai per cap altre club).
+            assigned = {
+                r[0]
+                for r in c.execute(
+                    "SELECT id FROM players WHERE club_id = ?", (club_id,)
+                ).fetchall()
+            }
+            ever |= assigned
+
             if not season_only:
                 return list(ever)
 
             # season_only: (jugat amb el club aquesta temporada) ∪
-            #              (última partida amb equip = aquest club)
+            #              (última partida amb equip = aquest club) ∪
+            #              (assignats oficialment al club)
             inici, fi = self._temporada_actual_dates(c)
             this_season: set[int] = set()
             if inici and fi:
@@ -1158,7 +1171,7 @@ class DataSource:
                 ).fetchone()
                 if last and last[0] == club_id:
                     still.add(pid)
-            return list(this_season | still)
+            return list(this_season | still | assigned)
 
     def virtual_club_player_ids(self, vc_id: int) -> list[int]:
         with self._conn() as c:
