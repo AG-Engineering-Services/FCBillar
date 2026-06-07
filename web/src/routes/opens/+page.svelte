@@ -10,12 +10,14 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
-	const rondes = $derived([...new Set(ranking.map((r) => r.ronda as number))].sort((a, b) => a - b));
+	let expandedPlayer = $state<string | null>(null);
+	const genRanking = $derived(ranking.filter((r) => r.genere === 'general'));
+	const rondes = $derived([...new Set(genRanking.map((r) => r.ronda as number))].sort((a, b) => a - b));
 	$effect(() => {
 		if (ronda == null && rondes.length) ronda = rondes[rondes.length - 1];
 	});
-	const rondaRows = $derived(ranking.filter((r) => r.ronda === ronda).sort((a, b) => a.posicio - b.posicio));
-	const rondaInfo = $derived(ranking.find((r) => r.ronda === ronda));
+	const rondaRows = $derived(genRanking.filter((r) => r.ronda === ronda).sort((a, b) => a.posicio - b.posicio));
+	const rondaInfo = $derived(genRanking.find((r) => r.ronda === ronda));
 	function stepRonda(d: number) {
 		const i = rondes.indexOf(ronda as number);
 		ronda = rondes[Math.min(rondes.length - 1, Math.max(0, i + d))];
@@ -98,14 +100,32 @@
 			</div>
 			<ul>
 				{#each rondaRows.filter((r) => !q.trim() || norm(r.jugador ?? '').includes(norm(q.trim()))) as r (r.player_fcb_id)}
-					<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
-						<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500' : 'text-slate-400'}">{r.posicio}</span>
-						<div class="min-w-0 flex-1">
-							<a href="/jugador/{r.player_fcb_id}" class="block truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
-							{#if r.club}<div class="truncate text-[11px] text-slate-400">{r.club}</div>{/if}
+					<li class="border-b border-slate-100 last:border-0">
+						<div class="flex items-center gap-2 px-3 py-2">
+							<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500' : 'text-slate-400'}">{r.posicio}</span>
+							<div class="min-w-0 flex-1">
+								<a href="/jugador/{r.player_fcb_id}" class="block truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
+								{#if r.club}<div class="truncate text-[11px] text-slate-400">{r.club}</div>{/if}
+							</div>
+							<span class="w-7 shrink-0 text-center text-xs tabular-nums text-slate-500">{r.opens_jugats}</span>
+							<button
+								onclick={() => (expandedPlayer = expandedPlayer === r.player_fcb_id ? null : r.player_fcb_id)}
+								class="flex w-12 shrink-0 items-center justify-end gap-0.5 font-mono text-sm font-bold tabular-nums"
+							>
+								{r.punts}
+								<span class="text-[9px] text-slate-400">{expandedPlayer === r.player_fcb_id ? '▴' : '▾'}</span>
+							</button>
 						</div>
-						<span class="w-7 shrink-0 text-center text-xs tabular-nums text-slate-500">{r.opens_jugats}</span>
-						<span class="w-10 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
+						{#if expandedPlayer === r.player_fcb_id && r.detall?.length}
+							<div class="space-y-0.5 bg-slate-50 px-3 pb-2 pl-11 pt-1">
+								{#each r.detall as d}
+									<div class="flex items-center justify-between gap-2 text-[11px]">
+										<span class="min-w-0 truncate text-slate-500">{d.open} · {d.pos}è</span>
+										<span class="shrink-0 font-mono font-semibold text-slate-700">{d.punts}</span>
+									</div>
+								{/each}
+							</div>
+						{/if}
 					</li>
 				{/each}
 			</ul>
