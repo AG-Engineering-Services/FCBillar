@@ -630,6 +630,7 @@ def publish_cloud_cmd() -> None:
         publish_copa,
         publish_games,
         publish_lliga,
+        publish_opens,
         publish_rankings,
     )
 
@@ -641,6 +642,7 @@ def publish_cloud_cmd() -> None:
         counts.update(publish_games(on_progress=_prog))
         counts.update(publish_lliga(on_progress=_prog))
         counts.update(publish_copa(on_progress=_prog))
+        counts.update(publish_opens(on_progress=_prog))
     except Exception as exc:  # noqa: BLE001
         console.print(f"[red]Error publicant al núvol: {exc}[/]")
         raise typer.Exit(code=1) from exc

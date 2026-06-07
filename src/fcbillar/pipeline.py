@@ -796,6 +796,12 @@ def _build_game_from_lliga_row(
     repo: Repository,
     create_missing_players: bool = False,
 ) -> Game | None:
+    # Partides fantasma: tauler sense jugador assignat o no disputat (0 entrades).
+    noms = f"{row.local_nom or ''} {row.visitant_nom or ''}".lower()
+    if "sense assignar" in noms:
+        return None
+    if not row.entrades:  # 0 o None → no jugada (incompareixença)
+        return None
     if create_missing_players:
         local_fcb = repo.resolve_or_create_player_by_nom(row.local_nom)
         visitant_fcb = repo.resolve_or_create_player_by_nom(row.visitant_nom)

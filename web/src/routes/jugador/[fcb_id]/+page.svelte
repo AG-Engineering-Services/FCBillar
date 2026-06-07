@@ -104,6 +104,51 @@
 		return { n, mitjana: ent ? car / ent : 0, sm, w, l, t, pct: n ? Math.round((100 * w) / n) : 0 };
 	});
 
+	// Evolució al rànquing (per la modalitat seleccionada): mitjana i posició.
+	let rankHist = $state<{ posicio: number | null; mitjana: number | null }[]>([]);
+	$effect(() => {
+		const id = fcbId;
+		const mod = selMod;
+		if (id && mod != null) loadRankHist(id, mod);
+		else rankHist = [];
+	});
+	async function loadRankHist(id: string, mod: number) {
+		const { data } = await supabase
+			.from('ranking_entries')
+			.select('num_seq, posicio, mitjana_general')
+			.eq('player_fcb_id', id)
+			.eq('modalitat_codi', mod)
+			.order('num_seq', { ascending: true });
+		rankHist = (data ?? []).map((r) => ({ posicio: r.posicio, mitjana: r.mitjana_general }));
+	}
+	const bestPos = $derived.by(() => {
+		const ps = rankHist.map((r) => r.posicio).filter((v): v is number => v != null);
+		return ps.length ? Math.min(...ps) : null;
+	});
+	const lastMitjana = $derived(rankHist.at(-1)?.mitjana ?? null);
+
+	function spark(vals: (number | null)[], invert = false): string {
+		const n = vals.length;
+		const valid = vals.filter((v): v is number => v != null);
+		if (valid.length < 2) return '';
+		let min = Math.min(...valid);
+		let max = Math.max(...valid);
+		if (min === max) {
+			min -= 1;
+			max += 1;
+		}
+		return vals
+			.map((v, i) => {
+				if (v == null) return null;
+				const x = n > 1 ? (i / (n - 1)) * 300 : 0;
+				let t = (v - min) / (max - min);
+				if (invert) t = 1 - t;
+				return `${x.toFixed(1)},${(58 - t * 56).toFixed(1)}`;
+			})
+			.filter(Boolean)
+			.join(' ');
+	}
+
 	function fmtDate(d: string | null): string {
 		if (!d) return '';
 		const [y, m, day] = d.split('-');
@@ -153,6 +198,47 @@
 		<p class="mb-2 px-1 text-xs text-slate-400">
 			{kpi.w} guanyades · {kpi.l} perdudes{kpi.t ? ` · ${kpi.t} empats` : ''}
 		</p>
+
+		<!-- Evolució al rànquing -->
+		{#if rankHist.length >= 2}
+			<div class="mb-4 space-y-2">
+				<div class="rounded-xl bg-white p-3 ring-1 ring-slate-200">
+					<div class="mb-1 flex items-baseline justify-between">
+						<span class="text-xs font-medium text-slate-500">Evolució mitjana</span>
+						<span class="font-mono text-xs text-slate-400"
+							>{lastMitjana != null ? lastMitjana.toFixed(3) : '—'}</span>
+					</div>
+					<svg viewBox="0 0 300 60" preserveAspectRatio="none" class="h-14 w-full">
+						<polyline
+							points={spark(rankHist.map((r) => r.mitjana))}
+							fill="none"
+							stroke="#0f172a"
+							stroke-width="1.5"
+							stroke-linejoin="round"
+							vector-effect="non-scaling-stroke" />
+					</svg>
+				</div>
+				<div class="rounded-xl bg-white p-3 ring-1 ring-slate-200">
+					<div class="mb-1 flex items-baseline justify-between">
+						<span class="text-xs font-medium text-slate-500"
+							>Evolució posició <span class="text-slate-300">(amunt = millor)</span></span>
+						<span class="font-mono text-xs text-slate-400">millor #{bestPos ?? '—'}</span>
+					</div>
+					<svg viewBox="0 0 300 60" preserveAspectRatio="none" class="h-14 w-full">
+						<polyline
+							points={spark(
+								rankHist.map((r) => r.posicio),
+								true
+							)}
+							fill="none"
+							stroke="#0f172a"
+							stroke-width="1.5"
+							stroke-linejoin="round"
+							vector-effect="non-scaling-stroke" />
+					</svg>
+				</div>
+			</div>
+		{/if}
 
 		<!-- Partides recents -->
 		<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">

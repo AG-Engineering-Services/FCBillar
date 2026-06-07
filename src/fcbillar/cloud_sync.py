@@ -290,9 +290,11 @@ def publish_lliga(
         )
         for pos, (eid, s) in enumerate(ranked, start=1):
             nom, fcb_id, lletra = equips.get(eid, ("?", None, ""))
+            # "UNICO" = club amb un sol equip → no es mostra la lletra.
+            equip = nom if (lletra or "").strip().upper() in ("", "UNICO") else f"{nom} {lletra}".strip()
             standing_rows.append({
                 "lliga_id": LLIGA_3B_ID, "divisio_id": div, "grup_id": gid,
-                "posicio": pos, "equip": f"{nom} {lletra}".strip(), "club_fcb_id": fcb_id,
+                "posicio": pos, "equip": equip, "club_fcb_id": fcb_id,
                 "pj": s["pj"], "g": s["g"], "e": s["e"], "p": s["p"],
                 "punts": 3 * s["g"] + s["e"], "pf": s["pf"], "pc": s["pc"],
             })
@@ -364,6 +366,55 @@ def publish_copa(
     )
     counts["copa_standings"] = _upsert(
         sb, "copa_standings", standing_rows, "edicio_id,jornada,grup_id,equip", prog
+    )
+    conn.close()
+    return counts
+
+
+def publish_opens(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Puja els opens (torneigs individuals) + classificacions a Supabase. FASE 5."""
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    # open_id = id intern (únic: torneig_id_extern es repeteix per divisions).
+    opens = [
+        {"open_id": r["id"], "nom": r["nom"], "temporada_id": r["temporada_id"]}
+        for r in conn.execute("SELECT id, nom, temporada_id FROM torneigs_individuals")
+    ]
+    seen: set[tuple[int, str]] = set()
+    classifs = []
+    for r in conn.execute(
+        """
+        SELECT tp.torneig_id AS open_id, tp.posicio,
+               p.fcb_id AS player_fcb_id, p.nom AS jugador, tp.club_text AS club,
+               tp.partides_jugades AS partides, tp.punts, tp.caramboles, tp.entrades,
+               tp.mitjana_general, tp.mitjana_particular, tp.serie_max
+        FROM torneig_participants tp
+        JOIN players p ON p.id = tp.player_id
+        ORDER BY tp.torneig_id, tp.posicio
+        """
+    ):
+        key = (r["open_id"], r["player_fcb_id"])
+        if key in seen:
+            continue
+        seen.add(key)
+        classifs.append({
+            "open_id": r["open_id"], "posicio": r["posicio"],
+            "player_fcb_id": r["player_fcb_id"], "jugador": r["jugador"], "club": r["club"],
+            "partides": r["partides"], "punts": r["punts"], "caramboles": r["caramboles"],
+            "entrades": r["entrades"], "mitjana_general": r["mitjana_general"],
+            "mitjana_particular": r["mitjana_particular"], "serie_max": r["serie_max"],
+        })
+
+    counts = {}
+    counts["opens"] = _upsert(sb, "opens", opens, "open_id", prog)
+    counts["open_classifications"] = _upsert(
+        sb, "open_classifications", classifs, "open_id,player_fcb_id", prog
     )
     conn.close()
     return counts

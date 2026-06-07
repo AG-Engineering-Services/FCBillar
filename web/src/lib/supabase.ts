@@ -87,3 +87,23 @@ export interface CopaStanding {
 	parcials: number | null;
 	mitjana: number | null;
 }
+
+export interface Open {
+	open_id: number;
+	nom: string;
+	temporada_id: number | null;
+}
+export interface OpenClassification {
+	open_id: number;
+	posicio: number | null;
+	player_fcb_id: string | null;
+	jugador: string | null;
+	club: string | null;
+	partides: number | null;
+	punts: number | null;
+	caramboles: number | null;
+	entrades: number | null;
+	mitjana_general: number | null;
+	mitjana_particular: number | null;
+	serie_max: number | null;
+}
