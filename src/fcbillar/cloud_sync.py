@@ -865,31 +865,44 @@ def publish_open_ranking(
         parts[r["oid"]].append((r["fcb_id"], r["nom"], r["club_text"], r["posicio"]))
 
     # GENERAL = opens NO femenins (els femenins tenen taula de punts pròpia, pendent).
+    textid = {o["id"]: o["torneig_id_extern"] for o in open_rows}
     gen_ids = [o["id"] for o in open_rows if "FEMENI" not in (o["nom"] or "").upper()]
-    ordered = sorted(gen_ids, key=lambda t: open_date.get(t, ""))  # cronològic ascendent
+    ordered = sorted(gen_ids, key=lambda t: textid.get(t, 0))  # cronològic global (id_extern)
+
+    def _ddet(oid, pos, pp):
+        return {"open": onom.get(oid), "data": open_date.get(oid) or None, "pos": pos, "punts": pp}
 
     # Un snapshot per ronda: finestra mòbil dels últims 5 opens fins a la ronda i.
     all_rows = []
     for i in range(1, len(ordered) + 1):
         window = ordered[max(0, i - 5):i]
-        acc: dict = {}
+        pp_player: dict = defaultdict(dict)  # fcb -> {oid: (pos, pts)}
+        info: dict = {}  # fcb -> (nom, club)
         for oid in window:
             for fcb, nom, club, pos in parts.get(oid, []):
-                a = acc.setdefault(fcb, {"pts": 0, "n": 0, "nom": nom, "club": club, "det": []})
-                pp = points_for_position(pos)
-                a["pts"] += pp
-                a["n"] += 1
-                a["det"].append({"open": onom.get(oid), "data": open_date.get(oid) or None, "pos": pos, "punts": pp})
+                pp_player[fcb][oid] = (pos, points_for_position(pos))
+                info[fcb] = (nom, club)
         last_open = ordered[i - 1]
-        ranked = sorted(acc.items(), key=lambda kv: -kv[1]["pts"])
-        for posicio, (fcb, a) in enumerate(ranked, start=1):
-            a["det"].sort(key=lambda d: d["data"] or "")
+        rows_r = []
+        for fcb, (nom, club) in info.items():
+            det, total, njug = [], 0, 0
+            for oid in window:  # tots els opens de la finestra (0 si no hi participa)
+                if oid in pp_player[fcb]:
+                    pos, pp = pp_player[fcb][oid]
+                    det.append(_ddet(oid, pos, pp))
+                    total += pp
+                    njug += 1
+                else:
+                    det.append(_ddet(oid, None, 0))
+            rows_r.append((fcb, nom, club, total, njug, det))
+        rows_r.sort(key=lambda x: -x[3])
+        for posicio, (fcb, nom, club, total, njug, det) in enumerate(rows_r, start=1):
             all_rows.append({
                 "genere": "general", "ronda": i, "ronda_nom": onom.get(last_open),
                 "ronda_data": open_date.get(last_open) or None,
-                "posicio": posicio, "player_fcb_id": fcb, "jugador": a["nom"],
-                "club": a["club"], "opens_jugats": a["n"], "punts": a["pts"],
-                "detall": a["det"],
+                "posicio": posicio, "player_fcb_id": fcb, "jugador": nom,
+                "club": club, "opens_jugats": njug, "punts": total,
+                "detall": det,
             })
     n = _upsert(sb, "open_ranking", all_rows, "genere,ronda,player_fcb_id", prog)
     conn.close()
