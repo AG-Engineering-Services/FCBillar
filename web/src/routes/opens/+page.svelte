@@ -124,11 +124,17 @@
 						{#if expandedPlayer === r.player_fcb_id && r.detall?.length}
 							<div class="space-y-0.5 bg-slate-50 px-3 pb-2 pl-11 pt-1">
 								{#each r.detall as d}
-									<div class="flex items-center justify-between gap-2 text-[11px] {d.pos ? '' : 'opacity-50'}">
-										<span class="min-w-0 truncate text-slate-500">
-											{d.open}{d.temp ? ` ${d.temp}` : ''} · {d.pos ? `${d.pos}è` : 'no hi va jugar'}
+									<div class="flex items-center justify-between gap-2 text-[11px] {d.pos || d.penal || d.absent ? '' : 'opacity-50'}">
+										<span class="min-w-0 truncate {d.penal ? 'font-medium text-red-500' : 'text-slate-500'}">
+											{d.open}{d.temp ? ` ${d.temp}` : ''} · {d.penal
+												? 'no presentat'
+												: d.absent
+													? 'absència justif.'
+													: d.pos
+														? `${d.pos}è`
+														: 'no inscrit'}
 										</span>
-										<span class="shrink-0 font-mono font-semibold text-slate-700">{d.punts}</span>
+										<span class="shrink-0 font-mono font-semibold {d.penal ? 'text-red-500' : 'text-slate-700'}">{d.punts}</span>
 									</div>
 								{/each}
 							</div>
