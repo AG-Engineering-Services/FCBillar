@@ -293,7 +293,7 @@
 	// Mitjana mòbil de 15 partides: a cada posició, la mitjana de les 15 acabant allà.
 	const roll15 = $derived.by(() => {
 		const asc = [...modGames].sort((a, b) => (a.data_partida ?? '').localeCompare(b.data_partida ?? ''));
-		const out: { avg: number; from: string | null; to: string | null }[] = [];
+		const out: { avg: number; g: number; from: string | null; to: string | null }[] = [];
 		for (let i = 14; i < asc.length; i++) {
 			let car = 0,
 				ent = 0;
@@ -302,7 +302,13 @@
 				car += p.myCar;
 				ent += p.ent;
 			}
-			out.push({ avg: ent ? car / ent : 0, from: asc[i - 14].data_partida, to: asc[i].data_partida });
+			const pg = persp(asc[i]);
+			out.push({
+				avg: ent ? car / ent : 0,
+				g: pg.ent ? pg.myCar / pg.ent : 0,
+				from: asc[i - 14].data_partida,
+				to: asc[i].data_partida
+			});
 		}
 		return out;
 	});
@@ -312,16 +318,16 @@
 	});
 	const rollChart = $derived.by(() => {
 		if (!roll15.length) return null;
-		const avgs = roll15.map((r) => r.avg);
-		const lo = Math.min(...avgs),
-			hi = Math.max(...avgs),
+		const all = [...roll15.map((r) => r.avg), ...roll15.map((r) => r.g)];
+		const lo = Math.min(...all),
+			hi = Math.max(...all),
 			range = hi - lo || 1,
 			n = roll15.length;
-		const pts = roll15.map((r, i) => ({
-			x: PAD + (n === 1 ? 0.5 : i / (n - 1)) * (VBW - 2 * PAD),
-			y: VBH - PAD - ((r.avg - lo) / range) * (VBH - 2 * PAD)
-		}));
-		return { pts, lo, hi, line: pts.map((p) => `${p.x},${p.y}`).join(' ') };
+		const X = (i: number) => PAD + (n === 1 ? 0.5 : i / (n - 1)) * (VBW - 2 * PAD);
+		const Y = (v: number) => VBH - PAD - ((v - lo) / range) * (VBH - 2 * PAD);
+		const pts = roll15.map((r, i) => ({ x: X(i), y: Y(r.avg) }));
+		const gpts = roll15.map((r, i) => ({ x: X(i), y: Y(r.g) }));
+		return { pts, gpts, lo, hi, line: pts.map((p) => `${p.x},${p.y}`).join(' ') };
 	});
 	function pickRoll(ev: MouseEvent) {
 		const el = ev.currentTarget as Element;
@@ -656,6 +662,9 @@
 					{#each [0, 0.25, 0.5, 0.75, 1] as f}
 						<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke="#eef2f7" stroke-width="1" vector-effect="non-scaling-stroke" />
 					{/each}
+					{#each rollChart.gpts as gp}
+						<circle cx={gp.x} cy={gp.y} r="2" fill="#cbd5e1" />
+					{/each}
 					<polyline points={rollChart.line} fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
 					{#if rollSel != null && rollChart.pts[rollSel]}
 						<line x1={rollChart.pts[rollSel].x} y1="2" x2={rollChart.pts[rollSel].x} y2={VBH - 2} stroke="#2563eb" stroke-width="1" vector-effect="non-scaling-stroke" />
@@ -667,7 +676,7 @@
 					<span>màx {rollChart.hi.toFixed(3)}</span>
 				</div>
 				{#if roll15.length > 1}
-					<input type="range" min="0" max={roll15.length - 1} bind:value={rollSel} class="mt-2 w-full accent-blue-600" />
+					<input type="range" min="0" max={roll15.length - 1} bind:value={rollSel} class="mt-2 h-1 w-full cursor-pointer accent-blue-600" />
 					<p class="text-center text-[10px] text-slate-400">finestra {(rollSel ?? 0) + 1} de {roll15.length} · llisca per recórrer enrere</p>
 				{/if}
 			</div>
