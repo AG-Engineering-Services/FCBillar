@@ -705,7 +705,7 @@
 					<span>màx {rollChart.hi.toFixed(3)}</span>
 				</div>
 				{#if roll15.length > 1}
-					<input type="range" min="0" max={roll15.length - 1} bind:value={rollSel} class="mt-2 h-1 w-full cursor-pointer accent-blue-600" />
+					<input type="range" min="0" max={roll15.length - 1} bind:value={rollSel} class="thin-range mt-2 w-full" />
 					<p class="text-center text-[10px] text-slate-400">finestra {(rollSel ?? 0) + 1} de {roll15.length} · llisca per recórrer enrere</p>
 				{/if}
 			</div>
