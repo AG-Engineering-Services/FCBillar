@@ -45,7 +45,7 @@ def main() -> None:
         """SELECT p.fcb_id fcb, p.nom, MAX(re.mitjana_general) v
         FROM ranking_entries re JOIN rankings rk ON rk.id=re.ranking_id
         JOIN modalitats m ON m.id=rk.modalitat_id JOIN players p ON p.id=re.player_id
-        WHERE m.codi_fcb=1 AND p.fcb_id NOT LIKE 'name:%' AND re.mitjana_general <= 1.6
+        WHERE m.codi_fcb=1 AND p.fcb_id NOT LIKE 'name:%'
         GROUP BY p.id HAVING COUNT(*) >= 5 ORDER BY v DESC LIMIT 5""",
         lambda r: f"{r['v']:.3f}",
     )
