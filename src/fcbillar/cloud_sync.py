@@ -930,6 +930,47 @@ def publish_open_ranking(
                 "club": club, "opens_jugats": njug, "punts": total,
                 "detall": det,
             })
+    # Penalitzacions del PDF oficial (Art. IV): -20 no presentat injustificat,
+    # 0 justificat, None no inscrit. Només a la ronda actual (el PDF és la finestra vigent).
+    try:
+        import httpx
+        from fcb_opens.scraper.official_pdf import OFFICIAL_RANKING_URL, parse_official_ranking
+
+        off = parse_official_ranking(
+            httpx.get(OFFICIAL_RANKING_URL, timeout=30, follow_redirects=True).content,
+            source_url=OFFICIAL_RANKING_URL,
+        )
+        max_ronda = len(ordered)
+        window = ordered[max(0, max_ronda - 5):max_ronda]
+        if max_ronda and len(off.opens) == len(window):  # alineació posicional segura
+            pdf = {_nm(e.display_name): (e.total_points, tuple(e.points_per_open)) for e in off.entries}
+            for row in all_rows:
+                if row["ronda"] != max_ronda:
+                    continue
+                hit = pdf.get(_nm(row["jugador"]))
+                if not hit:
+                    continue
+                total, ppo = hit
+                for i, d in enumerate(row["detall"]):
+                    pts = ppo[i] if i < len(ppo) else None
+                    if pts is None:  # no inscrit
+                        d["punts"], d["pos"] = 0, None
+                    else:
+                        d["punts"] = pts
+                        if pts < 0:  # penalització injustificada
+                            d["pos"], d["penal"] = None, True
+                        elif pts == 0:  # absència justificada
+                            d["pos"], d["absent"] = None, True
+                row["punts"] = total
+                row["opens_jugats"] = sum(1 for v in ppo if v is not None and v > 0)
+            latest = [r for r in all_rows if r["ronda"] == max_ronda]
+            latest.sort(key=lambda r: (-r["punts"], -mitj.get(r["player_fcb_id"], 0.0), r["jugador"] or ""))
+            for posicio, r in enumerate(latest, start=1):
+                r["posicio"] = posicio
+            prog("ok", f"penalitzacions oficials aplicades ({len(off.entries)} entrades PDF)")
+    except Exception as exc:  # noqa: BLE001
+        prog("warn", f"penalitzacions: PDF no aplicat ({exc})")
+
     n = _upsert(sb, "open_ranking", all_rows, "genere,ronda,player_fcb_id", prog)
     conn.close()
     return {"open_ranking": n}
