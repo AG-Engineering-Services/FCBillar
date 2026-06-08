@@ -37,6 +37,8 @@
 			standings = (s ?? []) as StandingRow[];
 			pranks = (pr ?? []) as PlayerRankRow[];
 			encontres = enc ?? [];
+			const { data: hs } = await supabase.from('lliga_history').select('temporada');
+			histSeasons = [...new Set((hs ?? []).map((r) => r.temporada as string))].sort().reverse();
 		} catch (e) {
 			error = (e as Error).message;
 		} finally {
@@ -93,6 +95,38 @@
 
 	// Resultats per jornada
 	let encontres = $state<any[]>([]);
+
+	// Temporada actual (billar: setembre-juny) i selector històric.
+	const currentSeason = (() => {
+		const d = new Date();
+		const y = d.getMonth() + 1 >= 8 ? d.getFullYear() : d.getFullYear() - 1;
+		return `${y}-${y + 1}`;
+	})();
+	let season = $state(currentSeason);
+	let histSeasons = $state<string[]>([]);
+	let history = $state<
+		{ lliga: string; divisio: string; posicio: number; equip: string; pm: number; pp: number }[]
+	>([]);
+	$effect(() => {
+		if (season !== currentSeason) loadHistory(season);
+	});
+	async function loadHistory(s: string) {
+		const { data } = await supabase
+			.from('lliga_history')
+			.select('lliga, divisio, posicio, equip, pm, pp')
+			.eq('temporada', s)
+			.order('lliga')
+			.order('divisio')
+			.order('posicio');
+		history = (data ?? []) as typeof history;
+	}
+	const histGroups = $derived(
+		[...new Set(history.map((r) => `${r.lliga}||${r.divisio}`))].map((k) => ({
+			lliga: k.split('||')[0],
+			divisio: k.split('||')[1],
+			rows: history.filter((r) => `${r.lliga}||${r.divisio}` === k)
+		}))
+	);
 	let jornadaSel = $state<Record<number, number>>({});
 	let partidesCache = $state<Record<number, any[]>>({});
 	let expandedEnc = $state(new Set<number>());
