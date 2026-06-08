@@ -302,7 +302,9 @@
 	{#if loading}
 		<p class="py-6 text-center text-sm text-slate-400">Carregant…</p>
 	{:else}
-		<!-- KPIs -->
+		<div class="lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+			<div class="min-w-0">
+			<!-- KPIs -->
 			<div class="mb-1 px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">Històric</div>
 			<div class="mb-3 grid grid-cols-4 gap-2">
 				{#each [['Partides', kpi.n, ''], ['Mitjana', kpi.mitjana.toFixed(3), ''], ['Sèrie màx', kpi.sm, 'sm'], ['% vict.', kpi.pct + '%', '']] as [label, val, key]}
@@ -478,7 +480,9 @@
 			</div>
 		{/if}
 
-		<!-- Partides recents -->
+			</div>
+			<div class="min-w-0">
+			<!-- Partides recents -->
 		<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
 			{#each displayGames as g (g.id)}
 				{@const p = persp(g)}
@@ -521,5 +525,7 @@
 		{:else if modGames.length > 60}
 			<p class="px-1 py-3 text-center text-[11px] text-slate-400">{modGames.length} partides</p>
 		{/if}
+			</div>
+		</div>
 	{/if}
 {/if}
