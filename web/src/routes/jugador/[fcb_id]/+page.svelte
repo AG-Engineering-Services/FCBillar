@@ -345,6 +345,26 @@
 				<p class="mb-2 px-1 text-[11px] text-blue-600">Partides amb la sèrie màxima ({kpi.sm}). Torna a tocar «Sèrie màx» per desfer.</p>
 			{/if}
 
+		{#if openRank.length}
+			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Rànquing d'Opens 3 Bandes</div>
+				<div class="grid grid-cols-3 gap-2">
+					<div class="text-center">
+						<div class="font-mono text-lg font-bold tabular-nums">#{openCur?.posicio ?? '—'}</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400">posició actual</div>
+					</div>
+					<div class="text-center">
+						<div class="font-mono text-lg font-bold tabular-nums text-emerald-600">#{openBest ?? '—'}</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400">millor posició</div>
+					</div>
+					<div class="text-center">
+						<div class="font-mono text-lg font-bold tabular-nums">{openCur?.punts ?? '—'}</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400">punts</div>
+					</div>
+				</div>
+			</div>
+		{/if}
+
 		{#if h2h.won || h2h.lost || h2h.played}
 			<div class="mb-4 space-y-1.5 rounded-xl bg-white p-3 ring-1 ring-slate-200">
 				<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Cara a cara (històric)</div>
