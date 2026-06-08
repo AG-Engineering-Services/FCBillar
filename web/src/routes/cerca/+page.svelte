@@ -62,9 +62,9 @@
 {:else if results.length === 0}
 	<p class="py-6 text-center text-sm text-slate-400">Cap jugador amb «{q}».</p>
 {:else}
-	<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+	<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 lg:columns-2 lg:gap-x-6">
 		{#each results as p (p.fcb_id)}
-			<li class="border-b border-slate-100 last:border-0">
+			<li class="break-inside-avoid border-b border-slate-100 last:border-0">
 				<a href="/jugador/{p.fcb_id}" class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50">
 					<div class="min-w-0 flex-1">
 						<div class="truncate text-sm font-medium leading-tight">{p.nom}</div>

@@ -146,9 +146,9 @@
 {:else if filtered.length === 0}
 	<p class="px-1 py-6 text-center text-sm text-slate-400">Sense resultats.</p>
 {:else}
-	<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 lg:columns-2 lg:gap-0">
+	<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 lg:columns-2 lg:gap-x-6">
 		{#each filtered as r (r.player_fcb_id + '-' + r.posicio)}
-			<li class="break-inside-avoid border-b border-slate-100 last:border-0 lg:border-l lg:[&:nth-child(odd)]:border-l-0">
+			<li class="break-inside-avoid border-b border-slate-100 last:border-0">
 				<a
 					href="/jugador/{r.player_fcb_id}"
 					class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50"

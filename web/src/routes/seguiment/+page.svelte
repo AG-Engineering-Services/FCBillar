@@ -293,9 +293,9 @@
 				{/each}
 			</div>
 		{/if}
-		<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+		<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 lg:columns-2 lg:gap-x-6">
 			{#each series as s (s.fcb_id)}
-				<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-2.5 last:border-0">
+				<li class="flex break-inside-avoid items-center gap-2 border-b border-slate-100 px-3 py-2.5 last:border-0">
 					<span class="h-3 w-3 shrink-0 rounded-full" style:background-color={s.color}></span>
 					<a href="/jugador/{s.fcb_id}" class="min-w-0 flex-1">
 						<div class="truncate text-sm font-medium leading-tight">{s.nom}</div>
