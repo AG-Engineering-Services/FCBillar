@@ -301,6 +301,11 @@
 		// partides reals que ja hi consten.
 		const pending = selMod === 1 ? copaPend.slice(0, 15) : [];
 		const w = sorted.slice(0, Math.max(0, 15 - pending.length));
+		const latestSeq = rankHist.at(-1)?.num_seq;
+		const [rankYear, rankMonth] = latestSeq != null ? ymFromSeq(latestSeq) : [0, 0];
+		const rankCutoff =
+			latestSeq != null ? `${rankYear}-${String(rankMonth).padStart(2, '0')}-01` : null;
+		const newN = rankCutoff ? sorted.filter((g) => (g.data_partida ?? '') >= rankCutoff).length : 0;
 		let car = 0,
 			ent = 0,
 			sm = 0,
@@ -323,10 +328,14 @@
 			else if (cp.myCar > cp.oppCar) won++;
 			else lost++;
 		}
+		const calculated = ent ? car / ent : 0;
+		const hasChanges = newN > 0 || pending.length > 0;
 		return {
 			n: w.length + pending.length,
 			pendingN: pending.length,
-			mitjana: ent ? car / ent : 0,
+			newN,
+			hasChanges,
+			mitjana: !hasChanges && lastMitjana != null ? lastMitjana : calculated,
 			sm,
 			won,
 			lost,
@@ -593,6 +602,7 @@
 				<p class="mt-2 px-1 text-[11px] text-slate-400">
 					{rank15.won} G · {rank15.lost} P{rank15.tie ? ` · ${rank15.tie} E` : ''}
 					{rank15.pendingN ? ` · inclou ${rank15.pendingN} de Copa pendent${rank15.pendingN === 1 ? '' : 's'}` : ''}
+					{!rank15.hasChanges ? ' · sense partides noves des del darrer rànquing' : ''}
 				</p>
 			</div>
 		{/if}
