@@ -14,6 +14,9 @@
 	let shown = $state(60);
 	let serieFilter = $state(false);
 	let clubHist = $state<{ temporada: string; club: string | null }[]>([]);
+	let palmares = $state<
+		{ openId: number; nom: string; temporada: string; posicio: number; club: string | null }[]
+	>([]);
 	let copaPend = $state<
 		{ encontreId: number; ordre: number; opp: string; myCar: number; oppCar: number; ent: number; grup: string }[]
 	>([]);
@@ -46,6 +49,23 @@
 		return groups
 			.reverse()
 			.map((g) => ({ club: g.club, label: `${g.y1}-${g.y2}` }));
+	});
+	const palmaresBySeason = $derived.by(() => {
+		const groups = new Map<
+			string,
+			{ openId: number; nom: string; temporada: string; posicio: number; club: string | null }[]
+		>();
+		for (const p of palmares) {
+			const season = p.temporada || 'Temporada desconeguda';
+			if (!groups.has(season)) groups.set(season, []);
+			groups.get(season)!.push(p);
+		}
+		return [...groups.entries()]
+			.sort(([a], [b]) => b.localeCompare(a))
+			.map(([temporada, entries]) => ({
+				temporada,
+				entries: entries.sort((a, b) => a.posicio - b.posicio || a.nom.localeCompare(b.nom))
+			}));
 	});
 	let loading = $state(true);
 	let error = $state<string | null>(null);
@@ -142,6 +162,32 @@
 				.eq('player_fcb_id', id)
 				.order('temporada', { ascending: false });
 			clubHist = pc ?? [];
+
+			const { data: podiums } = await supabase
+				.from('open_classifications')
+				.select('open_id, posicio, club')
+				.eq('player_fcb_id', id)
+				.gte('posicio', 1)
+				.lte('posicio', 3);
+			const openIds = [...new Set((podiums ?? []).map((x) => x.open_id))];
+			const { data: podiumOpens } = openIds.length
+				? await supabase.from('opens').select('open_id, nom, temporada').in('open_id', openIds)
+				: { data: [] };
+			const openById = new Map((podiumOpens ?? []).map((x) => [x.open_id, x]));
+			palmares = (podiums ?? [])
+				.map((p) => {
+					const o = openById.get(p.open_id);
+					return o
+						? {
+								openId: p.open_id,
+								nom: o.nom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim(),
+								temporada: o.temporada ?? '',
+								posicio: p.posicio,
+								club: p.club
+							}
+						: null;
+				})
+				.filter((p): p is NonNullable<typeof p> => p != null);
 
 			const { data: or } = await supabase
 				.from('open_ranking')
@@ -510,6 +556,9 @@
 		const [y, m, day] = d.split('-');
 		return `${day}/${m}/${y.slice(2)}`;
 	}
+	function ordinal(pos: number): string {
+		return pos === 1 ? '1r' : pos === 2 ? '2n' : '3r';
+	}
 	function back() {
 		if (typeof history !== 'undefined' && history.length > 1) history.back();
 		else location.href = '/';
@@ -654,6 +703,28 @@
 						<div class="font-mono text-lg font-bold tabular-nums">{openCur?.punts ?? '—'}</div>
 						<div class="text-[10px] uppercase tracking-wide text-slate-400">punts</div>
 					</div>
+				</div>
+			</div>
+		{/if}
+
+		{#if palmaresBySeason.length}
+			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Palmarès individual</div>
+				<div class="space-y-3">
+					{#each palmaresBySeason as season}
+						<div>
+							<div class="mb-1 text-[11px] font-semibold text-slate-500">{season.temporada}</div>
+							<ul class="space-y-1">
+								{#each season.entries as p}
+									<li class="flex items-center gap-2 text-sm">
+										<span class="w-6 shrink-0 text-center font-mono font-bold {p.posicio === 1 ? 'text-amber-500' : p.posicio === 2 ? 'text-slate-400' : 'text-orange-700'}">{ordinal(p.posicio)}</span>
+										<a href="/opens/{p.openId}" class="min-w-0 flex-1 truncate font-medium active:underline">{p.nom}</a>
+										{#if p.club}<span class="max-w-24 shrink-0 truncate text-[10px] text-slate-400">{p.club}</span>{/if}
+									</li>
+								{/each}
+							</ul>
+						</div>
+					{/each}
 				</div>
 			</div>
 		{/if}
