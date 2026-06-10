@@ -17,11 +17,6 @@ from fcbillar.config import get_settings
 
 MODS = [(1, "Tres Bandes"), (2, "Lliure"), (3, "Quadre 47/2"), (4, "Banda"), (6, "Quadre 71/2")]
 
-# Cap de mitjana de partida realista per modalitat: per damunt = partida
-# guanyada en molt poques entrades (un run, no una mitjana real) o error de font.
-AVG_CAP = {1: 2.7, 2: 15.0, 3: 20.0, 4: 5.0, 6: 30.0}
-
-
 def fetch_cloud_games():
     url, anon = _env("SUPABASE_URL"), _env("PUBLIC_SUPABASE_ANON_KEY")
     h = {"apikey": anon, "Accept-Profile": "fcbillar"}
@@ -69,10 +64,13 @@ def main() -> None:
                 noms[fcb] = g[f"player{side}_nom"]
                 n[fcb] += 1
                 car, ser = g[f"caramboles{side}"], g[f"serie_max{side}"]
-                if ent and ent >= 10 and car is not None:
+                # Una partida acabada en poques entrades és una mitjana de
+                # partida vàlida (p. ex. 300/1 a Lliure o 35/10 a 3 bandes).
+                # Aplicar-hi mínims d'entrades o sostres artificials amagava
+                # precisament els rècords reals.
+                if ent and car is not None:
                     avg = car / ent
-                    if avg <= AVG_CAP.get(codi, 99):
-                        best_avg[fcb] = max(best_avg.get(fcb, 0.0), avg)
+                    best_avg[fcb] = max(best_avg.get(fcb, 0.0), avg)
                 if ser is not None:
                     best_ser[fcb] = max(best_ser.get(fcb, 0), ser)
 
