@@ -15,7 +15,15 @@
 	let serieFilter = $state(false);
 	let clubHist = $state<{ temporada: string; club: string | null }[]>([]);
 	let palmares = $state<
-		{ openId: number; nom: string; temporada: string; posicio: number; club: string | null }[]
+		{
+			openId: number;
+			nom: string;
+			categoria: string | null;
+			modalitat: number | null;
+			temporada: string;
+			posicio: number;
+			club: string | null;
+		}[]
 	>([]);
 	let copaPend = $state<
 		{ encontreId: number; ordre: number; opp: string; myCar: number; oppCar: number; ent: number; grup: string }[]
@@ -53,9 +61,17 @@
 	const palmaresBySeason = $derived.by(() => {
 		const groups = new Map<
 			string,
-			{ openId: number; nom: string; temporada: string; posicio: number; club: string | null }[]
+			{
+				openId: number;
+				nom: string;
+				categoria: string | null;
+				modalitat: number | null;
+				temporada: string;
+				posicio: number;
+				club: string | null;
+			}[]
 		>();
-		for (const p of palmares) {
+		for (const p of palmares.filter((x) => x.modalitat === selMod)) {
 			const season = p.temporada || 'Temporada desconeguda';
 			if (!groups.has(season)) groups.set(season, []);
 			groups.get(season)!.push(p);
@@ -177,10 +193,32 @@
 			palmares = (podiums ?? [])
 				.map((p) => {
 					const o = openById.get(p.open_id);
+					const rawNom = o?.nom.trim() ?? '';
+					const isOpen = rawNom.toUpperCase().includes('OPEN');
+					const parts = rawNom.split(/\s+-\s+/);
+					const categoria = !isOpen ? (parts.length > 1 ? parts.pop()! : 'ÚNICA') : null;
+					const upperNom = rawNom.toUpperCase();
+					const modalitat = upperNom.includes('QUADRE 71/2')
+						? 6
+						: upperNom.includes('QUADRE 47/2')
+							? 3
+							: upperNom.includes('LLIURE')
+								? 2
+								: upperNom.includes('BANDA') &&
+									  !upperNom.includes('TRES BANDES') &&
+									  !upperNom.includes('3 BANDES')
+									? 4
+									: ['SNOOKER', 'QUILLES', 'ARTISTIC', 'BIATHL'].some((x) => upperNom.includes(x))
+										? null
+										: 1;
 					return o
 						? {
 								openId: p.open_id,
-								nom: o.nom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim(),
+								nom: isOpen
+									? rawNom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim()
+									: parts.join(' - ').trim(),
+								categoria,
+								modalitat,
 								temporada: o.temporada ?? '',
 								posicio: p.posicio,
 								club: p.club
@@ -718,7 +756,10 @@
 								{#each season.entries as p}
 									<li class="flex items-center gap-2 text-sm">
 										<span class="w-6 shrink-0 text-center font-mono font-bold {p.posicio === 1 ? 'text-amber-500' : p.posicio === 2 ? 'text-slate-400' : 'text-orange-700'}">{ordinal(p.posicio)}</span>
-										<a href="/opens/{p.openId}" class="min-w-0 flex-1 truncate font-medium active:underline">{p.nom}</a>
+										<div class="min-w-0 flex-1">
+											<a href="/opens/{p.openId}" class="block truncate font-medium active:underline">{p.nom}</a>
+											{#if p.categoria}<div class="truncate text-[10px] uppercase tracking-wide text-slate-400">Categoria · {p.categoria}</div>{/if}
+										</div>
 										{#if p.club}<span class="max-w-24 shrink-0 truncate text-[10px] text-slate-400">{p.club}</span>{/if}
 									</li>
 								{/each}
