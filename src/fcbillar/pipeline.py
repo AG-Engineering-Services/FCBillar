@@ -174,6 +174,7 @@ class IngestPartidesResult:
     games_upserted: int
     games_skipped_missing_opponent: int
     links_created: int
+    games_new: int = 0  # partides que NO existien abans (descàrrega real)
 
 
 # Mapeig de format del rànquing → segment de la URL de partides per jugador.
@@ -207,6 +208,7 @@ def ingest_partides(
     *,
     settings: Settings | None = None,
     create_missing_players: bool = False,
+    use_cache: bool = True,
 ) -> IngestPartidesResult:
     """Descarrega partideshome d'un jugador en un rànquing i les persisteix.
 
@@ -241,12 +243,13 @@ def ingest_partides(
     url = _partides_url(
         settings.base_url, num_seq, modalitat_codi_fcb, player_fcb_id, format_url=format_url
     )
-    html = client.fetch_html(url)
+    html = client.fetch_html(url, use_cache=use_cache)
     parsed = parse_partides_jugador(html)
 
     upserted = 0
     skipped = 0
     links = 0
+    new = 0
     for row in parsed.rows:
         game = _build_game_from_raw_row(
             row, modalitat_codi_fcb, owner_nom, repo,
@@ -255,6 +258,8 @@ def ingest_partides(
         if game is None:
             skipped += 1
             continue
+        if not repo.game_exists(game.id_natural):
+            new += 1
         repo.upsert_game(game)
         upserted += 1
         repo.link_game_to_ranking(
@@ -280,6 +285,7 @@ def ingest_partides(
         games_upserted=upserted,
         games_skipped_missing_opponent=skipped,
         links_created=links,
+        games_new=new,
     )
 
 
@@ -740,8 +746,13 @@ def ingest_lliga_encontre(
         if game is None:
             skipped += 1
             continue
-        repo.upsert_game(game)
-        upserted += 1
+        # Enrich-only: la competició classifica la partida (encontre/equips) però
+        # NO crea games ni discuteix la modalitat (autèntica, de partideshome).
+        # Si la partida no ve de cap rànquing, no es crea.
+        if repo.enrich_game_by_signature(game):
+            upserted += 1
+        else:
+            skipped += 1
 
     log.info(
         "Encontre lliga %d/%d/%d/%d/%d: %d partides, %d desades, %d saltades",

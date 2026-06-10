@@ -212,13 +212,40 @@ def publish_games(
         key = _sigkey(r["local_nom"], r["local_caramboles"], r["visitant_nom"], r["visitant_caramboles"], r["entrades"])
         copa_sig[key] = {_nm(r["local_nom"]): r["local_serie"], _nm(r["visitant_nom"]): r["visitant_serie"]}
 
+    # Índex de participació: norm(jugador) -> {(nom_torneig, modalitat, temporada)}.
+    # Permet etiquetar games INDIVIDUAL quan no hi ha la partida exacta scrapejada:
+    # si A i B van participar al mateix torneig (mateixa modalitat+temporada), el
+    # joc és d'aquell torneig (van jugar-hi l'un contra l'altre).
+    part_idx: dict = {}
+    for r in conn.execute(
+        """SELECT p.nom pname, ti.nom tnom, m.codi_fcb modc, te.nom season
+           FROM torneig_participants tp JOIN torneigs_individuals ti ON ti.id=tp.torneig_id
+           JOIN players p ON p.id=tp.player_id JOIN modalitats m ON m.id=ti.modalitat_id
+           LEFT JOIN temporades te ON te.id=ti.temporada_id"""
+    ):
+        tnom = _re.sub(r"\s*-\s*[ÚU]NICA\s*$", "", r["tnom"] or "", flags=_re.I).strip()
+        part_idx.setdefault(_nm(r["pname"]), set()).add((tnom, r["modc"], r["season"]))
+
+    def _season_of(ds):
+        if not ds:
+            return None
+        y, mo = int(ds[:4]), int(ds[5:7])
+        return f"{y}-{y + 1}" if mo >= 8 else f"{y - 1}-{y}"
+
     def enrich(r):
         """Retorna (etiqueta_competicio, serie1, serie2) enriquint des d'opens/copa."""
         comp, lliga_id = r["competicio"], r["lliga_id"]
         s1, s2 = r["serie_max1"], r["serie_max2"]
         label = comp
         if comp == "LLIGA":
-            label = "Lliga 4 Modalitats" if lliga_id in multimod else "Lliga 3 Bandes"
+            if lliga_id is not None:
+                label = "Lliga 4 Modalitats" if lliga_id in multimod else "Lliga 3 Bandes"
+            elif r["modalitat_codi"] != 1:
+                # Sense encontre: un joc que NO és de 3 bandes només pot venir
+                # de la lliga de 4 modalitats (la lliga 3 bandes només té 3 b).
+                label = "Lliga 4 Modalitats"
+            else:
+                label = "Lliga 3 Bandes"
         elif comp == "INDIVIDUAL":
             hit = open_sig.get(
                 _sigkey(r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"])
@@ -229,6 +256,19 @@ def publish_games(
                     s1 = hit[1].get(_nm(r["player1_nom"]))
                 if s2 is None:
                     s2 = hit[1].get(_nm(r["player2_nom"]))
+            else:
+                # Fallback: torneig compartit (mateixa modalitat + temporada).
+                shared = part_idx.get(_nm(r["player1_nom"]), set()) & part_idx.get(
+                    _nm(r["player2_nom"]), set()
+                )
+                cands = [t for t in shared if t[1] == r["modalitat_codi"]]
+                season = _season_of(r["data_partida"])
+                if season:
+                    sc = [t for t in cands if t[2] == season]
+                    if sc:
+                        cands = sc
+                if cands:
+                    label = cands[0][0]
         elif comp == "COPA":
             sm = copa_sig.get(
                 _sigkey(r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"])
@@ -238,6 +278,13 @@ def publish_games(
                     s1 = sm.get(_nm(r["player1_nom"]))
                 if s2 is None:
                     s2 = sm.get(_nm(r["player2_nom"]))
+        # Guàrdies de sanitat: la sèrie no pot superar les caramboles del jugador;
+        # a 3 bandes és impossible superar ~20 (error de parsing si ho fa).
+        cap = 20 if r["modalitat_codi"] == 1 else None
+        if s1 is not None and ((r["caramboles1"] is not None and s1 > r["caramboles1"]) or (cap and s1 > cap)):
+            s1 = None
+        if s2 is not None and ((r["caramboles2"] is not None and s2 > r["caramboles2"]) or (cap and s2 > cap)):
+            s2 = None
         return label, s1, s2
 
     games = []

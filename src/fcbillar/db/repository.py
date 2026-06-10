@@ -471,6 +471,12 @@ class Repository:
 
     # ---------------------- games ----------------------
 
+    def game_exists(self, game_id: str) -> bool:
+        return (
+            self.conn.execute("SELECT 1 FROM games WHERE id = ?", (game_id,)).fetchone()
+            is not None
+        )
+
     def upsert_game(self, game: Game) -> str:
         p1 = self.get_player_id_by_fcb_id(game.player1_fcb_id)
         p2 = self.get_player_id_by_fcb_id(game.player2_fcb_id)
@@ -537,6 +543,53 @@ class Repository:
             ),
         )
         return game.id_natural
+
+    def enrich_game_by_signature(self, game: Game) -> bool:
+        """Enriqueix un game EXISTENT (de partideshome) amb context de competició.
+
+        Cerca per signatura física (jugadors + data + caramboles + entrades),
+        independentment de la modalitat — la modalitat l'estableix només
+        partideshome i NO s'ha de tocar mai. Assigna encontre/equips/temporada.
+        No crea cap game: si no existeix, retorna False (la partida només compta
+        si ve d'un rànquing). Tampoc toca modalitat ni caramboles/entrades.
+        """
+        p1 = self.get_player_id_by_fcb_id(game.player1_fcb_id)
+        p2 = self.get_player_id_by_fcb_id(game.player2_fcb_id)
+        if p1 is None or p2 is None:
+            return False
+        d = game.data_partida.isoformat()
+        row = self.conn.execute(
+            """
+            SELECT id, player1_id FROM games
+            WHERE data_partida = ? AND entrades IS ?
+              AND ((player1_id=? AND player2_id=? AND caramboles1 IS ? AND caramboles2 IS ?)
+                OR (player1_id=? AND player2_id=? AND caramboles1 IS ? AND caramboles2 IS ?))
+            LIMIT 1
+            """,
+            (
+                d, game.entrades,
+                p1, p2, game.caramboles1, game.caramboles2,
+                p2, p1, game.caramboles2, game.caramboles1,
+            ),
+        ).fetchone()
+        if row is None:
+            return False
+        swapped = row["player1_id"] == p2 and p1 != p2
+        e1, e2 = (game.equip2_id, game.equip1_id) if swapped else (game.equip1_id, game.equip2_id)
+        self.conn.execute(
+            """
+            UPDATE games SET
+                equip1_id = COALESCE(?, equip1_id),
+                equip2_id = COALESCE(?, equip2_id),
+                encontre_lliga_id = COALESCE(?, encontre_lliga_id),
+                temporada_id = COALESCE(?, temporada_id),
+                arbitre = COALESCE(?, arbitre),
+                assistencia = COALESCE(?, assistencia)
+            WHERE id = ?
+            """,
+            (e1, e2, game.encontre_lliga_id, game.temporada_id, game.arbitre, game.assistencia, row["id"]),
+        )
+        return True
 
     def link_game_to_ranking(self, link: RankingGameLink) -> None:
         ranking_id = self.get_ranking_id(link.ranking_num_seq, link.ranking_modalitat)
