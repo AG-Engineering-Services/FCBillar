@@ -285,27 +285,17 @@
 	});
 	const lastMitjana = $derived(rankHist.at(-1)?.mitjana ?? null);
 	const currentPos = $derived(rankHist.at(-1)?.posicio ?? null);
-	// Previsió del proper rànquing: Copa pendent primer i després les partides de
-	// games per data desc (mateix dia → millor promig dins), fins arribar a 15.
-	const rank15 = $derived.by(() => {
-		const sorted = [...modGames].sort((a, b) => {
+	const sortedModGames = $derived(
+		[...modGames].sort((a, b) => {
 			const da = a.data_partida ?? '',
 				db = b.data_partida ?? '';
 			if (da !== db) return db.localeCompare(da);
 			const pa = persp(a),
 				pb = persp(b);
 			return (pb.ent ? pb.myCar / pb.ent : 0) - (pa.ent ? pa.myCar / pa.ent : 0);
-		});
-		// La Copa publicada separadament encara no té data ni modalitat al núvol.
-		// És Copa de 3 bandes i, com que encara no és a games, és posterior a les
-		// partides reals que ja hi consten.
-		const pending = selMod === 1 ? copaPend.slice(0, 15) : [];
-		const w = sorted.slice(0, Math.max(0, 15 - pending.length));
-		const latestSeq = rankHist.at(-1)?.num_seq;
-		const [rankYear, rankMonth] = latestSeq != null ? ymFromSeq(latestSeq) : [0, 0];
-		const rankCutoff =
-			latestSeq != null ? `${rankYear}-${String(rankMonth).padStart(2, '0')}-01` : null;
-		const newN = rankCutoff ? sorted.filter((g) => (g.data_partida ?? '') >= rankCutoff).length : 0;
+		})
+	);
+	function summarizeGames(w: GameRow[]) {
 		let car = 0,
 			ent = 0,
 			sm = 0,
@@ -321,6 +311,34 @@
 			else if (p.won) won++;
 			else lost++;
 		}
+		return { n: w.length, car, ent, sm, won, lost, tie };
+	}
+	// Reconstrucció de les 15 partides del rànquing publicat, sense les
+	// disputades dins o després del seu mes de publicació.
+	const currentRank15 = $derived.by(() => {
+		const latestSeq = rankHist.at(-1)?.num_seq;
+		if (latestSeq == null) return summarizeGames([]);
+		const [rankYear, rankMonth] = ymFromSeq(latestSeq);
+		const cutoff = `${rankYear}-${String(rankMonth).padStart(2, '0')}-01`;
+		return summarizeGames(sortedModGames.filter((g) => (g.data_partida ?? '') < cutoff).slice(0, 15));
+	});
+	// Previsió del proper rànquing: Copa pendent primer i després les partides de
+	// games per data desc (mateix dia → millor promig dins), fins arribar a 15.
+	const rank15 = $derived.by(() => {
+		// La Copa publicada separadament encara no té data ni modalitat al núvol.
+		// És Copa de 3 bandes i, com que encara no és a games, és posterior a les
+		// partides reals que ja hi consten.
+		const pending = selMod === 1 ? copaPend.slice(0, 15) : [];
+		const w = sortedModGames.slice(0, Math.max(0, 15 - pending.length));
+		const latestSeq = rankHist.at(-1)?.num_seq;
+		const [rankYear, rankMonth] = latestSeq != null ? ymFromSeq(latestSeq) : [0, 0];
+		const rankCutoff =
+			latestSeq != null ? `${rankYear}-${String(rankMonth).padStart(2, '0')}-01` : null;
+		const newN = rankCutoff
+			? sortedModGames.filter((g) => (g.data_partida ?? '') >= rankCutoff).length
+			: 0;
+		const stats = summarizeGames(w);
+		let { car, ent, sm, won, lost, tie } = stats;
 		for (const cp of pending) {
 			car += cp.myCar;
 			ent += cp.ent;
@@ -331,7 +349,7 @@
 		const calculated = ent ? car / ent : 0;
 		const hasChanges = newN > 0 || pending.length > 0;
 		return {
-			n: w.length + pending.length,
+			n: stats.n + pending.length,
 			pendingN: pending.length,
 			newN,
 			hasChanges,
@@ -583,7 +601,7 @@
 						<div class="text-[10px] uppercase tracking-wide text-slate-400">mitjana</div>
 					</div>
 					<div class="text-center">
-						<div class="font-mono text-base font-bold tabular-nums">{rank15.sm || '—'}</div>
+						<div class="font-mono text-base font-bold tabular-nums">{currentRank15.sm || '—'}</div>
 						<div class="text-[10px] uppercase tracking-wide text-slate-400">S.M.</div>
 					</div>
 					<div class="text-center">
@@ -599,11 +617,20 @@
 						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400">mitjana proper rànquing</div>
 					</div>
 				</div>
-				<p class="mt-2 px-1 text-[11px] text-slate-400">
-					{rank15.won} G · {rank15.lost} P{rank15.tie ? ` · ${rank15.tie} E` : ''}
-					{rank15.pendingN ? ` · inclou ${rank15.pendingN} de Copa pendent${rank15.pendingN === 1 ? '' : 's'}` : ''}
-					{!rank15.hasChanges ? ' · sense partides noves des del darrer rànquing' : ''}
-				</p>
+				<div class="mt-2 space-y-1 rounded-lg bg-slate-50 px-2 py-1.5 text-[11px] text-slate-500">
+					<p>
+						<span class="font-semibold text-slate-700">Actual:</span>
+						{currentRank15.won} G · {currentRank15.lost} P{currentRank15.tie ? ` · ${currentRank15.tie} E` : ''}
+					</p>
+					<p>
+						<span class="font-semibold text-slate-700">Previsió:</span>
+						{rank15.won} G · {rank15.lost} P{rank15.tie ? ` · ${rank15.tie} E` : ''}
+						{rank15.pendingN
+							? ` · ${rank15.pendingN} de Copa ${rank15.pendingN === 1 ? 'pendent' : 'pendents'}`
+							: ''}
+						{!rank15.hasChanges ? ' · sense partides noves' : ''}
+					</p>
+				</div>
 			</div>
 		{/if}
 
