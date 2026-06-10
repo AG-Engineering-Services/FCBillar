@@ -14,7 +14,9 @@
 	let shown = $state(60);
 	let serieFilter = $state(false);
 	let clubHist = $state<{ temporada: string; club: string | null }[]>([]);
-	let copaPend = $state<{ opp: string; myCar: number; oppCar: number; ent: number; grup: string }[]>([]);
+	let copaPend = $state<
+		{ encontreId: number; ordre: number; opp: string; myCar: number; oppCar: number; ent: number; grup: string }[]
+	>([]);
 	let openRank = $state<
 		{ ronda: number; posicio: number; punts: number; detall?: { pos: number | null }[] }[]
 	>([]);
@@ -90,14 +92,18 @@
 					.filter((x) => x.competicio === 'COPA')
 					.map(
 						(x) =>
-							[(x.player1_nom ?? '').toLowerCase(), (x.player2_nom ?? '').toLowerCase()]
+							[
+								`${(x.player1_nom ?? '').toLowerCase()}:${x.caramboles1 ?? ''}`,
+								`${(x.player2_nom ?? '').toLowerCase()}:${x.caramboles2 ?? ''}`
+							]
 								.sort()
 								.join('|') +
 							'|' +
 							(x.entrades ?? '')
 					)
 			);
-			const csel = 'jugador_local, caramboles_local, jugador_visitant, caramboles_visitant, entrades';
+			const csel =
+				'encontre_id, ordre, jugador_local, caramboles_local, jugador_visitant, caramboles_visitant, entrades';
 			const [{ data: cl }, { data: cv }] = await Promise.all([
 				supabase.from('copa_partides').select(csel).eq('jugador_local', nom),
 				supabase.from('copa_partides').select(csel).eq('jugador_visitant', nom)
@@ -106,7 +112,10 @@
 				.filter(
 					(cp: any) =>
 						!copaSig.has(
-							[(cp.jugador_local ?? '').toLowerCase(), (cp.jugador_visitant ?? '').toLowerCase()]
+							[
+								`${(cp.jugador_local ?? '').toLowerCase()}:${cp.caramboles_local ?? ''}`,
+								`${(cp.jugador_visitant ?? '').toLowerCase()}:${cp.caramboles_visitant ?? ''}`
+							]
 								.sort()
 								.join('|') +
 								'|' +
@@ -116,13 +125,16 @@
 				.map((cp: any) => {
 					const meLocal = cp.jugador_local === nom;
 					return {
+						encontreId: cp.encontre_id ?? 0,
+						ordre: cp.ordre ?? 0,
 						opp: (meLocal ? cp.jugador_visitant : cp.jugador_local) ?? '—',
 						myCar: (meLocal ? cp.caramboles_local : cp.caramboles_visitant) ?? 0,
 						oppCar: (meLocal ? cp.caramboles_visitant : cp.caramboles_local) ?? 0,
 						ent: cp.entrades ?? 0,
 						grup: 'Copa'
 					};
-				});
+				})
+				.sort((a, b) => b.encontreId - a.encontreId || b.ordre - a.ordre);
 
 			const { data: pc } = await supabase
 				.from('player_clubs')
@@ -273,7 +285,8 @@
 	});
 	const lastMitjana = $derived(rankHist.at(-1)?.mitjana ?? null);
 	const currentPos = $derived(rankHist.at(-1)?.posicio ?? null);
-	// Les 15 partides que computen al rànquing (data desc; mateix dia → millor promig dins).
+	// Previsió del proper rànquing: Copa pendent primer i després les partides de
+	// games per data desc (mateix dia → millor promig dins), fins arribar a 15.
 	const rank15 = $derived.by(() => {
 		const sorted = [...modGames].sort((a, b) => {
 			const da = a.data_partida ?? '',
@@ -283,7 +296,11 @@
 				pb = persp(b);
 			return (pb.ent ? pb.myCar / pb.ent : 0) - (pa.ent ? pa.myCar / pa.ent : 0);
 		});
-		const w = sorted.slice(0, 15);
+		// La Copa publicada separadament encara no té data ni modalitat al núvol.
+		// És Copa de 3 bandes i, com que encara no és a games, és posterior a les
+		// partides reals que ja hi consten.
+		const pending = selMod === 1 ? copaPend.slice(0, 15) : [];
+		const w = sorted.slice(0, Math.max(0, 15 - pending.length));
 		let car = 0,
 			ent = 0,
 			sm = 0,
@@ -299,7 +316,23 @@
 			else if (p.won) won++;
 			else lost++;
 		}
-		return { n: w.length, mitjana: ent ? car / ent : 0, sm, won, lost, tie, ids: new Set(w.map((g) => g.id)) };
+		for (const cp of pending) {
+			car += cp.myCar;
+			ent += cp.ent;
+			if (cp.myCar === cp.oppCar) tie++;
+			else if (cp.myCar > cp.oppCar) won++;
+			else lost++;
+		}
+		return {
+			n: w.length + pending.length,
+			pendingN: pending.length,
+			mitjana: ent ? car / ent : 0,
+			sm,
+			won,
+			lost,
+			tie,
+			ids: new Set(w.map((g) => g.id))
+		};
 	});
 
 	const VBW = 300;
@@ -559,6 +592,7 @@
 				</div>
 				<p class="mt-2 px-1 text-[11px] text-slate-400">
 					{rank15.won} G · {rank15.lost} P{rank15.tie ? ` · ${rank15.tie} E` : ''}
+					{rank15.pendingN ? ` · inclou ${rank15.pendingN} de Copa pendent${rank15.pendingN === 1 ? '' : 's'}` : ''}
 				</p>
 			</div>
 		{/if}
@@ -783,7 +817,7 @@
 			{#if copaPend.length}
 				<div class="mb-3 rounded-xl border border-blue-200 bg-blue-50 p-3">
 					<div class="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
-						Recents · encara no computen al rànquing
+						Recents · incloses a la previsió del proper rànquing
 					</div>
 					<ul class="space-y-1">
 						{#each copaPend as cp}
@@ -803,7 +837,7 @@
 			{#if rank15.ids.size}
 				<p class="mb-2 flex items-center gap-1.5 px-1 text-[11px] text-slate-400">
 					<span class="inline-block h-3 w-3 rounded bg-amber-50 ring-1 ring-amber-200"></span>
-					les {rank15.ids.size} que computen al rànquing actual
+					les {rank15.ids.size} de games que entren a la previsió del proper rànquing
 				</p>
 			{/if}
 		<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
