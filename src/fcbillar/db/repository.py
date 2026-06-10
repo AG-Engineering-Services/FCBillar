@@ -576,6 +576,9 @@ class Repository:
             return False
         swapped = row["player1_id"] == p2 and p1 != p2
         e1, e2 = (game.equip2_id, game.equip1_id) if swapped else (game.equip1_id, game.equip2_id)
+        # La sèrie major SÍ ve a les partides de lliga; partideshome no la porta.
+        # L'assignem (COALESCE: no sobreescriu si ja n'hi ha). Respecta l'ordre.
+        s1, s2 = (game.serie_max2, game.serie_max1) if swapped else (game.serie_max1, game.serie_max2)
         self.conn.execute(
             """
             UPDATE games SET
@@ -584,10 +587,13 @@ class Repository:
                 encontre_lliga_id = COALESCE(?, encontre_lliga_id),
                 temporada_id = COALESCE(?, temporada_id),
                 arbitre = COALESCE(?, arbitre),
-                assistencia = COALESCE(?, assistencia)
+                assistencia = COALESCE(?, assistencia),
+                serie_max1 = COALESCE(serie_max1, ?),
+                serie_max2 = COALESCE(serie_max2, ?)
             WHERE id = ?
             """,
-            (e1, e2, game.encontre_lliga_id, game.temporada_id, game.arbitre, game.assistencia, row["id"]),
+            (e1, e2, game.encontre_lliga_id, game.temporada_id, game.arbitre,
+             game.assistencia, s1, s2, row["id"]),
         )
         return True
 

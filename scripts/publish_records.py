@@ -17,6 +17,10 @@ from fcbillar.config import get_settings
 
 MODS = [(1, "Tres Bandes"), (2, "Lliure"), (3, "Quadre 47/2"), (4, "Banda"), (6, "Quadre 71/2")]
 
+# Cap de mitjana de partida realista per modalitat: per damunt = partida
+# guanyada en molt poques entrades (un run, no una mitjana real) o error de font.
+AVG_CAP = {1: 2.7, 2: 15.0, 3: 20.0, 4: 5.0, 6: 30.0}
+
 
 def fetch_cloud_games():
     url, anon = _env("SUPABASE_URL"), _env("PUBLIC_SUPABASE_ANON_KEY")
@@ -66,7 +70,9 @@ def main() -> None:
                 n[fcb] += 1
                 car, ser = g[f"caramboles{side}"], g[f"serie_max{side}"]
                 if ent and ent >= 10 and car is not None:
-                    best_avg[fcb] = max(best_avg.get(fcb, 0.0), car / ent)
+                    avg = car / ent
+                    if avg <= AVG_CAP.get(codi, 99):
+                        best_avg[fcb] = max(best_avg.get(fcb, 0.0), avg)
                 if ser is not None:
                     best_ser[fcb] = max(best_ser.get(fcb, 0), ser)
 
@@ -95,6 +101,8 @@ def main() -> None:
         push(f"{mnom} · Mitjana rànquing", rk, lambda v: f"{v:.3f}")
 
         # ---- Títols (1rs llocs en competicions individuals d'aquesta modalitat) ----
+        # Només OPENS (no campionats). Si una modalitat no en té, la categoria
+        # queda buida i no s'ensenya.
         ti = [
             (r["fcb"], r["nom"], r["v"])
             for r in conn.execute(
@@ -102,11 +110,12 @@ def main() -> None:
                    FROM torneig_participants tp JOIN torneigs_individuals t ON t.id=tp.torneig_id
                    JOIN modalitats m ON m.id=t.modalitat_id JOIN players p ON p.id=tp.player_id
                    WHERE tp.posicio=1 AND m.codi_fcb=? AND p.fcb_id NOT LIKE 'name:%'
+                     AND UPPER(t.nom) LIKE '%OPEN%'
                    GROUP BY p.id ORDER BY v DESC LIMIT 5""",
                 (codi,),
             )
         ]
-        push(f"{mnom} · Títols", ti, lambda v: str(v))
+        push(f"{mnom} · Opens guanyats", ti, lambda v: str(v))
 
     conn.close()
     sb = get_client()
