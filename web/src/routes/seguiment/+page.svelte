@@ -79,6 +79,9 @@
 		const names = players.map((p) => p.nom);
 		const [year, month] = ymFromSeq(seq);
 		const cutoff = `${year}-${String(month).padStart(2, '0')}-01`;
+		const [nextYear, nextMonth] = nextRankingMonth(year, month);
+		const currentAgeCutoff = monthOffset(year, month, -24);
+		const nextAgeCutoff = monthOffset(nextYear, nextMonth, -24);
 		const gameCols =
 			'id,data_partida,competicio,player1_fcb_id,player1_nom,caramboles1,player2_fcb_id,player2_nom,caramboles2,entrades';
 		const copaCols =
@@ -122,8 +125,19 @@
 				if ((a.data_partida ?? '') !== (b.data_partida ?? '')) return (b.data_partida ?? '').localeCompare(a.data_partida ?? '');
 				return playerAverage(b, player.fcb_id) - playerAverage(a, player.fcb_id);
 			});
-			const recent = sorted.slice(0, Math.max(0, 15 - pending.length));
-			const hasChanges = sorted.some((g) => (g.data_partida ?? '') >= cutoff) || pending.length > 0;
+			const currentIds = new Set(
+				sorted
+					.filter((g) => (g.data_partida ?? '') >= currentAgeCutoff && (g.data_partida ?? '') < cutoff)
+					.slice(0, 15)
+					.map((g) => g.id)
+			);
+			const recent = sorted
+				.filter((g) => (g.data_partida ?? '') >= nextAgeCutoff)
+				.slice(0, Math.max(0, 15 - pending.length));
+			const hasChanges =
+				pending.length > 0 ||
+				recent.length !== currentIds.size ||
+				recent.some((g) => !currentIds.has(g.id));
 			if (!hasChanges) continue;
 			let caramboles = recent.reduce((sum, g) => sum + playerCaramboles(g, player.fcb_id), 0);
 			let entrades = recent.reduce((sum, g) => sum + (g.entrades ?? 0), 0);
@@ -262,6 +276,16 @@
 		let y = 2026, m = 6;
 		for (let i = 0; i < 122 - seq; i++) { m--; if (m === 0) { y--; m = 12; } if (m === 8) m = 7; }
 		return [y, m];
+	}
+	function nextRankingMonth(year: number, month: number): [number, number] {
+		let y = year, m = month + 1;
+		if (m === 8) m = 9;
+		if (m === 13) { y++; m = 1; }
+		return [y, m];
+	}
+	function monthOffset(year: number, month: number, offset: number): string {
+		const d = new Date(Date.UTC(year, month - 1 + offset, 1));
+		return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-01`;
 	}
 	const dateFromSeq = (seq: number) => { const [y, m] = ymFromSeq(seq); return `${MESOS_NOM[m - 1]} '${String(y).slice(2)}`; };
 	const dateShort = (seq: number) => { const [y, m] = ymFromSeq(seq); return `${String(m).padStart(2, '0')}/${String(y).slice(2)}`; };

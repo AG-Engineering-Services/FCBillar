@@ -465,7 +465,12 @@
 		if (latestSeq == null) return summarizeGames([]);
 		const [rankYear, rankMonth] = ymFromSeq(latestSeq);
 		const cutoff = `${rankYear}-${String(rankMonth).padStart(2, '0')}-01`;
-		return summarizeGames(sortedModGames.filter((g) => (g.data_partida ?? '') < cutoff).slice(0, 15));
+		const ageCutoff = monthOffset(rankYear, rankMonth, -24);
+		return summarizeGames(
+			sortedModGames
+				.filter((g) => (g.data_partida ?? '') >= ageCutoff && (g.data_partida ?? '') < cutoff)
+				.slice(0, 15)
+		);
 	});
 	// Previsió del proper rànquing: Copa pendent primer i després les partides de
 	// games per data desc (mateix dia → millor promig dins), fins arribar a 15.
@@ -474,13 +479,29 @@
 		// És Copa de 3 bandes i, com que encara no és a games, és posterior a les
 		// partides reals que ja hi consten.
 		const pending = selMod === 1 ? copaPend.slice(0, 15) : [];
-		const w = sortedModGames.slice(0, Math.max(0, 15 - pending.length));
 		const latestSeq = rankHist.at(-1)?.num_seq;
 		const [rankYear, rankMonth] = latestSeq != null ? ymFromSeq(latestSeq) : [0, 0];
 		const rankCutoff =
 			latestSeq != null ? `${rankYear}-${String(rankMonth).padStart(2, '0')}-01` : null;
+		const [nextYear, nextMonth] = nextRankingMonth(rankYear, rankMonth);
+		const eligible = sortedModGames.filter(
+			(g) => latestSeq == null || (g.data_partida ?? '') >= monthOffset(nextYear, nextMonth, -24)
+		);
+		const w = eligible.slice(0, Math.max(0, 15 - pending.length));
+		const currentIds = new Set(
+			latestSeq != null
+				? sortedModGames
+						.filter(
+							(g) =>
+								(g.data_partida ?? '') >= monthOffset(rankYear, rankMonth, -24) &&
+								(g.data_partida ?? '') < rankCutoff!
+						)
+						.slice(0, 15)
+						.map((g) => g.id)
+				: []
+		);
 		const newN = rankCutoff
-			? sortedModGames.filter((g) => (g.data_partida ?? '') >= rankCutoff).length
+			? eligible.filter((g) => (g.data_partida ?? '') >= rankCutoff).length
 			: 0;
 		const stats = summarizeGames(w);
 		let { car, ent, sm, won, lost, tie } = stats;
@@ -492,7 +513,8 @@
 			else lost++;
 		}
 		const calculated = ent ? car / ent : 0;
-		const hasChanges = newN > 0 || pending.length > 0;
+		const hasChanges =
+			pending.length > 0 || w.length !== currentIds.size || w.some((g) => !currentIds.has(g.id));
 		return {
 			n: stats.n + pending.length,
 			pendingN: pending.length,
@@ -640,6 +662,20 @@
 			if (m === 8) m = 7;
 		}
 		return [y, m];
+	}
+	function nextRankingMonth(year: number, month: number): [number, number] {
+		let y = year,
+			m = month + 1;
+		if (m === 8) m = 9;
+		if (m === 13) {
+			y++;
+			m = 1;
+		}
+		return [y, m];
+	}
+	function monthOffset(year: number, month: number, offset: number): string {
+		const d = new Date(Date.UTC(year, month - 1 + offset, 1));
+		return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-01`;
 	}
 	function dateFromSeq(seq: number): string {
 		const [y, m] = ymFromSeq(seq);
