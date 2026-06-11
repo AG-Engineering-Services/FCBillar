@@ -2,7 +2,16 @@
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase';
 
-	type Rec = { categoria: string; ordre: number; player_fcb_id: string | null; jugador: string; valor: string };
+	type Detail = {
+		game_id: string;
+		modalitat_codi: number;
+		data: string | null;
+		rival: string;
+		caramboles: number;
+		caramboles_rival: number;
+		entrades: number;
+	};
+	type Rec = { categoria: string; ordre: number; player_fcb_id: string | null; jugador: string; valor: string; detall: string | null };
 	let recs = $state<Rec[]>([]);
 	let loading = $state(true);
 	let selMod = $state('');
@@ -10,7 +19,7 @@
 	onMount(async () => {
 		const { data } = await supabase
 			.from('records')
-			.select('categoria, ordre, player_fcb_id, jugador, valor')
+			.select('categoria, ordre, player_fcb_id, jugador, valor, detall')
 			.order('categoria')
 			.order('ordre');
 		recs = (data ?? []) as Rec[];
@@ -30,6 +39,15 @@
 		...new Set(recs.filter((r) => r.categoria.startsWith(selMod + ' ·')).map((r) => r.categoria))
 	]);
 	const shortCat = (c: string) => c.split(' · ')[1] ?? c;
+	function detail(raw: string | null): Detail | null {
+		if (!raw) return null;
+		try {
+			return JSON.parse(raw) as Detail;
+		} catch {
+			return null;
+		}
+	}
+	const fmtDate = (s: string | null) => s ? s.split('-').reverse().join('/') : '';
 </script>
 
 <h1 class="mb-3 text-lg font-bold">Rècords</h1>
@@ -55,10 +73,16 @@
 				</div>
 				<ul>
 					{#each recs.filter((r) => r.categoria === cat) as r (r.ordre)}
+						{@const d = detail(r.detall)}
 						<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
 							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums {r.ordre === 1 ? 'text-amber-500' : 'text-slate-400'}">{r.ordre}</span>
 							{#if r.player_fcb_id}
-								<a href="/jugador/{r.player_fcb_id}" class="min-w-0 flex-1 truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
+								<a href="/jugador/{r.player_fcb_id}{d ? `?mod=${d.modalitat_codi}&game=${d.game_id}` : ''}" class="min-w-0 flex-1 active:underline">
+									<div class="truncate text-sm font-medium leading-tight">{r.jugador}</div>
+									{#if d}
+										<div class="truncate text-[10px] text-slate-400">{fmtDate(d.data)} · vs {d.rival} · {d.caramboles}–{d.caramboles_rival} / {d.entrades} ent.</div>
+									{/if}
+								</a>
 							{:else}
 								<span class="min-w-0 flex-1 truncate text-sm">{r.jugador}</span>
 							{/if}

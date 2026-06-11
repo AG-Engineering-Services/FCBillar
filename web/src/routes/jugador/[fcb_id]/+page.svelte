@@ -274,7 +274,15 @@
 			modalitats = (md ?? [])
 				.map((m) => ({ codi: m.codi_fcb, nom: m.nom }))
 				.sort((a, b) => cnt(b.codi) - cnt(a.codi));
-			selMod = modalitats[0]?.codi ?? null;
+			const requestedMod = Number($page.url.searchParams.get('mod'));
+			const requestedGame = $page.url.searchParams.get('game');
+			selMod = modalitats.some((m) => m.codi === requestedMod) ? requestedMod : modalitats[0]?.codi ?? null;
+			if (requestedGame && selMod != null) {
+				const visible = games.filter((x) => x.modalitat_codi === selMod);
+				const index = visible.findIndex((x) => x.id === requestedGame);
+				if (index >= 0) shown = Math.max(60, index + 1);
+				setTimeout(() => document.getElementById(`game-${requestedGame}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+			}
 		} catch (e) {
 			error = (e as Error).message;
 		} finally {
@@ -1063,9 +1071,12 @@
 			{#each displayGames as g (g.id)}
 				{@const p = persp(g)}
 				<li
+					id="game-{g.id}"
 					class="flex items-center gap-3 border-b border-slate-100 px-3 py-2 last:border-0 {rank15.ids.has(g.id)
 						? 'bg-amber-50'
-						: ''}"
+						: $page.url.searchParams.get('game') === g.id
+							? 'bg-blue-50 ring-1 ring-inset ring-blue-300'
+							: ''}"
 				>
 					<span
 						class="w-6 shrink-0 rounded text-center text-xs font-bold {p.tie

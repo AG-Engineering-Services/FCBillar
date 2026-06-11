@@ -8,6 +8,7 @@ la mitjana al rànquing i els títols, de la BD local.
 from __future__ import annotations
 
 import collections
+import json
 import sqlite3
 
 import httpx
@@ -32,7 +33,7 @@ def valid_record_average(codi: int, car1: int | None, car2: int | None, ent: int
 def fetch_cloud_games():
     url, anon = _env("SUPABASE_URL"), _env("PUBLIC_SUPABASE_ANON_KEY")
     h = {"apikey": anon, "Accept-Profile": "fcbillar"}
-    cols = ("modalitat_codi,player1_fcb_id,player1_nom,caramboles1,serie_max1,"
+    cols = ("id,data_partida,modalitat_codi,player1_fcb_id,player1_nom,caramboles1,serie_max1,"
             "player2_fcb_id,player2_nom,caramboles2,serie_max2,entrades")
     out = []
     for frm in range(0, 80000, 1000):
@@ -55,9 +56,11 @@ def main() -> None:
     rows = []
 
     def push(cat, ranking, fmt):
-        for i, (fcb, nom, val) in enumerate(ranking[:5], start=1):
+        for i, item in enumerate(ranking[:5], start=1):
+            fcb, nom, val = item[:3]
+            detail = item[3] if len(item) > 3 else None
             rows.append({"categoria": cat, "ordre": i, "player_fcb_id": fcb,
-                         "jugador": nom, "valor": fmt(val), "detall": None})
+                         "jugador": nom, "valor": fmt(val), "detall": detail})
 
     for codi, mnom in MODS:
         # ---- KPIs de joc (núvol): mitjana de partida, sèrie major, més partides ----
@@ -82,12 +85,28 @@ def main() -> None:
                 # precisament els rècords reals.
                 if valid_record_average(codi, g["caramboles1"], g["caramboles2"], ent):
                     avg = car / ent
-                    best_avg[fcb] = max(best_avg.get(fcb, 0.0), avg)
+                    if avg > best_avg.get(fcb, (0.0, None))[0]:
+                        opp_side = 2 if side == 1 else 1
+                        best_avg[fcb] = (
+                            avg,
+                            json.dumps(
+                                {
+                                    "game_id": g["id"],
+                                    "modalitat_codi": codi,
+                                    "data": g["data_partida"],
+                                    "rival": g[f"player{opp_side}_nom"],
+                                    "caramboles": car,
+                                    "caramboles_rival": g[f"caramboles{opp_side}"],
+                                    "entrades": ent,
+                                },
+                                ensure_ascii=False,
+                            ),
+                        )
                 if ser is not None:
                     best_ser[fcb] = max(best_ser.get(fcb, 0), ser)
 
         push(f"{mnom} · Mitjana partida",
-             sorted(((f, noms[f], v) for f, v in best_avg.items()), key=lambda x: -x[2]),
+             sorted(((f, noms[f], v[0], v[1]) for f, v in best_avg.items()), key=lambda x: -x[2]),
              lambda v: f"{v:.3f}")
         push(f"{mnom} · Sèrie major",
              sorted(((f, noms[f], v) for f, v in best_ser.items()), key=lambda x: -x[2]),
