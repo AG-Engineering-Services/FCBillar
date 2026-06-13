@@ -1,17 +1,37 @@
+<script module lang="ts">
+	import type { OpenLiveRow } from '$lib/supabase';
+	// Cache per divisió: en tornar enrere des d'una fitxa de jugador, la pàgina
+	// es repinta a l'instant (contingut complet) i la restauració d'scroll de
+	// SvelteKit recupera el punt on era l'usuari sense esperar la xarxa.
+	const rowCache = new Map<number, OpenLiveRow>();
+	const phaseCache = new Map<number, number>();
+</script>
+
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import { supabase, type OpenLiveRow, type OpenLivePhase, type OpenLiveMatch } from '$lib/supabase';
+	import { supabase, type OpenLivePhase, type OpenLiveMatch } from '$lib/supabase';
 
-	let row = $state<OpenLiveRow | null>(null);
-	let loading = $state(true);
+	const id0 = Number($page.params.id);
+	let row = $state<OpenLiveRow | null>(rowCache.get(id0) ?? null);
+	let loading = $state(rowCache.get(id0) == null);
 	let error = $state<string | null>(null);
-	let selectedPhase = $state<number | null>(null);
+	let selectedPhase = $state<number | null>(phaseCache.get(id0) ?? null);
 	let timer: ReturnType<typeof setInterval> | null = null;
 
 	const divisionId = $derived(Number($page.params.id));
 	const payload = $derived(row?.payload_json ?? null);
 	const phases = $derived(payload?.phases ?? []);
+
+	// Recorda la fase seleccionada per divisió (per restaurar-la en tornar enrere).
+	$effect(() => {
+		if (selectedPhase !== null) phaseCache.set(divisionId, selectedPhase);
+	});
+
+	function playerHref(name: string): string | null {
+		const id = payload?.player_ids?.[name];
+		return id ? `/jugador/${id}` : null;
+	}
 
 	async function load() {
 		const { data, error: e } = await supabase
@@ -24,8 +44,10 @@
 		} else if (!data) {
 			error = 'Aquest Open ja no està en curs.';
 			row = null;
+			rowCache.delete(divisionId);
 		} else {
 			row = data as OpenLiveRow;
+			rowCache.set(divisionId, row);
 			error = null;
 			if (selectedPhase === null) {
 				const active = (row.payload_json.phases ?? []).findIndex((p) => p.is_active);
@@ -82,6 +104,16 @@
 	}
 </script>
 
+<!-- Nom de jugador: enllaç a la fitxa si el podem resoldre, si no text pla. -->
+{#snippet player(name: string, cls: string)}
+	{@const href = playerHref(name)}
+	{#if href}
+		<a {href} class="{cls} hover:underline active:underline">{name}</a>
+	{:else}
+		<span class={cls}>{name}</span>
+	{/if}
+{/snippet}
+
 <a href="/opens" class="mb-3 inline-block text-sm text-slate-400 active:underline">‹ Opens</a>
 
 {#if loading}
@@ -136,16 +168,34 @@
 							<span class="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700">Provisional</span>
 						{/if}
 					</div>
+					<!-- Capçalera de columnes (només PC/tablet) -->
+					<div class="hidden items-center gap-2 border-b border-emerald-200/70 px-1 pb-1 text-[9px] font-semibold uppercase tracking-wider text-emerald-700/70 md:flex">
+						<span class="w-4 text-right">#</span>
+						<span class="w-6">Gr</span>
+						<span class="flex-1">Jugador</span>
+						<span class="w-8 text-right">PJ</span>
+						<span class="w-8 text-right">Pts</span>
+						<span class="w-12 text-right">C</span>
+						<span class="w-12 text-right">E</span>
+						<span class="w-14 text-right">Mitjana</span>
+					</div>
 					<ol class="space-y-0.5">
 						{#each quals as q, i}
 							{@const grp = phase.groups.find((gg) => gg.label === q.group_label)}
 							{@const sure = !!grp && grp.n_matches_total > 0 && grp.n_matches_played === grp.n_matches_total}
 							<li class="flex items-center gap-2 text-sm">
 								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-400">{i + 1}</span>
-								<span class="shrink-0 rounded bg-white/70 px-1 font-mono text-[10px] text-slate-500">{q.group_label.replace('Grup ', '')}</span>
-								<span class="min-w-0 flex-1 truncate {sure ? 'font-medium' : ''}">{q.player_name}</span>
-								{#if sure}<span class="shrink-0 text-emerald-600" title="Classificació assegurada (grup acabat)">✓</span>{/if}
-								<span class="shrink-0 font-mono text-[11px] text-slate-500">{q.punts} pt · {q.mitjana.toFixed(3)}</span>
+								<span class="w-6 shrink-0 rounded bg-white/70 text-center font-mono text-[10px] text-slate-500">{q.group_label.replace('Grup ', '')}</span>
+								<span class="flex min-w-0 flex-1 items-center gap-1">
+									{@render player(q.player_name, 'truncate ' + (sure ? 'font-medium' : ''))}
+									{#if sure}<span class="shrink-0 text-emerald-600" title="Classificació assegurada (grup acabat)">✓</span>{/if}
+								</span>
+								<!-- Estadístiques completes: només PC/tablet -->
+								<span class="hidden w-8 shrink-0 text-right font-mono text-[11px] text-slate-500 md:inline">{q.pj ?? 0}</span>
+								<span class="hidden w-8 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 md:inline">{q.punts}</span>
+								<span class="hidden w-12 shrink-0 text-right font-mono text-[11px] text-slate-500 md:inline">{q.caramboles ?? 0}</span>
+								<span class="hidden w-12 shrink-0 text-right font-mono text-[11px] text-slate-500 md:inline">{q.entrades ?? 0}</span>
+								<span class="w-14 shrink-0 text-right font-mono text-[11px] text-slate-500">{q.mitjana.toFixed(3)}</span>
 							</li>
 						{/each}
 					</ol>
@@ -168,7 +218,7 @@
 									{@const pos = provPos(phase, g.label, s.player_name)}
 									<li class="flex items-center gap-2 rounded px-1 py-1 {pos === 1 ? 'bg-emerald-50' : pos >= 2 ? 'bg-amber-50/60' : ''}">
 										<span class="w-4 text-center text-xs font-mono {pos === 1 ? 'text-emerald-600' : pos >= 2 ? 'text-amber-600' : 'text-slate-400'}">{pos === 1 ? '▸' : idx + 1}</span>
-										<span class="min-w-0 flex-1 truncate text-sm">{s.player_name}</span>
+										{@render player(s.player_name, 'min-w-0 flex-1 truncate text-sm')}
 										<span class="shrink-0 font-mono text-[11px] text-slate-400">{s.mitjana.toFixed(3)}</span>
 										<span class="w-5 shrink-0 text-right font-mono text-sm font-semibold">{s.punts}</span>
 									</li>
@@ -188,9 +238,9 @@
 										{@const bWin = m.caramboles_b > m.caramboles_a}
 										<li>
 											<div class="flex items-center justify-between gap-2 text-xs">
-												<span class="min-w-0 flex-1 truncate font-bold {aWin ? 'text-emerald-600' : bWin ? 'text-red-600' : 'text-slate-900'}">{m.player_a}</span>
+												{@render player(m.player_a, 'min-w-0 flex-1 truncate font-bold ' + (aWin ? 'text-emerald-600' : bWin ? 'text-red-600' : 'text-slate-900'))}
 												<span class="shrink-0 font-mono font-bold text-slate-700">{m.caramboles_a}–{m.caramboles_b}</span>
-												<span class="min-w-0 flex-1 truncate text-right font-bold {bWin ? 'text-emerald-600' : aWin ? 'text-red-600' : 'text-slate-900'}">{m.player_b}</span>
+												{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right font-bold ' + (bWin ? 'text-emerald-600' : aWin ? 'text-red-600' : 'text-slate-900'))}
 											</div>
 											{#if m.entrades}<div class="text-center text-[10px] text-slate-400">{m.entrades} ent.</div>{/if}
 										</li>
@@ -213,9 +263,9 @@
 						{@const bWins = m.is_played && m.punts_b > m.punts_a}
 						<li class="border-b border-slate-100 px-3 py-2 last:border-0">
 							<div class="flex items-center justify-between gap-2 text-sm">
-								<span class="min-w-0 flex-1 truncate {aWins ? 'font-semibold' : ''}">{m.player_a || '—'}</span>
+								{#if m.player_a}{@render player(m.player_a, 'min-w-0 flex-1 truncate ' + (aWins ? 'font-semibold' : ''))}{:else}<span class="min-w-0 flex-1 truncate text-slate-400">—</span>{/if}
 								<span class="shrink-0 font-mono text-xs {m.is_played ? '' : 'text-slate-400'}">{m.punts_a}–{m.punts_b}</span>
-								<span class="min-w-0 flex-1 truncate text-right {bWins ? 'font-semibold' : ''}">{m.player_b || '—'}</span>
+								{#if m.player_b}{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right ' + (bWins ? 'font-semibold' : ''))}{:else}<span class="min-w-0 flex-1 truncate text-right text-slate-400">—</span>{/if}
 							</div>
 							{#if m.is_played}
 								<div class="mt-0.5 text-center text-[10px] text-slate-400">{m.caramboles_a}–{m.caramboles_b} car. · {m.entrades} ent.</div>

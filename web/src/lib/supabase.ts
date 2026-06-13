@@ -132,6 +132,9 @@ export interface OpenLiveStanding {
 	club: string;
 	punts: number;
 	mitjana: number;
+	pj?: number;
+	caramboles?: number;
+	entrades?: number;
 }
 export interface OpenLiveMatch {
 	player_a: string;
@@ -164,6 +167,9 @@ export interface OpenLiveProvQual {
 	punts: number;
 	mitjana: number;
 	serie_major: number;
+	pj?: number;
+	caramboles?: number;
+	entrades?: number;
 }
 export interface OpenLivePhase {
 	label: string;
@@ -194,6 +200,7 @@ export interface OpenLivePayload {
 	classification: OpenLiveClassRow[];
 	classification_is_provisional: boolean;
 	fetched_at: string;
+	player_ids?: Record<string, string>;
 }
 export interface OpenLiveRow {
 	fcb_division_id: number;

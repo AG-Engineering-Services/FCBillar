@@ -15,8 +15,10 @@
 		liveCount = count ?? 0;
 	});
 
-	// En canviar de pàgina, torna a dalt (i reseteja l'scroll/zoom de desplaçament).
-	afterNavigate(() => {
+	// En canviar de pàgina, torna a dalt. EXCEPCIÓ: en navegacions enrere/endavant
+	// (popstate) deixem que SvelteKit restauri la posició d'scroll on era l'usuari.
+	afterNavigate((nav) => {
+		if (nav.type === 'popstate') return;
 		if (typeof window !== 'undefined') window.scrollTo({ top: 0, left: 0 });
 	});
 

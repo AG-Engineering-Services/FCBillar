@@ -1422,6 +1422,85 @@ def _open_modality(name: str) -> str:
     return ""
 
 
+def _enrich_live_payload(payload: dict, sb) -> None:
+    """Enriqueix el payload en viu (in-place):
+      - PJ/caramboles/entrades per jugador a cada classificació i classificat,
+        calculats des de les partides JUGADES del grup (l'HTML de la FCB només
+        dóna jugador/club/punts/mitjana).
+      - `player_ids`: mapa nom→fcb_id (taula `players` de Supabase) perquè el web
+        pugui enllaçar cada jugador a la seva fitxa.
+    """
+    import re
+
+    # 1) Agregats PJ/C/E per (grup, jugador) des de les partides jugades.
+    for ph in payload.get("phases", []):
+        agg_by_group: dict[str, dict[str, list[int]]] = {}
+        for g in ph.get("groups", []):
+            agg: dict[str, list[int]] = {}
+            for m in g.get("matches", []):
+                if not m.get("is_played"):
+                    continue
+                ent = int(m.get("entrades") or 0)
+                for name, car in (
+                    (m.get("player_a"), m.get("caramboles_a")),
+                    (m.get("player_b"), m.get("caramboles_b")),
+                ):
+                    if not name:
+                        continue
+                    x = agg.setdefault(name, [0, 0, 0])
+                    x[0] += 1
+                    x[1] += int(car or 0)
+                    x[2] += ent
+            agg_by_group[g.get("label", "")] = agg
+            for s in g.get("standings", []):
+                pj, c, en = agg.get(s["player_name"], [0, 0, 0])
+                s["pj"], s["caramboles"], s["entrades"] = pj, c, en
+        for q in ph.get("provisional_qualifiers", []):
+            pj, c, en = agg_by_group.get(q.get("group_label", ""), {}).get(
+                q.get("player_name", ""), [0, 0, 0]
+            )
+            q["pj"], q["caramboles"], q["entrades"] = pj, c, en
+
+    # 2) Resolució nom→fcb_id (exacte o variant amb coma normalitzada; només quan
+    #    el match és únic, per no enllaçar homònims). Mirall de
+    #    DataSource.resolve_player_fcb_ids, però contra Supabase.
+    names: set[str] = set()
+    for ph in payload.get("phases", []):
+        for g in ph.get("groups", []):
+            for s in g.get("standings", []):
+                names.add(s["player_name"])
+            for m in g.get("matches", []):
+                names.add(m.get("player_a") or "")
+                names.add(m.get("player_b") or "")
+        for m in ph.get("ko_matches", []):
+            names.add(m.get("player_a") or "")
+            names.add(m.get("player_b") or "")
+        for q in ph.get("provisional_qualifiers", []):
+            names.add(q.get("player_name") or "")
+    names.discard("")
+    if not names:
+        payload["player_ids"] = {}
+        return
+
+    norm = {n: re.sub(r",\s*", ", ", n) for n in names}
+    variants = sorted(set(names) | set(norm.values()))
+    by_nom: dict[str, list[str]] = {}
+    for i in range(0, len(variants), 80):
+        chunk = variants[i : i + 80]
+        try:
+            res = sb.table("players").select("nom,fcb_id").in_("nom", chunk).execute()
+        except Exception:  # noqa: BLE001
+            continue
+        for r in res.data or []:
+            by_nom.setdefault(r["nom"], []).append(r["fcb_id"])
+    player_ids: dict[str, str] = {}
+    for n in names:
+        ids = by_nom.get(n) or by_nom.get(norm[n])
+        if ids and len(ids) == 1:
+            player_ids[n] = ids[0]
+    payload["player_ids"] = player_ids
+
+
 def publish_live_opens(
     on_progress: Progress | None = None, *, force: bool = True
 ) -> dict[str, int]:
@@ -1478,6 +1557,7 @@ def publish_live_opens(
         if not state.phases:
             continue
         payload = _state_payload(state, fetched_at)
+        _enrich_live_payload(payload, sb)
         rows.append({
             "fcb_division_id": e.division_id,
             "name": state.structure.name,
