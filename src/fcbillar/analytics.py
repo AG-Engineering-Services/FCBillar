@@ -179,10 +179,8 @@ def rating_breakdown(
 
     Retorna `{player_id: {"buckets": [...], "weighted_index": float|None,
     "crossover": float|None, "total": int}}`. Les franges es reparteixen per
-    quantils (cada eix ~ el mateix nombre de partides). De moment només Tres
-    bandes; per a altres modalitats retorna {}."""
-    if modalitat_codi != 1:
-        return {}
+    quantils (cada eix ~ el mateix nombre de partides), de manera que el repartiment
+    s'adapta sol a l'escala de cada modalitat (Tres bandes ~0,2-1,8; Lliure ~5-40…)."""
     if player_ids is not None and not player_ids:
         return {}
 

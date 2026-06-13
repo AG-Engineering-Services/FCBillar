@@ -107,7 +107,6 @@
 		losses: number;
 		draws: number;
 	}
-	const TRES_BANDES = 1;
 	let ratingBuckets: RatingBucket[] = [];
 	let ratingIndex: number | null = null;
 	let ratingCrossover: number | null = null;
@@ -230,11 +229,13 @@
 		await loadRating();
 	}
 
-	// L'aranya només té sentit en Tres bandes (de moment); altres modalitats la
-	// deixen buida.
+	// L'aranya necessita una modalitat concreta (no "Totes"): els quantils
+	// s'adapten a l'escala de cada modalitat.
 	async function loadRating() {
-		if (!fcbId || selectedMod !== TRES_BANDES) {
+		if (!fcbId || selectedMod == null) {
 			ratingBuckets = [];
+			ratingIndex = null;
+			ratingCrossover = null;
 			return;
 		}
 		try {
@@ -242,7 +243,7 @@
 				buckets: RatingBucket[];
 				weighted_index: number | null;
 				crossover: number | null;
-			}>(`/api/players/${fcbId}/rating-breakdown?modalitat=${TRES_BANDES}`);
+			}>(`/api/players/${fcbId}/rating-breakdown?modalitat=${selectedMod}`);
 			ratingBuckets = r?.buckets ?? [];
 			ratingIndex = r?.weighted_index ?? null;
 			ratingCrossover = r?.crossover ?? null;
@@ -431,8 +432,8 @@
 		</div>
 	{/if}
 
-	<!-- ── Rendiment per nivell d'oponent (aranya, Tres bandes) ───────────── -->
-	{#if selectedMod === TRES_BANDES}
+	<!-- ── Rendiment per nivell d'oponent (aranya, per modalitat) ─────────── -->
+	{#if selectedMod != null && ratingBuckets.length}
 		<div class="mb-6">
 			<Collapsible title="Rendiment per nivell d'oponent" open={true}>
 				<Card>
@@ -474,8 +475,8 @@
 						{/if}
 						<p class="text-xs text-slate-500 mt-3 text-center">
 							8 franges amb el mateix nombre de partides cada una (els rangs s'estrenyen on tens
-							més rivals), per mitjana de rànquing del rival al moment de la partida (Tres bandes).
-							L'índex pondera les victòries pel nivell del rival.
+							més rivals), per mitjana de rànquing del rival al moment de la partida, en la
+							modalitat seleccionada. L'índex pondera les victòries pel nivell del rival.
 						</p>
 					</div>
 				</Card>

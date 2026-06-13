@@ -392,9 +392,9 @@ def publish_rating_buckets(
 ) -> dict[str, int]:
     """Precomputa i puja el rendiment per nivell d'oponent (aranya de la fitxa).
 
-    Branques adaptatives al perfil del jugador + indicadors (índex ponderat,
-    creuament 50%). De moment només Tres bandes (codi_fcb = 1). La lògica viu a
-    `fcbillar.analytics` perquè local (API) i núvol calculin idèntic."""
+    Franges per quantils + indicadors (índex ponderat, creuament 50%), per a
+    **totes les modalitats** (els quantils s'adapten sols a cada escala). La
+    lògica viu a `fcbillar.analytics` perquè local (API) i núvol calculin idèntic."""
     from fcbillar.analytics import rating_breakdown
 
     prog: Progress = on_progress or (lambda level, msg: None)
@@ -403,41 +403,44 @@ def publish_rating_buckets(
     conn.row_factory = sqlite3.Row
 
     fcb_by_pid = {r["id"]: r["fcb_id"] for r in conn.execute("SELECT id, fcb_id FROM players")}
-    data = rating_breakdown(conn, 1, None)
-    conn.close()
+    mods = [r["codi_fcb"] for r in conn.execute("SELECT codi_fcb FROM modalitats ORDER BY codi_fcb")]
 
     bucket_rows, index_rows = [], []
-    for pid, prof in data.items():
-        fid = fcb_by_pid.get(pid)
-        if not fid:
-            continue
-        for b in prof["buckets"]:
-            bucket_rows.append({
+    for codi in mods:
+        data = rating_breakdown(conn, codi, None)
+        for pid, prof in data.items():
+            fid = fcb_by_pid.get(pid)
+            if not fid:
+                continue
+            for b in prof["buckets"]:
+                bucket_rows.append({
+                    "player_fcb_id": fid,
+                    "modalitat_codi": codi,
+                    "bucket": f"b{b['order']}",
+                    "bucket_order": b["order"],
+                    "label": b["label"],
+                    "wins": b["wins"],
+                    "losses": b["losses"],
+                    "draws": b["draws"],
+                })
+            index_rows.append({
                 "player_fcb_id": fid,
-                "modalitat_codi": 1,
-                "bucket": f"b{b['order']}",
-                "bucket_order": b["order"],
-                "label": b["label"],
-                "wins": b["wins"],
-                "losses": b["losses"],
-                "draws": b["draws"],
+                "modalitat_codi": codi,
+                "weighted_index": prof["weighted_index"],
+                "crossover": prof["crossover"],
+                "total_games": prof["total"],
             })
-        index_rows.append({
-            "player_fcb_id": fid,
-            "modalitat_codi": 1,
-            "weighted_index": prof["weighted_index"],
-            "crossover": prof["crossover"],
-            "total_games": prof["total"],
-        })
+        prog("ok", f"rating modalitat {codi}: {len(data)} jugadors")
+    conn.close()
 
     sb = get_client()
-    # Branques ara són adaptatives (claus b0..b5); esborrem les antigues (claus
-    # fixes ge1000…) abans d'inserir perquè l'upsert no deixi files òrfenes.
-    sb.table("player_rating_buckets").delete().eq("modalitat_codi", 1).execute()
+    # Recalcul complet: esborrem totes les files (totes les modalitats) abans
+    # d'inserir perquè l'upsert no deixi franges/índexs orfes.
+    sb.table("player_rating_buckets").delete().gt("modalitat_codi", 0).execute()
     n = _upsert(
         sb, "player_rating_buckets", bucket_rows, "player_fcb_id,modalitat_codi,bucket", prog
     )
-    sb.table("player_rating_index").delete().eq("modalitat_codi", 1).execute()
+    sb.table("player_rating_index").delete().gt("modalitat_codi", 0).execute()
     ni = _upsert(
         sb, "player_rating_index", index_rows, "player_fcb_id,modalitat_codi", prog
     )

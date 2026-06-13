@@ -496,7 +496,7 @@ class DataSource:
         self, fcb_id: str, modalitat_codi: int = 1
     ) -> dict:
         """Victòries/derrotes per nivell de l'oponent (mitjana de rànquing al moment
-        de la partida), amb branques adaptatives al perfil del jugador i indicadors
+        de la partida), amb franges per quantils (qualsevol modalitat) i indicadors
         (índex ponderat + creuament 50%). Tres bandes. Vegeu `fcbillar.analytics`."""
         from fcbillar.analytics import rating_breakdown
 

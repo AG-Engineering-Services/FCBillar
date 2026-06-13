@@ -435,26 +435,27 @@
 		selIdx = null;
 	}
 
-	// Rendiment per nivell d'oponent (aranya, branques adaptatives). Tres bandes.
+	// Rendiment per nivell d'oponent (aranya, quantils) per a la modalitat seleccionada.
 	let ratingBuckets = $state<{ label: string; wins: number; losses: number; draws: number }[]>([]);
 	let ratingIndex = $state<number | null>(null);
 	let ratingCrossover = $state<number | null>(null);
 	let radarMode = $state<'abs' | 'pct'>('abs');
 	$effect(() => {
 		const id = fcbId;
-		if (id && selMod === 1) loadRatingBuckets(id);
+		const mod = selMod;
+		if (id && mod != null) loadRatingBuckets(id, mod);
 		else {
 			ratingBuckets = [];
 			ratingIndex = null;
 			ratingCrossover = null;
 		}
 	});
-	async function loadRatingBuckets(id: string) {
+	async function loadRatingBuckets(id: string, mod: number) {
 		const { data } = await supabase
 			.from('player_rating_buckets')
 			.select('bucket_order, label, wins, losses, draws')
 			.eq('player_fcb_id', id)
-			.eq('modalitat_codi', 1)
+			.eq('modalitat_codi', mod)
 			.order('bucket_order', { ascending: true });
 		ratingBuckets = (data ?? []).map((r) => ({
 			label: r.label,
@@ -466,7 +467,7 @@
 			.from('player_rating_index')
 			.select('weighted_index, crossover')
 			.eq('player_fcb_id', id)
-			.eq('modalitat_codi', 1)
+			.eq('modalitat_codi', mod)
 			.maybeSingle();
 		ratingIndex = idx?.weighted_index ?? null;
 		ratingCrossover = idx?.crossover ?? null;
@@ -1012,8 +1013,8 @@
 			</div>
 		{/if}
 
-		<!-- Rendiment per nivell d'oponent (aranya, Tres bandes) -->
-		{#if selMod === 1 && ratingBuckets.some((b) => b.wins + b.losses > 0)}
+		<!-- Rendiment per nivell d'oponent (aranya, per modalitat) -->
+		{#if selMod != null && ratingBuckets.some((b) => b.wins + b.losses > 0)}
 			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
 				<div class="mb-1 flex items-center justify-between">
 					<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">

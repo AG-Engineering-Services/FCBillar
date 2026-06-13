@@ -90,5 +90,6 @@ def test_rating_breakdown_end_to_end(tmp_path) -> None:
     assert prof["crossover"] is not None
 
 
-def test_rating_breakdown_non_tres_bandes_is_empty(tmp_path) -> None:
-    assert rating_breakdown(_setup(tmp_path), 2, [1]) == {}
+def test_rating_breakdown_modality_without_games_is_empty(tmp_path) -> None:
+    # El setup només té partides de Tres bandes; una modalitat sense partides → {}.
+    assert rating_breakdown(_setup(tmp_path), 4, [1]) == {}
