@@ -31,7 +31,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
 
@@ -45,7 +45,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          END=$(( SECONDS + 3300 ))   # ~55 min de bucle dins d'aquesta execució
+          END=$(( SECONDS + 21000 ))   # ~5,5 h: el bucle no acaba abans del següent tret (sense forats)
           i=0
           while [ "$SECONDS" -lt "$END" ]; do
             i=$(( i + 1 ))
