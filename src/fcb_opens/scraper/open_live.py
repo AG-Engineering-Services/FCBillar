@@ -807,15 +807,11 @@ def compute_provisional_qualifiers(
                 max_sm_by_player[m.player_b] = max(
                     max_sm_by_player.get(m.player_b, 0), m.serie_major_b
                 )
-        ordered = sorted(
-            group.standings,
-            key=lambda s: (
-                -s.punts,
-                -s.mitjana,
-                -max_sm_by_player.get(s.player_name, 0),
-                s.player_name,
-            ),
-        )
+        # Confiem en l'ORDRE de la classificació de la federació (ja aplica els
+        # seus desempats oficials i la convenció de no-presentats); el 1r de la
+        # taula és el classificat. Re-ordenar pel nostre compte feia que, en cas
+        # d'empat, marquéssim com a 1r un que la federació té com a 2n.
+        ordered = list(group.standings)
         for idx, s in enumerate(ordered[:n]):
             out.append(
                 ProvisionalQualifier(
