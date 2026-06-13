@@ -773,6 +773,35 @@ def _phase_player_names(phase: PhaseDetail) -> frozenset[str]:
     return frozenset(names)
 
 
+def _seed_groups_advancers_last(
+    groups: tuple[Group, ...], earlier_names: frozenset[str]
+) -> tuple[Group, ...]:
+    """Respecta l'ordre de SORTEIG dels grups encara NO jugats: els jugadors que
+    vénen d'una fase anterior (p.ex. els qualificats de la pre-prèvia) són sempre
+    els últims caps de sèrie del seu grup (a un grup de 3, el 3r). La taula de
+    classificació de la federació, abans de jugar, ve ordenada per rànquing i els
+    deixa escampats; aquí els recol·loquem al final mantenint l'ordre relatiu de
+    la resta. Els grups ja començats es deixen tal qual (l'ordre reflecteix els
+    resultats)."""
+    if not earlier_names:
+        return groups
+    out: list[Group] = []
+    for g in groups:
+        if not g.standings or any(m.is_played for m in g.matches):
+            out.append(g)
+            continue
+        direct = [s for s in g.standings if _norm_name(s.player_name) not in earlier_names]
+        adv = [s for s in g.standings if _norm_name(s.player_name) in earlier_names]
+        if not adv:
+            out.append(g)
+            continue
+        out.append(Group(
+            label=g.label, url=g.url, venue=g.venue,
+            standings=tuple(direct + adv), matches=g.matches,
+        ))
+    return tuple(out)
+
+
 def _group_sm_by_player(group: Group) -> dict[str, int]:
     """Max sèrie-major per player across a group's matches. The standings
     table doesn't carry SM, so we derive it from the match results."""
@@ -1724,9 +1753,11 @@ def fetch_live_state(division_id: int, *, force: bool = False) -> OpenLiveState:
     #    advancers (group winners + best 2nds). When the next round isn't
     #    drawn yet we only surface the sure qualifiers (the group winners).
     enriched: list[PhaseDetail] = []
+    earlier_names: frozenset[str] = frozenset()  # jugadors de fases anteriors
     for i, d in enumerate(details):
         if d.ref.kind != "group":
             enriched.append(d)
+            earlier_names = earlier_names | _phase_player_names(d)
             continue
         # The next round's published draw tells us who advanced from this
         # phase: all group winners + the best 2nds the federation placed
@@ -1735,14 +1766,19 @@ def fetch_live_state(division_id: int, *, force: bool = False) -> OpenLiveState:
             _phase_player_names(details[i + 1]) if i + 1 < len(details) else None
         )
         qualifiers = compute_provisional_qualifiers(d, next_names)
+        # Respecta l'ordre de sorteig: els que vénen d'una fase anterior són els
+        # últims caps de sèrie del seu grup (3r en grups de 3) mentre no s'hagi
+        # jugat res. (No afecta els classificats: els grups no jugats no en tenen.)
+        groups = _seed_groups_advancers_last(d.groups, earlier_names)
         enriched.append(
             PhaseDetail(
                 ref=d.ref,
-                groups=d.groups,
+                groups=groups,
                 ko_matches=d.ko_matches,
                 provisional_qualifiers=qualifiers,
             )
         )
+        earlier_names = earlier_names | _phase_player_names(d)
 
     # 5) Third pass: derive provisional KO brackets when the FCB hasn't
     #    published them yet — including PARTIAL publication (some pairings
