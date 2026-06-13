@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase, tipusOf, type Open } from '$lib/supabase';
+	import { supabase, tipusOf, type Open, type OpenLiveRow } from '$lib/supabase';
 
 	let opens = $state<Open[]>([]);
+	let liveOpens = $state<OpenLiveRow[]>([]);
 	let ranking = $state<any[]>([]);
 	let ronda = $state<number | null>(null);
 	let q = $state('');
@@ -38,7 +39,31 @@
 	// (tipusOf de $lib/supabase, mirall de fcbillar.torneig_naming).
 	const clean = (nom: string) => nom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim();
 
+	// Resum d'una línia d'un Open en directe: fase activa (o l'última amb dades)
+	// i progrés de partides, per mostrar-ho a la targeta sense obrir el detall.
+	function liveSummary(r: OpenLiveRow): string {
+		const phases = r.payload_json?.phases ?? [];
+		const active = phases.find((p) => p.is_active) ?? [...phases].reverse().find((p) => {
+			if (p.kind === 'group') return p.groups.some((g) => g.n_matches_total > 0);
+			return p.ko_matches.length > 0;
+		});
+		if (!active) return 'sorteig publicat';
+		if (active.kind === 'group') {
+			const played = active.groups.reduce((a, g) => a + g.n_matches_played, 0);
+			const total = active.groups.reduce((a, g) => a + g.n_matches_total, 0);
+			return `${active.label} · ${played}/${total} partides`;
+		}
+		const played = active.ko_matches.filter((m) => m.is_played).length;
+		return `${active.label} · ${played}/${active.ko_matches.length}`;
+	}
+
 	onMount(async () => {
+		// Opens en directe (no bloqueja la resta si falla).
+		supabase
+			.from('open_live')
+			.select('*')
+			.order('fcb_division_id')
+			.then(({ data }) => (liveOpens = (data ?? []) as OpenLiveRow[]));
 		try {
 			const { data, error: e } = await supabase.from('opens').select('*').order('nom');
 			if (e) throw e;
@@ -70,6 +95,35 @@
 			.filter((o) => (q.trim() ? norm(o.nom).includes(norm(q.trim())) : true))
 	);
 </script>
+
+<!-- Opens EN DIRECTE: targetes destacades quan n'hi ha en curs -->
+{#if liveOpens.length}
+	<section class="mb-4">
+		<div class="mb-1.5 flex items-center gap-1.5">
+			<span class="relative flex h-2 w-2">
+				<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+				<span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+			</span>
+			<h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500">En directe</h2>
+		</div>
+		<div class="grid gap-2 sm:grid-cols-2">
+			{#each liveOpens as r (r.fcb_division_id)}
+				<a
+					href="/opens/directe/{r.fcb_division_id}"
+					class="block rounded-xl bg-white p-3 ring-1 ring-emerald-200 active:bg-emerald-50"
+				>
+					<div class="flex items-start justify-between gap-2">
+						<div class="min-w-0 text-sm font-semibold leading-tight">{r.name}</div>
+						{#if r.modality}
+							<span class="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500">{r.modality}</span>
+						{/if}
+					</div>
+					<div class="mt-1 text-[11px] text-slate-400">{liveSummary(r)}</div>
+				</a>
+			{/each}
+		</div>
+	</section>
+{/if}
 
 <!-- Toggle Opens / Campionats de Catalunya -->
 <div class="mb-3 inline-flex rounded-lg bg-slate-100 p-0.5 text-sm">
