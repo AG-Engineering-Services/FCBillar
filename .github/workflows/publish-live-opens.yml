@@ -10,15 +10,18 @@ name: Publish live opens
 #   - SUPABASE_URL
 #   - SUPABASE_SERVICE_ROLE_KEY
 #
-# CADÈNCIA: divendres, dissabte i diumenge, de 9:00 a 22:00 hora local, cada 30
+# CADÈNCIA: divendres, dissabte i diumenge, de 9:00 a 22:00 hora local, cada 15
 # min. ATENCIÓ: el cron de GitHub Actions va en UTC i NO aplica horari d'estiu.
 #   - Estiu (CEST = UTC+2, ~final març–final octubre): 9–22 local = 07–20 UTC.
-#   - Hivern (CET = UTC+1): caldria sumar 1 h → '*/30 8-21 * * 5,6,0'.
+#   - Hivern (CET = UTC+1): caldria sumar 1 h → '*/15 8-21 * * 5,6,0'.
 # Dies de la setmana: 5=dv, 6=ds, 0=dg.
+# NOTA: els crons de GitHub són best-effort (retards de 5–45 min i salts sota
+# càrrega); */15 dóna més intents perquè algun caigui a temps, però no garanteix
+# puntualitat. Per a fiabilitat real caldria un cron extern → workflow_dispatch.
 
 on:
   schedule:
-    - cron: '*/30 7-20 * * 5,6,0'
+    - cron: '*/15 7-20 * * 5,6,0'
   workflow_dispatch: {}
 
 # No solapis execucions: si una triga, la següent espera (no s'encavalquen).
