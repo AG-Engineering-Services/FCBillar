@@ -65,8 +65,11 @@
 			rowCache.set(divisionId, row);
 			error = null;
 			if (selectedPhase === null) {
-				const active = (row.payload_json.phases ?? []).findIndex((p) => p.is_active);
-				selectedPhase = active >= 0 ? active : 0;
+				// Obre a la primera fase INCOMPLETA (encara en joc), no a una de ja
+				// tancada. Si totes estan acabades, mostra l'última.
+				const ph = row.payload_json.phases ?? [];
+				const firstIncomplete = ph.findIndex((p) => phaseStatus(p) !== 'done');
+				selectedPhase = firstIncomplete >= 0 ? firstIncomplete : Math.max(0, ph.length - 1);
 			}
 		}
 		// Marcadors en viu (OCR) — no bloqueja; es refresca a cada poll.

@@ -128,10 +128,12 @@
 			resolvePlayers(collectNames(data))
 				.then((m) => (fcbMap = { ...fcbMap, ...m }))
 				.catch(() => {});
-			// Default to the first active phase if nothing selected yet
+			// Default to the first INCOMPLETE phase (not yet finished) if nothing
+			// selected yet — so an open with an already-completed phase opens on the
+			// phase that's actually in play. If every phase is done, show the last.
 			if (selectedPhase === null) {
-				const active = data.phases.findIndex((p) => p.is_active);
-				selectedPhase = active >= 0 ? active : 0;
+				const firstIncomplete = data.phases.findIndex((p) => phaseStatus(p) !== 'done');
+				selectedPhase = firstIncomplete >= 0 ? firstIncomplete : Math.max(0, data.phases.length - 1);
 			}
 			// Refresh snapshot count on each load
 			api
