@@ -52,6 +52,7 @@ from ..scraper.official_pdf import (
     parse_official_ranking,
 )
 from ..scraper.open_live import (
+    _norm_name,
     division_url,
     fetch_doc_pdf,
     fetch_has_final_classification,
@@ -639,8 +640,20 @@ def register_routes(app: FastAPI) -> None:
         """
         from datetime import datetime, timezone
 
+        # Ordre de sorteig dels grups encara no jugats = ordre del rànquing d'Opens.
+        # Si el càlcul falla, deixem l'ordre de la federació (rank_by_name=None).
         try:
-            state = fetch_live_state(division_id, force=force)
+            _opens_rank = compute_opens_ranking(conn)
+            rank_by_name = {
+                _norm_name(e.display_name): i + 1 for i, e in enumerate(_opens_rank)
+            }
+        except Exception:  # noqa: BLE001
+            rank_by_name = None
+
+        try:
+            state = fetch_live_state(
+                division_id, force=force, rank_by_name=rank_by_name
+            )
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(502, detail=f"FCB fetch failed: {exc}") from exc
 

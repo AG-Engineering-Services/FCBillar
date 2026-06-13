@@ -34,6 +34,7 @@ from supabase import Client, create_client
 from .reglament.puntuacio import points_for_position
 from .scraper.classificacio import fetch_classification
 from .scraper.open_live import (
+    _norm_name,
     compute_open_classification,
     fetch_final_classification_id,
     fetch_has_final_classification,
@@ -42,6 +43,42 @@ from .scraper.open_live import (
 )
 
 SCHEMA = "fcb_opens"
+
+
+def opens_ranking_by_name(sb_fcbillar, *, genere: str = "general") -> dict[str, int]:
+    """`{nom normalitzat → posició al Rànquing Català d'Opens}` (1 = millor).
+
+    Llegeix l'última ronda de `fcbillar.open_ranking` (la finestra vigent dels 5
+    millors Opens). `sb_fcbillar` ha d'estar lligat a l'esquema `fcbillar`. Torna
+    `{}` davant qualsevol error perquè l'ordenació en viu degradi cap a l'ordre de
+    sorteig de la federació en comptes de petar."""
+    try:
+        tbl = sb_fcbillar.table("open_ranking")
+        last = (
+            tbl.select("ronda")
+            .eq("genere", genere)
+            .order("ronda", desc=True)
+            .limit(1)
+            .execute()
+        )
+        if not last.data:
+            return {}
+        ronda = last.data[0]["ronda"]
+        rows = (
+            tbl.select("posicio,jugador")
+            .eq("genere", genere)
+            .eq("ronda", ronda)
+            .execute()
+        )
+        out: dict[str, int] = {}
+        for r in rows.data or []:
+            nom = r.get("jugador")
+            pos = r.get("posicio")
+            if nom and pos is not None:
+                out[_norm_name(nom)] = int(pos)
+        return out
+    except Exception:  # noqa: BLE001
+        return {}
 
 
 def _client() -> Client:
@@ -237,6 +274,8 @@ def snapshot_all_live_opens(
     counters = SnapshotCounters()
     sb = _client()
     fetched_at = datetime.now(timezone.utc).isoformat()
+    # Ordre de sorteig dels grups encara no jugats = ordre del rànquing d'Opens.
+    rank_by_name = opens_ranking_by_name(sb.schema("fcbillar"))
 
     on_progress("phase", "discover")
     entries = fetch_individuals_llistat(force=force_refresh)
@@ -290,7 +329,9 @@ def snapshot_all_live_opens(
 
         on_progress("open", f"{entry.division_id} · {entry.name}")
         try:
-            state = fetch_live_state(entry.division_id, force=force_refresh)
+            state = fetch_live_state(
+                entry.division_id, force=force_refresh, rank_by_name=rank_by_name
+            )
         except Exception as exc:  # noqa: BLE001
             counters.errors.append(
                 f"live-state fetch failed for {entry.division_id}: {exc}"

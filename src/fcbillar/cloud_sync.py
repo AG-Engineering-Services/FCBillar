@@ -1518,11 +1518,14 @@ def publish_live_opens(
         fetch_individuals_llistat,
         fetch_live_state,
     )
-    from fcb_opens.snapshot_live import _state_payload
+    from fcb_opens.snapshot_live import _state_payload, opens_ranking_by_name
 
     prog: Progress = on_progress or (lambda level, msg: None)
     sb = get_client()
     fetched_at = datetime.now(timezone.utc).isoformat()
+    # Ordre de sorteig dels grups encara no jugats = ordre del rànquing d'Opens
+    # (`get_client()` ja està lligat a l'esquema `fcbillar`, on viu `open_ranking`).
+    rank_by_name = opens_ranking_by_name(sb)
 
     try:
         entries = fetch_individuals_llistat(force=force)
@@ -1548,7 +1551,9 @@ def publish_live_opens(
         except Exception:  # noqa: BLE001 — si la sonda falla, el tractem com a en curs
             pass
         try:
-            state = fetch_live_state(e.division_id, force=force)
+            state = fetch_live_state(
+                e.division_id, force=force, rank_by_name=rank_by_name
+            )
         except Exception as exc:  # noqa: BLE001
             prog("warn", f"#{e.division_id} {e.name}: {exc}")
             errors += 1

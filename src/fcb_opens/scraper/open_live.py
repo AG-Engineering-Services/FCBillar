@@ -773,18 +773,33 @@ def _phase_player_names(phase: PhaseDetail) -> frozenset[str]:
     return frozenset(names)
 
 
-def _seed_groups_advancers_last(
-    groups: tuple[Group, ...], earlier_names: frozenset[str]
+def _seed_unplayed_groups(
+    groups: tuple[Group, ...],
+    earlier_names: frozenset[str],
+    rank_by_name: dict[str, int] | None = None,
 ) -> tuple[Group, ...]:
-    """Respecta l'ordre de SORTEIG dels grups encara NO jugats: els jugadors que
-    vénen d'una fase anterior (p.ex. els qualificats de la pre-prèvia) són sempre
-    els últims caps de sèrie del seu grup (a un grup de 3, el 3r). La taula de
-    classificació de la federació, abans de jugar, ve ordenada per rànquing i els
-    deixa escampats; aquí els recol·loquem al final mantenint l'ordre relatiu de
-    la resta. Els grups ja començats es deixen tal qual (l'ordre reflecteix els
-    resultats)."""
-    if not earlier_names:
+    """Ordena els jugadors dels grups encara NO jugats segons l'ordre de sorteig.
+
+    Mentre no s'hagi jugat cap partida d'un grup, l'ordre dels jugadors és
+    informatiu (tots van 0-0), així que el fixem nosaltres:
+
+      • Per RÀNQUING D'OPENS: `rank_by_name` mapeja nom normalitzat → posició al
+        Rànquing Català d'Opens (1 = millor). Els jugadors sense rànquing
+        conserven l'ordre relatiu de la federació, darrere dels classificats.
+      • EXCEPCIÓ — advancers de fase anterior: els qui vénen d'una fase prèvia
+        (p.ex. els qualificats de la pre-prèvia) són SEMPRE l'últim cap de sèrie
+        del seu grup (el 3r en un grup de 3), passi el que passi al rànquing.
+
+    Sense `rank_by_name` mantenim l'ordre de la federació i només recol·loquem
+    els advancers al final (comportament anterior). Els grups ja començats es
+    deixen tal qual: l'ordre ja reflecteix els resultats."""
+    if not rank_by_name and not earlier_names:
         return groups
+    big = 10**9
+
+    def _rank(s: GroupStanding) -> int:
+        return (rank_by_name or {}).get(_norm_name(s.player_name), big)
+
     out: list[Group] = []
     for g in groups:
         if not g.standings or any(m.is_played for m in g.matches):
@@ -792,12 +807,18 @@ def _seed_groups_advancers_last(
             continue
         direct = [s for s in g.standings if _norm_name(s.player_name) not in earlier_names]
         adv = [s for s in g.standings if _norm_name(s.player_name) in earlier_names]
-        if not adv:
+        if rank_by_name:
+            # `sorted` és estable: els jugadors sense rànquing (clau `big`)
+            # queden al final conservant l'ordre original de la federació.
+            direct = sorted(direct, key=_rank)
+            adv = sorted(adv, key=_rank)
+        new_standings = tuple(direct + adv)
+        if new_standings == g.standings:
             out.append(g)
             continue
         out.append(Group(
             label=g.label, url=g.url, venue=g.venue,
-            standings=tuple(direct + adv), matches=g.matches,
+            standings=new_standings, matches=g.matches,
         ))
     return tuple(out)
 
@@ -1665,12 +1686,22 @@ def parse_ko_page(html: str) -> tuple[MatchResult, ...]:
 # --------------------------------------------------------------------------- #
 
 
-def fetch_live_state(division_id: int, *, force: bool = False) -> OpenLiveState:
+def fetch_live_state(
+    division_id: int,
+    *,
+    force: bool = False,
+    rank_by_name: dict[str, int] | None = None,
+) -> OpenLiveState:
     """Fetch the complete live state of an ongoing Open.
 
     Args:
         division_id: FCB division id, e.g. 206 for Sants.
         force: bypass the HTTP cache for every page.
+        rank_by_name: optional `{normalised name → Opens-ranking position}`
+            (1 = top). When provided, the players of every NOT-yet-played group
+            are ordered by that ranking (advancers from a previous phase always
+            last; see `_seed_unplayed_groups`). When omitted, the federation's
+            draw order is kept and only advancers are pushed to the end.
 
     Returns:
         OpenLiveState with phases fully populated. KO rounds that haven't
@@ -1766,10 +1797,10 @@ def fetch_live_state(division_id: int, *, force: bool = False) -> OpenLiveState:
             _phase_player_names(details[i + 1]) if i + 1 < len(details) else None
         )
         qualifiers = compute_provisional_qualifiers(d, next_names)
-        # Respecta l'ordre de sorteig: els que vénen d'una fase anterior són els
-        # últims caps de sèrie del seu grup (3r en grups de 3) mentre no s'hagi
-        # jugat res. (No afecta els classificats: els grups no jugats no en tenen.)
-        groups = _seed_groups_advancers_last(d.groups, earlier_names)
+        # Ordre de sorteig dels grups encara no jugats: per rànquing d'Opens
+        # (si el tenim) i amb els advancers de fase anterior sempre al final (3r
+        # en grups de 3). No afecta els classificats: els grups no jugats no en tenen.
+        groups = _seed_unplayed_groups(d.groups, earlier_names, rank_by_name)
         enriched.append(
             PhaseDetail(
                 ref=d.ref,
