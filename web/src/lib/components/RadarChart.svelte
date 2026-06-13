@@ -1,11 +1,16 @@
 <script lang="ts">
-	// Radar (aranya) de rendiment: un eix per grup d'oponent, dos polígons
-	// superposats (victòries / derrotes). SVG pur, sense dependències.
+	// Radar (aranya) de rendiment: un eix per franja de nivell d'oponent.
+	// mode='abs' → dos polígons (victòries / derrotes). mode='pct' → un polígon
+	// (% de victòries per franja). SVG pur, sense dependències.
 	let {
 		buckets = [],
-		size = 340
-	}: { buckets?: { label: string; wins: number; losses: number; draws?: number }[]; size?: number } =
-		$props();
+		size = 360,
+		mode = 'abs'
+	}: {
+		buckets?: { label: string; wins: number; losses: number; draws?: number }[];
+		size?: number;
+		mode?: 'abs' | 'pct';
+	} = $props();
 
 	const WIN = '#16a34a';
 	const LOSS = '#dc2626';
@@ -13,16 +18,19 @@
 	const n = $derived(buckets.length);
 	const cx = $derived(size / 2);
 	const cy = $derived(size / 2);
-	const R = $derived(size / 2 - 58); // marge per a les etiquetes
+	const R = $derived(size / 2 - 64);
 
-	const maxVal = $derived(Math.max(1, ...buckets.flatMap((b) => [b.wins, b.losses])));
+	const dec = (b: { wins: number; losses: number }) => b.wins + b.losses;
+	const winPct = (b: { wins: number; losses: number }) => (dec(b) > 0 ? (b.wins / dec(b)) * 100 : 0);
+
 	function niceCeil(v: number): number {
 		if (v <= 5) return 5;
 		if (v <= 10) return 10;
 		const step = v <= 50 ? 5 : v <= 100 ? 10 : 25;
 		return Math.ceil(v / step) * step;
 	}
-	const scaleMax = $derived(niceCeil(maxVal));
+	const maxAbs = $derived(Math.max(1, ...buckets.flatMap((b) => [b.wins, b.losses])));
+	const scaleMax = $derived(mode === 'pct' ? 100 : niceCeil(maxAbs));
 
 	function angle(i: number): number {
 		return (-90 + (i * 360) / n) * (Math.PI / 180);
@@ -55,8 +63,10 @@
 			}).join(' ')
 		}))
 	);
+	const pctVals = $derived(buckets.map(winPct));
 	const winPoly = $derived(poly(buckets.map((b) => b.wins)));
 	const lossPoly = $derived(poly(buckets.map((b) => b.losses)));
+	const pctPoly = $derived(poly(pctVals));
 	const hasData = $derived(buckets.some((b) => b.wins + b.losses > 0));
 </script>
 
@@ -72,14 +82,24 @@
 				{@const [x, y] = pt(i, R)}
 				<line x1={cx} y1={cy} x2={x} y2={y} stroke="#e2e8f0" stroke-width="1" />
 			{/each}
-			<polygon points={lossPoly} fill={LOSS} fill-opacity="0.18" stroke={LOSS} stroke-width="2" />
-			<polygon points={winPoly} fill={WIN} fill-opacity="0.22" stroke={WIN} stroke-width="2" />
-			{#each buckets as b, i}
-				{@const [wx, wy] = pt(i, (b.wins / scaleMax) * R)}
-				{@const [lx, ly] = pt(i, (b.losses / scaleMax) * R)}
-				<circle cx={lx} cy={ly} r="3" fill={LOSS} />
-				<circle cx={wx} cy={wy} r="3" fill={WIN} />
-			{/each}
+
+			{#if mode === 'pct'}
+				<polygon points={pctPoly} fill={WIN} fill-opacity="0.2" stroke={WIN} stroke-width="2" />
+				{#each buckets as _b, i}
+					{@const [x, y] = pt(i, (pctVals[i] / scaleMax) * R)}
+					<circle cx={x} cy={y} r="3" fill={WIN} />
+				{/each}
+			{:else}
+				<polygon points={lossPoly} fill={LOSS} fill-opacity="0.18" stroke={LOSS} stroke-width="2" />
+				<polygon points={winPoly} fill={WIN} fill-opacity="0.22" stroke={WIN} stroke-width="2" />
+				{#each buckets as b, i}
+					{@const [wx, wy] = pt(i, (b.wins / scaleMax) * R)}
+					{@const [lx, ly] = pt(i, (b.losses / scaleMax) * R)}
+					<circle cx={lx} cy={ly} r="3" fill={LOSS} />
+					<circle cx={wx} cy={wy} r="3" fill={WIN} />
+				{/each}
+			{/if}
+
 			{#each buckets as b, i}
 				{@const [lxr, lyr] = pt(i, R + 14)}
 				<text
@@ -92,27 +112,35 @@
 				>
 					{b.label}
 				</text>
-				<text
-					x={lxr}
-					y={lyr + 13}
-					text-anchor={anchor(i)}
-					dominant-baseline="middle"
-					style="font-size: 10px"
-				>
-					<tspan fill={WIN}>{b.wins}V</tspan>
-					<tspan fill="#94a3b8"> · </tspan>
-					<tspan fill={LOSS}>{b.losses}D</tspan>
-				</text>
+				{#if mode === 'pct'}
+					<text x={lxr} y={lyr + 13} text-anchor={anchor(i)} dominant-baseline="middle" style="font-size: 10px">
+						<tspan fill={dec(b) ? WIN : '#94a3b8'}>{dec(b) ? Math.round(winPct(b)) + '%' : '—'}</tspan>
+						<tspan fill="#94a3b8"> ({dec(b)})</tspan>
+					</text>
+				{:else}
+					<text x={lxr} y={lyr + 13} text-anchor={anchor(i)} dominant-baseline="middle" style="font-size: 10px">
+						<tspan fill={WIN}>{b.wins}V</tspan>
+						<tspan fill="#94a3b8"> · </tspan>
+						<tspan fill={LOSS}>{b.losses}D</tspan>
+					</text>
+				{/if}
 			{/each}
 		</svg>
 		<div class="mt-1 flex items-center gap-4 text-xs text-slate-600">
-			<span class="flex items-center gap-1">
-				<span class="inline-block h-3 w-3 rounded-sm" style="background:{WIN}"></span> Victòries
-			</span>
-			<span class="flex items-center gap-1">
-				<span class="inline-block h-3 w-3 rounded-sm" style="background:{LOSS}"></span> Derrotes
-			</span>
-			<span class="text-slate-400">escala 0–{scaleMax}</span>
+			{#if mode === 'pct'}
+				<span class="flex items-center gap-1">
+					<span class="inline-block h-3 w-3 rounded-sm" style="background:{WIN}"></span> % victòries
+				</span>
+				<span class="text-slate-400">escala 0–100% · (n)</span>
+			{:else}
+				<span class="flex items-center gap-1">
+					<span class="inline-block h-3 w-3 rounded-sm" style="background:{WIN}"></span> Victòries
+				</span>
+				<span class="flex items-center gap-1">
+					<span class="inline-block h-3 w-3 rounded-sm" style="background:{LOSS}"></span> Derrotes
+				</span>
+				<span class="text-slate-400">escala 0–{scaleMax}</span>
+			{/if}
 		</div>
 	</div>
 {/if}

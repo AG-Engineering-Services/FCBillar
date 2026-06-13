@@ -32,50 +32,64 @@ from __future__ import annotations
 import sqlite3
 from itertools import pairwise
 
-N_BRANCHES = 6  # nombre fix de branques de l'aranya (adaptatives per jugador)
+WINDOW_T = 3  # mitja finestra en dècimes (±0,3 al voltant del nivell del jugador)
+STEP_T = 1    # amplada de cada franja central en dècimes (0,1)
 
 
 def _fmt(v: float) -> str:
-    """Format d'un valor de mitjana per a etiqueta (coma decimal, 2 decimals)."""
-    return f"{v:.2f}".replace(".", ",")
+    """Format d'una dècima per a etiqueta (coma decimal, 1 decimal). 0,2 / 1,0."""
+    return f"{v:.1f}".replace(".", ",")
 
 
-def _adaptive_buckets(games: list[tuple[int, float]]) -> list[dict]:
-    """Reparteix les partides en N_BRANCHES franges d'igual amplada sobre el rang
-    [min, max] de mitjanes de rival observades. `games` = llista de (res, rating)
-    on res ∈ {1 victòria, -1 derrota, 0 empat}. Retorna sempre N_BRANCHES franges
-    (algunes poden quedar buides) excepte si totes les mitjanes són iguals."""
-    ratings = [r for _res, r in games]
-    lo, hi = min(ratings), max(ratings)
-    if hi <= lo:
-        # Tots els rivals al mateix nivell: una sola franja.
-        edges = [lo, lo]
-        n = 1
-    else:
-        n = N_BRANCHES
-        width = (hi - lo) / n
-        edges = [lo + k * width for k in range(n + 1)]
-        edges[-1] = hi  # tanca exactament al màxim
+def _median(xs: list[float]) -> float:
+    s = sorted(xs)
+    n = len(s)
+    return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2
 
-    buckets = [
-        {
-            "order": k,
-            "label": _fmt(edges[k]) if n == 1 else f"{_fmt(edges[k])}-{_fmt(edges[k + 1])}",
-            "rating_min": round(edges[k], 4),
-            "rating_max": round(edges[k + 1] if n > 1 else edges[k], 4),
-            "wins": 0,
-            "losses": 0,
-            "draws": 0,
-        }
-        for k in range(n)
-    ]
-    span = (hi - lo) or 1.0
+
+def _centered_buckets(games: list[tuple[int, float]], center: float) -> list[dict]:
+    """Franges centrades en el nivell del jugador, amb límits a la dècima i les
+    cues agrupades. `games` = (res, rating) amb res ∈ {1, -1, 0}. `center` = nivell
+    del jugador (la seva mitjana de rànquing).
+
+    Una finestra de ±0,3 al voltant del centre es talla en franges de 0,1; tot el
+    que cau per sota de la finestra va a un paquet "< x" i tot el que cau per sobre
+    a un paquet "> y". P.ex. centre 0,6 → < 0,3 · 0,3-0,4 · … · 0,8-0,9 · > 0,9."""
+    c_t = round(center * 10)
+    lo_t = c_t - WINDOW_T
+    hi_t = c_t + WINDOW_T
+    has_low = lo_t > 0  # cap rival per sota de 0,0: no cal cua inferior
+
+    edges_t = list(range(max(lo_t, 0), hi_t + 1, STEP_T))  # límits interns (dècimes)
+    buckets: list[dict] = []
+    if has_low:
+        buckets.append({
+            "order": 0, "label": f"< {_fmt(lo_t / 10)}",
+            "rating_min": None, "rating_max": lo_t / 10,
+            "wins": 0, "losses": 0, "draws": 0,
+        })
+    for a, b in pairwise(edges_t):
+        buckets.append({
+            "order": len(buckets), "label": f"{_fmt(a / 10)}-{_fmt(b / 10)}",
+            "rating_min": a / 10, "rating_max": b / 10,
+            "wins": 0, "losses": 0, "draws": 0,
+        })
+    buckets.append({
+        "order": len(buckets), "label": f"> {_fmt(hi_t / 10)}",
+        "rating_min": hi_t / 10, "rating_max": None,
+        "wins": 0, "losses": 0, "draws": 0,
+    })
+
+    first_inner = 1 if has_low else 0
     for res, r in games:
-        # +eps perquè un valor just al límit (per error de coma flotant) caigui a
-        # la franja superior, coherent amb la convenció [lo, hi).
-        idx = int((r - lo) / span * n + 1e-9)
-        if idx >= n:
-            idx = n - 1
+        rt = round(r * 10, 4)
+        if has_low and rt < lo_t:
+            idx = 0
+        elif rt >= hi_t:
+            idx = len(buckets) - 1
+        else:
+            idx = first_inner + int((rt - max(lo_t, 0)) / STEP_T + 1e-9)
+            idx = min(idx, len(buckets) - 2)  # no envair la cua superior
         if res == 1:
             buckets[idx]["wins"] += 1
         elif res == -1:
@@ -104,8 +118,9 @@ def _crossover(buckets: list[dict]) -> float | None:
     for b in buckets:
         dec = b["wins"] + b["losses"]
         if dec:
-            mid = (b["rating_min"] + b["rating_max"]) / 2
-            pts.append((mid, b["wins"] / dec))
+            lo, hi = b["rating_min"], b["rating_max"]
+            rep = hi if lo is None else lo if hi is None else (lo + hi) / 2
+            pts.append((rep, b["wins"] / dec))
     if not pts:
         return None
     if all(wr >= 0.5 for _m, wr in pts):
@@ -173,6 +188,33 @@ def _opp_rating_rows(
     return out
 
 
+def _player_centers(
+    conn: sqlite3.Connection, player_ids: list[int] | None
+) -> dict[int, float]:
+    """Nivell de cada jugador = la seva mitjana de rànquing Tres bandes més recent."""
+    filt, params = "", []
+    if player_ids is not None:
+        ph = ",".join("?" * len(player_ids))
+        filt = f"AND p.id IN ({ph})"
+        params = list(player_ids)
+    centers: dict[int, float] = {}
+    for pid, mg in conn.execute(
+        f"""
+        SELECT p.id, re.mitjana_general
+        FROM ranking_entries re
+        JOIN rankings rk ON rk.id = re.ranking_id
+        JOIN modalitats m ON m.id = rk.modalitat_id
+        JOIN players p ON p.id = re.player_id
+        WHERE m.codi_fcb = 1 {filt}
+        ORDER BY rk.num_seq DESC
+        """,
+        params,
+    ):
+        if pid not in centers and mg is not None:
+            centers[pid] = float(mg)
+    return centers
+
+
 def rating_breakdown(
     conn: sqlite3.Connection,
     modalitat_codi: int = 1,
@@ -180,10 +222,10 @@ def rating_breakdown(
 ) -> dict[int, dict]:
     """Perfil de rendiment per nivell de rival, per jugador.
 
-    Retorna `{player_id: {"buckets": [...], "weighted_index": float|None,
-    "crossover": float|None, "total": int}}`. Les branques són adaptatives
-    (N_BRANCHES franges d'igual amplada sobre el rang de rivals del jugador). De
-    moment només Tres bandes; per a altres modalitats retorna {}."""
+    Retorna `{player_id: {"buckets": [...], "center": float, "weighted_index":
+    float|None, "crossover": float|None, "total": int}}`. Les franges es centren
+    en el nivell del jugador (±0,3 en passos de 0,1, cues agrupades). De moment
+    només Tres bandes; per a altres modalitats retorna {}."""
     if modalitat_codi != 1:
         return {}
     if player_ids is not None and not player_ids:
@@ -193,11 +235,17 @@ def rating_breakdown(
     for me, res, rating in _opp_rating_rows(conn, modalitat_codi, player_ids):
         by_player.setdefault(me, []).append((res, rating))
 
+    centers = _player_centers(conn, list(by_player.keys()) or None)
     out: dict[int, dict] = {}
     for pid, games in by_player.items():
-        buckets = _adaptive_buckets(games)
+        # Sense rànquing propi: aproximem el nivell amb la mediana dels rivals.
+        center = centers.get(pid)
+        if center is None:
+            center = _median([r for _res, r in games])
+        buckets = _centered_buckets(games, center)
         out[pid] = {
             "buckets": buckets,
+            "center": round(center, 3),
             "weighted_index": _weighted_index(games),
             "crossover": _crossover(buckets),
             "total": len(games),

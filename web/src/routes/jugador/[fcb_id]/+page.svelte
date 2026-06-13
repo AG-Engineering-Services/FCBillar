@@ -431,6 +431,7 @@
 	let ratingBuckets = $state<{ label: string; wins: number; losses: number; draws: number }[]>([]);
 	let ratingIndex = $state<number | null>(null);
 	let ratingCrossover = $state<number | null>(null);
+	let radarMode = $state<'abs' | 'pct'>('abs');
 	$effect(() => {
 		const id = fcbId;
 		if (id && selMod === 1) loadRatingBuckets(id);
@@ -974,10 +975,22 @@
 		<!-- Rendiment per nivell d'oponent (aranya, Tres bandes) -->
 		{#if selMod === 1 && ratingBuckets.some((b) => b.wins + b.losses > 0)}
 			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-				<div class="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-					Rendiment per nivell d'oponent
+				<div class="mb-1 flex items-center justify-between">
+					<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+						Rendiment per nivell d'oponent
+					</div>
+					<div class="inline-flex overflow-hidden rounded-md border border-slate-300 text-[10px]">
+						<button
+							class="px-2 py-0.5 {radarMode === 'abs' ? 'bg-slate-800 text-white' : 'text-slate-600'}"
+							onclick={() => (radarMode = 'abs')}>Absolut</button
+						>
+						<button
+							class="px-2 py-0.5 {radarMode === 'pct' ? 'bg-slate-800 text-white' : 'text-slate-600'}"
+							onclick={() => (radarMode = 'pct')}>%</button
+						>
+					</div>
 				</div>
-				<RadarChart buckets={ratingBuckets} />
+				<RadarChart buckets={ratingBuckets} mode={radarMode} />
 				{#if ratingIndex != null || ratingCrossover != null}
 					<div class="mt-2 flex justify-center gap-8">
 						{#if ratingIndex != null}
@@ -997,8 +1010,9 @@
 					</div>
 				{/if}
 				<p class="mt-2 text-center text-[10px] text-slate-400">
-					6 branques adaptades al rang de rivals del jugador (mitjana de rànquing al moment de la
-					partida). L'índex pondera les victòries pel nivell del rival.
+					Franges centrades en el nivell del jugador (±0,3 de 0,1 en 0,1, extrems agrupats), segons
+					la mitjana de rànquing del rival al moment de la partida. L'índex pondera les victòries
+					pel nivell del rival.
 				</p>
 			</div>
 		{/if}

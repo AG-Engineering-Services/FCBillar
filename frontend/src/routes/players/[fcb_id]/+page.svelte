@@ -101,8 +101,8 @@
 	interface RatingBucket {
 		order: number;
 		label: string;
-		rating_min: number;
-		rating_max: number;
+		rating_min: number | null;
+		rating_max: number | null;
 		wins: number;
 		losses: number;
 		draws: number;
@@ -111,6 +111,7 @@
 	let ratingBuckets: RatingBucket[] = [];
 	let ratingIndex: number | null = null;
 	let ratingCrossover: number | null = null;
+	let radarMode: 'abs' | 'pct' = 'abs';
 
 	let loading = true;
 	let notFound = false;
@@ -404,7 +405,19 @@
 			<Collapsible title="Rendiment per nivell d'oponent" open={true}>
 				<Card>
 					<div class="p-4">
-						<RadarChart buckets={ratingBuckets} />
+						<div class="flex justify-center mb-2">
+							<div class="inline-flex rounded-md border border-slate-300 overflow-hidden text-xs">
+								<button
+									class="px-3 py-1 {radarMode === 'abs' ? 'bg-slate-800 text-white' : 'text-slate-600'}"
+									on:click={() => (radarMode = 'abs')}>Absolut</button
+								>
+								<button
+									class="px-3 py-1 {radarMode === 'pct' ? 'bg-slate-800 text-white' : 'text-slate-600'}"
+									on:click={() => (radarMode = 'pct')}>%</button
+								>
+							</div>
+						</div>
+						<RadarChart buckets={ratingBuckets} mode={radarMode} />
 						{#if ratingIndex != null || ratingCrossover != null}
 							<div class="flex flex-wrap justify-center gap-x-8 gap-y-2 mt-3">
 								{#if ratingIndex != null}
@@ -428,9 +441,9 @@
 							</div>
 						{/if}
 						<p class="text-xs text-slate-500 mt-3 text-center">
-							Branques adaptades al perfil: 6 franges d'igual amplada pel rang de rivals (per
-							mitjana de rànquing al moment de la partida, Tres bandes). L'índex pondera les
-							victòries pel nivell del rival.
+							Franges centrades en el teu nivell (±0,3 de 0,1 en 0,1, extrems agrupats), segons la
+							mitjana de rànquing del rival al moment de la partida (Tres bandes). L'índex pondera
+							les victòries pel nivell del rival.
 						</p>
 					</div>
 				</Card>
