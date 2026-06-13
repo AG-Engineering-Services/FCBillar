@@ -6,12 +6,17 @@
 	import { supabase } from '$lib/supabase';
 	let { children } = $props();
 
-	// Punt vermell llampegant al costat d'"Opens" si hi ha algun Open en curs.
+	// Punt vermell llampegant al costat d'"Opens" NOMÉS quan hi ha competició
+	// activa ara mateix. Ho lliguem a la frescor de open_live: el cron només
+	// refresca l'estat durant les finestres de competició (dv/ds/dg), així que
+	// si el snapshot més recent és d'aquesta darrera hora i mitja, s'està jugant.
 	let liveCount = $state(0);
 	onMount(async () => {
+		const since = new Date(Date.now() - 90 * 60 * 1000).toISOString();
 		const { count } = await supabase
 			.from('open_live')
-			.select('fcb_division_id', { count: 'exact', head: true });
+			.select('fcb_division_id', { count: 'exact', head: true })
+			.gte('captured_at', since);
 		liveCount = count ?? 0;
 	});
 
