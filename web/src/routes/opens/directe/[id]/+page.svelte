@@ -10,18 +10,27 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import { supabase, type OpenLivePhase, type OpenLiveMatch } from '$lib/supabase';
+	import { supabase, type OpenLivePhase, type OpenLiveMatch, type OpenLiveScore } from '$lib/supabase';
 
 	const id0 = Number($page.params.id);
 	let row = $state<OpenLiveRow | null>(rowCache.get(id0) ?? null);
 	let loading = $state(rowCache.get(id0) == null);
 	let error = $state<string | null>(null);
 	let selectedPhase = $state<number | null>(phaseCache.get(id0) ?? null);
+	let scores = $state<OpenLiveScore[]>([]);
 	let timer: ReturnType<typeof setInterval> | null = null;
 
 	const divisionId = $derived(Number($page.params.id));
 	const payload = $derived(row?.payload_json ?? null);
 	const phases = $derived(payload?.phases ?? []);
+
+	// Marcadors en viu (OCR) per grup. Normalitzem l'etiqueta (de vegades "T",
+	// de vegades "Grup T") perquè casi amb el grup de la classificació.
+	const normGroup = (s: string | null) => (s ?? '').replace(/grup\s*/i, '').toUpperCase().trim();
+	function liveForGroup(label: string): OpenLiveScore[] {
+		const k = normGroup(label);
+		return scores.filter((s) => normGroup(s.group_label) === k);
+	}
 
 	// Recorda la fase seleccionada per divisió (per restaurar-la en tornar enrere).
 	$effect(() => {
@@ -54,6 +63,12 @@
 				selectedPhase = active >= 0 ? active : 0;
 			}
 		}
+		// Marcadors en viu (OCR) — no bloqueja; es refresca a cada poll.
+		supabase
+			.from('open_live_scores')
+			.select('*')
+			.eq('fcb_division_id', divisionId)
+			.then(({ data }) => (scores = (data ?? []) as OpenLiveScore[]));
 		loading = false;
 	}
 
@@ -206,7 +221,7 @@
 				{#each phase.groups as g (g.label)}
 					{@const done = g.n_matches_total > 0 && g.n_matches_played === g.n_matches_total}
 					{@const played = g.matches.filter((m) => m.is_played)}
-					<div class="overflow-hidden rounded-xl bg-white ring-1 {done ? 'ring-emerald-200' : 'ring-slate-200'}">
+					<div class="overflow-hidden rounded-xl bg-white ring-1 {liveForGroup(g.label).length ? 'ring-red-200' : done ? 'ring-emerald-200' : 'ring-slate-200'}">
 						<div class="flex items-center justify-between gap-2 px-3 py-1.5 {done ? 'bg-emerald-50' : 'bg-slate-50'}">
 							<span class="text-sm font-semibold">{g.label}</span>
 							<span class="text-[11px] {done ? 'text-emerald-700' : 'text-amber-700'}">{g.n_matches_played}/{g.n_matches_total}</span>
@@ -227,7 +242,32 @@
 						{:else}
 							<p class="px-3 py-2 text-xs text-slate-400">Sense classificació encara.</p>
 						{/if}
-						{#if played.length}
+						{#if liveForGroup(g.label).length}
+								<div class="border-t border-red-100 px-3 py-2">
+									<div class="mb-1 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-red-600">
+										<span class="relative inline-flex h-1.5 w-1.5">
+											<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
+											<span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span>
+										</span>
+										En joc ara
+									</div>
+									<ul class="space-y-1.5">
+										{#each liveForGroup(g.label) as sc (sc.video_id)}
+											{@const aW = (sc.car_a ?? 0) > (sc.car_b ?? 0)}
+											{@const bW = (sc.car_b ?? 0) > (sc.car_a ?? 0)}
+											<li>
+												<div class="flex items-center justify-between gap-2 text-xs">
+													{@render player(sc.player_a ?? '—', 'min-w-0 flex-1 truncate font-bold ' + (aW ? 'text-emerald-600' : bW ? 'text-red-600' : 'text-slate-900'))}
+													<span class="shrink-0 font-mono font-bold text-slate-700">{sc.car_a}–{sc.car_b}</span>
+													{@render player(sc.player_b ?? '—', 'min-w-0 flex-1 truncate text-right font-bold ' + (bW ? 'text-emerald-600' : aW ? 'text-red-600' : 'text-slate-900'))}
+												</div>
+												{#if sc.entrades}<div class="text-center text-[10px] text-slate-400">{sc.entrades} ent.</div>{/if}
+											</li>
+										{/each}
+									</ul>
+								</div>
+							{/if}
+							{#if played.length}
 							<div class="border-t border-slate-100 px-3 py-2">
 								<div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
 									Partides disputades

@@ -211,6 +211,23 @@ export interface OpenLiveRow {
 	updated_at: string;
 }
 
+// Marcador EN VIU d'una partida (OCR de la retransmissió de YouTube).
+// Taula fcbillar.open_live_scores; el publica el worker de Multiview.
+export interface OpenLiveScore {
+	video_id: string;
+	fcb_division_id: number;
+	club: string | null;
+	title: string | null;
+	phase: string | null;
+	group_label: string | null;
+	player_a: string | null;
+	player_b: string | null;
+	car_a: number | null;
+	car_b: number | null;
+	entrades: number | null;
+	captured_at: string;
+}
+
 export interface OpenClassification {
 	open_id: number;
 	posicio: number | null;
