@@ -3,8 +3,16 @@
 	import { supabase, type GameRow } from '$lib/supabase';
 	import { follows, toggleFollow } from '$lib/follows';
 	import RadarChart from '$lib/components/RadarChart.svelte';
+	import { theme } from '$lib/theme';
 
 	const fcbId = $derived($page.params.fcb_id);
+
+	// Colors dels gràfics SVG reactius al tema (clar/fosc).
+	const cGrid = $derived($theme === 'dark' ? '#1e293b' : '#eef2f7'); // graella horitzontal
+	const cAxis = $derived($theme === 'dark' ? '#334155' : '#e2e8f0'); // guies verticals
+	const cAxisAmber = $derived($theme === 'dark' ? '#78350f' : '#fde68a');
+	const cInk = $derived($theme === 'dark' ? '#e2e8f0' : '#0f172a'); // línia/àrea principal
+	const cHalo = $derived($theme === 'dark' ? '#0f172a' : '#fff'); // halo dels punts
 
 	let nom = $state('');
 	let club = $state<string | null>(null);
@@ -764,23 +772,23 @@
 	}
 </script>
 
-<button onclick={back} class="mb-2 inline-flex items-center gap-1 text-sm text-slate-500">
+<button onclick={back} class="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
 	<span aria-hidden="true">←</span> Rànquings
 </button>
 
 {#if error}
-	<div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
+	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
 {:else}
 	<div class="mb-3 flex items-start justify-between gap-3">
 		<div class="min-w-0">
 			<h1 class="text-lg font-bold leading-tight">{nom}</h1>
-			{#if club}<a href="/club/{clubId}" class="text-sm text-slate-400 active:underline">{club}</a>{/if}
+			{#if club}<a href="/club/{clubId}" class="text-sm text-slate-400 dark:text-slate-500 active:underline">{club}</a>{/if}
 		</div>
 		<button
 			onclick={() => toggleFollow(fcbId)}
 			class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium {$follows.includes(fcbId)
-				? 'bg-amber-100 text-amber-700 ring-1 ring-amber-300'
-				: 'bg-slate-900 text-white'}"
+				? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 ring-1 ring-amber-300 dark:ring-amber-900/50'
+				: 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'}"
 		>
 			{$follows.includes(fcbId) ? '★ Seguint' : '☆ Seguir'}
 		</button>
@@ -795,83 +803,83 @@
 						shown = 60;
 					}}
 					class="shrink-0 rounded-full px-3 py-1 text-sm font-medium {m.codi === selMod
-						? 'bg-slate-900 text-white'
-						: 'bg-white text-slate-600 ring-1 ring-slate-200'}"
+						? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+						: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 				>{m.nom}</button>
 			{/each}
 		</div>
 	{/if}
 
 	{#if loading}
-		<p class="py-6 text-center text-sm text-slate-400">Carregant…</p>
+		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
 	{:else}
 		<div class="lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
 			<div class="min-w-0">
 			<!-- KPIs -->
-			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Històric</div>
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Històric</div>
 				<div class="grid grid-cols-5 gap-2">
 					{#each [['Partides', kpi.n, ''], ['Mitjana', kpi.mitjana.toFixed(3), ''], ['Sèrie màx', kpi.sm, 'sm'], ['% vict.', kpi.pct + '%', ''], [kpi.bestN > 1 ? `Millor mitj. ×${kpi.bestN}` : 'Millor mitj.', kpi.best != null ? kpi.best.toFixed(3) : '—', '']] as [label, val, key]}
 						<button onclick={() => { if (key === 'sm') serieFilter = !serieFilter; }} class="rounded-lg py-0.5 text-center {key === 'sm' && serieFilter ? 'ring-2 ring-blue-500' : ''}">
 							<div class="font-mono text-base font-bold tabular-nums">{val}</div>
-							<div class="text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
+							<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</div>
 						</button>
 					{/each}
 				</div>
-				<p class="mt-2 px-1 text-[11px] text-slate-400">{kpi.w} G · {kpi.l} P{kpi.t ? ` · ${kpi.t} E` : ''}</p>
+				<p class="mt-2 px-1 text-[11px] text-slate-400 dark:text-slate-500">{kpi.w} G · {kpi.l} P{kpi.t ? ` · ${kpi.t} E` : ''}</p>
 			</div>
-			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Temporada actual</div>
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Temporada actual</div>
 				<div class="grid grid-cols-4 gap-2">
 					{#each [['Partides', seasonKpi.n], ['Mitjana', seasonKpi.mitjana.toFixed(3)], ['Sèrie màx', seasonKpi.sm], ['% vict.', seasonKpi.pct + '%']] as [label, val]}
 						<div class="text-center">
 							<div class="font-mono text-base font-bold tabular-nums">{val}</div>
-							<div class="text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
+							<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</div>
 						</div>
 					{/each}
 				</div>
-				<p class="mt-2 px-1 text-[11px] text-slate-400">{seasonKpi.w} G · {seasonKpi.l} P{seasonKpi.t ? ` · ${seasonKpi.t} E` : ''}</p>
+				<p class="mt-2 px-1 text-[11px] text-slate-400 dark:text-slate-500">{seasonKpi.w} G · {seasonKpi.l} P{seasonKpi.t ? ` · ${seasonKpi.t} E` : ''}</p>
 			</div>
 			{#if serieFilter}
-				<p class="mb-2 px-1 text-[11px] text-blue-600">Partides amb la sèrie màxima ({kpi.sm}). Torna a tocar «Sèrie màx» per desfer.</p>
+				<p class="mb-2 px-1 text-[11px] text-blue-600 dark:text-blue-400">Partides amb la sèrie màxima ({kpi.sm}). Torna a tocar «Sèrie màx» per desfer.</p>
 			{/if}
 
 		{#if currentPos != null}
-			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Rànquing actual · 15 partides</div>
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Rànquing actual · 15 partides</div>
 				<div class="grid grid-cols-3 gap-2">
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums">#{currentPos}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">posició</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">posició</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums">{lastMitjana != null ? lastMitjana.toFixed(3) : '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">mitjana</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">mitjana</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums">{currentRank15.sm || '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">S.M.</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">S.M.</div>
 					</div>
 					<div class="text-center">
-						<div class="font-mono text-base font-bold tabular-nums text-amber-500">#{bestPos ?? '—'}</div>
-						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400">millor pos. rànquing</div>
+						<div class="font-mono text-base font-bold tabular-nums text-amber-500 dark:text-amber-400">#{bestPos ?? '—'}</div>
+						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400 dark:text-slate-500">millor pos. rànquing</div>
 					</div>
 					<div class="text-center">
-						<div class="font-mono text-base font-bold tabular-nums text-emerald-600">{bestMitjana != null ? bestMitjana.toFixed(3) : '—'}</div>
-						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400">millor mitjana rànquing</div>
+						<div class="font-mono text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{bestMitjana != null ? bestMitjana.toFixed(3) : '—'}</div>
+						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400 dark:text-slate-500">millor mitjana rànquing</div>
 					</div>
 					<div class="text-center">
-						<div class="font-mono text-base font-bold tabular-nums {lastMitjana != null && rank15.mitjana > lastMitjana ? 'text-emerald-600' : lastMitjana != null && rank15.mitjana < lastMitjana ? 'text-red-500' : ''}">{rank15.n ? rank15.mitjana.toFixed(3) : '—'}</div>
-						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400">mitjana proper rànquing</div>
+						<div class="font-mono text-base font-bold tabular-nums {lastMitjana != null && rank15.mitjana > lastMitjana ? 'text-emerald-600 dark:text-emerald-400' : lastMitjana != null && rank15.mitjana < lastMitjana ? 'text-red-500 dark:text-red-400' : ''}">{rank15.n ? rank15.mitjana.toFixed(3) : '—'}</div>
+						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400 dark:text-slate-500">mitjana proper rànquing</div>
 					</div>
 				</div>
-				<div class="mt-2 space-y-1 rounded-lg bg-slate-50 px-2 py-1.5 text-[11px] text-slate-500">
+				<div class="mt-2 space-y-1 rounded-lg bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5 text-[11px] text-slate-500 dark:text-slate-400">
 					<p>
-						<span class="font-semibold text-slate-700">Actual:</span>
+						<span class="font-semibold text-slate-700 dark:text-slate-200">Actual:</span>
 						{currentRank15.won} G · {currentRank15.lost} P{currentRank15.tie ? ` · ${currentRank15.tie} E` : ''}
 					</p>
 					<p>
-						<span class="font-semibold text-slate-700">Previsió:</span>
+						<span class="font-semibold text-slate-700 dark:text-slate-200">Previsió:</span>
 						{rank15.won} G · {rank15.lost} P{rank15.tie ? ` · ${rank15.tie} E` : ''}
 						{rank15.pendingN
 							? ` · ${rank15.pendingN} de Copa ${rank15.pendingN === 1 ? 'pendent' : 'pendents'}`
@@ -883,74 +891,74 @@
 		{/if}
 
 		{#if openRank.length}
-			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Rànquing d'Opens 3 Bandes</div>
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Rànquing d'Opens 3 Bandes</div>
 				<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums">#{openCur?.posicio ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">posició actual</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">posició actual</div>
 					</div>
 					<div class="text-center">
-						<div class="font-mono text-lg font-bold tabular-nums text-emerald-600">#{openBest ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">millor posició</div>
+						<div class="font-mono text-lg font-bold tabular-nums text-emerald-600 dark:text-emerald-400">#{openBest ?? '—'}</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">millor posició</div>
 					</div>
 					<div class="text-center">
-						<div class="font-mono text-lg font-bold tabular-nums text-amber-500">#{openBestResult ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">millor en un open</div>
+						<div class="font-mono text-lg font-bold tabular-nums text-amber-500 dark:text-amber-400">#{openBestResult ?? '—'}</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">millor en un open</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums">{openCur?.punts ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">punts</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">punts</div>
 					</div>
 				</div>
 			</div>
 		{/if}
 
 		{#if openRankFem.length}
-			<div class="mb-4 rounded-xl bg-rose-50 p-3 ring-1 ring-rose-200">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-rose-400">
+			<div class="mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 p-3 ring-1 ring-rose-200 dark:ring-rose-900/50">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-rose-400 dark:text-rose-400">
 					Rànquing Circuit Català Femení 3 Bandes
 				</div>
 				<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums">#{openFemCur?.posicio ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">posició actual</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">posició actual</div>
 					</div>
 					<div class="text-center">
-						<div class="font-mono text-lg font-bold tabular-nums text-emerald-600">#{openFemBest ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">millor posició</div>
+						<div class="font-mono text-lg font-bold tabular-nums text-emerald-600 dark:text-emerald-400">#{openFemBest ?? '—'}</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">millor posició</div>
 					</div>
 					<div class="text-center">
-						<div class="font-mono text-lg font-bold tabular-nums text-amber-500">#{openFemBestResult ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">millor en una prova</div>
+						<div class="font-mono text-lg font-bold tabular-nums text-amber-500 dark:text-amber-400">#{openFemBestResult ?? '—'}</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">millor en una prova</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums">{openFemCur?.punts ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-400">punts</div>
+						<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">punts</div>
 					</div>
 				</div>
 			</div>
 		{/if}
 
 		{#if palmaresBySeason.length}
-			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Palmarès individual</div>
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Palmarès individual</div>
 				<div class="space-y-3">
 					{#each palmaresBySeason as season}
 						<div>
-							<div class="mb-1 text-[11px] font-semibold text-slate-500">{season.temporada}</div>
+							<div class="mb-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{season.temporada}</div>
 							<ul class="space-y-1">
 								{#each season.entries as p}
-									<li class="flex items-center gap-2 rounded-lg px-1.5 py-1 text-sm {p.tipus === 'campionat' ? 'bg-blue-50 ring-1 ring-blue-100' : ''}">
-										<span class="w-6 shrink-0 text-center font-mono font-bold {p.posicio === 1 ? 'text-amber-500' : p.posicio === 2 ? 'text-slate-400' : 'text-orange-700'}">{ordinal(p.posicio)}</span>
+									<li class="flex items-center gap-2 rounded-lg px-1.5 py-1 text-sm {p.tipus === 'campionat' ? 'bg-blue-50 dark:bg-blue-950/40 ring-1 ring-blue-100 dark:ring-blue-900/50' : ''}">
+										<span class="w-6 shrink-0 text-center font-mono font-bold {p.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : p.posicio === 2 ? 'text-slate-400 dark:text-slate-500' : 'text-orange-700 dark:text-orange-300'}">{ordinal(p.posicio)}</span>
 										<div class="min-w-0 flex-1">
 											<div class="mb-0.5 flex items-center gap-1.5">
-												<span class="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide {p.tipus === 'campionat' ? 'bg-blue-600 text-white' : p.tipus === 'open' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}">{p.tipus === 'campionat' ? 'Camp. Catalunya' : p.tipus === 'open' ? 'Open' : 'Torneig'}</span>
+												<span class="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide {p.tipus === 'campionat' ? 'bg-blue-600 text-white' : p.tipus === 'open' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{p.tipus === 'campionat' ? 'Camp. Catalunya' : p.tipus === 'open' ? 'Open' : 'Torneig'}</span>
 												<a href="/opens/{p.openId}" class="min-w-0 truncate font-medium active:underline">{p.nom}</a>
 											</div>
-											{#if p.categoria}<div class="truncate text-[10px] uppercase tracking-wide text-slate-400">Categoria · {p.categoria}</div>{/if}
+											{#if p.categoria}<div class="truncate text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">Categoria · {p.categoria}</div>{/if}
 										</div>
-										{#if p.club}<span class="max-w-24 shrink-0 truncate text-[10px] text-slate-400">{p.club}</span>{/if}
+										{#if p.club}<span class="max-w-24 shrink-0 truncate text-[10px] text-slate-400 dark:text-slate-500">{p.club}</span>{/if}
 									</li>
 								{/each}
 							</ul>
@@ -961,13 +969,13 @@
 		{/if}
 
 		{#if h2h.played.length || h2h.won.length || h2h.lost.length}
-			<div class="mb-4 space-y-2 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-				<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Cara a cara (històric)</div>
-				{#each [['played', 'Més jugat amb', 'total', '', ''], ['won', 'Més guanyat a', 'won', 'text-emerald-600', ' G'], ['lost', 'Més perdut amb', 'lost', 'text-red-500', ' P']] as [k, title, field, color, suf]}
+			<div class="mb-4 space-y-2 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Cara a cara (històric)</div>
+				{#each [['played', 'Més jugat amb', 'total', '', ''], ['won', 'Més guanyat a', 'won', 'text-emerald-600 dark:text-emerald-400', ' G'], ['lost', 'Més perdut amb', 'lost', 'text-red-500 dark:text-red-400', ' P']] as [k, title, field, color, suf]}
 					{@const list = h2h[k]}
 					{#if list.length}
 						<div class="flex items-start gap-2 text-sm">
-							<span class="shrink-0 text-slate-500">{title}</span>
+							<span class="shrink-0 text-slate-500 dark:text-slate-400">{title}</span>
 							<div class="min-w-0 flex-1 space-y-0.5 text-right font-medium">
 								{#each list as e}<a
 										href="/jugador/{e.id}"
@@ -983,28 +991,28 @@
 
 		<!-- Millor partida (per mitjana) -->
 		{#if kpi.best != null && bestGames.length}
-			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
 					Millor partida{bestGames.length > 1 ? ` · ${bestGames.length}` : ''} · mitjana {kpi.best.toFixed(3)}
 				</div>
-				<div class="divide-y divide-slate-100">
+				<div class="divide-y divide-slate-100 dark:divide-slate-800">
 					{#each bestGames as g}
 						<div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 py-1.5 text-sm">
 							<span
 								class="rounded px-1 py-0.5 text-[10px] font-semibold {g.won
-									? 'bg-emerald-100 text-emerald-700'
+									? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
 									: g.tie
-										? 'bg-slate-100 text-slate-500'
-										: 'bg-red-100 text-red-600'}"
+										? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+										: 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400'}"
 								>{g.won ? 'V' : g.tie ? 'E' : 'D'}</span
 							>
 							{#if g.oppId}
 								<a href="/jugador/{g.oppId}" class="font-medium active:underline">{g.opp}</a>
 							{:else}<span class="font-medium">{g.opp}</span>{/if}
-							<span class="font-mono text-slate-500">{g.myCar}–{g.oppCar} · {g.ent} ent.</span>
+							<span class="font-mono text-slate-500 dark:text-slate-400">{g.myCar}–{g.oppCar} · {g.ent} ent.</span>
 							<span class="font-mono font-bold">{(g.myCar / g.ent).toFixed(3)}</span>
-							{#if g.comp}<span class="text-[11px] text-slate-400">{g.comp}</span>{/if}
-							<span class="ml-auto text-[11px] text-slate-400"
+							{#if g.comp}<span class="text-[11px] text-slate-400 dark:text-slate-500">{g.comp}</span>{/if}
+							<span class="ml-auto text-[11px] text-slate-400 dark:text-slate-500"
 								>{g.date ? g.date.split('-').reverse().join('/') : ''}</span
 							>
 						</div>
@@ -1015,18 +1023,18 @@
 
 		<!-- Rendiment per nivell d'oponent (aranya, per modalitat) -->
 		{#if selMod != null && ratingBuckets.some((b) => b.wins + b.losses > 0)}
-			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-center justify-between">
-					<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+					<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
 						Rendiment per nivell d'oponent
 					</div>
-					<div class="inline-flex overflow-hidden rounded-md border border-slate-300 text-[10px]">
+					<div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-700 text-[10px]">
 						<button
-							class="px-2 py-0.5 {radarMode === 'abs' ? 'bg-slate-800 text-white' : 'text-slate-600'}"
+							class="px-2 py-0.5 {radarMode === 'abs' ? 'bg-slate-800 text-white' : 'text-slate-600 dark:text-slate-300'}"
 							onclick={() => (radarMode = 'abs')}>Absolut</button
 						>
 						<button
-							class="px-2 py-0.5 {radarMode === 'pct' ? 'bg-slate-800 text-white' : 'text-slate-600'}"
+							class="px-2 py-0.5 {radarMode === 'pct' ? 'bg-slate-800 text-white' : 'text-slate-600 dark:text-slate-300'}"
 							onclick={() => (radarMode = 'pct')}>%</button
 						>
 					</div>
@@ -1035,26 +1043,26 @@
 				{#if ratingIndex != null || ratingCrossover != null}
 					<div class="mt-3 grid grid-cols-1 gap-2">
 						{#if ratingIndex != null}
-							<div class="rounded-lg bg-slate-50 p-2">
+							<div class="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-2">
 								<div class="flex items-baseline gap-2">
 									<span class="font-mono text-lg font-bold tabular-nums">{ratingIndex}</span>
-									<span class="text-[11px] font-semibold text-slate-600">Índex de rendiment</span>
+									<span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Índex de rendiment</span>
 								</div>
-								<p class="text-[11px] leading-snug text-slate-500">
+								<p class="text-[11px] leading-snug text-slate-500 dark:text-slate-400">
 									Com el % de victòries, però cada partida pesa segons el nivell del rival:
 									guanyar als forts compta més. De 0 a 100 (~50 = equilibrat).
 								</p>
 							</div>
 						{/if}
 						{#if ratingCrossover != null}
-							<div class="rounded-lg bg-slate-50 p-2">
+							<div class="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-2">
 								<div class="flex items-baseline gap-2">
 									<span class="font-mono text-lg font-bold tabular-nums"
 										>{ratingCrossover.toFixed(2).replace('.', ',')}</span
 									>
-									<span class="text-[11px] font-semibold text-slate-600">Nivell de competitivitat</span>
+									<span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Nivell de competitivitat</span>
 								</div>
-								<p class="text-[11px] leading-snug text-slate-500">
+								<p class="text-[11px] leading-snug text-slate-500 dark:text-slate-400">
 									Mitjana de rival on comences a perdre més partides de les que guanyes (la taxa
 									de victòries creua el 50%). Ets competitiu fins aquest nivell.
 								</p>
@@ -1068,87 +1076,87 @@
 		<!-- Evolució al rànquing -->
 		{#if mitjanaChart}
 			{#if selIdx != null && rankHist[selIdx]}
-				<div class="mb-2 flex items-center justify-center gap-3 rounded-lg bg-slate-900 px-3 py-1.5 text-xs text-white">
+				<div class="mb-2 flex items-center justify-center gap-3 rounded-lg bg-slate-900 dark:bg-slate-700 px-3 py-1.5 text-xs text-white">
 					<span class="font-semibold">{dateFromSeq(rankHist[selIdx].num_seq)}</span>
 					<span>mitjana <span class="font-mono font-bold">{rankHist[selIdx].mitjana?.toFixed(3) ?? '—'}</span></span>
 					<span>posició <span class="font-mono font-bold">#{rankHist[selIdx].posicio ?? '—'}</span></span>
 				</div>
 			{:else}
-				<p class="mb-2 text-center text-[11px] text-slate-400">Toca un gràfic per veure els valors d'un rànquing</p>
+				<p class="mb-2 text-center text-[11px] text-slate-400 dark:text-slate-500">Toca un gràfic per veure els valors d'un rànquing</p>
 			{/if}
 			<div class="mb-4 space-y-3">
 				<!-- Mitjana -->
-				<div class="rounded-xl bg-white p-3 ring-1 ring-slate-200">
+				<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 					<div class="mb-2 flex items-end justify-between">
-						<span class="text-xs font-semibold uppercase tracking-wide text-slate-400"
+						<span class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500"
 							>Mitjana al rànquing</span>
 						<div class="flex gap-4 text-right">
 							<div>
 								<div class="font-mono text-base font-bold leading-none tabular-nums">
 									{lastMitjana != null ? lastMitjana.toFixed(3) : '—'}
 								</div>
-								<div class="text-[10px] text-slate-400">actual</div>
+								<div class="text-[10px] text-slate-400 dark:text-slate-500">actual</div>
 							</div>
 							<div>
-								<div class="font-mono text-base font-bold leading-none tabular-nums text-emerald-600">
+								<div class="font-mono text-base font-bold leading-none tabular-nums text-emerald-600 dark:text-emerald-400">
 									{mitjanaChart.hi.toFixed(3)}
 								</div>
-								<div class="text-[10px] text-slate-400">millor</div>
+								<div class="text-[10px] text-slate-400 dark:text-slate-500">millor</div>
 							</div>
 						</div>
 					</div>
 					<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickPoint} role="presentation" class="h-24 w-full cursor-pointer">
 							{#each [0, 0.25, 0.5, 0.75, 1] as f}
-								<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke="#eef2f7" stroke-width="1" vector-effect="non-scaling-stroke" />
+								<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
 							{/each}
 						{#each xTicks as t}
-							<line x1={t.x} y1="2" x2={t.x} y2={VBH - 2} stroke="#e2e8f0" stroke-width="1" vector-effect="non-scaling-stroke" />
+							<line x1={t.x} y1="2" x2={t.x} y2={VBH - 2} stroke={cAxis} stroke-width="1" vector-effect="non-scaling-stroke" />
 						{/each}
-						<polyline points={mitjanaChart.area} fill="#0f172a" opacity="0.06" />
+						<polyline points={mitjanaChart.area} fill={cInk} opacity="0.06" />
 						<polyline
 							points={mitjanaChart.line}
 							fill="none"
-							stroke="#0f172a"
+							stroke={cInk}
 							stroke-width="1.5"
 							stroke-linejoin="round"
 							vector-effect="non-scaling-stroke" />
-						<circle cx={mitjanaChart.last.x} cy={mitjanaChart.last.y} r="3" fill="#0f172a" />
+						<circle cx={mitjanaChart.last.x} cy={mitjanaChart.last.y} r="3" fill={cInk} />
 							{#if selIdx != null && mitjanaChart.pts[selIdx]}
-								<line x1={mitjanaChart.pts[selIdx].x} y1="2" x2={mitjanaChart.pts[selIdx].x} y2={VBH - 2} stroke="#0f172a" stroke-width="1" vector-effect="non-scaling-stroke" />
-								<circle cx={mitjanaChart.pts[selIdx].x} cy={mitjanaChart.pts[selIdx].y} r="4" fill="#0f172a" stroke="#fff" stroke-width="1.5" />
+								<line x1={mitjanaChart.pts[selIdx].x} y1="2" x2={mitjanaChart.pts[selIdx].x} y2={VBH - 2} stroke={cInk} stroke-width="1" vector-effect="non-scaling-stroke" />
+								<circle cx={mitjanaChart.pts[selIdx].x} cy={mitjanaChart.pts[selIdx].y} r="4" fill={cInk} stroke={cHalo} stroke-width="1.5" />
 							{/if}
 					</svg>
-					<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300">
+					<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300 dark:text-slate-600">
 						{#each xTicks as t}<span>{t.label}</span>{/each}
 					</div>
 				</div>
 				<!-- Posició -->
-				<div class="rounded-xl bg-white p-3 ring-1 ring-slate-200">
+				<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 					<div class="mb-2 flex items-end justify-between">
-						<span class="text-xs font-semibold uppercase tracking-wide text-slate-400"
+						<span class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500"
 							>Posició al rànquing</span>
 						<div class="flex gap-4 text-right">
 							<div>
 								<div class="font-mono text-base font-bold leading-none tabular-nums">
 									#{currentPos ?? '—'}
 								</div>
-								<div class="text-[10px] text-slate-400">actual</div>
+								<div class="text-[10px] text-slate-400 dark:text-slate-500">actual</div>
 							</div>
 							<div>
-								<div class="font-mono text-base font-bold leading-none tabular-nums text-amber-500">
+								<div class="font-mono text-base font-bold leading-none tabular-nums text-amber-500 dark:text-amber-400">
 									#{bestPos ?? '—'}
 								</div>
-								<div class="text-[10px] text-slate-400">millor</div>
+								<div class="text-[10px] text-slate-400 dark:text-slate-500">millor</div>
 							</div>
 						</div>
 					</div>
 					{#if posChart}
 						<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickPoint} role="presentation" class="h-24 w-full cursor-pointer">
 							{#each [0, 0.25, 0.5, 0.75, 1] as f}
-								<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke="#eef2f7" stroke-width="1" vector-effect="non-scaling-stroke" />
+								<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
 							{/each}
 							{#each xTicks as t}
-								<line x1={t.x} y1="2" x2={t.x} y2={VBH - 2} stroke="#fde68a" stroke-width="1" vector-effect="non-scaling-stroke" />
+								<line x1={t.x} y1="2" x2={t.x} y2={VBH - 2} stroke={cAxisAmber} stroke-width="1" vector-effect="non-scaling-stroke" />
 							{/each}
 							<polyline points={posChart.area} fill="#f59e0b" opacity="0.08" />
 							<polyline
@@ -1161,41 +1169,41 @@
 							<circle cx={posChart.last.x} cy={posChart.last.y} r="3" fill="#f59e0b" />
 								{#if selIdx != null && posChart.pts[selIdx]}
 									<line x1={posChart.pts[selIdx].x} y1="2" x2={posChart.pts[selIdx].x} y2={VBH - 2} stroke="#b45309" stroke-width="1" vector-effect="non-scaling-stroke" />
-									<circle cx={posChart.pts[selIdx].x} cy={posChart.pts[selIdx].y} r="4" fill="#f59e0b" stroke="#fff" stroke-width="1.5" />
+									<circle cx={posChart.pts[selIdx].x} cy={posChart.pts[selIdx].y} r="4" fill="#f59e0b" stroke={cHalo} stroke-width="1.5" />
 								{/if}
 						</svg>
-						<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300">
+						<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300 dark:text-slate-600">
 							{#each xTicks as t}<span>{t.label}</span>{/each}
 						</div>
-						<p class="mt-1 text-right text-[10px] text-slate-300">{posChart.n} rànquings · amunt = millor</p>
+						<p class="mt-1 text-right text-[10px] text-slate-300 dark:text-slate-600">{posChart.n} rànquings · amunt = millor</p>
 					{/if}
 				</div>
 			</div>
 		{/if}
 
 		{#if rollChart && roll15.length}
-			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-end justify-between">
-					<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Mitjana mòbil · 15 partides</span>
+					<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Mitjana mòbil · 15 partides</span>
 					{#if rollSel != null && roll15[rollSel]}
 						<div class="text-right">
-							<div class="font-mono text-base font-bold leading-none tabular-nums text-blue-600">{roll15[rollSel].avg.toFixed(3)}</div>
-							<div class="text-[9px] text-slate-400">{fmtDate(roll15[rollSel].from)} – {fmtDate(roll15[rollSel].to)}</div>
+							<div class="font-mono text-base font-bold leading-none tabular-nums text-blue-600 dark:text-blue-400">{roll15[rollSel].avg.toFixed(3)}</div>
+							<div class="text-[9px] text-slate-400 dark:text-slate-500">{fmtDate(roll15[rollSel].from)} – {fmtDate(roll15[rollSel].to)}</div>
 						</div>
 					{/if}
 				</div>
 				{#if rollSel != null && roll15[rollSel]}
-					<div class="mb-1 flex items-center justify-between gap-2 rounded-lg bg-slate-900 px-2 py-1 text-[11px] text-white">
+					<div class="mb-1 flex items-center justify-between gap-2 rounded-lg bg-slate-900 dark:bg-slate-700 px-2 py-1 text-[11px] text-white">
 						<span class="min-w-0 truncate">
 							{#if roll15[rollSel].oppId}<a href="/jugador/{roll15[rollSel].oppId}" class="font-medium active:underline">{roll15[rollSel].opp}</a>{:else}<span class="font-medium">{roll15[rollSel].opp}</span>{/if}
-							<span class="text-slate-300">· {fmtDate(roll15[rollSel].date)}</span>
+							<span class="text-slate-300 dark:text-slate-600">· {fmtDate(roll15[rollSel].date)}</span>
 						</span>
 						<span class="shrink-0">partida <span class="font-mono font-bold">{roll15[rollSel].g.toFixed(3)}</span></span>
 					</div>
 				{/if}
 				<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickRoll} role="presentation" class="h-24 w-full cursor-pointer">
 					{#each [0, 0.25, 0.5, 0.75, 1] as f}
-						<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke="#eef2f7" stroke-width="1" vector-effect="non-scaling-stroke" />
+						<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
 					{/each}
 					<polyline points={rollChart.gline} fill="none" stroke="#94a3b8" stroke-width="1" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
 					{#each rollChart.gpts as gp}
@@ -1205,29 +1213,29 @@
 					{#if rollSel != null && rollSel - rollStart >= 0 && rollSel - rollStart < rollWin.length}
 						{@const li = rollSel - rollStart}
 						<line x1={rollChart.pts[li].x} y1="2" x2={rollChart.pts[li].x} y2={VBH - 2} stroke="#2563eb" stroke-width="1" vector-effect="non-scaling-stroke" />
-						<circle cx={rollChart.pts[li].x} cy={rollChart.pts[li].y} r="4" fill="#2563eb" stroke="#fff" stroke-width="1.5" />
-						<circle cx={rollChart.gpts[li].x} cy={rollChart.gpts[li].y} r="3.5" fill="#475569" stroke="#fff" stroke-width="1.5" />
+						<circle cx={rollChart.pts[li].x} cy={rollChart.pts[li].y} r="4" fill="#2563eb" stroke={cHalo} stroke-width="1.5" />
+						<circle cx={rollChart.gpts[li].x} cy={rollChart.gpts[li].y} r="3.5" fill="#475569" stroke={cHalo} stroke-width="1.5" />
 					{/if}
 				</svg>
-				<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-400">
+				<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-400 dark:text-slate-500">
 					<span>mín {rollChart.lo.toFixed(3)}</span>
 					<span>màx {rollChart.hi.toFixed(3)}</span>
 				</div>
 				{#if roll15.length > 1}
 					<input type="range" min="0" max={roll15.length - 1} step="1" bind:value={rollSel} class="thin-range mt-2 w-full" />
-					<p class="text-center text-[10px] text-slate-400">punt {(rollSel ?? 0) + 1} de {roll15.length} · finestra {rollStart + 1}–{Math.min(rollStart + WIN, roll15.length)}</p>
+					<p class="text-center text-[10px] text-slate-400 dark:text-slate-500">punt {(rollSel ?? 0) + 1} de {roll15.length} · finestra {rollStart + 1}–{Math.min(rollStart + WIN, roll15.length)}</p>
 				{/if}
 			</div>
 		{/if}
 
 		{#if clubGroups.length}
-			<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Clubs</div>
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Clubs</div>
 				<div class="flex flex-wrap gap-1.5">
 					{#each clubGroups as g}
-						<div class="rounded-lg bg-slate-50 px-2 py-1 text-[11px] ring-1 ring-slate-200">
-							<span class="font-semibold text-slate-700">{g.label}</span>
-							<span class="text-slate-500">· {g.club ?? '—'}</span>
+						<div class="rounded-lg bg-slate-50 dark:bg-slate-800/50 px-2 py-1 text-[11px] ring-1 ring-slate-200 dark:ring-slate-800">
+							<span class="font-semibold text-slate-700 dark:text-slate-200">{g.label}</span>
+							<span class="text-slate-500 dark:text-slate-400">· {g.club ?? '—'}</span>
 						</div>
 					{/each}
 				</div>
@@ -1238,19 +1246,19 @@
 			<div class="min-w-0">
 			<!-- Partides recents -->
 			{#if selMod === 1 && copaPend.length}
-				<div class="mb-3 rounded-xl border border-blue-200 bg-blue-50 p-3">
-					<div class="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
+				<div class="mb-3 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 p-3">
+					<div class="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300">
 						Recents · incloses a la previsió del proper rànquing
 					</div>
 					<ul class="space-y-1">
 						{#each copaPend as cp}
 							<li class="flex items-center gap-3 text-sm">
-								<span class="w-5 shrink-0 text-center text-xs font-bold {cp.myCar > cp.oppCar ? 'text-emerald-600' : cp.myCar < cp.oppCar ? 'text-red-500' : 'text-slate-400'}">{cp.myCar > cp.oppCar ? 'G' : cp.myCar < cp.oppCar ? 'P' : 'E'}</span>
+								<span class="w-5 shrink-0 text-center text-xs font-bold {cp.myCar > cp.oppCar ? 'text-emerald-600 dark:text-emerald-400' : cp.myCar < cp.oppCar ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}">{cp.myCar > cp.oppCar ? 'G' : cp.myCar < cp.oppCar ? 'P' : 'E'}</span>
 								<span class="min-w-0 flex-1 truncate">{cp.opp}</span>
-								<span class="shrink-0 text-[10px] uppercase text-blue-600">{cp.grup}</span>
+								<span class="shrink-0 text-[10px] uppercase text-blue-600 dark:text-blue-400">{cp.grup}</span>
 								<div class="shrink-0 text-right">
 									<div class="font-mono text-sm tabular-nums">{cp.myCar}–{cp.oppCar}</div>
-									<div class="font-mono text-[11px] tabular-nums text-slate-400">{cp.ent ? `${(cp.myCar / cp.ent).toFixed(3)} · ${cp.ent} ent.` : '—'}</div>
+									<div class="font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500">{cp.ent ? `${(cp.myCar / cp.ent).toFixed(3)} · ${cp.ent} ent.` : '—'}</div>
 								</div>
 							</li>
 						{/each}
@@ -1258,28 +1266,28 @@
 				</div>
 			{/if}
 			{#if rank15.ids.size}
-				<p class="mb-2 flex items-center gap-1.5 px-1 text-[11px] text-slate-400">
-					<span class="inline-block h-3 w-3 rounded bg-amber-50 ring-1 ring-amber-200"></span>
+				<p class="mb-2 flex items-center gap-1.5 px-1 text-[11px] text-slate-400 dark:text-slate-500">
+					<span class="inline-block h-3 w-3 rounded bg-amber-50 dark:bg-amber-950/40 ring-1 ring-amber-200 dark:ring-amber-900/50"></span>
 					les {rank15.ids.size} de games que entren a la previsió del proper rànquing
 				</p>
 			{/if}
-		<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+		<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			{#each displayGames as g (g.id)}
 				{@const p = persp(g)}
 				<li
 					id="game-{g.id}"
-					class="flex items-center gap-3 border-b border-slate-100 px-3 py-2 last:border-0 {rank15.ids.has(g.id)
-						? 'bg-amber-50'
+					class="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0 {rank15.ids.has(g.id)
+						? 'bg-amber-50 dark:bg-amber-950/40'
 						: $page.url.searchParams.get('game') === g.id
-							? 'bg-blue-50 ring-1 ring-inset ring-blue-300'
+							? 'bg-blue-50 dark:bg-blue-950/40 ring-1 ring-inset ring-blue-300 dark:ring-blue-900/50'
 							: ''}"
 				>
 					<span
 						class="w-6 shrink-0 rounded text-center text-xs font-bold {p.tie
-							? 'text-slate-400'
+							? 'text-slate-400 dark:text-slate-500'
 							: p.won
-								? 'text-emerald-600'
-								: 'text-red-500'}">{p.tie ? 'E' : p.won ? 'G' : 'P'}</span>
+								? 'text-emerald-600 dark:text-emerald-400'
+								: 'text-red-500 dark:text-red-400'}">{p.tie ? 'E' : p.won ? 'G' : 'P'}</span>
 					<div class="min-w-0 flex-1">
 						{#if p.oppId}
 							<a
@@ -1289,13 +1297,13 @@
 						{:else}
 							<div class="truncate text-sm leading-tight">{p.opp}</div>
 						{/if}
-						<div class="text-[11px] text-slate-400">
+						<div class="text-[11px] text-slate-400 dark:text-slate-500">
 							{fmtDate(p.date)} · {p.comp ?? ''}{p.mySerie ? ` · S.M. ${p.mySerie}` : ''}
 						</div>
 					</div>
 					<div class="shrink-0 text-right">
 						<div class="font-mono text-sm tabular-nums">{p.myCar}–{p.oppCar}</div>
-						<div class="text-[11px] tabular-nums text-slate-400">
+						<div class="text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
 							{p.ent ? `${(p.myCar / p.ent).toFixed(3)} · ${p.ent} ent.` : '—'}
 						</div>
 					</div>
@@ -1305,12 +1313,12 @@
 		{#if !serieFilter && modGames.length > shown}
 			<button
 				onclick={() => (shown += 60)}
-				class="mt-2 w-full rounded-lg bg-white py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 active:bg-slate-50"
+				class="mt-2 w-full rounded-lg bg-white dark:bg-slate-900 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800 active:bg-slate-50 dark:active:bg-slate-800/50"
 			>
 				Carregar més ({shown} de {modGames.length})
 			</button>
 		{:else if modGames.length > 60}
-			<p class="px-1 py-3 text-center text-[11px] text-slate-400">{modGames.length} partides</p>
+			<p class="px-1 py-3 text-center text-[11px] text-slate-400 dark:text-slate-500">{modGames.length} partides</p>
 		{/if}
 			</div>
 		</div>
@@ -1325,6 +1333,9 @@
 		border-radius: 9999px;
 		background: #e2e8f0;
 		cursor: pointer;
+	}
+	:global(html.dark) .thin-range {
+		background: #334155; /* slate-700 */
 	}
 	.thin-range::-webkit-slider-thumb {
 		-webkit-appearance: none;

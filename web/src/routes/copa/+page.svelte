@@ -121,21 +121,21 @@
 </script>
 
 {#if error}
-	<div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
+	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
 {:else if loading}
-	<p class="py-6 text-center text-sm text-slate-400">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
 {:else if phases.length === 0}
-	<p class="py-6 text-center text-sm text-slate-400">Sense classificacions de copa.</p>
+	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense classificacions de copa.</p>
 {:else}
 	<!-- Toggle Equips / Jugadors -->
-	<div class="mb-3 inline-flex rounded-lg bg-slate-100 p-0.5 text-sm">
+	<div class="mb-3 inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 text-sm">
 		<button
 			onclick={() => (mode = 'equips')}
-			class="rounded-md px-3 py-1 font-medium {mode === 'equips' ? 'bg-white shadow-sm' : 'text-slate-500'}"
+			class="rounded-md px-3 py-1 font-medium {mode === 'equips' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 			>Equips</button>
 		<button
 			onclick={() => (mode = 'jugadors')}
-			class="rounded-md px-3 py-1 font-medium {mode === 'jugadors' ? 'bg-white shadow-sm' : 'text-slate-500'}"
+			class="rounded-md px-3 py-1 font-medium {mode === 'jugadors' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 			>Jugadors</button>
 	</div>
 
@@ -143,16 +143,16 @@
 		bind:value={q}
 		inputmode="search"
 		placeholder={mode === 'equips' ? 'Filtra equip…' : 'Filtra jugador…'}
-		class="mb-3 w-full rounded-lg border-slate-300 bg-white py-2 px-3 text-sm shadow-sm"
+		class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm"
 	/>
 
 	{#if mode === 'jugadors'}
 		<!-- Rànquing de tota la competició -->
-		<section class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
-			<header class="border-b border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+		<section class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+			<header class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				Rànquing de la Copa · {compPlayers.length} jugadors
 			</header>
-			<div class="flex items-center gap-2 border-b border-slate-100 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400">
+			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
 				<span class="w-6 text-center">#</span>
 				<span class="flex-1">Jugador</span>
 				<span class="w-6 text-center">PJ</span>
@@ -161,11 +161,11 @@
 			</div>
 			<ul>
 				{#each compPlayers as r (r.player_fcb_id)}
-					<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
-						<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500' : 'text-slate-400'}">{r.posicio}</span>
+					<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
+						<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
 						<a href="/jugador/{r.player_fcb_id}" class="min-w-0 flex-1 truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
-						<span class="w-6 shrink-0 text-center text-xs tabular-nums text-slate-500">{r.partides}</span>
-						<span class="w-11 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
+						<span class="w-6 shrink-0 text-center text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.partides}</span>
+						<span class="w-11 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
 						<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
 					</li>
 				{/each}
@@ -178,24 +178,24 @@
 				<button
 					onclick={() => (selJornada = f.jornada)}
 					class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium {f.jornada === selJornada
-						? 'bg-slate-900 text-white'
-						: 'bg-white text-slate-600 ring-1 ring-slate-200'}">{f.nom}</button>
+						? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+						: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}">{f.nom}</button>
 			{/each}
 		</div>
 
 		{#each phaseGroups as g (g.grup_id)}
-		<section class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+		<section class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			<button
 				onclick={() => toggle(g.grup_id)}
-				class="flex w-full items-center gap-2 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
+				class="flex w-full items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
 			>
 				<span class="flex-1">{g.grup_nom ?? 'Grup'}</span>
-				<span class="font-normal normal-case text-slate-400">{count(g.grup_id)} {mode}</span>
-				<span class="text-slate-400 transition-transform {collapsed.has(g.grup_id) ? '' : 'rotate-90'}">›</span>
+				<span class="font-normal normal-case text-slate-400 dark:text-slate-500">{count(g.grup_id)} {mode}</span>
+				<span class="text-slate-400 dark:text-slate-500 transition-transform {collapsed.has(g.grup_id) ? '' : 'rotate-90'}">›</span>
 			</button>
 			{#if !collapsed.has(g.grup_id)}
 				{#if mode === 'equips'}
-					<div class="flex items-center gap-2 border-y border-slate-100 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400">
+					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
 						<span class="w-5 text-center">#</span>
 						<span class="flex-1">Equip</span>
 						<span class="w-12 text-right">Mitj.</span>
@@ -203,16 +203,16 @@
 					</div>
 					<ul>
 						{#each rows(g.grup_id) as r (r.equip)}
-							<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
-								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500' : 'text-slate-400'}">{r.posicio}</span>
+							<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
+								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
 								<div class="min-w-0 flex-1 truncate text-sm font-medium leading-tight">{r.equip}</div>
-								<span class="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-slate-400">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
+								<span class="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
 								<span class="w-9 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
 							</li>
 						{/each}
 					</ul>
 				{:else}
-					<div class="flex items-center gap-2 border-y border-slate-100 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400">
+					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
 						<span class="w-5 text-center">#</span>
 						<span class="flex-1">Jugador</span>
 						<span class="w-12 text-right">Mitj.</span>
@@ -220,10 +220,10 @@
 					</div>
 					<ul>
 						{#each playerRows(g.grup_id) as r (r.player_fcb_id)}
-							<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
-								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500' : 'text-slate-400'}">{r.posicio}</span>
+							<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
+								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
 								<a href="/jugador/{r.player_fcb_id}" class="min-w-0 flex-1 truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
-								<span class="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
+								<span class="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
 								<span class="w-8 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
 							</li>
 						{/each}
@@ -232,23 +232,23 @@
 
 				<!-- Resultats del grup -->
 				{#if encOf(g.grup_id).length}
-					<div class="border-t border-slate-100 bg-slate-50/60 p-2">
+					<div class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 p-2">
 						<ul class="space-y-1">
 							{#each encOf(g.grup_id) as e (e.encontre_id)}
-								<li class="overflow-hidden rounded-lg bg-white ring-1 ring-slate-200">
+								<li class="overflow-hidden rounded-lg bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 									<button onclick={() => toggleEnc(e.encontre_id)} class="flex w-full items-center gap-2 px-2 py-1.5 text-xs">
 										<span class="flex-1 truncate text-left font-medium">{e.equip_local}</span>
-										<span class="shrink-0 rounded bg-slate-100 px-1.5 font-mono font-bold tabular-nums">{e.gols_local}–{e.gols_visitant}</span>
+										<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 font-mono font-bold tabular-nums">{e.gols_local}–{e.gols_visitant}</span>
 										<span class="flex-1 truncate text-right font-medium">{e.equip_visitant}</span>
 									</button>
 									{#if expandedEnc.has(e.encontre_id)}
-										<div class="border-t border-slate-100 px-2 py-1">
+										<div class="border-t border-slate-100 dark:border-slate-800 px-2 py-1">
 											{#each partidesCache[e.encontre_id] ?? [] as p}
 												<div class="flex items-center gap-2 py-0.5 text-[11px]">
 													<span class="flex-1 truncate text-left">{p.jugador_local}</span>
 													<span class="shrink-0 font-mono tabular-nums">{p.caramboles_local}–{p.caramboles_visitant}</span>
 													<span class="flex-1 truncate text-right">{p.jugador_visitant}</span>
-													<span class="w-12 shrink-0 text-right text-slate-400">{p.entrades} ent</span>
+													<span class="w-12 shrink-0 text-right text-slate-400 dark:text-slate-500">{p.entrades} ent</span>
 												</div>
 											{/each}
 										</div>

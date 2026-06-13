@@ -2,6 +2,11 @@
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase';
 	import { follows, toggleFollow, clubFollows, toggleClubFollow } from '$lib/follows';
+	import { theme } from '$lib/theme';
+
+	// Colors dels gràfics SVG reactius al tema (clar/fosc).
+	const cGrid = $derived($theme === 'dark' ? '#1e293b' : '#eef2f7');
+	const cHalo = $derived($theme === 'dark' ? '#0f172a' : '#fff');
 
 	interface Pt {
 		seq: number;
@@ -17,7 +22,8 @@
 		posicio: number | null;
 		mitjana: number | null;
 	}
-	const COLORS = ['#0f172a', '#e0322a', '#2563eb', '#16a34a', '#f59e0b', '#7c3aed', '#db2777', '#0891b2'];
+	// '#64748b' (slate-500) en comptes del negre original: visible en clar i fosc.
+	const COLORS = ['#64748b', '#e0322a', '#2563eb', '#16a34a', '#f59e0b', '#7c3aed', '#db2777', '#0891b2'];
 
 	let allPlayers = $state<{ fcb_id: string; nom: string; club_fcb_id: string | null }[]>([]);
 	let clubsMap = $state<Map<string, string>>(new Map());
@@ -318,51 +324,51 @@
 <h1 class="mb-3 text-base font-bold">★ Seguiment</h1>
 
 {#if loading}
-	<p class="py-6 text-center text-sm text-slate-400">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
 {:else}
 	<!-- CLUBS seguits -->
-	<h2 class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Clubs</h2>
+	<h2 class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Clubs</h2>
 	<input
 		bind:value={clubQ}
 		placeholder="Afegeix un club…"
-		class="mb-2 w-full rounded-lg border-slate-300 bg-white py-2 px-3 text-sm shadow-sm"
+		class="mb-2 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm"
 	/>
 	{#if clubMatches.length}
-		<ul class="mb-3 overflow-hidden rounded-lg bg-white ring-1 ring-slate-200">
+		<ul class="mb-3 overflow-hidden rounded-lg bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			{#each clubMatches as c (c.fcb_id)}
 				<button
 					onclick={() => {
 						toggleClubFollow(c.fcb_id);
 						clubQ = '';
 					}}
-					class="flex w-full items-center justify-between border-b border-slate-100 px-3 py-2 text-left text-sm last:border-0 active:bg-slate-50"
+					class="flex w-full items-center justify-between border-b border-slate-100 dark:border-slate-800 px-3 py-2 text-left text-sm last:border-0 active:bg-slate-50 dark:active:bg-slate-800/50"
 				>
-					<span class="truncate">{c.nom}</span><span class="text-amber-500">+ seguir</span>
+					<span class="truncate">{c.nom}</span><span class="text-amber-500 dark:text-amber-400">+ seguir</span>
 				</button>
 			{/each}
 		</ul>
 	{/if}
 	{#each $clubFollows as clubId (clubId)}
-		<section class="mb-3 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
-			<header class="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
+		<section class="mb-3 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+			<header class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2">
 				<button onclick={() => toggleClubCollapse(clubId)} class="flex min-w-0 flex-1 items-center gap-2 text-left">
-					<span class="text-slate-400 transition-transform {collapsedClubs.has(clubId) ? '' : 'rotate-90'}">›</span>
+					<span class="text-slate-400 dark:text-slate-500 transition-transform {collapsedClubs.has(clubId) ? '' : 'rotate-90'}">›</span>
 					<span class="truncate text-sm font-bold">{clubsMap.get(clubId) ?? clubId}</span>
-					<span class="shrink-0 text-[11px] font-normal text-slate-400">{clubPlayers(clubId).length}</span>
+					<span class="shrink-0 text-[11px] font-normal text-slate-400 dark:text-slate-500">{clubPlayers(clubId).length}</span>
 				</button>
-				<button onclick={() => toggleClubFollow(clubId)} class="shrink-0 text-xs text-amber-600">★ treure</button>
+				<button onclick={() => toggleClubFollow(clubId)} class="shrink-0 text-xs text-amber-600 dark:text-amber-400">★ treure</button>
 			</header>
 			{#if !collapsedClubs.has(clubId)}
 				<ul>
 					{#each clubPlayers(clubId) as p, i (p.fcb_id)}
-						<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
-							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-400">{i + 1}</span>
+						<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
+							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-400 dark:text-slate-500">{i + 1}</span>
 							<a href="/jugador/{p.fcb_id}" class="min-w-0 flex-1 truncate text-sm font-medium active:underline">{p.nom}</a>
 							{#if p.rank}
-								<span class="shrink-0 font-mono text-xs tabular-nums text-slate-500">
+								<span class="shrink-0 font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">
 									#{p.rank.posicio} · {p.rank.mitjana?.toFixed(3)}
 									{#if projectedMap.has(p.fcb_id)}
-										<span class="font-bold text-blue-600"> → prev. {projectedMap.get(p.fcb_id)?.toFixed(3)}</span>
+										<span class="font-bold text-blue-600 dark:text-blue-400"> → prev. {projectedMap.get(p.fcb_id)?.toFixed(3)}</span>
 									{/if}
 								</span>
 							{/if}
@@ -373,20 +379,20 @@
 		</section>
 	{/each}
 	{#if $clubFollows.length === 0}
-		<p class="mb-4 text-[11px] text-slate-400">Cap club seguit. Cerca'n un a dalt.</p>
+		<p class="mb-4 text-[11px] text-slate-400 dark:text-slate-500">Cap club seguit. Cerca'n un a dalt.</p>
 	{/if}
 
 	<!-- JUGADORS seguits -->
-	<h2 class="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-400">Jugadors</h2>
+	<h2 class="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Jugadors</h2>
 	{#if series.length === 0}
-		<div class="rounded-xl bg-white p-5 text-center text-sm text-slate-400 ring-1 ring-slate-200">
+		<div class="rounded-xl bg-white dark:bg-slate-900 p-5 text-center text-sm text-slate-400 dark:text-slate-500 ring-1 ring-slate-200 dark:ring-slate-800">
 			Cap jugador seguit. Entra a una fitxa i toca <b>☆ Seguir</b>.
 		</div>
 	{:else}
 		{#if hasHist}
 			<div class="mb-3 space-y-3">
 				{#if selSeq != null}
-					<div class="rounded-lg bg-slate-900 px-3 py-2 text-xs text-white">
+					<div class="rounded-lg bg-slate-900 dark:bg-slate-700 px-3 py-2 text-xs text-white">
 						<div class="mb-1 font-semibold">{dateFromSeq(selSeq)}</div>
 						<div class="flex flex-wrap gap-x-3 gap-y-1">
 							{#each series as s}
@@ -406,16 +412,16 @@
 					{@const vr = rng(getter)}
 					{@const yTop = inv ? vr[0] : vr[1]}
 					{@const yBot = inv ? vr[1] : vr[0]}
-					<div class="rounded-xl bg-white p-3 ring-1 ring-slate-200">
-						<div class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</div>
+					<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+						<div class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{title}</div>
 						<div class="flex gap-1">
-							<div class="flex w-9 flex-col justify-between py-0.5 text-right text-[9px] tabular-nums text-slate-400">
+							<div class="flex w-9 flex-col justify-between py-0.5 text-right text-[9px] tabular-nums text-slate-400 dark:text-slate-500">
 								<span>{inv ? '#' + Math.round(yTop) : yTop.toFixed(2)}</span>
 								<span>{inv ? '#' + Math.round(yBot) : yBot.toFixed(2)}</span>
 							</div>
 							<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickSeq} role="presentation" class="h-24 flex-1 cursor-pointer">
 								{#each [0, 0.25, 0.5, 0.75, 1] as f}
-									<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke="#eef2f7" stroke-width="1" vector-effect="non-scaling-stroke" />
+									<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
 								{/each}
 								{#each series as s}
 									<polyline points={lineFor(s, getter, inv)} fill="none" stroke={s.color} stroke-width="1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
@@ -426,34 +432,34 @@
 										{@const v = valAt(s, selSeq, getter)}
 										{#if v != null}
 											{@const t = inv ? 1 - (v - vr[0]) / (vr[1] - vr[0]) : (v - vr[0]) / (vr[1] - vr[0])}
-											<circle cx={xForSeq(selSeq)} cy={VBH - PAD - t * (VBH - 2 * PAD)} r="3.5" fill={s.color} stroke="#fff" stroke-width="1" />
+											<circle cx={xForSeq(selSeq)} cy={VBH - PAD - t * (VBH - 2 * PAD)} r="3.5" fill={s.color} stroke={cHalo} stroke-width="1" />
 										{/if}
 									{/each}
 								{/if}
 							</svg>
 						</div>
-						<div class="flex justify-between pl-10 text-[9px] tabular-nums text-slate-400">
+						<div class="flex justify-between pl-10 text-[9px] tabular-nums text-slate-400 dark:text-slate-500">
 							{#each xTicksSeg as seq}<span>{dateShort(seq)}</span>{/each}
 						</div>
 					</div>
 				{/each}
 			</div>
 		{/if}
-		<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 lg:columns-2 lg:gap-x-6">
+		<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800 lg:columns-2 lg:gap-x-6">
 			{#each series as s (s.fcb_id)}
-				<li class="flex break-inside-avoid items-center gap-2 border-b border-slate-100 px-3 py-2.5 last:border-0">
+				<li class="flex break-inside-avoid items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2.5 last:border-0">
 					<span class="h-3 w-3 shrink-0 rounded-full" style:background-color={s.color}></span>
 					<a href="/jugador/{s.fcb_id}" class="min-w-0 flex-1">
 						<div class="truncate text-sm font-medium leading-tight">{s.nom}</div>
-						{#if s.club}<div class="truncate text-xs text-slate-400">{s.club}</div>{/if}
+						{#if s.club}<div class="truncate text-xs text-slate-400 dark:text-slate-500">{s.club}</div>{/if}
 					</a>
 					{#if s.posicio != null}
 						<div class="shrink-0 text-right">
 							<div class="font-mono text-sm font-bold tabular-nums">#{s.posicio}</div>
-							<div class="text-[10px] text-slate-400">{s.mitjana?.toFixed(3) ?? ''}</div>
+							<div class="text-[10px] text-slate-400 dark:text-slate-500">{s.mitjana?.toFixed(3) ?? ''}</div>
 						</div>
 					{/if}
-					<button onclick={() => toggleFollow(s.fcb_id)} class="shrink-0 rounded-full px-2 py-1 text-xs text-amber-600" aria-label="treure">★</button>
+					<button onclick={() => toggleFollow(s.fcb_id)} class="shrink-0 rounded-full px-2 py-1 text-xs text-amber-600 dark:text-amber-400" aria-label="treure">★</button>
 				</li>
 			{/each}
 		</ul>

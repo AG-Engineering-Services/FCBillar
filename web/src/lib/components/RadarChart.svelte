@@ -12,8 +12,12 @@
 		mode?: 'abs' | 'pct';
 	} = $props();
 
+	import { theme } from '$lib/theme';
+
 	const WIN = '#16a34a';
 	const LOSS = '#dc2626';
+	// Color de la graella (anells/radis) reactiu al tema.
+	const cGrid = $derived($theme === 'dark' ? '#334155' : '#e2e8f0');
 
 	const n = $derived(buckets.length);
 	const cx = $derived(size / 2);
@@ -74,16 +78,16 @@
 </script>
 
 {#if !hasData}
-	<p class="text-slate-500 text-sm">Sense partides classificades per nivell d'oponent.</p>
+	<p class="text-slate-500 dark:text-slate-400 text-sm">Sense partides classificades per nivell d'oponent.</p>
 {:else}
 	<div class="flex flex-col items-center">
 		<svg viewBox="0 0 {size} {size}" width={size} height={size} class="max-w-full">
 			{#each rings as ring}
-				<polygon points={ring.points} fill="none" stroke="#e2e8f0" stroke-width="1" />
+				<polygon points={ring.points} fill="none" stroke={cGrid} stroke-width="1" />
 			{/each}
 			{#each buckets as _b, i}
 				{@const [x, y] = pt(i, R)}
-				<line x1={cx} y1={cy} x2={x} y2={y} stroke="#e2e8f0" stroke-width="1" />
+				<line x1={cx} y1={cy} x2={x} y2={y} stroke={cGrid} stroke-width="1" />
 			{/each}
 
 			{#if mode === 'pct'}
@@ -113,7 +117,7 @@
 					y={lyr}
 					text-anchor={anchor(i)}
 					dominant-baseline="middle"
-					class="fill-slate-600"
+					class="fill-slate-600 dark:fill-slate-300"
 					style="font-size: 11px; font-weight: 600"
 				>
 					{b.label}
@@ -135,7 +139,7 @@
 				{/if}
 			{/each}
 		</svg>
-		<div class="mt-1 flex items-center gap-4 text-xs text-slate-600">
+		<div class="mt-1 flex items-center gap-4 text-xs text-slate-600 dark:text-slate-300">
 			{#if mode === 'pct'}
 				<span class="flex items-center gap-1">
 					<span class="inline-block h-3 w-3 rounded-sm" style="background:{WIN}"></span> % victòries
@@ -143,7 +147,7 @@
 				<span class="flex items-center gap-1">
 					<span class="inline-block h-3 w-3 rounded-sm" style="background:{LOSS}"></span> % derrotes
 				</span>
-				<span class="text-slate-400">escala 0–100%</span>
+				<span class="text-slate-400 dark:text-slate-500">escala 0–100%</span>
 			{:else}
 				<span class="flex items-center gap-1">
 					<span class="inline-block h-3 w-3 rounded-sm" style="background:{WIN}"></span> Victòries
@@ -151,7 +155,7 @@
 				<span class="flex items-center gap-1">
 					<span class="inline-block h-3 w-3 rounded-sm" style="background:{LOSS}"></span> Derrotes
 				</span>
-				<span class="text-slate-400">escala 0–{scaleMax}</span>
+				<span class="text-slate-400 dark:text-slate-500">escala 0–{scaleMax}</span>
 			{/if}
 		</div>
 	</div>

@@ -39,25 +39,25 @@
 	bind:value={q}
 	inputmode="search"
 	placeholder="Cerca…"
-	class="mb-3 w-full rounded-lg border-slate-300 bg-white py-2.5 px-3 text-sm shadow-sm"
+	class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 px-3 text-sm shadow-sm"
 />
 
 {#if error}
-	<div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
+	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
 {:else if loading}
-	<p class="py-6 text-center text-sm text-slate-400">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
 {:else if filtered.length === 0}
-	<p class="py-6 text-center text-sm text-slate-400">Cap campionat.</p>
+	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap campionat.</p>
 {:else}
-	<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+	<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 		{#each filtered as o (o.open_id)}
-			<li class="border-b border-slate-100 last:border-0">
-				<a href="/opens/{o.open_id}" class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50">
+			<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
+				<a href="/opens/{o.open_id}" class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50 dark:active:bg-slate-800/50">
 					<div class="min-w-0 flex-1 truncate text-sm font-medium leading-tight">{clean(o.nom)}</div>
-					<span class="shrink-0 text-slate-300">›</span>
+					<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
 				</a>
 			</li>
 		{/each}
 	</ul>
-	<p class="px-1 py-3 text-center text-[11px] text-slate-400">{filtered.length} campionats</p>
+	<p class="px-1 py-3 text-center text-[11px] text-slate-400 dark:text-slate-500">{filtered.length} campionats</p>
 {/if}

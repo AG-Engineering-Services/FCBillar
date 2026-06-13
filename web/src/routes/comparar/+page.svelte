@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { supabase, type GameRow } from '$lib/supabase';
+	import { theme } from '$lib/theme';
+
+	// Graella del gràfic SVG reactiva al tema (clar/fosc).
+	const cGrid = $derived($theme === 'dark' ? '#1e293b' : '#eef2f7');
 
 	const COLORS = ['#2563eb', '#dc2626', '#16a34a', '#d97706'];
 	type Sel = {
@@ -189,13 +193,13 @@
 			bind:value={q}
 			inputmode="search"
 			placeholder="Afegeix jugador…"
-			class="w-full rounded-lg border-slate-300 bg-white py-2.5 px-3 text-sm shadow-sm"
+			class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 px-3 text-sm shadow-sm"
 		/>
 		{#if matches.length}
-			<ul class="absolute z-10 mt-1 w-full overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-slate-200">
+			<ul class="absolute z-10 mt-1 w-full overflow-hidden rounded-lg bg-white dark:bg-slate-900 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800">
 				{#each matches as p (p.fcb_id)}
 					<li>
-						<button onclick={() => add(p)} class="block w-full truncate px-3 py-2 text-left text-sm active:bg-slate-50">{p.nom}</button>
+						<button onclick={() => add(p)} class="block w-full truncate px-3 py-2 text-left text-sm active:bg-slate-50 dark:active:bg-slate-800/50">{p.nom}</button>
 					</li>
 				{/each}
 			</ul>
@@ -215,17 +219,17 @@
 {/if}
 
 {#if sel.length < 2}
-	<p class="py-6 text-center text-sm text-slate-400">Afegeix com a mínim 2 jugadors per comparar.</p>
+	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Afegeix com a mínim 2 jugadors per comparar.</p>
 {:else}
 	<!-- Mitjana de joc per modalitat (cadascuna per separat) -->
 	{#if modMitjanes.length}
-		<div class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
-			<div class="border-b border-slate-100 bg-slate-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+		<div class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+			<div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
 				Mitjana de joc per modalitat
 			</div>
 			{#each modMitjanes as row}
-				<div class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
-					<span class="w-24 shrink-0 text-[11px] uppercase tracking-wide text-slate-400">{MODNOM[row.mod] ?? row.mod}</span>
+				<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
+					<span class="w-24 shrink-0 text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">{MODNOM[row.mod] ?? row.mod}</span>
 					{#each row.vals as v, i}
 						<span class="flex-1 text-center font-mono text-sm font-bold tabular-nums" style:color={sel[i].color}>{v != null ? v.toFixed(3) : '—'}</span>
 					{/each}
@@ -241,17 +245,17 @@
 				<button
 					onclick={() => (selMod = m)}
 					class="rounded-full px-2.5 py-1 text-xs font-medium {selMod === m
-						? 'bg-slate-900 text-white'
-						: 'bg-slate-100 text-slate-500'}">{MODNOM[m] ?? m}</button>
+						? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+						: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{MODNOM[m] ?? m}</button>
 			{/each}
 		</div>
 	{/if}
 
 	<!-- KPIs de la modalitat seleccionada -->
-	<div class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+	<div class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 		{#each [['Posició rànquing', curPos.map((p) => (p != null ? '#' + p : '—'))], ['Mitjana rànquing', curMit.map((m) => (m != null ? m.toFixed(3) : '—'))], ['Partides', kpis.map((k) => k.n)], ['Sèrie màx', kpis.map((k) => k.sm)], ['% victòries', kpis.map((k) => k.pct + '%')]] as [label, vals]}
-			<div class="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-0">
-				<span class="w-24 shrink-0 text-[11px] uppercase tracking-wide text-slate-400">{label}</span>
+			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
+				<span class="w-24 shrink-0 text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</span>
 				{#each vals as v, i}
 					<span class="flex-1 text-center font-mono text-sm font-bold tabular-nums" style:color={sel[i].color}>{v}</span>
 				{/each}
@@ -261,12 +265,12 @@
 
 	<!-- Cara a cara directe -->
 	{#if h2h.length}
-		<div class="mb-4 rounded-xl bg-white p-3 ring-1 ring-slate-200">
-			<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Cara a cara directe</div>
+		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+			<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Cara a cara directe</div>
 			{#each h2h as m}
 				<div class="flex items-center justify-between gap-2 py-1 text-sm">
 					<span class="min-w-0 flex-1 truncate text-right">{m.a}</span>
-					<span class="shrink-0 rounded bg-slate-900 px-2 py-0.5 font-mono text-xs font-bold text-white">{m.aw}–{m.bw}</span>
+					<span class="shrink-0 rounded bg-slate-900 dark:bg-slate-700 px-2 py-0.5 font-mono text-xs font-bold text-white">{m.aw}–{m.bw}</span>
 					<span class="min-w-0 flex-1 truncate">{m.b}</span>
 				</div>
 			{/each}
@@ -275,14 +279,14 @@
 
 	<!-- Gràfic de mitjana al rànquing superposat -->
 	{#if hasChart}
-		<div class="rounded-xl bg-white p-3 ring-1 ring-slate-200">
+		<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 			<div class="mb-1 flex items-end justify-between">
-				<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Evolució mitjana rànquing · {MODNOM[selMod] ?? selMod}</span>
-				<span class="text-[9px] tabular-nums text-slate-400">{mitRange[1].toFixed(2)} ↕ {mitRange[0].toFixed(2)}</span>
+				<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Evolució mitjana rànquing · {MODNOM[selMod] ?? selMod}</span>
+				<span class="text-[9px] tabular-nums text-slate-400 dark:text-slate-500">{mitRange[1].toFixed(2)} ↕ {mitRange[0].toFixed(2)}</span>
 			</div>
 			<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" class="h-28 w-full">
 				{#each [0, 0.25, 0.5, 0.75, 1] as f}
-					<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke="#eef2f7" stroke-width="1" vector-effect="non-scaling-stroke" />
+					<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
 				{/each}
 				{#each sel as s}
 					<polyline points={lineFor(s)} fill="none" stroke={s.color} stroke-width="1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke" />

@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { afterNavigate } from '$app/navigation';
 	import { supabase } from '$lib/supabase';
+	import { theme, toggleTheme } from '$lib/theme';
 	let { children } = $props();
 
 	// Punt vermell llampegant al costat d'"Opens" NOMÉS quan hi ha competició
@@ -42,7 +43,9 @@
 </script>
 
 <div class="mx-auto flex min-h-full max-w-screen-sm flex-col md:max-w-3xl lg:max-w-5xl">
-	<header class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
+	<header
+		class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90"
+	>
 		<div class="flex items-center gap-2 px-4 pt-3 md:px-6 md:pt-4">
 			<svg viewBox="0 0 40 40" class="h-7 w-7 shrink-0 md:h-9 md:w-9" aria-hidden="true">
 				<rect width="40" height="40" rx="10" fill="#0b3d2e" />
@@ -54,14 +57,34 @@
 				<circle cx="24.2" cy="22" r="1.8" fill="#fff" opacity="0.5" />
 			</svg>
 			<span class="text-base font-bold tracking-tight md:text-xl">FCBillar</span>
+			<button
+				type="button"
+				onclick={toggleTheme}
+				class="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+				aria-label={$theme === 'dark' ? 'Mode clar' : 'Mode fosc'}
+				title={$theme === 'dark' ? 'Mode clar' : 'Mode fosc'}
+			>
+				{#if $theme === 'dark'}
+					<!-- sol: prem per passar a clar -->
+					<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<circle cx="12" cy="12" r="4" />
+						<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+					</svg>
+				{:else}
+					<!-- lluna: prem per passar a fosc -->
+					<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+					</svg>
+				{/if}
+			</button>
 		</div>
 		<nav class="flex flex-wrap gap-x-1 gap-y-0 px-3 pt-2 md:px-5">
 			{#each tabs as t}
 				<a
 					href={t.href}
 					class="-mb-px rounded-t-lg px-3 py-2 text-sm font-medium md:px-4 md:text-base {t.match(path)
-						? 'border-b-2 border-slate-900 text-slate-900'
-						: 'text-slate-400'}"
+						? 'border-b-2 border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100'
+						: 'text-slate-400 dark:text-slate-500'}"
 					>{t.label}{#if t.href === '/opens' && liveCount > 0}<span
 							class="relative ml-1 inline-flex h-2 w-2 align-middle"
 							title="Opens en directe ara"
@@ -74,9 +97,11 @@
 	<main class="flex-1 px-3 py-3 md:px-6 md:py-5">
 		{@render children()}
 	</main>
-	<footer class="flex flex-col items-center gap-2 px-4 py-6 text-center text-[11px] text-slate-400">
+	<footer
+		class="flex flex-col items-center gap-2 px-4 py-6 text-center text-[11px] text-slate-400 dark:text-slate-500"
+	>
 		<img src="/logo-ag.png" alt="Propietari de l'aplicació" class="h-7 w-auto opacity-80" />
 		<p>No se'n permet la distribució no autoritzada.</p>
-		<p class="text-slate-300">Dades de la Federació Catalana de Billar · ús personal</p>
+		<p class="text-slate-300 dark:text-slate-600">Dades de la Federació Catalana de Billar · ús personal</p>
 	</footer>
 </div>

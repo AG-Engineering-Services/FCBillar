@@ -48,29 +48,29 @@
 	inputmode="search"
 	autofocus
 	placeholder="Cerca qualsevol jugador…"
-	class="mb-3 w-full rounded-lg border-slate-300 bg-white py-2.5 px-3 text-sm shadow-sm"
+	class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 px-3 text-sm shadow-sm"
 />
 
 {#if error}
-	<div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</div>
+	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
 {:else if loading}
-	<p class="py-6 text-center text-sm text-slate-400">Carregant jugadors…</p>
+	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant jugadors…</p>
 {:else if !q.trim()}
-	<p class="py-6 text-center text-sm text-slate-400">
+	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">
 		Escriu un nom per cercar entre {players.length} jugadors.
 	</p>
 {:else if results.length === 0}
-	<p class="py-6 text-center text-sm text-slate-400">Cap jugador amb «{q}».</p>
+	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap jugador amb «{q}».</p>
 {:else}
-	<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 lg:columns-2 lg:gap-x-6">
+	<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800 lg:columns-2 lg:gap-x-6">
 		{#each results as p (p.fcb_id)}
-			<li class="break-inside-avoid border-b border-slate-100 last:border-0">
-				<a href="/jugador/{p.fcb_id}" class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50">
+			<li class="break-inside-avoid border-b border-slate-100 dark:border-slate-800 last:border-0">
+				<a href="/jugador/{p.fcb_id}" class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50 dark:active:bg-slate-800/50">
 					<div class="min-w-0 flex-1">
 						<div class="truncate text-sm font-medium leading-tight">{p.nom}</div>
-						{#if p.club}<div class="truncate text-xs text-slate-400">{p.club}</div>{/if}
+						{#if p.club}<div class="truncate text-xs text-slate-400 dark:text-slate-500">{p.club}</div>{/if}
 					</div>
-					<span class="shrink-0 text-slate-300">›</span>
+					<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
 				</a>
 			</li>
 		{/each}

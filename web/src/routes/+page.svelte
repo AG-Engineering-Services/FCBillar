@@ -102,7 +102,7 @@
 </script>
 
 {#if error}
-	<div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">
 		{error}
 	</div>
 {/if}
@@ -114,8 +114,8 @@
 			onclick={() => pickMod(m.codi_fcb)}
 			class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors {m.codi_fcb ===
 			selMod
-				? 'bg-slate-900 text-white'
-				: 'bg-white text-slate-600 ring-1 ring-slate-200'}"
+				? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+				: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 		>
 			{m.nom}
 		</button>
@@ -127,7 +127,7 @@
 	<select
 		onchange={pickSeq}
 		value={selSeq}
-		class="rounded-lg border-slate-300 bg-white py-2 pl-3 pr-8 text-sm shadow-sm"
+		class="rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 pl-3 pr-8 text-sm shadow-sm"
 	>
 		{#each snapshots as s}
 			<option value={s.num_seq}>{snapLabel(s)}</option>
@@ -137,36 +137,36 @@
 		bind:value={search}
 		inputmode="search"
 		placeholder="Cerca jugador o club…"
-		class="min-w-0 flex-1 rounded-lg border-slate-300 bg-white py-2 px-3 text-sm shadow-sm"
+		class="min-w-0 flex-1 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm"
 	/>
 </div>
 
 {#if loading}
-	<p class="px-1 py-6 text-center text-sm text-slate-400">Carregant…</p>
+	<p class="px-1 py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
 {:else if filtered.length === 0}
-	<p class="px-1 py-6 text-center text-sm text-slate-400">Sense resultats.</p>
+	<p class="px-1 py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense resultats.</p>
 {:else}
-	<ul class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 lg:columns-2 lg:gap-x-6">
+	<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800 lg:columns-2 lg:gap-x-6">
 		{#each filtered as r (r.player_fcb_id + '-' + r.posicio)}
-			<li class="break-inside-avoid border-b border-slate-100 last:border-0">
+			<li class="break-inside-avoid border-b border-slate-100 dark:border-slate-800 last:border-0">
 				<a
 					href="/jugador/{r.player_fcb_id}"
-					class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50"
+					class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50 dark:active:bg-slate-800/50"
 				>
 					<span
-						class="w-7 shrink-0 text-center text-sm font-semibold tabular-nums text-slate-400"
+						class="w-7 shrink-0 text-center text-sm font-semibold tabular-nums text-slate-400 dark:text-slate-500"
 					>{r.posicio ?? '—'}</span>
 					<div class="min-w-0 flex-1">
 						<div class="truncate text-sm font-medium leading-tight">{r.jugador}</div>
-						{#if r.club}<div class="truncate text-xs text-slate-400">{r.club}</div>{/if}
+						{#if r.club}<div class="truncate text-xs text-slate-400 dark:text-slate-500">{r.club}</div>{/if}
 					</div>
 					<span class="shrink-0 font-mono text-sm font-semibold tabular-nums">
 						{r.mitjana_general != null ? r.mitjana_general.toFixed(3) : '—'}
 					</span>
-					<span class="shrink-0 text-slate-300">›</span>
+					<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
 				</a>
 			</li>
 		{/each}
 	</ul>
-	<p class="px-1 py-3 text-center text-[11px] text-slate-400">{filtered.length} jugadors</p>
+	<p class="px-1 py-3 text-center text-[11px] text-slate-400 dark:text-slate-500">{filtered.length} jugadors</p>
 {/if}
