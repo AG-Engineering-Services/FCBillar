@@ -790,6 +790,10 @@ def compute_provisional_qualifiers(
             continue
         if not group.standings:
             continue
+        # Si encara no s'ha jugat cap partida del grup, no hi ha base per dir
+        # qui passa (tothom va 0-0): no marquem cap classificat provisional.
+        if not any(m.is_played for m in group.matches):
+            continue
         # Per-Open tiebreak inside a group: punts → promig (mitjana) → sèrie
         # major. The standings table doesn't carry SM, so we derive max-SM
         # per player from the group's match results.
