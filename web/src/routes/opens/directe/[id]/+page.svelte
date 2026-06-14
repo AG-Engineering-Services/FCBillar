@@ -38,6 +38,30 @@
 			.sort((a, b) => a.rows[0].position - b.rows[0].position);
 	});
 
+	// Millor sèrie major del torneig (màxim de totes les partides jugades).
+	const bestSerie = $derived.by(() => {
+		let best = 0;
+		const who: string[] = [];
+		const consider = (name: string | null | undefined, sm: number) => {
+			if (!name || !sm) return;
+			if (sm > best) { best = sm; who.length = 0; who.push(name); }
+			else if (sm === best && !who.includes(name)) who.push(name);
+		};
+		for (const ph of phases) {
+			for (const g of ph.groups) for (const mm of g.matches) {
+				if (!mm.is_played) continue;
+				consider(mm.player_a, mm.serie_major_a);
+				consider(mm.player_b, mm.serie_major_b);
+			}
+			for (const mm of ph.ko_matches) {
+				if (!mm.is_played) continue;
+				consider(mm.player_a, mm.serie_major_a);
+				consider(mm.player_b, mm.serie_major_b);
+			}
+		}
+		return best > 0 ? { sm: best, players: who } : null;
+	});
+
 	// Marcadors en viu (OCR) per grup. Normalitzem l'etiqueta (de vegades "T",
 	// de vegades "Grup T") perquè casi amb el grup de la classificació.
 	const normGroup = (s: string | null) => (s ?? '').replace(/grup\s*/i, '').toUpperCase().trim();
@@ -215,6 +239,16 @@
 		</div>
 		<p class="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">Actualitzat {agoText(row.captured_at)} · es refresca sol</p>
 	</div>
+
+	{#if bestSerie}
+		<div class="mb-3 flex items-center gap-2 rounded-xl bg-violet-50 dark:bg-violet-950/40 px-3 py-2 ring-1 ring-violet-200 dark:ring-violet-900/50">
+			<span class="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">Millor sèrie</span>
+			<span class="min-w-0 flex-1 truncate text-sm">
+				{#each bestSerie.players as p, i}{#if i > 0}, {/if}{@render player(p, 'font-bold')}{/each}
+			</span>
+			<span class="shrink-0 font-mono text-lg font-bold text-violet-700 dark:text-violet-300">{bestSerie.sm}</span>
+		</div>
+	{/if}
 
 	<!-- Selector de fases -->
 	<div class="mb-3 flex flex-wrap gap-1.5">
