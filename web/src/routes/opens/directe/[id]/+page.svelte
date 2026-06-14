@@ -278,6 +278,7 @@
 							</li>
 						{/each}
 					</ul>
+					<p class="mt-1.5 text-[10px] leading-tight text-red-700/70 dark:text-red-400/70">Lectura automàtica del marcador (OCR): pot portar un cert retard respecte al resultat real.</p>
 				</div>
 			{/if}
 			<div class="grid gap-2.5 sm:grid-cols-2">
