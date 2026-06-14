@@ -19,6 +19,7 @@
 	let selectedPhase = $state<number | null>(phaseCache.get(id0) ?? null);
 	let scores = $state<OpenLiveScore[]>([]);
 	let timer: ReturnType<typeof setInterval> | null = null;
+	let scoresTimer: ReturnType<typeof setInterval> | null = null;
 
 	const divisionId = $derived(Number($page.params.id));
 	const payload = $derived(row?.payload_json ?? null);
@@ -48,6 +49,16 @@
 		return id ? `/jugador/${id}` : null;
 	}
 
+	// Marcadors en viu (OCR): taula minúscula, és el que canvia més sovint → es
+	// refresca tot sol cada 30 s (independent del payload pesat de la federació).
+	function loadScores() {
+		supabase
+			.from('open_live_scores')
+			.select('*')
+			.eq('fcb_division_id', divisionId)
+			.then(({ data }) => (scores = (data ?? []) as OpenLiveScore[]));
+	}
+
 	async function load() {
 		const { data, error: e } = await supabase
 			.from('open_live')
@@ -73,23 +84,24 @@
 			}
 		}
 		// Marcadors en viu (OCR) — no bloqueja; es refresca a cada poll.
-		supabase
-			.from('open_live_scores')
-			.select('*')
-			.eq('fcb_division_id', divisionId)
-			.then(({ data }) => (scores = (data ?? []) as OpenLiveScore[]));
+		loadScores();
 		loading = false;
 	}
 
 	onMount(() => {
 		load();
-		// Auto-refresc cada 90 s mentre la pestanya estigui visible.
+		// Payload de la federació (pesat, canvia lent): cada 90 s.
 		timer = setInterval(() => {
 			if (document.visibilityState === 'visible') load();
 		}, 90_000);
+		// Marcadors en viu (lleuger, canvia sovint): cada 30 s.
+		scoresTimer = setInterval(() => {
+			if (document.visibilityState === 'visible') loadScores();
+		}, 30_000);
 	});
 	onDestroy(() => {
 		if (timer) clearInterval(timer);
+		if (scoresTimer) clearInterval(scoresTimer);
 	});
 
 	function agoText(iso: string): string {
