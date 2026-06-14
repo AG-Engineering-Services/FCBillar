@@ -139,19 +139,12 @@
 		return phase.ko_matches.length ? phase.ko_matches : phase.provisional_matches;
 	}
 
-	// Primer cognom (vista de partides en directe). El nom ve "COGNOM1 [COGNOM2],
-	// NOM"; el 1r cognom pot ser compost amb partícules (de, la, del…) → "DE LA HOZ".
-	const _PART = new Set(['DE', 'DEL', 'DELS', 'D', 'LA', 'LES', 'EL', 'ELS', 'LO', 'LOS', 'I', 'Y', 'VON', 'VAN', 'DER', 'DA', 'DO', 'DOS', 'DAS', 'SAN', 'SANTA', 'MC', 'MAC']);
-	function firstSurname(name: string | null | undefined): string {
+	// Cognoms (vista de partides en directe): el nom ve "COGNOM1 [COGNOM2], NOM" →
+	// mostrem tot el tros abans de la coma (els DOS cognoms, compostos inclosos com
+	// "DE LA HOZ") i deixem fora el nom de pila.
+	function surnamesOnly(name: string | null | undefined): string {
 		if (!name || name === '—') return name ?? '—';
-		const surnames = (name.includes(',') ? name.split(',')[0] : name).trim();
-		const toks = surnames.split(/\s+/).filter(Boolean);
-		const out: string[] = [];
-		for (const t of toks) {
-			out.push(t);
-			if (!_PART.has(t.toUpperCase().replace(/['’.]/g, ''))) break;
-		}
-		return out.join(' ') || surnames;
+		return (name.includes(',') ? name.split(',')[0] : name).trim() || name;
 	}
 </script>
 
@@ -165,13 +158,13 @@
 	{/if}
 {/snippet}
 
-<!-- Igual que player() però mostra NOMÉS el 1r cognom (partides en directe). -->
+<!-- Igual que player() però mostra els dos COGNOMS, sense el nom (partides en directe). -->
 {#snippet playerShort(name: string, cls: string)}
 	{@const href = playerHref(name)}
 	{#if href}
-		<a {href} class="{cls} hover:underline active:underline">{firstSurname(name)}</a>
+		<a {href} class="{cls} hover:underline active:underline">{surnamesOnly(name)}</a>
 	{:else}
-		<span class={cls}>{firstSurname(name)}</span>
+		<span class={cls}>{surnamesOnly(name)}</span>
 	{/if}
 {/snippet}
 
