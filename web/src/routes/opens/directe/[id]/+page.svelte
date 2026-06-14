@@ -499,7 +499,7 @@
 									{@render player(r.player_name, (r.position <= 8 ? 'font-semibold ' : '') + 'truncate')}
 									{#if r.rank3b}<span class="shrink-0 font-mono text-[10px] text-slate-400 dark:text-slate-500" title="Posició al rànquing de 3 bandes">({r.rank3b})</span>{/if}
 								</span>
-								{#if r.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial: millor classificat de la seva banda del rànquing 3 bandes">{r.prize}</span>{/if}
+								{#if r.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial (opens 3 bandes): millor classificat de la seva banda del rànquing">{r.prize}</span>{/if}
 								{#if r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
 								<span class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline">{r.mitjana.toFixed(3)}</span>
 								<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title="Punts de rànquing segons el lloc (reglament dels opens)">{r.open_points}</span>

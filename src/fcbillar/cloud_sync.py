@@ -1550,7 +1550,7 @@ def _open_modality(name: str) -> str:
     return ""
 
 
-def _enrich_live_payload(payload: dict, sb) -> None:
+def _enrich_live_payload(payload: dict, sb, open_name: str = "") -> None:
     """Enriqueix el payload en viu (in-place):
       - PJ/caramboles/entrades per jugador a cada classificació i classificat,
         calculats des de les partides JUGADES del grup (l'HTML de la FCB només
@@ -1633,9 +1633,13 @@ def _enrich_live_payload(payload: dict, sb) -> None:
     #      · "millor classificat d'entre els del rànquing 3B 61-180"
     #      · "millor classificat d'entre els del 181 fins al final (i no rankejats)"
     #    Cada fila de la classificació rep `rank3b` (per mostrar-lo) i la fila
-    #    guanyadora de cada banda rep `prize`.
+    #    guanyadora de cada banda rep `prize`. NOMÉS per a opens de TRES BANDES:
+    #    els premis per banda de rànquing i el rànquing 3B no apliquen a la resta de
+    #    modalitats (quadre, banda, lliure).
+    _nm = (open_name or payload.get("name") or "").upper()
+    is_3b = "TRES BANDES" in _nm or "3 BANDES" in _nm or "3B" in _nm
     classification = payload.get("classification") or []
-    if classification:
+    if classification and is_3b:
         rank3b = _ranking_3b_by_fcb_id(sb)
         best_a: tuple[int, dict] | None = None  # banda 61-180
         best_b: tuple[int, dict] | None = None  # banda 181+ / no rankejat
@@ -1744,7 +1748,7 @@ def publish_live_opens(
         if not state.phases:
             continue
         payload = _state_payload(state, fetched_at)
-        _enrich_live_payload(payload, sb)
+        _enrich_live_payload(payload, sb, open_name=state.structure.name)
         rows.append({
             "fcb_division_id": e.division_id,
             "name": state.structure.name,

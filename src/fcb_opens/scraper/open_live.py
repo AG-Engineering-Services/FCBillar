@@ -1547,27 +1547,30 @@ def compute_open_classification(
                 )
             )
 
-    # Group bands come AFTER the deepest KO band. Walk groups in reverse
-    # phase order (PRÈVIA → pre-prèvia → pre-pre-prèvia, deepest first)
-    # and assign positions sequentially. This avoids the band-size
-    # collisions you get when relying on capacity-of-next-phase.
-    next_position = max(
-        (r.position for r in rows), default=0
-    ) + 1
-    if next_position < 2:
-        next_position = 2  # leave 1 for champion / projected finalist
+    # Trams de GRUP, sota el KO. El primer lloc de cada tram = posicions ja ocupades
+    # (KO + trams de grup més profunds) + 1. S'ADAPTA A LA MODALITAT: el KO de 3
+    # bandes entra a SETZENS (32 jugadors) i el de QUADRE a VUITENS (16), de manera
+    # que la prèvia comença a 33 o a 17 respectivament.
+    group_idxs = [k for k, p in enumerate(phases) if p.ref.kind == "group"]
+    ko_idxs = [k for k, p in enumerate(phases) if p.ref.kind == "ko"]
+    deepest_group = max(group_idxs) if group_idxs else None
+    if ko_idxs:
+        ko_size = _phase_capacity(phases[min(ko_idxs)])   # capacitat del primer KO
+    elif deepest_group is not None:
+        # Frontera (KO no sortejat): 1rs de cada grup + igual nombre de reservats.
+        ko_size = 2 * len(phases[deepest_group].groups)
+    else:
+        ko_size = 1
+    running = ko_size  # llocs 1..ko_size ocupats pel quadre KO
     for i in range(len(phases) - 1, -1, -1):
         phase = phases[i]
         if phase.ref.kind != "group":
             continue
-        # Tram estructural estàndard FCB (prèvia 33+, pre-prèvia 65+, pre-pre-prèvia
-        # 95+) si el coneixem pel nom de la ronda; si no, continuació seqüencial sota
-        # el darrer tram assignat.
-        band = _group_band_start(phase.ref.label)
-        pos = band if band is not None else next_position
+        band = running + 1
         # Els classificats d'una fase TANCADA (tots els grups decidits) són
         # DEFINITIUS; si encara hi ha grups oberts, la posició és provisional.
         phase_closed = bool(phase.groups) and all(_group_closed(g) for g in phase.groups)
+        pos = band
         for name in eliminated_per_phase[i]:
             mg, sm, club = phase_stats[i][name]
             if not club:
@@ -1587,7 +1590,19 @@ def compute_open_classification(
                 )
             )
             pos += 1
-        next_position = max(next_position, pos)
+        # Avança pel TOTAL d'eliminats de la fase (no només els confirmats fins ara),
+        # perquè el tram de la fase superior quedi ben col·locat. Avançats: a la
+        # darrera fase de grups només els 1rs (els altres llocs del KO són reservats);
+        # a les fases anteriors, els que apareixen en fases posteriors.
+        if i == deepest_group:
+            advancers_total = len(phase.groups)
+        else:
+            later: set[str] = set()
+            for j in range(i + 1, len(phases)):
+                later |= set(phase_stats[j].keys())
+            advancers_total = len(set(phase_stats[i].keys()) & later)
+        elim_total = max(len(phase_stats[i]) - advancers_total, len(eliminated_per_phase[i]))
+        running = band - 1 + elim_total
 
     # Final-phase head: position 1 (and 2) get filled by, in priority order:
     #   1. Champion if the final has been played.
