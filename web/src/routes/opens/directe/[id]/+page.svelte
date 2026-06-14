@@ -41,10 +41,18 @@
 
 	// Millor sèrie major del torneig (màxim de totes les partides jugades).
 	const bestSerie = $derived.by(() => {
+		// Premi de millor sèrie: NOMÉS per als jugadors que NO queden entre els 8
+		// primers classificats (els llocs 1-8 ja tenen premi propi).
+		const top8 = new Set(
+			(payload?.classification ?? [])
+				.filter((r) => r.position <= 8)
+				.map((r) => canonName(r.player_name))
+		);
 		let best = 0;
 		const who: string[] = [];
 		const consider = (name: string | null | undefined, sm: number) => {
 			if (!name || !sm) return;
+			if (top8.has(canonName(name))) return; // fora els 8 millors classificats
 			if (sm > best) { best = sm; who.length = 0; who.push(name); }
 			else if (sm === best && !who.includes(name)) who.push(name);
 		};
@@ -243,9 +251,9 @@
 
 	{#if bestSerie}
 		<div class="mb-3 flex items-start gap-2 rounded-xl bg-violet-50 dark:bg-violet-950/40 px-3 py-2 ring-1 ring-violet-200 dark:ring-violet-900/50">
-			<span class="shrink-0 pt-0.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">Millor sèrie</span>
-			<span class="min-w-0 flex-1 text-sm leading-snug">
-				{#each bestSerie.players as p, i}{#if i > 0}<span class="text-slate-400">, </span>{/if}{@render player(p, 'font-bold')}{/each}
+			<span class="shrink-0 pt-0.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300" title="Millor sèrie major d'entre els jugadors que no queden entre els 8 primers">Millor sèrie<span class="font-normal normal-case"> (fora top 8)</span></span>
+			<span class="flex min-w-0 flex-1 flex-col gap-0.5 text-sm leading-snug">
+				{#each bestSerie.players as p}<span class="truncate">{@render player(p, 'font-bold')}</span>{/each}
 			</span>
 			<span class="shrink-0 font-mono text-lg font-bold leading-none text-violet-700 dark:text-violet-300">{bestSerie.sm}</span>
 		</div>
