@@ -472,7 +472,8 @@
 							{#each tier.rows as r (r.player_name)}
 								<li class="flex items-center gap-2 text-sm">
 									<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{r.position}{#if r.is_provisional_position}<span class="text-amber-500" title="Posició provisional">*</span>{/if}</span>
-									{@render player(r.player_name, 'min-w-0 flex-1 truncate')}
+									{@render player(r.player_name, 'min-w-0 flex-1 truncate' + (r.position <= 8 ? ' font-semibold' : ''))}
+									{#if r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
 									<span class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline">{r.mitjana.toFixed(3)}</span>
 									<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title="Punts de rànquing segons el lloc (reglament dels opens)">{r.open_points}</span>
 								</li>
