@@ -242,12 +242,12 @@
 	</div>
 
 	{#if bestSerie}
-		<div class="mb-3 flex items-center gap-2 rounded-xl bg-violet-50 dark:bg-violet-950/40 px-3 py-2 ring-1 ring-violet-200 dark:ring-violet-900/50">
-			<span class="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">Millor sèrie</span>
-			<span class="min-w-0 flex-1 truncate text-sm">
-				{#each bestSerie.players as p, i}{#if i > 0}, {/if}{@render player(p, 'font-bold')}{/each}
+		<div class="mb-3 flex items-start gap-2 rounded-xl bg-violet-50 dark:bg-violet-950/40 px-3 py-2 ring-1 ring-violet-200 dark:ring-violet-900/50">
+			<span class="shrink-0 pt-0.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">Millor sèrie</span>
+			<span class="min-w-0 flex-1 text-sm leading-snug">
+				{#each bestSerie.players as p, i}{#if i > 0}<span class="text-slate-400">, </span>{/if}{@render player(p, 'font-bold')}{/each}
 			</span>
-			<span class="shrink-0 font-mono text-lg font-bold text-violet-700 dark:text-violet-300">{bestSerie.sm}</span>
+			<span class="shrink-0 font-mono text-lg font-bold leading-none text-violet-700 dark:text-violet-300">{bestSerie.sm}</span>
 		</div>
 	{/if}
 

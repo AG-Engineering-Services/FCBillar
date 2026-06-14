@@ -1481,13 +1481,13 @@ def compute_open_classification(
                     if n in closed_players and n not in advancers and n not in later_known
                 ]
             else:
-                # Fase FRONTERA (KO encara no sortejat): només confirmem l'eliminació
-                # de qui NO pot avançar de cap manera. El 1r avança; un 2n encara pot
-                # ser un "millor 2n"; per tant només el 3r (o pitjor) d'un grup tancat
-                # — o un NO-PRESENTAT (no pot ser millor 2n) — està confirmat fora.
+                # Fase FRONTERA (KO encara no sortejat): TOTS els no-avançats d'un
+                # grup TANCAT estan eliminats. A la darrera fase de grups només
+                # avancen els 1rs (els altres llocs del KO els ocupen reservats), de
+                # manera que 2ns i 3rs queden tots fora. `advancers` aquí són els 1rs.
                 elim = [
                     n for n in phase_stats[i]
-                    if n in closed_players and (position_lookup.get(n, 999) >= 3 or _noshow(n))
+                    if n in closed_players and n not in advancers
                 ]
             punts_lookup = _phase_punts_lookup(phase)
             # Ordena: els NO-PRESENTATS van SEMPRE al final del seu tram (0 punts,
