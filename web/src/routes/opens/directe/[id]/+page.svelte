@@ -10,7 +10,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import { supabase, type OpenLivePhase, type OpenLiveGroup, type OpenLiveMatch, type OpenLiveScore } from '$lib/supabase';
+	import { supabase, type OpenLivePhase, type OpenLiveGroup, type OpenLiveMatch, type OpenLiveScore, type OpenLiveClassRow } from '$lib/supabase';
 
 	const id0 = Number($page.params.id);
 	let row = $state<OpenLiveRow | null>(rowCache.get(id0) ?? null);
@@ -24,6 +24,19 @@
 	const divisionId = $derived(Number($page.params.id));
 	const payload = $derived(row?.payload_json ?? null);
 	const phases = $derived(payload?.phases ?? []);
+
+	// Classificació provisional (jugadors ELIMINATS, per tram segons la fase on cauen),
+	// agrupada per ronda i ordenada pel millor lloc. Es va omplint a mesura que cauen.
+	const classByRound = $derived.by(() => {
+		const m = new Map<string, OpenLiveClassRow[]>();
+		for (const r of payload?.classification ?? []) {
+			if (!m.has(r.round_label)) m.set(r.round_label, []);
+			m.get(r.round_label)!.push(r);
+		}
+		return [...m.entries()]
+			.map(([round, rows]) => ({ round, rows: rows.slice().sort((a, b) => a.position - b.position) }))
+			.sort((a, b) => a.rows[0].position - b.rows[0].position);
+	});
 
 	// Marcadors en viu (OCR) per grup. Normalitzem l'etiqueta (de vegades "T",
 	// de vegades "Grup T") perquè casi amb el grup de la classificació.
@@ -295,7 +308,7 @@
 							</li>
 						{/each}
 					</ul>
-					<p class="mt-1.5 text-[10px] leading-tight text-red-700/70 dark:text-red-400/70">Lectura automàtica del marcador (OCR): pot portar un cert retard respecte al resultat real.</p>
+					<p class="mt-1.5 text-[10px] leading-tight text-red-700/70 dark:text-red-400/70">Lectura automàtica del marcador (OCR): pot portar un cert retard i tenir errors puntuals respecte al resultat real.</p>
 				</div>
 			{/if}
 			<div class="grid gap-2.5 sm:grid-cols-2">
@@ -404,5 +417,37 @@
 				</ul>
 			{/if}
 		{/if}
+	{/if}
+
+	{#if classByRound.length}
+		<div class="mt-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+			<div class="mb-2">
+				<h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Classificació provisional</h2>
+				<p class="mt-0.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">Jugadors ja eliminats, ordenats per la ronda on cauen. S'actualitza a mesura que es tanquen grups i partides.</p>
+			</div>
+			<div class="space-y-3">
+				{#each classByRound as tier (tier.round)}
+					{@const lo = tier.rows[0].position}
+					{@const hi = tier.rows[tier.rows.length - 1].position}
+					<div>
+						<div class="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+							<span>{tier.round}</span>
+							<span class="font-mono font-normal text-slate-400 dark:text-slate-500">llocs {lo === hi ? lo : `${lo}–${hi}`}</span>
+						</div>
+						<ol class="space-y-0.5">
+							{#each tier.rows as r (r.player_name)}
+								<li class="flex items-center gap-2 text-sm">
+									<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{r.position}{#if r.is_provisional_position}<span class="text-amber-500" title="Posició provisional">*</span>{/if}</span>
+									{@render player(r.player_name, 'min-w-0 flex-1 truncate')}
+									<span class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline">{r.mitjana.toFixed(3)}</span>
+									<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title="Punts de rànquing segons el lloc (reglament dels opens)">{r.open_points}</span>
+								</li>
+							{/each}
+						</ol>
+					</div>
+				{/each}
+			</div>
+			<p class="mt-2 text-[10px] leading-tight text-slate-400 dark:text-slate-500"><span class="text-amber-500">*</span> posició provisional. Punts = puntuació de rànquing segons el lloc final (reglament dels opens).</p>
+		</div>
 	{/if}
 {/if}
