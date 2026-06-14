@@ -1459,9 +1459,19 @@ def compute_open_classification(
             # NOMÉS eliminats CONFIRMATS: cal que el grup estigui TANCAT (places
             # decidides). Així no llistem jugadors de grups encara pendents.
             closed_players: set[str] = set()
+            played_count: dict[str, int] = {}
             for g in phase.groups:
                 if _group_closed(g):
                     closed_players.update(s.player_name for s in g.standings)
+                for m in g.matches:
+                    if not m.is_played:
+                        continue
+                    for nm in (m.player_a, m.player_b):
+                        if nm:
+                            played_count[nm] = played_count.get(nm, 0) + 1
+            # No-presentat: jugador d'un grup tancat que no ha jugat cap partida.
+            def _noshow(n: str) -> bool:
+                return n in closed_players and played_count.get(n, 0) == 0
             position_lookup = _phase_position_in_group_lookup(phase)
             if later_known:
                 # La ronda següent ja està sortejada → els avançats són definitius.
@@ -1474,17 +1484,18 @@ def compute_open_classification(
                 # Fase FRONTERA (KO encara no sortejat): només confirmem l'eliminació
                 # de qui NO pot avançar de cap manera. El 1r avança; un 2n encara pot
                 # ser un "millor 2n"; per tant només el 3r (o pitjor) d'un grup tancat
-                # està confirmat fora.
+                # — o un NO-PRESENTAT (no pot ser millor 2n) — està confirmat fora.
                 elim = [
                     n for n in phase_stats[i]
-                    if n in closed_players and position_lookup.get(n, 999) >= 3
+                    if n in closed_players and (position_lookup.get(n, 999) >= 3 or _noshow(n))
                 ]
             punts_lookup = _phase_punts_lookup(phase)
-            # Ordena per posició dins el grup (2ns abans que 3rs…), després per stats.
-            # L'ordre de standings de la FCB ja codifica el cas no-show (no-presentat
-            # 2n, l'altre no-guanyador 3r), així que el respectem.
+            # Ordena: els NO-PRESENTATS van SEMPRE al final del seu tram (0 punts,
+            # mantenen plaça però darrers); després per posició al grup, punts i
+            # mitjana (criteri de l'usuari).
             elim.sort(
                 key=lambda n: (
+                    1 if _noshow(n) else 0,
                     position_lookup.get(n, 999),
                     -punts_lookup.get(n, 0),
                     -phase_stats[i][n][0],
@@ -1549,10 +1560,12 @@ def compute_open_classification(
             continue
         # Tram estructural estàndard FCB (prèvia 33+, pre-prèvia 65+, pre-pre-prèvia
         # 95+) si el coneixem pel nom de la ronda; si no, continuació seqüencial sota
-        # el darrer tram assignat. Marcat com a provisional (l'ordre i la posició
-        # exacta es fixen a mesura que es completa el quadre).
+        # el darrer tram assignat.
         band = _group_band_start(phase.ref.label)
         pos = band if band is not None else next_position
+        # Els classificats d'una fase TANCADA (tots els grups decidits) són
+        # DEFINITIUS; si encara hi ha grups oberts, la posició és provisional.
+        phase_closed = bool(phase.groups) and all(_group_closed(g) for g in phase.groups)
         for name in eliminated_per_phase[i]:
             mg, sm, club = phase_stats[i][name]
             if not club:
@@ -1566,7 +1579,7 @@ def compute_open_classification(
                     mitjana=mg,
                     serie_major=sm,
                     open_points=points_for_position(pos),
-                    is_provisional_position=True,
+                    is_provisional_position=not phase_closed,
                 )
             )
             pos += 1

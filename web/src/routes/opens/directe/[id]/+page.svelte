@@ -18,6 +18,7 @@
 	let error = $state<string | null>(null);
 	let selectedPhase = $state<number | null>(phaseCache.get(id0) ?? null);
 	let scores = $state<OpenLiveScore[]>([]);
+	let showClassif = $state(false); // pestanya "Classificació" (paral·lela a les fases)
 	let timer: ReturnType<typeof setInterval> | null = null;
 	let scoresTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -255,8 +256,8 @@
 		{#each phases as p, i}
 			{@const st = phaseStatus(p)}
 			<button
-				onclick={() => (selectedPhase = i)}
-				class="rounded-lg border px-2.5 py-1 text-xs font-medium {selectedPhase === i ? 'ring-2 ring-slate-400 dark:ring-slate-600' : ''} {st === 'done'
+				onclick={() => { selectedPhase = i; showClassif = false; }}
+				class="rounded-lg border px-2.5 py-1 text-xs font-medium {selectedPhase === i && !showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600' : ''} {st === 'done'
 					? 'border-emerald-300 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
 					: st === 'active'
 						? 'border-amber-300 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300'
@@ -266,9 +267,19 @@
 				{st === 'done' ? '✓' : st === 'active' ? '●' : '○'}
 			</button>
 		{/each}
+		{#if classByRound.length}
+			<button
+				onclick={() => (showClassif = true)}
+				class="rounded-lg border px-2.5 py-1 text-xs font-medium {showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600 ' : ''}border-violet-300 dark:border-violet-900/50 bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300"
+			>
+				Classificació
+			</button>
+		{/if}
 	</div>
 
-	{#if selectedPhase !== null && phases[selectedPhase]}
+	{#if showClassif}
+		{@render classifView()}
+	{:else if selectedPhase !== null && phases[selectedPhase]}
 		{@const phase = phases[selectedPhase]}
 		{#if phase.kind === 'group'}
 			{@const quals = phase.provisional_qualifiers
@@ -453,36 +464,41 @@
 		{/if}
 	{/if}
 
-	{#if classByRound.length}
-		<div class="mt-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="mb-2">
-				<h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Classificació provisional</h2>
-				<p class="mt-0.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">Jugadors ja eliminats, ordenats per la ronda on cauen. S'actualitza a mesura que es tanquen grups i partides.</p>
-			</div>
-			<div class="space-y-3">
-				{#each classByRound as tier (tier.round)}
-					{@const lo = tier.rows[0].position}
-					{@const hi = tier.rows[tier.rows.length - 1].position}
-					<div>
-						<div class="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-							<span>{tier.round}</span>
-							<span class="font-mono font-normal text-slate-400 dark:text-slate-500">llocs {lo === hi ? lo : `${lo}–${hi}`}</span>
-						</div>
-						<ol class="space-y-0.5">
-							{#each tier.rows as r (r.player_name)}
-								<li class="flex items-center gap-2 text-sm">
-									<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{r.position}{#if r.is_provisional_position}<span class="text-amber-500" title="Posició provisional">*</span>{/if}</span>
-									{@render player(r.player_name, 'min-w-0 flex-1 truncate' + (r.position <= 8 ? ' font-semibold' : ''))}
-									{#if r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
-									<span class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline">{r.mitjana.toFixed(3)}</span>
-									<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title="Punts de rànquing segons el lloc (reglament dels opens)">{r.open_points}</span>
-								</li>
-							{/each}
-						</ol>
-					</div>
-				{/each}
-			</div>
-			<p class="mt-2 text-[10px] leading-tight text-slate-400 dark:text-slate-500"><span class="text-amber-500">*</span> posició provisional. Punts = puntuació de rànquing segons el lloc final (reglament dels opens).</p>
-		</div>
-	{/if}
 {/if}
+
+{#snippet classifView()}
+	<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+		<div class="mb-2">
+			<h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Classificació provisional</h2>
+			<p class="mt-0.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">Jugadors ja eliminats, per la ronda on cauen. Els d'una fase tancada són definitius; la resta, provisionals (*).</p>
+		</div>
+		<div class="space-y-3">
+			{#each classByRound as tier (tier.round)}
+				{@const lo = tier.rows[0].position}
+				{@const hi = tier.rows[tier.rows.length - 1].position}
+				<div>
+					<div class="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+						<span>{tier.round}</span>
+						<span class="font-mono font-normal text-slate-400 dark:text-slate-500">llocs {lo === hi ? lo : `${lo}–${hi}`}</span>
+					</div>
+					<ol class="space-y-0.5">
+						{#each tier.rows as r (r.player_name)}
+							<li class="flex items-center gap-2 text-sm">
+								<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{r.position}{#if r.is_provisional_position}<span class="text-amber-500" title="Posició provisional">*</span>{/if}</span>
+								<span class="flex min-w-0 flex-1 items-baseline gap-1 truncate">
+									{@render player(r.player_name, (r.position <= 8 ? 'font-semibold ' : '') + 'truncate')}
+									{#if r.rank3b}<span class="shrink-0 font-mono text-[10px] text-slate-400 dark:text-slate-500" title="Posició al rànquing de 3 bandes">({r.rank3b})</span>{/if}
+								</span>
+								{#if r.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial: millor classificat de la seva banda del rànquing 3 bandes">{r.prize}</span>{/if}
+								{#if r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
+								<span class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline">{r.mitjana.toFixed(3)}</span>
+								<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title="Punts de rànquing segons el lloc (reglament dels opens)">{r.open_points}</span>
+							</li>
+						{/each}
+					</ol>
+				</div>
+			{/each}
+		</div>
+		<p class="mt-2 text-[10px] leading-tight text-slate-400 dark:text-slate-500"><span class="text-amber-500">*</span> provisional · (n) = rànquing 3B · <span class="text-violet-600 dark:text-violet-300">premi</span> per posició (1-8) o per banda de rànquing. Punts segons el reglament.</p>
+	</div>
+{/snippet}

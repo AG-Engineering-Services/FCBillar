@@ -451,15 +451,109 @@ def publish_rating_buckets(
 LLIGA_3B_ID = 36
 
 
+def _fetch_official_lliga_standings(
+    group_keys: list[tuple[int, int]], prog: Progress
+) -> dict[tuple[int, int], list]:
+    """Scrapeja la classificació OFICIAL (live) de cada grup de la lliga 36.
+
+    Retorna {(divisio_id, grup_id): [LligaClassificacioRow]}. És la font de
+    veritat per a posició + punts (penalitzacions i desempat ja aplicats).
+    Robust: si l'scraper no arrenca o un grup falla, l'omet i el caller cau a
+    l'ordre calculat des dels encontres per a aquell grup.
+    """
+    out: dict[tuple[int, int], list] = {}
+    try:
+        from fcbillar.config import get_settings
+        from fcbillar.scraper.client import ScraperClient
+        from fcbillar.scraper.parsers import parse_lliga_classificacio
+    except Exception as e:  # pragma: no cover - dependència de scraper absent
+        prog("warn", f"classificació oficial: import fallit ({e}); s'usa l'ordre calculat")
+        return out
+
+    settings = get_settings()
+    base = settings.base_url.rstrip("/")
+    try:
+        with ScraperClient(settings) as cl:
+            for div, gid in group_keys:
+                url = f"{base}/ca/lligues/classificacio/{LLIGA_3B_ID}/{div}/{gid}"
+                try:
+                    rows = parse_lliga_classificacio(cl.fetch_html(url))
+                except Exception as e:
+                    prog("warn", f"classificació oficial {div}/{gid} fallida: {e}")
+                    continue
+                if rows:
+                    out[(div, gid)] = rows
+    except Exception as e:
+        prog("warn", f"scraper classificació oficial no disponible ({e}); ordre calculat")
+    prog("ok", f"classificació oficial: {len(out)}/{len(group_keys)} grups")
+    return out
+
+
+def _match_official_rows(off_rows, stats: dict, equips: dict, repo) -> dict:
+    """Casa cada fila oficial amb un equip del grup → {eid: LligaClassificacioRow}.
+
+    Primer per (club_id, lletra); si falla, per club_id únic dins del grup (les
+    fases FINAL reasignen la lletra de l'equip, p.ex. "B"→"A"). El club s'obté
+    del text oficial via el mateix resolutor (exacte/normalitzat/àlies) que fa
+    servir la ingesta d'encontres, de manera que noms com "SANT ADRIÀ" casen
+    amb "C.B.SANT ADRIÀ".
+    """
+    from fcbillar.pipeline import _split_equip_nom
+
+    by_club_lletra: dict[tuple, int] = {}
+    by_club: dict[int, list[int]] = {}
+    for eid in stats:
+        meta = equips.get(eid)
+        if not meta:
+            continue
+        _nom, _fcb, lletra, club_id = meta
+        by_club_lletra[(club_id, (lletra or "").upper())] = eid
+        by_club.setdefault(club_id, []).append(eid)
+
+    matched: dict[int, object] = {}
+    used: set[int] = set()
+    for r in off_rows:
+        club_nom, lletra = _split_equip_nom(r.equip)
+        club_id = repo.resolve_club_id_by_nom(club_nom)
+        if club_id is None:
+            continue
+        eid = by_club_lletra.get((club_id, (lletra or "").upper()))
+        if eid is None or eid in used:
+            cands = [e for e in by_club.get(club_id, []) if e not in used]
+            eid = cands[0] if len(cands) == 1 else None
+        if eid is None or eid in used:
+            continue
+        used.add(eid)
+        matched[eid] = r
+    return matched
+
+
 def publish_lliga(
-    db_path: Path | None = None, on_progress: Progress | None = None
+    db_path: Path | None = None,
+    on_progress: Progress | None = None,
+    use_official: bool = True,
 ) -> dict[str, int]:
-    """Calcula i puja les classificacions de la lliga 3 bandes (temporada actual)."""
+    """Calcula i puja les classificacions de la lliga 3 bandes (temporada actual).
+
+    Les estadístiques de detall (PJ/G/E/P, parcials) es deriven dels encontres,
+    però la POSICIÓ i els PUNTS són els de la classificació OFICIAL de la
+    federació (`/ca/lligues/classificacio/...`), que ja porta el desempat oficial
+    (per parcials) i les penalitzacions federatives —que no es publiquen com a
+    fet separat, només es veuen com a menys punts dels que tocarien. Quan un equip
+    té menys punts oficials dels esperats per les seves victòries, la diferència
+    es desa a `penalitzacio` per marcar la sanció. Si l'scraper no està disponible
+    (`use_official=False` o error de xarxa), es cau a l'ordre calculat des dels
+    encontres (PM, després parcials a favor), com fa la federació.
+    """
     prog: Progress = on_progress or (lambda level, msg: None)
     db_path = db_path or get_settings().db_path
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     sb = get_client()
+
+    from fcbillar.db.repository import Repository
+
+    repo = Repository(conn)
 
     tr = conn.execute("SELECT id FROM temporades ORDER BY nom DESC LIMIT 1").fetchone()
     season_id = tr["id"] if tr else None
@@ -472,9 +566,10 @@ def publish_lliga(
         )
     }
     equips = {
-        r["id"]: (r["nom"], r["fcb_id"], r["lletra"])
+        r["id"]: (r["nom"], r["fcb_id"], r["lletra"], r["club_id"])
         for r in conn.execute(
-            "SELECT e.id, e.lletra, c.nom, c.fcb_id FROM equips e JOIN clubs c ON c.id = e.club_id"
+            "SELECT e.id, e.lletra, e.club_id, c.nom, c.fcb_id "
+            "FROM equips e JOIN clubs c ON c.id = e.club_id"
         )
     }
 
@@ -485,6 +580,12 @@ def publish_lliga(
         """,
         (LLIGA_3B_ID, season_id),
     ).fetchall()
+
+    official: dict[tuple[int, int], list] = {}
+    if use_official:
+        official = _fetch_official_lliga_standings(
+            [(g["divisio_id"], g["grup_id"]) for g in groups], prog
+        )
 
     group_rows: list[dict] = []
     standing_rows: list[dict] = []
@@ -497,7 +598,8 @@ def publish_lliga(
         enc = conn.execute(
             """
             SELECT equip_local_id AS loc, equip_visitant_id AS vis,
-                   p_match_local AS pml, p_match_visitant AS pmv
+                   p_match_local AS pml, p_match_visitant AS pmv,
+                   p_parcials_local AS ppl, p_parcials_visitant AS ppv
             FROM encontres_lliga
             WHERE lliga_id = ? AND divisio_id = ? AND grup_id = ? AND temporada_id = ?
             """,
@@ -506,7 +608,9 @@ def publish_lliga(
         stats: dict[int, dict] = {}
 
         def _s(eid):
-            return stats.setdefault(eid, {"pj": 0, "g": 0, "e": 0, "p": 0, "pf": 0, "pc": 0})
+            return stats.setdefault(
+                eid, {"pj": 0, "g": 0, "e": 0, "p": 0, "pf": 0, "pc": 0, "ppf": 0, "ppc": 0}
+            )
 
         for r in enc:
             pml, pmv = r["pml"], r["pmv"]
@@ -516,6 +620,10 @@ def publish_lliga(
             sl["pj"] += 1; sv["pj"] += 1
             sl["pf"] += pml; sl["pc"] += pmv
             sv["pf"] += pmv; sv["pc"] += pml
+            ppl, ppv = r["ppl"], r["ppv"]
+            if ppl is not None and ppv is not None:
+                sl["ppf"] += ppl; sl["ppc"] += ppv
+                sv["ppf"] += ppv; sv["ppc"] += ppl
             if pml > pmv:
                 sl["g"] += 1; sv["p"] += 1
             elif pml < pmv:
@@ -523,20 +631,40 @@ def publish_lliga(
             else:
                 sl["e"] += 1; sv["e"] += 1
 
-        ranked = sorted(
-            stats.items(),
-            key=lambda kv: (3 * kv[1]["g"] + kv[1]["e"], kv[1]["pf"] - kv[1]["pc"]),
-            reverse=True,
-        )
+        # Casa cada equip amb la seva fila oficial (posició + punts de la
+        # federació). Els equips sense fila oficial s'ordenen al final per
+        # (PM, parcials a favor), el mateix desempat que aplica la federació.
+        off_rows = official.get((div, gid))
+        matched = _match_official_rows(off_rows, stats, equips, repo) if off_rows else {}
+
+        def _rank_key(kv):
+            eid, s = kv
+            off = matched.get(eid)
+            if off is not None:
+                return (0, off.posicio, 0, 0)
+            return (1, 0, -(3 * s["g"] + s["e"]), -s["ppf"])
+
+        ranked = sorted(stats.items(), key=_rank_key)
         for pos, (eid, s) in enumerate(ranked, start=1):
-            nom, fcb_id, lletra = equips.get(eid, ("?", None, ""))
+            nom, fcb_id, lletra, _club_id = equips.get(eid, ("?", None, "", None))
             # "UNICO" = club amb un sol equip → no es mostra la lletra.
             equip = nom if (lletra or "").strip().upper() in ("", "UNICO") else f"{nom} {lletra}".strip()
+            computed_pm = 3 * s["g"] + s["e"]
+            off = matched.get(eid)
+            punts = off.pm if off is not None else computed_pm
+            # Sanció federativa = punts esperats per victòries − punts oficials.
+            # Només > 0 és sanció; < 0 vol dir que ens falten resultats (no sanció).
+            penal = (
+                computed_pm - off.pm
+                if off is not None and computed_pm > off.pm
+                else None
+            )
             standing_rows.append({
                 "lliga_id": LLIGA_3B_ID, "divisio_id": div, "grup_id": gid,
                 "posicio": pos, "equip": equip, "club_fcb_id": fcb_id,
                 "pj": s["pj"], "g": s["g"], "e": s["e"], "p": s["p"],
-                "punts": 3 * s["g"] + s["e"], "pf": s["pf"], "pc": s["pc"],
+                "punts": punts, "pf": s["pf"], "pc": s["pc"],
+                "penalitzacio": penal,
             })
 
     counts = {}
@@ -1499,6 +1627,60 @@ def _enrich_live_payload(payload: dict, sb) -> None:
         if ids and len(ids) == 1:
             player_ids[n] = ids[0]
     payload["player_ids"] = player_ids
+
+    # 3) Rànquing de TRES BANDES (modalitat_codi=1, seqüència vigent) per jugador,
+    #    i premis especials de la classificació de l'open:
+    #      · "millor classificat d'entre els del rànquing 3B 61-180"
+    #      · "millor classificat d'entre els del 181 fins al final (i no rankejats)"
+    #    Cada fila de la classificació rep `rank3b` (per mostrar-lo) i la fila
+    #    guanyadora de cada banda rep `prize`.
+    classification = payload.get("classification") or []
+    if classification:
+        rank3b = _ranking_3b_by_fcb_id(sb)
+        best_a: tuple[int, dict] | None = None  # banda 61-180
+        best_b: tuple[int, dict] | None = None  # banda 181+ / no rankejat
+        for row in classification:
+            fid = player_ids.get(row.get("player_name", ""))
+            pos3b = rank3b.get(fid) if fid else None
+            if pos3b is not None:
+                row["rank3b"] = pos3b
+            op = row.get("position")
+            if not isinstance(op, int):
+                continue
+            if pos3b is not None and 61 <= pos3b <= 180:
+                if best_a is None or op < best_a[0]:
+                    best_a = (op, row)
+            elif pos3b is None or pos3b >= 181:
+                if best_b is None or op < best_b[0]:
+                    best_b = (op, row)
+        if best_a is not None:
+            best_a[1]["prize"] = "Millor 61-180"
+        if best_b is not None:
+            best_b[1]["prize"] = "Millor 181+"
+
+
+def _ranking_3b_by_fcb_id(sb) -> dict[str, int]:
+    """{player_fcb_id: posicio} del rànquing vigent de TRES BANDES (modalitat_codi=1,
+    num_seq més alt). Font dels premis especials per banda de rànquing dels opens."""
+    try:
+        seqs = (
+            sb.table("rankings").select("num_seq")
+            .eq("modalitat_codi", 1).order("num_seq", desc=True).limit(1).execute()
+        )
+        if not seqs.data:
+            return {}
+        latest = seqs.data[0]["num_seq"]
+        out: dict[str, int] = {}
+        res = (
+            sb.table("ranking_entries").select("player_fcb_id,posicio")
+            .eq("modalitat_codi", 1).eq("num_seq", latest).execute()
+        )
+        for r in res.data or []:
+            if r.get("player_fcb_id") and r.get("posicio") is not None:
+                out[r["player_fcb_id"]] = int(r["posicio"])
+        return out
+    except Exception:  # noqa: BLE001
+        return {}
 
 
 def publish_live_opens(

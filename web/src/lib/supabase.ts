@@ -67,6 +67,8 @@ export interface StandingRow {
 	punts: number | null;
 	pf: number | null;
 	pc: number | null;
+	/** Punts restats per sanció federativa (> 0). null = sense sanció. */
+	penalitzacio?: number | null;
 }
 
 export interface CopaGroup {
@@ -191,6 +193,8 @@ export interface OpenLiveClassRow {
 	serie_major: number;
 	open_points: number;
 	is_provisional_position: boolean;
+	rank3b?: number; // posició al rànquing de 3 bandes (per mostrar entre parèntesi)
+	prize?: string; // premi especial per banda de rànquing ("Millor 61-180" / "Millor 181+")
 }
 export interface OpenLivePayload {
 	division_id: number;
