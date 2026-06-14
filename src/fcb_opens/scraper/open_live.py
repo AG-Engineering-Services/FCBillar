@@ -1450,6 +1450,7 @@ def compute_open_classification(
     # Pre-compute eliminated + sorted name list per phase. Sort key differs
     # for KO (mitjana/SM only — single match) vs group (punts first).
     eliminated_per_phase: list[list[str]] = []
+    noshow_names: set[str] = set()  # no-presentats: punts d'open = 0 (de moment)
     for i, phase in enumerate(phases):
         later_known: set[str] = set()
         for j in range(i + 1, len(phases)):
@@ -1503,6 +1504,7 @@ def compute_open_classification(
                     n,
                 )
             )
+            noshow_names.update(n for n in elim if _noshow(n))
         else:
             elim = [
                 n for n in phase_stats[i]
@@ -1570,6 +1572,8 @@ def compute_open_classification(
             mg, sm, club = phase_stats[i][name]
             if not club:
                 club = club_by_player.get(name, "")
+            # No-presentat: 0 punts (de moment; el reglament en preveu possible -20).
+            pts = 0 if name in noshow_names else points_for_position(pos)
             rows.append(
                 OpenClassificationRow(
                     position=pos,
@@ -1578,7 +1582,7 @@ def compute_open_classification(
                     round_label=phase.ref.label,
                     mitjana=mg,
                     serie_major=sm,
-                    open_points=points_for_position(pos),
+                    open_points=pts,
                     is_provisional_position=not phase_closed,
                 )
             )
