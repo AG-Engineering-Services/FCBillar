@@ -250,12 +250,14 @@
 	</div>
 
 	{#if bestSerie}
-		<div class="mb-3 flex items-start gap-2 rounded-xl bg-violet-50 dark:bg-violet-950/40 px-3 py-2 ring-1 ring-violet-200 dark:ring-violet-900/50">
-			<span class="shrink-0 pt-0.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300" title="Millor sèrie major d'entre els jugadors que no queden entre els 8 primers">Millor sèrie<span class="font-normal normal-case"> (fora top 8)</span></span>
-			<span class="flex min-w-0 flex-1 flex-col gap-0.5 text-sm leading-snug">
+		<div class="mb-3 rounded-xl bg-violet-50 dark:bg-violet-950/40 px-3 py-2 ring-1 ring-violet-200 dark:ring-violet-900/50">
+			<div class="flex items-center justify-between gap-2">
+				<span class="text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300" title="Millor sèrie major d'entre els jugadors que no queden entre els 8 primers">Millor sèrie<span class="font-normal normal-case"> (fora top 8)</span></span>
+				<span class="shrink-0 font-mono text-lg font-bold leading-none text-violet-700 dark:text-violet-300">{bestSerie.sm}</span>
+			</div>
+			<div class="mt-1 flex flex-col gap-0.5 text-sm leading-snug">
 				{#each bestSerie.players as p}<span class="truncate">{@render player(p, 'font-bold')}</span>{/each}
-			</span>
-			<span class="shrink-0 font-mono text-lg font-bold leading-none text-violet-700 dark:text-violet-300">{bestSerie.sm}</span>
+			</div>
 		</div>
 	{/if}
 
