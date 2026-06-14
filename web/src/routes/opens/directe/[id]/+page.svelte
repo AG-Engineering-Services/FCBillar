@@ -10,7 +10,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import { supabase, type OpenLivePhase, type OpenLiveMatch, type OpenLiveScore } from '$lib/supabase';
+	import { supabase, type OpenLivePhase, type OpenLiveGroup, type OpenLiveMatch, type OpenLiveScore } from '$lib/supabase';
 
 	const id0 = Number($page.params.id);
 	let row = $state<OpenLiveRow | null>(rowCache.get(id0) ?? null);
@@ -113,12 +113,29 @@
 		return `fa ${h} h`;
 	}
 
+	const canonName = (s: string | null | undefined) =>
+		(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+	// Un grup està TANCAT (places decidides) quan totes les partides estan jugades,
+	// O BÉ —grup de 3 amb un jugador que NO es presenta— quan les partides jugades
+	// són totes del MATEIX parell: els 2 presents juguen dos cops i el grup queda
+	// tancat amb 2 partides, encara que la federació mantingui n_matches_total=3.
+	function groupClosed(g: OpenLiveGroup): boolean {
+		if (g.n_matches_total > 0 && g.n_matches_played === g.n_matches_total) return true;
+		const played = (g.matches ?? []).filter((m) => m.is_played && m.player_a && m.player_b);
+		if (played.length >= 2) {
+			const pairs = new Set(played.map((m) => [canonName(m.player_a), canonName(m.player_b)].sort().join('|')));
+			if (pairs.size === 1) return true; // totes les jugades són el mateix parell → no-show
+		}
+		return false;
+	}
+
 	function phaseStatus(p: OpenLivePhase): 'done' | 'active' | 'pending' {
 		if (p.kind === 'group') {
 			const total = p.groups.reduce((a, g) => a + g.n_matches_total, 0);
 			const played = p.groups.reduce((a, g) => a + g.n_matches_played, 0);
 			if (total === 0 || played === 0) return 'pending';
-			return played === total ? 'done' : 'active';
+			return p.groups.every(groupClosed) ? 'done' : 'active';
 		}
 		if (p.ko_matches.length === 0) return 'pending';
 		const played = p.ko_matches.filter((m) => m.is_played).length;
@@ -211,7 +228,7 @@
 				.slice()
 				.sort((a, b) => a.position_in_group - b.position_in_group || b.punts - a.punts || b.mitjana - a.mitjana)}
 			{@const nSeconds = quals.filter((q) => q.position_in_group > 1).length}
-			{@const phaseComplete = phase.groups.every((g) => g.n_matches_total > 0 && g.n_matches_played === g.n_matches_total)}
+			{@const phaseComplete = phase.groups.every(groupClosed)}
 			{#if quals.length}
 				<div class="mb-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-3 ring-1 ring-emerald-200 dark:ring-emerald-900/50">
 					<div class="mb-1.5 flex items-center gap-2">
@@ -236,12 +253,12 @@
 					<ol class="space-y-0.5">
 						{#each quals as q, i}
 							{@const grp = phase.groups.find((gg) => gg.label === q.group_label)}
-							{@const sure = q.position_in_group > 1 || (!!grp && grp.n_matches_total > 0 && grp.n_matches_played === grp.n_matches_total)}
+							{@const sure = q.position_in_group > 1 || (!!grp && groupClosed(grp))}
 							<li class="flex items-center gap-2 text-sm {q.position_in_group > 1 ? '-mx-1 rounded bg-amber-50/70 dark:bg-amber-950/40 px-1' : ''}">
 								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{i + 1}</span>
 								<span class="w-6 shrink-0 rounded bg-white/70 dark:bg-slate-900/70 text-center font-mono text-[10px] text-slate-500 dark:text-slate-400">{q.group_label.replace('Grup ', '')}</span>
 								<span class="flex min-w-0 flex-1 items-center gap-1">
-									{@render player(q.player_name, 'truncate ' + (sure ? 'font-medium' : ''))}
+									{@render player(q.player_name, 'truncate ' + (sure ? 'font-bold' : ''))}
 									{#if q.position_in_group > 1}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1 text-[9px] font-semibold uppercase text-amber-700 dark:text-amber-300" title="Millor 2n: classificat per omplir la següent ronda">2n</span>{/if}{#if sure}<span class="shrink-0 text-emerald-600 dark:text-emerald-400" title={q.position_in_group > 1 ? 'Classificat (millor 2n, col·locat per la federació)' : 'Classificació assegurada (grup acabat)'}>✓</span>{/if}
 								</span>
 								<!-- Estadístiques completes: només PC/tablet -->
@@ -283,12 +300,12 @@
 			{/if}
 			<div class="grid gap-2.5 sm:grid-cols-2">
 				{#each phase.groups as g (g.label)}
-					{@const done = g.n_matches_total > 0 && g.n_matches_played === g.n_matches_total}
+					{@const done = groupClosed(g)}
 					{@const played = g.matches.filter((m) => m.is_played)}
 					<div class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 {liveForGroup(g.label).length ? 'ring-red-200 dark:ring-red-900/50' : done ? 'ring-emerald-200 dark:ring-emerald-900/50' : 'ring-slate-200 dark:ring-slate-800'}">
 						<div class="flex items-center justify-between gap-2 px-3 py-1.5 {done ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'bg-slate-50 dark:bg-slate-800/50'}">
 							<span class="text-sm font-semibold">{g.label}</span>
-							<span class="text-[11px] {done ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}">{g.n_matches_played}/{g.n_matches_total}</span>
+							<span class="text-[11px] {done ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}">{g.n_matches_played}/{done ? g.n_matches_played : g.n_matches_total}</span>
 						</div>
 						{#if g.venue}<div class="px-3 pt-1 text-[10px] text-slate-400 dark:text-slate-500">{g.venue}</div>{/if}
 						{#if g.standings.length}
