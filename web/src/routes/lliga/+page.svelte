@@ -307,7 +307,7 @@
 								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
 								<div class="min-w-0 flex-1">
 									<div class="truncate text-sm font-medium leading-tight">{r.equip}</div>
-									<div class="text-[11px] tabular-nums text-slate-400 dark:text-slate-500">{r.g}-{r.e}-{r.p}</div>
+									<div class="text-[11px] tabular-nums text-slate-400 dark:text-slate-500">{r.g}-{r.e}-{r.p}{#if r.penalitzacio}<span class="ml-1 font-medium text-red-500 dark:text-red-400" title="Sanció federativa: −{r.penalitzacio} {r.penalitzacio === 1 ? 'punt' : 'punts'}">· −{r.penalitzacio} sanció</span>{/if}</div>
 								</div>
 								<span class="w-7 shrink-0 text-center text-sm tabular-nums text-slate-500 dark:text-slate-400">{r.pj}</span>
 								<span class="w-9 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>

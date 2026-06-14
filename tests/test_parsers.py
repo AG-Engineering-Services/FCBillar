@@ -11,6 +11,7 @@ from fcbillar.scraper.parsers import (
     HistorialEntry,
     parse_clubs_listing,
     parse_home_current_rankings,
+    parse_lliga_classificacio,
     parse_lliga_divisions,
     parse_lliga_encontres,
     parse_lliga_grups,
@@ -317,3 +318,27 @@ def test_parse_lliga_partides_encontre(lliga_partides_html: str) -> None:
     assert p1.arbitre == "BOTERO"
     assert p1.assistencia == "Partit disputat"
     assert p1.modalitat == "Tres bandes"
+
+
+@pytest.fixture
+def lliga_classif_html() -> str:
+    return (FIXTURES / "lliga_3b_honor_grupA_classif.html").read_text(encoding="utf-8")
+
+
+def test_parse_lliga_classificacio(lliga_classif_html: str) -> None:
+    """Classificació oficial d'un grup: 8 equips amb posició, PM, PP, J."""
+    rows = parse_lliga_classificacio(lliga_classif_html)
+    assert len(rows) == 8
+    first = rows[0]
+    assert first.posicio == 1
+    assert first.equip == 'C.B. MATARÓ "A"'
+    assert first.pm == 36
+    assert first.pp == 89
+    assert first.j == 14
+    last = rows[-1]
+    assert last.posicio == 8
+    assert last.equip == 'C.B. SANTS "A"'
+    assert last.pm == 6
+    assert last.pp == 32
+    # Posicions consecutives 1..8, sense capçalera ni llegenda colades.
+    assert [r.posicio for r in rows] == list(range(1, 9))

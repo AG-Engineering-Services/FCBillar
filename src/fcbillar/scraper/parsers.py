@@ -412,6 +412,60 @@ def parse_lliga_grups(html: str) -> list[LligaGrup]:
 
 
 @dataclass(frozen=True)
+class LligaClassificacioRow:
+    """Una fila de la classificació OFICIAL d'un grup, tal com la publica la
+    federació a /ca/lligues/classificacio/{lliga}/{div}/{grup}.
+
+    A diferència de la classificació que calculem nosaltres des dels encontres,
+    aquesta ja porta aplicades les penalitzacions federatives (que no es
+    publiquen com a fet separat: només es veuen com a menys PM dels que tocarien
+    per les victòries) i el desempat oficial (per PP). És la font de veritat per
+    a l'ordre i els punts de la temporada en curs.
+    """
+
+    posicio: int
+    equip: str  # text tal qual: 'C.B. CANET "B"', 'S.B. GEiEG', ...
+    pm: int  # punts de match (OFICIALS, amb penalització ja restada)
+    pp: int | None  # punts parcials (desempat oficial)
+    j: int | None  # partides jugades
+
+
+def parse_lliga_classificacio(html: str) -> list[LligaClassificacioRow]:
+    """Parseja /ca/lligues/classificacio/{lliga}/{div}/{grup} → files oficials.
+
+    Estructura: dins de `section.three.fourths.padded`, cada equip és un
+    `div.row.box.info` amb 5 cel·les filles en ordre: posició, EQUIP, PM, PP, J.
+    La capçalera és `div.row.box.black` (no la capturem perquè no és `.info`).
+    """
+    soup = BeautifulSoup(html, "lxml")
+    section = soup.select_one("section.three.fourths.padded")
+    if section is None:
+        return []
+    out: list[LligaClassificacioRow] = []
+    for box in section.select("div.row.box.info"):
+        cells = box.find_all("div", recursive=False)
+        if len(cells) < 3:
+            continue
+        texts = [_text(c) for c in cells]
+        pos, pm = _parse_int(texts[0]), _parse_int(texts[2])
+        if pos is None or pm is None:
+            continue  # fila no-equip (capçalera, llegenda…)
+        equip = texts[1].strip()
+        if not equip:
+            continue
+        out.append(
+            LligaClassificacioRow(
+                posicio=pos,
+                equip=equip,
+                pm=pm,
+                pp=_parse_int(texts[3]) if len(texts) > 3 else None,
+                j=_parse_int(texts[4]) if len(texts) > 4 else None,
+            )
+        )
+    return out
+
+
+@dataclass(frozen=True)
 class LligaJornadaLink:
     """Link a una jornada concreta dins d'un grup."""
 
