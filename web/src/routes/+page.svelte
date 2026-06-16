@@ -162,9 +162,10 @@
 </div>
 
 {#if provActive}
-	<p class="mb-2 px-1 text-[11px] leading-snug text-blue-600 dark:text-blue-400">
-		En <span class="font-semibold">blau</span>: projecció del proper rànquing — mitjana i moviment
-		de posició incloent-hi les partides de competicions en curs (copa, opens…).
+	<p class="mb-2 px-1 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
+		A la dreta, <span class="font-semibold">projecció del proper rànquing</span> (mitjana i posició
+		amb les partides de competicions en curs): <span class="font-semibold text-emerald-600 dark:text-emerald-400">verd</span>
+		puja, <span class="font-semibold text-red-500 dark:text-red-400">vermell</span> baixa.
 	</p>
 {/if}
 
@@ -193,9 +194,19 @@
 					</span>
 					{#if pv && pv.partides_post > 0}
 						{@const dp = (pv.posicio_oficial ?? 0) - (pv.posicio_provisional ?? 0)}
-						<span class="w-14 shrink-0 text-right leading-tight">
-							<span class="block font-mono text-xs font-semibold tabular-nums text-blue-600 dark:text-blue-400"
-								>{pv.mitjana_provisional != null ? pv.mitjana_provisional.toFixed(3) : ''}</span>
+						{@const dm = (pv.mitjana_provisional ?? 0) - (pv.mitjana_oficial ?? 0)}
+						{@const mUp = dm > 0.0005}
+						{@const mDown = dm < -0.0005}
+						<span class="w-16 shrink-0 text-right leading-tight">
+							<span
+								class="block font-mono text-xs font-semibold tabular-nums {mUp
+									? 'text-emerald-600 dark:text-emerald-400'
+									: mDown
+										? 'text-red-500 dark:text-red-400'
+										: 'text-slate-500 dark:text-slate-400'}"
+								>{mUp ? '↑' : mDown ? '↓' : ''}{pv.mitjana_provisional != null
+									? pv.mitjana_provisional.toFixed(3)
+									: ''}</span>
 							<span
 								class="block text-[10px] font-bold tabular-nums {dp > 0
 									? 'text-emerald-600 dark:text-emerald-400'
@@ -205,7 +216,7 @@
 								>{dp > 0 ? `▲${dp}` : dp < 0 ? `▼${-dp}` : '–'}</span>
 						</span>
 					{:else if provActive}
-						<span class="w-14 shrink-0"></span>
+						<span class="w-16 shrink-0"></span>
 					{/if}
 					<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
 				</a>
