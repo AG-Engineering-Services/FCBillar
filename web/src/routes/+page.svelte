@@ -204,9 +204,7 @@
 									: mDown
 										? 'text-red-500 dark:text-red-400'
 										: 'text-slate-500 dark:text-slate-400'}"
-								>{mUp ? '↑' : mDown ? '↓' : ''}{pv.mitjana_provisional != null
-									? pv.mitjana_provisional.toFixed(3)
-									: ''}</span>
+								>{mUp ? `+${dm.toFixed(3)}` : mDown ? dm.toFixed(3) : '='}</span>
 							<span
 								class="block text-[10px] font-bold tabular-nums {dp > 0
 									? 'text-emerald-600 dark:text-emerald-400'
