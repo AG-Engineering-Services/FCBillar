@@ -458,6 +458,8 @@ def publish_pending_games(
                 """SELECT local_nom, local_caramboles, local_serie, visitant_nom,
                           visitant_caramboles, visitant_serie, entrades FROM copa_partides"""
             ):
+                if not r["entrades"] or r["entrades"] <= 0:
+                    continue  # fixture no jugada (caramboles 0-0, sense entrades)
                 sig = _sig(r["local_nom"], r["local_caramboles"], r["visitant_nom"],
                            r["visitant_caramboles"], r["entrades"])
                 if sig in game_sigs:
@@ -487,6 +489,8 @@ def publish_pending_games(
                     return
                 na, nb = m.get("player_a"), m.get("player_b")
                 ca, cb, ent = m.get("caramboles_a"), m.get("caramboles_b"), m.get("entrades")
+                if not ent or ent <= 0:
+                    return  # marcada jugada però sense entrades: descartem
                 sig = _sig(na, ca, nb, cb, ent)
                 if sig in game_sigs:
                     return
