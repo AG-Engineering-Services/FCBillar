@@ -36,11 +36,14 @@ hi ha res a projectar.
 | `posicio_provisional` | int | Posició projectada (definitius abans que provisionals) |
 | `mitjana_provisional` | real \| null | Mitjana projectada; **null** si el jugador no té partides noves |
 | `partides_post` | int | Nº de partides pendents que mou aquest jugador (0 = no s'ha mogut) |
+| `proj_won` / `proj_lost` / `proj_tie` | int \| null | G/P/E de la finestra projectada de 15 (només per als qui s'han mogut; sumen 15) |
+| `window_game_ids` | jsonb \| null | IDs (de `games`) que entren a la finestra projectada — per ressaltar-los; les partides pendents NO hi són (venen de `pending_games`) |
 
 PK: `(modalitat_codi, num_seq, player_fcb_id)`.
 
 Moviment d'un jugador = `posicio_oficial − posicio_provisional` (positiu = puja).
-Mostra el provisional d'un jugador només si `partides_post > 0`.
+Mostra el provisional d'un jugador només si `partides_post > 0`. Els camps de
+desglossament (`proj_*`, `window_game_ids`) només estan plens per a aquests.
 
 ```ts
 const { data } = await sb
