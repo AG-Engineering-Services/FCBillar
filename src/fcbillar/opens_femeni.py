@@ -55,6 +55,41 @@ def femeni_provas(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return sorted(rows, key=lambda o: o["divisio_id_extern"] or 0)
 
 
+def _derive_standings_from_partides(
+    conn: sqlite3.Connection, tor_ext: int, div_ext: int, nom2fcb: dict[str, str]
+) -> list[tuple[str, str, str | None, int]]:
+    """Deriva la classificació d'una prova des de les PARTIDES (torneig_partides)
+    quan la federació encara no n'ha publicat la classificació final però els
+    resultats ja hi són. Ordena per punts de matx (suma) i, com a desempat, per
+    mitjana general (Σcaramboles / Σentrades). Retorna [(fcb_id, nom, None, posicio)].
+    """
+    agg: dict[str, dict] = {}
+    for r in conn.execute(
+        "SELECT player1_nom, caramboles1, punts1, player2_nom, caramboles2, punts2, entrades "
+        "FROM torneig_partides WHERE torneig_id_extern = ? AND divisio_id_extern = ?",
+        (tor_ext, div_ext),
+    ):
+        ent = r["entrades"] or 0
+        for nom, car, pts in (
+            (r["player1_nom"], r["caramboles1"], r["punts1"]),
+            (r["player2_nom"], r["caramboles2"], r["punts2"]),
+        ):
+            a = agg.setdefault(_nm(nom), {"nom": nom, "pts": 0, "car": 0, "ent": 0})
+            a["pts"] += pts or 0
+            a["car"] += car or 0
+            a["ent"] += ent
+    ranked = sorted(
+        agg.values(),
+        key=lambda a: (-a["pts"], -(a["car"] / a["ent"] if a["ent"] else 0.0), a["nom"]),
+    )
+    out: list[tuple[str, str, str | None, int]] = []
+    for pos, a in enumerate(ranked, start=1):
+        fcb = nom2fcb.get(_nm(a["nom"]))
+        if fcb is not None:
+            out.append((fcb, a["nom"], None, pos))
+    return out
+
+
 def femeni_ranking_rows(conn: sqlite3.Connection) -> list[dict]:
     """Files del rànquing femení: un snapshot per ronda (finestra mòbil de 5).
 
@@ -128,6 +163,22 @@ def femeni_ranking_rows(conn: sqlite3.Connection) -> list[dict]:
         ids,
     ):
         parts[r["oid"]].append((r["fcb_id"], r["nom"], r["club_text"], r["posicio"]))
+
+    # Fallback: proves amb partides però SENSE classificació oficial publicada
+    # (la federació triga a penjar-la) → deriva-la dels resultats.
+    missing = [oid for oid in ids if not parts.get(oid)]
+    if missing:
+        nom2fcb: dict[str, str] = {}
+        for r in conn.execute("SELECT nom, fcb_id FROM players"):
+            nom2fcb.setdefault(_nm(r["nom"]), r["fcb_id"])
+        ext_by_oid = {oid: ext for ext, oid in idmap.items()}  # oid → (tor_ext, div_ext)
+        for oid in missing:
+            ext = ext_by_oid.get(oid)
+            if not ext:
+                continue
+            derived = _derive_standings_from_partides(conn, ext[0], ext[1], nom2fcb)
+            if derived:
+                parts[oid] = derived
 
     def _ddet(oid, pos, pp):
         return {
