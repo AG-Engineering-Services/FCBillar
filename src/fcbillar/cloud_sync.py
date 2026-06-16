@@ -247,30 +247,33 @@ def publish_provisional_ranking(
         mod_id = conn.execute(
             "SELECT id FROM modalitats WHERE codi_fcb = ?", (mod,)
         ).fetchone()[0]
-        games_by: dict[str, list[tuple[str, int | None, int | None]]] = {}
+        # Per jugador: (data, caramboles_propis, caramboles_rival, entrades, game_id).
+        games_by: dict[str, list[tuple[str, int | None, int | None, int | None, str]]] = {}
         for r in conn.execute(
-            """SELECT p1.fcb_id f1, g.caramboles1 c1, p2.fcb_id f2, g.caramboles2 c2,
-                      g.entrades e, g.data_partida d
+            """SELECT g.id gid, p1.fcb_id f1, g.caramboles1 c1, p2.fcb_id f2,
+                      g.caramboles2 c2, g.entrades e, g.data_partida d
                FROM games g JOIN players p1 ON p1.id = g.player1_id
                JOIN players p2 ON p2.id = g.player2_id WHERE g.modalitat_id = ?""",
             (mod_id,),
         ):
             if r["d"] and r["d"] >= age_cutoff:
-                games_by.setdefault(r["f1"], []).append((r["d"], r["c1"], r["e"]))
-                games_by.setdefault(r["f2"], []).append((r["d"], r["c2"], r["e"]))
+                games_by.setdefault(r["f1"], []).append((r["d"], r["c1"], r["c2"], r["e"], r["gid"]))
+                games_by.setdefault(r["f2"], []).append((r["d"], r["c2"], r["c1"], r["e"], r["gid"]))
 
         # pending per jugador (de Supabase, publicat per publish_pending_games abans).
-        pend: dict[str, list[tuple[int | None, int | None]]] = {}
+        pend: dict[str, list[tuple[int | None, int | None, int | None]]] = {}
         pdata = (
             sb.table("pending_games")
-            .select("player_fcb_id, caramboles, entrades")
+            .select("player_fcb_id, caramboles, caramboles_opp, entrades")
             .eq("modalitat_codi", mod)
             .execute()
             .data
             or []
         )
         for pr in pdata:
-            pend.setdefault(pr["player_fcb_id"], []).append((pr["caramboles"], pr["entrades"]))
+            pend.setdefault(pr["player_fcb_id"], []).append(
+                (pr["caramboles"], pr["caramboles_opp"], pr["entrades"])
+            )
 
         import json as _json
 
@@ -290,20 +293,42 @@ def publish_provisional_ranking(
             proj_def = off_def or (n_pending > 0 and computable >= 15)
             if n_pending == 0:
                 computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
-                                 "proj": None, "n": 0, "eff": off_mj or 0.0})
+                                 "proj": None, "n": 0, "eff": off_mj or 0.0,
+                                 "won": None, "lost": None, "tie": None, "gids": None})
                 continue
-            window = list(pg[:15])
+            # Finestra de 15: pendents (les més recents) + les més recents de games.
             recent = sorted(games_by.get(fcb, []), key=lambda x: x[0], reverse=True)
-            window += [(c, en) for _d, c, en in recent[: max(0, 15 - len(window))]]
-            car = ent = 0
-            for c, en in window:
+            recent_window = recent[: max(0, 15 - min(n_pending, 15))]
+            car = ent = won = lost = tie = 0
+
+            def _tally(c, c_opp):
+                nonlocal won, lost, tie
+                if c is None or c_opp is None:
+                    return
+                if c > c_opp:
+                    won += 1
+                elif c < c_opp:
+                    lost += 1
+                else:
+                    tie += 1
+
+            for c, c_opp, en in pg[:15]:
                 if c is not None and en is not None:
                     car += c
                     ent += en
+                _tally(c, c_opp)
+            gids: list[str] = []
+            for _d, c, c_opp, en, gid in recent_window:
+                if c is not None and en is not None:
+                    car += c
+                    ent += en
+                _tally(c, c_opp)
+                gids.append(gid)
             proj = (car / ent) if ent else None
             eff = proj if proj is not None else (off_mj or 0.0)
             computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
-                             "proj": proj, "n": n_pending, "eff": eff})
+                             "proj": proj, "n": n_pending, "eff": eff,
+                             "won": won, "lost": lost, "tie": tie, "gids": gids})
 
         # La federació ordena TOTS els definitius (per mitjana) abans dels no
         # definitius. Respectem-ho: un no-definitiu amb 2 bones partides NO pot
@@ -326,6 +351,8 @@ def publish_provisional_ranking(
                 "posicio_provisional": i,
                 "mitjana_provisional": round(c["proj"], 4) if c["proj"] is not None else None,
                 "partides_post": c["n"],
+                "proj_won": c["won"], "proj_lost": c["lost"], "proj_tie": c["tie"],
+                "window_game_ids": c["gids"],
             }
             for i, c in enumerate(computed, start=1)
         ]

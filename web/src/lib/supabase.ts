@@ -39,6 +39,11 @@ export interface ProvisionalRow {
 	posicio_provisional: number | null;
 	mitjana_provisional: number | null;
 	partides_post: number;
+	// Desglossament de la finestra projectada (només per als qui s'han mogut).
+	proj_won?: number | null;
+	proj_lost?: number | null;
+	proj_tie?: number | null;
+	window_game_ids?: string[] | null; // IDs de `games` que entren a la finestra
 }
 
 // Partides jugades en competicions en curs encara NO al rànquing oficial

@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { supabase, type GameRow, type PendingGameRow } from '$lib/supabase';
+	import {
+		supabase,
+		type GameRow,
+		type PendingGameRow,
+		type ProvisionalRow
+	} from '$lib/supabase';
 	import { follows, toggleFollow } from '$lib/follows';
 	import RadarChart from '$lib/components/RadarChart.svelte';
 	import { theme } from '$lib/theme';
@@ -38,6 +43,10 @@
 	// Partides pendents (totes les competicions en curs) llegides de pending_games;
 	// la dedup contra `games` ja la fa el publisher server-side.
 	let pendingRows = $state<PendingGameRow[]>([]);
+	// Projecció AUTORITATIVA del proper rànquing (taula ranking_provisional), per
+	// modalitat. La fitxa ja no recalcula res: en llegeix mitjana, posició i G/P/E.
+	let provByMod = $state<Map<number, ProvisionalRow>>(new Map());
+	const provRow = $derived(selMod != null ? (provByMod.get(selMod) ?? null) : null);
 	const copaPend = $derived(
 		pendingRows
 			.filter((r) => r.modalitat_codi === selMod)
@@ -173,6 +182,15 @@
 				)
 				.eq('player_fcb_id', id);
 			pendingRows = (pg ?? []) as PendingGameRow[];
+
+			// Projecció del proper rànquing (autoritativa, computada al backend).
+			const { data: pr } = await supabase
+				.from('ranking_provisional')
+				.select(
+					'player_fcb_id, modalitat_codi, posicio_oficial, mitjana_oficial, posicio_provisional, mitjana_provisional, partides_post, proj_won, proj_lost, proj_tie, window_game_ids'
+				)
+				.eq('player_fcb_id', id);
+			provByMod = new Map((pr ?? []).map((r: any) => [r.modalitat_codi, r as ProvisionalRow]));
 
 			const { data: pc } = await supabase
 				.from('player_clubs')
@@ -516,60 +534,24 @@
 				.slice(0, 15)
 		);
 	});
-	// Previsió del proper rànquing: Copa pendent primer i després les partides de
-	// games per data desc (mateix dia → millor promig dins), fins arribar a 15.
+	// Previsió del proper rànquing: AUTORITATIVA (taula ranking_provisional,
+	// computada al backend amb la mateixa font de pendents). La fitxa no recalcula.
 	const rank15 = $derived.by(() => {
-		// Partides pendents (copa, opens…) de pending_games, ja filtrades a la
-		// modalitat. Com que encara no són a games, són posteriors a les que hi
-		// consten (= les més recents), i van primer a la finestra de 15.
-		const pending = copaPend.slice(0, 15);
-		const latestSeq = rankHist.at(-1)?.num_seq;
-		const [rankYear, rankMonth] = latestSeq != null ? ymFromSeq(latestSeq) : [0, 0];
-		const rankCutoff =
-			latestSeq != null ? `${rankYear}-${String(rankMonth).padStart(2, '0')}-01` : null;
-		const [nextYear, nextMonth] = nextRankingMonth(rankYear, rankMonth);
-		const eligible = sortedModGames.filter(
-			(g) => latestSeq == null || (g.data_partida ?? '') >= monthOffset(nextYear, nextMonth, -24)
-		);
-		const w = eligible.slice(0, Math.max(0, 15 - pending.length));
-		const currentIds = new Set(
-			latestSeq != null
-				? sortedModGames
-						.filter(
-							(g) =>
-								(g.data_partida ?? '') >= monthOffset(rankYear, rankMonth, -24) &&
-								(g.data_partida ?? '') < rankCutoff!
-						)
-						.slice(0, 15)
-						.map((g) => g.id)
-				: []
-		);
-		const newN = rankCutoff
-			? eligible.filter((g) => (g.data_partida ?? '') >= rankCutoff).length
-			: 0;
-		const stats = summarizeGames(w);
-		let { car, ent, sm, won, lost, tie } = stats;
-		for (const cp of pending) {
-			car += cp.myCar;
-			ent += cp.ent;
-			if (cp.myCar === cp.oppCar) tie++;
-			else if (cp.myCar > cp.oppCar) won++;
-			else lost++;
-		}
-		const calculated = ent ? car / ent : 0;
-		const hasChanges =
-			pending.length > 0 || w.length !== currentIds.size || w.some((g) => !currentIds.has(g.id));
+		const r = provRow;
+		const changes = !!r && (r.partides_post ?? 0) > 0;
+		const won = r?.proj_won ?? 0;
+		const lost = r?.proj_lost ?? 0;
+		const tie = r?.proj_tie ?? 0;
 		return {
-			n: stats.n + pending.length,
-			pendingN: pending.length,
-			newN,
-			hasChanges,
-			mitjana: !hasChanges && lastMitjana != null ? lastMitjana : calculated,
-			sm,
+			pendingN: r?.partides_post ?? 0,
+			hasChanges: changes,
+			// Sense canvis: la mitjana del proper rànquing és l'oficial vigent.
+			mitjana: changes ? (r?.mitjana_provisional ?? null) : lastMitjana,
+			posicio: changes ? (r?.posicio_provisional ?? null) : null,
 			won,
 			lost,
 			tie,
-			ids: new Set(w.map((g) => g.id))
+			ids: new Set<string>((r?.window_game_ids as string[] | null) ?? [])
 		};
 	});
 
@@ -707,16 +689,6 @@
 		}
 		return [y, m];
 	}
-	function nextRankingMonth(year: number, month: number): [number, number] {
-		let y = year,
-			m = month + 1;
-		if (m === 8) m = 9;
-		if (m === 13) {
-			y++;
-			m = 1;
-		}
-		return [y, m];
-	}
 	function monthOffset(year: number, month: number, offset: number): string {
 		const d = new Date(Date.UTC(year, month - 1 + offset, 1));
 		return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-01`;
@@ -841,8 +813,12 @@
 						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400 dark:text-slate-500">millor mitjana rànquing</div>
 					</div>
 					<div class="text-center">
-						<div class="font-mono text-base font-bold tabular-nums {lastMitjana != null && rank15.mitjana > lastMitjana ? 'text-emerald-600 dark:text-emerald-400' : lastMitjana != null && rank15.mitjana < lastMitjana ? 'text-red-500 dark:text-red-400' : ''}">{rank15.n ? rank15.mitjana.toFixed(3) : '—'}</div>
-						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400 dark:text-slate-500">mitjana proper rànquing</div>
+						<div class="font-mono text-base font-bold tabular-nums {rank15.hasChanges && lastMitjana != null && rank15.mitjana != null && rank15.mitjana > lastMitjana ? 'text-emerald-600 dark:text-emerald-400' : rank15.hasChanges && lastMitjana != null && rank15.mitjana != null && rank15.mitjana < lastMitjana ? 'text-red-500 dark:text-red-400' : ''}">{rank15.mitjana != null ? rank15.mitjana.toFixed(3) : '—'}</div>
+						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-400 dark:text-slate-500">mitjana proper rànq.</div>
+						{#if rank15.hasChanges && rank15.posicio != null}
+							{@const dp = (currentPos ?? 0) - rank15.posicio}
+							<div class="mt-0.5 text-[11px] font-bold tabular-nums {dp > 0 ? 'text-emerald-600 dark:text-emerald-400' : dp < 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}">#{rank15.posicio}{dp > 0 ? ` ▲${dp}` : dp < 0 ? ` ▼${-dp}` : ''}</div>
+						{/if}
 					</div>
 				</div>
 				<div class="mt-2 space-y-1 rounded-lg bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5 text-[11px] text-slate-500 dark:text-slate-400">
@@ -852,11 +828,14 @@
 					</p>
 					<p>
 						<span class="font-semibold text-slate-700 dark:text-slate-200">Previsió:</span>
-						{rank15.won} G · {rank15.lost} P{rank15.tie ? ` · ${rank15.tie} E` : ''}
-						{rank15.pendingN
-							? ` · ${rank15.pendingN} ${rank15.pendingN === 1 ? 'pendent' : 'pendents'}`
-							: ''}
-						{!rank15.hasChanges ? ' · sense partides noves' : ''}
+						{#if rank15.hasChanges}
+							{rank15.won} G · {rank15.lost} P{rank15.tie ? ` · ${rank15.tie} E` : ''}
+							{rank15.pendingN
+								? ` · ${rank15.pendingN} ${rank15.pendingN === 1 ? 'pendent' : 'pendents'}`
+								: ''}
+						{:else}
+							sense partides noves
+						{/if}
 					</p>
 				</div>
 			</div>
