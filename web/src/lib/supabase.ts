@@ -30,6 +30,30 @@ export interface RankingRow {
 	partides: number | null;
 }
 
+// Projecció del proper rànquing (taula fcbillar.ranking_provisional). Es publica
+// quan hi ha partides de competicions en curs encara no al rànquing oficial.
+export interface ProvisionalRow {
+	player_fcb_id: string;
+	posicio_oficial: number | null;
+	mitjana_oficial: number | null;
+	posicio_provisional: number | null;
+	mitjana_provisional: number | null;
+	partides_post: number;
+}
+
+// Partides jugades en competicions en curs encara NO al rànquing oficial
+// (taula fcbillar.pending_games). Una fila per jugador i partida.
+export interface PendingGameRow {
+	modalitat_codi: number;
+	competicio: string | null;
+	font: string;
+	opponent_nom: string | null;
+	caramboles: number | null;
+	caramboles_opp: number | null;
+	entrades: number | null;
+	serie: number | null;
+}
+
 export interface GameRow {
 	id: string;
 	data_partida: string | null;

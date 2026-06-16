@@ -1,15 +1,24 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase, type Modalitat, type Snapshot, type RankingRow } from '$lib/supabase';
+	import {
+		supabase,
+		type Modalitat,
+		type Snapshot,
+		type RankingRow,
+		type ProvisionalRow
+	} from '$lib/supabase';
 
 	let modalitats = $state<Modalitat[]>([]);
 	let snapshots = $state<Snapshot[]>([]);
 	let rows = $state<RankingRow[]>([]);
+	let prov = $state<Map<string, ProvisionalRow>>(new Map());
 	let selMod = $state<number | null>(null);
 	let selSeq = $state<number | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let search = $state('');
+	// La projecció només aplica al snapshot més recent (el proper rànquing).
+	const provActive = $derived(prov.size > 0 && selSeq === snapshots[0]?.num_seq);
 
 	function norm(s: string): string {
 		return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
@@ -87,6 +96,17 @@
 			return;
 		}
 		rows = (data ?? []) as RankingRow[];
+
+		// Projecció del proper rànquing (la taula només té files per al snapshot
+		// vigent i quan hi ha partides de competicions en curs).
+		const { data: pv } = await supabase
+			.from('ranking_provisional')
+			.select(
+				'player_fcb_id, posicio_oficial, mitjana_oficial, posicio_provisional, mitjana_provisional, partides_post'
+			)
+			.eq('modalitat_codi', selMod)
+			.eq('num_seq', selSeq);
+		prov = new Map((pv ?? []).map((p) => [p.player_fcb_id, p as ProvisionalRow]));
 	}
 
 	async function pickMod(codi: number) {
@@ -141,6 +161,13 @@
 	/>
 </div>
 
+{#if provActive}
+	<p class="mb-2 px-1 text-[11px] leading-snug text-blue-600 dark:text-blue-400">
+		En <span class="font-semibold">blau</span>: projecció del proper rànquing — mitjana i moviment
+		de posició incloent-hi les partides de competicions en curs (copa, opens…).
+	</p>
+{/if}
+
 {#if loading}
 	<p class="px-1 py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
 {:else if filtered.length === 0}
@@ -148,6 +175,7 @@
 {:else}
 	<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800 lg:columns-2 lg:gap-x-6">
 		{#each filtered as r (r.player_fcb_id + '-' + r.posicio)}
+			{@const pv = provActive ? prov.get(r.player_fcb_id) : undefined}
 			<li class="break-inside-avoid border-b border-slate-100 dark:border-slate-800 last:border-0">
 				<a
 					href="/jugador/{r.player_fcb_id}"
@@ -163,6 +191,22 @@
 					<span class="shrink-0 font-mono text-sm font-semibold tabular-nums">
 						{r.mitjana_general != null ? r.mitjana_general.toFixed(3) : '—'}
 					</span>
+					{#if pv && pv.partides_post > 0}
+						{@const dp = (pv.posicio_oficial ?? 0) - (pv.posicio_provisional ?? 0)}
+						<span class="w-14 shrink-0 text-right leading-tight">
+							<span class="block font-mono text-xs font-semibold tabular-nums text-blue-600 dark:text-blue-400"
+								>{pv.mitjana_provisional != null ? pv.mitjana_provisional.toFixed(3) : ''}</span>
+							<span
+								class="block text-[10px] font-bold tabular-nums {dp > 0
+									? 'text-emerald-600 dark:text-emerald-400'
+									: dp < 0
+										? 'text-red-500 dark:text-red-400'
+										: 'text-slate-400 dark:text-slate-500'}"
+								>{dp > 0 ? `▲${dp}` : dp < 0 ? `▼${-dp}` : '–'}</span>
+						</span>
+					{:else if provActive}
+						<span class="w-14 shrink-0"></span>
+					{/if}
 					<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
 				</a>
 			</li>

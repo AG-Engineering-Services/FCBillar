@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { supabase, type GameRow } from '$lib/supabase';
+	import { supabase, type GameRow, type PendingGameRow } from '$lib/supabase';
 	import { follows, toggleFollow } from '$lib/follows';
 	import RadarChart from '$lib/components/RadarChart.svelte';
 	import { theme } from '$lib/theme';
@@ -35,9 +35,20 @@
 			club: string | null;
 		}[]
 	>([]);
-	let copaPend = $state<
-		{ encontreId: number; ordre: number; opp: string; myCar: number; oppCar: number; ent: number; grup: string }[]
-	>([]);
+	// Partides pendents (totes les competicions en curs) llegides de pending_games;
+	// la dedup contra `games` ja la fa el publisher server-side.
+	let pendingRows = $state<PendingGameRow[]>([]);
+	const copaPend = $derived(
+		pendingRows
+			.filter((r) => r.modalitat_codi === selMod)
+			.map((r) => ({
+				opp: r.opponent_nom ?? '—',
+				myCar: r.caramboles ?? 0,
+				oppCar: r.caramboles_opp ?? 0,
+				ent: r.entrades ?? 0,
+				grup: r.competicio ?? 'Pendent'
+			}))
+	);
 	let openRank = $state<
 		{ ronda: number; posicio: number; punts: number; detall?: { pos: number | null }[] }[]
 	>([]);
@@ -152,55 +163,16 @@
 			if (e) throw e;
 			games = (g ?? []) as GameRow[];
 
-			// Copa recent que encara no compta (a copa_partides però no a games).
-			const copaSig = new Set(
-				games
-					.filter((x) => x.competicio === 'COPA')
-					.map(
-						(x) =>
-							[
-								`${(x.player1_nom ?? '').toLowerCase()}:${x.caramboles1 ?? ''}`,
-								`${(x.player2_nom ?? '').toLowerCase()}:${x.caramboles2 ?? ''}`
-							]
-								.sort()
-								.join('|') +
-							'|' +
-							(x.entrades ?? '')
-					)
-			);
-			const csel =
-				'encontre_id, ordre, jugador_local, caramboles_local, jugador_visitant, caramboles_visitant, entrades';
-			const [{ data: cl }, { data: cv }] = await Promise.all([
-				supabase.from('copa_partides').select(csel).eq('jugador_local', nom),
-				supabase.from('copa_partides').select(csel).eq('jugador_visitant', nom)
-			]);
-			copaPend = [...(cl ?? []), ...(cv ?? [])]
-				.filter(
-					(cp: any) =>
-						!copaSig.has(
-							[
-								`${(cp.jugador_local ?? '').toLowerCase()}:${cp.caramboles_local ?? ''}`,
-								`${(cp.jugador_visitant ?? '').toLowerCase()}:${cp.caramboles_visitant ?? ''}`
-							]
-								.sort()
-								.join('|') +
-								'|' +
-								(cp.entrades ?? '')
-						)
+			// Partides pendents de TOTES les competicions en curs (copa, opens…) que
+			// encara no compten al rànquing. La dedup contra `games` ja la fa el
+			// publisher server-side; aquí només llegim.
+			const { data: pg } = await supabase
+				.from('pending_games')
+				.select(
+					'modalitat_codi, competicio, font, opponent_nom, caramboles, caramboles_opp, entrades, serie'
 				)
-				.map((cp: any) => {
-					const meLocal = cp.jugador_local === nom;
-					return {
-						encontreId: cp.encontre_id ?? 0,
-						ordre: cp.ordre ?? 0,
-						opp: (meLocal ? cp.jugador_visitant : cp.jugador_local) ?? '—',
-						myCar: (meLocal ? cp.caramboles_local : cp.caramboles_visitant) ?? 0,
-						oppCar: (meLocal ? cp.caramboles_visitant : cp.caramboles_local) ?? 0,
-						ent: cp.entrades ?? 0,
-						grup: 'Copa'
-					};
-				})
-				.sort((a, b) => b.encontreId - a.encontreId || b.ordre - a.ordre);
+				.eq('player_fcb_id', id);
+			pendingRows = (pg ?? []) as PendingGameRow[];
 
 			const { data: pc } = await supabase
 				.from('player_clubs')
@@ -547,10 +519,10 @@
 	// Previsió del proper rànquing: Copa pendent primer i després les partides de
 	// games per data desc (mateix dia → millor promig dins), fins arribar a 15.
 	const rank15 = $derived.by(() => {
-		// La Copa publicada separadament encara no té data ni modalitat al núvol.
-		// És Copa de 3 bandes i, com que encara no és a games, és posterior a les
-		// partides reals que ja hi consten.
-		const pending = selMod === 1 ? copaPend.slice(0, 15) : [];
+		// Partides pendents (copa, opens…) de pending_games, ja filtrades a la
+		// modalitat. Com que encara no són a games, són posteriors a les que hi
+		// consten (= les més recents), i van primer a la finestra de 15.
+		const pending = copaPend.slice(0, 15);
 		const latestSeq = rankHist.at(-1)?.num_seq;
 		const [rankYear, rankMonth] = latestSeq != null ? ymFromSeq(latestSeq) : [0, 0];
 		const rankCutoff =
@@ -882,7 +854,7 @@
 						<span class="font-semibold text-slate-700 dark:text-slate-200">Previsió:</span>
 						{rank15.won} G · {rank15.lost} P{rank15.tie ? ` · ${rank15.tie} E` : ''}
 						{rank15.pendingN
-							? ` · ${rank15.pendingN} de Copa ${rank15.pendingN === 1 ? 'pendent' : 'pendents'}`
+							? ` · ${rank15.pendingN} ${rank15.pendingN === 1 ? 'pendent' : 'pendents'}`
 							: ''}
 						{!rank15.hasChanges ? ' · sense partides noves' : ''}
 					</p>
@@ -1245,17 +1217,19 @@
 			</div>
 			<div class="min-w-0">
 			<!-- Partides recents -->
-			{#if selMod === 1 && copaPend.length}
+			{#if copaPend.length}
 				<div class="mb-3 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 p-3">
 					<div class="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300">
-						Recents · incloses a la previsió del proper rànquing
+						{copaPend.length} {copaPend.length === 1 ? 'partida pendent' : 'partides pendents'} · incloses a la previsió del proper rànquing
 					</div>
-					<ul class="space-y-1">
+					<ul class="space-y-1.5">
 						{#each copaPend as cp}
 							<li class="flex items-center gap-3 text-sm">
 								<span class="w-5 shrink-0 text-center text-xs font-bold {cp.myCar > cp.oppCar ? 'text-emerald-600 dark:text-emerald-400' : cp.myCar < cp.oppCar ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}">{cp.myCar > cp.oppCar ? 'G' : cp.myCar < cp.oppCar ? 'P' : 'E'}</span>
-								<span class="min-w-0 flex-1 truncate">{cp.opp}</span>
-								<span class="shrink-0 text-[10px] uppercase text-blue-600 dark:text-blue-400">{cp.grup}</span>
+								<div class="min-w-0 flex-1">
+									<div class="truncate leading-tight">{cp.opp}</div>
+									<div class="truncate text-[10px] uppercase tracking-wide text-blue-600 dark:text-blue-400">{cp.grup}</div>
+								</div>
 								<div class="shrink-0 text-right">
 									<div class="font-mono text-sm tabular-nums">{cp.myCar}–{cp.oppCar}</div>
 									<div class="font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500">{cp.ent ? `${(cp.myCar / cp.ent).toFixed(3)} · ${cp.ent} ent.` : '—'}</div>
