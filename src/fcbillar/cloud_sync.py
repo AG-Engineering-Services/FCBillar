@@ -185,6 +185,291 @@ def publish_rankings(
     return counts
 
 
+def publish_provisional_ranking(
+    db_path: Path | None = None,
+    on_progress: Progress | None = None,
+    modalitats: tuple[int, ...] = (1,),
+) -> dict[str, int]:
+    """Computa i puja el rànquing PROVISIONAL a `fcbillar.ranking_provisional`.
+
+    Projecció del proper rànquing reusant la MATEIXA lògica que la fitxa (`rank15`):
+    per cada jugador rankejat, mitjana = ΣC/ΣE sobre les seves `pending_games`
+    (competicions en curs no a `games`) + les (15 − n_pending) partides MÉS RECENTS
+    de `games` (dins la finestra de 24 mesos respecte del proper rànquing). Reordena
+    els jugadors per aquesta mitjana efectiva i assigna posició projectada.
+
+    Un jugador només "es mou" si té ≥1 partida pendent; altrament conserva la mitjana
+    oficial per a l'ordre. Si ningú té pendents, la modalitat queda sense files i el
+    frontend no mostra la columna provisional. Pilot: Tres Bandes (codi 1)."""
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    def _next_month(y: int, m: int) -> tuple[int, int]:
+        m += 1
+        if m == 8:  # el rànquing salta l'agost
+            m = 9
+        if m == 13:
+            y, m = y + 1, 1
+        return y, m
+
+    def _month_offset(y: int, m: int, off: int) -> str:
+        idx = y * 12 + (m - 1) + off
+        return f"{idx // 12:04d}-{idx % 12 + 1:02d}-01"
+
+    total = 0
+    for mod in modalitats:
+        rk = conn.execute(
+            """SELECT r.id, r.num_seq, r.any_pub, r.mes_pub
+               FROM rankings r JOIN modalitats m ON m.id = r.modalitat_id
+               WHERE m.codi_fcb = ? ORDER BY r.num_seq DESC LIMIT 1""",
+            (mod,),
+        ).fetchone()
+        if rk is None:
+            continue
+        if rk["any_pub"] and rk["mes_pub"]:
+            ny, nm = _next_month(rk["any_pub"], rk["mes_pub"])
+            age_cutoff = _month_offset(ny, nm, -24)
+        else:
+            age_cutoff = "0000-00-00"
+
+        entries = conn.execute(
+            """SELECT p.fcb_id, e.posicio, e.mitjana_general, e.extras_json
+               FROM ranking_entries e JOIN players p ON p.id = e.player_id
+               WHERE e.ranking_id = ?""",
+            (rk["id"],),
+        ).fetchall()
+        if not entries:
+            continue
+
+        mod_id = conn.execute(
+            "SELECT id FROM modalitats WHERE codi_fcb = ?", (mod,)
+        ).fetchone()[0]
+        games_by: dict[str, list[tuple[str, int | None, int | None]]] = {}
+        for r in conn.execute(
+            """SELECT p1.fcb_id f1, g.caramboles1 c1, p2.fcb_id f2, g.caramboles2 c2,
+                      g.entrades e, g.data_partida d
+               FROM games g JOIN players p1 ON p1.id = g.player1_id
+               JOIN players p2 ON p2.id = g.player2_id WHERE g.modalitat_id = ?""",
+            (mod_id,),
+        ):
+            if r["d"] and r["d"] >= age_cutoff:
+                games_by.setdefault(r["f1"], []).append((r["d"], r["c1"], r["e"]))
+                games_by.setdefault(r["f2"], []).append((r["d"], r["c2"], r["e"]))
+
+        # pending per jugador (de Supabase, publicat per publish_pending_games abans).
+        pend: dict[str, list[tuple[int | None, int | None]]] = {}
+        pdata = (
+            sb.table("pending_games")
+            .select("player_fcb_id, caramboles, entrades")
+            .eq("modalitat_codi", mod)
+            .execute()
+            .data
+            or []
+        )
+        for pr in pdata:
+            pend.setdefault(pr["player_fcb_id"], []).append((pr["caramboles"], pr["entrades"]))
+
+        import json as _json
+
+        computed: list[dict] = []
+        for e in entries:
+            fcb, off_pos, off_mj = e["fcb_id"], e["posicio"], e["mitjana_general"]
+            try:
+                off_def = bool((_json.loads(e["extras_json"] or "{}")).get("definitiva", True))
+            except Exception:  # noqa: BLE001
+                off_def = True
+            pg = pend.get(fcb, [])
+            n_pending = len(pg)
+            # Definitiu = 15 partides computables (24 mesos). Mai degradem un
+            # definitiu oficial (la nostra `games` pot ser incompleta); però un
+            # no-definitiu que arribi a 15 amb les pendents SÍ que es promociona.
+            computable = len(games_by.get(fcb, [])) + n_pending
+            proj_def = off_def or (n_pending > 0 and computable >= 15)
+            if n_pending == 0:
+                computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
+                                 "proj": None, "n": 0, "eff": off_mj or 0.0})
+                continue
+            window = list(pg[:15])
+            recent = sorted(games_by.get(fcb, []), key=lambda x: x[0], reverse=True)
+            window += [(c, en) for _d, c, en in recent[: max(0, 15 - len(window))]]
+            car = ent = 0
+            for c, en in window:
+                if c is not None and en is not None:
+                    car += c
+                    ent += en
+            proj = (car / ent) if ent else None
+            eff = proj if proj is not None else (off_mj or 0.0)
+            computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
+                             "proj": proj, "n": n_pending, "eff": eff})
+
+        # La federació ordena TOTS els definitius (per mitjana) abans dels no
+        # definitius. Respectem-ho: un no-definitiu amb 2 bones partides NO pot
+        # avançar els definitius. (Projecció pilot: la condició definitiu/no es
+        # conserva de l'oficial.)
+        computed.sort(
+            key=lambda c: (0 if c["def"] else 1, -c["eff"],
+                           c["pos"] if c["pos"] is not None else 1_000_000)
+        )
+        active = [c for c in computed if c["n"] > 0]
+        sb.table("ranking_provisional").delete().eq("modalitat_codi", mod).execute()
+        if not active:
+            prog("ok", f"ranking_provisional[{mod}]: 0 (sense partides pendents)")
+            continue
+
+        rows = [
+            {
+                "modalitat_codi": mod, "num_seq": rk["num_seq"], "player_fcb_id": c["fcb"],
+                "posicio_oficial": c["pos"], "mitjana_oficial": c["mj"],
+                "posicio_provisional": i,
+                "mitjana_provisional": round(c["proj"], 4) if c["proj"] is not None else None,
+                "partides_post": c["n"],
+            }
+            for i, c in enumerate(computed, start=1)
+        ]
+        for chunk in _chunks(rows):
+            sb.table("ranking_provisional").insert(chunk).execute()
+        total += len(rows)
+        prog("ok",
+             f"ranking_provisional[{mod}]: {len(rows)} files ({len(active)} amb partides noves)")
+
+    conn.close()
+    return {"ranking_provisional": total}
+
+
+def publish_pending_games(
+    db_path: Path | None = None,
+    on_progress: Progress | None = None,
+    modalitats: tuple[int, ...] = (1,),
+) -> dict[str, int]:
+    """Publica `fcbillar.pending_games`: partides jugades en competicions EN CURS
+    (copa via `copa_partides` local + opens via `open_live` a Supabase) encara NO
+    presents a `games`. És la font de la projecció del proper rànquing (la fitxa i
+    `ranking_provisional`). Una fila per jugador i partida (perspectiva del jugador).
+
+    Dedup per signatura (parella de noms normalitzats + caramboles + entrades)
+    contra `games`: quan la partida ja hi consta, deixa de ser pendent. Pilot: Tres
+    Bandes (la copa catalana és de 3 bandes; els opens es filtren per modalitat)."""
+    import re as _re
+    import unicodedata as _ud
+
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    def _nm(s: str | None) -> str:
+        s = "".join(c for c in _ud.normalize("NFD", s or "") if _ud.category(c) != "Mn")
+        return " ".join(s.strip().lower().split())
+
+    def _sig(na, ca, nb, cb, ent) -> str:
+        a, b = sorted([
+            f"{_nm(na)}:{'' if ca is None else ca}",
+            f"{_nm(nb)}:{'' if cb is None else cb}",
+        ])
+        return f"{a}|{b}|{'' if ent is None else ent}"
+
+    _MODNM = {1: "Tres Bandes", 2: "Lliure", 3: "Quadre 47/2", 4: "Banda", 6: "Quadre 71/2"}
+    nom2fcb: dict[str, str] = {}
+    for r in conn.execute("SELECT nom, fcb_id FROM players"):
+        nom2fcb.setdefault(_nm(r["nom"]), r["fcb_id"])
+
+    # open_live es llegeix una sola vegada (Supabase).
+    live_rows = sb.table("open_live").select("modality, payload_json, captured_at").execute().data or []
+
+    total = 0
+    for mod in modalitats:
+        mrow = conn.execute("SELECT id FROM modalitats WHERE codi_fcb = ?", (mod,)).fetchone()
+        if mrow is None:
+            continue
+        mod_id = mrow[0]
+
+        game_sigs: set[str] = set()
+        for r in conn.execute(
+            """SELECT p1.nom n1, g.caramboles1 c1, p2.nom n2, g.caramboles2 c2, g.entrades e
+               FROM games g JOIN players p1 ON p1.id = g.player1_id
+               JOIN players p2 ON p2.id = g.player2_id WHERE g.modalitat_id = ?""",
+            (mod_id,),
+        ):
+            game_sigs.add(_sig(r["n1"], r["c1"], r["n2"], r["c2"], r["e"]))
+
+        out: dict[tuple[str, str], dict] = {}
+
+        def _add(pf, opp_nom, opp_fcb, car, car_opp, ent, serie, comp, font, sig, cap):
+            # Només jugadors amb fcb_id federatiu real; els placeholders ("name:…")
+            # no tenen fitxa ni surten al rànquing, així que no aporten res.
+            if pf is None or str(pf).startswith("name:"):
+                return
+            out.setdefault((pf, sig), {
+                "player_fcb_id": pf, "modalitat_codi": mod, "signatura": sig,
+                "competicio": comp, "font": font, "opponent_nom": opp_nom,
+                "opponent_fcb_id": opp_fcb, "caramboles": car, "caramboles_opp": car_opp,
+                "entrades": ent, "serie": serie, "captured_at": cap,
+            })
+
+        # --- COPA (Copa Catalana = 3 bandes → només modalitat 1) ---
+        if mod == 1:
+            for r in conn.execute(
+                """SELECT local_nom, local_caramboles, local_serie, visitant_nom,
+                          visitant_caramboles, visitant_serie, entrades FROM copa_partides"""
+            ):
+                sig = _sig(r["local_nom"], r["local_caramboles"], r["visitant_nom"],
+                           r["visitant_caramboles"], r["entrades"])
+                if sig in game_sigs:
+                    continue
+                lf = nom2fcb.get(_nm(r["local_nom"]))
+                vf = nom2fcb.get(_nm(r["visitant_nom"]))
+                _add(lf, r["visitant_nom"], vf, r["local_caramboles"], r["visitant_caramboles"],
+                     r["entrades"], r["local_serie"], "Copa", "copa", sig, None)
+                _add(vf, r["local_nom"], lf, r["visitant_caramboles"], r["local_caramboles"],
+                     r["entrades"], r["visitant_serie"], "Copa", "copa", sig, None)
+
+        # --- OPENS EN CURS (open_live) ---
+        modname = _MODNM.get(mod)
+        for ol in live_rows:
+            if (ol.get("modality") or "") != modname:
+                continue
+            payload = ol.get("payload_json") or {}
+            cap = ol.get("captured_at")
+            comp = _re.sub(r"\s*-\s*[ÚU]NICA\s*$", "", payload.get("name") or "", flags=_re.I).strip()
+            pids = payload.get("player_ids") or {}
+
+            def _pid(n):
+                return pids.get(n) or nom2fcb.get(_nm(n))
+
+            def _match(m):
+                if not m.get("is_played"):
+                    return
+                na, nb = m.get("player_a"), m.get("player_b")
+                ca, cb, ent = m.get("caramboles_a"), m.get("caramboles_b"), m.get("entrades")
+                sig = _sig(na, ca, nb, cb, ent)
+                if sig in game_sigs:
+                    return
+                fa, fb = _pid(na), _pid(nb)
+                _add(fa, nb, fb, ca, cb, ent, m.get("serie_major_a"), comp, "open_live", sig, cap)
+                _add(fb, na, fa, cb, ca, ent, m.get("serie_major_b"), comp, "open_live", sig, cap)
+
+            for ph in payload.get("phases", []):
+                for grp in ph.get("groups", []):
+                    for m in grp.get("matches", []):
+                        _match(m)
+                for m in ph.get("ko_matches", []):
+                    _match(m)
+
+        sb.table("pending_games").delete().eq("modalitat_codi", mod).execute()
+        rows = list(out.values())
+        for chunk in _chunks(rows):
+            sb.table("pending_games").insert(chunk).execute()
+        total += len(rows)
+        prog("ok", f"pending_games[{mod}]: {len(rows)} files")
+
+    conn.close()
+    return {"pending_games": total}
+
+
 def publish_games(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:

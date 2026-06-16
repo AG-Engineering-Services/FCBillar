@@ -1380,11 +1380,16 @@ def ingest_individuals_temporada(
     temporada: str | None = None,
     create_missing_players: bool = True,
     settings: Settings | None = None,
+    use_cache: bool = True,
 ) -> IngestIndividualsResult:
     """Ingest dels torneigs individuals d'una temporada.
 
     `temporada=None` o `'current'` → temporada actual (`/ca/individuals/llistat`).
     Per cada torneig, descobreix divisions i ingest classificació final.
+
+    `use_cache=False` força fetch fresc — imprescindible per al re-scrape setmanal:
+    detecta torneigs nous (apareixen amb ID més alt al llistat) i partides noves
+    dins competicions encara obertes (no tancades fins a la classificació definitiva).
     """
     settings = settings or client.settings
     base = settings.base_url.rstrip("/")
@@ -1405,7 +1410,7 @@ def ingest_individuals_temporada(
     # 1. Fetch llistat de torneigs
     url = _individuals_llistat_url(base, temporada)
     try:
-        html = client.fetch_html(url)
+        html = client.fetch_html(url, use_cache=use_cache)
     except Exception as e:
         log.error("FAIL fetch individuals llistat: %s", e)
         return IngestIndividualsResult(0, 0, 0)
@@ -1418,7 +1423,7 @@ def ingest_individuals_temporada(
     for torneig in torneigs:
         torneig_url = f"{base}/ca/individuals/divisions/{torneig.torneig_id_extern}"
         try:
-            torneig_html = client.fetch_html(torneig_url)
+            torneig_html = client.fetch_html(torneig_url, use_cache=use_cache)
         except Exception as e:
             log.warning("FAIL torneig %s: %s", torneig.nom, e)
             failed += 1
@@ -1434,7 +1439,7 @@ def ingest_individuals_temporada(
             )
             classif_url = f"{base}/{classif_href.lstrip('/')}"
             try:
-                classif_html = client.fetch_html(classif_url)
+                classif_html = client.fetch_html(classif_url, use_cache=use_cache)
             except Exception as e:
                 log.warning("    FAIL classif %s %s: %s", torneig.nom, div.nom, e)
                 continue

@@ -101,12 +101,18 @@ def main() -> None:
         "--tournaments",
         help="IDs externs separats per comes; per defecte processa tots els torneigs",
     )
+    parser.add_argument(
+        "--cache",
+        action="store_true",
+        help="Permet servir HTML de la cache (per defecte, fresc per detectar partides noves)",
+    )
     args = parser.parse_args()
     selected = (
         {int(value) for value in args.tournaments.split(",")}
         if args.tournaments
         else None
     )
+    use_cache = args.cache
 
     s = get_settings()
     conn = sqlite3.connect(str(s.db_path))
@@ -122,10 +128,14 @@ def main() -> None:
             t, d = o["torneig_id_extern"], o["divisio_id_extern"]
             phase_html: list[str] = []
             with suppress(Exception):
-                phase_html.append(cl.fetch_html(f"{BASE}/ca/individuals/fases/{t}/{d}"))
+                phase_html.append(
+                    cl.fetch_html(f"{BASE}/ca/individuals/fases/{t}/{d}", use_cache=use_cache)
+                )
             with suppress(Exception):
                 phase_html.append(
-                    cl.fetch_html(f"{BASE}/ca/historial/fasesIndividual/{t}/{d}")
+                    cl.fetch_html(
+                        f"{BASE}/ca/historial/fasesIndividual/{t}/{d}", use_cache=use_cache
+                    )
                 )
             if not phase_html:
                 print(f"[{i}/{len(opens)}] {t}/{d}: FAIL fases", flush=True)
@@ -138,7 +148,7 @@ def main() -> None:
                 group_pages.extend(linked_pages(html, _GROUP_PHASE_RE))
             for group_url in dict.fromkeys(group_pages):
                 try:
-                    group_html = cl.fetch_html(group_url)
+                    group_html = cl.fetch_html(group_url, use_cache=use_cache)
                 except Exception:
                     continue
                 pages.extend(linked_pages(group_html, _GAME_PAGE_RE))
@@ -147,7 +157,7 @@ def main() -> None:
             seen_games: set[tuple] = set()
             for url in dict.fromkeys(pages):
                 try:
-                    html = cl.fetch_html(url)
+                    html = cl.fetch_html(url, use_cache=use_cache)
                 except Exception:
                     continue
                 for g in parse_partides(html):

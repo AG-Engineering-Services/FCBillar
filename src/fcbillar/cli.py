@@ -602,6 +602,10 @@ def ingest_individuals_cmd(
         "current", "--temporada",
         help="Temporada (ex: '2024-2025') o 'current' per a l'actual",
     ),
+    cache: bool = typer.Option(
+        False, "--cache",
+        help="Permet servir HTML de la cache (per defecte, fresc per detectar novetats)",
+    ),
 ) -> None:
     """Ingest dels torneigs individuals (opens, catalans, etc.) per temporada."""
     settings = get_settings()
@@ -611,6 +615,7 @@ def ingest_individuals_cmd(
             temporada=None if temporada == "current" else temporada,
             create_missing_players=True,
             settings=settings,
+            use_cache=cache,
         )
     console.print(
         f"[green]OK individuals temporada {temporada}: "
@@ -713,7 +718,9 @@ def publish_cloud_cmd() -> None:
         publish_open_ranking,
         publish_open_ranking_femeni,
         publish_opens,
+        publish_pending_games,
         publish_player_clubs,
+        publish_provisional_ranking,
         publish_rankings,
         publish_rating_buckets,
     )
@@ -724,6 +731,8 @@ def publish_cloud_cmd() -> None:
     try:
         counts = publish_rankings(on_progress=_prog)
         counts.update(publish_games(on_progress=_prog))
+        counts.update(publish_pending_games(on_progress=_prog))
+        counts.update(publish_provisional_ranking(on_progress=_prog))
         counts.update(publish_lliga(on_progress=_prog))
         counts.update(publish_lliga_standings_hist(on_progress=_prog))
         counts.update(publish_copa(on_progress=_prog))
