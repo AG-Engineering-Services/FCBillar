@@ -187,7 +187,7 @@
 			const { data: pr } = await supabase
 				.from('ranking_provisional')
 				.select(
-					'player_fcb_id, modalitat_codi, posicio_oficial, mitjana_oficial, posicio_provisional, mitjana_provisional, partides_post, proj_won, proj_lost, proj_tie, window_game_ids'
+					'player_fcb_id, modalitat_codi, posicio_oficial, mitjana_oficial, posicio_provisional, mitjana_provisional, partides_post, proj_won, proj_lost, proj_tie, window_game_ids, current_game_ids'
 				)
 				.eq('player_fcb_id', id);
 			provByMod = new Map((pr ?? []).map((r: any) => [r.modalitat_codi, r as ProvisionalRow]));
@@ -520,9 +520,16 @@
 		}
 		return { n: w.length, car, ent, sm, won, lost, tie };
 	}
-	// Reconstrucció de les 15 partides del rànquing publicat, sense les
-	// disputades dins o després del seu mes de publicació.
+	// Les 15 partides del rànquing OFICIAL vigent. Font autoritativa:
+	// ranking_provisional.current_game_ids (de ranking_game_links). Fallback a la
+	// reconstrucció heurística per dates si no hi ha dades (altres modalitats, o
+	// cap moviment publicat).
 	const currentRank15 = $derived.by(() => {
+		const ids = provRow?.current_game_ids ?? null;
+		if (ids && ids.length) {
+			const set = new Set(ids);
+			return summarizeGames(modGames.filter((g) => set.has(g.id)));
+		}
 		const latestSeq = rankHist.at(-1)?.num_seq;
 		if (latestSeq == null) return summarizeGames([]);
 		const [rankYear, rankMonth] = ymFromSeq(latestSeq);

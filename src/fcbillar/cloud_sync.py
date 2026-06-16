@@ -307,7 +307,8 @@ def publish_provisional_ranking(
                 computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
                                  "proj": None, "n": 0, "eff": off_mj or 0.0,
                                  "won": None, "lost": None, "tie": None,
-                                 "gids": links_by_fcb.get(fcb) or None})
+                                 "gids": links_by_fcb.get(fcb) or None,
+                                 "cur_gids": links_by_fcb.get(fcb) or None})
                 continue
             # Finestra de 15: pendents (les més recents) + les més recents de games.
             recent = sorted(games_by.get(fcb, []), key=lambda x: x[0], reverse=True)
@@ -341,7 +342,8 @@ def publish_provisional_ranking(
             eff = proj if proj is not None else (off_mj or 0.0)
             computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
                              "proj": proj, "n": n_pending, "eff": eff,
-                             "won": won, "lost": lost, "tie": tie, "gids": gids})
+                             "won": won, "lost": lost, "tie": tie, "gids": gids,
+                             "cur_gids": links_by_fcb.get(fcb) or None})
 
         # La federació ordena TOTS els definitius (per mitjana) abans dels no
         # definitius. Respectem-ho: un no-definitiu amb 2 bones partides NO pot
@@ -365,7 +367,7 @@ def publish_provisional_ranking(
                 "mitjana_provisional": round(c["proj"], 4) if c["proj"] is not None else None,
                 "partides_post": c["n"],
                 "proj_won": c["won"], "proj_lost": c["lost"], "proj_tie": c["tie"],
-                "window_game_ids": c["gids"],
+                "window_game_ids": c["gids"], "current_game_ids": c["cur_gids"],
             }
             for i, c in enumerate(computed, start=1)
         ]

@@ -43,7 +43,8 @@ export interface ProvisionalRow {
 	proj_won?: number | null;
 	proj_lost?: number | null;
 	proj_tie?: number | null;
-	window_game_ids?: string[] | null; // IDs de `games` que entren a la finestra
+	window_game_ids?: string[] | null; // IDs de `games` de la finestra PROJECTADA
+	current_game_ids?: string[] | null; // IDs de `games` del rànquing OFICIAL vigent
 }
 
 // Partides jugades en competicions en curs encara NO al rànquing oficial
