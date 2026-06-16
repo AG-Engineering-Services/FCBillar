@@ -875,7 +875,7 @@
 		{#if openRankFem.length}
 			<div class="mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 p-3 ring-1 ring-rose-200 dark:ring-rose-900/50">
 				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-rose-400 dark:text-rose-400">
-					Rànquing Circuit Català Femení 3 Bandes
+					Rànquing Circuit Català Tres Bandes Femení
 				</div>
 				<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
 					<div class="text-center">
