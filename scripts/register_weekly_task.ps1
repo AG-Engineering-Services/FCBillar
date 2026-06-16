@@ -4,8 +4,9 @@
     setmanal de FCBillar la nit de diumenge a dilluns.
 
 .DESCRIPTION
-    Crea una tasca setmanal que llança scripts\weekly_reingest.ps1 cada DILLUNS
-    a les 03:00 com l'usuari actual. Opcions clau:
+    Crea una tasca que llança scripts\weekly_reingest.ps1 DIVENDRES, DISSABTE i
+    DIUMENGE a les 22:30 (per capturar els games del cap de setmana a mesura que
+    es disputen) i DILLUNS a les 03:00 (repàs), com l'usuari actual. Opcions clau:
       - StartWhenAvailable: si l'equip estava apagat a les 03:00, s'executa tan
         aviat com torni a estar disponible (catch-up del cap de setmana).
       - WakeToRun: desperta l'equip si està en suspensió.
@@ -26,6 +27,7 @@
 #>
 param(
     [string]$At = '03:00',
+    [string]$Weekend = '22:30',
     [switch]$Unregister,
     [switch]$RunNow
 )
@@ -50,7 +52,12 @@ $action = New-ScheduledTaskAction -Execute $ps `
     -Argument ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $script) `
     -WorkingDirectory $repo
 
-$trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday -At $At
+# Cap de setmana de competició: divendres/dissabte/diumenge a la nit (22:30) per
+# capturar els games a mesura que es disputen, + el repàs de dilluns (03:00).
+$triggers = @(
+    New-ScheduledTaskTrigger -Weekly -DaysOfWeek Friday, Saturday, Sunday -At $Weekend
+    New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday -At $At
+)
 
 $settings = New-ScheduledTaskSettingsSet `
     -StartWhenAvailable `
@@ -64,13 +71,13 @@ $principal = New-ScheduledTaskPrincipal `
     -UserId ("{0}\{1}" -f $env:USERDOMAIN, $env:USERNAME) `
     -LogonType Interactive -RunLevel Limited
 
-$task = New-ScheduledTask -Action $action -Trigger $trigger `
+$task = New-ScheduledTask -Action $action -Trigger $triggers `
     -Settings $settings -Principal $principal `
-    -Description 'Reingesta completa de partides i rànquings de FCBillar i publicació a Supabase. Finestra de temporada 25-ago..31-jul (gestionada per weekly_reingest.ps1). Nit de diumenge a dilluns.'
+    -Description 'Reingesta completa de partides i rànquings de FCBillar i publicació a Supabase. Finestra de temporada 25-ago..31-jul (gestionada per weekly_reingest.ps1). Divendres/dissabte/diumenge a la nit + repàs de dilluns.'
 
 try {
     Register-ScheduledTask -TaskName $taskName -InputObject $task -Force | Out-Null
-    Write-Host "Tasca '$taskName' registrada: cada DILLUNS a les $At." -ForegroundColor Green
+    Write-Host "Tasca '$taskName' registrada: Dv/Ds/Dg a les $Weekend + Dl a les $At." -ForegroundColor Green
 } catch {
     Write-Host "ERROR registrant la tasca: $_" -ForegroundColor Red
     Write-Host "Si és 'Accés denegat', obre PowerShell com a Administrador i torna-ho a executar." -ForegroundColor Yellow
