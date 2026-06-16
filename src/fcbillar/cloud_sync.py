@@ -275,6 +275,17 @@ def publish_provisional_ranking(
                 (pr["caramboles"], pr["caramboles_opp"], pr["entrades"])
             )
 
+        # IDs dels games que componen el rànquing OFICIAL vigent (per jugador): per
+        # ressaltar "quins games computen" també als qui NO s'han mogut (autoritatiu,
+        # de la federació via ranking_game_links).
+        links_by_fcb: dict[str, list[str]] = {}
+        for lr in conn.execute(
+            """SELECT p.fcb_id f, l.game_id gid FROM ranking_game_links l
+               JOIN players p ON p.id = l.player_id_origen WHERE l.ranking_id = ?""",
+            (rk["id"],),
+        ):
+            links_by_fcb.setdefault(lr["f"], []).append(lr["gid"])
+
         import json as _json
 
         computed: list[dict] = []
@@ -292,9 +303,11 @@ def publish_provisional_ranking(
             computable = len(games_by.get(fcb, [])) + n_pending
             proj_def = off_def or (n_pending > 0 and computable >= 15)
             if n_pending == 0:
+                # Sense partides noves: ressaltem els games oficials que ja computen.
                 computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
                                  "proj": None, "n": 0, "eff": off_mj or 0.0,
-                                 "won": None, "lost": None, "tie": None, "gids": None})
+                                 "won": None, "lost": None, "tie": None,
+                                 "gids": links_by_fcb.get(fcb) or None})
                 continue
             # Finestra de 15: pendents (les més recents) + les més recents de games.
             recent = sorted(games_by.get(fcb, []), key=lambda x: x[0], reverse=True)

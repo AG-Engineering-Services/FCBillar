@@ -1221,7 +1221,11 @@
 			{#if rank15.ids.size}
 				<p class="mb-2 flex items-center gap-1.5 px-1 text-[11px] text-slate-400 dark:text-slate-500">
 					<span class="inline-block h-3 w-3 rounded bg-amber-50 dark:bg-amber-950/40 ring-1 ring-amber-200 dark:ring-amber-900/50"></span>
-					les {rank15.ids.size} de games que entren a la previsió del proper rànquing
+					{#if rank15.hasChanges}
+						les {rank15.ids.size} de games que entren a la previsió del proper rànquing
+					{:else}
+						les {rank15.ids.size} de games que computen al rànquing actual
+					{/if}
 				</p>
 			{/if}
 		<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
