@@ -7,6 +7,14 @@
 		type RankingRow,
 		type ProvisionalRow
 	} from '$lib/supabase';
+	import { clubMatches, playerMatches } from '$lib/search';
+
+	type SearchScope = 'tot' | 'jugador' | 'club';
+	const SCOPES: { val: SearchScope; label: string }[] = [
+		{ val: 'tot', label: 'Tot' },
+		{ val: 'jugador', label: 'Jugador' },
+		{ val: 'club', label: 'Club' }
+	];
 
 	let modalitats = $state<Modalitat[]>([]);
 	let snapshots = $state<Snapshot[]>([]);
@@ -17,12 +25,9 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let search = $state('');
+	let scope = $state<SearchScope>('tot');
 	// La projecció només aplica al snapshot més recent (el proper rànquing).
 	const provActive = $derived(prov.size > 0 && selSeq === snapshots[0]?.num_seq);
-
-	function norm(s: string): string {
-		return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-	}
 
 	const MESOS = [
 		'gener', 'febrer', 'març', 'abril', 'maig', 'juny',
@@ -35,15 +40,15 @@
 		}
 		return `Rànquing #${s.num_seq}`;
 	}
-	const filtered = $derived(
-		search.trim()
-			? rows.filter(
-					(r) =>
-						norm(r.jugador).includes(norm(search.trim())) ||
-						norm(r.club ?? '').includes(norm(search.trim()))
-				)
-			: rows
-	);
+	const filtered = $derived.by(() => {
+		const t = search.trim();
+		if (!t) return rows;
+		return rows.filter((r) => {
+			const mp = scope !== 'club' && playerMatches(r.jugador, t);
+			const mc = scope !== 'jugador' && clubMatches(r.club, t);
+			return mp || mc;
+		});
+	});
 
 	onMount(async () => {
 		try {
@@ -113,6 +118,7 @@
 		if (codi === selMod) return;
 		selMod = codi;
 		search = '';
+		scope = 'tot';
 		await loadSnapshots();
 	}
 	async function pickSeq(e: Event) {
@@ -160,6 +166,24 @@
 		class="min-w-0 flex-1 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm"
 	/>
 </div>
+
+<!-- Àmbit de la cerca: evita que cognoms com «Manresa» o «Olesa» es barregin amb clubs -->
+{#if search.trim()}
+	<div class="-mt-1 mb-3 flex items-center gap-1.5 px-0.5 text-xs">
+		<span class="text-slate-400 dark:text-slate-500">Cerca a:</span>
+		{#each SCOPES as s (s.val)}
+			<button
+				type="button"
+				onclick={() => (scope = s.val)}
+				class="rounded-full px-2.5 py-1 font-medium transition-colors {scope === s.val
+					? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+					: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
+			>
+				{s.label}
+			</button>
+		{/each}
+	</div>
+{/if}
 
 {#if provActive}
 	<p class="mb-2 px-1 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
