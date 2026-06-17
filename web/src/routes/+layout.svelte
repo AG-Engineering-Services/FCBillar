@@ -40,9 +40,13 @@
 		{ href: '/seguiment', label: '★ Seguits', match: (p: string) => p.startsWith('/seguiment') }
 	];
 	const path = $derived($page.url.pathname);
+	// Vista aïllada (/fitxa/[id]): sense capçalera/navbar ni peu, perquè no es pugui
+	// accedir a cap altra secció de la PWA des d'aquí.
+	const embed = $derived(path.startsWith('/fitxa'));
 </script>
 
 <div class="mx-auto flex min-h-full max-w-screen-sm flex-col md:max-w-3xl lg:max-w-5xl">
+	{#if !embed}
 	<header
 		class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90"
 	>
@@ -94,9 +98,11 @@
 			{/each}
 		</nav>
 	</header>
+	{/if}
 	<main class="flex-1 px-3 py-3 md:px-6 md:py-5">
 		{@render children()}
 	</main>
+	{#if !embed}
 	<footer
 		class="flex flex-col items-center gap-2 px-4 py-6 text-center text-[11px] text-slate-400 dark:text-slate-500"
 	>
@@ -104,4 +110,5 @@
 		<p>No se'n permet la distribució no autoritzada.</p>
 		<p class="text-slate-300 dark:text-slate-600">Dades de la Federació Catalana de Billar · ús personal</p>
 	</footer>
+	{/if}
 </div>
