@@ -752,6 +752,43 @@ def publish_cloud_cmd() -> None:
     total = ", ".join(f"{k}={v}" for k, v in counts.items())
     console.print(f"[green]OK publicat a Supabase (fcbillar): {total}[/]")
 
+    # App germana "Estadístiques" (schema public): marca computa. No fatal.
+    try:
+        from fcbillar.cloud_sync import publish_estadistiques_computa
+
+        c2 = publish_estadistiques_computa(on_progress=_prog)
+        console.print(
+            "[green]OK Estadístiques computa: "
+            + ", ".join(f"{k}={v}" for k, v in c2.items())
+            + "[/]"
+        )
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[yellow]Avís: no s'ha pogut marcar computa a Estadístiques: {exc}[/]")
+
+
+@app.command("publish-estadistiques-computa")
+def publish_estadistiques_computa_cmd(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Només informa, no escriu."),
+) -> None:
+    """Marca `public.partides.computa` (app Estadístiques) amb la finestra oficial.
+
+    Casa cada partida d'Estadístiques amb les que computen al rànquing federatiu
+    (ranking_game_links) per signatura+data. Idempotent. Es crida també des de
+    `publish-cloud`."""
+    from fcbillar.cloud_sync import publish_estadistiques_computa
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"[dim]  {msg}[/]" if level == "ok" else f"[yellow]{msg}[/]")
+
+    try:
+        counts = publish_estadistiques_computa(on_progress=_prog, dry_run=dry_run)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]Error: {exc}[/]")
+        raise typer.Exit(code=1) from exc
+    total = ", ".join(f"{k}={v}" for k, v in counts.items())
+    pref = "[DRY-RUN] " if dry_run else ""
+    console.print(f"[green]{pref}OK: {total}[/]")
+
 
 @app.command("publish-live-opens")
 def publish_live_opens_cmd() -> None:

@@ -23,6 +23,11 @@ from fcbillar.config import PROJECT_ROOT, get_settings
 SCHEMA = "fcbillar"
 Progress = Callable[[str, str], None]
 
+# --- App germana "Estadístiques" (schema public, mateix projecte Supabase) ---
+# Mapatge entre el seu món i el federatiu, per marcar `public.partides.computa`.
+EST_USERS: dict[int, str] = {1: "278", 2: "2535", 3: "332"}  # usuari_id -> fcb_id
+EST_MOD_BY_FCB: dict[int, int] = {1: 1, 2: 2, 3: 4, 4: 3, 6: 5}  # codi_fcb -> modalitat_id
+
 
 @functools.lru_cache(maxsize=1)
 def _name_overrides() -> dict[str, str]:
@@ -78,6 +83,20 @@ def get_client():
     if not key:
         raise RuntimeError("Falta SUPABASE_SERVICE_ROLE_KEY (entorn o .env).")
     return create_client(url, key).schema(SCHEMA)
+
+
+def get_public_client():
+    """Client Supabase amb service_role, schema `public` (app germana Estadístiques).
+
+    Comparteix el mateix projecte Supabase; la service_role salta RLS i pot
+    escriure a `public.partides` (marca `computa`)."""
+    from supabase import create_client
+
+    url = _env("SUPABASE_URL")
+    key = _env("SUPABASE_SERVICE_ROLE_KEY")
+    if not url or not key:
+        raise RuntimeError("Falta SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (entorn o .env).")
+    return create_client(url, key).schema("public")
 
 
 def _chunks(rows: list[dict], n: int = 500) -> Iterable[list[dict]]:
@@ -1703,6 +1722,124 @@ def publish_open_ranking_femeni(
     sb = get_client()
     n = _upsert(sb, "open_ranking", rows, "genere,ronda,player_fcb_id", prog)
     return {"open_ranking_femeni": n}
+
+
+def _date_dist(a: str | None, b: str | None) -> int:
+    """Distància en dies entre dues dates ISO; gran si alguna és buida/dolenta."""
+    from datetime import date
+
+    def _p(s: str | None):
+        try:
+            y, m, d = str(s).split("-")[:3]
+            return date(int(y), int(m), int(d))
+        except Exception:  # noqa: BLE001
+            return None
+
+    da, db = _p(a), _p(b)
+    return abs((da - db).days) if (da and db) else 10**6
+
+
+def publish_estadistiques_computa(
+    db_path: Path | None = None,
+    on_progress: Progress | None = None,
+    *,
+    dry_run: bool = False,
+) -> dict[str, int]:
+    """Marca `public.partides.computa` (app Estadístiques) amb la finestra OFICIAL.
+
+    Per a cada jugador seguit (`EST_USERS`) i modalitat (`EST_MOD_BY_FCB`), llegeix
+    les partides que computen al rànquing federatiu vigent (`ranking_game_links`) i
+    casa cada una amb la partida d'Estadístiques per signatura (caramboles propis,
+    del rival, entrades) + data més propera (les dates d'Estadístiques estan
+    entrades a mà i poden anar desplaçades). Reescriu `computa` sencer a cada
+    execució (idempotent). Amb `dry_run=True` només informa, no escriu.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    pub = get_public_client()  # cal per llegir partides fins i tot en dry-run
+
+    total_true = 0
+    total_unmatched = 0
+    for est_uid, fcb_id in EST_USERS.items():
+        for codi_fcb, est_mod in EST_MOD_BY_FCB.items():
+            rk = conn.execute(
+                """SELECT r.id, r.num_seq FROM rankings r JOIN modalitats m ON m.id = r.modalitat_id
+                   WHERE m.codi_fcb = ? ORDER BY r.num_seq DESC LIMIT 1""",
+                (codi_fcb,),
+            ).fetchone()
+            window: list[tuple[int, int, int, str]] = []
+            if rk is not None:
+                for g in conn.execute(
+                    """SELECT CASE WHEN p1.fcb_id = ? THEN g.caramboles1 ELSE g.caramboles2 END co,
+                              CASE WHEN p1.fcb_id = ? THEN g.caramboles2 ELSE g.caramboles1 END copp,
+                              g.entrades e, g.data_partida d
+                       FROM ranking_game_links l JOIN games g ON g.id = l.game_id
+                       JOIN players p1 ON p1.id = g.player1_id
+                       JOIN players p2 ON p2.id = g.player2_id
+                       JOIN players po ON po.id = l.player_id_origen
+                       WHERE l.ranking_id = ? AND po.fcb_id = ?""",
+                    (fcb_id, fcb_id, rk["id"], fcb_id),
+                ):
+                    if g["co"] is not None and g["copp"] is not None and g["e"]:
+                        window.append((g["co"], g["copp"], g["e"], g["d"]))
+
+            rows = (
+                pub.table("partides")
+                .select("id,caramboles,caramboles_oponent,entrades,data")
+                .eq("usuari_id", est_uid)
+                .eq("modalitat_id", est_mod)
+                .execute()
+                .data
+                or []
+            )
+            if not rows:
+                continue
+
+            # casa cada partida de la finestra amb una d'Estadístiques (bijectiu)
+            by_sig: dict[tuple, list[dict]] = {}
+            for p in rows:
+                by_sig.setdefault(
+                    (p["caramboles"], p["caramboles_oponent"], p["entrades"]), []
+                ).append(p)
+            used: set = set()
+            matched: list = []
+            unmatched = 0
+            for co, copp, e, d in window:
+                cand = [p for p in by_sig.get((co, copp, e), []) if p["id"] not in used]
+                if not cand:
+                    unmatched += 1
+                    continue
+                if len(cand) > 1:
+                    cand.sort(key=lambda p: _date_dist(p.get("data"), d))
+                used.add(cand[0]["id"])
+                matched.append(cand[0]["id"])
+
+            total_true += len(matched)
+            total_unmatched += unmatched
+            prog(
+                "ok",
+                f"computa[u{est_uid}/mod{codi_fcb}]: finestra={len(window)} "
+                f"casades={len(matched)} sense_match={unmatched} (de {len(rows)} partides)"
+                + ("  [DRY]" if dry_run else ""),
+            )
+            if dry_run:
+                continue
+
+            font = f"fcbillar:rk{rk['id']}" if rk is not None else None
+            # reset a false tot el conjunt usuari+modalitat, després marca les casades
+            pub.table("partides").update({"computa": False, "computa_font": None}).eq(
+                "usuari_id", est_uid
+            ).eq("modalitat_id", est_mod).execute()
+            for chunk in _chunks([{"id": i} for i in matched]):
+                ids = [r["id"] for r in chunk]
+                pub.table("partides").update(
+                    {"computa": True, "computa_font": font}
+                ).in_("id", ids).execute()
+
+    conn.close()
+    return {"estadistiques_computa": total_true, "estadistiques_sense_match": total_unmatched}
 
 
 def publish_player_clubs(
