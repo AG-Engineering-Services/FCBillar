@@ -53,7 +53,7 @@
 	     així es percep com una marca de fons a totes les pàgines —inclosa la vista
 	     aïllada /fitxa— sense destorbar la lectura. -->
 	<div
-		class="pointer-events-none fixed inset-0 z-0 flex select-none flex-col items-center justify-center gap-3 opacity-[0.035] dark:opacity-[0.07]"
+		class="pointer-events-none fixed inset-0 z-0 flex select-none flex-col items-center justify-center gap-3 opacity-[0.05] dark:opacity-[0.09]"
 		aria-hidden="true"
 	>
 		<img src="/logo-ag.png" alt="" class="w-48 max-w-[55vw] grayscale md:w-64 lg:w-72" />
