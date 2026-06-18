@@ -40,12 +40,28 @@
 		{ href: '/seguiment', label: '★ Seguits', match: (p: string) => p.startsWith('/seguiment') }
 	];
 	const path = $derived($page.url.pathname);
-	// Vista aïllada (/fitxa/[id]): sense capçalera/navbar ni peu, perquè no es pugui
-	// accedir a cap altra secció de la PWA des d'aquí.
+	// Vista aïllada (/fitxa/[id]): sense capçalera/navbar, perquè no es pugui accedir
+	// a cap altra secció de la PWA des d'aquí. El peu (autoria + avís de no distribució)
+	// SÍ que s'hi mostra: no conté navegació i l'avís ha de sortir a totes les pàgines.
 	const embed = $derived(path.startsWith('/fitxa'));
 </script>
 
 <div class="mx-auto flex min-h-full max-w-screen-sm flex-col md:max-w-3xl lg:max-w-5xl">
+	<!-- Marca d'aigua d'autoria: emblema "AG" + nom Albert Gómez, fixat al centre de la
+	     finestra i sense capturar clics (pointer-events-none). Va a z-0: per sota de la
+	     capçalera sticky (z-10) i per sobre del contingut, però amb opacitat molt baixa,
+	     així es percep com una marca de fons a totes les pàgines —inclosa la vista
+	     aïllada /fitxa— sense destorbar la lectura. -->
+	<div
+		class="pointer-events-none fixed inset-0 z-0 flex select-none flex-col items-center justify-center gap-3 opacity-[0.035] dark:opacity-[0.07]"
+		aria-hidden="true"
+	>
+		<img src="/logo-ag.png" alt="" class="w-48 max-w-[55vw] grayscale md:w-64 lg:w-72" />
+		<span
+			class="text-2xl font-semibold uppercase tracking-[0.35em] text-slate-900 dark:text-slate-100 md:text-3xl lg:text-4xl"
+			>Albert&nbsp;Gómez</span
+		>
+	</div>
 	{#if !embed}
 	<header
 		class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90"
@@ -102,13 +118,14 @@
 	<main class="flex-1 px-3 py-3 md:px-6 md:py-5">
 		{@render children()}
 	</main>
-	{#if !embed}
 	<footer
 		class="flex flex-col items-center gap-2 px-4 py-6 text-center text-[11px] text-slate-400 dark:text-slate-500"
 	>
-		<img src="/logo-ag.png" alt="Propietari de l'aplicació" class="h-7 w-auto opacity-80" />
-		<p>No se'n permet la distribució no autoritzada.</p>
+		<div class="flex items-center gap-2">
+			<img src="/logo-ag.png" alt="Albert Gómez" class="h-7 w-auto opacity-80" />
+			<span class="text-xs font-semibold tracking-wide text-slate-500 dark:text-slate-400">Albert Gómez</span>
+		</div>
+		<p>© Albert Gómez. No se'n permet la distribució no autoritzada.</p>
 		<p class="text-slate-300 dark:text-slate-600">Dades de la Federació Catalana de Billar · ús personal</p>
 	</footer>
-	{/if}
 </div>
