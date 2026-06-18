@@ -137,6 +137,26 @@
 	});
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+	let shownBeforePrint = 60;
+
+	// A l'imprimir es mostren totes les partides de la modalitat; després es
+	// restaurem el nombre de files que hi havia abans.
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+		const expand = () => {
+			shownBeforePrint = shown;
+			shown = modGames.length;
+		};
+		const collapse = () => {
+			shown = shownBeforePrint;
+		};
+		window.addEventListener('beforeprint', expand);
+		window.addEventListener('afterprint', collapse);
+		return () => {
+			window.removeEventListener('beforeprint', expand);
+			window.removeEventListener('afterprint', collapse);
+		};
+	});
 
 	$effect(() => {
 		const id = fcbId;
@@ -726,7 +746,7 @@
 </script>
 
 {#if !kiosk}
-	<button onclick={back} class="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
+	<button onclick={back} class="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 print:hidden">
 		<span aria-hidden="true">←</span> Rànquings
 	</button>
 {/if}
@@ -745,7 +765,7 @@
 		{#if !kiosk}
 			<button
 				onclick={() => toggleFollow(fcbId)}
-				class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium {$follows.includes(fcbId)
+				class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium print:hidden {$follows.includes(fcbId)
 					? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 ring-1 ring-amber-300 dark:ring-amber-900/50'
 					: 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'}"
 			>
@@ -755,7 +775,7 @@
 	</div>
 
 	{#if modalitats.length > 1}
-		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
+		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] print:hidden">
 			{#each modalitats as m}
 				<button
 					onclick={() => {
@@ -768,12 +788,15 @@
 				>{m.nom}</button>
 			{/each}
 		</div>
+		<p class="mb-3 hidden text-sm font-medium print:block">
+			Modalitat: {modalitats.find((m) => m.codi === selMod)?.nom ?? '—'}
+		</p>
 	{/if}
 
 	{#if loading}
 		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
 	{:else}
-		<div class="lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+		<div class="profile-root lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start print:block">
 			<div class="min-w-0">
 			<!-- KPIs -->
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
@@ -996,7 +1019,7 @@
 					<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
 						Rendiment per nivell d'oponent
 					</div>
-					<div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-700 text-[10px]">
+					<div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-700 text-[10px] print:hidden">
 						<button
 							class="px-2 py-0.5 {radarMode === 'abs' ? 'bg-slate-800 text-white' : 'text-slate-600 dark:text-slate-300'}"
 							onclick={() => (radarMode = 'abs')}>Absolut</button
@@ -1050,7 +1073,7 @@
 					<span>posició <span class="font-mono font-bold">#{rankHist[selIdx].posicio ?? '—'}</span></span>
 				</div>
 			{:else}
-				<p class="mb-2 text-center text-[11px] text-slate-400 dark:text-slate-500">Toca un gràfic per veure els valors d'un rànquing</p>
+				<p class="mb-2 text-center text-[11px] text-slate-400 dark:text-slate-500 print:hidden">Toca un gràfic per veure els valors d'un rànquing</p>
 			{/if}
 			<div class="mb-4 space-y-3">
 				<!-- Mitjana -->
@@ -1073,7 +1096,7 @@
 							</div>
 						</div>
 					</div>
-					<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickPoint} role="presentation" class="h-24 w-full cursor-pointer">
+					<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickPoint} role="presentation" class="h-24 w-full cursor-pointer print:h-16">
 							{#each [0, 0.25, 0.5, 0.75, 1] as f}
 								<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
 							{/each}
@@ -1119,7 +1142,7 @@
 						</div>
 					</div>
 					{#if posChart}
-						<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickPoint} role="presentation" class="h-24 w-full cursor-pointer">
+						<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickPoint} role="presentation" class="h-24 w-full cursor-pointer print:h-16">
 							{#each [0, 0.25, 0.5, 0.75, 1] as f}
 								<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
 							{/each}
@@ -1169,7 +1192,7 @@
 						<span class="shrink-0">partida <span class="font-mono font-bold">{roll15[rollSel].g.toFixed(3)}</span></span>
 					</div>
 				{/if}
-				<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickRoll} role="presentation" class="h-24 w-full cursor-pointer">
+				<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickRoll} role="presentation" class="h-24 w-full cursor-pointer print:h-16">
 					{#each [0, 0.25, 0.5, 0.75, 1] as f}
 						<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
 					{/each}
@@ -1190,8 +1213,8 @@
 					<span>màx {rollChart.hi.toFixed(3)}</span>
 				</div>
 				{#if roll15.length > 1}
-					<input type="range" min="0" max={roll15.length - 1} step="1" bind:value={rollSel} class="thin-range mt-2 w-full" />
-					<p class="text-center text-[10px] text-slate-400 dark:text-slate-500">punt {(rollSel ?? 0) + 1} de {roll15.length} · finestra {rollStart + 1}–{Math.min(rollStart + WIN, roll15.length)}</p>
+					<input type="range" min="0" max={roll15.length - 1} step="1" bind:value={rollSel} class="thin-range mt-2 w-full print:hidden" />
+					<p class="text-center text-[10px] text-slate-400 dark:text-slate-500 print:hidden">punt {(rollSel ?? 0) + 1} de {roll15.length} · finestra {rollStart + 1}–{Math.min(rollStart + WIN, roll15.length)}</p>
 				{/if}
 			</div>
 		{/if}
@@ -1245,54 +1268,65 @@
 					{/if}
 				</p>
 			{/if}
-		<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-			{#each displayGames as g (g.id)}
-				{@const p = persp(g)}
-				<li
-					id="game-{g.id}"
-					class="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0 {rank15.ids.has(g.id)
-						? 'bg-amber-50 dark:bg-amber-950/40'
-						: $page.url.searchParams.get('game') === g.id
-							? 'bg-blue-50 dark:bg-blue-950/40 ring-1 ring-inset ring-blue-300 dark:ring-blue-900/50'
-							: ''}"
-				>
-					<span
-						class="w-6 shrink-0 rounded text-center text-xs font-bold {p.tie
-							? 'text-slate-400 dark:text-slate-500'
-							: p.won
-								? 'text-emerald-600 dark:text-emerald-400'
-								: 'text-red-500 dark:text-red-400'}">{p.tie ? 'E' : p.won ? 'G' : 'P'}</span>
-					<div class="min-w-0 flex-1">
-						{#if p.oppId && !kiosk}
-							<a
-								href="/jugador/{p.oppId}"
-								class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline"
-								>{p.opp}</a>
-						{:else}
-							<div class="truncate text-sm leading-tight">{p.opp}</div>
-						{/if}
-						<div class="text-[11px] text-slate-400 dark:text-slate-500">
-							{fmtDate(p.date)} · {p.comp ?? ''}{p.mySerie ? ` · S.M. ${p.mySerie}` : ''}
-						</div>
-					</div>
-					<div class="shrink-0 text-right">
-						<div class="font-mono text-sm tabular-nums">{p.myCar}–{p.oppCar}</div>
-						<div class="text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
-							{p.ent ? `${(p.myCar / p.ent).toFixed(3)} · ${p.ent} ent.` : '—'}
-						</div>
-					</div>
-				</li>
-			{/each}
-		</ul>
+		<div class="games-wrap overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+			<table class="w-full text-sm">
+				<thead class="print-only bg-slate-50 text-left text-[10px] uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+					<tr>
+						<th class="px-3 py-1.5 font-medium">Res.</th>
+						<th class="px-3 py-1.5 font-medium">Rival · Competició</th>
+						<th class="px-3 py-1.5 text-right font-medium">Marcador</th>
+						<th class="px-3 py-1.5 text-right font-medium">Mitjana</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each displayGames as g (g.id)}
+						{@const p = persp(g)}
+						<tr
+							id="game-{g.id}"
+							class="border-b border-slate-100 dark:border-slate-800 last:border-b-0 {rank15.ids.has(g.id)
+								? 'bg-amber-50 dark:bg-amber-950/40'
+								: $page.url.searchParams.get('game') === g.id
+									? 'bg-blue-50 dark:bg-blue-950/40'
+									: ''}"
+						>
+							<td class="w-8 px-3 py-2 text-center">
+								<span class="inline-block w-6 rounded text-center text-xs font-bold {p.tie
+									? 'text-slate-400 dark:text-slate-500'
+									: p.won
+										? 'text-emerald-600 dark:text-emerald-400'
+										: 'text-red-500 dark:text-red-400'}">{p.tie ? 'E' : p.won ? 'G' : 'P'}</span>
+							</td>
+							<td class="px-3 py-2">
+								{#if p.oppId && !kiosk}
+									<a
+										href="/jugador/{p.oppId}"
+										class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline"
+										>{p.opp}</a>
+									{:else}
+										<div class="truncate text-sm leading-tight">{p.opp}</div>
+									{/if}
+									<div class="text-[11px] text-slate-400 dark:text-slate-500">
+										{fmtDate(p.date)}{#if p.comp} · {p.comp}{/if}{#if p.mySerie} · S.M. {p.mySerie}{/if}
+									</div>
+								</td>
+								<td class="px-3 py-2 text-right font-mono text-sm tabular-nums">{p.myCar}–{p.oppCar}</td>
+								<td class="px-3 py-2 text-right text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
+									{p.ent ? `${(p.myCar / p.ent).toFixed(3)} · ${p.ent} ent.` : '—'}
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		{#if !serieFilter && modGames.length > shown}
 			<button
 				onclick={() => (shown += 60)}
-				class="mt-2 w-full rounded-lg bg-white dark:bg-slate-900 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800 active:bg-slate-50 dark:active:bg-slate-800/50"
+				class="mt-2 w-full rounded-lg bg-white dark:bg-slate-900 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800 active:bg-slate-50 dark:active:bg-slate-800/50 print:hidden"
 			>
 				Carregar més ({shown} de {modGames.length})
 			</button>
 		{:else if modGames.length > 60}
-			<p class="px-1 py-3 text-center text-[11px] text-slate-400 dark:text-slate-500">{modGames.length} partides</p>
+			<p class="px-1 py-3 text-center text-[11px] text-slate-400 dark:text-slate-500 print:hidden">{modGames.length} partides</p>
 		{/if}
 			</div>
 		</div>
@@ -1327,5 +1361,31 @@
 		border-radius: 9999px;
 		background: #2563eb;
 		cursor: pointer;
+	}
+
+	.print-only {
+		display: none;
+	}
+
+	@media print {
+		.profile-root :global(.rounded-xl:not(.games-wrap)) {
+			break-inside: avoid;
+			page-break-inside: avoid;
+		}
+		.games-wrap {
+			break-inside: auto;
+			overflow: visible !important;
+		}
+		.games-wrap tbody tr {
+			break-inside: avoid;
+			page-break-inside: avoid;
+		}
+		.print-only {
+			display: table-header-group !important;
+		}
+		.print-only tr {
+			break-inside: avoid;
+			page-break-inside: avoid;
+		}
 	}
 </style>

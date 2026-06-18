@@ -129,3 +129,23 @@
 		<p class="text-slate-300 dark:text-slate-600">Dades de la Federació Catalana de Billar · ús personal</p>
 	</footer>
 </div>
+
+<style>
+	@page {
+		size: A4 portrait;
+		margin: 8mm;
+	}
+	@media print {
+		:global(header),
+		:global(footer),
+		:global(.pointer-events-none.fixed) {
+			display: none !important;
+		}
+		:global(main) {
+			padding: 0 !important;
+		}
+		:global(html) {
+			font-size: 10pt;
+		}
+	}
+</style>
