@@ -505,29 +505,31 @@
 	<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 		<div class="mb-2">
 			<h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Classificació provisional</h2>
-			<p class="mt-0.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">Jugadors ja eliminats, per la ronda on cauen. Els d'una fase tancada són definitius; la resta, provisionals (*).</p>
+			<p class="mt-0.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">A dalt, els jugadors encara EN JOC (llocs del quadre, ordre provisional pel rànquing inicial). A sota, els ja eliminats per la ronda on cauen. Tot és provisional (*) fins a la classificació definitiva.</p>
 		</div>
 		<div class="space-y-3">
 			{#each classByRound as tier (tier.round)}
+				{@const alive = tier.round === 'EN JOC'}
 				{@const lo = tier.rows[0].position}
 				{@const hi = tier.rows[tier.rows.length - 1].position}
 				<div>
-					<div class="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-						<span>{tier.round}</span>
+					<div class="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider {alive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}">
+						<span>{alive ? 'Encara en competició' : tier.round}</span>
 						<span class="font-mono font-normal text-slate-400 dark:text-slate-500">llocs {lo === hi ? lo : `${lo}–${hi}`}</span>
+						{#if alive}<span class="rounded bg-amber-100 dark:bg-amber-900/40 px-1 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">provisional</span>{/if}
 					</div>
 					<ol class="space-y-0.5">
 						{#each tier.rows as r (r.player_name)}
 							<li class="flex items-center gap-2 text-sm">
 								<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{r.position}{#if r.is_provisional_position}<span class="text-amber-500" title="Posició provisional">*</span>{/if}</span>
 								<span class="flex min-w-0 flex-1 items-baseline gap-1 truncate">
-									{@render player(r.player_name, (r.position <= 8 ? 'font-semibold ' : '') + 'truncate')}
+									{@render player(r.player_name, (!alive && r.position <= 8 ? 'font-semibold ' : '') + 'truncate')}
 									{#if r.rank3b}<span class="shrink-0 font-mono text-[10px] text-slate-400 dark:text-slate-500" title="Posició al rànquing de 3 bandes">({r.rank3b})</span>{/if}
 								</span>
 								{#if r.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial (opens 3 bandes): millor classificat de la seva banda del rànquing">{r.prize}</span>{/if}
-								{#if r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
-								<span class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline">{r.mitjana.toFixed(3)}</span>
-								<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title="Punts de rànquing segons el lloc (reglament dels opens)">{r.open_points}</span>
+								{#if !alive && r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
+								<span class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline">{r.mitjana ? r.mitjana.toFixed(3) : '—'}</span>
+								<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title={alive ? 'Punts pendents: encara en competició' : 'Punts de rànquing segons el lloc (reglament dels opens)'}>{alive ? '—' : r.open_points}</span>
 							</li>
 						{/each}
 					</ol>
