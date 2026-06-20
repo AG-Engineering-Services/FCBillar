@@ -14,6 +14,40 @@
 	// kiosk=true (sense botons de navegació ni enllaços que surtin de la vista).
 	let { fcbId, kiosk = false }: { fcbId: string; kiosk?: boolean } = $props();
 
+	// --- Botó de reingesta manual (NOMÉS a la fitxa de l'Albert Gómez) --------
+	// Dispara la reingesta del web de la federació que corre al PC de casa. Com que
+	// el PWA és al núvol i la reingesta necessita les BD locals + la sessió de login,
+	// el botó només encua una petició a Supabase (taula reingest_requests); un
+	// watcher al PC (scripts/reingest_watcher.ps1) la consumeix i executa la
+	// reingesta. Gate: cal el correu autoritzat (validat també per RLS al servidor).
+	const ADMIN_FCB_ID = '278';
+	const ADMIN_EMAIL = 'algoam@gmail.com';
+	const isAdmin = $derived(fcbId === ADMIN_FCB_ID);
+	let reingestState = $state<'idle' | 'sending' | 'ok' | 'denied' | 'error'>('idle');
+	let reingestMsg = $state('');
+
+	async function requestReingest() {
+		const email = prompt('Correu autoritzat per llançar la reingesta de la federació:');
+		if (email === null) return; // cancel·lat
+		if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
+			reingestState = 'denied';
+			reingestMsg = 'Correu no autoritzat.';
+			return;
+		}
+		reingestState = 'sending';
+		reingestMsg = '';
+		const { error: e } = await supabase
+			.from('reingest_requests')
+			.insert({ requested_email: ADMIN_EMAIL, source: `fitxa/${fcbId}` });
+		if (e) {
+			reingestState = 'error';
+			reingestMsg = `No s'ha pogut encuar: ${e.message}`;
+		} else {
+			reingestState = 'ok';
+			reingestMsg = "Petició enviada. La reingesta s'executarà al PC quan estigui engegat (cada pocs minuts).";
+		}
+	}
+
 	// Colors dels gràfics SVG reactius al tema (clar/fosc).
 	const cGrid = $derived($theme === 'dark' ? '#1e293b' : '#eef2f7'); // graella horitzontal
 	const cAxis = $derived($theme === 'dark' ? '#334155' : '#e2e8f0'); // guies verticals
@@ -762,17 +796,41 @@
 				{:else}<a href="/club/{clubId}" class="text-sm text-slate-400 dark:text-slate-500 active:underline">{club}</a>{/if}
 			{/if}
 		</div>
-		{#if !kiosk}
-			<button
-				onclick={() => toggleFollow(fcbId)}
-				class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium print:hidden {$follows.includes(fcbId)
-					? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 ring-1 ring-amber-300 dark:ring-amber-900/50'
-					: 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'}"
-			>
-				{$follows.includes(fcbId) ? '★ Seguint' : '☆ Seguir'}
-			</button>
-		{/if}
+		<div class="flex shrink-0 items-center gap-2 print:hidden">
+			{#if isAdmin}
+				<button
+					onclick={requestReingest}
+					disabled={reingestState === 'sending'}
+					title="Reingesta del web de la federació (detecta partides noves)"
+					class="rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-emerald-500"
+				>
+					{reingestState === 'sending' ? 'Enviant…' : '↻ Reingesta'}
+				</button>
+			{/if}
+			{#if !kiosk}
+				<button
+					onclick={() => toggleFollow(fcbId)}
+					class="rounded-full px-3 py-1.5 text-sm font-medium {$follows.includes(fcbId)
+						? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 ring-1 ring-amber-300 dark:ring-amber-900/50'
+						: 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'}"
+				>
+					{$follows.includes(fcbId) ? '★ Seguint' : '☆ Seguir'}
+				</button>
+			{/if}
+		</div>
 	</div>
+
+	{#if isAdmin && reingestState !== 'idle'}
+		<div
+			class="mb-3 rounded-lg px-3 py-2 text-sm print:hidden {reingestState === 'ok'
+				? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900/50'
+				: reingestState === 'sending'
+					? 'bg-slate-50 text-slate-600 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800'
+					: 'bg-red-50 text-red-800 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50'}"
+		>
+			{reingestMsg}
+		</div>
+	{/if}
 
 	{#if modalitats.length > 1}
 		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] print:hidden">

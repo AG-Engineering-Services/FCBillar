@@ -259,6 +259,7 @@ export interface OpenLiveScore {
 	car_a: number | null;
 	car_b: number | null;
 	entrades: number | null;
+	finished: boolean | null;
 	captured_at: string;
 }
 

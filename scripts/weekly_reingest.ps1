@@ -81,6 +81,22 @@ if (-not $uv) {
     exit 1
 }
 
+# --- Lock anti-concurrència (tasca Ds/Dg + watcher del botó + execució manual) -
+# weekly_reingest pot ser disparat alhora per la tasca programada del cap de
+# setmana i pel watcher del botó del PWA. Dues ingestes simultànies xocarien
+# (lock de SQLite, sessions de navegador). Aquest lock fa que només una corri.
+$lockFile = Join-Path $repo 'data\.reingest.lock'
+$lockMaxAgeMin = 180
+if (Test-Path $lockFile) {
+    $ageMin = (New-TimeSpan -Start (Get-Item $lockFile).LastWriteTime -End (Get-Date)).TotalMinutes
+    if ($ageMin -lt $lockMaxAgeMin) {
+        Write-Log ("Ja hi ha una reingesta en curs (lock fa {0} min). Ometent." -f [int]$ageMin)
+        exit 0
+    }
+    Write-Log ("Lock antic ({0} min): el sobreescric." -f [int]$ageMin)
+}
+Set-Content -LiteralPath $lockFile -Value (Get-Date -Format 'o')
+
 # --- Carrega SUPABASE_* del .env a l'entorn (fcb_opens només llegeix entorn) -
 function Import-DotEnvKeys($path, [string[]]$keys) {
     if (-not (Test-Path $path)) { return }
@@ -139,6 +155,8 @@ if ($SkipPublish) {
 Get-ChildItem -LiteralPath $logDir -Filter 'reingest_*.log' -ErrorAction SilentlyContinue |
     Sort-Object LastWriteTime -Descending | Select-Object -Skip 30 |
     Remove-Item -Force -ErrorAction SilentlyContinue
+
+Remove-Item -LiteralPath $lockFile -Force -ErrorAction SilentlyContinue
 
 Write-Log "Fi reingesta. Passos OK=$($script:nOk) FALLATS=$($script:nFail). Log: $log"
 exit $script:nFail

@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
     Registra (o esborra) la Tasca Programada de Windows que executa la reingesta
-    setmanal de FCBillar la nit de diumenge a dilluns.
+    setmanal de FCBillar els caps de setmana al matí.
 
 .DESCRIPTION
-    Crea una tasca que llança scripts\weekly_reingest.ps1 DIVENDRES, DISSABTE i
-    DIUMENGE a les 22:30 (per capturar els games del cap de setmana a mesura que
-    es disputen) i DILLUNS a les 03:00 (repàs), com l'usuari actual. Opcions clau:
-      - StartWhenAvailable: si l'equip estava apagat a les 03:00, s'executa tan
+    Crea una tasca que llança scripts\weekly_reingest.ps1 DISSABTE i DIUMENGE a
+    les 08:00 (hora de Barcelona = hora local de l'equip, Romance Standard Time)
+    per capturar els games del cap de setmana. Opcions clau:
+      - StartWhenAvailable: si l'equip estava apagat a les 08:00, s'executa tan
         aviat com torni a estar disponible (catch-up del cap de setmana).
       - WakeToRun: desperta l'equip si està en suspensió.
       - La finestra de temporada (25-ago .. 31-jul) la gestiona el propi script.
@@ -17,7 +17,7 @@
     com si no", caldrà -RunLevel/-LogonType S4U i privilegis d'administrador.
 
 .PARAMETER At
-    Hora d'inici (per defecte 03:00).
+    Hora d'inici (per defecte 08:00, hora local = Barcelona).
 
 .PARAMETER Unregister
     Esborra la tasca en comptes de crear-la.
@@ -26,8 +26,7 @@
     Després de registrar-la, la llança immediatament una vegada (prova).
 #>
 param(
-    [string]$At = '03:00',
-    [string]$Weekend = '22:30',
+    [string]$At = '08:00',
     [switch]$Unregister,
     [switch]$RunNow
 )
@@ -52,11 +51,10 @@ $action = New-ScheduledTaskAction -Execute $ps `
     -Argument ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $script) `
     -WorkingDirectory $repo
 
-# Cap de setmana de competició: divendres/dissabte/diumenge a la nit (22:30) per
-# capturar els games a mesura que es disputen, + el repàs de dilluns (03:00).
+# Cap de setmana de competició: dissabte i diumenge al matí (08:00, hora de
+# Barcelona = hora local de l'equip) per capturar els games del cap de setmana.
 $triggers = @(
-    New-ScheduledTaskTrigger -Weekly -DaysOfWeek Friday, Saturday, Sunday -At $Weekend
-    New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday -At $At
+    New-ScheduledTaskTrigger -Weekly -DaysOfWeek Saturday, Sunday -At $At
 )
 
 $settings = New-ScheduledTaskSettingsSet `
@@ -73,11 +71,11 @@ $principal = New-ScheduledTaskPrincipal `
 
 $task = New-ScheduledTask -Action $action -Trigger $triggers `
     -Settings $settings -Principal $principal `
-    -Description 'Reingesta completa de partides i rànquings de FCBillar i publicació a Supabase. Finestra de temporada 25-ago..31-jul (gestionada per weekly_reingest.ps1). Divendres/dissabte/diumenge a la nit + repàs de dilluns.'
+    -Description 'Reingesta completa de partides i rànquings de FCBillar i publicació a Supabase. Finestra de temporada 25-ago..31-jul (gestionada per weekly_reingest.ps1). Dissabte i diumenge a les 08:00 (hora de Barcelona).'
 
 try {
     Register-ScheduledTask -TaskName $taskName -InputObject $task -Force | Out-Null
-    Write-Host "Tasca '$taskName' registrada: Dv/Ds/Dg a les $Weekend + Dl a les $At." -ForegroundColor Green
+    Write-Host "Tasca '$taskName' registrada: Ds/Dg a les $At (hora de Barcelona)." -ForegroundColor Green
 } catch {
     Write-Host "ERROR registrant la tasca: $_" -ForegroundColor Red
     Write-Host "Si és 'Accés denegat', obre PowerShell com a Administrador i torna-ho a executar." -ForegroundColor Yellow

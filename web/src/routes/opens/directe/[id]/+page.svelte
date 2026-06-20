@@ -74,15 +74,40 @@
 	// Marcadors en viu (OCR) per grup. Normalitzem l'etiqueta (de vegades "T",
 	// de vegades "Grup T") perquè casi amb el grup de la classificació.
 	const normGroup = (s: string | null) => (s ?? '').replace(/grup\s*/i, '').toUpperCase().trim();
-	// Només marcadors FRESCS: si fa més de 8 min que no es refresquen, la partida
+	// Només marcadors FRESCS: si fa més de 12 min que no es refresquen, la partida
 	// pot haver acabat o estar en pausa → no mostrem un valor potser obsolet.
 	const FRESH_MS = 12 * 60 * 1000;
+
+	// Un marcador OCR és OBSOLET si, segons el payload oficial, ja no hi pot haver
+	// partida en joc en aquell grup: el grup ja està tancat (totes les partides
+	// jugades) o el mateix emparellament ja consta com a partida disputada. Passa
+	// quan el worker d'OCR deixa el marcador congelat (el stream continua amb una
+	// altra taula o s'atura sense que en detecti el final). Sense aquest filtre un
+	// grup acabat surt com a "en joc" tot i que ja no s'hi juga res.
+	function scoreIsStale(sc: OpenLiveScore): boolean {
+		if (sc.finished) return true;
+		const gk = normGroup(sc.group_label);
+		const pair = [canonName(sc.player_a), canonName(sc.player_b)].sort().join('|');
+		for (const ph of phases) {
+			for (const g of ph.groups) {
+				if (normGroup(g.label) !== gk) continue;
+				if (groupClosed(g)) return true;
+				for (const m of g.matches) {
+					if (m.is_played && [canonName(m.player_a), canonName(m.player_b)].sort().join('|') === pair)
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	// Marcadors EN VIU vàlids: frescos i encara coherents amb el payload oficial.
+	const liveScores = $derived(
+		scores.filter((s) => Date.now() - new Date(s.captured_at).getTime() < FRESH_MS && !scoreIsStale(s))
+	);
 	function liveForGroup(label: string): OpenLiveScore[] {
 		const k = normGroup(label);
-		const cutoff = Date.now() - FRESH_MS;
-		return scores.filter(
-			(s) => normGroup(s.group_label) === k && new Date(s.captured_at).getTime() > cutoff
-		);
+		return liveScores.filter((s) => normGroup(s.group_label) === k);
 	}
 
 	// Recorda la fase seleccionada per divisió (per restaurar-la en tornar enrere).
@@ -341,7 +366,7 @@
 					<p class="mt-1.5 text-[10px] text-slate-400 dark:text-slate-500">Tots els 1rs de grup + els millors 2ns que calguin per omplir la següent ronda. ✓ = plaça assegurada.</p>
 				</div>
 			{/if}
-			{@const liveNow = scores.filter((s) => Date.now() - new Date(s.captured_at).getTime() < FRESH_MS).map((sc) => ({ sc, grp: sc.group_label || '—' }))}
+			{@const liveNow = liveScores.map((sc) => ({ sc, grp: sc.group_label || '—' }))}
 			{#if liveNow.length}
 				<div class="mb-3 rounded-xl bg-red-50 p-3 ring-1 ring-red-200 dark:bg-red-950/40 dark:ring-red-900/50">
 					<div class="mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-red-700 dark:text-red-400">
