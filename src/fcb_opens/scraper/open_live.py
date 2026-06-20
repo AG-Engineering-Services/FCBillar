@@ -382,6 +382,10 @@ class OpenLiveState:
 
     structure: OpenStructure
     phases: list[PhaseDetail] = field(default_factory=list)
+    # `{nom normalitzat → posició al Rànquing Català d'Opens}` (1 = millor), el
+    # mateix seeding que ordena els grups no jugats. L'usa la classificació per
+    # ordenar el bloc de jugadors encara vius (els 16 primers llocs del quadre).
+    seeding: dict[str, int] = field(default_factory=dict)
 
 
 # --------------------------------------------------------------------------- #
@@ -1642,25 +1646,123 @@ def compute_open_classification(
                         open_points=points_for_position(1),
                     )
                 )
-        elif last.provisional_players:
-            # 1 or 2 semi-winners. provisional_players is already sorted by
-            # cumulative (mitjana DESC, sèrie major DESC, name).
-            for rank, p in enumerate(list(last.provisional_players)[:2], start=1):
-                rows.append(
-                    OpenClassificationRow(
-                        position=rank,
-                        player_name=p.name,
-                        club=club_by_player.get(p.name, p.club or ""),
-                        round_label=last.ref.label,
-                        mitjana=p.mitjana,
-                        serie_major=p.serie_major,
-                        open_points=points_for_position(rank),
-                        is_provisional_position=True,
-                    )
-                )
+
+    # --- Jugadors encara VIUS (capçalera provisional del quadre) --------------
+    # Tots els qui han entrat al quadre KO i encara NO han estat eliminats ocupen,
+    # PROVISIONALMENT, els llocs de dalt (1..K) fins que la federació publiqui la
+    # classificació definitiva. Per petició de l'usuari l'ordre del bloc és:
+    #   • els 16 PRIMERS llocs, per RÀNQUING INICIAL (seeding del Rànquing d'Opens);
+    #   • del 17 en avall, per ORDRE DE CLASSIFICACIÓ a la següent fase (1rs abans
+    #     que 2ns, després per punts/mitjana de grup).
+    # Substitueix l'antiga capçalera que només col·locava els finalistes coneguts.
+    if ko_idxs:
+        rows.extend(
+            _alive_classification_rows(
+                phases=phases,
+                group_idxs=group_idxs,
+                phase_stats=phase_stats,
+                club_by_player=club_by_player,
+                ko_size=ko_size,
+                placed_names={_norm_name(r.player_name) for r in rows},
+                used_positions={r.position for r in rows},
+                seeding=getattr(state, "seeding", None) or {},
+            )
+        )
 
     rows.sort(key=lambda r: r.position)
     return tuple(rows)
+
+
+def _alive_classification_rows(
+    *,
+    phases: list[PhaseDetail],
+    group_idxs: list[int],
+    phase_stats: list[dict[str, tuple[float, int, str]]],
+    club_by_player: dict[str, str],
+    ko_size: int,
+    placed_names: set[str],
+    used_positions: set[int],
+    seeding: dict[str, int],
+) -> list[OpenClassificationRow]:
+    """Files provisionals dels jugadors encara VIUS (vegeu el bloc que crida).
+
+    Viu = ha entrat al quadre KO (classificat d'una fase de grups o present en
+    una ronda KO, oficial o projectada) i encara no té lloc assignat (ni eliminat
+    ni campió). Els 16 primers llocs s'ordenen pel `seeding`; la resta, per l'ordre
+    de classificació a la següent fase. Tot marcat `is_provisional_position`."""
+    from ..reglament.puntuacio import points_for_position
+
+    BIG = 10**9
+
+    # Estadístiques (mitjana, SM, club) de la fase més profunda on apareix cadascú.
+    latest_stats: dict[str, tuple[float, int, str]] = {}
+    for ps in phase_stats:
+        for nm, val in ps.items():
+            latest_stats[_norm_name(nm)] = val
+    club_by_norm = {_norm_name(k): v for k, v in club_by_player.items()}
+
+    # Ordre de classificació a la següent fase, de la fase de grups més profunda
+    # que en tingui: clau menor = millor (1rs abans que 2ns; després punts/mitjana).
+    qual_key: dict[str, tuple[int, int, float]] = {}
+    for gi in reversed(group_idxs):
+        if phases[gi].provisional_qualifiers:
+            for q in phases[gi].provisional_qualifiers:
+                qual_key[_norm_name(q.player_name)] = (
+                    q.position_in_group, -q.punts, -q.mitjana
+                )
+            break
+
+    # Pool del quadre KO: classificats de grups + qualsevol nom en una ronda KO.
+    alive: dict[str, str] = {}  # norm → nom a mostrar
+    for gi in group_idxs:
+        for q in phases[gi].provisional_qualifiers:
+            if q.player_name:
+                alive.setdefault(_norm_name(q.player_name), q.player_name)
+    for phase in phases:
+        if phase.ref.kind != "ko":
+            continue
+        for m in (*phase.ko_matches, *phase.provisional_matches):
+            for nm in (m.player_a, m.player_b):
+                if nm:
+                    alive.setdefault(_norm_name(nm), nm)
+        for p in phase.provisional_players:
+            if p.name:
+                alive.setdefault(_norm_name(p.name), p.name)
+    # Treu els que ja tenen lloc (eliminats confirmats o campió).
+    alive = {k: v for k, v in alive.items() if k not in placed_names}
+    if not alive:
+        return []
+
+    def _qkey(norm: str) -> tuple[int, int, float, str]:
+        pg, npunts, nmitj = qual_key.get(norm, (9, 0, 0.0))
+        return (pg, npunts, nmitj, alive[norm])
+
+    # Els 16 millor classificats van a dalt ordenats per SEEDING; la resta, per
+    # ordre de classificació. (Cap a 17+ el seeding deixa de ser el criteri.)
+    by_qual = sorted(alive, key=_qkey)
+    top = sorted(by_qual[:16], key=lambda k: (seeding.get(k, BIG), _qkey(k)))
+    ordered = top + by_qual[16:]
+
+    free = [p for p in range(1, ko_size + 1) if p not in used_positions]
+    out: list[OpenClassificationRow] = []
+    for norm, pos in zip(ordered, free):
+        name = alive[norm]
+        mg, sm, club = latest_stats.get(norm, (0.0, 0, ""))
+        if not club:
+            club = club_by_norm.get(norm, "")
+        out.append(
+            OpenClassificationRow(
+                position=pos,
+                player_name=name,
+                club=club,
+                round_label="EN JOC",
+                mitjana=mg,
+                serie_major=sm,
+                open_points=points_for_position(pos),
+                is_provisional_position=True,
+            )
+        )
+    return out
 
 
 _PDF_MATCH_LINE_A = re.compile(
@@ -1958,4 +2060,8 @@ def fetch_live_state(
                     provisional_players=advancing,
                 )
 
-    return OpenLiveState(structure=structure_full, phases=final)
+    return OpenLiveState(
+        structure=structure_full,
+        phases=final,
+        seeding=dict(rank_by_name or {}),
+    )
