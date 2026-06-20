@@ -97,6 +97,28 @@ if (Test-Path $lockFile) {
 }
 Set-Content -LiteralPath $lockFile -Value (Get-Date -Format 'o')
 
+# --- Manté el PC despert durant tota la reingesta ---------------------------
+# Evita que la suspensió talli un pas llarg (p.ex. scrape-lliga, com va passar
+# el 2026-06-20: el PC es va adormir i el pas va fallar). SetThreadExecutionState
+# amb ES_CONTINUOUS|ES_SYSTEM_REQUIRED manté el sistema actiu mentre corre aquest
+# procés; es deixa anar al final amb ES_CONTINUOUS sol.
+$script:keepAwake = $false
+try {
+    if (-not ('Win32.Power' -as [type])) {
+        Add-Type -Namespace Win32 -Name Power -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("kernel32.dll")]
+public static extern uint SetThreadExecutionState(uint esFlags);
+'@
+    }
+    $ES_CONTINUOUS = [uint32]0x80000000
+    $ES_SYSTEM_REQUIRED = [uint32]0x00000001
+    [Win32.Power]::SetThreadExecutionState($ES_CONTINUOUS -bor $ES_SYSTEM_REQUIRED) | Out-Null
+    $script:keepAwake = $true
+    Write-Log "Mode despert activat (el PC no se suspendrà durant la reingesta)."
+} catch {
+    Write-Log "AVÍS: no he pogut activar el mode despert: $_"
+}
+
 # --- Carrega SUPABASE_* del .env a l'entorn (fcb_opens només llegeix entorn) -
 function Import-DotEnvKeys($path, [string[]]$keys) {
     if (-not (Test-Path $path)) { return }
@@ -156,6 +178,9 @@ Get-ChildItem -LiteralPath $logDir -Filter 'reingest_*.log' -ErrorAction Silentl
     Sort-Object LastWriteTime -Descending | Select-Object -Skip 30 |
     Remove-Item -Force -ErrorAction SilentlyContinue
 
+if ($script:keepAwake) {
+    try { [Win32.Power]::SetThreadExecutionState([uint32]0x80000000) | Out-Null } catch {}
+}
 Remove-Item -LiteralPath $lockFile -Force -ErrorAction SilentlyContinue
 
 Write-Log "Fi reingesta. Passos OK=$($script:nOk) FALLATS=$($script:nFail). Log: $log"
