@@ -2018,7 +2018,9 @@ def _open_modality(name: str) -> str:
     return ""
 
 
-def _enrich_live_payload(payload: dict, sb, open_name: str = "") -> None:
+def _enrich_live_payload(
+    payload: dict, sb, open_name: str = "", division_id: int | None = None
+) -> None:
     """Enriqueix el payload en viu (in-place):
       - PJ/caramboles/entrades per jugador a cada classificació i classificat,
         calculats des de les partides JUGADES del grup (l'HTML de la FCB només
@@ -2108,7 +2110,14 @@ def _enrich_live_payload(payload: dict, sb, open_name: str = "") -> None:
     is_3b = "TRES BANDES" in _nm or "3 BANDES" in _nm or "3B" in _nm
     classification = payload.get("classification") or []
     if classification and is_3b:
-        rank3b = _ranking_3b_by_fcb_id(sb)
+        # Rànquing 3B per als premis: el FIXAT per a aquest open (vigent en el
+        # moment de la convocatòria) o, si no n'hi ha cap, el darrer publicat.
+        pinned = _load_prize_pins().get(division_id) if division_id is not None else None
+        used_seq = pinned if pinned is not None else _latest_3b_num_seq(sb)
+        if used_seq is not None:
+            # El web hi ancora el selector de premis (mostra el mes correcte).
+            payload["prize_num_seq"] = used_seq
+        rank3b = _ranking_3b_by_fcb_id(sb, used_seq)
         best_a: tuple[int, dict] | None = None  # banda 61-180
         best_b: tuple[int, dict] | None = None  # banda 181+ / no rankejat
         for row in classification:
@@ -2131,21 +2140,31 @@ def _enrich_live_payload(payload: dict, sb, open_name: str = "") -> None:
             best_b[1]["prize"] = "Millor 181+"
 
 
-def _ranking_3b_by_fcb_id(sb) -> dict[str, int]:
-    """{player_fcb_id: posicio} del rànquing vigent de TRES BANDES (modalitat_codi=1,
-    num_seq més alt). Font dels premis especials per banda de rànquing dels opens."""
+def _latest_3b_num_seq(sb) -> int | None:
+    """num_seq més alt del rànquing de TRES BANDES (modalitat_codi=1)."""
     try:
-        seqs = (
+        r = (
             sb.table("rankings").select("num_seq")
             .eq("modalitat_codi", 1).order("num_seq", desc=True).limit(1).execute()
         )
-        if not seqs.data:
+        return int(r.data[0]["num_seq"]) if r.data else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _ranking_3b_by_fcb_id(sb, num_seq: int | None = None) -> dict[str, int]:
+    """{player_fcb_id: posicio} del rànquing de TRES BANDES (modalitat_codi=1) per a
+    la seqüència `num_seq` indicada; si és None, la vigent (num_seq més alt). Font
+    dels premis especials per banda de rànquing dels opens."""
+    try:
+        if num_seq is None:
+            num_seq = _latest_3b_num_seq(sb)
+        if num_seq is None:
             return {}
-        latest = seqs.data[0]["num_seq"]
         out: dict[str, int] = {}
         res = (
             sb.table("ranking_entries").select("player_fcb_id,posicio")
-            .eq("modalitat_codi", 1).eq("num_seq", latest).execute()
+            .eq("modalitat_codi", 1).eq("num_seq", num_seq).execute()
         )
         for r in res.data or []:
             if r.get("player_fcb_id") and r.get("posicio") is not None:
@@ -2153,6 +2172,49 @@ def _ranking_3b_by_fcb_id(sb) -> dict[str, int]:
         return out
     except Exception:  # noqa: BLE001
         return {}
+
+
+# --- Pin del rànquing 3B per als premis, per open (divisió) ------------------
+# El premi per banda s'ha de calcular amb el rànquing 3B vigent EN EL MOMENT DE
+# LA CONVOCATÒRIA, que sovint NO és el darrer publicat. Es desa per
+# `fcb_division_id` en un JSON local (només cal a la màquina que publica). Sense
+# pin → darrer rànquing (comportament anterior).
+
+
+def _prize_pin_path() -> Path:
+    return PROJECT_ROOT / "data" / "open_prize_ranking.json"
+
+
+def _load_prize_pins() -> dict[int, int]:
+    import json
+
+    p = _prize_pin_path()
+    if not p.exists():
+        return {}
+    try:
+        raw = json.loads(p.read_text(encoding="utf-8"))
+        return {int(k): int(v) for k, v in raw.items()}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def set_open_prize_num_seq(division_id: int, num_seq: int | None) -> None:
+    """Fixa (o esborra, amb num_seq=None) el rànquing 3B (num_seq) per als premis
+    d'un open. La propera publicació (`publish-live-opens`) hi aplicarà aquest
+    rànquing en comptes del darrer."""
+    import json
+
+    pins = _load_prize_pins()
+    if num_seq is None:
+        pins.pop(division_id, None)
+    else:
+        pins[division_id] = int(num_seq)
+    p = _prize_pin_path()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(
+        json.dumps({str(k): v for k, v in sorted(pins.items())}, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
 
 
 def publish_live_opens(
@@ -2216,7 +2278,7 @@ def publish_live_opens(
         if not state.phases:
             continue
         payload = _state_payload(state, fetched_at)
-        _enrich_live_payload(payload, sb, open_name=state.structure.name)
+        _enrich_live_payload(payload, sb, open_name=state.structure.name, division_id=e.division_id)
         rows.append({
             "fcb_division_id": e.division_id,
             "name": state.structure.name,

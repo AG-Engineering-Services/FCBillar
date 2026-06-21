@@ -71,8 +71,15 @@
 				const raw = localStorage.getItem(seqKey(divisionId));
 				if (raw != null) stored = Number(raw);
 			} catch { /* ignore */ }
+			// Prioritat: tria desada al navegador > rànquing fixat al publicador
+			// (payload.prize_num_seq, el de la convocatòria) > darrer publicat.
+			const pinned = payload?.prize_num_seq ?? null;
 			selectedSeq =
-				stored != null && rankSeqs.some((s) => s.num_seq === stored) ? stored : rankSeqs[0].num_seq;
+				stored != null && rankSeqs.some((s) => s.num_seq === stored)
+					? stored
+					: pinned != null && rankSeqs.some((s) => s.num_seq === pinned)
+						? pinned
+						: rankSeqs[0].num_seq;
 		}
 	}
 	

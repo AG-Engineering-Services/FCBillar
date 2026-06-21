@@ -814,6 +814,57 @@ def publish_live_opens_cmd() -> None:
     console.print(f"[green]OK opens en directe publicats: {total}[/]")
 
 
+@app.command("set-open-prize-ranking")
+def set_open_prize_ranking_cmd(
+    division_id: int = typer.Argument(..., help="fcb_division_id de l'open en curs"),
+    num_seq: int | None = typer.Option(
+        None, "--num-seq", help="num_seq del rànquing 3B a aplicar als premis"
+    ),
+    month: str | None = typer.Option(
+        None, "--month", help="Mes del rànquing 3B (AAAA-MM); es resol a num_seq"
+    ),
+    clear: bool = typer.Option(
+        False, "--clear", help="Treu el pin (torna al darrer rànquing publicat)"
+    ),
+) -> None:
+    """Fixa quin rànquing de 3 bandes s'usa per als PREMIS d'un open (el vigent en
+    el moment de la convocatòria). La propera `publish-live-opens` l'hi aplicarà i
+    el web ho mostrarà per a tothom. Sense pin → darrer rànquing publicat."""
+    from fcbillar.cloud_sync import get_client, set_open_prize_num_seq
+
+    if clear:
+        set_open_prize_num_seq(division_id, None)
+        console.print(
+            f"[green]Pin tret per a la divisió {division_id} (s'usarà el darrer rànquing).[/]"
+        )
+        return
+
+    seq = num_seq
+    if seq is None and month:
+        try:
+            year, mon = (int(x) for x in month.split("-"))
+        except Exception as exc:  # noqa: BLE001
+            console.print(f"[red]--month ha de ser AAAA-MM (ex: 2026-04). Rebut: {month!r}[/]")
+            raise typer.Exit(code=1) from exc
+        rows = (
+            get_client().table("rankings").select("num_seq")
+            .eq("modalitat_codi", 1).eq("any_pub", year).eq("mes_pub", mon).execute()
+        ).data or []
+        if not rows:
+            console.print(f"[red]No hi ha rànquing 3B publicat per {year}-{mon:02d}.[/]")
+            raise typer.Exit(code=1)
+        seq = int(rows[0]["num_seq"])
+    if seq is None:
+        console.print("[red]Cal indicar --num-seq N o --month AAAA-MM (o --clear).[/]")
+        raise typer.Exit(code=1)
+
+    set_open_prize_num_seq(division_id, seq)
+    console.print(
+        f"[green]Divisió {division_id}: premis amb rànquing 3B num_seq={seq}. "
+        f"Republica amb 'fcbillar publish-live-opens'.[/]"
+    )
+
+
 @app.command("ingest-copa")
 def ingest_copa_cmd(
     edicio: int = typer.Argument(..., help="ID d'edició de la Copa (ex: 7)"),
