@@ -1347,14 +1347,14 @@
 									? 'bg-blue-50 dark:bg-blue-950/40'
 									: ''}"
 						>
-							<td class="w-8 px-3 py-2 text-center">
+							<td class="w-8 px-2 py-2 text-center sm:px-3">
 								<span class="inline-block w-6 rounded text-center text-xs font-bold {p.tie
 									? 'text-slate-400 dark:text-slate-500'
 									: p.won
 										? 'text-emerald-600 dark:text-emerald-400'
 										: 'text-red-500 dark:text-red-400'}">{p.tie ? 'E' : p.won ? 'G' : 'P'}</span>
 							</td>
-							<td class="px-3 py-2">
+							<td class="w-full max-w-0 px-2 py-2 sm:px-3">
 								{#if p.oppId && !kiosk}
 									<a
 										href="/jugador/{p.oppId}"
@@ -1363,12 +1363,12 @@
 									{:else}
 										<div class="truncate text-sm leading-tight">{p.opp}</div>
 									{/if}
-									<div class="text-[11px] text-slate-400 dark:text-slate-500">
+									<div class="truncate text-[11px] text-slate-400 dark:text-slate-500">
 										{fmtDate(p.date)}{#if p.comp} · {p.comp}{/if}{#if p.mySerie} · S.M. {p.mySerie}{/if}
 									</div>
 								</td>
-								<td class="px-3 py-2 text-right font-mono text-sm tabular-nums">{p.myCar}–{p.oppCar}</td>
-								<td class="px-3 py-2 text-right text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
+								<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{p.myCar}–{p.oppCar}</td>
+								<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-400 dark:text-slate-500 sm:px-3">
 									{p.ent ? `${(p.myCar / p.ent).toFixed(3)} · ${p.ent} ent.` : '—'}
 								</td>
 							</tr>
@@ -1433,6 +1433,13 @@
 		.games-wrap {
 			break-inside: auto;
 			overflow: visible !important;
+		}
+		/* A pantalla la cel·la del rival té max-width:0 perquè el truncate retalli i no
+		   empenyi el marcador fora de la vista; a l'imprimir la pàgina és ampla, així que
+		   alliberem la restricció i deixem que els noms i la competició es mostrin sencers. */
+		.games-wrap td {
+			max-width: none !important;
+			white-space: normal !important;
 		}
 		.games-wrap tbody tr {
 			break-inside: avoid;

@@ -171,6 +171,9 @@ if ($SkipPublish) {
 } else {
     Invoke-Step 'fcbillar publish-cloud (Supabase fcbillar)'      @($uv, 'run', 'fcbillar', 'publish-cloud')
     Invoke-Step 'fcb_opens supabase-sync (Supabase fcb_opens)'    @($uv, 'run', 'python', '-m', 'fcb_opens.cli', 'supabase-sync')
+    # Porta de codificació: escaneig (sense --apply) que avisa si reapareix el
+    # mojibake doble (UTF-8→cp1252). Surt amb 2 si en troba → pas marcat FALLAT.
+    Invoke-Step 'verifica codificació del núvol (scan)'           @($uv, 'run', 'python', 'scripts/repair_supabase_encoding.py')
 }
 
 # --- Neteja de logs antics (conserva els 30 més recents) --------------------

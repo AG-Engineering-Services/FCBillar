@@ -220,14 +220,17 @@ def main(apply: bool) -> int:
     print()
     if grand_corrupt == 0:
         print("✓ Cap valor doblement codificat. El núvol és net.")
-    elif apply:
+        return 0
+    if apply:
         print(f"✓ Reparades {grand_fixed}/{grand_corrupt} files corruptes.")
         if grand_fixed < grand_corrupt:
             print("  (algunes files sense clau identificable; cal repassar-les a mà)")
-    else:
-        print(f"⚠ {grand_corrupt} files corruptes detectades. "
-              f"Executa amb --apply per reparar-les.")
+            return 2
+        return 0
+    print(f"⚠ {grand_corrupt} files corruptes detectades. "
+          f"Executa amb --apply per reparar-les.")
+    return 2
 
 
 if __name__ == "__main__":
-    main(apply="--apply" in sys.argv)
+    sys.exit(main(apply="--apply" in sys.argv))
