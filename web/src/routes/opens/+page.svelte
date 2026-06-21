@@ -35,6 +35,99 @@
 	function norm(s: string): string {
 		return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 	}
+
+	// --- Rànquing d'opens CALCULAT (open en curs) -----------------------------
+	// Si un dels 5 opens de la finestra vigent encara s'està jugant, el rànquing
+	// publicat el deixa a 0 per a tothom (encara no té classificació definitiva):
+	// «corren els opens però no els punts». Aquí, a la ronda vigent, li omplim els
+	// punts amb la classificació PROVISIONAL en directe (open_live). Això
+	// substitueix de facto l'open més antic de la finestra per l'open en curs i hi
+	// afegeix els jugadors que NOMÉS disputen aquest. Els qui no el disputen es
+	// queden a 0 en aquell open. Marcat com a «calculat · subjecte a errors».
+	const maxRonda = $derived(rondes.length ? rondes[rondes.length - 1] : null);
+
+	// {fcb_id -> {pts, pos, nom, club}} d'un open en directe. `open_points` ja ve
+	// calculat al payload per a TOTHOM: eliminats per la posició final, i encara en
+	// joc per la posició provisional al quadre (open_live.py:_alive_classification_rows).
+	function provPointsFromLive(r: OpenLiveRow) {
+		const ids = r.payload_json?.player_ids ?? {};
+		const m = new Map<string, { pts: number; pos: number; nom: string; club: string }>();
+		for (const c of r.payload_json?.classification ?? []) {
+			const fid = ids[c.player_name];
+			if (!fid) continue;
+			const prev = m.get(fid);
+			if (!prev || c.position < prev.pos)
+				m.set(fid, { pts: c.open_points, pos: c.position, nom: c.player_name, club: c.club });
+		}
+		return m;
+	}
+
+	const overlay = $derived.by(() => {
+		if (ronda == null || ronda !== maxRonda) return null;
+		const base = rondaRows;
+		if (!base.length || !liveOpens.length) return null;
+		// Un slot de la finestra és «en curs» si TOTHOM hi té 0 (sense classificació
+		// publicada) i hi ha un open_live amb el mateix nom. Així no trepitgem mai
+		// un open ja acabat encara que en quedi una fila live obsoleta.
+		type Slot = { open: string; live: ReturnType<typeof provPointsFromLive> } | null;
+		const slots: Slot[] = (base[0].detall ?? []).map((d: any, i: number): Slot => {
+			const allZero = base.every((r: any) => !(((r.detall?.[i]?.punts) ?? 0) > 0));
+			if (!allZero) return null;
+			const lo = liveOpens.find((o) => norm(o.name) === norm(d.open ?? ''));
+			return lo ? { open: d.open as string, live: provPointsFromLive(lo) } : null;
+		});
+		if (!slots.some(Boolean)) return null;
+
+		const present = new Set<string>();
+		const rows: any[] = base.map((r) => {
+			const det = (r.detall ?? []).map((d: any) => ({ ...d }));
+			let total = 0, njug = 0, maxs = 0;
+			det.forEach((d: any, i: number) => {
+				const s = slots[i];
+				if (s) {
+					const p = s.live.get(r.player_fcb_id);
+					if (p) { d.pos = p.pos; d.punts = p.pts; d.prov = true; }
+					else { d.pos = null; d.punts = 0; d.prov = false; }
+				}
+				const pts = d.punts || 0;
+				if (pts > 0) njug++;
+				total += pts;
+				maxs = Math.max(maxs, pts);
+			});
+			present.add(r.player_fcb_id);
+			return { ...r, detall: det, punts: total, opens_jugats: njug, _max: maxs };
+		});
+
+		// Jugadors que NOMÉS disputen l'open en curs (no surten a cap dels acabats).
+		slots.forEach((s, i) => {
+			if (!s) return;
+			for (const [fid, p] of s.live) {
+				if (present.has(fid)) continue;
+				present.add(fid);
+				const det = (base[0].detall ?? []).map((d: any, j: number) =>
+					j === i
+						? { open: d.open, temp: d.temp, data: d.data ?? null, pos: p.pos, punts: p.pts, prov: true }
+						: { open: d.open, temp: d.temp, data: d.data ?? null, pos: null, punts: 0 }
+				);
+				rows.push({
+					genere: 'general', ronda, ronda_nom: base[0].ronda_nom, ronda_temp: base[0].ronda_temp,
+					posicio: 0, player_fcb_id: fid, jugador: p.nom, club: p.club,
+					opens_jugats: 1, punts: p.pts, detall: det, _max: p.pts
+				});
+			}
+		});
+
+		rows.sort(
+			(a, b) =>
+				b.punts - a.punts ||
+				(b._max ?? 0) - (a._max ?? 0) ||
+				(a.jugador || '').localeCompare(b.jugador || '')
+		);
+		rows.forEach((r, i) => (r.posicio = i + 1));
+		return { rows, liveName: slots.find(Boolean)?.open ?? '' };
+	});
+
+	const displayRows = $derived(overlay ? overlay.rows : rondaRows);
 	// Tipus de torneig: prioritza el camp publicat; fallback a la regla compartida
 	// (tipusOf de $lib/supabase, mirall de fcbillar.torneig_naming).
 	const clean = (nom: string) => nom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim();
@@ -161,11 +254,22 @@
 	{#if rondes.length === 0}
 		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense rànquing d'opens.</p>
 	{:else}
-		<div class="mb-3 flex items-center justify-between gap-2 rounded-lg bg-slate-900 dark:bg-slate-700 px-2 py-2 text-white">
+		{#if overlay}
+				<div class="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
+					<span class="mt-0.5 shrink-0">⚠</span>
+					<span>
+						Rànquing <strong>calculat</strong>, <strong>no oficial</strong>: inclou <strong>{overlay.liveName}</strong> en directe amb els punts de la classificació provisional (els qui encara juguen, segons l'ordre de la darrera fase acabada). Els qui no el disputen hi tenen 0. Pot contenir errors fins que l'open sigui definitiu.
+					</span>
+				</div>
+			{/if}
+			<div class="mb-3 flex items-center justify-between gap-2 rounded-lg {overlay ? 'bg-amber-600 dark:bg-amber-700' : 'bg-slate-900 dark:bg-slate-700'} px-2 py-2 text-white">
 			<button onclick={() => stepRonda(-1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="anterior">‹</button>
 			<div class="min-w-0 text-center">
-				<div class="truncate text-xs font-semibold">Fins a {rondaInfo?.ronda_nom ?? ''}</div>
-				<div class="text-[10px] text-slate-300 dark:text-slate-600">{rondaInfo?.ronda_temp ?? ''} · ronda {ronda}/{rondes.length}</div>
+				<div class="flex items-center justify-center gap-1.5 text-xs font-semibold">
+						<span class="truncate">Fins a {rondaInfo?.ronda_nom ?? ''}</span>
+						{#if overlay}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider">calculat</span>{/if}
+					</div>
+				<div class="text-[10px] {overlay ? 'text-amber-100' : 'text-slate-300 dark:text-slate-600'}">{rondaInfo?.ronda_temp ?? ''} · ronda {ronda}/{rondes.length}</div>
 			</div>
 			<button onclick={() => stepRonda(1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="següent">›</button>
 		</div>
@@ -177,7 +281,7 @@
 				<span class="w-10 text-right">Punts</span>
 			</div>
 			<ul>
-				{#each rondaRows.filter((r) => !q.trim() || norm(r.jugador ?? '').includes(norm(q.trim()))) as r (r.player_fcb_id)}
+				{#each displayRows.filter((r) => !q.trim() || norm(r.jugador ?? '').includes(norm(q.trim()))) as r (r.player_fcb_id)}
 					<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
 						<div class="flex items-center gap-2 px-3 py-2">
 							<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
@@ -198,16 +302,16 @@
 							<div class="space-y-0.5 bg-slate-50 dark:bg-slate-800/50 px-3 pb-2 pl-11 pt-1">
 								{#each r.detall as d}
 									<div class="flex items-center justify-between gap-2 text-[11px] {d.pos || d.penal || d.absent ? '' : 'opacity-50'}">
-										<span class="min-w-0 truncate {d.penal ? 'font-medium text-red-500 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'}">
+										<span class="min-w-0 truncate {d.penal ? 'font-medium text-red-500 dark:text-red-400' : d.prov ? 'font-medium text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}">
 											{d.open}{d.temp ? ` ${d.temp}` : ''} · {d.penal
 												? 'no presentat'
 												: d.absent
 													? 'absència justif.'
 													: d.pos
-														? `${d.pos}è`
+														? `${d.pos}è${d.prov ? ' (prov.)' : ''}`
 														: 'no inscrit'}
 										</span>
-										<span class="shrink-0 font-mono font-semibold {d.penal ? 'text-red-500 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'}">{d.punts}</span>
+										<span class="shrink-0 font-mono font-semibold {d.penal ? 'text-red-500 dark:text-red-400' : d.prov ? 'text-amber-600 dark:text-amber-400' : 'text-slate-700 dark:text-slate-200'}">{d.punts}</span>
 									</div>
 								{/each}
 							</div>
@@ -216,7 +320,7 @@
 				{/each}
 			</ul>
 		</div>
-		<p class="px-1 py-2 text-center text-[10px] text-slate-400 dark:text-slate-500">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII).</p>
+		<p class="px-1 py-2 text-center text-[10px] text-slate-400 dark:text-slate-500">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII).{overlay ? ' La ronda vigent és calculada: inclou un open en curs amb punts provisionals.' : ''}</p>
 	{/if}
 {:else if filtered.length === 0}
 	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap open.</p>
