@@ -223,8 +223,14 @@
 		return q?.position_in_group ?? 0;
 	}
 
-	function koPairs(phase: OpenLivePhase): OpenLiveMatch[] {
-		return phase.ko_matches.length ? phase.ko_matches : phase.provisional_matches;
+	// Costat guanyador d'una partida KO jugada: per punts i, si empaten (la FCB
+	// no sempre omple la columna PUNTS al KO), per caramboles. null si no jugada
+	// o empat real (es resol per observacions, que aquí no pintem).
+	function koWinnerSide(m: OpenLiveMatch): 'a' | 'b' | null {
+		if (!m.is_played) return null;
+		if (m.punts_a !== m.punts_b) return m.punts_a > m.punts_b ? 'a' : 'b';
+		if (m.caramboles_a !== m.caramboles_b) return m.caramboles_a > m.caramboles_b ? 'a' : 'b';
+		return null;
 	}
 
 	// Cognoms (vista de partides en directe): el nom ve "COGNOM1 [COGNOM2], NOM" →
@@ -254,6 +260,23 @@
 	{:else}
 		<span class={cls}>{surnamesOnly(name)}</span>
 	{/if}
+{/snippet}
+
+<!-- Una fila d'emparellament KO. `calc` = aparellament calculat (no publicat per la FCB). -->
+{#snippet koMatch(m: OpenLiveMatch, calc: boolean)}
+	{@const w = koWinnerSide(m)}
+	<li class="border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
+		<div class="flex items-center justify-between gap-2 text-sm">
+			{#if m.player_a}{@render player(m.player_a, 'min-w-0 flex-1 truncate ' + (w === 'a' ? 'font-semibold' : ''))}{:else}<span class="min-w-0 flex-1 truncate text-slate-400 dark:text-slate-500">—</span>{/if}
+			<span class="shrink-0 font-mono text-xs {m.is_played ? '' : 'text-slate-400 dark:text-slate-500'}">{m.punts_a}–{m.punts_b}</span>
+			{#if m.player_b}{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right ' + (w === 'b' ? 'font-semibold' : ''))}{:else}<span class="min-w-0 flex-1 truncate text-right text-slate-400 dark:text-slate-500">—</span>{/if}
+		</div>
+		{#if m.is_played}
+			<div class="mt-0.5 text-center text-[10px] text-slate-400 dark:text-slate-500">{m.caramboles_a}–{m.caramboles_b} car. · {m.entrades} ent.</div>
+		{:else}
+			<div class="mt-0.5 text-center text-[10px] {calc ? 'text-sky-600 dark:text-sky-400' : 'text-amber-600 dark:text-amber-400'}">{calc ? 'calculat' : 'pendent'}</div>
+		{/if}
+	</li>
 {/snippet}
 
 <a href="/opens" class="mb-3 inline-block text-sm text-slate-400 dark:text-slate-500 active:underline">‹ Opens</a>
@@ -472,28 +495,42 @@
 				{/each}
 			</div>
 		{:else}
-			<!-- Fase KO: emparellaments (oficials o calculats) -->
-			{@const pairs = koPairs(phase)}
-			{#if pairs.length === 0}
+			<!-- Fase KO: classificats ordenats + emparellaments oficials i calculats -->
+			{@const official = phase.ko_matches}
+			{@const calc = phase.provisional_matches ?? []}
+			{@const seeds = phase.provisional_players ?? []}
+			{#if seeds.length}
+				<div class="mb-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 p-3 ring-1 ring-sky-200 dark:ring-sky-900/50">
+					<div class="mb-1.5 flex items-center gap-2">
+						<span class="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">Classificats per a aquesta ronda ({seeds.length})</span>
+						{#if official.length === 0}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Provisional</span>{/if}
+					</div>
+					<ol class="space-y-0.5">
+						{#each seeds as s, i}
+							<li class="flex items-center gap-2 text-sm">
+								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{i + 1}</span>
+								<span class="flex min-w-0 flex-1 items-center gap-1">
+									{@render player(s.name, 'truncate')}
+									{#if s.source === 'reservat'}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Cap de sèrie reservat (no juga la prèvia)">res</span>{/if}
+								</span>
+								{#if s.serie_major}<span class="hidden w-10 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline" title="Sèrie major">{s.serie_major}</span>{/if}
+								<span class="w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400" title="Mitjana amb què entra a la ronda">{s.mitjana ? s.mitjana.toFixed(3) : '—'}</span>
+							</li>
+						{/each}
+					</ol>
+					<p class="mt-1.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">Ordre per la mitjana de la ronda anterior (sèrie major com a desempat). Fixa l'aparellament 1-N de sota.</p>
+				</div>
+			{/if}
+
+			{#if official.length === 0 && calc.length === 0}
 				<p class="py-4 text-center text-sm text-slate-400 dark:text-slate-500">Encara no hi ha emparellaments d'aquesta ronda.</p>
 			{:else}
+				{#if calc.length}
+					<p class="mb-1.5 text-[10px] text-sky-600 dark:text-sky-400">{official.length ? 'Oficials + calculats (mentre la federació no publiqui la resta).' : 'Emparellaments calculats: la federació encara no els ha publicat.'}</p>
+				{/if}
 				<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-					{#each pairs as m, i}
-						{@const aWins = m.is_played && m.punts_a > m.punts_b}
-						{@const bWins = m.is_played && m.punts_b > m.punts_a}
-						<li class="border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-							<div class="flex items-center justify-between gap-2 text-sm">
-								{#if m.player_a}{@render player(m.player_a, 'min-w-0 flex-1 truncate ' + (aWins ? 'font-semibold' : ''))}{:else}<span class="min-w-0 flex-1 truncate text-slate-400 dark:text-slate-500">—</span>{/if}
-								<span class="shrink-0 font-mono text-xs {m.is_played ? '' : 'text-slate-400 dark:text-slate-500'}">{m.punts_a}–{m.punts_b}</span>
-								{#if m.player_b}{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right ' + (bWins ? 'font-semibold' : ''))}{:else}<span class="min-w-0 flex-1 truncate text-right text-slate-400 dark:text-slate-500">—</span>{/if}
-							</div>
-							{#if m.is_played}
-								<div class="mt-0.5 text-center text-[10px] text-slate-400 dark:text-slate-500">{m.caramboles_a}–{m.caramboles_b} car. · {m.entrades} ent.</div>
-							{:else}
-								<div class="mt-0.5 text-center text-[10px] text-amber-600 dark:text-amber-400">{phase.ko_matches.length ? 'pendent' : 'calculat'}</div>
-							{/if}
-						</li>
-					{/each}
+					{#each official as m}{@render koMatch(m, false)}{/each}
+					{#each calc as m}{@render koMatch(m, true)}{/each}
 				</ul>
 			{/if}
 		{/if}

@@ -950,27 +950,26 @@ def _accumulate_match(
     stats[name] = s
 
 
-def _collect_player_stats_up_to(
-    phases: list["PhaseDetail"], stop_idx: int
-) -> dict[str, _PlayerStats]:
-    """Aggregate per-player stats from every played match in phases
-    `[0, stop_idx)`. Used as the seeding key for KO rounds beyond the
-    first: the deeper into the Open you are, the more matches feed into
-    the player's mitjana."""
+def _collect_player_stats_in_phase(phase: "PhaseDetail") -> dict[str, _PlayerStats]:
+    """Aggregate per-player stats from the played matches of a SINGLE phase.
+
+    This is the seeding key for the next KO round: per FCB practice the
+    qualifiers of a KO round are re-seeded by the mitjana they made IN THAT
+    ROUND ONLY (not the cumulative one across the whole Open). Since a player
+    plays exactly one match per KO round, this is effectively that match's
+    caramboles/entrades and its sèrie major."""
     stats: dict[str, _PlayerStats] = {}
-    for i in range(min(stop_idx, len(phases))):
-        phase = phases[i]
-        for g in phase.groups:
-            for m in g.matches:
-                if not m.is_played:
-                    continue
-                _accumulate_match(stats, m.player_a, m.caramboles_a, m.entrades, m.serie_major_a)
-                _accumulate_match(stats, m.player_b, m.caramboles_b, m.entrades, m.serie_major_b)
-        for m in phase.ko_matches:
+    for g in phase.groups:
+        for m in g.matches:
             if not m.is_played:
                 continue
             _accumulate_match(stats, m.player_a, m.caramboles_a, m.entrades, m.serie_major_a)
             _accumulate_match(stats, m.player_b, m.caramboles_b, m.entrades, m.serie_major_b)
+    for m in phase.ko_matches:
+        if not m.is_played:
+            continue
+        _accumulate_match(stats, m.player_a, m.caramboles_a, m.entrades, m.serie_major_a)
+        _accumulate_match(stats, m.player_b, m.caramboles_b, m.entrades, m.serie_major_b)
     return stats
 
 
@@ -1006,25 +1005,38 @@ def _winner_from_observations(
     return None
 
 
+def _ko_winner(m: "MatchResult") -> str | None:
+    """Winner of a single KO match, or None if it can't be decided.
+
+    FCB isn't consistent about the PUNTS column in KO rounds (sometimes a
+    1-0 / 2-0 win marker, sometimes left at 0-0 with only the CARAMBOLES
+    filled). We therefore decide in this order, each step strictly safer
+    than the previous one:
+      1. more PUNTS wins (when FCB fills the win marker);
+      2. else more CARAMBOLES wins (a three-cushion match is won by
+         scoring more caramboles, so this never picks the loser);
+      3. else fall back to the Observacions tie-break text (1-1 endings).
+    Returns None for an unplayed match or a genuine, unresolvable tie."""
+    if not m.is_played:
+        return None
+    if m.punts_a != m.punts_b:
+        return m.player_a if m.punts_a > m.punts_b else m.player_b
+    if m.caramboles_a != m.caramboles_b:
+        return m.player_a if m.caramboles_a > m.caramboles_b else m.player_b
+    return _winner_from_observations(m.observations, m.player_a, m.player_b)
+
+
 def _winners_of(matches: tuple["MatchResult", ...]) -> list[str] | None:
     """Return the list of winners of a played KO round, or None if any
-    match is unplayed or has an unresolvable tie. Tied matches whose
-    Observacions field names a winner are resolved via that text."""
+    match is unplayed or has an unresolvable tie."""
     winners: list[str] = []
     for m in matches:
         if not m.is_played:
             return None
-        if m.punts_a > m.punts_b:
-            winners.append(m.player_a)
-        elif m.punts_b > m.punts_a:
-            winners.append(m.player_b)
-        else:
-            tie_winner = _winner_from_observations(
-                m.observations, m.player_a, m.player_b
-            )
-            if tie_winner is None:
-                return None
-            winners.append(tie_winner)
+        w = _ko_winner(m)
+        if w is None:
+            return None
+        winners.append(w)
     return winners
 
 
@@ -1034,9 +1046,9 @@ def compute_next_ko_round(
     """Provisional bracket for KO phase `phases[idx]` derived from the
     immediately preceding KO phase's winners.
 
-    Re-seeding rule (per FCB practice): the qualifiers are sorted by
-    cumulative mitjana DESC, then sèrie major DESC, then name. They
-    then play 1st-vs-Nth, 2nd-vs-(N-1)th, … 1-vs-N pyramid.
+    Re-seeding rule (per FCB practice): the qualifiers are sorted by the
+    mitjana they made IN THE PREVIOUS ROUND DESC, then sèrie major DESC,
+    then name. They then play 1st-vs-Nth, 2nd-vs-(N-1)th, … 1-vs-N pyramid.
 
     Returns () if the previous round can't be resolved (any match
     unplayed or tied) or if the index doesn't fit (no previous KO).
@@ -1049,7 +1061,7 @@ def compute_next_ko_round(
     winners = _winners_of(prev.ko_matches)
     if winners is None or len(winners) < 2:
         return ()
-    stats = _collect_player_stats_up_to(phases, idx)
+    stats = _collect_player_stats_in_phase(prev)
 
     def sort_key(name: str) -> tuple[float, int, str]:
         s = stats.get(name) or _PlayerStats(name=name)
@@ -1075,7 +1087,7 @@ def compute_advancing_players(
     Sources:
       • First KO after the last group phase → group winners + RESERVATS.
       • Any subsequent KO → winners of the previous KO (real or computed),
-        with cumulative stats from every played match so far.
+        seeded by the mitjana they made in that previous round only.
     """
     if idx <= last_group_idx or idx >= len(phases):
         return ()
@@ -1136,17 +1148,12 @@ def compute_advancing_players(
     for m in source_matches:
         if not m.is_played:
             continue
-        if m.punts_a > m.punts_b:
-            winners.append(m.player_a)
-        elif m.punts_b > m.punts_a:
-            winners.append(m.player_b)
-        else:
-            tw = _winner_from_observations(m.observations, m.player_a, m.player_b)
-            if tw is not None:
-                winners.append(tw)
+        w = _ko_winner(m)
+        if w is not None:
+            winners.append(w)
     if not winners:
         return ()
-    stats = _collect_player_stats_up_to(phases, idx)
+    stats = _collect_player_stats_in_phase(prev)
     out = []
     for name in winners:
         s = stats.get(name)
@@ -1676,15 +1683,7 @@ def compute_open_classification(
     if last.ref.kind == "ko" and last.ref.label.upper() == "FINAL":
         if last.ko_matches and last.ko_matches[0].is_played:
             fm = last.ko_matches[0]
-            winner_name: str | None = None
-            if fm.punts_a > fm.punts_b:
-                winner_name = fm.player_a
-            elif fm.punts_b > fm.punts_a:
-                winner_name = fm.player_b
-            else:
-                winner_name = _winner_from_observations(
-                    fm.observations, fm.player_a, fm.player_b
-                )
+            winner_name = _ko_winner(fm)
             if winner_name:
                 if fm.entrades:
                     won_by_a = winner_name == fm.player_a
@@ -1945,13 +1944,35 @@ def _find_ko_doc_for_round(
     return None
 
 
+def _dedupe_ko_matches(matches: tuple[MatchResult, ...]) -> tuple[MatchResult, ...]:
+    """Drop duplicate KO pairings. FCB occasionally enters the same match
+    twice (mirrored A/B, e.g. once per arbitre), which would otherwise yield
+    duplicate winners and a garbled next round. In a single-elimination round
+    each player plays at most once, so any repeated unordered {A, B} pairing is
+    a duplicate: keep the first occurrence, upgrading to a played row if the
+    first copy was still unplayed."""
+    best: dict[frozenset[str], MatchResult] = {}
+    order: list[frozenset[str]] = []
+    for m in matches:
+        if not m.player_a or not m.player_b:
+            continue
+        key = frozenset({_norm_name(m.player_a), _norm_name(m.player_b)})
+        prev = best.get(key)
+        if prev is None:
+            best[key] = m
+            order.append(key)
+        elif m.is_played and not prev.is_played:
+            best[key] = m
+    return tuple(best[k] for k in order)
+
+
 def parse_ko_page(html: str) -> tuple[MatchResult, ...]:
     """Parse a KO round page. Same match-row structure as groups, without a
     group-level standings block. Returns () if 'No hi ha registres disponibles'."""
     if "No hi ha registres disponibles" in html:
         return ()
     soup = BeautifulSoup(html, "lxml")
-    return _parse_group_matches(soup)
+    return _dedupe_ko_matches(_parse_group_matches(soup))
 
 
 # --------------------------------------------------------------------------- #
