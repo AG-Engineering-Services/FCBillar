@@ -24,6 +24,17 @@ _ABBREVIATIONS = {
     "HDEZ": "HERNANDEZ",
 }
 
+# Given-name variants that refer to the same person across FCB sources: the
+# monthly ranking may store the Catalan form while the live tournament page
+# shows the Spanish one (or vice-versa). Canonicalised to a single form so
+# surname-anchored matching links them. Extend as new cases surface.
+_GIVEN_NAME_ALIASES = {
+    "ARMANDO": "ARMAND",
+}
+
+# Single per-token rewrite table applied during matching normalization.
+_TOKEN_ALIASES = {**_ABBREVIATIONS, **_GIVEN_NAME_ALIASES}
+
 
 def _strip_accents(value: str) -> str:
     nfkd = unicodedata.normalize("NFD", value)
@@ -37,7 +48,7 @@ def normalize_for_matching(name: str) -> str:
     tokens = [t for t in text.split() if t]
     while tokens and tokens[0] in _GREETING_PREFIXES:
         tokens.pop(0)
-    expanded = [_ABBREVIATIONS.get(tok, tok) for tok in tokens]
+    expanded = [_TOKEN_ALIASES.get(tok, tok) for tok in tokens]
     return " ".join(expanded)
 
 

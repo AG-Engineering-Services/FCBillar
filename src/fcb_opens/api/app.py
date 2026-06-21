@@ -819,6 +819,24 @@ def register_routes(app: FastAPI) -> None:
             (ranking_row["id"],),
         ).fetchall()
         ranking_by_name: dict[str, dict] = {row["normalized_name"]: dict(row) for row in rows}
+        # Secondary, alias-aware index for cross-source name variants the exact
+        # normalized form misses — e.g. the surname abbreviation HDEZ vs
+        # HERNANDEZ, or the given-name variant ARMAND vs ARMANDO. The monthly
+        # ranking and the live tournament page are both FCB but spell some
+        # names differently; normalize_for_matching strips punctuation and
+        # applies the known token aliases so these collapse to one key. Keys
+        # that two distinct ranking entries would share are dropped, so we
+        # never guess a position when the alias form is ambiguous.
+        ranking_by_match: dict[str, dict] = {}
+        ambiguous_match_keys: set[str] = set()
+        for row in rows:
+            mkey = normalize_for_matching(row["normalized_name"])
+            if mkey in ranking_by_match:
+                ambiguous_match_keys.add(mkey)
+            else:
+                ranking_by_match[mkey] = dict(row)
+        for mkey in ambiguous_match_keys:
+            ranking_by_match.pop(mkey, None)
 
         # Walk all group standings across all phases. A player advancing
         # through phases may appear in more than one (their finished PPP
@@ -833,6 +851,8 @@ def register_routes(app: FastAPI) -> None:
                 for s in group.standings:
                     key = normalize_name(s.player_name)
                     match = ranking_by_name.get(key)
+                    if match is None:
+                        match = ranking_by_match.get(normalize_for_matching(s.player_name))
                     fcb_pos = match["position"] if match else None
                     fcb_def = bool(match["is_definitive"]) if match else False
                     latest_by_player[key] = RankingBandEntry(
