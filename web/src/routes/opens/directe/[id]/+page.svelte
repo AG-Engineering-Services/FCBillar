@@ -39,6 +39,94 @@
 			.sort((a, b) => a.rows[0].position - b.rows[0].position);
 	});
 
+
+	// --- Premis per banda de rànquing 3B (recàlcul al navegador) ----------------
+	// El payload porta rank3b/prize precalculats amb el DARRER rànquing publicat,
+	// però el premi s'ha de calcular amb el rànquing vigent EN EL MOMENT DE LA
+	// CONVOCATÒRIA (sovint no és el darrer). L'usuari tria quina seqüència del
+	// rànquing de TRES BANDES (modalitat_codi=1) s'aplica i ho recalculem aquí,
+	// sense dependre de cap republicació. Només per a opens de 3 bandes.
+	const CA_MONTHS = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
+	const is3b = $derived(/TRES\s*BANDES|3\s*BANDES|\b3B\b/i.test(payload?.name ?? ''));
+	
+	type RankSeq = { num_seq: number; any_pub: number | null; mes_pub: number | null };
+	let rankSeqs = $state<RankSeq[]>([]);
+	let selectedSeq = $state<number | null>(null);
+	let posByFcbId = $state<Map<string, number>>(new Map());
+	
+	const seqLabel = (s: RankSeq) =>
+		s.mes_pub && s.any_pub ? `${CA_MONTHS[(s.mes_pub - 1) % 12]} ${s.any_pub}` : `#${s.num_seq}`;
+	const seqKey = (div: number) => `fcb_open_prize_seq_${div}`;
+	
+	async function loadRankSeqs() {
+		const { data } = await supabase
+			.from('rankings')
+			.select('num_seq, any_pub, mes_pub')
+			.eq('modalitat_codi', 1)
+			.order('num_seq', { ascending: false });
+		rankSeqs = (data ?? []) as RankSeq[];
+		if (selectedSeq === null && rankSeqs.length) {
+			let stored: number | null = null;
+			try {
+				const raw = localStorage.getItem(seqKey(divisionId));
+				if (raw != null) stored = Number(raw);
+			} catch { /* ignore */ }
+			selectedSeq =
+				stored != null && rankSeqs.some((s) => s.num_seq === stored) ? stored : rankSeqs[0].num_seq;
+		}
+	}
+	
+	async function loadRankEntries(seq: number) {
+		const { data } = await supabase
+			.from('ranking_entries')
+			.select('player_fcb_id, posicio')
+			.eq('modalitat_codi', 1)
+			.eq('num_seq', seq);
+		const m = new Map<string, number>();
+		for (const r of (data ?? []) as { player_fcb_id: string | null; posicio: number | null }[]) {
+			if (r.player_fcb_id != null && r.posicio != null) m.set(String(r.player_fcb_id), Number(r.posicio));
+		}
+		posByFcbId = m;
+	}
+	
+	function onSelectSeq(seq: number) {
+		selectedSeq = seq;
+		try { localStorage.setItem(seqKey(divisionId), String(seq)); } catch { /* ignore */ }
+		loadRankEntries(seq);
+	}
+	
+	// rank3b + premi per banda recalculats per a la seqüència triada (per jugador).
+	// Reprodueix la lògica del publicador (cloud_sync._enrich_live_payload): millor
+	// classificat (posició més petita) de la banda 61-180 i de la 181+/sense rànquing.
+	const prizeByPlayer = $derived.by(() => {
+		const out = new Map<string, { rank3b?: number; prize?: string }>();
+		if (!is3b || posByFcbId.size === 0) return out;
+		const ids = payload?.player_ids ?? {};
+		let bestA: { pos: number; name: string } | null = null;
+		let bestB: { pos: number; name: string } | null = null;
+		for (const r of payload?.classification ?? []) {
+			const fid = ids[r.player_name];
+			const pos3b = fid != null ? posByFcbId.get(String(fid)) : undefined;
+			const entry: { rank3b?: number; prize?: string } = {};
+			if (pos3b != null) entry.rank3b = pos3b;
+			out.set(r.player_name, entry);
+			if (typeof r.position !== 'number') continue;
+			if (pos3b != null && pos3b >= 61 && pos3b <= 180) {
+				if (bestA === null || r.position < bestA.pos) bestA = { pos: r.position, name: r.player_name };
+			} else if (pos3b == null || pos3b >= 181) {
+				if (bestB === null || r.position < bestB.pos) bestB = { pos: r.position, name: r.player_name };
+			}
+		}
+		if (bestA) out.get(bestA.name)!.prize = 'Millor 61-180';
+		if (bestB) out.get(bestB.name)!.prize = 'Millor 181+';
+		return out;
+	});
+	
+	// Valors a mostrar: recalculats si tenim rànquing triat, si no els del payload.
+	function effClass(r: OpenLiveClassRow): { rank3b?: number; prize?: string } {
+		return is3b && posByFcbId.size ? (prizeByPlayer.get(r.player_name) ?? {}) : { rank3b: r.rank3b, prize: r.prize };
+	}
+
 	// Millor sèrie major del torneig (màxim de totes les partides jugades).
 	const bestSerie = $derived.by(() => {
 		// Premi de millor sèrie: NOMÉS per als jugadors que NO queden entre els 8
@@ -152,6 +240,12 @@
 				const ph = row.payload_json.phases ?? [];
 				const firstIncomplete = ph.findIndex((p) => phaseStatus(p) !== 'done');
 				selectedPhase = firstIncomplete >= 0 ? firstIncomplete : Math.max(0, ph.length - 1);
+			}
+			// Premis 3B: carrega les seqüències del rànquing i les posicions del mes triat.
+			const nm3b = (row.payload_json?.name ?? '').toUpperCase();
+			if (/TRES\s*BANDES|3\s*BANDES|3B/.test(nm3b)) {
+				if (!rankSeqs.length) await loadRankSeqs();
+				if (selectedSeq != null && posByFcbId.size === 0) await loadRankEntries(selectedSeq);
 			}
 		}
 		// Marcadors en viu (OCR) — no bloqueja; es refresca a cada poll.
@@ -550,6 +644,22 @@
 			<h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Classificació provisional</h2>
 			<p class="mt-0.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">A dalt, els jugadors encara EN JOC: primer els caps de sèrie (reservats) pel rànquing d'opens, després els classificats de la prèvia per ordre de classificació. A sota, els ja eliminats per la ronda on cauen. Tot és provisional (*) fins a la classificació definitiva.</p>
 		</div>
+		{#if is3b && rankSeqs.length}
+			<div class="mb-2 flex flex-wrap items-center gap-2 text-[11px]">
+				<label for="prize-seq" class="font-medium text-slate-600 dark:text-slate-300">Rànquing premis:</label>
+				<select
+					id="prize-seq"
+					class="rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-[11px]"
+					bind:value={selectedSeq}
+					onchange={() => { if (selectedSeq != null) onSelectSeq(selectedSeq); }}
+				>
+					{#each rankSeqs as s, i (s.num_seq)}
+						<option value={s.num_seq}>{seqLabel(s)}{i === 0 ? ' · darrer' : ''}</option>
+					{/each}
+				</select>
+				<span class="text-slate-400 dark:text-slate-500">premis per banda recalculats al navegador segons el rànquing de la convocatòria</span>
+			</div>
+		{/if}
 		<div class="space-y-3">
 			{#each classByRound as tier (tier.round)}
 				{@const alive = tier.round === 'EN JOC'}
@@ -563,13 +673,14 @@
 					</div>
 					<ol class="space-y-0.5">
 						{#each tier.rows as r (r.player_name)}
+							{@const ec = effClass(r)}
 							<li class="flex items-center gap-2 text-sm">
 								<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{r.position}{#if r.is_provisional_position}<span class="text-amber-500" title="Posició provisional">*</span>{/if}</span>
 								<span class="flex min-w-0 flex-1 items-baseline gap-1 truncate">
 									{@render player(r.player_name, (!alive && r.position <= 8 ? 'font-semibold ' : '') + 'truncate')}
-									{#if r.rank3b}<span class="shrink-0 font-mono text-[10px] text-slate-400 dark:text-slate-500" title="Posició al rànquing de 3 bandes">({r.rank3b})</span>{/if}
+									{#if ec.rank3b}<span class="shrink-0 font-mono text-[10px] text-slate-400 dark:text-slate-500" title="Posició al rànquing de 3 bandes">({ec.rank3b})</span>{/if}
 								</span>
-								{#if r.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial (opens 3 bandes): millor classificat de la seva banda del rànquing">{r.prize}</span>{/if}
+								{#if ec.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial (opens 3 bandes): millor classificat de la seva banda del rànquing">{ec.prize}</span>{/if}
 								{#if !alive && r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
 								<span class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline">{r.mitjana ? r.mitjana.toFixed(3) : '—'}</span>
 								<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title={alive ? 'Punts pendents: encara en competició' : 'Punts de rànquing segons el lloc (reglament dels opens)'}>{alive ? '—' : r.open_points}</span>
