@@ -150,7 +150,11 @@ def _cps(s):
     return " ".join(f"U+{ord(c):04X}" for c in s if isinstance(s, str) and ord(c) > 127)
 
 
-def main(apply: bool) -> None:
+def main(apply: bool) -> int:
+    """Retorna un codi de sortida: 0 = net / tot reparat, 2 = queda corrupció.
+
+    Pensat per fer de porta al cron setmanal: en mode escaneig (sense --apply)
+    surt amb 2 si troba mojibake, perquè el pas quedi marcat com a FALLAT al log."""
     base = _client()
 
     grand_corrupt = 0
