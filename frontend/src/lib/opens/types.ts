@@ -320,6 +320,7 @@ export interface RankingBandResponse {
 	division_id: number;
 	open_name: string;
 	month_id: number;
+	month_is_saved: boolean;
 	fetched_at: string;
 	band_61_180: RankingBandEntry[];
 	band_181_plus: RankingBandEntry[];

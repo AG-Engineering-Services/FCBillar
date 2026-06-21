@@ -7,7 +7,8 @@
 		LivePhase,
 		LiveMatch,
 		OpenDocument,
-		RankingBandResponse
+		RankingBandResponse,
+		MonthlyRankingSummary
 	} from '$lib/opens/types';
 
 	let liveData = $state<LiveOpenResponse | null>(null);
@@ -158,13 +159,49 @@
 	let bandLoading = $state(false);
 	let bandError = $state<string | null>(null);
 
-	async function loadBands() {
+	// Prize-ranking selector. The prizes of an Open are decided by each
+	// player's FCB Tres Bandes position *at the moment of the convocatòria*,
+	// which is not always the latest published ranking. The user picks which
+	// monthly ranking applies; the choice is persisted per Open and the bands
+	// recompute automatically.
+	let rankings = $state<MonthlyRankingSummary[]>([]);
+	let selectedMonthId = $state<number | null>(null);
+
+	// Catalan calendar label for an FCB ranking month_id. Anchor:
+	// month_id 120 = March 2026 (see src/fcb_opens/scraper/ranking.py); the
+	// FCB publishes one per month, monotonically increasing.
+	const CA_MONTHS = [
+		'Gener', 'Febrer', 'Març', 'Abril', 'Maig', 'Juny',
+		'Juliol', 'Agost', 'Setembre', 'Octubre', 'Novembre', 'Desembre'
+	];
+	function monthLabel(monthId: number): string {
+		const abs = 2026 * 12 + 2 + (monthId - 120); // 2 = March (0-based)
+		const year = Math.floor(abs / 12);
+		const month = ((abs % 12) + 12) % 12;
+		return `${CA_MONTHS[month]} ${year}`;
+	}
+
+	async function ensureRankings() {
+		if (rankings.length) return;
+		try {
+			rankings = await api.listMonthlyRankings();
+		} catch {
+			// best-effort: without the list the selector falls back to a label
+		}
+	}
+
+	async function loadBands(monthId?: number | null) {
 		const id = Number($page.params.divisionId);
 		if (!Number.isFinite(id)) return;
 		bandLoading = true;
 		bandError = null;
 		try {
-			bandData = await api.getLiveOpenByRankingBand(id);
+			bandData = await api.getLiveOpenByRankingBand(
+				id,
+				monthId != null ? { monthId } : undefined
+			);
+			// Sync the selector to whatever the backend resolved (saved or latest).
+			selectedMonthId = bandData.month_id;
 		} catch (e: any) {
 			bandError = e.message;
 		} finally {
@@ -172,9 +209,25 @@
 		}
 	}
 
+	// User picked a ranking: persist it for this Open and recompute the bands.
+	async function onSelectRanking(monthId: number) {
+		const id = Number($page.params.divisionId);
+		if (!Number.isFinite(id)) return;
+		selectedMonthId = monthId;
+		try {
+			await api.setPrizeRanking(id, monthId);
+		} catch {
+			// even if persisting fails, still show the recomputed view
+		}
+		await loadBands(monthId);
+	}
+
 	function toggleBands() {
 		showBands = !showBands;
-		if (showBands && bandData === null && !bandLoading) loadBands();
+		if (showBands) {
+			ensureRankings();
+			if (bandData === null && !bandLoading) loadBands();
+		}
 	}
 
 	$effect(() => {
@@ -386,9 +439,40 @@
 			{:else if bandError}
 				<p class="mt-3 text-sm text-red-700">{bandError}</p>
 			{:else if bandData}
-				<p class="mt-2 text-xs text-slate-500">
-					Posició a partir del rànquing FCB <span class="font-mono">#{bandData.month_id}</span>
-					{#if bandLoading}<span class="ml-2 italic">actualitzant…</span>{/if}
+				<div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+					<label for="prize-ranking" class="font-medium">Rànquing aplicable (premis):</label>
+					{#if rankings.length}
+						<select
+							id="prize-ranking"
+							class="rounded border border-slate-300 bg-white px-2 py-1 text-xs"
+							bind:value={selectedMonthId}
+							onchange={() => {
+								if (selectedMonthId != null) onSelectRanking(selectedMonthId);
+							}}
+						>
+							{#each rankings as r, i (r.month_id)}
+								<option value={r.month_id}>
+									{monthLabel(r.month_id)} (#{r.month_id}){i === 0 ? ' · darrer' : ''}
+								</option>
+							{/each}
+						</select>
+					{:else}
+						<span class="font-mono">{monthLabel(bandData.month_id)} (#{bandData.month_id})</span>
+					{/if}
+					{#if bandData.month_is_saved}
+						<span
+							class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700"
+							title="Triat manualment per a aquest open"
+						>
+							fixat
+						</span>
+					{:else}
+						<span class="text-[11px] italic text-slate-400">(per defecte: darrer publicat)</span>
+					{/if}
+					{#if bandLoading}<span class="italic">actualitzant…</span>{/if}
+				</div>
+				<p class="mt-1 text-[11px] text-slate-400">
+					Posició al rànquing FCB Tres Bandes en el moment de la convocatòria.
 				</p>
 				<div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
 					{#each [{ title: 'Banda 61-180', entries: bandData.band_61_180 }, { title: 'Banda 181 → fi', entries: bandData.band_181_plus }] as band}

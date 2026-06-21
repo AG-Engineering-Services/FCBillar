@@ -429,6 +429,7 @@ class RankingBandResponse(BaseModel):
     division_id: int
     open_name: str
     month_id: int
+    month_is_saved: bool  # True when month_id came from a pinned per-Open choice
     fetched_at: str  # ISO-8601, same instant as the live fetch
     band_61_180: list[RankingBandEntry]
     band_181_plus: list[RankingBandEntry]

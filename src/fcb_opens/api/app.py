@@ -762,8 +762,15 @@ def register_routes(app: FastAPI) -> None:
 
         For each player currently visible in the Open's group standings,
         look up their position in the FCB monthly ranking at `month_id`
-        (defaults to the latest stored ranking — the snapshot in force at
-        the moment of convocatòria for ongoing Opens) and bucket them:
+        and bucket them. Resolution order for which ranking to use:
+
+          1. an explicit `month_id` query param (the user picking from the
+             selector), else
+          2. the ranking pinned for this Open via the prize-ranking save
+             endpoint (the convocatòria-time ranking), else
+          3. the latest stored ranking.
+
+        Buckets:
 
           * band_61_180   — FCB positions 61..180
           * band_181_plus — FCB positions ≥ 181
@@ -780,14 +787,19 @@ def register_routes(app: FastAPI) -> None:
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(502, detail=f"FCB fetch failed: {exc}") from exc
 
-        # Resolve the convocatòria-time monthly ranking (default: latest).
-        if month_id is not None:
+        # Resolve which monthly ranking to use (see resolution order above).
+        # The pinned per-Open choice is the convocatòria-time ranking.
+        saved_month_id = db.get_prize_ranking_month_id(conn, division_id)
+        effective_month_id = month_id if month_id is not None else saved_month_id
+        if effective_month_id is not None:
             ranking_row = conn.execute(
                 "SELECT id, month_id FROM monthly_rankings WHERE month_id = ?",
-                (month_id,),
+                (effective_month_id,),
             ).fetchone()
             if ranking_row is None:
-                raise HTTPException(404, detail=f"No monthly ranking for month_id={month_id}")
+                raise HTTPException(
+                    404, detail=f"No monthly ranking for month_id={effective_month_id}"
+                )
         else:
             ranking_row = conn.execute(
                 "SELECT id, month_id FROM monthly_rankings ORDER BY month_id DESC LIMIT 1"
@@ -796,6 +808,7 @@ def register_routes(app: FastAPI) -> None:
                 raise HTTPException(404, detail="No monthly ranking stored in the DB yet")
 
         resolved_month_id = ranking_row["month_id"]
+        month_is_saved = saved_month_id is not None and saved_month_id == resolved_month_id
         rows = conn.execute(
             """
             SELECT p.normalized_name, mre.position, mre.is_definitive
@@ -858,11 +871,50 @@ def register_routes(app: FastAPI) -> None:
             division_id=state.structure.division_id,
             open_name=state.structure.name,
             month_id=resolved_month_id,
+            month_is_saved=month_is_saved,
             fetched_at=datetime.now(timezone.utc).isoformat(),
             band_61_180=band_61_180,
             band_181_plus=band_181_plus,
             unranked=unranked,
         )
+
+    @app.put("/api/opens/live/{division_id}/prize-ranking")
+    def set_open_prize_ranking(
+        division_id: int,
+        month_id: int,
+        conn: sqlite3.Connection = Depends(get_connection),
+    ):
+        """Pin the monthly ranking used for this Open's prize bands.
+
+        The prizes of an Open are decided by each player's FCB Tres Bandes
+        position at the moment of the convocatòria — not necessarily the
+        latest published ranking. The by-ranking-band view honours this
+        choice (see resolution order there). `month_id=0` clears it.
+        """
+        from datetime import datetime, timezone
+
+        if month_id == 0:
+            conn.execute(
+                "DELETE FROM open_prize_ranking WHERE fcb_division_id = ?",
+                (division_id,),
+            )
+            conn.commit()
+            return {"ok": True, "division_id": division_id, "month_id": None}
+
+        exists = conn.execute(
+            "SELECT 1 FROM monthly_rankings WHERE month_id = ?", (month_id,)
+        ).fetchone()
+        if exists is None:
+            raise HTTPException(404, detail=f"No monthly ranking for month_id={month_id}")
+
+        db.set_prize_ranking_month_id(
+            conn,
+            fcb_division_id=division_id,
+            month_id=month_id,
+            updated_at=datetime.now(timezone.utc).isoformat(),
+        )
+        conn.commit()
+        return {"ok": True, "division_id": division_id, "month_id": month_id}
 
     @app.get("/api/opens/docs/{doc_id}/pdf")
     def get_doc_pdf(doc_id: int, force: bool = False):

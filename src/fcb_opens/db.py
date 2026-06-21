@@ -95,6 +95,20 @@ CREATE INDEX IF NOT EXISTS idx_ols_div_time
     ON open_live_snapshots(fcb_division_id, captured_at);
 
 -- --------------------------------------------------------------------- --
+-- Prize-ranking selection per Open. The prizes of an Open are decided by
+-- each player's FCB Tres Bandes ranking position *at the moment of the
+-- convocatòria* — which is not necessarily the latest published ranking.
+-- This table pins, per live division, which monthly ranking (month_id)
+-- must be used for the by-ranking-band (prize) view. When absent, the
+-- view falls back to the latest stored ranking.
+-- --------------------------------------------------------------------- --
+CREATE TABLE IF NOT EXISTS open_prize_ranking (
+    fcb_division_id   INTEGER PRIMARY KEY,
+    month_id          INTEGER NOT NULL,
+    updated_at        TEXT NOT NULL
+);
+
+-- --------------------------------------------------------------------- --
 -- Open projections: the *provisional* bracket computed from the official
 -- inscrits-per-clubs PDF (seeding via Art. XVIII + the group generator,
 -- Art. VIII-IX), built before the federation publishes the real groups.
@@ -554,6 +568,41 @@ def list_live_snapshots(
         LIMIT ?
         """,
         (fcb_division_id, limit),
+    )
+
+
+def get_prize_ranking_month_id(
+    conn: sqlite3.Connection,
+    fcb_division_id: int,
+) -> int | None:
+    """Return the monthly ranking (month_id) pinned for an Open's prizes.
+
+    `None` means no explicit choice was saved — callers should fall back
+    to the latest stored ranking.
+    """
+    row = conn.execute(
+        "SELECT month_id FROM open_prize_ranking WHERE fcb_division_id = ?",
+        (fcb_division_id,),
+    ).fetchone()
+    return int(row["month_id"]) if row is not None else None
+
+
+def set_prize_ranking_month_id(
+    conn: sqlite3.Connection,
+    fcb_division_id: int,
+    month_id: int,
+    updated_at: str,
+) -> None:
+    """Pin (or repin) the monthly ranking used for an Open's prize bands."""
+    conn.execute(
+        """
+        INSERT INTO open_prize_ranking (fcb_division_id, month_id, updated_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(fcb_division_id) DO UPDATE SET
+            month_id = excluded.month_id,
+            updated_at = excluded.updated_at
+        """,
+        (fcb_division_id, month_id, updated_at),
     )
 
 

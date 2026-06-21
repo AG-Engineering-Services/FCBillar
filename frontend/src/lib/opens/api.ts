@@ -147,6 +147,15 @@ export const api = {
 		);
 	},
 
+	// Pin the monthly ranking used for an Open's prize bands (convocatòria-time
+	// ranking). `monthId = 0` clears the choice (falls back to latest).
+	setPrizeRanking: (divisionId: number, monthId: number, fetchFn?: typeof fetch) =>
+		request<{ ok: boolean; division_id: number; month_id: number | null }>(
+			`/opens/live/${divisionId}/prize-ranking?month_id=${monthId}`,
+			{ method: 'PUT' },
+			fetchFn
+		),
+
 	listOpensDocs: (fetchFn?: typeof fetch) =>
 		request<OpenDocument[]>('/opens/docs', {}, fetchFn),
 
