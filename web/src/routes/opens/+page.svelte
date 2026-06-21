@@ -5,7 +5,7 @@
 	let opens = $state<Open[]>([]);
 	let liveOpens = $state<OpenLiveRow[]>([]);
 	let ranking = $state<any[]>([]);
-	let ronda = $state<number | null>(null);
+	let ronda = $state<number | 'calc' | null>(null);
 	let q = $state('');
 	let cat = $state<'opens' | 'ranking'>('opens');
 	let season = $state<string | null>(null);
@@ -20,35 +20,33 @@
 	});
 
 	let expandedPlayer = $state<string | null>(null);
-	const genRanking = $derived(ranking.filter((r) => r.genere === 'general'));
-	const rondes = $derived([...new Set(genRanking.map((r) => r.ronda as number))].sort((a, b) => a - b));
-	$effect(() => {
-		if (ronda == null && rondes.length) ronda = rondes[rondes.length - 1];
-	});
-	const rondaRows = $derived(genRanking.filter((r) => r.ronda === ronda).sort((a, b) => a.posicio - b.posicio));
-	const rondaInfo = $derived(genRanking.find((r) => r.ronda === ronda));
-	function stepRonda(d: number) {
-		const i = rondes.indexOf(ronda as number);
-		ronda = rondes[Math.min(rondes.length - 1, Math.max(0, i + d))];
-	}
 
 	function norm(s: string): string {
 		return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 	}
 
+	const genRanking = $derived(ranking.filter((r) => r.genere === 'general'));
+	const rondes = $derived([...new Set(genRanking.map((r) => r.ronda as number))].sort((a, b) => a - b));
+
 	// --- Rànquing d'opens CALCULAT (open en curs) -----------------------------
-	// Si un dels 5 opens de la finestra vigent encara s'està jugant, el rànquing
-	// publicat el deixa a 0 per a tothom (encara no té classificació definitiva):
-	// «corren els opens però no els punts». Aquí, a la ronda vigent, li omplim els
-	// punts amb la classificació PROVISIONAL en directe (open_live). Això
-	// substitueix de facto l'open més antic de la finestra per l'open en curs i hi
-	// afegeix els jugadors que NOMÉS disputen aquest. Els qui no el disputen es
-	// queden a 0 en aquell open. Marcat com a «calculat · subjecte a errors».
-	const maxRonda = $derived(rondes.length ? rondes[rondes.length - 1] : null);
+	// Quan un open de 3 bandes s'està jugant, la finestra publicada ja l'inclou
+	// però sense classificació definitiva, i el pas del PDF oficial la desalinea
+	// (el PDF encara llista la finestra anterior amb el mateix nombre d'opens →
+	// «corren els opens però no els punts»). Per això NO fem servir la ronda
+	// publicada amb l'open en curs: en construïm una de CALCULADA a partir de la
+	// darrera ronda NETA (sense l'open en curs), deixant-hi els 4 opens acabats
+	// més recents i afegint-hi l'open en curs amb els punts de la classificació
+	// provisional EN DIRECTE (open_live). Marcat «calculat · subjecte a errors».
+	function is3BLive(name: string): boolean {
+		const u = norm(name);
+		if (u.includes('femeni')) return false;
+		return /tres ?bandes|3 ?bandes|\b3b\b/.test(u);
+	}
+	const liveCD = $derived(liveOpens.find((o) => is3BLive(o.name)) ?? null);
 
 	// {fcb_id -> {pts, pos, nom, club}} d'un open en directe. `open_points` ja ve
-	// calculat al payload per a TOTHOM: eliminats per la posició final, i encara en
-	// joc per la posició provisional al quadre (open_live.py:_alive_classification_rows).
+	// calculat al payload per a TOTHOM (eliminats per posició final, encara en joc
+	// per la posició provisional; open_live.py:_alive_classification_rows).
 	function provPointsFromLive(r: OpenLiveRow) {
 		const ids = r.payload_json?.player_ids ?? {};
 		const m = new Map<string, { pts: number; pos: number; nom: string; club: string }>();
@@ -62,72 +60,88 @@
 		return m;
 	}
 
-	const overlay = $derived.by(() => {
-		if (ronda == null || ronda !== maxRonda) return null;
-		const base = rondaRows;
-		if (!base.length || !liveOpens.length) return null;
-		// Un slot de la finestra és «en curs» si TOTHOM hi té 0 (sense classificació
-		// publicada) i hi ha un open_live amb el mateix nom. Així no trepitgem mai
-		// un open ja acabat encara que en quedi una fila live obsoleta.
-		type Slot = { open: string; live: ReturnType<typeof provPointsFromLive> } | null;
-		const slots: Slot[] = (base[0].detall ?? []).map((d: any, i: number): Slot => {
-			const allZero = base.every((r: any) => !(((r.detall?.[i]?.punts) ?? 0) > 0));
-			if (!allZero) return null;
-			const lo = liveOpens.find((o) => norm(o.name) === norm(d.open ?? ''));
-			return lo ? { open: d.open as string, live: provPointsFromLive(lo) } : null;
-		});
-		if (!slots.some(Boolean)) return null;
+	// Noms (normalitzats) dels opens de la finestra de cada ronda.
+	const rondaOpens = $derived.by(() => {
+		const m = new Map<number, string[]>();
+		for (const r of genRanking)
+			if (!m.has(r.ronda)) m.set(r.ronda, (r.detall ?? []).map((d: any) => norm(d.open ?? '')));
+		return m;
+	});
+	const cdNorm = $derived(liveCD ? norm(liveCD.name) : null);
+	// Rondes "netes": les que NO contenen l'open en curs (la que el conté ve
+	// desalineada pel PDF oficial i no l'usem).
+	const cleanRondes = $derived(
+		cdNorm ? rondes.filter((rn) => !(rondaOpens.get(rn) ?? []).includes(cdNorm)) : rondes
+	);
+	// Posicions de l'slider: rondes netes + (si hi ha open en curs) la calculada.
+	const positions = $derived<(number | 'calc')[]>(liveCD ? [...cleanRondes, 'calc'] : rondes);
+	$effect(() => {
+		if (!positions.length) return;
+		if (ronda == null || !positions.includes(ronda as number | 'calc'))
+			ronda = positions[positions.length - 1];
+	});
+	const isCalc = $derived(ronda === 'calc');
 
+	// Files de la ronda CALCULADA.
+	const calcRows = $derived.by(() => {
+		if (!liveCD || !cleanRondes.length) return [];
+		const baseRonda = cleanRondes[cleanRondes.length - 1];
+		const baseRows = genRanking
+			.filter((r) => r.ronda === baseRonda)
+			.sort((a, b) => a.posicio - b.posicio);
+		if (!baseRows.length) return [];
+		const L = (baseRows[0].detall ?? []).length;
+		const keepStart = Math.max(0, L - 4); // els 4 opens acabats més recents
+		const template = (baseRows[0].detall ?? []).slice(keepStart);
+		const temp = baseRows[0].ronda_temp;
+		const cdPts = provPointsFromLive(liveCD);
+		const cdSlot = (pos: number | null, punts: number) => ({
+			open: liveCD.name, temp, data: null, pos, punts, prov: true
+		});
 		const present = new Set<string>();
-		const rows: any[] = base.map((r) => {
-			const det = (r.detall ?? []).map((d: any) => ({ ...d }));
+		const rows: any[] = baseRows.map((r) => {
+			const kept = (r.detall ?? []).slice(keepStart).map((d: any) => ({ ...d }));
+			const cp = cdPts.get(r.player_fcb_id);
+			const det = [...kept, cdSlot(cp ? cp.pos : null, cp ? cp.pts : 0)];
 			let total = 0, njug = 0, maxs = 0;
-			det.forEach((d: any, i: number) => {
-				const s = slots[i];
-				if (s) {
-					const p = s.live.get(r.player_fcb_id);
-					if (p) { d.pos = p.pos; d.punts = p.pts; d.prov = true; }
-					else { d.pos = null; d.punts = 0; d.prov = false; }
-				}
-				const pts = d.punts || 0;
-				if (pts > 0) njug++;
-				total += pts;
-				maxs = Math.max(maxs, pts);
-			});
+			for (const d of det) { const p = d.punts || 0; if (p > 0) njug++; total += p; maxs = Math.max(maxs, p); }
 			present.add(r.player_fcb_id);
-			return { ...r, detall: det, punts: total, opens_jugats: njug, _max: maxs };
+			return { ...r, ronda: 'calc', detall: det, punts: total, opens_jugats: njug, _max: maxs };
 		});
-
-		// Jugadors que NOMÉS disputen l'open en curs (no surten a cap dels acabats).
-		slots.forEach((s, i) => {
-			if (!s) return;
-			for (const [fid, p] of s.live) {
-				if (present.has(fid)) continue;
-				present.add(fid);
-				const det = (base[0].detall ?? []).map((d: any, j: number) =>
-					j === i
-						? { open: d.open, temp: d.temp, data: d.data ?? null, pos: p.pos, punts: p.pts, prov: true }
-						: { open: d.open, temp: d.temp, data: d.data ?? null, pos: null, punts: 0 }
-				);
-				rows.push({
-					genere: 'general', ronda, ronda_nom: base[0].ronda_nom, ronda_temp: base[0].ronda_temp,
-					posicio: 0, player_fcb_id: fid, jugador: p.nom, club: p.club,
-					opens_jugats: 1, punts: p.pts, detall: det, _max: p.pts
-				});
-			}
-		});
-
-		rows.sort(
-			(a, b) =>
-				b.punts - a.punts ||
-				(b._max ?? 0) - (a._max ?? 0) ||
-				(a.jugador || '').localeCompare(b.jugador || '')
-		);
-		rows.forEach((r, i) => (r.posicio = i + 1));
-		return { rows, liveName: slots.find(Boolean)?.open ?? '' };
+		// Jugadors que NOMÉS disputen l'open en curs.
+		for (const [fid, p] of cdPts) {
+			if (present.has(fid)) continue;
+			const det = [
+				...template.map((d: any) => ({ open: d.open, temp: d.temp, data: d.data ?? null, pos: null, punts: 0 })),
+				cdSlot(p.pos, p.pts)
+			];
+			rows.push({
+				genere: 'general', ronda: 'calc', ronda_nom: liveCD.name, ronda_temp: temp,
+				player_fcb_id: fid, jugador: p.nom, club: p.club,
+				opens_jugats: p.pts > 0 ? 1 : 0, punts: p.pts, detall: det, _max: p.pts
+			});
+		}
+		return rows
+			.filter((r) => r.punts > 0)
+			.sort(
+				(a, b) =>
+					b.punts - a.punts ||
+					(b._max ?? 0) - (a._max ?? 0) ||
+					(a.jugador || '').localeCompare(b.jugador || '')
+			)
+			.map((r, i) => ({ ...r, posicio: i + 1 }));
 	});
 
-	const displayRows = $derived(overlay ? overlay.rows : rondaRows);
+	const rondaRows = $derived(
+		isCalc ? calcRows : genRanking.filter((r) => r.ronda === ronda).sort((a, b) => a.posicio - b.posicio)
+	);
+	const rondaInfo = $derived(isCalc ? null : genRanking.find((r) => r.ronda === ronda));
+	function stepRonda(d: number) {
+		const i = positions.indexOf(ronda as number | 'calc');
+		if (i < 0) return;
+		ronda = positions[Math.min(positions.length - 1, Math.max(0, i + d))];
+	}
+
 	// Tipus de torneig: prioritza el camp publicat; fallback a la regla compartida
 	// (tipusOf de $lib/supabase, mirall de fcbillar.torneig_naming).
 	const clean = (nom: string) => nom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim();
@@ -254,22 +268,22 @@
 	{#if rondes.length === 0}
 		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense rànquing d'opens.</p>
 	{:else}
-		{#if overlay}
+		{#if isCalc}
 				<div class="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
 					<span class="mt-0.5 shrink-0">⚠</span>
 					<span>
-						Rànquing <strong>calculat</strong>, <strong>no oficial</strong>: inclou <strong>{overlay.liveName}</strong> en directe amb els punts de la classificació provisional (els qui encara juguen, segons l'ordre de la darrera fase acabada). Els qui no el disputen hi tenen 0. Pot contenir errors fins que l'open sigui definitiu.
+						Rànquing <strong>calculat</strong>, <strong>no oficial</strong>: inclou <strong>{liveCD?.name}</strong> en directe amb els punts de la classificació provisional (els qui encara juguen, segons l'ordre de la darrera fase acabada). Els qui no el disputen hi tenen 0. Pot contenir errors fins que l'open sigui definitiu.
 					</span>
 				</div>
 			{/if}
-			<div class="mb-3 flex items-center justify-between gap-2 rounded-lg {overlay ? 'bg-amber-600 dark:bg-amber-700' : 'bg-slate-900 dark:bg-slate-700'} px-2 py-2 text-white">
+			<div class="mb-3 flex items-center justify-between gap-2 rounded-lg {isCalc ? 'bg-amber-600 dark:bg-amber-700' : 'bg-slate-900 dark:bg-slate-700'} px-2 py-2 text-white">
 			<button onclick={() => stepRonda(-1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="anterior">‹</button>
 			<div class="min-w-0 text-center">
 				<div class="flex items-center justify-center gap-1.5 text-xs font-semibold">
-						<span class="truncate">Fins a {rondaInfo?.ronda_nom ?? ''}</span>
-						{#if overlay}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider">calculat</span>{/if}
+						<span class="truncate">Fins a {isCalc ? (liveCD?.name ?? '') : (rondaInfo?.ronda_nom ?? '')}</span>
+						{#if isCalc}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider">calculat</span>{/if}
 					</div>
-				<div class="text-[10px] {overlay ? 'text-amber-100' : 'text-slate-300 dark:text-slate-600'}">{rondaInfo?.ronda_temp ?? ''} · ronda {ronda}/{rondes.length}</div>
+				<div class="text-[10px] {isCalc ? 'text-amber-100' : 'text-slate-300 dark:text-slate-600'}">{isCalc ? 'en directe · calculat' : `${rondaInfo?.ronda_temp ?? ''} · ronda ${ronda}/${cleanRondes.length}`}</div>
 			</div>
 			<button onclick={() => stepRonda(1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="següent">›</button>
 		</div>
@@ -281,7 +295,7 @@
 				<span class="w-10 text-right">Punts</span>
 			</div>
 			<ul>
-				{#each displayRows.filter((r) => !q.trim() || norm(r.jugador ?? '').includes(norm(q.trim()))) as r (r.player_fcb_id)}
+				{#each rondaRows.filter((r) => !q.trim() || norm(r.jugador ?? '').includes(norm(q.trim()))) as r (r.player_fcb_id)}
 					<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
 						<div class="flex items-center gap-2 px-3 py-2">
 							<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
@@ -320,7 +334,7 @@
 				{/each}
 			</ul>
 		</div>
-		<p class="px-1 py-2 text-center text-[10px] text-slate-400 dark:text-slate-500">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII).{overlay ? ' La ronda vigent és calculada: inclou un open en curs amb punts provisionals.' : ''}</p>
+		<p class="px-1 py-2 text-center text-[10px] text-slate-400 dark:text-slate-500">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII).{isCalc ? ' Ronda CALCULADA: els 4 darrers opens acabats + l’open en curs amb punts provisionals en directe.' : ''}</p>
 	{/if}
 {:else if filtered.length === 0}
 	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap open.</p>
