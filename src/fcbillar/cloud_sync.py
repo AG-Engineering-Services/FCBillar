@@ -297,13 +297,25 @@ def publish_provisional_ranking(
         # IDs dels games que componen el rànquing OFICIAL vigent (per jugador): per
         # ressaltar "quins games computen" també als qui NO s'han mogut (autoritatiu,
         # de la federació via ranking_game_links).
+        #
+        # A més, el `rowid` d'aquests links == ordre de la pàgina `partideshome`
+        # de la federació (agrupada per competició; dins d'un mateix dia, en ordre
+        # de joc). Quan la finestra de 15 PARTEIX un dia, la federació conserva la
+        # partida llistada MÉS TARD (rowid més alt = jugada més tard = més recent)
+        # i en deixa fora l'anterior. Comprovat empíricament sobre 5 rànquings:
+        # 265/267 casos de partició coincideixen (les 2 excepcions són partides del
+        # mateix dia en competicions diferents, que la pròpia federació ordena de
+        # forma inconsistent). Guardem l'ordre per usar-lo com a desempat al sort.
         links_by_fcb: dict[str, list[str]] = {}
+        order_by_fcb: dict[str, dict[str, int]] = {}
         for lr in conn.execute(
-            """SELECT p.fcb_id f, l.game_id gid FROM ranking_game_links l
-               JOIN players p ON p.id = l.player_id_origen WHERE l.ranking_id = ?""",
+            """SELECT p.fcb_id f, l.game_id gid, l.rowid rid FROM ranking_game_links l
+               JOIN players p ON p.id = l.player_id_origen WHERE l.ranking_id = ?
+               ORDER BY l.rowid""",
             (rk["id"],),
         ):
             links_by_fcb.setdefault(lr["f"], []).append(lr["gid"])
+            order_by_fcb.setdefault(lr["f"], {})[lr["gid"]] = lr["rid"]
 
         import json as _json
 
@@ -330,7 +342,17 @@ def publish_provisional_ranking(
                                  "cur_gids": links_by_fcb.get(fcb) or None})
                 continue
             # Finestra de 15: pendents (les més recents) + les més recents de games.
-            recent = sorted(games_by.get(fcb, []), key=lambda x: x[0], reverse=True)
+            # Desempat intradia per ordre de la federació (vegeu order_by_fcb):
+            # mateixa data → rowid més alt primer, perquè la federació conserva la
+            # partida llistada més tard. Les partides fora del darrer rànquing
+            # oficial (més antigues, sempre sota el tall) reben -1 i queden al
+            # final del seu dia.
+            order = order_by_fcb.get(fcb, {})
+            recent = sorted(
+                games_by.get(fcb, []),
+                key=lambda x: (x[0], order.get(x[4], -1)),
+                reverse=True,
+            )
             recent_window = recent[: max(0, 15 - min(n_pending, 15))]
             car = ent = won = lost = tie = 0
 
@@ -1664,7 +1686,13 @@ def publish_open_ranking(
         )
         max_ronda = len(ordered)
         window = ordered[max(0, max_ronda - 5):max_ronda]
-        if max_ronda and len(off.opens) == len(window):  # alineació posicional segura
+        # El PDF oficial només llista opens ACABATS. Si la finestra vigent inclou un
+        # open EN CURS (encara sense participants), el PDF porta una finestra diferent
+        # amb el mateix nombre d'opens i l'alineació POSICIONAL desplaça les columnes
+        # (l'open en curs agafaria els punts del darrer del PDF, etc.). En aquest cas
+        # NO apliquem el PDF: deixem els punts base i l'open en curs a 0.
+        window_complete = all(parts.get(oid) for oid in window)
+        if window_complete and max_ronda and len(off.opens) == len(window):  # alineació posicional segura
             pdf = {_nm(e.display_name): (e.total_points, tuple(e.points_per_open)) for e in off.entries}
             for row in all_rows:
                 if row["ronda"] != max_ronda:
@@ -1690,6 +1718,8 @@ def publish_open_ranking(
             for posicio, r in enumerate(latest, start=1):
                 r["posicio"] = posicio
             prog("ok", f"penalitzacions oficials aplicades ({len(off.entries)} entrades PDF)")
+        elif not window_complete:
+            prog("ok", "penalitzacions: PDF no aplicat (la finestra vigent inclou un open en curs)")
     except Exception as exc:  # noqa: BLE001
         prog("warn", f"penalitzacions: PDF no aplicat ({exc})")
 
