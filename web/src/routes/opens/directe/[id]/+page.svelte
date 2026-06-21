@@ -505,7 +505,7 @@
 	<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 		<div class="mb-2">
 			<h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Classificació provisional</h2>
-			<p class="mt-0.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">A dalt, els jugadors encara EN JOC (llocs del quadre, ordre provisional pel rànquing inicial). A sota, els ja eliminats per la ronda on cauen. Tot és provisional (*) fins a la classificació definitiva.</p>
+			<p class="mt-0.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">A dalt, els jugadors encara EN JOC: primer els caps de sèrie (reservats) pel rànquing d'opens, després els classificats de la prèvia per ordre de classificació. A sota, els ja eliminats per la ronda on cauen. Tot és provisional (*) fins a la classificació definitiva.</p>
 		</div>
 		<div class="space-y-3">
 			{#each classByRound as tier (tier.round)}

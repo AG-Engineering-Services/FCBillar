@@ -386,6 +386,11 @@ class OpenLiveState:
     # mateix seeding que ordena els grups no jugats. L'usa la classificació per
     # ordenar el bloc de jugadors encara vius (els 16 primers llocs del quadre).
     seeding: dict[str, int] = field(default_factory=dict)
+    # Caps de sèrie (grup "JUGADORS RESERVATS"): entren directament al primer KO
+    # sense jugar la prèvia. Es guarden a part dels grups regulars perquè no
+    # comptin com a jugadors de la prèvia; ocupen els llocs 1..N de dalt del
+    # quadre, ordenats pel `seeding`.
+    reservats: tuple[GroupStanding, ...] = ()
 
 
 # --------------------------------------------------------------------------- #
@@ -501,7 +506,13 @@ def parse_fases_page(html: str) -> tuple[PhaseRef, ...]:
 _GROUP_LINK_RE = re.compile(
     r"/individuals/partidesgrups/\d+/\d+/\d+/(\d+)"
 )
-_GROUP_VENUE_RE = re.compile(r"(Grup [A-Z]+|RESERVATS)(?:\s*\|\s*Es juga a:\s*(.+))?", re.I)
+# El grup de caps de sèrie (jugadors reservats directament al primer KO) surt
+# etiquetat "JUGADORS RESERVATS" o, en altres opens, només "RESERVATS". Capturem
+# les dues formes i normalitzem l'etiqueta a "RESERVATS" (la resta del codi hi
+# compta amb `label.upper() == "RESERVATS"`).
+_GROUP_VENUE_RE = re.compile(
+    r"(Grup [A-Z]+|(?:JUGADORS\s+)?RESERVATS)(?:\s*\|\s*Es juga a:\s*(.+))?", re.I
+)
 
 
 def parse_grups_page(html: str) -> tuple[Group, ...]:
@@ -520,6 +531,8 @@ def parse_grups_page(html: str) -> tuple[Group, ...]:
         if not m:
             continue
         label = m.group(1)
+        if "RESERVAT" in label.upper():
+            label = "RESERVATS"  # normalitza "JUGADORS RESERVATS" → "RESERVATS"
         venue = m.group(2).strip() if m.group(2) else None
         groups.append(Group(label=label, url=_abs(href), venue=venue))
 
@@ -1147,6 +1160,52 @@ def compute_advancing_players(
     return tuple(out)
 
 
+def _seeded_first_ko_pool(
+    last_group_phase: PhaseDetail,
+    reservats: tuple[GroupStanding, ...],
+    seeding: dict[str, int],
+) -> tuple[AdvancingPlayer, ...]:
+    """Pool del PRIMER KO en ordre de SEEDING (1..N), pensat per a l'aparellament
+    piràmide 1-N, 2-(N-1), … de `_pair_pyramid`:
+
+      • PRIMER els RESERVATS (caps de sèrie que no juguen la prèvia), pel
+        RÀNQUING D'OPENS (`seeding`; 1 = millor, sense rànquing al final);
+      • DESPRÉS els classificats de la prèvia, per ORDRE DE CLASSIFICACIÓ a la
+        següent fase (1rs abans que 2ns; després punts/mitjana).
+
+    Reservats al davant (millors seeds, llocs 1..16) i classificats al darrere
+    (17..32): la piràmide empara així el millor reservat amb el pitjor classificat.
+    Sense reservats publicats recau només en els classificats de la prèvia."""
+    big = 10**9
+    out: list[AdvancingPlayer] = []
+    seen: set[str] = set()
+    for s in sorted(
+        reservats,
+        key=lambda r: (seeding.get(_norm_name(r.player_name), big), r.player_name),
+    ):
+        k = _norm_name(s.player_name)
+        if not s.player_name or k in seen:
+            continue
+        seen.add(k)
+        out.append(AdvancingPlayer(
+            name=s.player_name, club=s.club, mitjana=s.mitjana,
+            serie_major=0, source="reservat",
+        ))
+    for q in sorted(
+        last_group_phase.provisional_qualifiers,
+        key=lambda q: (q.position_in_group, -q.punts, -q.mitjana, q.player_name),
+    ):
+        k = _norm_name(q.player_name)
+        if not q.player_name or k in seen:
+            continue
+        seen.add(k)
+        out.append(AdvancingPlayer(
+            name=q.player_name, club=q.club, mitjana=q.mitjana,
+            serie_major=q.serie_major, source="winner",
+        ))
+    return tuple(out)
+
+
 def _pair_pyramid(names: list[str]) -> tuple[MatchResult, ...]:
     """Pyramid pairing: 1st vs Nth, 2nd vs (N-1)th, … Returns () if the
     pool has fewer than 2 names."""
@@ -1651,9 +1710,10 @@ def compute_open_classification(
     # Tots els qui han entrat al quadre KO i encara NO han estat eliminats ocupen,
     # PROVISIONALMENT, els llocs de dalt (1..K) fins que la federació publiqui la
     # classificació definitiva. Per petició de l'usuari l'ordre del bloc és:
-    #   • els 16 PRIMERS llocs, per RÀNQUING INICIAL (seeding del Rànquing d'Opens);
-    #   • del 17 en avall, per ORDRE DE CLASSIFICACIÓ a la següent fase (1rs abans
-    #     que 2ns, després per punts/mitjana de grup).
+    #   • PRIMER els RESERVATS (caps de sèrie que no juguen la prèvia), pel
+    #     RÀNQUING INICIAL d'opens → ocupen els 16 primers llocs;
+    #   • DESPRÉS els classificats de la prèvia, per l'ORDRE DE CLASSIFICACIÓ a la
+    #     següent fase (1rs abans que 2ns; després punts/mitjana) → llocs 17..32.
     # Substitueix l'antiga capçalera que només col·locava els finalistes coneguts.
     if ko_idxs:
         rows.extend(
@@ -1666,6 +1726,7 @@ def compute_open_classification(
                 placed_names={_norm_name(r.player_name) for r in rows},
                 used_positions={r.position for r in rows},
                 seeding=getattr(state, "seeding", None) or {},
+                reservats=getattr(state, "reservats", ()) or (),
             )
         )
 
@@ -1683,16 +1744,25 @@ def _alive_classification_rows(
     placed_names: set[str],
     used_positions: set[int],
     seeding: dict[str, int],
+    reservats: tuple[GroupStanding, ...] = (),
 ) -> list[OpenClassificationRow]:
     """Files provisionals dels jugadors encara VIUS (vegeu el bloc que crida).
 
-    Viu = ha entrat al quadre KO (classificat d'una fase de grups o present en
-    una ronda KO, oficial o projectada) i encara no té lloc assignat (ni eliminat
-    ni campió). Els 16 primers llocs s'ordenen pel `seeding`; la resta, per l'ordre
-    de classificació a la següent fase. Tot marcat `is_provisional_position`."""
+    Viu = ha entrat al quadre KO (cap de sèrie RESERVAT, classificat d'una fase de
+    grups, o present en una ronda KO) i encara no té lloc assignat (ni eliminat ni
+    campió). Els RESERVATS van primer, ordenats pel `seeding` (rànquing d'opens);
+    després els classificats de la prèvia, per l'ordre de classificació a la
+    següent fase. Tot marcat `is_provisional_position`."""
     from ..reglament.puntuacio import points_for_position
 
     BIG = 10**9
+
+    # Caps de sèrie reservats: nom + club (no juguen la prèvia → mitjana/SM 0).
+    reservat_info: dict[str, tuple[str, str]] = {}
+    for s in reservats:
+        if s.player_name:
+            reservat_info.setdefault(_norm_name(s.player_name), (s.player_name, s.club))
+    reservat_norms = set(reservat_info)
 
     # Estadístiques (mitjana, SM, club) de la fase més profunda on apareix cadascú.
     latest_stats: dict[str, tuple[float, int, str]] = {}
@@ -1712,8 +1782,10 @@ def _alive_classification_rows(
                 )
             break
 
-    # Pool del quadre KO: classificats de grups + qualsevol nom en una ronda KO.
+    # Pool del quadre KO: reservats + classificats de grups + noms a una ronda KO.
     alive: dict[str, str] = {}  # norm → nom a mostrar
+    for norm, (name, _club) in reservat_info.items():
+        alive[norm] = name
     for gi in group_idxs:
         for q in phases[gi].provisional_qualifiers:
             if q.player_name:
@@ -1737,19 +1809,24 @@ def _alive_classification_rows(
         pg, npunts, nmitj = qual_key.get(norm, (9, 0, 0.0))
         return (pg, npunts, nmitj, alive[norm])
 
-    # Els 16 millor classificats van a dalt ordenats per SEEDING; la resta, per
-    # ordre de classificació. (Cap a 17+ el seeding deixa de ser el criteri.)
-    by_qual = sorted(alive, key=_qkey)
-    top = sorted(by_qual[:16], key=lambda k: (seeding.get(k, BIG), _qkey(k)))
-    ordered = top + by_qual[16:]
+    # RESERVATS primer (per seeding); després la resta (per ordre de classificació).
+    res_alive = sorted(
+        (k for k in alive if k in reservat_norms),
+        key=lambda k: (seeding.get(k, BIG), alive[k]),
+    )
+    oth_alive = sorted((k for k in alive if k not in reservat_norms), key=_qkey)
+    ordered = res_alive + oth_alive
 
     free = [p for p in range(1, ko_size + 1) if p not in used_positions]
     out: list[OpenClassificationRow] = []
     for norm, pos in zip(ordered, free):
         name = alive[norm]
-        mg, sm, club = latest_stats.get(norm, (0.0, 0, ""))
-        if not club:
-            club = club_by_norm.get(norm, "")
+        if norm in reservat_info:
+            mg, sm, club = 0.0, 0, reservat_info[norm][1]
+        else:
+            mg, sm, club = latest_stats.get(norm, (0.0, 0, ""))
+            if not club:
+                club = club_by_norm.get(norm, "")
         out.append(
             OpenClassificationRow(
                 position=pos,
@@ -1928,6 +2005,7 @@ def fetch_live_state(
     # (available days before match day). We prefer HTML; fall back to PDF.
     ko_docs_cache: tuple[DocEntry, ...] | None = None
     details: list[PhaseDetail] = []
+    reservats_standings: tuple[GroupStanding, ...] = ()
     for ref in phase_refs:
         if ref.kind == "group":
             grups_html = fetch(ref.url, force=force)
@@ -1938,6 +2016,13 @@ def fetch_live_state(
                 group = parse_group_page(
                     group_html, label=stub.label, url=stub.url, venue=stub.venue
                 )
+                if group.label.upper() == "RESERVATS":
+                    # Caps de sèrie: es guarden a part. NO entren als grups
+                    # regulars perquè no contin com a jugadors de la prèvia
+                    # (afectaria el càlcul de trams d'eliminats de la classif.).
+                    if group.standings:
+                        reservats_standings = group.standings
+                    continue
                 groups.append(group)
             details.append(PhaseDetail(ref=ref, groups=tuple(groups)))
         else:  # ko
@@ -2028,7 +2113,16 @@ def fetch_live_state(
             if d.ref.kind != "ko":
                 continue
 
-            advancing = compute_advancing_players(final, i, last_group_idx)
+            # Primer KO: pool sembrat reservats(rànquing) + classificats(classif.),
+            # perquè la piràmide doni l'aparellament 1-N, 2-(N-1), … demanat (caps
+            # de sèrie contra els pitjors classificats). La resta de rondes: guanyadors
+            # de la ronda anterior.
+            if i == last_group_idx + 1:
+                advancing = _seeded_first_ko_pool(
+                    final[last_group_idx], reservats_standings, rank_by_name or {}
+                )
+            else:
+                advancing = compute_advancing_players(final, i, last_group_idx)
             paired: set[str] = set()
             for m in d.ko_matches:
                 if m.player_a:
@@ -2064,4 +2158,5 @@ def fetch_live_state(
         structure=structure_full,
         phases=final,
         seeding=dict(rank_by_name or {}),
+        reservats=reservats_standings,
     )

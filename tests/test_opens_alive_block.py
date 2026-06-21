@@ -1,11 +1,12 @@
 """Tests for the still-alive block of `compute_open_classification`.
 
-Jugadors que han entrat al quadre KO i encara no han estat eliminats ocupen,
-PROVISIONALMENT, els llocs de dalt (1..K). Per petició de l'usuari:
-  • els 16 primers llocs s'ordenen pel RÀNQUING INICIAL (seeding del Rànquing
-    Català d'Opens);
-  • del 17 en avall, per l'ordre de classificació a la següent fase.
-Tot marcat provisional fins que la federació publiqui la classificació final.
+Un cop superada la prèvia, els llocs de dalt de la classificació (el quadre KO,
+encara per jugar) s'omplen PROVISIONALMENT:
+  • PRIMER els RESERVATS (caps de sèrie que no juguen la prèvia), ordenats pel
+    RÀNQUING INICIAL d'opens (seeding) → llocs 1..16;
+  • DESPRÉS els classificats de la prèvia, per l'ORDRE DE CLASSIFICACIÓ a la
+    següent fase (1rs abans que 2ns; després punts/mitjana) → llocs 17..32.
+Tot marcat provisional fins a la classificació definitiva.
 """
 
 from __future__ import annotations
@@ -40,9 +41,10 @@ def _group(label: str, players: list[tuple[str, int, float]]) -> Group:
     return Group(label=label, url="", standings=st, matches=matches)
 
 
-def _state(groups: list[Group]) -> OpenLiveState:
+def _state(groups: list[Group], reservats: list[tuple[str, str]] | None = None) -> OpenLiveState:
     """A PRÈVIA group phase (group winners qualify) + an undrawn QUARTS KO,
-    so ko_size=8 and the PRÈVIA losers land at 9+."""
+    so ko_size=8 and the PRÈVIA losers land at 9+. `reservats` is a list of
+    (name, club) seeded directly into the KO."""
     quals = tuple(
         ProvisionalQualifier(g.label, 1, g.standings[0].player_name, "",
                              g.standings[0].punts, g.standings[0].mitjana, 0)
@@ -56,7 +58,8 @@ def _state(groups: list[Group]) -> OpenLiveState:
     quarts = PhaseDetail(ref=PhaseRef(label="QUARTS", kind="ko", url=""))
     struct = OpenStructure(division_id=1, name="OPEN TEST", phase_id=1,
                            phases=(previa.ref, quarts.ref))
-    return OpenLiveState(structure=struct, phases=[previa, quarts])
+    res = tuple(GroupStanding(n, c, 0, 0.0) for n, c in (reservats or []))
+    return OpenLiveState(structure=struct, phases=[previa, quarts], reservats=res)
 
 
 def _groups() -> list[Group]:
@@ -80,20 +83,26 @@ def test_alive_winners_fill_the_top_provisionally():
     assert elim and min(r.position for r in elim) >= 9
 
 
-def test_top16_ordered_by_seeding():
-    state = _state(_groups())
-    # Seeding (Rànquing d'Opens): D millor, després B, A, C.
-    state.seeding = {"WIN_D": 1, "WIN_B": 5, "WIN_A": 9, "WIN_C": 20}
+def test_reservats_first_by_seeding_then_previa_by_qualification():
+    state = _state(_groups(), reservats=[("RES_X", "CX"), ("RES_Y", "CY")])
+    # Seeding: RES_Y millor que RES_X (i, per provar que NO afecta la prèvia,
+    # els winners reben un seeding contrari al seu ordre de classificació).
+    state.seeding = {"RES_Y": 2, "RES_X": 5,
+                     "WIN_C": 1, "WIN_A": 3, "WIN_B": 7, "WIN_D": 9}
     rows = compute_open_classification(state)
-    order = [r.player_name for r in sorted(rows, key=lambda r: r.position)
-             if r.round_label == "EN JOC"]
-    assert order == ["WIN_D", "WIN_B", "WIN_A", "WIN_C"]
+    alive = sorted([r for r in rows if r.round_label == "EN JOC"], key=lambda r: r.position)
+    order = [r.player_name for r in alive]
+    # 1-2: reservats per seeding; 3-6: winners per classificació (mitjana DESC),
+    # IGNORANT el seeding dels winners.
+    assert order == ["RES_Y", "RES_X", "WIN_D", "WIN_B", "WIN_A", "WIN_C"]
+    # El club dels reservats es manté tot i no jugar cap partida.
+    assert next(r.club for r in alive if r.player_name == "RES_Y") == "CY"
 
 
-def test_without_seeding_falls_back_to_qualification_order():
-    # Sense seeding, el bloc viu s'ordena per classificació (punts iguals →
-    # mitjana DESC): D(1.00) > B(0.90) > A(0.80) > C(0.70).
-    rows = compute_open_classification(_state(_groups()))
-    order = [r.player_name for r in sorted(rows, key=lambda r: r.position)
-             if r.round_label == "EN JOC"]
-    assert order == ["WIN_D", "WIN_B", "WIN_A", "WIN_C"]
+def test_without_reservats_previa_is_ordered_by_qualification_not_seeding():
+    state = _state(_groups())
+    # Seeding contrari a l'ordre de mitjana: ha de guanyar la classificació.
+    state.seeding = {"WIN_A": 1, "WIN_B": 2, "WIN_C": 3, "WIN_D": 4}
+    order = [r.player_name for r in sorted(compute_open_classification(state),
+             key=lambda r: r.position) if r.round_label == "EN JOC"]
+    assert order == ["WIN_D", "WIN_B", "WIN_A", "WIN_C"]  # mitjana DESC, no seeding
