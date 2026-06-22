@@ -760,7 +760,11 @@
 			bins[i].count++;
 		}
 		const maxCount = Math.max(...bins.map((b) => b.count));
-		return { bins, maxCount, step, n: avgs.length, lo, hi, mitjana: kpi.mitjana };
+		// Desviació típica de les mitjanes per partida respecte la mitjana oficial,
+		// per quantificar i dibuixar la dispersió típica del rendiment (franja ±1σ).
+		const center = kpi.mitjana;
+		const sd = Math.sqrt(avgs.reduce((s, a) => s + (a - center) ** 2, 0) / avgs.length);
+		return { bins, maxCount, step, n: avgs.length, lo, hi, mitjana: center, sd };
 	});
 	// Posició x de la línia de referència de la mitjana global dins l'histograma.
 	const histoMeanX = $derived.by(() => {
@@ -768,6 +772,15 @@
 		const span = histo.bins.length * histo.step;
 		const f = span ? (histo.mitjana - histo.bins[0].x0) / span : 0;
 		return PAD + Math.max(0, Math.min(1, f)) * (VBW - 2 * PAD);
+	});
+	// Franja ±1σ al voltant de la mitjana, en coordenades x de l'SVG.
+	const histoSdBand = $derived.by(() => {
+		if (!histo || !histo.sd) return null;
+		const span = histo.bins.length * histo.step;
+		if (!span) return null;
+		const toX = (v: number) =>
+			PAD + Math.max(0, Math.min(1, (v - histo.bins[0].x0) / span)) * (VBW - 2 * PAD);
+		return { x1: toX(histo.mitjana - histo.sd), x2: toX(histo.mitjana + histo.sd) };
 	});
 	// Etiquetes de l'eix X: ~4 vores de bin repartides + la vora final.
 	const histoTicks = $derived.by(() => {
@@ -1354,9 +1367,15 @@
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-end justify-between">
 					<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Distribució de la mitjana · per partida</span>
-					<div class="flex items-center gap-1.5">
-						<span class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
-						<span class="font-mono text-base font-bold leading-none tabular-nums">{histo.mitjana.toFixed(3)}</span>
+					<div class="flex items-center gap-3">
+						<div class="flex items-center gap-1.5">
+							<span class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
+							<span class="font-mono text-base font-bold leading-none tabular-nums">{histo.mitjana.toFixed(3)}</span>
+						</div>
+						<div class="flex items-baseline gap-1">
+							<span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">σ</span>
+							<span class="font-mono text-sm font-bold leading-none tabular-nums">{histo.sd.toFixed(3)}</span>
+						</div>
 					</div>
 				</div>
 				{#if histoSel != null && histo.bins[histoSel]}
@@ -1372,6 +1391,9 @@
 					{#each [0, 0.25, 0.5, 0.75, 1] as f}
 						<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
 					{/each}
+					{#if histoSdBand}
+						<rect x={histoSdBand.x1} y={PAD} width={Math.max(0, histoSdBand.x2 - histoSdBand.x1)} height={VBH - 2 * PAD} fill="#10b981" opacity="0.1" />
+					{/if}
 					{#each histo.bins as b, i}
 						{@const bw = (VBW - 2 * PAD) / histo.bins.length}
 						{@const h = histo.maxCount ? (b.count / histo.maxCount) * (VBH - 2 * PAD) : 0}
@@ -1384,7 +1406,7 @@
 				<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300 dark:text-slate-600">
 					{#each histoTicks as t}<span>{t}</span>{/each}
 				</div>
-				<p class="mt-1 text-right text-[10px] text-slate-300 dark:text-slate-600">{histo.n} partides · la línia verda és la mitjana</p>
+				<p class="mt-1 text-right text-[10px] text-slate-300 dark:text-slate-600">{histo.n} partides · línia = mitjana · franja = ±1σ</p>
 			</div>
 		{/if}
 
