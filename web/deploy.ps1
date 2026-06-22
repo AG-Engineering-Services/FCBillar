@@ -3,10 +3,14 @@
     Desplega el frontend (web/) a Vercel (projecte seguiment-lliga-open).
 
 .DESCRIPTION
-    El projecte de Vercel està connectat al repo GitHub de fcb-opens, i Vercel
-    BLOQUEJA els desplegaments fets des de dins d'un altre repo Git (adjunta
-    metadades Git alienes). Per evitar-ho, aquest script copia el codi font de
-    web/ a una carpeta temporal FORA de cap repo Git i desplega des d'allà.
+    NOTA (juny 2026): el projecte de Vercel ja està connectat per Git al repo
+    FCBillar (Root Directory = web, branca master), de manera que cada push a
+    master desplega SOL. Aquest script queda com a ALTERNATIVA MANUAL (per
+    publicar a l'instant sense passar per un push, o si l'auto-deploy falla).
+
+    Com que Vercel adjunta les metadades Git del repo on s'executa, aquest
+    script copia el codi font de web/ a una carpeta temporal FORA de cap repo
+    Git i desplega des d'allà per evitar conflictes de metadades.
 
     Requisits: `vercel login` amb el compte que té "Albert's projects".
     Les env vars (PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_ANON_KEY) ja són al
