@@ -54,6 +54,8 @@
 	const cAxisAmber = $derived($theme === 'dark' ? '#78350f' : '#fde68a');
 	const cInk = $derived($theme === 'dark' ? '#e2e8f0' : '#0f172a'); // línia/àrea principal
 	const cHalo = $derived($theme === 'dark' ? '#0f172a' : '#fff'); // halo dels punts
+	const cHisto = $derived($theme === 'dark' ? '#4f46e5' : '#c7d2fe'); // barres histograma
+	const cHistoSel = $derived($theme === 'dark' ? '#a5b4fc' : '#4f46e5'); // barra seleccionada
 
 	let nom = $state('');
 	let club = $state<string | null>(null);
@@ -723,6 +725,77 @@
 		rollSel = rollStart + Math.max(0, Math.min(n - 1, Math.round(frac * (n - 1))));
 	}
 
+	// Histograma: distribució de la mitjana per partida (caramboles/entrades) de la
+	// modalitat seleccionada. Els intervals (bins) tenen una mida "rodona" derivada
+	// del rang, de manera que funciona igual a 3 bandes (~0,2) que a lliure (~2,5).
+	function niceStep(raw: number) {
+		const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+		const n = raw / pow;
+		return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * pow;
+	}
+	function fmtAvg(v: number, step: number) {
+		const d = step >= 5 ? 0 : step >= 1 ? 1 : step >= 0.1 ? 2 : 3;
+		return v.toFixed(d);
+	}
+	const histo = $derived.by(() => {
+		const avgs = modGames
+			.map(persp)
+			.filter((p) => p.ent > 0)
+			.map((p) => p.myCar / p.ent);
+		if (avgs.length < 5) return null;
+		const lo = Math.min(...avgs);
+		const hi = Math.max(...avgs);
+		const step = niceStep((hi - lo) / 12 || 0.1);
+		const start = Math.floor(lo / step) * step;
+		const nBins = Math.max(1, Math.round((hi - start) / step + 1e-9) + 1);
+		const bins = Array.from({ length: nBins }, (_, i) => ({
+			x0: start + i * step,
+			x1: start + (i + 1) * step,
+			count: 0
+		}));
+		for (const a of avgs) {
+			let i = Math.floor((a - start) / step + 1e-9);
+			if (i < 0) i = 0;
+			if (i >= nBins) i = nBins - 1;
+			bins[i].count++;
+		}
+		const maxCount = Math.max(...bins.map((b) => b.count));
+		return { bins, maxCount, step, n: avgs.length, lo, hi, mitjana: kpi.mitjana };
+	});
+	// Posició x de la línia de referència de la mitjana global dins l'histograma.
+	const histoMeanX = $derived.by(() => {
+		if (!histo) return null;
+		const span = histo.bins.length * histo.step;
+		const f = span ? (histo.mitjana - histo.bins[0].x0) / span : 0;
+		return PAD + Math.max(0, Math.min(1, f)) * (VBW - 2 * PAD);
+	});
+	// Etiquetes de l'eix X: ~4 vores de bin repartides + la vora final.
+	const histoTicks = $derived.by(() => {
+		if (!histo) return [] as string[];
+		const b = histo.bins;
+		const k = Math.min(4, b.length);
+		const out: string[] = [];
+		for (let i = 0; i < k; i++) {
+			const idx = Math.round((i * (b.length - 1)) / Math.max(1, k - 1));
+			out.push(fmtAvg(b[idx].x0, histo.step));
+		}
+		out.push(fmtAvg(b[b.length - 1].x1, histo.step));
+		return out;
+	});
+	let histoSel = $state<number | null>(null);
+	$effect(() => {
+		void selMod;
+		histoSel = null; // reinicia la selecció en canviar de modalitat
+	});
+	function pickHisto(ev: MouseEvent) {
+		const el = ev.currentTarget as Element;
+		const rect = el.getBoundingClientRect();
+		const n = histo?.bins.length ?? 0;
+		if (!n) return;
+		const frac = (ev.clientX - rect.left) / rect.width;
+		histoSel = Math.max(0, Math.min(n - 1, Math.floor(frac * n)));
+	}
+
 	// Selecció de punt (clic): mostra els valors del punt més proper als dos gràfics.
 	let selIdx = $state<number | null>(null);
 	function pickPoint(ev: MouseEvent) {
@@ -1274,6 +1347,44 @@
 					<input type="range" min="0" max={roll15.length - 1} step="1" bind:value={rollSel} class="thin-range mt-2 w-full print:hidden" />
 					<p class="text-center text-[10px] text-slate-400 dark:text-slate-500 print:hidden">punt {(rollSel ?? 0) + 1} de {roll15.length} · finestra {rollStart + 1}–{Math.min(rollStart + WIN, roll15.length)}</p>
 				{/if}
+			</div>
+		{/if}
+
+		{#if histo}
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-1 flex items-end justify-between">
+					<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Distribució de la mitjana · per partida</span>
+					<div class="flex items-center gap-1.5">
+						<span class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
+						<span class="font-mono text-base font-bold leading-none tabular-nums">{histo.mitjana.toFixed(3)}</span>
+					</div>
+				</div>
+				{#if histoSel != null && histo.bins[histoSel]}
+					{@const b = histo.bins[histoSel]}
+					<div class="mb-1 flex items-center justify-between gap-2 rounded-lg bg-slate-900 dark:bg-slate-700 px-2 py-1 text-[11px] text-white">
+						<span>mitjana <span class="font-mono font-bold">{fmtAvg(b.x0, histo.step)}–{fmtAvg(b.x1, histo.step)}</span></span>
+						<span class="font-mono font-bold">{b.count} {b.count === 1 ? 'partida' : 'partides'} · {Math.round((100 * b.count) / histo.n)}%</span>
+					</div>
+				{:else}
+					<p class="mb-1 text-center text-[11px] text-slate-400 dark:text-slate-500 print:hidden">Toca una barra per veure el detall</p>
+				{/if}
+				<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickHisto} role="presentation" class="h-24 w-full cursor-pointer print:h-16">
+					{#each [0, 0.25, 0.5, 0.75, 1] as f}
+						<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
+					{/each}
+					{#each histo.bins as b, i}
+						{@const bw = (VBW - 2 * PAD) / histo.bins.length}
+						{@const h = histo.maxCount ? (b.count / histo.maxCount) * (VBH - 2 * PAD) : 0}
+						<rect x={PAD + i * bw + bw * 0.1} y={VBH - PAD - h} width={bw * 0.8} height={h} fill={histoSel === i ? cHistoSel : cHisto} />
+					{/each}
+					{#if histoMeanX != null}
+						<line x1={histoMeanX} y1="2" x2={histoMeanX} y2={VBH - 2} stroke="#10b981" stroke-width="1.5" stroke-dasharray="3 2" vector-effect="non-scaling-stroke" />
+					{/if}
+				</svg>
+				<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300 dark:text-slate-600">
+					{#each histoTicks as t}<span>{t}</span>{/each}
+				</div>
+				<p class="mt-1 text-right text-[10px] text-slate-300 dark:text-slate-600">{histo.n} partides · la línia verda és la mitjana</p>
 			</div>
 		{/if}
 
