@@ -1673,27 +1673,38 @@ def publish_open_ranking(
                 "ronda_data": open_date.get(last_open) or None, "ronda_temp": tnom.get(last_open),
                 "posicio": posicio, "player_fcb_id": fcb, "jugador": _disp(nom),
                 "club": club, "opens_jugats": njug, "punts": total,
-                "detall": det,
+                "detall": det, "provisional": False,
             })
     # Penalitzacions del PDF oficial (Art. IV): -20 no presentat injustificat,
     # 0 justificat, None no inscrit. Només a la ronda actual (el PDF és la finestra vigent).
+    #
+    # La FCB publica la CLASSIFICACIÓ final d'un open abans de refrescar el PDF del
+    # RÀNQUING. Hi ha doncs una finestra de temps en què la nostra ronda vigent ja
+    # inclou l'open més recent (amb els punts de la seva classificació final) però el
+    # PDF encara llista la finestra anterior. Com que el PDF té sempre 5 columnes,
+    # aplicar-lo POSICIONALMENT desplaçaria totes les columnes (l'open nou robaria els
+    # punts del darrer del PDF). Per detectar-ho casem les columnes del PDF amb la
+    # nostra finestra per paraula-clau de seu (map_pdf_columns_to_window): el PDF està
+    # AL DIA només si totes les columnes casen amb la mateixa posició de la finestra
+    # (mapping identitat). Si no, NO apliquem el PDF i marquem la ronda PROVISIONAL.
+    max_ronda = len(ordered)
+    window = ordered[max(0, max_ronda - 5):max_ronda]
+    prov_latest = True
     try:
         import httpx
+        from fcb_opens.reglament.open_match import map_pdf_columns_to_window
         from fcb_opens.scraper.official_pdf import OFFICIAL_RANKING_URL, parse_official_ranking
 
         off = parse_official_ranking(
             httpx.get(OFFICIAL_RANKING_URL, timeout=30, follow_redirects=True).content,
             source_url=OFFICIAL_RANKING_URL,
         )
-        max_ronda = len(ordered)
-        window = ordered[max(0, max_ronda - 5):max_ronda]
-        # El PDF oficial només llista opens ACABATS. Si la finestra vigent inclou un
-        # open EN CURS (encara sense participants), el PDF porta una finestra diferent
-        # amb el mateix nombre d'opens i l'alineació POSICIONAL desplaça les columnes
-        # (l'open en curs agafaria els punts del darrer del PDF, etc.). En aquest cas
-        # NO apliquem el PDF: deixem els punts base i l'open en curs a 0.
+        window_names = [onom.get(oid, "") for oid in window]
+        colmap = map_pdf_columns_to_window([o.full_name for o in off.opens], window_names)
+        identity = {i: i for i in range(len(window))}
+        pdf_is_current = len(off.opens) == len(window) and colmap == identity
         window_complete = all(parts.get(oid) for oid in window)
-        if window_complete and max_ronda and len(off.opens) == len(window):  # alineació posicional segura
+        if max_ronda and window_complete and pdf_is_current:  # alineació posicional segura
             pdf = {_nm(e.display_name): (e.total_points, tuple(e.points_per_open)) for e in off.entries}
             for row in all_rows:
                 if row["ronda"] != max_ronda:
@@ -1718,11 +1729,26 @@ def publish_open_ranking(
             latest.sort(key=lambda r: (-r["punts"], -mitj.get(r["player_fcb_id"], 0.0), r["jugador"] or ""))
             for posicio, r in enumerate(latest, start=1):
                 r["posicio"] = posicio
+            prov_latest = False
             prog("ok", f"penalitzacions oficials aplicades ({len(off.entries)} entrades PDF)")
         elif not window_complete:
-            prog("ok", "penalitzacions: PDF no aplicat (la finestra vigent inclou un open en curs)")
+            prog("ok", "ronda provisional: l'open més recent encara no té classificació final")
+        else:
+            prog("ok", "ronda provisional: el rànquing oficial encara no inclou l'open més recent")
     except Exception as exc:  # noqa: BLE001
-        prog("warn", f"penalitzacions: PDF no aplicat ({exc})")
+        prog("warn", f"penalitzacions: PDF no aplicat ({exc}); ronda marcada provisional")
+
+    # Marca la ronda vigent com a PROVISIONAL (punts des de la classificació final,
+    # pendents que la federació actualitzi el rànquing oficial) i n'assenyala l'open
+    # més recent al desglossament perquè el frontend hi pugui pintar "(prov.)".
+    if prov_latest and max_ronda:
+        for row in all_rows:
+            if row["ronda"] != max_ronda:
+                continue
+            row["provisional"] = True
+            det = row.get("detall") or []
+            if det and det[-1].get("pos") is not None:
+                det[-1]["prov"] = True
 
     n = _upsert(sb, "open_ranking", all_rows, "genere,ronda,player_fcb_id", prog)
     conn.close()
@@ -1747,6 +1773,7 @@ def publish_open_ranking_femeni(
     conn.close()
     for r in rows:
         r["jugador"] = _disp(r["jugador"])
+        r.setdefault("provisional", False)
     if not rows:
         prog("ok", "open_ranking (femeni): 0 files")
         return {"open_ranking_femeni": 0}

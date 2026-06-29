@@ -136,6 +136,12 @@
 		isCalc ? calcRows : genRanking.filter((r) => r.ronda === ronda).sort((a, b) => a.posicio - b.posicio)
 	);
 	const rondaInfo = $derived(isCalc ? null : genRanking.find((r) => r.ronda === ronda));
+	// Ronda PUBLICADA provisional: la federació ja té la classificació final de
+	// l'open més recent però encara no n'ha actualitzat el rànquing oficial, així
+	// que `publish_open_ranking` n'ha calculat els punts des de la classificació i
+	// ha marcat la ronda provisional=true. Estil ambre, com la ronda calculada.
+	const rondaProvisional = $derived(!isCalc && !!(rondaInfo as any)?.provisional);
+	const amber = $derived(isCalc || rondaProvisional);
 	function stepRonda(d: number) {
 		const i = positions.indexOf(ronda as number | 'calc');
 		if (i < 0) return;
@@ -275,15 +281,22 @@
 						Rànquing <strong>calculat</strong>, <strong>no oficial</strong>: inclou <strong>{liveCD?.name}</strong> en directe amb els punts de la classificació provisional (els qui encara juguen, segons l'ordre de la darrera fase acabada). Els qui no el disputen hi tenen 0. Pot contenir errors fins que l'open sigui definitiu.
 					</span>
 				</div>
+			{:else if rondaProvisional}
+				<div class="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
+					<span class="mt-0.5 shrink-0">⚠</span>
+					<span>
+						Rànquing <strong>provisional</strong>: inclou <strong>{rondaInfo?.ronda_nom}</strong> amb els punts de la seva <strong>classificació final</strong>. La federació encara no n'ha actualitzat el rànquing oficial; subjecte a canvis (penalitzacions per incompareixença, desempats) quan es publiqui.
+					</span>
+				</div>
 			{/if}
-			<div class="mb-3 flex items-center justify-between gap-2 rounded-lg {isCalc ? 'bg-amber-600 dark:bg-amber-700' : 'bg-slate-900 dark:bg-slate-700'} px-2 py-2 text-white">
+			<div class="mb-3 flex items-center justify-between gap-2 rounded-lg {amber ? 'bg-amber-600 dark:bg-amber-700' : 'bg-slate-900 dark:bg-slate-700'} px-2 py-2 text-white">
 			<button onclick={() => stepRonda(-1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="anterior">‹</button>
 			<div class="min-w-0 text-center">
 				<div class="flex items-center justify-center gap-1.5 text-xs font-semibold">
 						<span class="truncate">Fins a {isCalc ? (liveCD?.name ?? '') : (rondaInfo?.ronda_nom ?? '')}</span>
-						{#if isCalc}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider">calculat</span>{/if}
+						{#if isCalc}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider">calculat</span>{:else if rondaProvisional}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider">provisional</span>{/if}
 					</div>
-				<div class="text-[10px] {isCalc ? 'text-amber-100' : 'text-slate-300 dark:text-slate-600'}">{isCalc ? 'en directe · calculat' : `${rondaInfo?.ronda_temp ?? ''} · ronda ${ronda}/${cleanRondes.length}`}</div>
+				<div class="text-[10px] {amber ? 'text-amber-100' : 'text-slate-300 dark:text-slate-600'}">{isCalc ? 'en directe · calculat' : `${rondaInfo?.ronda_temp ?? ''} · ronda ${ronda}/${rondes.length}${rondaProvisional ? ' · provisional' : ''}`}</div>
 			</div>
 			<button onclick={() => stepRonda(1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="següent">›</button>
 		</div>
@@ -334,7 +347,7 @@
 				{/each}
 			</ul>
 		</div>
-		<p class="px-1 py-2 text-center text-[10px] text-slate-400 dark:text-slate-500">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII).{isCalc ? ' Ronda CALCULADA: els 4 darrers opens acabats + l’open en curs amb punts provisionals en directe.' : ''}</p>
+		<p class="px-1 py-2 text-center text-[10px] text-slate-400 dark:text-slate-500">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII).{isCalc ? ' Ronda CALCULADA: els 4 darrers opens acabats + l’open en curs amb punts provisionals en directe.' : rondaProvisional ? ' Ronda PROVISIONAL: punts de la classificació final del darrer open, pendent que la federació actualitzi el rànquing oficial.' : ''}</p>
 	{/if}
 {:else if filtered.length === 0}
 	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap open.</p>
