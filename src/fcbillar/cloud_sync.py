@@ -576,6 +576,27 @@ def publish_pending_games(
                 for m in ph.get("ko_matches", []):
                     _match(m)
 
+        # --- LLIGA: partides jugades encara no al rànquing oficial (lliga_pending_partides) ---
+        # Capturades per ingest_lliga_encontre (promocions/finals i jornades recents)
+        # abans que partideshome les pugi a `games`. Dedup per signatura contra `games`:
+        # en incorporar-les la ingesta oficial, deixen de ser pendents.
+        for r in conn.execute(
+            """SELECT competicio, player1_nom n1, caramboles1 c1, serie1 s1,
+                      player2_nom n2, caramboles2 c2, serie2 s2, entrades e
+               FROM lliga_pending_partides WHERE modalitat_codi = ?""",
+            (mod,),
+        ):
+            if not r["e"] or r["e"] <= 0:
+                continue
+            sig = _sig(r["n1"], r["c1"], r["n2"], r["c2"], r["e"])
+            if sig in game_sigs:
+                continue
+            lf = nom2fcb.get(_nm(r["n1"]))
+            vf = nom2fcb.get(_nm(r["n2"]))
+            comp = r["competicio"] or "Lliga"
+            _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "lliga", sig, None)
+            _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "lliga", sig, None)
+
         sb.table("pending_games").delete().eq("modalitat_codi", mod).execute()
         rows = list(out.values())
         for chunk in _chunks(rows):

@@ -871,6 +871,34 @@ def ingest_lliga_encontre(
     html = client.fetch_html(url)
     partides = parse_lliga_partides(html)
 
+    # v11: desa les partides JUGADES (entrades>0) com a PENDENTS perquè surtin a la
+    # fitxa fins que la ingesta oficial (partideshome) les incorpori a `games`.
+    # publish_pending_games les dedup per signatura contra `games`. DELETE+INSERT per
+    # encontre perquè un re-ingest les substitueixi. La modalitat ve del NOM de la
+    # partida (lligues "4 modalitats" en barregen), amb fallback a la de l'ingest.
+    _MOD_CODI = {"tres bandes": 1, "lliure": 2, "banda": 4, "quadre 47/2": 3, "quadre 71/2": 6}
+    conn.execute(
+        "DELETE FROM lliga_pending_partides WHERE encontre_lliga_id=?", (encontre_lliga_id,)
+    )
+    for row in partides:
+        if not row.entrades or row.entrades <= 0:
+            continue
+        conn.execute(
+            """INSERT INTO lliga_pending_partides
+               (encontre_lliga_id, modalitat_codi, competicio, data, player1_nom,
+                caramboles1, serie1, player2_nom, caramboles2, serie2, entrades)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                encontre_lliga_id,
+                _MOD_CODI.get((row.modalitat or "").strip().lower(), modalitat_codi_fcb),
+                competicio_nom,
+                data.isoformat() if data else None,
+                row.local_nom, row.local_caramboles, row.local_serie_major,
+                row.visitant_nom, row.visitant_caramboles, row.visitant_serie_major,
+                row.entrades,
+            ),
+        )
+
     upserted = 0
     skipped = 0
     for row in partides:

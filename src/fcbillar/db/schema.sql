@@ -332,3 +332,25 @@ CREATE TABLE IF NOT EXISTS torneig_partides (
 );
 CREATE INDEX IF NOT EXISTS ix_torneig_partides_div
     ON torneig_partides(torneig_id_extern, divisio_id_extern);
+
+-- v11: Partides individuals de lliga JUGADES (entrades>0) que encara NO consten al
+-- rànquing oficial (partideshome/`games`). La ingesta de lliga normalment les salta
+-- (espera que arribin via partideshome); aquí les desem perquè surtin com a PENDENTS
+-- a la fitxa fins que la ingesta oficial les incorpora a `games`. publish_pending_games
+-- les dedup per signatura contra `games`. Poblada per ingest_lliga_encontre (DELETE +
+-- INSERT per encontre). NO té PK: el mateix enfrontament pot repetir-se.
+CREATE TABLE IF NOT EXISTS lliga_pending_partides (
+    encontre_lliga_id INTEGER NOT NULL REFERENCES encontres_lliga(id) ON DELETE CASCADE,
+    modalitat_codi    INTEGER,
+    competicio        TEXT,
+    data              TEXT,
+    player1_nom       TEXT,
+    caramboles1       INTEGER,
+    serie1            INTEGER,
+    player2_nom       TEXT,
+    caramboles2       INTEGER,
+    serie2            INTEGER,
+    entrades          INTEGER
+);
+CREATE INDEX IF NOT EXISTS ix_lliga_pending_enc
+    ON lliga_pending_partides(encontre_lliga_id);

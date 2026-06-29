@@ -24,6 +24,8 @@ Versions:
      es calcula a linking.py creuant torneig_partides amb games.
 - 10: rankings.data_pub — data ISO exacta de publicació (de l'historial), font
      autoritativa per a any_pub/mes_pub (substitueix la heurística monòtona).
+- 11: lliga_pending_partides — partides de lliga jugades encara no al rànquing
+     oficial; font de pendents per a la fitxa (la crea l'executescript).
 """
 
 from __future__ import annotations
@@ -35,7 +37,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 
 
 def _read_schema_sql() -> str:
