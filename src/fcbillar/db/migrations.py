@@ -22,6 +22,8 @@ Versions:
      games.torneig_id / torneig_fase_id / torneig_link_method, i formalització
      de la taula torneig_partides (resultats reals dels campionats). El vincle
      es calcula a linking.py creuant torneig_partides amb games.
+- 10: rankings.data_pub — data ISO exacta de publicació (de l'historial), font
+     autoritativa per a any_pub/mes_pub (substitueix la heurística monòtona).
 """
 
 from __future__ import annotations
@@ -33,7 +35,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 9
+SCHEMA_VERSION = 10
 
 
 def _read_schema_sql() -> str:
@@ -89,6 +91,14 @@ def _migrate_to_v9(conn: sqlite3.Connection) -> None:
             log.info("→v9: afegida columna games.%s", col_name)
 
 
+def _migrate_to_v10(conn: sqlite3.Connection) -> None:
+    """Afegeix rankings.data_pub (data ISO de publicació, de l'historial)."""
+    existing_cols = {row[1] for row in conn.execute("PRAGMA table_info(rankings)").fetchall()}
+    if "data_pub" not in existing_cols:
+        conn.execute("ALTER TABLE rankings ADD COLUMN data_pub TEXT")
+        log.info("→v10: afegida columna rankings.data_pub")
+
+
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
     conn = connect(db_path)
     version = current_version(conn)
@@ -106,6 +116,9 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # per a BDs noves les crea directament el schema.sql via executescript).
     if 1 <= version < 9:
         _migrate_to_v9(conn)
+    # → v10: rankings.data_pub (data exacta de publicació de l'historial).
+    if 1 <= version < 10:
+        _migrate_to_v10(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

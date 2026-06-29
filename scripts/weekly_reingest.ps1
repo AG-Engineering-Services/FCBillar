@@ -1,8 +1,13 @@
 <#
 .SYNOPSIS
     Reingesta setmanal completa de FCBillar (partides + rànquings) i publicació
-    al núvol. Pensat per executar-se DESATÈS via Tasca Programada de Windows la
-    nit de diumenge a dilluns (dilluns 03:00).
+    al núvol.
+
+    NOTA: el calendari CANÒNIC ara és al núvol (GitHub Actions,
+    .github/workflows/reingest.yml), que no depèn del PC. Aquest script queda com
+    a FALLBACK local manual (p.ex. si el núvol està caigut o per fer edicions
+    curades). En acabar, puja l'estat a R2 (`fcbillar state push`) perquè la còpia
+    del núvol segueixi sent la canònica.
 
 .DESCRIPTION
     Incorpora les darreres novetats publicades al web de la federació
@@ -110,9 +115,11 @@ try {
 public static extern uint SetThreadExecutionState(uint esFlags);
 '@
     }
-    $ES_CONTINUOUS = [uint32]0x80000000
-    $ES_SYSTEM_REQUIRED = [uint32]0x00000001
-    [Win32.Power]::SetThreadExecutionState($ES_CONTINUOUS -bor $ES_SYSTEM_REQUIRED) | Out-Null
+    # Windows PowerShell 5.1 no converteix bé el literal 0x80000000 a UInt32
+    # (el tracta com a int32 negatiu -2147483648). Construïm el valor sense signe
+    # amb [Convert]::ToUInt32(hex), que funciona tant a 5.1 com a 7+.
+    # 0x80000001 = ES_CONTINUOUS | ES_SYSTEM_REQUIRED.
+    [Win32.Power]::SetThreadExecutionState([Convert]::ToUInt32('80000001', 16)) | Out-Null
     $script:keepAwake = $true
     Write-Log "Mode despert activat (el PC no se suspendrà durant la reingesta)."
 } catch {
@@ -133,7 +140,10 @@ function Import-DotEnvKeys($path, [string[]]$keys) {
         if ($val) { Set-Item -Path ("Env:{0}" -f $name) -Value $val }
     }
 }
-Import-DotEnvKeys (Join-Path $repo '.env') @('SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY')
+Import-DotEnvKeys (Join-Path $repo '.env') @(
+    'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY',
+    'R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET'
+)
 
 # --- Executor de passos (aïllat; continua si un falla) ----------------------
 $script:nOk = 0; $script:nFail = 0
@@ -176,13 +186,23 @@ if ($SkipPublish) {
     Invoke-Step 'verifica codificació del núvol (scan)'           @($uv, 'run', 'python', 'scripts/repair_supabase_encoding.py')
 }
 
+# --- PUJA L'ESTAT A R2 (manté el núvol canònic) -----------------------------
+# Aquest script és un fallback local; en acabar, puja les BD a R2 perquè el job
+# del núvol (reingest.yml) parteixi de la versió més recent. Cal tenir R2_* al
+# .env. Sense --check-generation: una execució local deliberada vol ser canònica.
+if ($env:R2_BUCKET -and -not $DryRun) {
+    Invoke-Step 'state push a R2 (BD canònica)'              @($uv, 'run', 'fcbillar', 'state', 'push', '--all')
+} else {
+    Write-Log "AVÍS: falten claus R2_* al .env (o DryRun): no es puja l'estat a R2."
+}
+
 # --- Neteja de logs antics (conserva els 30 més recents) --------------------
 Get-ChildItem -LiteralPath $logDir -Filter 'reingest_*.log' -ErrorAction SilentlyContinue |
     Sort-Object LastWriteTime -Descending | Select-Object -Skip 30 |
     Remove-Item -Force -ErrorAction SilentlyContinue
 
 if ($script:keepAwake) {
-    try { [Win32.Power]::SetThreadExecutionState([uint32]0x80000000) | Out-Null } catch {}
+    try { [Win32.Power]::SetThreadExecutionState([Convert]::ToUInt32('80000000', 16)) | Out-Null } catch {}
 }
 Remove-Item -LiteralPath $lockFile -Force -ErrorAction SilentlyContinue
 

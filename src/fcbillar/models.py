@@ -42,6 +42,7 @@ class Ranking:
     format_url: str  # "data" | "datahome"
     any_pub: int | None = None
     mes_pub: int | None = None
+    data_pub: str | None = None  # data ISO de publicació (de l'historial)
     scraped_at: datetime | None = None
 
 

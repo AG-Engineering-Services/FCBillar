@@ -37,11 +37,13 @@ from fcbillar.pipeline import (
     ingest_lliga_jornada,
     ingest_partides,
     ingest_ranking,
+    reconcile_ranking_dates,
     run_status,
     set_follow,
     sync_current_rankings,
 )
 from fcbillar.scraper.client import ScraperClient
+from fcbillar.scraper.parsers import parse_ranking_historial
 
 app = typer.Typer(
     name="fcbillar",
@@ -224,6 +226,49 @@ def sync() -> None:
         console.print(
             f"[yellow]Tot al dia. Rànquings actuals: {[(r.num_seq, r.modalitat_codi_fcb) for r in result.discovered.rankings]}[/]"
         )
+
+
+@app.command("reconcile-ranking-dates")
+def reconcile_ranking_dates_cmd(
+    historial_html: str | None = typer.Argument(
+        None,
+        help="Camí a un HTML guardat de /ca/jugador/ranking/historial. "
+        "Si s'omet, es prova la sessió viva.",
+    ),
+) -> None:
+    """Lliga num_seq → data real de publicació (de l'historial) i en corregeix
+    el mes/any. Desa rankings.data_pub i re-deriva any_pub/mes_pub."""
+    from pathlib import Path
+
+    settings = get_settings()
+    if historial_html:
+        html = Path(historial_html).read_text(encoding="utf-8", errors="replace")
+        console.print(f"[cyan]Historial des de fitxer: {historial_html}[/]")
+    else:
+        url = f"{settings.base_url.rstrip('/')}/ca/jugador/ranking/historial"
+        with ScraperClient(settings) as client:
+            html = client.fetch_html(url, use_cache=False)
+        console.print(f"[cyan]Historial des de la sessió viva: {url}[/]")
+
+    entries = parse_ranking_historial(html)
+    result = reconcile_ranking_dates(entries, settings=settings)
+
+    console.print(
+        f"[green]Datats {result.dated} num_seq de l'historial.[/]  "
+        f"Canvis de mes: {len(result.changed)}.  "
+        f"No a la BD: {result.not_in_db or '—'}"
+    )
+    if result.changed:
+        table = Table(title="Correccions de mes (num_seq → mes real)")
+        table.add_column("num_seq", justify="right")
+        table.add_column("data_pub")
+        table.add_column("abans")
+        table.add_column("després")
+        for c in result.changed:
+            old = f"{c.old[0]}-{c.old[1]:02d}" if c.old[0] else "—"
+            new = f"{c.new[0]}-{c.new[1]:02d}"
+            table.add_row(str(c.num_seq), c.data_pub, old, f"[bold yellow]{new}[/]")
+        console.print(table)
 
 
 @app.command()
@@ -440,6 +485,167 @@ def import_clubs_cmd() -> None:
 
 
 app.add_typer(clubs_app, name="clubs")
+
+
+# --------------------------------------------------------------------------- #
+# Estat canònic al núvol (Cloudflare R2) — vegeu fcbillar.state_sync
+# --------------------------------------------------------------------------- #
+
+state_app = typer.Typer(
+    help="Sincronitza l'estat canònic (BD + sessió) amb Cloudflare R2.",
+    no_args_is_help=True,
+)
+
+
+def _state_names(db: bool, opens_db: bool, session: bool, default) -> tuple[str, ...]:
+    """Tradueix els flags --db/--opens-db/--session a noms lògics (o el per defecte)."""
+    picked = []
+    if db:
+        picked.append("db")
+    if opens_db:
+        picked.append("opens-db")
+    if session:
+        picked.append("session")
+    return tuple(picked) if picked else default
+
+
+@state_app.command("pull")
+def state_pull_cmd(
+    db: bool = typer.Option(False, "--db", help="Només la BD principal"),
+    opens_db: bool = typer.Option(False, "--opens-db", help="Només la BD d'opens"),
+    session: bool = typer.Option(False, "--session", help="Només la sessió de login"),
+) -> None:
+    """Baixa de R2 a local (escriptura atòmica). Sense flags: baixa-ho tot."""
+    from fcbillar import state_sync
+
+    names = _state_names(db, opens_db, session, state_sync.ALL)
+    try:
+        res = state_sync.pull(names)
+    except RuntimeError as exc:
+        console.print(f"[red]{exc}[/]")
+        raise typer.Exit(code=1) from exc
+    for k, v in res.items():
+        console.print(f"[dim]  {k}: {v}[/]")
+    console.print("[green]OK pull de R2 completat.[/]")
+
+
+@state_app.command("push")
+def state_push_cmd(
+    db: bool = typer.Option(False, "--db", help="Només la BD principal"),
+    opens_db: bool = typer.Option(False, "--opens-db", help="Només la BD d'opens"),
+    session: bool = typer.Option(False, "--session", help="Només la sessió de login"),
+    check_generation: bool = typer.Option(
+        False, "--check-generation", help="Nega si el núvol ha avançat (guardó de divergència)"
+    ),
+    force: bool = typer.Option(False, "--force", help="Ignora el guardó de generació"),
+) -> None:
+    """Puja de local a R2. Sense flags: puja BD principal + BD d'opens (no la sessió)."""
+    from fcbillar import state_sync
+
+    names = _state_names(db, opens_db, session, ("db", "opens-db"))
+    try:
+        res = state_sync.push(names, check_generation=check_generation, force=force)
+    except RuntimeError as exc:
+        console.print(f"[red]{exc}[/]")
+        raise typer.Exit(code=1) from exc
+    for k, v in res.items():
+        console.print(f"[dim]  {k}: {v}[/]")
+    console.print("[green]OK push a R2 completat.[/]")
+
+
+@state_app.command("status")
+def state_status_cmd() -> None:
+    """Mostra generació local/remota i mida dels objectes a R2."""
+    from fcbillar import state_sync
+
+    try:
+        info = state_sync.status()
+    except RuntimeError as exc:
+        console.print(f"[red]{exc}[/]")
+        raise typer.Exit(code=1) from exc
+    for k, v in info.items():
+        console.print(f"[cyan]{k}[/]: {v}")
+
+
+@state_app.command("report")
+def state_report_cmd(
+    session_ok: bool = typer.Option(True, "--session-ok/--no-session-ok"),
+    n_ok: int = typer.Option(0, "--n-ok", help="Passos correctes"),
+    n_fail: int = typer.Option(0, "--n-fail", help="Passos fallats"),
+    last_error: str = typer.Option("", "--last-error", help="Resum de l'últim error"),
+    close_requests: bool = typer.Option(
+        False, "--close-requests", help="Tanca les files reingest_requests en 'running'"
+    ),
+) -> None:
+    """Escriu l'estat de l'última reingesta a `fcbillar.cloud_status` (per al banner del PWA).
+
+    Amb `--close-requests` també marca a 'done'/'error' les peticions del botó que
+    havien quedat en estat 'running'. Cal SUPABASE_URL i SUPABASE_SERVICE_ROLE_KEY.
+    """
+    from datetime import datetime, timezone
+
+    from fcbillar.cloud_sync import get_client
+
+    now = datetime.now(timezone.utc).isoformat()
+    sb = get_client()
+    sb.table("cloud_status").upsert(
+        {
+            "id": 1,
+            "session_ok": session_ok,
+            "last_run": now,
+            "last_error": last_error or None,
+            "n_ok": n_ok,
+            "n_fail": n_fail,
+            "updated_at": now,
+        },
+        on_conflict="id",
+    ).execute()
+    console.print(
+        f"[green]OK cloud_status: session_ok={session_ok} n_ok={n_ok} n_fail={n_fail}[/]"
+    )
+
+    if close_requests:
+        status = "error" if n_fail > 0 else "done"
+        sb.table("reingest_requests").update(
+            {"status": status, "finished_at": now, "n_ok": n_ok, "n_fail": n_fail}
+        ).eq("status", "running").execute()
+        console.print(f"[green]OK reingest_requests 'running' → '{status}'.[/]")
+
+
+app.add_typer(state_app, name="state")
+
+
+@app.command("session-check")
+def session_check_cmd() -> None:
+    """Comprova si la sessió de login encara és vàlida (per al job del núvol).
+
+    Codis de sortida: 0 = autenticat · 2 = no hi ha fitxer de sessió ·
+    3 = la sessió ha caducat (la federació torna a servir el formulari de login).
+    Qualsevol altre error (xarxa, timeout) surt amb 1 i NO s'ha d'interpretar com
+    a sessió caducada.
+    """
+    from fcbillar.auth import LOGIN_FORM_SELECTOR
+    from fcbillar.scraper.client import ScraperClient
+
+    settings = get_settings()
+    if not settings.storage_state_path.exists():
+        console.print("[red]No hi ha sessió desada.[/]")
+        raise typer.Exit(code=2)
+
+    url = f"{settings.base_url.rstrip('/')}/ca/jugador"
+    try:
+        with ScraperClient(settings) as client:
+            client.page.goto(url, wait_until="domcontentloaded")
+            form_present = client.page.query_selector(LOGIN_FORM_SELECTOR) is not None
+    except Exception as exc:  # noqa: BLE001 — error transitori, no és sessió caducada
+        console.print(f"[yellow]No s'ha pogut comprovar la sessió (transitori): {exc}[/]")
+        raise typer.Exit(code=1) from exc
+
+    if form_present:
+        console.print("[red]Sessió caducada: cal `fcbillar login` al PC i `state push --session`.[/]")
+        raise typer.Exit(code=3)
+    console.print("[green]OK sessió vàlida.[/]")
+
 
 
 @clubs_app.command("list")

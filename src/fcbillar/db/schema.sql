@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS rankings (
     format_url      TEXT NOT NULL CHECK (format_url IN ('data', 'datahome')),
     any_pub         INTEGER,
     mes_pub         INTEGER,
+    data_pub        TEXT,  -- data ISO exacta de publicació (de l'historial); font de any_pub/mes_pub
     scraped_at      TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE(num_seq, modalitat_id)
 );

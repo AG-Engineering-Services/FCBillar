@@ -385,13 +385,14 @@ class Repository:
             )
         cur = self.conn.execute(
             """
-            INSERT INTO rankings (num_seq, modalitat_id, url, format_url, any_pub, mes_pub)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO rankings (num_seq, modalitat_id, url, format_url, any_pub, mes_pub, data_pub)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(num_seq, modalitat_id) DO UPDATE SET
                 url = excluded.url,
                 format_url = excluded.format_url,
                 any_pub = COALESCE(excluded.any_pub, rankings.any_pub),
                 mes_pub = COALESCE(excluded.mes_pub, rankings.mes_pub),
+                data_pub = COALESCE(excluded.data_pub, rankings.data_pub),
                 scraped_at = datetime('now')
             RETURNING id
             """,
@@ -402,6 +403,7 @@ class Repository:
                 ranking.format_url,
                 ranking.any_pub,
                 ranking.mes_pub,
+                ranking.data_pub,
             ),
         )
         return cur.fetchone()[0]

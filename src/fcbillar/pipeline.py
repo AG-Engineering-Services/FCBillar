@@ -10,6 +10,7 @@ from datetime import date
 from fcbillar.config import Settings, get_settings
 from fcbillar.db.migrations import ensure_schema
 from fcbillar.db.repository import Repository
+from fcbillar.ranking_dates import month_for_publication_date
 from fcbillar.models import (
     Club,
     EncontreLliga,
@@ -129,8 +130,14 @@ def ingest_ranking(
     *,
     settings: Settings | None = None,
     preferred_format: str | None = None,
+    data_pub: date | None = None,
 ) -> IngestRankingResult | None:
-    """Descarrega un rànquing, el parseja i el persisteix a la BD."""
+    """Descarrega un rànquing, el parseja i el persisteix a la BD.
+
+    Si es passa `data_pub` (data real de publicació, p.ex. de l'historial),
+    es desa i en deriva `any_pub`/`mes_pub` — font autoritativa que substitueix
+    la vella heurística monòtona.
+    """
     settings = settings or client.settings
     fetched = fetch_ranking_html(
         client, num_seq, modalitat_codi_fcb, preferred_format=preferred_format
@@ -140,6 +147,10 @@ def ingest_ranking(
 
     parsed = parse_ranking(fetched.html, num_seq, modalitat_codi_fcb)
 
+    any_pub = mes_pub = None
+    if data_pub is not None:
+        any_pub, mes_pub = month_for_publication_date(data_pub)
+
     conn = ensure_schema(settings.db_path)
     repo = Repository(conn)
     ranking_id = repo.upsert_ranking(
@@ -148,6 +159,9 @@ def ingest_ranking(
             modalitat_codi_fcb=modalitat_codi_fcb,
             url=fetched.url,
             format_url=fetched.fmt,
+            any_pub=any_pub,
+            mes_pub=mes_pub,
+            data_pub=data_pub.isoformat() if data_pub is not None else None,
         )
     )
     # Upsert primer tots els jugadors perquè les entries els referencien.
@@ -431,6 +445,74 @@ def discover_historical_rankings(client: ScraperClient) -> list[HistorialEntry]:
     return parse_ranking_historial(html)
 
 
+@dataclass
+class RankingDateChange:
+    num_seq: int
+    data_pub: str
+    old: tuple[int | None, int | None]  # (any_pub, mes_pub) abans
+    new: tuple[int, int]  # (any_pub, mes_pub) derivat de la data real
+
+
+@dataclass
+class ReconcileDatesResult:
+    changed: list[RankingDateChange]  # mes_pub/any_pub que canvien
+    dated: int  # num_seq als quals s'ha (re)assignat data_pub
+    not_in_db: list[int]  # num_seq de l'historial que no existeixen a la BD
+
+
+def reconcile_ranking_dates(
+    entries: list[HistorialEntry],
+    *,
+    settings: Settings | None = None,
+) -> ReconcileDatesResult:
+    """Aplica les dates reals de l'historial a la taula `rankings`.
+
+    Per cada num_seq present a l'historial, desa `data_pub` i hi (re)deriva
+    `any_pub`/`mes_pub` per a TOTES les files de modalitat existents (la data és
+    global per num_seq). NO re-scrapeja entries; només corregeix l'etiqueta de mes.
+    Retorna un informe amb els canvis de mes detectats.
+    """
+    settings = settings or get_settings()
+    conn = ensure_schema(settings.db_path)
+
+    # num_seq -> data (global; agafem la més recent si es repetís)
+    by_seq: dict[int, date] = {}
+    for e in entries:
+        for _mod, (_fmt, num_seq) in e.rankings.items():
+            by_seq[num_seq] = e.data
+
+    changed: list[RankingDateChange] = []
+    dated = 0
+    not_in_db: list[int] = []
+    for num_seq, d in sorted(by_seq.items()):
+        ny, nm = month_for_publication_date(d)
+        rows = conn.execute(
+            "SELECT id, any_pub, mes_pub FROM rankings WHERE num_seq = ?",
+            (num_seq,),
+        ).fetchall()
+        if not rows:
+            not_in_db.append(num_seq)
+            continue
+        # Una entrada de canvi per num_seq (el mes és el mateix per totes les mod).
+        first = rows[0]
+        if (first["any_pub"], first["mes_pub"]) != (ny, nm):
+            changed.append(
+                RankingDateChange(
+                    num_seq=num_seq,
+                    data_pub=d.isoformat(),
+                    old=(first["any_pub"], first["mes_pub"]),
+                    new=(ny, nm),
+                )
+            )
+        conn.execute(
+            "UPDATE rankings SET data_pub = ?, any_pub = ?, mes_pub = ? WHERE num_seq = ?",
+            (d.isoformat(), ny, nm, num_seq),
+        )
+        dated += 1
+
+    return ReconcileDatesResult(changed=changed, dated=dated, not_in_db=not_in_db)
+
+
 def sync_current_rankings(
     client: ScraperClient, *, settings: Settings | None = None
 ) -> SyncResult:
@@ -445,7 +527,8 @@ def sync_current_rankings(
         latest_db = repo.latest_ranking_num_seq(current.modalitat_codi_fcb) or 0
         if current.num_seq > latest_db:
             result = ingest_ranking(
-                client, current.num_seq, current.modalitat_codi_fcb, settings=settings
+                client, current.num_seq, current.modalitat_codi_fcb, settings=settings,
+                data_pub=home.data_ranking,
             )
             if result is not None:
                 ingested.append((current.num_seq, current.modalitat_codi_fcb))
@@ -480,6 +563,7 @@ def backfill_ranking(
     only_followed: bool = False,
     settings: Settings | None = None,
     preferred_format: str | None = None,
+    data_pub: date | None = None,
 ) -> BackfillResult:
     """Ingest un rànquing concret + partides dels jugadors filtrats.
 
@@ -489,7 +573,8 @@ def backfill_ranking(
     """
     settings = settings or client.settings
     res = ingest_ranking(
-        client, num_seq, modalitat_codi_fcb, settings=settings, preferred_format=preferred_format
+        client, num_seq, modalitat_codi_fcb, settings=settings,
+        preferred_format=preferred_format, data_pub=data_pub,
     )
     if res is None:
         return BackfillResult(False, 0, 0, 0)
@@ -579,21 +664,20 @@ def backfill_historical(
     """
     settings = settings or client.settings
     entries = discover_historical_rankings(client)
-    # Aplanem a llista (num_seq, modalitat) ordenada cronològicament ascendent.
-    flat: list[tuple[int, int]] = []
-    flat_with_fmt: list[tuple[int, int, str]] = []
+    # Aplanem a llista (num_seq, modalitat, fmt, data) ordenada cronològicament asc.
+    flat_with_fmt: list[tuple[int, int, str, date]] = []
     for entry in sorted(entries, key=lambda e: e.data):
         for modalitat, (fmt, num_seq) in entry.rankings.items():
             if modalitat_codi_fcb is not None and modalitat != modalitat_codi_fcb:
                 continue
-            flat_with_fmt.append((num_seq, modalitat, fmt))
+            flat_with_fmt.append((num_seq, modalitat, fmt, entry.data))
 
     processed: list[tuple[int, int]] = []
     failed: list[tuple[int, int]] = []
     total_players = 0
     total_up = 0
     total_skip = 0
-    for num_seq, modalitat, fmt in flat_with_fmt:
+    for num_seq, modalitat, fmt, data_pub in flat_with_fmt:
         try:
             res = backfill_ranking(
                 client,
@@ -603,6 +687,7 @@ def backfill_historical(
                 only_followed=only_followed,
                 settings=settings,
                 preferred_format=fmt,
+                data_pub=data_pub,
             )
         except Exception as e:
             log.warning("Backfill històric: error a %s/%s: %s", num_seq, modalitat, e)

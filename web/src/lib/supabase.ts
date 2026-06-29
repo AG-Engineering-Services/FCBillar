@@ -12,6 +12,18 @@ export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_K
 	auth: { persistSession: false }
 });
 
+// Estat de l'última reingesta al núvol (taula fcbillar.cloud_status, una sola fila).
+// L'escriu el workflow reingest.yml via `fcbillar state report`. El PWA la llegeix
+// per avisar l'admin quan cal re-login al PC (session_ok=false).
+export interface CloudStatus {
+	session_ok: boolean;
+	last_run: string | null;
+	last_error: string | null;
+	n_ok: number | null;
+	n_fail: number | null;
+	updated_at: string | null;
+}
+
 export interface Modalitat {
 	codi_fcb: number;
 	nom: string;

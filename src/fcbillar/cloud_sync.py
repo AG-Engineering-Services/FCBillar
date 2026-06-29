@@ -163,10 +163,11 @@ def publish_rankings(
             "num_seq": r["num_seq"],
             "any_pub": r["any_pub"],
             "mes_pub": r["mes_pub"],
+            "data_pub": r["data_pub"],
         }
         for r in conn.execute(
             """
-            SELECT m.codi_fcb AS modalitat_codi, r.num_seq, r.any_pub, r.mes_pub
+            SELECT m.codi_fcb AS modalitat_codi, r.num_seq, r.any_pub, r.mes_pub, r.data_pub
             FROM rankings r JOIN modalitats m ON m.id = r.modalitat_id
             """
         )

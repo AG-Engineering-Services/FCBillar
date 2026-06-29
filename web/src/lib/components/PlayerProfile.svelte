@@ -15,11 +15,11 @@
 	let { fcbId, kiosk = false }: { fcbId: string; kiosk?: boolean } = $props();
 
 	// --- Botó de reingesta manual (NOMÉS a la fitxa de l'Albert Gómez) --------
-	// Dispara la reingesta del web de la federació que corre al PC de casa. Com que
-	// el PWA és al núvol i la reingesta necessita les BD locals + la sessió de login,
-	// el botó només encua una petició a Supabase (taula reingest_requests); un
-	// watcher al PC (scripts/reingest_watcher.ps1) la consumeix i executa la
-	// reingesta. Gate: cal el correu autoritzat (validat també per RLS al servidor).
+	// Dispara la reingesta de la federació, que ARA corre al núvol (GitHub Actions).
+	// El botó només encua una petició a Supabase (taula reingest_requests); el
+	// workflow reingest-dispatch.yml la consulta cada pocs minuts i dispara la
+	// reingesta al núvol. Gate: cal el correu autoritzat (validat també per RLS al
+	// servidor).
 	const ADMIN_FCB_ID = '278';
 	const ADMIN_EMAIL = 'algoam@gmail.com';
 	const isAdmin = $derived(fcbId === ADMIN_FCB_ID);
@@ -34,6 +34,13 @@
 			reingestMsg = 'Correu no autoritzat.';
 			return;
 		}
+		// Marca aquest dispositiu com a admin perquè el layout mostri l'avís de
+		// sessió caducada (cloud_status.session_ok=false) només a qui pot actuar-hi.
+		try {
+			localStorage.setItem('fcb_admin', '1');
+		} catch {
+			/* localStorage no disponible: no és crític */
+		}
 		reingestState = 'sending';
 		reingestMsg = '';
 		const { error: e } = await supabase
@@ -44,7 +51,7 @@
 			reingestMsg = `No s'ha pogut encuar: ${e.message}`;
 		} else {
 			reingestState = 'ok';
-			reingestMsg = "Petició enviada. La reingesta s'executarà al PC quan estigui engegat (cada pocs minuts).";
+			reingestMsg = "Petició enviada. La reingesta s'executarà al núvol en pocs minuts.";
 		}
 	}
 

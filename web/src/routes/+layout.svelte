@@ -12,6 +12,10 @@
 	// refresca l'estat durant les finestres de competició (dv/ds/dg), així que
 	// si el snapshot més recent és d'aquesta darrera hora i mitja, s'està jugant.
 	let liveCount = $state(0);
+	// Avís de manteniment NOMÉS per a l'admin (qui ha usat el botó de reingesta,
+	// marcat a localStorage): si la sessió de login de la federació ha caducat, la
+	// reingesta del núvol no pot entrar dades noves fins fer `fcbillar login` al PC.
+	let sessionExpired = $state(false);
 	onMount(async () => {
 		const since = new Date(Date.now() - 90 * 60 * 1000).toISOString();
 		const { count } = await supabase
@@ -19,6 +23,17 @@
 			.select('fcb_division_id', { count: 'exact', head: true })
 			.gte('captured_at', since);
 		liveCount = count ?? 0;
+
+		const isAdmin =
+			typeof localStorage !== 'undefined' && localStorage.getItem('fcb_admin') === '1';
+		if (isAdmin) {
+			const { data } = await supabase
+				.from('cloud_status')
+				.select('session_ok')
+				.eq('id', 1)
+				.maybeSingle();
+			sessionExpired = data?.session_ok === false;
+		}
 	});
 
 	// En canviar de pàgina, torna a dalt. EXCEPCIÓ: en navegacions enrere/endavant
@@ -114,6 +129,16 @@
 			{/each}
 		</nav>
 	</header>
+	{/if}
+	{#if sessionExpired && !embed}
+		<div
+			class="mx-3 mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-200 md:mx-6"
+			role="status"
+		>
+			⚠ La sessió de la federació ha caducat: la reingesta del núvol no incorpora dades
+			noves. Fes <code class="font-mono">fcbillar login</code> i
+			<code class="font-mono">state push --session</code> al PC.
+		</div>
 	{/if}
 	<main class="flex-1 px-3 py-3 md:px-6 md:py-5">
 		{@render children()}

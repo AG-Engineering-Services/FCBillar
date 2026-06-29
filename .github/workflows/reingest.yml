@@ -1,0 +1,139 @@
+name: Reingesta (núvol)
+
+# Reingesta setmanal completa de FCBillar, ABANS feta al PC de casa (Tasca
+# Programada de Windows) i ARA al núvol. Baixa l'estat canònic de Cloudflare R2
+# (BD + sessió de login), incorpora les novetats de la federació (fcbillar.cat) i
+# publica a Supabase, d'on l'app web (Vercel) llegeix en temps d'execució.
+#
+# Disparadors:
+#   - schedule:           dilluns 02:00 UTC (reingesta setmanal desatesa)
+#   - workflow_dispatch:  manual (inputs force / copa_edicio)
+#   - repository_dispatch: type 'reingest' — el pont del botó del PWA
+#                          (.github/workflows/reingest-dispatch.yml) el dispara.
+#
+# REQUISITS (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   (publicació)
+#   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET  (estat a R2)
+#
+# La sessió de login NO es pot renovar al núvol (captcha): si caduca, el job ho
+# detecta (`session-check`), omet els passos amb login, i marca cloud_status
+# perquè el PWA mostri un banner "cal re-login al PC".
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'        # dilluns 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Força encara que sigui dins l'aturada d'estiu (1-24 ago)"
+        type: boolean
+        default: false
+      copa_edicio:
+        description: "ID d'edició de la Copa a fcbillar.cat"
+        default: "7"
+  repository_dispatch:
+    types: [reingest]
+
+# Serialitza i NO cancel·la: mai matar una escriptura a mig fer (a diferència del
+# workflow de live-opens, que sí pot cancel·lar perquè no escriu res durador).
+concurrency:
+  group: reingest
+  cancel-in-progress: false
+
+jobs:
+  reingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      COPA_EDICIO: ${{ github.event.inputs.copa_edicio || '7' }}
+      FORCE: ${{ github.event.inputs.force || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Porta d'aturada d'estiu (omet 1-24 d'agost, en UTC, tret de force).
+      - id: gate
+        run: |
+          if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          M=$(date -u +%m); D=$(date -u +%d)
+          if [ "$M" = "08" ] && [ "$D" -lt 25 ]; then
+            echo "Aturada d'estiu (1-24 d'agost): ometo la reingesta."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up uv
+        if: steps.gate.outputs.skip != 'true'
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # Cau dels navegadors de Playwright (clau lligada a uv.lock, que fixa la
+      # versió de playwright i per tant la del Chromium).
+      - name: Cache Playwright browsers
+        if: steps.gate.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+
+      - name: Install Chromium
+        if: steps.gate.outputs.skip != 'true'
+        run: uv run --no-dev playwright install --with-deps chromium
+
+      - name: Baixa l'estat canònic de R2
+        if: steps.gate.outputs.skip != 'true'
+        run: uv run --no-dev fcbillar state pull --all
+
+      - name: Reingesta (7 passos aïllats, continua si un falla)
+        if: steps.gate.outputs.skip != 'true'
+        run: |
+          set +e
+          NOK=0; NFAIL=0
+          run() { local name="$1"; shift; echo "::group::$name"; "$@"; local rc=$?; echo "exit=$rc"; echo "::endgroup::"; if [ "$rc" -eq 0 ]; then NOK=$((NOK+1)); else NFAIL=$((NFAIL+1)); fi; }
+
+          # Comprova la sessió: 0=ok, 2=sense sessió, 3=caducada, 1=transitori.
+          uv run --no-dev fcbillar session-check; SC=$?
+          SESSION_OK=true
+          if [ "$SC" -eq 0 ]; then
+            run "import-temporada"   uv run --no-dev fcbillar import-temporada
+            run "ingest-individuals" uv run --no-dev fcbillar ingest-individuals
+            run "ingest-copa"        uv run --no-dev fcbillar ingest-copa "$COPA_EDICIO"
+          else
+            echo "session-check=$SC: ometo els passos amb login."
+            NFAIL=$((NFAIL+1))
+            if [ "$SC" -eq 2 ] || [ "$SC" -eq 3 ]; then SESSION_OK=false; fi
+          fi
+
+          # Passos públics (httpx, sense login) i publicació al núvol.
+          run "scrape-current-opens" uv run --no-dev python -m fcb_opens.cli scrape-current-opens
+          run "scrape-lliga"         uv run --no-dev python -m fcb_opens.cli scrape-lliga 36 --full
+          run "publish-cloud"        uv run --no-dev fcbillar publish-cloud
+          run "supabase-sync"        uv run --no-dev python -m fcb_opens.cli supabase-sync
+          run "encoding-scan"        uv run --no-dev python scripts/repair_supabase_encoding.py
+
+          echo "N_OK=$NOK"            >> "$GITHUB_ENV"
+          echo "N_FAIL=$NFAIL"        >> "$GITHUB_ENV"
+          echo "SESSION_OK=$SESSION_OK" >> "$GITHUB_ENV"
+          echo "Resum: OK=$NOK FALLATS=$NFAIL session_ok=$SESSION_OK"
+
+      # Repuja les BD a R2 encara que algun pas hagi fallat (els upserts són
+      # parcials però vàlids); mai sobre una execució saltada per l'estiu.
+      - name: Repuja l'estat a R2
+        if: always() && steps.gate.outputs.skip != 'true'
+        run: uv run --no-dev fcbillar state push --all
+
+      - name: Reporta l'estat (cloud_status + tanca peticions del botó)
+        if: always() && steps.gate.outputs.skip != 'true'
+        run: |
+          SESSION_FLAG="--session-ok"; [ "${SESSION_OK:-true}" = "false" ] && SESSION_FLAG="--no-session-ok"
+          uv run --no-dev fcbillar state report \
+            $SESSION_FLAG \
+            --n-ok "${N_OK:-0}" --n-fail "${N_FAIL:-0}" \
+            --close-requests
