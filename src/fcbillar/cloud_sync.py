@@ -513,6 +513,35 @@ def publish_pending_games(
                 _add(vf, r["local_nom"], lf, r["visitant_caramboles"], r["local_caramboles"],
                      r["entrades"], r["visitant_serie"], "Copa", "copa", sig, None)
 
+            # --- OPENS 3B de la temporada en curs (torneig_partides) ---
+            # Partides reals d'opens scrapejades per ingest_open_games, encara NO al
+            # rànquing oficial (dedup per signatura contra `games`). Cobreix l'OPEN ja
+            # acabat però no absorbit pel rànquing mensual (cas Costa Daurada): mentre
+            # open_live només té els opens EN DIRECTE, aquesta font manté la pendència
+            # fins que la ingesta oficial els incorpora a `games`. La modalitat de l'open
+            # viu al NOM (torneigs_individuals.modalitat_id és NULL), per això filtrem
+            # per "TRES BANDES" i temporada en curs (temporada_id=1, no femení).
+            for r in conn.execute(
+                """SELECT ti.nom comp, tp.player1_nom n1, tp.caramboles1 c1, tp.serie1 s1,
+                          tp.player2_nom n2, tp.caramboles2 c2, tp.serie2 s2, tp.entrades e
+                   FROM torneig_partides tp
+                   JOIN torneigs_individuals ti
+                     ON ti.torneig_id_extern = tp.torneig_id_extern
+                        AND ti.divisio_id_extern = tp.divisio_id_extern
+                   WHERE ti.temporada_id = 1
+                     AND ti.nom LIKE '%TRES BANDES%' AND ti.nom NOT LIKE '%FEMENI%'"""
+            ):
+                if not r["e"] or r["e"] <= 0:
+                    continue
+                sig = _sig(r["n1"], r["c1"], r["n2"], r["c2"], r["e"])
+                if sig in game_sigs:
+                    continue
+                comp = _re.sub(r"^OPEN\s+TRES BANDES\s+", "", r["comp"] or "", flags=_re.I).strip() or "Open"
+                lf = nom2fcb.get(_nm(r["n1"]))
+                vf = nom2fcb.get(_nm(r["n2"]))
+                _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "open", sig, None)
+                _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "open", sig, None)
+
         # --- OPENS EN CURS (open_live) ---
         modname = _MODNM.get(mod)
         for ol in live_rows:
