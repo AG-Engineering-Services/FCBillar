@@ -632,16 +632,24 @@ def session_check_cmd() -> None:
         console.print("[red]No hi ha sessió desada.[/]")
         raise typer.Exit(code=2)
 
-    url = f"{settings.base_url.rstrip('/')}/ca/jugador"
+    # IMPORTANT: comprovem /jugador/home, NO /ca/jugador. La landing /ca/jugador
+    # renderitza el formulari de login (#formloguinacion) al DOM SEMPRE —fins i tot
+    # autenticat—, cosa que donava falsos "sessió caducada". A /jugador/home el form
+    # només hi és si NO estàs autenticat (si la sessió ha caducat, la federació hi
+    # redirigeix a la landing de login). Sessió vàlida = sense formulari I encara a
+    # /jugador/home.
+    url = f"{settings.base_url.rstrip('/')}/jugador/home"
     try:
         with ScraperClient(settings) as client:
             client.page.goto(url, wait_until="domcontentloaded")
+            client.page.wait_for_timeout(1500)  # deixa que un eventual redirect s'assenti
             form_present = client.page.query_selector(LOGIN_FORM_SELECTOR) is not None
+            on_home = "/jugador/home" in client.page.url
     except Exception as exc:  # noqa: BLE001 — error transitori, no és sessió caducada
         console.print(f"[yellow]No s'ha pogut comprovar la sessió (transitori): {exc}[/]")
         raise typer.Exit(code=1) from exc
 
-    if form_present:
+    if form_present or not on_home:
         console.print("[red]Sessió caducada: cal `fcbillar login` al PC i `state push --session`.[/]")
         raise typer.Exit(code=3)
     console.print("[green]OK sessió vàlida.[/]")
