@@ -5,6 +5,7 @@ línia perquè la UI pugui mostrar el log en viu.
 """
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -12,6 +13,31 @@ from pathlib import Path
 from PyQt6.QtCore import QObject, QThread, pyqtSignal
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+# Claus que els subprocessos (en especial `fcb_opens`, que NOMÉS llegeix l'entorn,
+# no el .env) necessiten per publicar al núvol. Les carreguem del .env a l'entorn
+# del subprocés perquè els botons de publicació funcionin com ho fa weekly_reingest.ps1.
+_ENV_KEYS = (
+    "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY",
+    "R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET",
+)
+
+
+def _subprocess_env() -> dict[str, str]:
+    """os.environ + claus rellevants del .env del projecte (sense sobreescriure-les)."""
+    env = dict(os.environ)
+    dotenv = PROJECT_ROOT / ".env"
+    if dotenv.exists():
+        for raw in dotenv.read_text(encoding="utf-8").splitlines():
+            t = raw.strip()
+            if not t or t.startswith("#") or "=" not in t:
+                continue
+            name, _, val = t.partition("=")
+            name = name.strip()
+            val = val.strip().strip('"').strip("'")
+            if name in _ENV_KEYS and val and not env.get(name):
+                env[name] = val
+    return env
 
 
 class SubprocessWorker(QThread):
@@ -35,6 +61,7 @@ class SubprocessWorker(QThread):
                 bufsize=1,
                 encoding="utf-8",
                 errors="replace",
+                env=_subprocess_env(),
             )
         except FileNotFoundError as e:
             self.line_received.emit(f"ERROR: {e}")

@@ -20,7 +20,7 @@ from desktop.views.partides_view import PartidesView
 from desktop.views.players_view import PlayersView
 from desktop.views.rankings_view import RankingsView
 from desktop.views.results_view import ResultsView
-from desktop.views.scraping_view import ScrapingView
+from desktop.views.reingesta_view import ReingestaView
 from desktop.views.virtual_clubs_view import VirtualClubsView
 
 SIDEBAR_ITEMS = [
@@ -32,7 +32,7 @@ SIDEBAR_ITEMS = [
     ("Clubs", "🏛"),
     ("Focus club", "⭐"),
     ("Clubs virtuals", "🧩"),
-    ("Scraping", "🔄"),
+    ("Reingesta", "🔄"),
 ]
 
 
@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
             ClubsView(self._controller),
             ClubFocusView(self._controller),
             VirtualClubsView(self._controller),
-            ScrapingView(),
+            ReingestaView(),
         ]
         for view in self._views:
             self._stack.addWidget(view)
