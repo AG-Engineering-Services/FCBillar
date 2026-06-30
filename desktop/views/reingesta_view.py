@@ -127,11 +127,11 @@ class ReingestaView(QWidget):
     def _build_nologada(self) -> QFrame:
         frame, lay = _panel("🌐  No logada — pàgines públiques")
 
-        self._cb_lliga = QCheckBox("Lliga (fcb_opens scrape-lliga 36)")
+        self._cb_lliga = QCheckBox("Lliga 3 bandes (encontres + promocions → games/pendents)")
         self._cb_copa = QCheckBox("Copa")
-        self._cb_opens = QCheckBox("Opens / Individuals (+ resultats)")
-        self._cb_indiv = QCheckBox("Scrape current opens (en directe)")
-        for cb in (self._cb_lliga, self._cb_copa, self._cb_opens, self._cb_indiv):
+        self._cb_opens = QCheckBox("Opens / competicions individuals (resultats)")
+        self._cb_oprank = QCheckBox("Rànquing d'opens (en directe)")
+        for cb in (self._cb_lliga, self._cb_copa, self._cb_opens, self._cb_oprank):
             cb.setChecked(True)
             lay.addWidget(cb)
 
@@ -182,13 +182,17 @@ class ReingestaView(QWidget):
             steps.append(("Ingest individuals (opens/catalans)", [*FCB, "ingest-individuals"]))
             steps.append(("Resultats reals d'opens (torneig_partides)",
                           [*UV, "python", "scripts/ingest_open_games.py"]))
-        if self._cb_indiv.isChecked():
-            steps.append(("Scrape current opens", [*OPENS, "scrape-current-opens"]))
+            steps.append(("Scrape current opens (fcb_opens)", [*OPENS, "scrape-current-opens"]))
+        if self._cb_oprank.isChecked():
+            steps.append(("Rànquing d'opens en directe (open_live)", [*FCB, "publish-live-opens"]))
         if self._cb_copa.isChecked():
             steps.append((f"Ingest Copa (edició {self._copa_edicio.value()})",
                           [*FCB, "ingest-copa", str(self._copa_edicio.value())]))
         if self._cb_lliga.isChecked():
-            steps.append(("Scrape lliga 3 bandes", [*OPENS, "scrape-lliga", "36", "--full"]))
+            steps.append(("Lliga 3B → games/pendents (fcbillar ingest-lliga)",
+                          [*FCB, "ingest-lliga", "36"]))
+            steps.append(("Lliga 3B → classificacions (fcb_opens)",
+                          [*OPENS, "scrape-lliga", "36", "--full"]))
         if self._cb_publish.isChecked():
             steps.extend(self._publish_steps())
         if not steps:

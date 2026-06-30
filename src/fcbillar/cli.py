@@ -400,6 +400,54 @@ def ingest_lliga_grup_cmd(
     )
 
 
+@app.command("ingest-lliga")
+def ingest_lliga_cmd(
+    lliga_id: int = typer.Argument(36, help="Id de la lliga (36=TRES BANDES, 37=4 MODALITATS)"),
+    modalitat: int = typer.Option(1, "--modalitat", help="Codi de modalitat"),
+    create_missing_players: bool = typer.Option(
+        False, "--create-missing-players", help="Crea placeholders pels jugadors no registrats"
+    ),
+) -> None:
+    """Ingest de TOTA una lliga: descobreix divisions+grups (incloses PROMOCIONS i
+    FINALS) i ingest totes les jornades de cada grup. Pàgines públiques (no login)."""
+    settings = get_settings()
+    tot_enc = tot_up = tot_skip = 0
+    with ScraperClient(settings) as client:
+        tree = discover_lliga(client, lliga_id, depth=2)
+        n_grups = sum(len(g) for g in tree.grups_by_div.values())
+        console.print(
+            f"[cyan]Lliga {lliga_id}: {len(tree.divisions)} divisions, {n_grups} grups[/]"
+        )
+        for div in tree.divisions:
+            for grup in tree.grups_by_div.get(div.divisio_id, []):
+                try:
+                    r = ingest_lliga_grup(
+                        client,
+                        lliga_id=lliga_id,
+                        divisio_id=div.divisio_id,
+                        grup_id=grup.grup_id,
+                        modalitat_codi_fcb=modalitat,
+                        settings=settings,
+                        create_missing_players=create_missing_players,
+                    )
+                    tot_enc += r.total_encontres
+                    tot_up += r.total_games_upserted
+                    tot_skip += r.total_games_skipped
+                    console.print(
+                        f"  {div.divisio_id}/{grup.grup_id} {grup.nom}: "
+                        f"{r.jornades_processed} jorn, {r.total_encontres} enc, "
+                        f"{r.total_games_upserted} desades, {r.total_games_skipped} pendents"
+                    )
+                except Exception as e:  # noqa: BLE001
+                    console.print(
+                        f"  [yellow]{div.divisio_id}/{grup.grup_id} {grup.nom}: ERROR {e}[/]"
+                    )
+    console.print(
+        f"[green]OK lliga {lliga_id}: {tot_enc} encontres, {tot_up} desades, "
+        f"{tot_skip} pendents/saltades.[/]"
+    )
+
+
 @app.command("discover-lliga")
 def discover_lliga_cmd(
     lliga_id: int = typer.Argument(..., help="Id de la lliga (36=TRES BANDES, 37=4 MODALITATS)"),

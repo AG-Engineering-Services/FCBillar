@@ -807,7 +807,10 @@ def parse_lliga_jornades(html: str) -> list[LligaJornadaLink]:
     if section is None:
         raise ValueError("Secció principal no trobada a la pàgina de jornades")
     out: list[LligaJornadaLink] = []
-    for box in section.select("div.row.box.info"):
+    # `div.row.box` (no `.info`): les jornades de PROMOCIÓ (ANADA/TORNADA) NO porten
+    # la classe `info` que sí tenen les jornades regulars/finals. La regex d'href de
+    # sota és el filtre real, així que ampliar el selector és segur.
+    for box in section.select("div.row.box"):
         link = box.select_one("a[href]")
         if link is None:
             continue
