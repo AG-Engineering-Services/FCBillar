@@ -7,8 +7,9 @@
     federatiu amb captcha) i és l'amo d'aquestes dades. La part NO-LOGADA (lliga,
     copa, opens) la fa ARA un workflow diari al núvol (.github/workflows/
     reingest-nologin.yml). Perquè el núvol no trepitgi els rànquings, aquest script
-    puja la BD canònica a R2 al final (`state push --all`); el núvol l'estira amb
-    `state pull`. L'altra automatització al núvol és publish-live-opens.yml.
+    puja les BD canòniques al GitHub Release 'fcb-state' al final (`gh release
+    upload`); el núvol les baixa amb `gh release download`. L'altra automatització
+    al núvol és publish-live-opens.yml.
 
 .DESCRIPTION
     Incorpora les darreres novetats publicades al web de la federació
@@ -144,13 +145,7 @@ function Import-DotEnvKeys($path, [string[]]$keys) {
         if ($val) { Set-Item -Path ("Env:{0}" -f $name) -Value $val }
     }
 }
-Import-DotEnvKeys (Join-Path $repo '.env') @(
-    'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY',
-    # R2: perquè el `state push` final mantingui fresca la BD canònica que el
-    # workflow diari no-logat (reingest-nologin.yml) estira. fcbillar ja llegeix
-    # .env, però les injectem a l'entorn per uniformitat i per poder-les detectar.
-    'R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET'
-)
+Import-DotEnvKeys (Join-Path $repo '.env') @('SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY')
 
 # --- Executor de passos (aïllat; continua si un falla) ----------------------
 $script:nOk = 0; $script:nFail = 0
@@ -200,18 +195,23 @@ if ($SkipPublish) {
     Invoke-Step 'verifica codificació del núvol (scan)'           @($uv, 'run', 'python', 'scripts/repair_supabase_encoding.py')
 }
 
-# --- Puja la BD canònica a R2 (per al workflow diari no-logat) ---------------
+# --- Puja les BD canòniques al GitHub Release (per al workflow diari no-logat) -
 # Re-acoblat 2026-07-05: el PC (logat) és l'amo dels rànquings/games; el workflow
 # reingest-nologin.yml (núvol, diari) refresca lliga/copa/opens. Perquè el
 # publish-cloud del núvol NO trepitgi els rànquings frescos amb una BD vella, el
-# PC puja la BD a R2 al final de cada reingesta. El núvol fa `state pull` i, en
-# publicar, reescriu els mateixos rànquings (idempotent). Si no hi ha R2 al .env,
-# s'omet silenciosament (setup encara no fet).
-if ($env:R2_ACCOUNT_ID -and $env:R2_BUCKET) {
-    # Sense flags = puja db + opens-db (no la sessió; aquesta la puja `fcbillar login`).
-    Invoke-Step 'state push (BD canònica a R2)' @($uv, 'run', 'fcbillar', 'state', 'push')
+# PC puja les BD al release 'fcb-state' al final de cada reingesta. El núvol les
+# baixa amb `gh release download` i, en publicar, reescriu els mateixos rànquings
+# (idempotent). Cal `gh` autenticat amb permís contents:write al repo. Si no hi ha
+# `gh`, s'omet silenciosament (setup encara no fet).
+$gh = (Get-Command gh -ErrorAction SilentlyContinue).Source
+if ($gh -and -not $DryRun) {
+    Invoke-Step 'gh release upload (BD al release fcb-state)' @(
+        $gh, 'release', 'upload', 'fcb-state',
+        (Join-Path $repo 'data\fcbillar.db'), (Join-Path $repo 'data\fcb_opens.db'),
+        '--clobber'
+    )
 } else {
-    Write-Log "R2 no configurat al .env: s'omet la pujada d'estat a R2 (el workflow diari no-logat en depèn)."
+    Write-Log "gh no disponible (o DryRun): s'omet la pujada de BD al release (el workflow diari no-logat en depèn)."
 }
 
 # --- Neteja de logs antics (conserva els 30 més recents) --------------------

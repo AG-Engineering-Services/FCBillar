@@ -1,21 +1,26 @@
 name: Reingesta no-logada (núvol)
 
 # Reingesta DIÀRIA de les dades PÚBLIQUES de FCBillar (sense login federatiu):
-# lliga, copa i opens/individuals. Baixa l'estat canònic de Cloudflare R2 (BD +
-# sessió), incorpora les novetats de fcbillar.cat i publica a Supabase, d'on
-# l'app web (Vercel) llegeix en temps d'execució.
+# lliga, copa i opens/individuals. L'estat (les dues BD SQLite) es guarda GRATIS
+# com a assets d'un GitHub Release (tag 'fcb-state'), no a cap servei extern.
+# Incorpora les novetats de fcbillar.cat i publica a Supabase, d'on l'app web
+# (Vercel) llegeix en temps d'execució.
 #
-# Per què R2 encara que sigui "no-logat": el ScraperClient de fcbillar llança
-# Chromium i EXIGEIX que existeixi session/storage_state.json (tot i que les
-# pàgines de lliga/copa/opens són públiques i carreguen amb sessió caducada), i
-# publish-cloud publica des de data/fcbillar.db (cal la BD amb el players master
-# per enllaçar partides). Per això: state pull → scrape → publish → state push.
+# Per què cal persistir la BD encara que sigui "no-logat":
+#   - publish-cloud publica des de data/fcbillar.db (cal el players master per
+#     enllaçar partides, i els rànquings que el PC hi ha deixat).
+#   - el ScraperClient de fcbillar llança Chromium i EXIGEIX que existeixi
+#     session/storage_state.json. PERÒ les pàgines de lliga/copa/opens són
+#     públiques → n'hi ha prou amb una sessió BUIDA (verificat), que generem al
+#     vol. Així NO exposem cap credencial de login al release públic.
 #
 # DIVISIÓ D'AMOS (evita clobbering PC↔núvol):
-#   - PC (weekly_reingest.ps1, LOGAT):  rànquings + games  → puja BD a R2 al final
+#   - PC (weekly_reingest.ps1, LOGAT):  rànquings + games  → puja la BD al release
 #   - Núvol (aquest job, NO-LOGAT):     lliga + copa + opens
-#   El núvol estira sempre la BD fresca del PC, així publish-cloud reescriu els
-#   mateixos rànquings (idempotent) i només canvia lliga/copa/opens.
+#   El núvol baixa sempre la BD fresca del PC, així publish-cloud reescriu els
+#   mateixos rànquings (idempotent) i només canvia lliga/copa/opens. Els dos
+#   escriuen al mateix release (last-writer-wins); no coincideixen en el temps
+#   (PC ~06-07h UTC dissabte/diumenge, núvol 21h UTC cada dia).
 #
 # Disparadors:
 #   - schedule:          cada dia 21:00 UTC (≈22:00 Barcelona a l'hivern, 23:00 a
@@ -23,12 +28,15 @@ name: Reingesta no-logada (núvol)
 #                        és irrellevant perquè caça el dia sencer de competició)
 #   - workflow_dispatch: manual (inputs force / copa_edicio)
 #
-# REQUISITS (Settings → Secrets and variables → Actions):
-#   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY                              (publicació)
-#   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET     (estat a R2)
-# I un SEED inicial des del PC:  fcbillar state push --db --opens-db --session
-# (puja data/fcbillar.db + data/fcb_opens.db + session/storage_state.json a R2;
-#  cal --session explícit perquè `state push` sense flags NO puja la sessió).
+# REQUISITS:
+#   - Secrets (Settings → Secrets and variables → Actions):
+#       SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+#     (GITHUB_TOKEN ja el proporciona Actions; amb permissions: contents: write
+#      pot escriure els assets del release.)
+#   - SEED inicial des del PC (una vegada):
+#       gh release create fcb-state --prerelease --title "Estat canònic (reingest)" \
+#         --notes "BD del workflow reingest-nologin. No editar a mà."
+#       gh release upload fcb-state data/fcbillar.db data/fcb_opens.db --clobber
 
 on:
   schedule:
@@ -43,8 +51,7 @@ on:
         description: "ID d'edició de la Copa a fcbillar.cat"
         default: "7"
 
-# Serialitza i NO cancel·la: comparteix el grup 'reingest' amb qualsevol altra
-# escriptura d'estat perquè mai coincideixin dues escriptures a mig fer a R2.
+# Serialitza i NO cancel·la: mai matar una escriptura del release a mig fer.
 concurrency:
   group: reingest
   cancel-in-progress: false
@@ -53,13 +60,13 @@ jobs:
   reingest-nologin:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: write          # per pujar/baixar assets del release fcb-state
     env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      STATE_TAG: fcb-state
       COPA_EDICIO: ${{ github.event.inputs.copa_edicio || '7' }}
       FORCE: ${{ github.event.inputs.force || 'false' }}
     steps:
@@ -96,10 +103,17 @@ jobs:
         if: steps.gate.outputs.skip != 'true'
         run: uv run --no-dev playwright install --with-deps chromium
 
-      - name: Baixa l'estat canònic de R2 (BD + sessió)
+      # Baixa l'estat (les 2 BD) del release i genera una sessió BUIDA. Si el
+      # release/asset no existeix, falla expressament: cal fer el SEED abans (la
+      # BD amb el players master + rànquings del PC és imprescindible).
+      - name: Baixa l'estat del release (BD) + sessió buida
         if: steps.gate.outputs.skip != 'true'
-        # Sense flags = baixa-ho tot (db + opens-db + sessió).
-        run: uv run --no-dev fcbillar state pull
+        run: |
+          gh release download "$STATE_TAG" --dir data \
+            --pattern 'fcbillar.db' --pattern 'fcb_opens.db' --clobber
+          mkdir -p session
+          printf '%s' '{"cookies":[],"origins":[]}' > session/storage_state.json
+          ls -lh data/fcbillar.db data/fcb_opens.db
 
       - name: Reingesta no-logada (passos aïllats, continua si un falla)
         if: steps.gate.outputs.skip != 'true'
@@ -108,7 +122,7 @@ jobs:
           NOK=0; NFAIL=0
           run() { local name="$1"; shift; echo "::group::$name"; "$@"; local rc=$?; echo "exit=$rc"; echo "::endgroup::"; if [ "$rc" -eq 0 ]; then NOK=$((NOK+1)); else NFAIL=$((NFAIL+1)); fi; }
 
-          # Pàgines públiques (Chromium amb sessió possiblement caducada — no importa)
+          # Pàgines públiques (Chromium amb sessió buida — n'hi ha prou)
           run "ingest-lliga"         uv run --no-dev fcbillar ingest-lliga 36
           run "ingest-copa"          uv run --no-dev fcbillar ingest-copa "$COPA_EDICIO"
           run "ingest-individuals"   uv run --no-dev fcbillar ingest-individuals
@@ -116,7 +130,7 @@ jobs:
           run "scrape-lliga"         uv run --no-dev python -m fcb_opens.cli scrape-lliga 36 --full
 
           # Publicació a Supabase (fcbillar publica tot des de la BD; els rànquings
-          # coincideixen amb els que el PC ja va pujar a R2 → reescriptura idempotent).
+          # coincideixen amb els que el PC ja va pujar al release → idempotent).
           run "publish-cloud"        uv run --no-dev fcbillar publish-cloud
           run "supabase-sync"        uv run --no-dev python -m fcb_opens.cli supabase-sync
           run "encoding-scan"        uv run --no-dev python scripts/repair_supabase_encoding.py
@@ -125,9 +139,9 @@ jobs:
           echo "N_FAIL=$NFAIL" >> "$GITHUB_ENV"
           echo "Resum: OK=$NOK FALLATS=$NFAIL"
 
-      # Repuja les BD a R2 encara que algun pas hagi fallat (upserts parcials però
-      # vàlids); mai sobre una execució saltada per l'aturada d'estiu.
-      - name: Repuja l'estat a R2
+      # Repuja les BD al release encara que algun pas hagi fallat (upserts parcials
+      # però vàlids); mai sobre una execució saltada per l'aturada d'estiu.
+      - name: Repuja l'estat (BD) al release
         if: always() && steps.gate.outputs.skip != 'true'
-        # Sense flags = puja db + opens-db (NO la sessió: el núvol no la renova).
-        run: uv run --no-dev fcbillar state push
+        run: |
+          gh release upload "$STATE_TAG" data/fcbillar.db data/fcb_opens.db --clobber
