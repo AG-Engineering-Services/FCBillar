@@ -3,11 +3,12 @@
     Reingesta setmanal completa de FCBillar (partides + rànquings) i publicació
     al núvol.
 
-    NOTA: el calendari CANÒNIC ara és al núvol (GitHub Actions,
-    .github/workflows/reingest.yml), que no depèn del PC. Aquest script queda com
-    a FALLBACK local manual (p.ex. si el núvol està caigut o per fer edicions
-    curades). En acabar, puja l'estat a R2 (`fcbillar state push`) perquè la còpia
-    del núvol segueixi sent la canònica.
+    NOTA: aquest script fa la part LOGADA (rànquings + games, que necessiten login
+    federatiu amb captcha) i és l'amo d'aquestes dades. La part NO-LOGADA (lliga,
+    copa, opens) la fa ARA un workflow diari al núvol (.github/workflows/
+    reingest-nologin.yml). Perquè el núvol no trepitgi els rànquings, aquest script
+    puja la BD canònica a R2 al final (`state push --all`); el núvol l'estira amb
+    `state pull`. L'altra automatització al núvol és publish-live-opens.yml.
 
 .DESCRIPTION
     Incorpora les darreres novetats publicades al web de la federació
@@ -19,10 +20,13 @@
 
       INGESTA LOCAL  ->  data/fcbillar.db i data/fcb_opens.db
         1. fcbillar import-temporada       clubs + rànquings per modalitat   [LOGIN]
-        2. fcbillar ingest-individuals     opens / torneigs individuals
-        3. fcbillar ingest-copa <edicio>   Copa Catalana
-        4. fcb_opens scrape-current-opens  opens (BD fcb_opens)
-        5. fcb_opens scrape-lliga 36 --full lliga Tres Bandes (BD fcb_opens)
+        2. fcbillar backfill 1|2|3|4|6     partides del rànquing actual de totes
+                                           les modalitats (import-temporada NO
+                                           baixa partides)                   [LOGIN]
+        3. fcbillar ingest-individuals     opens / torneigs individuals
+        4. fcbillar ingest-copa <edicio>   Copa Catalana
+        5. fcb_opens scrape-current-opens  opens (BD fcb_opens)
+        6. fcb_opens scrape-lliga 36 --full lliga Tres Bandes (BD fcb_opens)
 
       PUBLICACIÓ NÚVOL  ->  Supabase (schemes fcbillar + fcb_opens)
         6. fcbillar publish-cloud          rànquings/partides/lliga/copa/opens(+femení)
@@ -142,6 +146,9 @@ function Import-DotEnvKeys($path, [string[]]$keys) {
 }
 Import-DotEnvKeys (Join-Path $repo '.env') @(
     'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY',
+    # R2: perquè el `state push` final mantingui fresca la BD canònica que el
+    # workflow diari no-logat (reingest-nologin.yml) estira. fcbillar ja llegeix
+    # .env, però les injectem a l'entorn per uniformitat i per poder-les detectar.
     'R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET'
 )
 
@@ -167,6 +174,13 @@ Write-Log "Inici reingesta setmanal (repo=$repo, copa=$CopaEdicio, dryrun=$DryRu
 
 # --- INGESTA LOCAL ----------------------------------------------------------
 Invoke-Step 'import-temporada (clubs + rànquings per modalitat) [LOGIN]' @($uv, 'run', 'fcbillar', 'import-temporada')
+# Backfill de partides del rànquing ACTUAL de cada modalitat. import-temporada fa
+# sync (capçaleres + classificacions) però NO partides; sense això el detall
+# "últimes N partides" de cada jugador queda congelat entre reingestes manuals.
+# codis_fcb: 1=Tres Bandes, 2=Lliure, 3=Quadre 47/2, 4=Banda, 6=Quadre 71/2.
+foreach ($mod in @(1, 2, 3, 4, 6)) {
+    Invoke-Step "backfill partides modalitat $mod (rànquing actual) [LOGIN]" @($uv, 'run', 'fcbillar', 'backfill', "$mod")
+}
 Invoke-Step 'ingest-individuals (opens / torneigs individuals)'          @($uv, 'run', 'fcbillar', 'ingest-individuals')
 Invoke-Step 'ingest-copa'                                                @($uv, 'run', 'fcbillar', 'ingest-copa', "$CopaEdicio")
 Invoke-Step 'fcb_opens scrape-current-opens'                             @($uv, 'run', 'python', '-m', 'fcb_opens.cli', 'scrape-current-opens')
@@ -186,14 +200,18 @@ if ($SkipPublish) {
     Invoke-Step 'verifica codificació del núvol (scan)'           @($uv, 'run', 'python', 'scripts/repair_supabase_encoding.py')
 }
 
-# --- PUJA L'ESTAT A R2 (manté el núvol canònic) -----------------------------
-# Aquest script és un fallback local; en acabar, puja les BD a R2 perquè el job
-# del núvol (reingest.yml) parteixi de la versió més recent. Cal tenir R2_* al
-# .env. Sense --check-generation: una execució local deliberada vol ser canònica.
-if ($env:R2_BUCKET -and -not $DryRun) {
-    Invoke-Step 'state push a R2 (BD canònica)'              @($uv, 'run', 'fcbillar', 'state', 'push', '--all')
+# --- Puja la BD canònica a R2 (per al workflow diari no-logat) ---------------
+# Re-acoblat 2026-07-05: el PC (logat) és l'amo dels rànquings/games; el workflow
+# reingest-nologin.yml (núvol, diari) refresca lliga/copa/opens. Perquè el
+# publish-cloud del núvol NO trepitgi els rànquings frescos amb una BD vella, el
+# PC puja la BD a R2 al final de cada reingesta. El núvol fa `state pull` i, en
+# publicar, reescriu els mateixos rànquings (idempotent). Si no hi ha R2 al .env,
+# s'omet silenciosament (setup encara no fet).
+if ($env:R2_ACCOUNT_ID -and $env:R2_BUCKET) {
+    # Sense flags = puja db + opens-db (no la sessió; aquesta la puja `fcbillar login`).
+    Invoke-Step 'state push (BD canònica a R2)' @($uv, 'run', 'fcbillar', 'state', 'push')
 } else {
-    Write-Log "AVÍS: falten claus R2_* al .env (o DryRun): no es puja l'estat a R2."
+    Write-Log "R2 no configurat al .env: s'omet la pujada d'estat a R2 (el workflow diari no-logat en depèn)."
 }
 
 # --- Neteja de logs antics (conserva els 30 més recents) --------------------

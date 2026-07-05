@@ -1,0 +1,133 @@
+name: Reingesta no-logada (núvol)
+
+# Reingesta DIÀRIA de les dades PÚBLIQUES de FCBillar (sense login federatiu):
+# lliga, copa i opens/individuals. Baixa l'estat canònic de Cloudflare R2 (BD +
+# sessió), incorpora les novetats de fcbillar.cat i publica a Supabase, d'on
+# l'app web (Vercel) llegeix en temps d'execució.
+#
+# Per què R2 encara que sigui "no-logat": el ScraperClient de fcbillar llança
+# Chromium i EXIGEIX que existeixi session/storage_state.json (tot i que les
+# pàgines de lliga/copa/opens són públiques i carreguen amb sessió caducada), i
+# publish-cloud publica des de data/fcbillar.db (cal la BD amb el players master
+# per enllaçar partides). Per això: state pull → scrape → publish → state push.
+#
+# DIVISIÓ D'AMOS (evita clobbering PC↔núvol):
+#   - PC (weekly_reingest.ps1, LOGAT):  rànquings + games  → puja BD a R2 al final
+#   - Núvol (aquest job, NO-LOGAT):     lliga + copa + opens
+#   El núvol estira sempre la BD fresca del PC, així publish-cloud reescriu els
+#   mateixos rànquings (idempotent) i només canvia lliga/copa/opens.
+#
+# Disparadors:
+#   - schedule:          cada dia 21:00 UTC (≈22:00 Barcelona a l'hivern, 23:00 a
+#                        l'estiu; GH cron és UTC sense canvi d'hora — l'1h de drift
+#                        és irrellevant perquè caça el dia sencer de competició)
+#   - workflow_dispatch: manual (inputs force / copa_edicio)
+#
+# REQUISITS (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY                              (publicació)
+#   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET     (estat a R2)
+# I un SEED inicial des del PC:  fcbillar state push --db --opens-db --session
+# (puja data/fcbillar.db + data/fcb_opens.db + session/storage_state.json a R2;
+#  cal --session explícit perquè `state push` sense flags NO puja la sessió).
+
+on:
+  schedule:
+    - cron: '0 21 * * *'        # cada dia 21:00 UTC ≈ 22:00 Barcelona (hivern)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Força encara que sigui dins l'aturada d'estiu (1-24 ago)"
+        type: boolean
+        default: false
+      copa_edicio:
+        description: "ID d'edició de la Copa a fcbillar.cat"
+        default: "7"
+
+# Serialitza i NO cancel·la: comparteix el grup 'reingest' amb qualsevol altra
+# escriptura d'estat perquè mai coincideixin dues escriptures a mig fer a R2.
+concurrency:
+  group: reingest
+  cancel-in-progress: false
+
+jobs:
+  reingest-nologin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      COPA_EDICIO: ${{ github.event.inputs.copa_edicio || '7' }}
+      FORCE: ${{ github.event.inputs.force || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Porta d'aturada d'estiu (omet 1-24 d'agost, en UTC, tret de force).
+      - id: gate
+        run: |
+          if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          M=$(date -u +%m); D=$(date -u +%d)
+          if [ "$M" = "08" ] && [ "$D" -lt 25 ]; then
+            echo "Aturada d'estiu (1-24 d'agost): ometo la reingesta."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up uv
+        if: steps.gate.outputs.skip != 'true'
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # Chromium per al ScraperClient (lliga/copa/individuals de fcbillar). Clau
+      # de cau lligada a uv.lock, que fixa la versió de playwright (i del Chromium).
+      - name: Cache Playwright browsers
+        if: steps.gate.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+
+      - name: Install Chromium
+        if: steps.gate.outputs.skip != 'true'
+        run: uv run --no-dev playwright install --with-deps chromium
+
+      - name: Baixa l'estat canònic de R2 (BD + sessió)
+        if: steps.gate.outputs.skip != 'true'
+        # Sense flags = baixa-ho tot (db + opens-db + sessió).
+        run: uv run --no-dev fcbillar state pull
+
+      - name: Reingesta no-logada (passos aïllats, continua si un falla)
+        if: steps.gate.outputs.skip != 'true'
+        run: |
+          set +e
+          NOK=0; NFAIL=0
+          run() { local name="$1"; shift; echo "::group::$name"; "$@"; local rc=$?; echo "exit=$rc"; echo "::endgroup::"; if [ "$rc" -eq 0 ]; then NOK=$((NOK+1)); else NFAIL=$((NFAIL+1)); fi; }
+
+          # Pàgines públiques (Chromium amb sessió possiblement caducada — no importa)
+          run "ingest-lliga"         uv run --no-dev fcbillar ingest-lliga 36
+          run "ingest-copa"          uv run --no-dev fcbillar ingest-copa "$COPA_EDICIO"
+          run "ingest-individuals"   uv run --no-dev fcbillar ingest-individuals
+          run "scrape-current-opens" uv run --no-dev python -m fcb_opens.cli scrape-current-opens
+          run "scrape-lliga"         uv run --no-dev python -m fcb_opens.cli scrape-lliga 36 --full
+
+          # Publicació a Supabase (fcbillar publica tot des de la BD; els rànquings
+          # coincideixen amb els que el PC ja va pujar a R2 → reescriptura idempotent).
+          run "publish-cloud"        uv run --no-dev fcbillar publish-cloud
+          run "supabase-sync"        uv run --no-dev python -m fcb_opens.cli supabase-sync
+          run "encoding-scan"        uv run --no-dev python scripts/repair_supabase_encoding.py
+
+          echo "N_OK=$NOK"     >> "$GITHUB_ENV"
+          echo "N_FAIL=$NFAIL" >> "$GITHUB_ENV"
+          echo "Resum: OK=$NOK FALLATS=$NFAIL"
+
+      # Repuja les BD a R2 encara que algun pas hagi fallat (upserts parcials però
+      # vàlids); mai sobre una execució saltada per l'aturada d'estiu.
+      - name: Repuja l'estat a R2
+        if: always() && steps.gate.outputs.skip != 'true'
+        # Sense flags = puja db + opens-db (NO la sessió: el núvol no la renova).
+        run: uv run --no-dev fcbillar state push
