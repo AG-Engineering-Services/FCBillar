@@ -287,6 +287,18 @@
 		return `fa ${h} h`;
 	}
 
+	// Horari de grup (opens projectats): "dg 19/07" + etiqueta del tipus de partida.
+	const WD = ['dg', 'dl', 'dt', 'dc', 'dj', 'dv', 'ds'];
+	function fmtGroupDay(iso: string | null): string {
+		if (!iso) return '';
+		const [y, m, d] = iso.split('-').map(Number);
+		if (!y || !m || !d) return '';
+		const wd = WD[new Date(y, m - 1, d).getDay()];
+		return `${wd} ${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`;
+	}
+	const MATCH_TYPE: Record<string, string> = { '2-3': '2n·3r', '1-P': '1r·perd', '1-G': '1r·guany' };
+	const matchTypeLabel = (t: string) => MATCH_TYPE[t] ?? t;
+
 	const canonName = (s: string | null | undefined) =>
 		(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
@@ -552,7 +564,15 @@
 							<span class="text-sm font-semibold">{g.label}</span>
 							<span class="text-[11px] {done ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}">{g.n_matches_played}/{done ? g.n_matches_played : g.n_matches_total}</span>
 						</div>
-						{#if g.venue}<div class="px-3 pt-1 text-[10px] text-slate-400 dark:text-slate-500">{g.venue}</div>{/if}
+						{#if g.schedule}
+							<div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 px-3 pt-1 text-[10px] text-slate-500 dark:text-slate-400">
+								{#if g.schedule.date}<span class="font-semibold">{fmtGroupDay(g.schedule.date)}</span>{/if}
+								{#if g.schedule.billar}<span class="rounded bg-slate-100 dark:bg-slate-800 px-1 font-medium">Billar {g.schedule.billar}</span>{/if}
+								{#each g.schedule.matches as m}
+									<span class="tabular-nums"><span class="text-slate-400 dark:text-slate-500">{matchTypeLabel(m.type)}</span> {m.time}</span>
+								{/each}
+							</div>
+						{:else if g.venue}<div class="px-3 pt-1 text-[10px] text-slate-400 dark:text-slate-500">{g.venue}</div>{/if}
 						{#if g.standings.length}
 							<ol class="px-2 py-1">
 								{#each g.standings as s, idx}
