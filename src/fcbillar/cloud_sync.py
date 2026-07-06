@@ -2126,6 +2126,29 @@ def _open_modality(name: str) -> str:
     return ""
 
 
+def _open_match_key(name: str) -> str:
+    """Clau estable d'un open per casar la *projecció* amb l'open real.
+
+    Els dos noms difereixen (la projecció ve del PDF 'RÀNQUING INICIAL', amb el
+    subtítol del memorial entre cometes i sovint sense la modalitat; el nom viu
+    ve del llistat de la federació, normalment amb 'TRES BANDES'). Reduïm tots
+    dos a la part comuna i estable: edició + seu, sense accents, modalitat,
+    'OPEN'/'MEMORIAL' ni el subtítol entre cometes.
+    """
+    import re
+    import unicodedata
+
+    s = name.split('"')[0]  # descarta el subtítol del memorial entre cometes
+    s = unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode().upper()
+    for w in (
+        "TRES BANDES", "3 BANDES", "QUADRE 47/2", "QUADRE 71/2",
+        "BANDA", "LLIURE", "OPEN", "MEMORIAL", "UNICA",
+    ):
+        s = s.replace(w, " ")
+    s = re.sub(r"[^A-Z0-9 ]", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
 def _enrich_live_payload(
     payload: dict, sb, open_name: str = "", division_id: int | None = None
 ) -> None:
@@ -2401,14 +2424,17 @@ def publish_live_opens(
     if rows:
         _upsert(sb, "open_live", rows, "fcb_division_id", prog)
 
-    # Treu els Opens que ja no són en curs (acabats o desapareguts del llistat).
-    # `not in (active_ids)`; si no n'hi ha cap actiu, esborra-ho tot (usem [-1],
-    # un id impossible, perquè el filtre 'not in' no quedi buit).
+    # Treu els Opens REALS que ja no són en curs (acabats o desapareguts del
+    # llistat). Només toca ids POSITIUS: les projeccions (id sintètic negatiu,
+    # publicades per `project-open-ranking`) es protegeixen amb `.gt(...,0)` i es
+    # retiren a part més avall. `not in (active_ids)`; si no n'hi ha cap actiu,
+    # usem [-1] (id impossible) perquè el filtre 'not in' no quedi buit.
     removed = 0
     try:
         res = (
             sb.table("open_live")
             .delete()
+            .gt("fcb_division_id", 0)
             .not_.in_("fcb_division_id", active_ids or [-1])
             .execute()
         )
@@ -2418,4 +2444,31 @@ def publish_live_opens(
     except Exception as exc:  # noqa: BLE001
         prog("warn", f"no s'han pogut retirar files antigues: {exc}")
 
-    return {"live_opens": len(rows), "removed": removed, "errors": errors}
+    # Retira les PROJECCIONS (id negatiu) que ja tenen l'open real en curs: quan
+    # la federació publica el sorteig, el seguiment real (id positiu) substitueix
+    # la projecció (casant pel nom d'open, no per l'id, que la federació assigna
+    # de nou cada edició).
+    superseded = 0
+    try:
+        proj_rows = (
+            sb.table("open_live").select("fcb_division_id,name")
+            .lt("fcb_division_id", 0).execute().data or []
+        )
+        active_keys = {_open_match_key(r["name"]) for r in rows}
+        stale = [
+            p["fcb_division_id"] for p in proj_rows
+            if _open_match_key(p["name"]) in active_keys
+        ]
+        if stale:
+            sb.table("open_live").delete().in_("fcb_division_id", stale).execute()
+            superseded = len(stale)
+            prog("ok", f"open_live: {superseded} projeccions retirades (sorteig real ja publicat)")
+    except Exception as exc:  # noqa: BLE001
+        prog("warn", f"no s'han pogut retirar projeccions superades: {exc}")
+
+    return {
+        "live_opens": len(rows),
+        "removed": removed,
+        "superseded": superseded,
+        "errors": errors,
+    }

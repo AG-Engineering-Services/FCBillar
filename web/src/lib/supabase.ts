@@ -250,6 +250,13 @@ export interface OpenLivePayload {
 	// num_seq del rànquing 3B amb què s'han calculat rank3b/prize (el de la
 	// convocatòria si està fixat; si no, el darrer). El selector hi ancora el valor per defecte.
 	prize_num_seq?: number;
+	// Open PROJECTAT (generat des del rànquing inicial abans del sorteig oficial
+	// FCB, via `fcbillar project-open-ranking`). El web el mostra com un open en
+	// curs però amb badge 'projecció · no oficial'. num_inscriptions/structure
+	// són context (p.ex. {P:16, PP:16, PPP:1}).
+	projected?: boolean;
+	num_inscriptions?: number;
+	structure?: Record<string, number>;
 }
 export interface OpenLiveRow {
 	fcb_division_id: number;

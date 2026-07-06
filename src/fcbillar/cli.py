@@ -32,6 +32,7 @@ from fcbillar.pipeline import (
     import_clubs_oficials,
     import_temporada,
     ingest_copa_edicio,
+    ingest_individuals_all_temporades,
     ingest_individuals_temporada,
     ingest_lliga_grup,
     ingest_lliga_jornada,
@@ -868,19 +869,33 @@ def ingest_individuals_cmd(
         False, "--cache",
         help="Permet servir HTML de la cache (per defecte, fresc per detectar novetats)",
     ),
+    historical: bool = typer.Option(
+        False, "--historical",
+        help="Ingerir TOTES les temporades (actual + històric de /ca/historial), no només una",
+    ),
 ) -> None:
     """Ingest dels torneigs individuals (opens, catalans, etc.) per temporada."""
     settings = get_settings()
     with ScraperClient(settings) as client:
-        result = ingest_individuals_temporada(
-            client,
-            temporada=None if temporada == "current" else temporada,
-            create_missing_players=True,
-            settings=settings,
-            use_cache=cache,
-        )
+        if historical:
+            result = ingest_individuals_all_temporades(
+                client,
+                create_missing_players=True,
+                settings=settings,
+                use_cache=cache,
+            )
+            scope = "totes les temporades"
+        else:
+            result = ingest_individuals_temporada(
+                client,
+                temporada=None if temporada == "current" else temporada,
+                create_missing_players=True,
+                settings=settings,
+                use_cache=cache,
+            )
+            scope = f"temporada {temporada}"
     console.print(
-        f"[green]OK individuals temporada {temporada}: "
+        f"[green]OK individuals {scope}: "
         f"{result.torneigs_processed} torneigs ({result.torneigs_failed} fallats), "
         f"{result.total_participants} participants[/]"
     )
@@ -1074,6 +1089,170 @@ def publish_live_opens_cmd() -> None:
         raise typer.Exit(code=1) from exc
     total = ", ".join(f"{k}={v}" for k, v in counts.items())
     console.print(f"[green]OK opens en directe publicats: {total}[/]")
+
+
+@app.command("project-open-ranking")
+def project_open_ranking_cmd(
+    pdf: str = typer.Argument(..., help="PDF 'RÀNQUING INICIAL' de l'open"),
+    season: str | None = typer.Option(None, "--season", help="Temporada, ex: 2025-2026"),
+    division_id: int | None = typer.Option(
+        None, "--division-id",
+        help="fcb_division_id sintètic (negatiu). Per defecte, derivat del nom de l'open.",
+    ),
+    modality: str | None = typer.Option(
+        None, "--modality", help="Modalitat (per defecte, derivada del nom o 'Tres Bandes')."
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="No publica; només mostra el resum."),
+    json_out: bool = typer.Option(
+        False, "--json", help="Imprimeix una línia JSON final amb el resum (per al watcher)."
+    ),
+) -> None:
+    """Genera un OPEN EN CURS *projectat* des del rànquing inicial (abans del sorteig FCB).
+
+    Parseja el PDF oficial 'RÀNQUING INICIAL', genera els grups de TOTES les fases
+    (reglament Art. VIII-IX; la sembra de l'Art. XVIII ja ve aplicada per la
+    federació a la columna Posició) i el publica a `fcbillar.open_live` amb un
+    `fcb_division_id` sintètic NEGATIU i el marcador `projected`. El web el mostra
+    com un open 'En directe' amb el badge 'projecció · no oficial'. Quan la federació
+    publiqui els grups reals, la propera `publish-live-opens` el substitueix pel
+    seguiment real (mateix nom) i esborra la projecció.
+    Cal SUPABASE_URL i SUPABASE_SERVICE_ROLE_KEY (al .env o a l'entorn).
+    """
+    import zlib
+    from datetime import datetime, timezone
+    from pathlib import Path
+
+    from fcb_opens.projection import (
+        build_projection_from_seeded,
+        projection_to_live_payload,
+    )
+    from fcb_opens.scraper.ranking_inicial_pdf import parse_ranking_inicial_pdf
+    from fcbillar.cloud_sync import (
+        _enrich_live_payload,
+        _open_modality,
+        _upsert,
+        get_client,
+    )
+
+    pdf_path = Path(pdf)
+    if not pdf_path.exists():
+        console.print(f"[red]No existeix el PDF: {pdf_path}[/]")
+        raise typer.Exit(code=1)
+
+    ranking = parse_ranking_inicial_pdf(pdf_path)
+    n = ranking.num_players
+    if n == 0:
+        console.print("[red]No s'ha llegit cap jugador del PDF (format inesperat?).[/]")
+        raise typer.Exit(code=1)
+
+    try:
+        proj = build_projection_from_seeded(ranking, season=season)
+    except NotImplementedError as exc:
+        console.print(
+            f"[red]No es pot projectar amb N={n} inscrits: {exc}[/]\n"
+            f"[dim]El generador cobreix N parell dins [64,128].[/]"
+        )
+        raise typer.Exit(code=1) from exc
+
+    name = proj["name"]
+    if division_id is None:
+        # id sintètic estable i negatiu: el mateix open sempre cau a la mateixa
+        # fila, així una re-càrrega ACTUALITZA en lloc de duplicar.
+        division_id = -(zlib.crc32(name.encode("utf-8")) % 2_000_000 + 1)
+    elif division_id >= 0:
+        console.print(
+            "[yellow]Avís: --division-id hauria de ser negatiu per no xocar amb divisions reals de la FCB.[/]"
+        )
+
+    mod = modality or _open_modality(name) or "Tres Bandes"
+    struct = " · ".join(f"{v} {k}" for k, v in proj["structure"].items())
+    console.print(
+        f"[bold]{name}[/]\n"
+        f"[dim]{n} inscrits · {struct} + Fase Final · modalitat: {mod} · id sintètic: {division_id}[/]"
+    )
+    for w in proj.get("warnings", []):
+        mark = "⛔" if w["level"] == "error" else "⚠️" if w["level"] == "warning" else "ℹ️"
+        console.print(f"[dim]  {mark} {w['message']}[/]")
+
+    if dry_run:
+        console.print("[dim]DRY-RUN: no s'ha publicat res.[/]")
+        if json_out:
+            import json as _json
+            typer.echo(_json.dumps({
+                "division_id": division_id, "open_name": name,
+                "n_players": n, "modality": mod, "dry_run": True,
+            }))
+        return
+
+    sb = get_client()
+    fetched_at = datetime.now(timezone.utc).isoformat()
+    payload = projection_to_live_payload(proj, division_id=division_id, fetched_at=fetched_at)
+    try:
+        _enrich_live_payload(payload, sb, open_name=name, division_id=division_id)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[yellow]No s'han pogut resoldre els enllaços de jugador: {exc}[/]")
+
+    row = {
+        "fcb_division_id": division_id,
+        "name": name,
+        "modality": mod,
+        "payload_json": payload,
+        "captured_at": fetched_at,
+        "updated_at": fetched_at,
+    }
+    try:
+        _upsert(sb, "open_live", [row], "fcb_division_id", lambda _l, m: console.print(f"[dim]  {m}[/]"))
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]Error publicant a open_live: {exc}[/]")
+        raise typer.Exit(code=1) from exc
+
+    n_links = len(payload.get("player_ids") or {})
+    console.print(
+        f"[green]OK: open projectat publicat a open_live (id {division_id}, "
+        f"{n_links} jugadors enllaçats).[/]\n"
+        f"[dim]Visible a la PWA: /opens/directe/{division_id}[/]"
+    )
+    if json_out:
+        import json as _json
+        typer.echo(_json.dumps({
+            "division_id": division_id, "open_name": name,
+            "n_players": n, "modality": mod, "n_links": n_links,
+        }))
+
+
+@app.command("remove-projected-open")
+def remove_projected_open_cmd(
+    division_id: int | None = typer.Argument(
+        None, help="id sintètic negatiu a esborrar. Sense argument, --all esborra totes les projeccions."
+    ),
+    all_: bool = typer.Option(False, "--all", help="Esborra TOTES les projeccions (files amb id negatiu)."),
+) -> None:
+    """Retira una projecció d'open (o totes) de `open_live`.
+
+    Escapatòria manual: normalment `publish-live-opens` ja retira la projecció
+    quan la federació publica el sorteig real, però si els noms no casen la pots
+    treure a mà aquí.
+    """
+    from fcbillar.cloud_sync import get_client
+
+    sb = get_client()
+    q = sb.table("open_live").delete()
+    if all_:
+        q = q.lt("fcb_division_id", 0)
+    elif division_id is not None:
+        if division_id >= 0:
+            console.print("[red]Aquesta comanda només esborra projeccions (id negatiu).[/]")
+            raise typer.Exit(code=1)
+        q = q.eq("fcb_division_id", division_id)
+    else:
+        console.print("[red]Indica un id negatiu o --all.[/]")
+        raise typer.Exit(code=1)
+    try:
+        res = q.execute()
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]Error esborrant: {exc}[/]")
+        raise typer.Exit(code=1) from exc
+    console.print(f"[green]OK: {len(res.data or [])} projeccio(ns) retirada(es).[/]")
 
 
 @app.command("set-open-prize-ranking")
