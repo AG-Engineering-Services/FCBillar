@@ -16,9 +16,11 @@ payload (see db.save_projection) and returned verbatim by the API.
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 
 from .generator import GroupSlot, generate_tournament
 from .scraper.inscrits_pdf import InscritEntry, InscritsList
+from .scraper.ranking_inicial_pdf import RankingInicialEntry, RankingInicialList
 
 # Human-readable phase names. The generator's P/PP/PPP are, top-down, the
 # phases closest to the Fase Final (Art. VIII):
@@ -101,47 +103,62 @@ def _build_warnings(ordered: list[InscritEntry], inscrits: InscritsList, n: int)
     return warnings
 
 
-def build_projection(
-    inscrits: InscritsList,
-    *,
-    season: str | None = None,
-    resolve_fcb_id: Callable[[str], str | None] | None = None,
-    opens_points_by_name: dict[str, int] | None = None,
-) -> dict:
-    """Compute the full projected bracket payload from a parsed inscrits list.
+@dataclass(frozen=True)
+class _Seed:
+    """A player in final seed order, uniform across the two PDF sources.
 
-    ``resolve_fcb_id`` maps a player name to the FCBillar ``fcb_id`` of the
-    existing player profile (or None). When provided, every player reference in
-    the payload carries an ``fcb_id`` so the UI can link to that player's page.
-    ``opens_points_by_name`` attaches each player's current Catalan-Opens
-    ranking points (sum of the last 5 opens) for context.
+    ``ranking_position`` is the Catalan-Opens ranking position to *display*
+    (from the inscrits' POSSIC. RANQ. OPEN, or the initial ranking's Rànquing
+    column) — not the seed order, which is the 1-indexed position in the list.
     """
-    ordered = order_inscrits(list(inscrits.entries))
-    n = len(ordered)
 
+    player_name: str
+    club: str
+    ranking_position: int | None
+    mitjana: float
+    ranquing_estat: str
+
+
+def _assemble_projection(
+    *,
+    name: str,
+    season: str | None,
+    declared_total: int | None,
+    seeds: list[_Seed],
+    warnings: list[dict],
+    resolve_fcb_id: Callable[[str], str | None] | None,
+    opens_points_by_name: dict[str, int] | None,
+) -> dict:
+    """Build the full projected bracket payload from an ordered seed list.
+
+    Shared core for both entry points (inscrits list and initial ranking): given
+    players already in final seed order (1..N), runs the group generator and
+    lays out phases, seed table and Fase Final setzens.
+    """
+    n = len(seeds)
     tournament = generate_tournament(n)
 
     # Resolve each distinct player name to an fcb_id once (cheap DB lookups).
     fcb_ids: dict[str, str | None] = {}
     if resolve_fcb_id is not None:
-        for e in ordered:
-            if e.player_name not in fcb_ids:
-                fcb_ids[e.player_name] = resolve_fcb_id(e.player_name)
+        for s in seeds:
+            if s.player_name not in fcb_ids:
+                fcb_ids[s.player_name] = resolve_fcb_id(s.player_name)
 
     points = opens_points_by_name or {}
 
     # position (1-indexed) -> seed dict, for resolving direct slots.
     def seed_dict(position: int) -> dict:
-        e = ordered[position - 1]
+        s = seeds[position - 1]
         return {
             "seed_order": position,
-            "player_name": e.player_name,
-            "club": e.club,
-            "ranking_position": e.seed_position,
-            "mitjana": e.mitjana,
-            "ranquing_estat": e.ranquing_estat,
-            "fcb_id": fcb_ids.get(e.player_name),
-            "opens_points": points.get(e.player_name),
+            "player_name": s.player_name,
+            "club": s.club,
+            "ranking_position": s.ranking_position,
+            "mitjana": s.mitjana,
+            "ranquing_estat": s.ranquing_estat,
+            "fcb_id": fcb_ids.get(s.player_name),
+            "opens_points": points.get(s.player_name),
         }
 
     # Which phase each seed *enters*. Direct slots in a phase reveal this;
@@ -149,8 +166,8 @@ def build_projection(
     entry_phase: dict[int, str] = {p: "Fase Final" for p in range(1, 17)}
 
     phases_out: list[dict] = []
-    for name in _PHASE_ORDER:
-        phase = tournament.phases.get(name)
+    for pname in _PHASE_ORDER:
+        phase = tournament.phases.get(pname)
         if phase is None:
             continue
         groups_out: list[dict] = []
@@ -158,7 +175,7 @@ def build_projection(
             players_out: list[dict] = []
             for idx, slot in enumerate(group.slots):
                 if slot.inscription_position is not None:
-                    entry_phase[slot.inscription_position] = _PHASE_TITLES[name]
+                    entry_phase[slot.inscription_position] = _PHASE_TITLES[pname]
                     players_out.append({"slot": idx, "kind": "player", **seed_dict(slot.inscription_position)})
                 else:
                     players_out.append({
@@ -169,8 +186,8 @@ def build_projection(
                     })
             groups_out.append({"label": group.label, "players": players_out})
         phases_out.append({
-            "name": name,
-            "title": _PHASE_TITLES[name],
+            "name": pname,
+            "title": _PHASE_TITLES[pname],
             "n_groups": len(phase.groups),
             "groups": groups_out,
         })
@@ -196,12 +213,12 @@ def build_projection(
         })
 
     return {
-        "name": inscrits.open_name or "Open",
+        "name": name,
         "season": season,
         "num_inscriptions": n,
-        "declared_total": inscrits.declared_total,
-        "structure": {name: len(tournament.phases[name].groups) for name in tournament.phases},
-        "warnings": _build_warnings(ordered, inscrits, n),
+        "declared_total": declared_total,
+        "structure": {pn: len(tournament.phases[pn].groups) for pn in tournament.phases},
+        "warnings": warnings,
         "seeds": seeds_out,
         "phases": phases_out,
         "fase_final": {
@@ -209,4 +226,205 @@ def build_projection(
             "n_direct_seeds": 16,
             "setzens": setzens,
         },
+    }
+
+
+def build_projection(
+    inscrits: InscritsList,
+    *,
+    season: str | None = None,
+    resolve_fcb_id: Callable[[str], str | None] | None = None,
+    opens_points_by_name: dict[str, int] | None = None,
+) -> dict:
+    """Compute the full projected bracket payload from a parsed inscrits list.
+
+    ``resolve_fcb_id`` maps a player name to the FCBillar ``fcb_id`` of the
+    existing player profile (or None). When provided, every player reference in
+    the payload carries an ``fcb_id`` so the UI can link to that player's page.
+    ``opens_points_by_name`` attaches each player's current Catalan-Opens
+    ranking points (sum of the last 5 opens) for context.
+    """
+    ordered = order_inscrits(list(inscrits.entries))
+    n = len(ordered)
+    seeds = [
+        _Seed(e.player_name, e.club, e.seed_position, e.mitjana, e.ranquing_estat)
+        for e in ordered
+    ]
+    return _assemble_projection(
+        name=inscrits.open_name or "Open",
+        season=season,
+        declared_total=inscrits.declared_total,
+        seeds=seeds,
+        warnings=_build_warnings(ordered, inscrits, n),
+        resolve_fcb_id=resolve_fcb_id,
+        opens_points_by_name=opens_points_by_name,
+    )
+
+
+def _build_warnings_seeded(entries: list[RankingInicialEntry]) -> list[dict]:
+    """Lightweight checks for the initial-ranking path (validator-lite)."""
+    warnings: list[dict] = []
+    # Homònims dins la mateixa llista (poden enganyar la resolució de jugador).
+    seen: dict[str, int] = {}
+    for e in entries:
+        seen[e.player_name] = seen.get(e.player_name, 0) + 1
+    for nom, c in seen.items():
+        if c > 1:
+            warnings.append({"level": "warning", "message": f"{nom}: apareix {c} cops a la llista."})
+    n_new = sum(1 for e in entries if e.ranking_position is None)
+    if n_new:
+        warnings.append({
+            "level": "info",
+            "message": f"{n_new} jugadors sense posició al rànquing d'opens "
+                       f"(definitius/provisionals, sembrats per mitjana al final per la federació).",
+        })
+    return warnings
+
+
+def build_projection_from_seeded(
+    ranking: RankingInicialList,
+    *,
+    season: str | None = None,
+    resolve_fcb_id: Callable[[str], str | None] | None = None,
+    opens_points_by_name: dict[str, int] | None = None,
+) -> dict:
+    """Compute the projected bracket from the official RÀNQUING INICIAL PDF.
+
+    The initial ranking already carries the federation's final seed order (Art.
+    XVIII fully applied), so — unlike the inscrits path — we do **not** re-seed:
+    the ``Posició`` column is authoritative and drives the group generator
+    directly.
+    """
+    ordered = list(ranking.entries)  # already sorted by Posició in the parser
+    seeds = [
+        _Seed(e.player_name, e.club, e.ranking_position, e.mitjana, e.ranquing_estat)
+        for e in ordered
+    ]
+    return _assemble_projection(
+        name=ranking.open_name or "Open",
+        season=season,
+        declared_total=None,
+        seeds=seeds,
+        warnings=_build_warnings_seeded(ordered),
+        resolve_fcb_id=resolve_fcb_id,
+        opens_points_by_name=opens_points_by_name,
+    )
+
+
+def _live_match(player_a: str, player_b: str) -> dict:
+    """A not-yet-played match in the live-open payload shape."""
+    return {
+        "player_a": player_a,
+        "player_b": player_b,
+        "punts_a": 0,
+        "punts_b": 0,
+        "caramboles_a": 0,
+        "caramboles_b": 0,
+        "serie_major_a": 0,
+        "serie_major_b": 0,
+        "entrades": None,
+        "arbitre": None,
+        "observations": None,
+        "is_played": False,
+    }
+
+
+def projection_to_live_payload(
+    projection: dict,
+    *,
+    division_id: int,
+    fetched_at: str,
+) -> dict:
+    """Map a projected bracket to the `open_live` payload shape (LiveOpenResponse).
+
+    The PWA renders projected opens through the very same live-open card and
+    detail as real ones; the only difference is ``projected: True``, which the
+    frontend uses to badge it 'projecció · no oficial'. Group phases carry the
+    seeded players as standings (no matches played yet) and placeholder slots
+    (winner of a lower phase) as unlinkable preview rows. The Fase Final is a KO
+    phase whose 16 setzens are shown as pending matches, with the 16 direct
+    seeds listed as reserved qualifiers.
+    """
+
+    def _standing(p: dict) -> dict:
+        if p["kind"] == "player":
+            return {
+                "player_name": p["player_name"],
+                "club": p.get("club") or "",
+                "punts": 0,
+                "mitjana": p.get("mitjana") or 0.0,
+            }
+        # placeholder ("Guanyador Grup X"): a preview row, no player to link to
+        return {"player_name": p["label"], "club": "", "punts": 0, "mitjana": 0.0}
+
+    phases_out: list[dict] = []
+    for ph in projection["phases"]:
+        groups_out = [
+            {
+                "label": f"Grup {g['label']}",
+                "url": "",
+                "venue": None,
+                "standings": [_standing(p) for p in g["players"]],
+                "matches": [],
+                "n_matches_played": 0,
+                "n_matches_total": 0,
+            }
+            for g in ph["groups"]
+        ]
+        phases_out.append({
+            "label": ph["title"],
+            "kind": "group",
+            "url": "",
+            "groups": groups_out,
+            "ko_matches": [],
+            "is_active": False,
+            "provisional_qualifiers": [],
+            "provisional_matches": [],
+            "provisional_players": [],
+        })
+
+    # Fase Final K.O.: setzens as pending matches + the 16 direct seeds as
+    # reserved qualifiers (rendered in the KO 'classificats' box).
+    ff = projection["fase_final"]
+    ko_matches = [_live_match(m["a"]["player_name"], m["b"]["label"]) for m in ff["setzens"]]
+    reserved = [
+        {
+            "name": s["player_name"],
+            "club": s.get("club") or "",
+            "mitjana": s.get("mitjana") or 0.0,
+            "serie_major": 0,
+            "source": "reservat",
+        }
+        for s in projection["seeds"]
+        if s.get("entry_phase") == "Fase Final"
+    ]
+    phases_out.append({
+        "label": ff.get("title") or "Fase Final",
+        "kind": "ko",
+        "url": "",
+        "groups": [],
+        "ko_matches": ko_matches,
+        "is_active": False,
+        "provisional_qualifiers": [],
+        "provisional_matches": [],
+        "provisional_players": reserved,
+    })
+
+    player_ids = {
+        s["player_name"]: s["fcb_id"] for s in projection["seeds"] if s.get("fcb_id")
+    }
+
+    return {
+        "division_id": division_id,
+        "name": projection["name"],
+        "phase_id": None,
+        "phases": phases_out,
+        "classification": [],
+        "classification_is_provisional": True,
+        "fetched_at": fetched_at,
+        "player_ids": player_ids,
+        # Marker the PWA uses to badge this as a non-official projection.
+        "projected": True,
+        "num_inscriptions": projection.get("num_inscriptions"),
+        "structure": projection.get("structure"),
     }

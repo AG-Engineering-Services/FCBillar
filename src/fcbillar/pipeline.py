@@ -1615,6 +1615,82 @@ def ingest_individuals_temporada(
     )
 
 
+def _current_temporada_label(today: date | None = None) -> str:
+    """Etiqueta de la temporada actual (p.ex. '2025-2026'); talla a l'agost."""
+    today = today or date.today()
+    if today.month >= 8:
+        return f"{today.year}-{today.year + 1}"
+    return f"{today.year - 1}-{today.year}"
+
+
+def discover_individual_seasons(client: ScraperClient) -> list[str]:
+    """Etiquetes de temporada amb individuals a /ca/historial (p.ex. '2024-2025').
+
+    L'índex de l'historial enllaça cada temporada passada via
+    `/ca/historial/llistatIndividual/{temporada}`. Retorna les etiquetes en
+    l'ordre del portal (més recent primer), sense duplicats.
+    """
+    base = client.settings.base_url.rstrip("/")
+    html = client.fetch_html(f"{base}/ca/historial", use_cache=False)
+    seasons: list[str] = []
+    seen: set[str] = set()
+    for m in re.finditer(r"/?ca/historial/llistatIndividual/([\w\-]+)", html):
+        season = m.group(1)
+        if season not in seen:
+            seen.add(season)
+            seasons.append(season)
+    return seasons
+
+
+def ingest_individuals_all_temporades(
+    client: ScraperClient,
+    *,
+    create_missing_players: bool = True,
+    settings: Settings | None = None,
+    use_cache: bool = False,
+) -> IngestIndividualsResult:
+    """Ingest individuals de la temporada actual + totes les històriques.
+
+    Descobreix les temporades passades a /ca/historial i les recorre una a una,
+    a més de la temporada en curs (`/ca/individuals/llistat`). La temporada
+    actual s'exclou de la llista històrica si hi apareix, per no fer-la dos cops.
+    Cada temporada és aïllada: si una falla, continua amb la resta. Acumula el
+    resultat. `use_cache=False` per defecte: és un reimport històric complet.
+    """
+    settings = settings or client.settings
+    current = _current_temporada_label()
+    seasons = [s for s in discover_individual_seasons(client) if s != current]
+    targets: list[str | None] = [None, *seasons]  # None = temporada en curs
+    log.info("Individuals històric: %d temporades (actual + %d passades)",
+             len(targets), len(seasons))
+
+    processed = 0
+    failed = 0
+    total_part = 0
+    for target in targets:
+        label = target or "current"
+        try:
+            res = ingest_individuals_temporada(
+                client,
+                temporada=target,
+                create_missing_players=create_missing_players,
+                settings=settings,
+                use_cache=use_cache,
+            )
+        except Exception as e:  # aïllat: una temporada que peta no atura la resta
+            log.warning("FAIL ingest individuals temporada %s: %s", label, e)
+            failed += 1
+            continue
+        processed += res.torneigs_processed
+        failed += res.torneigs_failed
+        total_part += res.total_participants
+    return IngestIndividualsResult(
+        torneigs_processed=processed,
+        torneigs_failed=failed,
+        total_participants=total_part,
+    )
+
+
 # --------------------------- ingest de copa catalana ---------------------------
 
 

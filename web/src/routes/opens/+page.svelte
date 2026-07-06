@@ -21,6 +21,62 @@
 
 	let expandedPlayer = $state<string | null>(null);
 
+	// --- Admin: generar un open PROJECTAT des del rànquing inicial ------------
+	// Puja el PDF 'RÀNQUING INICIAL' a la cua (fcbillar.open_projection_requests);
+	// el watcher del PC el genera i el publica a open_live com a open projectat.
+	// Soft-gate pel correu autoritzat (validat també per RLS al servidor), mateix
+	// patró que el botó "↻ Reingesta" de la fitxa.
+	const ADMIN_EMAIL = 'algoam@gmail.com';
+	let showAdmin = $state(false);
+	let adminSeason = $state('');
+	let uploadState = $state<'idle' | 'sending' | 'ok' | 'denied' | 'error'>('idle');
+	let uploadMsg = $state('');
+
+	function fileToBase64(file: File): Promise<string> {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(((reader.result as string).split(',', 2)[1]) ?? '');
+			reader.onerror = () => reject(reader.error);
+			reader.readAsDataURL(file);
+		});
+	}
+
+	async function submitProjection(ev: Event) {
+		const input = ev.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+		const email = prompt('Correu autoritzat per generar la projecció:');
+		input.value = ''; // permet re-triar el mateix fitxer
+		if (email === null) return;
+		if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
+			uploadState = 'denied';
+			uploadMsg = 'Correu no autoritzat.';
+			return;
+		}
+		uploadState = 'sending';
+		uploadMsg = '';
+		try {
+			const pdf_base64 = await fileToBase64(file);
+			const { error: e } = await supabase.from('open_projection_requests').insert({
+				requested_email: ADMIN_EMAIL,
+				source: 'opens/upload',
+				season: adminSeason.trim() || null,
+				file_name: file.name,
+				pdf_base64
+			});
+			if (e) {
+				uploadState = 'error';
+				uploadMsg = `No s'ha pogut encuar: ${e.message}`;
+			} else {
+				uploadState = 'ok';
+				uploadMsg = "Petició enviada. La projecció es generarà al PC en pocs minuts i apareixerà a «En directe».";
+			}
+		} catch (err) {
+			uploadState = 'error';
+			uploadMsg = `Error llegint el PDF: ${(err as Error).message}`;
+		}
+	}
+
 	function norm(s: string): string {
 		return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 	}
@@ -155,6 +211,13 @@
 	// Resum d'una línia d'un Open en directe: fase activa (o l'última amb dades)
 	// i progrés de partides, per mostrar-ho a la targeta sense obrir el detall.
 	function liveSummary(r: OpenLiveRow): string {
+		// Open projectat (encara sense sorteig oficial): resumeix inscrits + estructura.
+		if (r.payload_json?.projected) {
+			const n = r.payload_json.num_inscriptions;
+			const s = r.payload_json.structure;
+			const st = s ? Object.entries(s).map(([k, v]) => `${v} ${k}`).join(' · ') : '';
+			return `${n ? `${n} inscrits` : 'projecció'}${st ? ' · ' + st : ''} · sorteig no oficial`;
+		}
 		const phases = r.payload_json?.phases ?? [];
 		const active = phases.find((p) => p.is_active) ?? [...phases].reverse().find((p) => {
 			if (p.kind === 'group') return p.groups.some((g) => g.n_matches_total > 0);
@@ -227,9 +290,14 @@
 				>
 					<div class="flex items-start justify-between gap-2">
 						<div class="min-w-0 text-sm font-semibold leading-tight">{r.name}</div>
-						{#if r.modality}
-							<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{r.modality}</span>
-						{/if}
+						<div class="flex shrink-0 items-center gap-1">
+							{#if r.payload_json?.projected}
+								<span class="rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">projecció</span>
+							{/if}
+							{#if r.modality}
+								<span class="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{r.modality}</span>
+							{/if}
+						</div>
 					</div>
 					<div class="mt-1 text-[11px] text-slate-400 dark:text-slate-500">{liveSummary(r)}</div>
 				</a>
@@ -366,3 +434,45 @@
 		{filtered.length} opens
 	</p>
 {/if}
+
+<!-- Admin: generar un open EN CURS projectat des del rànquing inicial -->
+<section class="mt-8 border-t border-slate-100 dark:border-slate-800 pt-3">
+	<button
+		onclick={() => (showAdmin = !showAdmin)}
+		class="text-[11px] text-slate-400 dark:text-slate-500 active:underline"
+	>
+		{showAdmin ? '▾' : '▸'} Admin · generar open des del rànquing inicial
+	</button>
+	{#if showAdmin}
+		<div class="mt-2 rounded-xl bg-slate-50 dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+			<p class="mb-2 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
+				Puja el PDF <strong>«RÀNQUING INICIAL»</strong> d'un open. Es generaran
+				automàticament els grups de totes les fases i apareixerà a
+				<strong>«En directe»</strong> com a <em>projecció</em> (no oficial) fins que
+				la federació publiqui el sorteig real.
+			</p>
+			<div class="flex flex-wrap items-center gap-2">
+				<input
+					bind:value={adminSeason}
+					placeholder="Temporada (ex: 2025-2026)"
+					class="w-44 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 px-3 text-sm shadow-sm"
+				/>
+				<label class="cursor-pointer rounded-lg bg-slate-900 dark:bg-slate-700 px-3 py-2 text-sm font-medium text-white {uploadState === 'sending' ? 'opacity-50' : ''}">
+					{uploadState === 'sending' ? 'Enviant…' : '📄 Tria PDF i genera'}
+					<input
+						type="file"
+						accept="application/pdf,.pdf"
+						class="hidden"
+						disabled={uploadState === 'sending'}
+						onchange={submitProjection}
+					/>
+				</label>
+			</div>
+			{#if uploadMsg}
+				<p class="mt-2 text-[11px] {uploadState === 'ok' ? 'text-emerald-600 dark:text-emerald-400' : uploadState === 'sending' ? 'text-slate-500 dark:text-slate-400' : 'text-red-600 dark:text-red-400'}">
+					{uploadMsg}
+				</p>
+			{/if}
+		</div>
+	{/if}
+</section>

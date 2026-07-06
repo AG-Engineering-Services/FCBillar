@@ -25,6 +25,8 @@
 	const divisionId = $derived(Number($page.params.id));
 	const payload = $derived(row?.payload_json ?? null);
 	const phases = $derived(payload?.phases ?? []);
+	// Open PROJECTAT (rànquing inicial, abans del sorteig oficial FCB).
+	const projected = $derived(!!payload?.projected);
 
 	// Classificació provisional (jugadors ELIMINATS, per tram segons la fase on cauen),
 	// agrupada per ronda i ordenada pel millor lloc. Es va omplint a mesura que cauen.
@@ -399,10 +401,30 @@
 			{#if row.modality}
 				<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">{row.modality}</span>
 			{/if}
-			<span class="shrink-0 rounded bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">En directe</span>
+			{#if projected}
+				<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Projecció · no oficial</span>
+			{:else}
+				<span class="shrink-0 rounded bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">En directe</span>
+			{/if}
 		</div>
-		<p class="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">Actualitzat {agoText(row.captured_at)} · es refresca sol</p>
+		<p class="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+			{#if projected}Sorteig <strong>projectat</strong> · encara no oficial{:else}Actualitzat {agoText(row.captured_at)} · es refresca sol{/if}
+		</p>
 	</div>
+
+	{#if projected}
+		<div class="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
+			<span class="mt-0.5 shrink-0">⚠</span>
+			<span>
+				Quadre <strong>projectat</strong> a partir del rànquing inicial (sembra de
+				l'Art. XVIII i fases del reglament){payload?.num_inscriptions ? ` · ${payload.num_inscriptions} inscrits` : ''}.
+				<strong>No és el sorteig oficial</strong>: quan la federació el publiqui, aquesta
+				pàgina passarà a mostrar el seguiment real. Els grups de cada fase es mostren
+				amb la sembra; els guanyadors de fases inferiors i els emparellaments de la
+				fase final apareixen com a pendents.
+			</span>
+		</div>
+	{/if}
 
 	{#if bestSerie}
 		<div class="mb-3 rounded-xl bg-violet-50 dark:bg-violet-950/40 px-3 py-2 ring-1 ring-violet-200 dark:ring-violet-900/50">
