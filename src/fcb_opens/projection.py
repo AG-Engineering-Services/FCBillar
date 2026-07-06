@@ -334,6 +334,7 @@ def projection_to_live_payload(
     *,
     division_id: int,
     fetched_at: str,
+    schedule_by_group: dict[str, dict] | None = None,
 ) -> dict:
     """Map a projected bracket to the `open_live` payload shape (LiveOpenResponse).
 
@@ -344,7 +345,14 @@ def projection_to_live_payload(
     (winner of a lower phase) as unlinkable preview rows. The Fase Final is a KO
     phase whose 16 setzens are shown as pending matches, with the 16 direct
     seeds listed as reserved qualifiers.
+
+    ``schedule_by_group`` (from ``horaris_pdf.parse_horaris_pdf``) maps a bare
+    group label ("AG", "Q", "B") to ``{date, billar, matches:[{type,time}]}``;
+    when given, each group carries a ``schedule`` field (and its ``venue`` shows
+    the billar) so the PWA — and NouProjecte's member board — can show when and
+    on which table each group plays.
     """
+    sched_map = schedule_by_group or {}
 
     def _standing(p: dict) -> dict:
         if p["kind"] == "player":
@@ -357,20 +365,23 @@ def projection_to_live_payload(
         # placeholder ("Guanyador Grup X"): a preview row, no player to link to
         return {"player_name": p["label"], "club": "", "punts": 0, "mitjana": 0.0}
 
+    def _group_out(g: dict) -> dict:
+        sched = sched_map.get(g["label"])
+        billar = sched.get("billar") if sched else None
+        return {
+            "label": f"Grup {g['label']}",
+            "url": "",
+            "venue": f"Billar {billar}" if billar else None,
+            "standings": [_standing(p) for p in g["players"]],
+            "matches": [],
+            "n_matches_played": 0,
+            "n_matches_total": len(sched["matches"]) if sched else 0,
+            "schedule": sched,  # {date, billar, matches:[{type,time}]} or None
+        }
+
     phases_out: list[dict] = []
     for ph in projection["phases"]:
-        groups_out = [
-            {
-                "label": f"Grup {g['label']}",
-                "url": "",
-                "venue": None,
-                "standings": [_standing(p) for p in g["players"]],
-                "matches": [],
-                "n_matches_played": 0,
-                "n_matches_total": 0,
-            }
-            for g in ph["groups"]
-        ]
+        groups_out = [_group_out(g) for g in ph["groups"]]
         phases_out.append({
             "label": ph["title"],
             "kind": "group",

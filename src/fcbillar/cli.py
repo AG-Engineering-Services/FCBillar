@@ -1102,6 +1102,10 @@ def project_open_ranking_cmd(
     modality: str | None = typer.Option(
         None, "--modality", help="Modalitat (per defecte, derivada del nom o 'Tres Bandes')."
     ),
+    horaris: str | None = typer.Option(
+        None, "--horaris",
+        help="PDF 'HORARIS' de l'open: enganxa dia/billar/hores a cada grup.",
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="No publica; només mostra el resum."),
     json_out: bool = typer.Option(
         False, "--json", help="Imprimeix una línia JSON final amb el resum (per al watcher)."
@@ -1145,6 +1149,16 @@ def project_open_ranking_cmd(
         console.print("[red]No s'ha llegit cap jugador del PDF (format inesperat?).[/]")
         raise typer.Exit(code=1)
 
+    schedule_by_group: dict[str, dict] | None = None
+    if horaris:
+        horaris_path = Path(horaris)
+        if not horaris_path.exists():
+            console.print(f"[red]No existeix el PDF d'horaris: {horaris_path}[/]")
+            raise typer.Exit(code=1)
+        from fcb_opens.scraper.horaris_pdf import parse_horaris_pdf
+        schedule_by_group = parse_horaris_pdf(horaris_path)
+        console.print(f"[dim]Horaris: {len(schedule_by_group)} grups amb dia/billar/hores.[/]")
+
     try:
         proj = build_projection_from_seeded(ranking, season=season)
     except NotImplementedError as exc:
@@ -1186,7 +1200,10 @@ def project_open_ranking_cmd(
 
     sb = get_client()
     fetched_at = datetime.now(timezone.utc).isoformat()
-    payload = projection_to_live_payload(proj, division_id=division_id, fetched_at=fetched_at)
+    payload = projection_to_live_payload(
+        proj, division_id=division_id, fetched_at=fetched_at,
+        schedule_by_group=schedule_by_group,
+    )
     try:
         _enrich_live_payload(payload, sb, open_name=name, division_id=division_id)
     except Exception as exc:  # noqa: BLE001

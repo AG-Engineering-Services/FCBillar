@@ -194,10 +194,19 @@ export interface OpenLiveMatch {
 	observations?: string | null;
 	is_played: boolean;
 }
+// Horari projectat d'un grup (del PDF oficial d'HORARIS): dia, billar (taula) i
+// l'hora de cada partida en ordre de joc (2-3 = 2n vs 3r, 1-P = 1r vs perdedor,
+// 1-G = 1r vs guanyador). Present només als opens projectats amb horaris.
+export interface OpenLiveGroupSchedule {
+	date: string | null; // ISO YYYY-MM-DD
+	billar: number | null;
+	matches: { type: '2-3' | '1-P' | '1-G' | string; time: string }[];
+}
 export interface OpenLiveGroup {
 	label: string;
 	url: string;
 	venue: string | null;
+	schedule?: OpenLiveGroupSchedule | null;
 	standings: OpenLiveStanding[];
 	matches: OpenLiveMatch[];
 	n_matches_played: number;
