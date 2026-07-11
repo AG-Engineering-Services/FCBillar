@@ -2149,6 +2149,35 @@ def _open_match_key(name: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def _projection_superseded_by(
+    proj_row: dict, active: list[tuple[set[str], str]]
+) -> bool:
+    """Diu si una projecció (id negatiu) ja té l'open REAL en curs publicat.
+
+    El nom del PDF ('XIV OPEN LES SANTES DE MATARO') i el del llistat de la
+    federació ('OPEN TRES BANDES MATARO') NO coincideixen: el primer porta
+    edició + festa + seu; el segon, sovint només la seu + modalitat. Per això no
+    casem per IGUALTAT de claus (mai coincidirien) sinó per CONTINÈNCIA: la clau
+    de l'open real (típicament només la seu) ha de ser un subconjunt no buit dels
+    tokens de la projecció, i amb la mateixa modalitat. Els Opens femenins mai es
+    publiquen en directe → cap open real pot substituir una projecció femenina.
+    """
+    if "FEMENI" in (proj_row.get("name") or "").upper():
+        return False
+    proj_tokens = set(_open_match_key(proj_row.get("name") or "").split())
+    if not proj_tokens:
+        return False
+    proj_mod = proj_row.get("modality") or ""
+    for real_tokens, real_mod in active:
+        if not real_tokens:
+            continue
+        if proj_mod and real_mod and proj_mod != real_mod:
+            continue
+        if real_tokens <= proj_tokens:
+            return True
+    return False
+
+
 def _enrich_live_payload(
     payload: dict, sb, open_name: str = "", division_id: int | None = None
 ) -> None:
@@ -2451,13 +2480,17 @@ def publish_live_opens(
     superseded = 0
     try:
         proj_rows = (
-            sb.table("open_live").select("fcb_division_id,name")
+            sb.table("open_live").select("fcb_division_id,name,modality")
             .lt("fcb_division_id", 0).execute().data or []
         )
-        active_keys = {_open_match_key(r["name"]) for r in rows}
+        # Cada open REAL actiu, reduït a (tokens de la clau estable, modalitat).
+        active = [
+            (set(_open_match_key(r["name"]).split()), r.get("modality") or "")
+            for r in rows
+        ]
         stale = [
             p["fcb_division_id"] for p in proj_rows
-            if _open_match_key(p["name"]) in active_keys
+            if _projection_superseded_by(p, active)
         ]
         if stale:
             sb.table("open_live").delete().in_("fcb_division_id", stale).execute()
