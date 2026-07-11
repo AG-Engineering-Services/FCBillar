@@ -2269,6 +2269,107 @@ def _merge_projected_phases(
     return merged
 
 
+def _autobuild_projection_payload(
+    division_id: int, division_name: str, fetched_at: str, *, force: bool = True
+) -> dict | None:
+    """Construeix la projecció d'un open des dels PDFs PÚBLICS de la federació.
+
+    Sense que l'usuari pugi res: localitza a la secció Documents d'Opens el PDF
+    'RÀNQUING INICIAL' de l'open (i 'HORARIS' si hi és), en genera el quadre
+    projectat (sembra Art. XVIII + fases del reglament) i el torna en forma de
+    payload d'open_live per fondre'l com a fases projectades. Retorna None si no
+    hi ha el PDF o el generador no cobreix el nombre d'inscrits (N parell dins
+    [64,128]). Tot embolcallat: qualsevol error de xarxa/format degrada a None
+    (l'open segueix mostrant les seves fases reals, sense projecció).
+    """
+    import os
+    import tempfile
+    import unicodedata
+
+    from fcb_opens.projection import (
+        build_projection_from_seeded,
+        projection_to_live_payload,
+    )
+    from fcb_opens.scraper.open_live import (
+        fetch_doc_pdf,
+        fetch_opens_docs,
+        filter_docs_for_division,
+    )
+    from fcb_opens.scraper.ranking_inicial_pdf import parse_ranking_inicial_pdf
+
+    def _n(t: str) -> str:
+        return unicodedata.normalize("NFD", t or "").encode("ascii", "ignore").decode().upper()
+
+    def _pdf_tempfile(doc_id: int) -> str | None:
+        try:
+            data, _fn = fetch_doc_pdf(doc_id, force=force)
+        except Exception:  # noqa: BLE001
+            return None
+        fd, path = tempfile.mkstemp(suffix=".pdf")
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(data)
+        return path
+
+    try:
+        docs = fetch_opens_docs(force=force)
+    except Exception:  # noqa: BLE001
+        return None
+    open_docs = [
+        d
+        for d in filter_docs_for_division(docs, division_id, division_name)
+        if "FEMENI" not in _n(d.title)
+    ]
+    rank_docs = [
+        d for d in open_docs
+        if "RANQUING INICIAL" in _n(d.title) or "RANKING INICIAL" in _n(d.title)
+    ]
+    if not rank_docs:
+        return None
+    rpath = _pdf_tempfile(rank_docs[0].doc_id)
+    if rpath is None:
+        return None
+    try:
+        ranking = parse_ranking_inicial_pdf(rpath)
+    except Exception:  # noqa: BLE001
+        return None
+    finally:
+        try:
+            os.unlink(rpath)
+        except OSError:
+            pass
+    if ranking.num_players == 0:
+        return None
+
+    # Horaris (opcional): enganxa dia/billar/hores a cada grup projectat.
+    sched = None
+    hor_docs = [d for d in open_docs if "HORARIS" in _n(d.title)]
+    if hor_docs:
+        hpath = _pdf_tempfile(hor_docs[0].doc_id)
+        if hpath is not None:
+            try:
+                from fcb_opens.scraper.horaris_pdf import parse_horaris_pdf
+
+                sched = parse_horaris_pdf(hpath)
+            except Exception:  # noqa: BLE001
+                sched = None
+            finally:
+                try:
+                    os.unlink(hpath)
+                except OSError:
+                    pass
+
+    try:
+        proj = build_projection_from_seeded(ranking, season=None)
+    except Exception:  # noqa: BLE001 — NotImplementedError si N fora de rang, etc.
+        return None
+    return projection_to_live_payload(
+        proj,
+        division_id=-abs(division_id),
+        fetched_at=fetched_at,
+        schedule_by_group=sched,
+    )
+
+
 def _enrich_live_payload(
     payload: dict, sb, open_name: str = "", division_id: int | None = None
 ) -> None:
@@ -2552,13 +2653,24 @@ def publish_live_opens(
         payload = _state_payload(state, fetched_at)
         _enrich_live_payload(payload, sb, open_name=state.structure.name, division_id=e.division_id)
         modality = _open_modality(state.structure.name)
-        # Fon les fases que la FCB encara no ha penjat al web: primer des de la
-        # projecció desada (fresca); si no n'hi ha, arrossega les que ja duia el
-        # payload real previ. La fase real guanya sempre que existeix.
+        # Fon les fases que la FCB encara no ha penjat al web. Fonts, per ordre:
+        #  1) projecció DESADA (id negatiu; l'usuari pot haver-la pujat/corregit).
+        #  2) el payload REAL previ, que ja arrossega les projectades d'abans
+        #     (barat: cap descàrrega; només si de fet en duia cap de projectada).
+        #  3) AUTO-construïda des dels PDFs públics de la federació (RÀNQUING
+        #     INICIAL + HORARIS) → així no cal pujar res a mà. Només mentre l'open
+        #     no tingui encara cap fase KO real (llavors la projecció ja no aporta).
         template = _matching_projection_payload(state.structure.name, modality, proj_full)
         template_phases = (template or {}).get("phases")
         if not template_phases:
-            template_phases = (prev_real.get(e.division_id) or {}).get("phases")
+            prev_phases = (prev_real.get(e.division_id) or {}).get("phases") or []
+            if any(p.get("projected") for p in prev_phases):
+                template_phases = prev_phases
+        if not template_phases and not any(p.get("kind") == "ko" for p in payload["phases"]):
+            auto = _autobuild_projection_payload(
+                e.division_id, state.structure.name, fetched_at, force=force
+            )
+            template_phases = (auto or {}).get("phases")
         if template_phases:
             payload["phases"] = _merge_projected_phases(payload["phases"], template_phases)
         rows.append({
