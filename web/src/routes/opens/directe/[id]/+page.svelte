@@ -456,14 +456,17 @@
 			{@const st = phaseStatus(p)}
 			<button
 				onclick={() => { selectedPhase = i; showClassif = false; }}
-				class="rounded-lg border px-2.5 py-1 text-xs font-medium {selectedPhase === i && !showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600' : ''} {st === 'done'
-					? 'border-emerald-300 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
-					: st === 'active'
-						? 'border-amber-300 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300'
-						: 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500'}"
+				title={p.projected ? 'Fase projectada: sorteig oficial, encara no publicat al web de la FCB' : ''}
+				class="rounded-lg border px-2.5 py-1 text-xs font-medium {selectedPhase === i && !showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600' : ''} {p.projected
+					? 'border-dashed border-amber-400 dark:border-amber-700 bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400'
+					: st === 'done'
+						? 'border-emerald-300 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
+						: st === 'active'
+							? 'border-amber-300 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300'
+							: 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500'}"
 			>
 				{p.label}
-				{st === 'done' ? '✓' : st === 'active' ? '●' : '○'}
+				{p.projected ? '· proj' : st === 'done' ? '✓' : st === 'active' ? '●' : '○'}
 			</button>
 		{/each}
 		{#if classByRound.length}
@@ -480,6 +483,12 @@
 		{@render classifView()}
 	{:else if selectedPhase !== null && phases[selectedPhase]}
 		{@const phase = phases[selectedPhase]}
+		{#if phase.projected}
+			<div class="mb-3 flex items-start gap-2 rounded-lg border border-dashed border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
+				<span class="mt-0.5 shrink-0">⚠</span>
+				<span>Fase <strong>projectada</strong>: el sorteig és oficial (grups del rànquing inicial, amb horaris), però la federació encara no l'ha publicat al seu web en directe. Quan ho faci, aquí es veuran els resultats reals.</span>
+			</div>
+		{/if}
 		{#if phase.kind === 'group'}
 			{@const quals = phase.provisional_qualifiers
 				.slice()

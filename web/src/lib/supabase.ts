@@ -234,6 +234,10 @@ export interface OpenLivePhase {
 	provisional_qualifiers: OpenLiveProvQual[];
 	provisional_matches: OpenLiveMatch[];
 	provisional_players: { name: string; club: string; mitjana: number; serie_major: number; source: string }[];
+	// Fase PROJECTADA dins un open real: la federació té el sorteig fet (grups del
+	// PDF oficial) però encara no l'ha publicat al web en directe. Les altres fases
+	// del mateix open són reals. Vegeu cloud_sync._merge_projected_phases.
+	projected?: boolean;
 }
 export interface OpenLiveClassRow {
 	position: number;
