@@ -2149,6 +2149,227 @@ def _open_match_key(name: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def _projection_superseded_by(
+    proj_row: dict, active: list[tuple[set[str], str]]
+) -> bool:
+    """Diu si una projecció (id negatiu) ja té l'open REAL en curs publicat.
+
+    El nom del PDF ('XIV OPEN LES SANTES DE MATARO') i el del llistat de la
+    federació ('OPEN TRES BANDES MATARO') NO coincideixen: el primer porta
+    edició + festa + seu; el segon, sovint només la seu + modalitat. Per això no
+    casem per IGUALTAT de claus (mai coincidirien) sinó per CONTINÈNCIA: la clau
+    de l'open real (típicament només la seu) ha de ser un subconjunt no buit dels
+    tokens de la projecció, i amb la mateixa modalitat. Els Opens femenins mai es
+    publiquen en directe → cap open real pot substituir una projecció femenina.
+    """
+    if "FEMENI" in (proj_row.get("name") or "").upper():
+        return False
+    proj_tokens = set(_open_match_key(proj_row.get("name") or "").split())
+    if not proj_tokens:
+        return False
+    proj_mod = proj_row.get("modality") or ""
+    for real_tokens, real_mod in active:
+        if not real_tokens:
+            continue
+        if proj_mod and real_mod and proj_mod != real_mod:
+            continue
+        if real_tokens <= proj_tokens:
+            return True
+    return False
+
+
+def _phase_code(label: str, kind: str = "") -> str:
+    """Codi estable d'una fase per casar la REAL (web FCB) amb la PROJECTADA.
+
+    Els noms difereixen en accents i plural: la real ve "PRE-PRE-PREVIA" i la
+    projectada "Pre-pre-prèvies". Es compten els prefixos "PRE" abans de l'arrel
+    "PREVI" → P / PP / PPP. Qualsevol fase KO (setzens…final) es col·lapsa a
+    "FINAL" perquè, quan la federació publiqui el quadre final real, substitueixi
+    la projectada encara que en digui "SETZENS" i no "Fase Final".
+    """
+    import re
+    import unicodedata
+
+    s = unicodedata.normalize("NFD", label or "").encode("ascii", "ignore").decode().upper()
+    s = re.sub(r"[^A-Z]", "", s)
+    if kind == "ko" or any(
+        k in s for k in ("FINAL", "SETZENS", "VUITENS", "QUARTS", "SEMIFINAL", "SEMIS")
+    ):
+        return "FINAL"
+    i = s.find("PREVI")
+    if i >= 0:
+        return "P" * (i // 3 + 1)
+    return s or "?"
+
+
+def _matching_projection_payload(
+    real_name: str, real_mod: str, proj_rows_full: list[dict]
+) -> dict | None:
+    """Payload d'open_live de la projecció que casa amb un open real (o None).
+
+    Mateixa regla de continència que `_projection_superseded_by`: la clau de
+    l'open real (típicament la seu) ha de ser subconjunt dels tokens de la
+    projecció, amb la mateixa modalitat i excloent les projeccions femenines.
+    """
+    real_tokens = set(_open_match_key(real_name).split())
+    if not real_tokens:
+        return None
+    for p in proj_rows_full:
+        if "FEMENI" in (p.get("name") or "").upper():
+            continue
+        pmod = p.get("modality") or ""
+        if real_mod and pmod and real_mod != pmod:
+            continue
+        if real_tokens <= set(_open_match_key(p.get("name") or "").split()):
+            return p.get("payload_json")
+    return None
+
+
+def _merge_projected_phases(
+    real_phases: list[dict], template_phases: list[dict] | None
+) -> list[dict]:
+    """Fon fases reals i projectades en un sol open (id positiu).
+
+    `template_phases` marca l'ordre i el conjunt complet de fases: pot ser el
+    payload d'una projecció (fases del PDF) o el payload REAL previ del mateix
+    open (que ja arrossega les fases projectades d'abans, quan la projecció ja
+    s'ha plegat i esborrat). Per a cada fase del template: si la federació ja té
+    la fase real (mateix `_phase_code`), guanya la REAL; si no, es manté la del
+    template marcada `projected=True`. Les fases reals que el template no conté
+    (p.ex. una ronda KO nova) s'afegeixen al final. Sense template, es tornen
+    les fases reals tal qual.
+    """
+    if not template_phases:
+        return real_phases
+    real_by_code: dict[str, dict] = {}
+    for ph in real_phases:
+        real_by_code.setdefault(_phase_code(ph.get("label", ""), ph.get("kind", "")), ph)
+    merged: list[dict] = []
+    used: set[str] = set()
+    for tph in template_phases:
+        code = _phase_code(tph.get("label", ""), tph.get("kind", ""))
+        if code in used:
+            continue
+        used.add(code)
+        if code in real_by_code:
+            rp = dict(real_by_code[code])
+            rp.pop("projected", None)
+            merged.append(rp)
+        else:
+            pp = dict(tph)
+            pp["projected"] = True
+            merged.append(pp)
+    for ph in real_phases:
+        code = _phase_code(ph.get("label", ""), ph.get("kind", ""))
+        if code not in used:
+            used.add(code)
+            rp = dict(ph)
+            rp.pop("projected", None)
+            merged.append(rp)
+    return merged
+
+
+def _autobuild_projection_payload(
+    division_id: int, division_name: str, fetched_at: str, *, force: bool = True
+) -> dict | None:
+    """Construeix la projecció d'un open des dels PDFs PÚBLICS de la federació.
+
+    Sense que l'usuari pugi res: localitza a la secció Documents d'Opens el PDF
+    'RÀNQUING INICIAL' de l'open (i 'HORARIS' si hi és), en genera el quadre
+    projectat (sembra Art. XVIII + fases del reglament) i el torna en forma de
+    payload d'open_live per fondre'l com a fases projectades. Retorna None si no
+    hi ha el PDF o el generador no cobreix el nombre d'inscrits (N parell dins
+    [64,128]). Tot embolcallat: qualsevol error de xarxa/format degrada a None
+    (l'open segueix mostrant les seves fases reals, sense projecció).
+    """
+    import os
+    import tempfile
+    import unicodedata
+
+    from fcb_opens.projection import (
+        build_projection_from_seeded,
+        projection_to_live_payload,
+    )
+    from fcb_opens.scraper.open_live import (
+        fetch_doc_pdf,
+        fetch_opens_docs,
+        filter_docs_for_division,
+    )
+    from fcb_opens.scraper.ranking_inicial_pdf import parse_ranking_inicial_pdf
+
+    def _n(t: str) -> str:
+        return unicodedata.normalize("NFD", t or "").encode("ascii", "ignore").decode().upper()
+
+    def _pdf_tempfile(doc_id: int) -> str | None:
+        try:
+            data, _fn = fetch_doc_pdf(doc_id, force=force)
+        except Exception:  # noqa: BLE001
+            return None
+        fd, path = tempfile.mkstemp(suffix=".pdf")
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(data)
+        return path
+
+    try:
+        docs = fetch_opens_docs(force=force)
+    except Exception:  # noqa: BLE001
+        return None
+    open_docs = [
+        d
+        for d in filter_docs_for_division(docs, division_id, division_name)
+        if "FEMENI" not in _n(d.title)
+    ]
+    rank_docs = [
+        d for d in open_docs
+        if "RANQUING INICIAL" in _n(d.title) or "RANKING INICIAL" in _n(d.title)
+    ]
+    if not rank_docs:
+        return None
+    rpath = _pdf_tempfile(rank_docs[0].doc_id)
+    if rpath is None:
+        return None
+    try:
+        ranking = parse_ranking_inicial_pdf(rpath)
+    except Exception:  # noqa: BLE001
+        return None
+    finally:
+        try:
+            os.unlink(rpath)
+        except OSError:
+            pass
+    if ranking.num_players == 0:
+        return None
+
+    # Horaris (opcional): enganxa dia/billar/hores a cada grup projectat.
+    sched = None
+    hor_docs = [d for d in open_docs if "HORARIS" in _n(d.title)]
+    if hor_docs:
+        hpath = _pdf_tempfile(hor_docs[0].doc_id)
+        if hpath is not None:
+            try:
+                from fcb_opens.scraper.horaris_pdf import parse_horaris_pdf
+
+                sched = parse_horaris_pdf(hpath)
+            except Exception:  # noqa: BLE001
+                sched = None
+            finally:
+                try:
+                    os.unlink(hpath)
+                except OSError:
+                    pass
+
+    try:
+        proj = build_projection_from_seeded(ranking, season=None)
+    except Exception:  # noqa: BLE001 — NotImplementedError si N fora de rang, etc.
+        return None
+    return projection_to_live_payload(
+        proj,
+        division_id=-abs(division_id),
+        fetched_at=fetched_at,
+        schedule_by_group=sched,
+    )
+
+
 def _enrich_live_payload(
     payload: dict, sb, open_name: str = "", division_id: int | None = None
 ) -> None:
@@ -2374,6 +2595,27 @@ def publish_live_opens(
     # (`get_client()` ja està lligat a l'esquema `fcbillar`, on viu `open_ranking`).
     rank_by_name = opens_ranking_by_name(sb)
 
+    # Fonts per fondre les fases PROJECTADES (encara no penjades al web per la
+    # FCB) amb les reals: la projecció desada (id negatiu) i, si ja s'ha plegat i
+    # esborrat, el payload REAL previ (que les arrossega). Vegeu
+    # `_merge_projected_phases`.
+    try:
+        _live_rows = (
+            sb.table("open_live")
+            .select("fcb_division_id,name,modality,payload_json")
+            .execute()
+            .data
+            or []
+        )
+    except Exception:  # noqa: BLE001
+        _live_rows = []
+    proj_full = [r for r in _live_rows if (r.get("fcb_division_id") or 0) < 0]
+    prev_real = {
+        r["fcb_division_id"]: r.get("payload_json")
+        for r in _live_rows
+        if (r.get("fcb_division_id") or 0) > 0
+    }
+
     try:
         entries = fetch_individuals_llistat(force=force)
     except Exception as exc:  # noqa: BLE001
@@ -2410,10 +2652,31 @@ def publish_live_opens(
             continue
         payload = _state_payload(state, fetched_at)
         _enrich_live_payload(payload, sb, open_name=state.structure.name, division_id=e.division_id)
+        modality = _open_modality(state.structure.name)
+        # Fon les fases que la FCB encara no ha penjat al web. Fonts, per ordre:
+        #  1) projecció DESADA (id negatiu; l'usuari pot haver-la pujat/corregit).
+        #  2) el payload REAL previ, que ja arrossega les projectades d'abans
+        #     (barat: cap descàrrega; només si de fet en duia cap de projectada).
+        #  3) AUTO-construïda des dels PDFs públics de la federació (RÀNQUING
+        #     INICIAL + HORARIS) → així no cal pujar res a mà. Només mentre l'open
+        #     no tingui encara cap fase KO real (llavors la projecció ja no aporta).
+        template = _matching_projection_payload(state.structure.name, modality, proj_full)
+        template_phases = (template or {}).get("phases")
+        if not template_phases:
+            prev_phases = (prev_real.get(e.division_id) or {}).get("phases") or []
+            if any(p.get("projected") for p in prev_phases):
+                template_phases = prev_phases
+        if not template_phases and not any(p.get("kind") == "ko" for p in payload["phases"]):
+            auto = _autobuild_projection_payload(
+                e.division_id, state.structure.name, fetched_at, force=force
+            )
+            template_phases = (auto or {}).get("phases")
+        if template_phases:
+            payload["phases"] = _merge_projected_phases(payload["phases"], template_phases)
         rows.append({
             "fcb_division_id": e.division_id,
             "name": state.structure.name,
-            "modality": _open_modality(state.structure.name),
+            "modality": modality,
             "payload_json": payload,
             "captured_at": fetched_at,
             "updated_at": fetched_at,
@@ -2451,13 +2714,17 @@ def publish_live_opens(
     superseded = 0
     try:
         proj_rows = (
-            sb.table("open_live").select("fcb_division_id,name")
+            sb.table("open_live").select("fcb_division_id,name,modality")
             .lt("fcb_division_id", 0).execute().data or []
         )
-        active_keys = {_open_match_key(r["name"]) for r in rows}
+        # Cada open REAL actiu, reduït a (tokens de la clau estable, modalitat).
+        active = [
+            (set(_open_match_key(r["name"]).split()), r.get("modality") or "")
+            for r in rows
+        ]
         stale = [
             p["fcb_division_id"] for p in proj_rows
-            if _open_match_key(p["name"]) in active_keys
+            if _projection_superseded_by(p, active)
         ]
         if stale:
             sb.table("open_live").delete().in_("fcb_division_id", stale).execute()

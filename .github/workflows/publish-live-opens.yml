@@ -9,18 +9,20 @@ name: Publish live opens
 #   - SUPABASE_URL
 #   - SUPABASE_SERVICE_ROLE_KEY
 #
-# CADÈNCIA: es llança CADA HORA (minut 0). Els crons poc freqüents SÍ que els
-# respecta GitHub (a diferència d'un `*/15`, que estrangularia). Cada execució fa
-# un BUCLE INTERN que verifica els resultats penjats per la federació cada ~2 min
-# durant ~70 min; així, dins de cada hora, les dades s'actualitzen cada pocs minuts.
-# El buffer (70 min > 60) i cancel-in-progress cobreixen els retards del cron.
+# CADÈNCIA: es llança CADA HORA (minut 0), 6–20 UTC. GitHub reparteix els crons
+# HORARIS de manera molt més fiable que els sub-horaris (`*/15`, que estrangula i
+# arriba a saltar-se hores senceres —vist el 2026-07-11, quan el primer tret del
+# dia no va arribar). Cada execució fa un BUCLE INTERN que refresca cada ~2 min;
+# el bucle és llarg (~5 h) a posta: si GitHub deixa caure alguns trets horaris,
+# l'últim que SÍ va arrencar segueix publicant fins que el següent el rellevi
+# (cancel-in-progress). Així n'hi ha prou que arrenqui ~1 tret cada poques hores.
 #
 # Finestra: DISSABTES i DIUMENGES, 8:00–22:00 hora local (06–20 UTC a l'estiu,
 # CEST=UTC+2; a l'hivern CET=UTC+1 caldria '0 7-21 * * 6,0'). Dies: 6=ds, 0=dg.
 
 on:
   schedule:
-    - cron: '*/15 6-20 * * 6,0'
+    - cron: '0 6-20 * * 6,0'
   workflow_dispatch: {}
 
 # Un nou tret reinicia el bucle des de zero (sempre dades fresques, sense pila).
