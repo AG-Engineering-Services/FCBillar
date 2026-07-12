@@ -131,9 +131,46 @@ class ReingestaView(QWidget):
         self._cb_copa = QCheckBox("Copa")
         self._cb_opens = QCheckBox("Opens / competicions individuals (resultats)")
         self._cb_oprank = QCheckBox("Rànquing d'opens (en directe)")
-        for cb in (self._cb_lliga, self._cb_copa, self._cb_opens, self._cb_oprank):
+        for cb in (self._cb_lliga, self._cb_copa):
             cb.setChecked(True)
             lay.addWidget(cb)
+
+        # Opens: igual que la part logada, tria recent vs reimport històric complet.
+        self._cb_opens.setChecked(True)
+        lay.addWidget(self._cb_opens)
+        opens_scope = QHBoxLayout()
+        opens_scope.addSpacing(22)
+        self._rb_opens_recent = QRadioButton("Només la temporada actual")
+        self._rb_opens_recent.setChecked(True)
+        self._rb_opens_all = QRadioButton("Reimport històric complet")
+        opens_grp = QButtonGroup(self)
+        opens_grp.addButton(self._rb_opens_recent)
+        opens_grp.addButton(self._rb_opens_all)
+        opens_scope.addWidget(self._rb_opens_recent)
+        opens_scope.addWidget(self._rb_opens_all)
+        opens_scope.addStretch()
+        lay.addLayout(opens_scope)
+        self._cb_opens.toggled.connect(self._rb_opens_recent.setEnabled)
+        self._cb_opens.toggled.connect(self._rb_opens_all.setEnabled)
+
+        self._cb_oprank.setChecked(True)
+        lay.addWidget(self._cb_oprank)
+
+        # Validació del PDF oficial d'opens (FCB) contra el rànquing calculat.
+        # No ingesta res: baixa el PDF fresc (--force refresca la cache d'1h) i
+        # mostra el diff (posicions, punts, penalitzacions -20, absents).
+        opens_diff_btn = QPushButton("🔍  Diff PDF oficial d'opens vs calculat")
+        opens_diff_btn.setToolTip(
+            "Baixa el PDF oficial d'opens 3B de la FCB (fresc) i el compara amb el "
+            "rànquing calculat. No publica res; només informa de discrepàncies."
+        )
+        opens_diff_btn.clicked.connect(
+            lambda: self._run([
+                ("Diff PDF oficial d'opens vs calculat",
+                 [*OPENS, "diff-official", "--force"]),
+            ])
+        )
+        lay.addWidget(opens_diff_btn)
 
         copa_row = QHBoxLayout()
         copa_row.addWidget(QLabel("Edició Copa:"))
@@ -179,10 +216,20 @@ class ReingestaView(QWidget):
     def _run_nologada(self) -> None:
         steps: list[tuple[str, list[str]]] = []
         if self._cb_opens.isChecked():
-            steps.append(("Ingest individuals (opens/catalans)", [*FCB, "ingest-individuals"]))
-            steps.append(("Resultats reals d'opens (torneig_partides)",
-                          [*UV, "python", "scripts/ingest_open_games.py"]))
-            steps.append(("Scrape current opens (fcb_opens)", [*OPENS, "scrape-current-opens"]))
+            if self._rb_opens_all.isChecked():
+                # Reimport històric: totes les temporades. ingest_open_games recorre
+                # tots els torneigs de la taula, així que en treu també els històrics.
+                steps.append(("Ingest individuals — TOT l'històric",
+                              [*FCB, "ingest-individuals", "--historical"]))
+                steps.append(("Resultats reals d'opens (torneig_partides)",
+                              [*UV, "python", "scripts/ingest_open_games.py"]))
+                steps.append(("Scrape historical opens (fcb_opens)", [*OPENS, "scrape-historical"]))
+                steps.append(("Scrape current opens (fcb_opens)", [*OPENS, "scrape-current-opens"]))
+            else:
+                steps.append(("Ingest individuals (opens/catalans)", [*FCB, "ingest-individuals"]))
+                steps.append(("Resultats reals d'opens (torneig_partides)",
+                              [*UV, "python", "scripts/ingest_open_games.py"]))
+                steps.append(("Scrape current opens (fcb_opens)", [*OPENS, "scrape-current-opens"]))
         if self._cb_oprank.isChecked():
             steps.append(("Rànquing d'opens en directe (open_live)", [*FCB, "publish-live-opens"]))
         if self._cb_copa.isChecked():

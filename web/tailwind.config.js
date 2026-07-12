@@ -5,8 +5,8 @@ export default {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans: ['ui-sans-serif', 'system-ui', 'sans-serif'],
-				mono: ['ui-monospace', 'SFMono-Regular', 'monospace']
+				sans: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				mono: ['"Geist Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace']
 			}
 		}
 	},

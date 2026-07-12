@@ -49,6 +49,7 @@
 		{ href: '/copa', label: 'Copa', match: (p: string) => p.startsWith('/copa') },
 		{ href: '/opens', label: 'Opens', match: (p: string) => p.startsWith('/opens') },
 		{ href: '/campionats', label: 'Camp. Cat.', match: (p: string) => p.startsWith('/campionats') },
+		{ href: '/clubs', label: 'Clubs', match: (p: string) => p.startsWith('/clubs') },
 		{ href: '/cerca', label: 'Cerca', match: (p: string) => p.startsWith('/cerca') },
 		{ href: '/comparar', label: 'Comparar', match: (p: string) => p.startsWith('/comparar') },
 		{ href: '/records', label: 'Rècords', match: (p: string) => p.startsWith('/records') },
