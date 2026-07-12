@@ -2270,7 +2270,12 @@ def _merge_projected_phases(
 
 
 def _autobuild_projection_payload(
-    division_id: int, division_name: str, fetched_at: str, *, force: bool = True
+    division_id: int,
+    division_name: str,
+    fetched_at: str,
+    *,
+    live_phases: "list | None" = None,
+    force: bool = True,
 ) -> dict | None:
     """Construeix la projecció d'un open des dels PDFs PÚBLICS de la federació.
 
@@ -2362,12 +2367,126 @@ def _autobuild_projection_payload(
         proj = build_projection_from_seeded(ranking, season=None)
     except Exception:  # noqa: BLE001 — NotImplementedError si N fora de rang, etc.
         return None
+
+    # Resol la RONDA SEGÜENT: omple els placeholders '<k>-<fase>' de cada fase de
+    # grups projectada amb els guanyadors SEGURS reals de la ronda viva
+    # corresponent, ordenats per punts→mitjana→sèrie major (fcb_opens.next_round).
+    # Així, en comptes de "Guanyador Grup X", es veu qui s'ha classificat de veritat
+    # abans que la FCB dibuixi el sorteig. Placeholders sense guanyador segur queden.
+    if live_phases:
+        from fcb_opens.next_round import (
+            rank_winners,
+            resolve_next_round,
+            secured_winners,
+        )
+
+        winners_by_code: dict[str, list] = {}
+        for lp in live_phases:
+            code = _phase_code(lp.ref.label, lp.ref.kind)
+            w = rank_winners(secured_winners(lp))
+            if w:
+                winners_by_code[code] = w
+        # La font dels placeholders d'una fase de grups és la fase inferior:
+        # P (Prèvies) ← PP, PP (Pre-prèvies) ← PPP.
+        _from_phase = {"P": "PP", "PP": "PPP"}
+        for phdict in proj.get("phases", []):
+            src = _from_phase.get(phdict.get("name"))
+            if src and src in winners_by_code:
+                phdict["groups"], _, _ = resolve_next_round(
+                    phdict["groups"], winners_by_code[src], src
+                )
+
     return projection_to_live_payload(
         proj,
         division_id=-abs(division_id),
         fetched_at=fetched_at,
         schedule_by_group=sched,
     )
+
+
+def _open_schedule_by_group(
+    division_id: int, division_name: str, *, force: bool = True
+) -> dict | None:
+    """Dia/billar/hores per grup (bare label, p.ex. 'AG', 'Q', 'B') des del PDF
+    HORARIS de l'open, o None si no hi ha PDF o falla. Cau amb gràcia."""
+    import os
+    import tempfile
+    import unicodedata
+
+    from fcb_opens.scraper.horaris_pdf import parse_horaris_pdf
+    from fcb_opens.scraper.open_live import (
+        fetch_doc_pdf,
+        fetch_opens_docs,
+        filter_docs_for_division,
+    )
+
+    def _n(t: str) -> str:
+        return unicodedata.normalize("NFD", t or "").encode("ascii", "ignore").decode().upper()
+
+    try:
+        docs = fetch_opens_docs(force=force)
+    except Exception:  # noqa: BLE001
+        return None
+    hor = [
+        d
+        for d in filter_docs_for_division(docs, division_id, division_name)
+        if "FEMENI" not in _n(d.title) and "HORARIS" in _n(d.title)
+    ]
+    if not hor:
+        return None
+    try:
+        data, _fn = fetch_doc_pdf(hor[0].doc_id, force=force)
+    except Exception:  # noqa: BLE001
+        return None
+    fd, path = tempfile.mkstemp(suffix=".pdf")
+    with os.fdopen(fd, "wb") as fh:
+        fh.write(data)
+    try:
+        return parse_horaris_pdf(path)
+    except Exception:  # noqa: BLE001
+        return None
+    finally:
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+
+
+_P_KEYS = set("ABCDEFGHIJKLMNOP")  # P (Prèvies): grups A..P
+_PP_KEYS = {"Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF"}
+
+
+def _attach_schedules(phases: list[dict], schedule_by_group: dict | None) -> None:
+    """Enganxa `schedule` (dia/billar/hores) i `venue` a cada grup, in-place, perquè
+    els grups de l'open EN CURS mostrin quan i on juga cadascú. Els grups que ja en
+    porten (projecció) no es toquen.
+
+    Els labels de P (A..P) i PP (Q..AF) del seguiment en viu casen directament amb
+    les claus del HORARIS. El PPP és l'excepció: la FCB l'etiqueta 'A' en viu però al
+    HORARIS/generador és 'AG'.., i 'A' allà és PRÈVIA — casar per label cru donaria la
+    data equivocada. Per això el PPP s'assigna per ORDRE a les claus del HORARIS que
+    no són ni de P ni de PP (les 'AG'..)."""
+    if not schedule_by_group:
+        return
+    ppp_keys = sorted(k for k in schedule_by_group if k not in _P_KEYS and k not in _PP_KEYS)
+    for ph in phases:
+        code = _phase_code(ph.get("label", ""), ph.get("kind", ""))
+        ppp_i = 0
+        for g in ph.get("groups", []):
+            if g.get("schedule"):
+                continue
+            if code == "PPP":
+                s = schedule_by_group.get(ppp_keys[ppp_i]) if ppp_i < len(ppp_keys) else None
+                ppp_i += 1
+            else:
+                bare = (g.get("label") or "").replace("Grup ", "").strip()
+                s = schedule_by_group.get(bare)
+            if not s:
+                continue
+            g["schedule"] = s
+            billar = s.get("billar")
+            if billar and not g.get("venue"):
+                g["venue"] = f"Billar {billar}"
 
 
 def _enrich_live_payload(
@@ -2653,24 +2772,38 @@ def publish_live_opens(
         payload = _state_payload(state, fetched_at)
         _enrich_live_payload(payload, sb, open_name=state.structure.name, division_id=e.division_id)
         modality = _open_modality(state.structure.name)
+
+        # Dia/billar/hores a cada grup de l'open EN CURS (grups reals), des del PDF
+        # HORARIS de la federació (l'HTML en directe no els porta).
+        _attach_schedules(
+            payload["phases"],
+            _open_schedule_by_group(e.division_id, state.structure.name, force=force),
+        )
+
         # Fon les fases que la FCB encara no ha penjat al web. Fonts, per ordre:
-        #  1) projecció DESADA (id negatiu; l'usuari pot haver-la pujat/corregit).
-        #  2) el payload REAL previ, que ja arrossega les projectades d'abans
-        #     (barat: cap descàrrega; només si de fet en duia cap de projectada).
-        #  3) AUTO-construïda des dels PDFs públics de la federació (RÀNQUING
-        #     INICIAL + HORARIS) → així no cal pujar res a mà. Només mentre l'open
-        #     no tingui encara cap fase KO real (llavors la projecció ja no aporta).
-        template = _matching_projection_payload(state.structure.name, modality, proj_full)
-        template_phases = (template or {}).get("phases")
+        #  1) AUTO-construïda des dels PDFs públics (RÀNQUING INICIAL + HORARIS),
+        #     amb la RONDA SEGÜENT resolta pels guanyadors SEGURS vius. Primària
+        #     perquè es re-resol a cada publicació (a mesura que es tanquen grups).
+        #     Només mentre l'open no tingui cap fase KO real (llavors ja no aporta).
+        #  2) projecció DESADA (id negatiu; l'usuari pot haver-la pujat/corregit).
+        #  3) el payload REAL previ, que ja arrossega les projectades d'abans.
+        template_phases = None
+        if not any(p.get("kind") == "ko" for p in payload["phases"]):
+            auto = _autobuild_projection_payload(
+                e.division_id,
+                state.structure.name,
+                fetched_at,
+                live_phases=state.phases,
+                force=force,
+            )
+            template_phases = (auto or {}).get("phases")
+        if not template_phases:
+            template = _matching_projection_payload(state.structure.name, modality, proj_full)
+            template_phases = (template or {}).get("phases")
         if not template_phases:
             prev_phases = (prev_real.get(e.division_id) or {}).get("phases") or []
             if any(p.get("projected") for p in prev_phases):
                 template_phases = prev_phases
-        if not template_phases and not any(p.get("kind") == "ko" for p in payload["phases"]):
-            auto = _autobuild_projection_payload(
-                e.division_id, state.structure.name, fetched_at, force=force
-            )
-            template_phases = (auto or {}).get("phases")
         if template_phases:
             payload["phases"] = _merge_projected_phases(payload["phases"], template_phases)
         rows.append({
