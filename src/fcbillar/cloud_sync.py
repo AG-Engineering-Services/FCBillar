@@ -2501,18 +2501,18 @@ def _enrich_real_groups_with_projection(
     noms que no hi siguin i que NO siguin placeholders sense resoldre. Retorna quants
     n'ha afegit. Idempotent: quan la FCB col·loca el jugador, el nom ja hi és → no es
     duplica."""
+    import re
     import unicodedata
 
     def _nm(s: str) -> str:
-        return (
-            "".join(
-                c
-                for c in unicodedata.normalize("NFD", s or "")
-                if unicodedata.category(c) != "Mn"
-            )
-            .upper()
-            .strip()
+        # Treu accents I tota la puntuació/espais: la FCB en viu escriu "COGNOM,
+        # NOM" i el PDF de vegades "COGNOM,NOM" (sense espai) → cal casar-los.
+        s = "".join(
+            c
+            for c in unicodedata.normalize("NFD", s or "")
+            if unicodedata.category(c) != "Mn"
         )
+        return re.sub(r"[^A-Za-z0-9]", "", s).upper()
 
     proj_by_code = {
         _phase_code(p.get("label", ""), p.get("kind", "")): p for p in proj_phases

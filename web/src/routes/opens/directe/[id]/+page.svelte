@@ -590,7 +590,7 @@
 										<span class="w-4 text-center text-xs font-mono {pos === 1 ? 'text-emerald-600 dark:text-emerald-400' : pos >= 2 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{pos === 1 ? '▸' : idx + 1}</span>
 										<span class="flex min-w-0 flex-1 items-center gap-1">
 											{@render player(s.player_name, 'truncate text-sm' + (s.incoming ? ' text-sky-700 dark:text-sky-300' : ''))}
-											{#if s.incoming}<span class="shrink-0 rounded bg-sky-100 dark:bg-sky-900/40 px-1 text-[9px] font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300" title="Classificat que entra d'una ronda inferior (encara no col·locat oficialment per la FCB)">▸ {s.from_group?.replace('Grup ', '') ?? 'class.'}</span>{/if}
+											{#if s.incoming}<span class="shrink-0 rounded bg-sky-100 dark:bg-sky-900/40 px-1 text-[9px] font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300" title="{s.seed_rank ? s.seed_rank + 'è ' : ''}classificat de la ronda anterior{s.from_group ? ' (de ' + s.from_group.replace('Grup ', '') + ')' : ''} — la FCB encara no l'ha col·locat oficialment">▸ {s.seed_rank ? s.seed_rank + 'è cl.' : 'class.'}</span>{/if}
 										</span>
 										<span class="shrink-0 font-mono text-[11px] text-slate-400 dark:text-slate-500">{s.mitjana.toFixed(3)}</span>
 										<span class="w-5 shrink-0 text-right font-mono text-sm font-semibold">{s.punts}</span>
