@@ -179,6 +179,11 @@ export interface OpenLiveStanding {
 	pj?: number;
 	caramboles?: number;
 	entrades?: number;
+	// Jugador que ENTRA al grup com a guanyador d'una ronda inferior (classificat
+	// segur) però que la FCB encara no hi ha col·locat oficialment. `from_group` =
+	// el grup d'on ve. Vegeu cloud_sync._enrich_real_groups_with_projection.
+	incoming?: boolean;
+	from_group?: string;
 }
 export interface OpenLiveMatch {
 	player_a: string;
