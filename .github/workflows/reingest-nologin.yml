@@ -41,6 +41,10 @@ name: Reingesta no-logada (núvol)
 on:
   schedule:
     - cron: '0 21 * * *'        # cada dia 21:00 UTC ≈ 22:00 Barcelona (hivern)
+    # Caps de setmana, cada hora 07-20 UTC (≈9-22 local): manté pending_games
+    # (i lliga/copa/opens) fresc mentre hi ha opens en directe. El 'gate' ho
+    # OMET si no hi ha cap open en directe, per no fer feina pesada en va.
+    - cron: '0 7-20 * * 6,0'
   workflow_dispatch:
     inputs:
       force:
@@ -72,17 +76,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Porta d'aturada d'estiu (omet 1-24 d'agost, en UTC, tret de force).
+      # Porta d'aturada d'estiu (omet 1-24 d'agost) + porta d'opens en directe
+      # per als trets HORARIS de cap de setmana.
       - id: gate
+        env:
+          EVENT: ${{ github.event_name }}
         run: |
           if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           M=$(date -u +%m); D=$(date -u +%d)
           if [ "$M" = "08" ] && [ "$D" -lt 25 ]; then
             echo "Aturada d'estiu (1-24 d'agost): ometo la reingesta."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
+          # Trets HORARIS de cap de setmana (07-20 UTC): NOMÉS si hi ha algun open
+          # en directe (id positiu a open_live). El tret diari (21:00) i els
+          # manuals (workflow_dispatch) corren sempre. `10#` evita l'error d'octal.
+          H=$((10#$(date -u +%H)))
+          if [ "$EVENT" = "schedule" ] && [ "$H" -ge 7 ] && [ "$H" -le 20 ]; then
+            LIVE=$(curl -s \
+              -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "Accept-Profile: fcbillar" \
+              "$SUPABASE_URL/rest/v1/open_live?select=fcb_division_id&fcb_division_id=gt.0&limit=1")
+            if [ "$LIVE" = "[]" ] || [ -z "$LIVE" ]; then
+              echo "Tret horari de cap de setmana sense opens en directe → ometo."
+              echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            echo "Opens en directe detectats → segueixo."
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
 
       - name: Set up uv
         if: steps.gate.outputs.skip != 'true'
