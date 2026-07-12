@@ -356,14 +356,21 @@ def projection_to_live_payload(
 
     def _standing(p: dict) -> dict:
         if p["kind"] == "player":
-            return {
+            st = {
                 "player_name": p["player_name"],
                 "club": p.get("club") or "",
                 "punts": 0,
                 "mitjana": p.get("mitjana") or 0.0,
             }
+            # Guanyador resolt d'una ronda inferior (via next_round): marca'l perquè
+            # es pugui distingir del seed directe i saber de quin grup ve.
+            if p.get("resolved"):
+                st["incoming"] = True
+                if p.get("from_group"):
+                    st["from_group"] = p["from_group"]
+            return st
         # placeholder ("Guanyador Grup X"): a preview row, no player to link to
-        return {"player_name": p["label"], "club": "", "punts": 0, "mitjana": 0.0}
+        return {"player_name": p["label"], "club": "", "punts": 0, "mitjana": 0.0, "placeholder": True}
 
     def _group_out(g: dict) -> dict:
         sched = sched_map.get(g["label"])

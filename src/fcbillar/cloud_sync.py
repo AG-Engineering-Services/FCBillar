@@ -2489,6 +2489,61 @@ def _attach_schedules(phases: list[dict], schedule_by_group: dict | None) -> Non
                 g["venue"] = f"Billar {billar}"
 
 
+def _enrich_real_groups_with_projection(
+    real_phases: list[dict], proj_phases: list[dict]
+) -> int:
+    """Completa els grups de les fases REALS de grups afegint-hi els jugadors que la
+    projecció ja té RESOLTS (guanyadors segurs de la ronda inferior) però que la FCB
+    encara no ha col·locat al grup — p.ex. el 3r de cada grup de PRÈVIA = guanyador de
+    PRE-PRÈVIA, quan la PP ja s'ha jugat però la FCB no ha penjat la composició final.
+
+    Casa fase per `_phase_code` i grup per label; afegeix (marcat `incoming`) només
+    noms que no hi siguin i que NO siguin placeholders sense resoldre. Retorna quants
+    n'ha afegit. Idempotent: quan la FCB col·loca el jugador, el nom ja hi és → no es
+    duplica."""
+    import unicodedata
+
+    def _nm(s: str) -> str:
+        return (
+            "".join(
+                c
+                for c in unicodedata.normalize("NFD", s or "")
+                if unicodedata.category(c) != "Mn"
+            )
+            .upper()
+            .strip()
+        )
+
+    proj_by_code = {
+        _phase_code(p.get("label", ""), p.get("kind", "")): p for p in proj_phases
+    }
+    added = 0
+    for ph in real_phases:
+        if ph.get("kind") != "group":
+            continue
+        pph = proj_by_code.get(_phase_code(ph.get("label", ""), ph.get("kind", "")))
+        if not pph:
+            continue
+        pg_by_label = {g.get("label"): g for g in pph.get("groups", [])}
+        for g in ph.get("groups", []):
+            pg = pg_by_label.get(g.get("label"))
+            if not pg:
+                continue
+            proj_players = [s for s in pg.get("standings", []) if not s.get("placeholder")]
+            standings = g.setdefault("standings", [])
+            # Grup ja complet (tants o més jugadors que la projecció): no hi toquem.
+            if len(standings) >= len(proj_players):
+                continue
+            have = {_nm(s.get("player_name")) for s in standings}
+            for ps in proj_players:
+                nm = _nm(ps.get("player_name"))
+                if nm and nm not in have:
+                    standings.append({**ps, "incoming": True})
+                    have.add(nm)
+                    added += 1
+    return added
+
+
 def _enrich_live_payload(
     payload: dict, sb, open_name: str = "", division_id: int | None = None
 ) -> None:
@@ -2780,32 +2835,33 @@ def publish_live_opens(
             _open_schedule_by_group(e.division_id, state.structure.name, force=force),
         )
 
-        # Fon les fases que la FCB encara no ha penjat al web. Fonts, per ordre:
-        #  1) AUTO-construïda des dels PDFs públics (RÀNQUING INICIAL + HORARIS),
-        #     amb la RONDA SEGÜENT resolta pels guanyadors SEGURS vius. Primària
-        #     perquè es re-resol a cada publicació (a mesura que es tanquen grups).
-        #     Només mentre l'open no tingui cap fase KO real (llavors ja no aporta).
-        #  2) projecció DESADA (id negatiu; l'usuari pot haver-la pujat/corregit).
-        #  3) el payload REAL previ, que ja arrossega les projectades d'abans.
-        template_phases = None
-        if not any(p.get("kind") == "ko" for p in payload["phases"]):
-            auto = _autobuild_projection_payload(
-                e.division_id,
-                state.structure.name,
-                fetched_at,
-                live_phases=state.phases,
-                force=force,
-            )
-            template_phases = (auto or {}).get("phases")
-        if not template_phases:
+        # AUTO-construeix la projecció (RÀNQUING INICIAL + HORARIS), amb la RONDA
+        # SEGÜENT resolta pels guanyadors SEGURS vius (punts→mitjana→SM). Serveix per:
+        #  (a) COMPLETAR els grups reals incomplets — el 3r que la FCB encara no ha
+        #      col·locat (guanyador de la ronda inferior); i
+        #  (b) FONDRE les fases que la FCB encara no ha publicat.
+        # Es re-fa a cada publicació (barat: PDFs en cau) perquè es re-resolgui a
+        # mesura que es tanquen grups. Fallbacks (desada / prèvia) només per fondre.
+        auto = _autobuild_projection_payload(
+            e.division_id,
+            state.structure.name,
+            fetched_at,
+            live_phases=state.phases,
+            force=force,
+        )
+        auto_phases = (auto or {}).get("phases")
+        if auto_phases:
+            _enrich_real_groups_with_projection(payload["phases"], auto_phases)
+            payload["phases"] = _merge_projected_phases(payload["phases"], auto_phases)
+        else:
             template = _matching_projection_payload(state.structure.name, modality, proj_full)
             template_phases = (template or {}).get("phases")
-        if not template_phases:
-            prev_phases = (prev_real.get(e.division_id) or {}).get("phases") or []
-            if any(p.get("projected") for p in prev_phases):
-                template_phases = prev_phases
-        if template_phases:
-            payload["phases"] = _merge_projected_phases(payload["phases"], template_phases)
+            if not template_phases:
+                prev_phases = (prev_real.get(e.division_id) or {}).get("phases") or []
+                if any(p.get("projected") for p in prev_phases):
+                    template_phases = prev_phases
+            if template_phases:
+                payload["phases"] = _merge_projected_phases(payload["phases"], template_phases)
         rows.append({
             "fcb_division_id": e.division_id,
             "name": state.structure.name,
