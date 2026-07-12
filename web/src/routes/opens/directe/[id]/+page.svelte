@@ -492,7 +492,7 @@
 		{#if phase.kind === 'group'}
 			{@const quals = phase.provisional_qualifiers
 				.slice()
-				.sort((a, b) => a.position_in_group - b.position_in_group || b.punts - a.punts || b.mitjana - a.mitjana)}
+				.sort((a, b) => a.position_in_group - b.position_in_group || b.punts - a.punts || b.mitjana - a.mitjana || b.serie_major - a.serie_major || a.player_name.localeCompare(b.player_name))}
 			{@const nSeconds = quals.filter((q) => q.position_in_group > 1).length}
 			{@const phaseComplete = phase.groups.every(groupClosed)}
 			{#if quals.length}
