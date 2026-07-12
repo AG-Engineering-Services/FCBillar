@@ -514,7 +514,7 @@
 						<span class="w-8 text-right">Pts</span>
 						<span class="w-12 text-right">C</span>
 						<span class="w-12 text-right">E</span>
-						<span class="w-14 text-right">Mitjana</span>
+						<span class="w-14 text-right">Mitjana</span><span class="w-10 text-right" title="Sèrie major (desempat a igualtat de mitjana)">SM</span>
 					</div>
 					<ol class="space-y-0.5">
 						{#each quals as q, i}
@@ -532,7 +532,7 @@
 								<span class="hidden w-8 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200 md:inline">{q.punts}</span>
 								<span class="hidden w-12 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 md:inline">{q.caramboles ?? 0}</span>
 								<span class="hidden w-12 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 md:inline">{q.entrades ?? 0}</span>
-								<span class="w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{q.mitjana.toFixed(3)}</span>
+								<span class="w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{q.mitjana.toFixed(3)}</span><span class="w-10 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400" title="Sèrie major">{q.serie_major ?? 0}</span>
 							</li>
 						{/each}
 					</ol>
