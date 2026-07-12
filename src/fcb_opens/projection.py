@@ -368,6 +368,8 @@ def projection_to_live_payload(
                 st["incoming"] = True
                 if p.get("from_group"):
                     st["from_group"] = p["from_group"]
+                if p.get("seed_rank"):
+                    st["seed_rank"] = p["seed_rank"]  # posició als classificats
             return st
         # placeholder ("Guanyador Grup X"): a preview row, no player to link to
         return {"player_name": p["label"], "club": "", "punts": 0, "mitjana": 0.0, "placeholder": True}

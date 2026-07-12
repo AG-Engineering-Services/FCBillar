@@ -179,10 +179,12 @@ export interface OpenLiveStanding {
 	pj?: number;
 	caramboles?: number;
 	entrades?: number;
-	// Jugador que ENTRA al grup com a guanyador d'una ronda inferior (classificat
-	// segur) però que la FCB encara no hi ha col·locat oficialment. `from_group` =
-	// el grup d'on ve. Vegeu cloud_sync._enrich_real_groups_with_projection.
+	// Jugador que ENTRA al grup com a classificat segur d'una ronda inferior que la
+	// FCB encara no hi ha col·locat oficialment. `seed_rank` = la seva posició al
+	// rànquing de classificats (1 = millor, per punts→mitjana→SM); `from_group` = el
+	// grup d'on ve. Vegeu cloud_sync._enrich_real_groups_with_projection.
 	incoming?: boolean;
+	seed_rank?: number;
 	from_group?: string;
 }
 export interface OpenLiveMatch {
