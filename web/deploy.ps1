@@ -21,14 +21,18 @@ param([switch]$Preview)
 $ErrorActionPreference = 'Stop'
 $web = $PSScriptRoot
 $tmp = Join-Path $env:TEMP ("fcbweb_deploy_{0}" -f (Get-Random))
+# El projecte Vercel té Root Directory = 'web', així que l'app ha de quedar sota
+# un subdir web/ (si es copia a l'arrel, Vercel busca .../web i falla). El
+# .vercel/project.json va a l'arrel del temp (el CLI el llegeix des d'allà).
+$dst = Join-Path $tmp 'web'
 $scope = 'alberts-projects-92d169cf'
 
-New-Item -ItemType Directory -Force -Path "$tmp\src", "$tmp\.vercel" | Out-Null
+New-Item -ItemType Directory -Force -Path "$dst\src", "$tmp\.vercel" | Out-Null
 foreach ($f in 'package.json','svelte.config.js','vite.config.ts','tailwind.config.js','postcss.config.js','tsconfig.json','.gitignore') {
-    Copy-Item (Join-Path $web $f) (Join-Path $tmp $f) -Force
+    Copy-Item (Join-Path $web $f) (Join-Path $dst $f) -Force
 }
-Copy-Item (Join-Path $web 'src\*') (Join-Path $tmp 'src') -Recurse -Force
-if (Test-Path (Join-Path $web 'static')) { Copy-Item (Join-Path $web 'static') $tmp -Recurse -Force }
+Copy-Item (Join-Path $web 'src\*') (Join-Path $dst 'src') -Recurse -Force
+if (Test-Path (Join-Path $web 'static')) { Copy-Item (Join-Path $web 'static') $dst -Recurse -Force }
 Copy-Item (Join-Path $web '.vercel\project.json') (Join-Path $tmp '.vercel\project.json') -Force
 
 Push-Location $tmp
