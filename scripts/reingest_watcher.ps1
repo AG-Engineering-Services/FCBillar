@@ -28,6 +28,7 @@
 #>
 param(
     [int]$CooldownMin = 15,
+    [int]$MaxPerDay = 4,
     [switch]$DryRun
 )
 
@@ -79,11 +80,47 @@ try {
     Write-WLog "ERROR consultant pendents: $_"
     exit 1
 }
+# Només files amb 'id' real. Si la resposta no és un array de dades (p.ex. un
+# objecte d'error de PostgREST retornat amb 200) es comptava com "1 pendent" amb
+# id buit i disparava una reingesta FANTASMA cada cooldown: va ser el bucle
+# desbocat del 2026-06-21 ("Disparant reingesta per 1 petició: " amb ids buits).
+$pending = @($pending | Where-Object { $_.id })
 if ($pending.Count -eq 0) { exit 0 }   # res a fer (cas normal, silenciós)
 
 Write-WLog "$($pending.Count) petici(ons) pendents."
 
-# --- 2) Cooldown anti-abús --------------------------------------------------
+# --- 1b) TALLAFOC LOCAL (independent de l'estat a Supabase) -----------------
+# El bucle desbocat del 2026-06-21 va venir de peticions que no sortien mai de
+# 'pending' (re-inserció externa o PATCH d'estat fallit): cada cooldown es
+# re-disparava una reingesta completa. Aquests dos guardes viuen en un fitxer
+# LOCAL, així que acoten els trets encara que Supabase quedi inconsistent.
+$fireFile = Join-Path $repo 'data\.reingest_watcher_fires.json'
+$today = (Get-Date).ToString('yyyy-MM-dd')
+$fires = $null
+if (Test-Path $fireFile) {
+    try { $fires = Get-Content -LiteralPath $fireFile -Raw | ConvertFrom-Json } catch { $fires = $null }
+}
+if (-not $fires) { $fires = [pscustomobject]@{ date = $today; count = 0; last = $null } }
+if ($fires.date -ne $today) { $fires.date = $today; $fires.count = 0 }  # nou dia: reinicia comptador
+
+# Cooldown LOCAL: si hem disparat fa < CooldownMin, no re-disparem.
+if ($fires.last) {
+    try {
+        $sinceLocal = (New-TimeSpan -Start ([datetime]$fires.last).ToUniversalTime() -End (Get-Date).ToUniversalTime()).TotalMinutes
+        if ($sinceLocal -lt $CooldownMin) {
+            Write-WLog ("Cooldown LOCAL actiu (últim tret fa {0} min < {1}). Ometent." -f [int]$sinceLocal, $CooldownMin)
+            exit 0
+        }
+    } catch {}
+}
+# Tallafoc diari: mai més de $MaxPerDay reingestes disparades pel botó en un dia.
+if ([int]$fires.count -ge $MaxPerDay) {
+    $srcs = (@($pending | ForEach-Object { $_.source }) | Sort-Object -Unique) -join ', '
+    Write-WLog ("TALLAFOC: ja s'han disparat {0} reingestes avui (màx {1}). Deixo {2} pendent(s) [{3}] a la cua. Revisa qui insereix a reingest_requests." -f [int]$fires.count, $MaxPerDay, $pending.Count, $srcs)
+    exit 0
+}
+
+# --- 2) Cooldown anti-abús (secundari; basat en l'estat de Supabase) --------
 try {
     $lastDone = @(Invoke-RestMethod -Method Get -Headers $hRead `
             -Uri "$rest`?status=in.(done,error)&select=finished_at&order=finished_at.desc&limit=1")
@@ -112,11 +149,22 @@ Write-WLog ("Disparant reingesta per {0} petici(ons): {1}" -f $ids.Count, $idLis
 
 if ($DryRun) { Write-WLog "DryRun: no executo res."; exit 0 }
 
-# --- 4) Marca 'running', executa, marca 'done'/'error' ----------------------
+# --- 4) Reclamar (running), executa, marca 'done'/'error' -------------------
+# Reclamar és OBLIGATORI: si el PATCH a 'running' falla, NO executem, perquè no
+# podríem garantir que les mateixes files no es re-disparin al cicle següent
+# (era part del bucle desbocat). Un tret que no es pot reclamar s'avorta.
 try {
     Invoke-RestMethod -Method Patch -Headers $hWrite -Uri "$rest`?id=in.($idList)" `
         -Body (@{ status = 'running'; started_at = (NowIso) } | ConvertTo-Json) | Out-Null
-} catch { Write-WLog "AVÍS: no he pogut marcar 'running': $_" }
+} catch {
+    Write-WLog "ERROR: no he pogut marcar 'running' ($_). No executo per evitar re-tret."
+    exit 1
+}
+
+# Registra el tret al fitxer LOCAL abans d'executar (compta per al tallafoc diari).
+$fires.count = [int]$fires.count + 1
+$fires.last = (Get-Date).ToUniversalTime().ToString('o')
+try { $fires | ConvertTo-Json | Set-Content -LiteralPath $fireFile -Encoding UTF8 } catch {}
 
 $ps = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
 $script = Join-Path $repo 'scripts\weekly_reingest.ps1'

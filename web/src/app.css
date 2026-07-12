@@ -5,9 +5,15 @@
 @layer base {
 	html {
 		-webkit-text-size-adjust: 100%;
+		text-rendering: optimizeLegibility;
 	}
 	body {
 		/* respect iOS safe areas (notch) for a true mobile feel */
 		padding-bottom: env(safe-area-inset-bottom);
+	}
+	/* Estil Geist: xifres tabulars perquè les columnes de números (mitjanes,
+	   punts, posicions) quedin alineades verticalment a totes les taules. */
+	table {
+		font-variant-numeric: tabular-nums;
 	}
 }
