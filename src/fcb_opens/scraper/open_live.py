@@ -1975,6 +1975,93 @@ def parse_ko_page(html: str) -> tuple[MatchResult, ...]:
     return _dedupe_ko_matches(_parse_group_matches(soup))
 
 
+def _attach_ko_provisional_players(
+    phases: list[PhaseDetail],
+    reservats: tuple[GroupStanding, ...],
+    seeding: dict[str, int],
+) -> list[PhaseDetail]:
+    """Deriva els quadres KO PROVISIONALS quan la FCB encara no els ha penjat —
+    inclosa la publicació PARCIAL (uns emparellaments llistats, d'altres no). Per
+    cada ronda KO:
+      • calcula el pool d'avançats esperat (guanyadors de grup + RESERVATS al primer
+        KO; guanyadors de la ronda anterior després);
+      • treu els ja emparellats a `ko_matches` oficials;
+      • empara en piràmide els restants (1r-vs-Nè per sembra mitjana/SM).
+    `provisional_matches` només conté els emparellaments que falten, perquè la UI els
+    pinti al costat dels oficials amb marca "calculat". Idempotent: recalculable amb
+    un `reservats` ampliat (p.ex. completant els que la FCB encara no ha llistat)."""
+    final = list(phases)
+    last_group_idx = next(
+        (i for i in range(len(final) - 1, -1, -1) if final[i].ref.kind == "group"),
+        None,
+    )
+    if last_group_idx is None:
+        return final
+    for i in range(last_group_idx + 1, len(final)):
+        d = final[i]
+        if d.ref.kind != "ko":
+            continue
+
+        # Primer KO: pool sembrat reservats(rànquing) + classificats(classif.),
+        # perquè la piràmide doni l'aparellament 1-N, 2-(N-1), … demanat (caps
+        # de sèrie contra els pitjors classificats). La resta de rondes: guanyadors
+        # de la ronda anterior.
+        if i == last_group_idx + 1:
+            advancing = _seeded_first_ko_pool(final[last_group_idx], reservats, seeding)
+        else:
+            advancing = compute_advancing_players(final, i, last_group_idx)
+        paired: set[str] = set()
+        for m in d.ko_matches:
+            if m.player_a:
+                paired.add(m.player_a)
+            if m.player_b:
+                paired.add(m.player_b)
+
+        # Only form pairings when the full expected pool is known;
+        # for partial pools we keep `advancing` (so the UI shows the
+        # already-qualified players) but skip pairing.
+        expected_n_matches = _KO_LABEL_TO_MATCHES.get(d.ref.label.upper())
+        expected_pool_size = expected_n_matches * 2 if expected_n_matches else None
+        pool_complete = (
+            expected_pool_size is None or len(advancing) >= expected_pool_size
+        )
+        if advancing and pool_complete:
+            leftover_names = [p.name for p in advancing if p.name not in paired]
+            prov = _pair_pyramid(leftover_names)
+        else:
+            prov = ()
+
+        if prov or advancing:
+            final[i] = PhaseDetail(
+                ref=d.ref,
+                groups=d.groups,
+                ko_matches=d.ko_matches,
+                provisional_qualifiers=d.provisional_qualifiers,
+                provisional_matches=prov,
+                provisional_players=advancing,
+            )
+    return final
+
+
+def augment_state_reservats(
+    state: "OpenLiveState", extra: list[GroupStanding]
+) -> None:
+    """Afegeix caps de sèrie RESERVATS extres a l'estat en viu i recalcula el pool
+    del primer KO, in-place. Pensat per COMPLETAR els reservats que la federació
+    encara no ha llistat al grup "RESERVATS" en viu (sovint en falta algun fins que
+    penja el sorteig del primer KO) a partir de la projecció (RÀNQUING INICIAL).
+
+    No afegeix res si `extra` és buit. Els noms extres es normalitzen amb l'espai
+    després de la coma perquè casin amb el `seeding` (rànquing d'Opens) i el reservat
+    quedi ben ordenat entre els altres caps de sèrie."""
+    if not extra:
+        return
+    state.reservats = tuple(state.reservats) + tuple(extra)
+    state.phases = _attach_ko_provisional_players(
+        state.phases, state.reservats, state.seeding or {}
+    )
+
+
 # --------------------------------------------------------------------------- #
 # Orchestrator
 # --------------------------------------------------------------------------- #
@@ -2115,65 +2202,10 @@ def fetch_live_state(
 
     # 5) Third pass: derive provisional KO brackets when the FCB hasn't
     #    published them yet — including PARTIAL publication (some pairings
-    #    listed, others missing).  For each KO round:
-    #      • compute the expected pool of advancers (group winners +
-    #        reservats for the first KO; previous-round winners later);
-    #      • subtract players already paired in the official `ko_matches`;
-    #      • pyramid-pair the leftovers (1st-vs-Nth on mitjana/SM seed).
-    #    `provisional_matches` therefore holds ONLY the missing pairings,
-    #    so the UI can render them alongside the official ones with a
-    #    "calculat" marker.
-    final = list(enriched)
-    last_group_idx = next(
-        (i for i in range(len(final) - 1, -1, -1) if final[i].ref.kind == "group"),
-        None,
+    #    listed, others missing).  See `_attach_ko_provisional_players`.
+    final = _attach_ko_provisional_players(
+        enriched, reservats_standings, rank_by_name or {}
     )
-    if last_group_idx is not None:
-        for i in range(last_group_idx + 1, len(final)):
-            d = final[i]
-            if d.ref.kind != "ko":
-                continue
-
-            # Primer KO: pool sembrat reservats(rànquing) + classificats(classif.),
-            # perquè la piràmide doni l'aparellament 1-N, 2-(N-1), … demanat (caps
-            # de sèrie contra els pitjors classificats). La resta de rondes: guanyadors
-            # de la ronda anterior.
-            if i == last_group_idx + 1:
-                advancing = _seeded_first_ko_pool(
-                    final[last_group_idx], reservats_standings, rank_by_name or {}
-                )
-            else:
-                advancing = compute_advancing_players(final, i, last_group_idx)
-            paired: set[str] = set()
-            for m in d.ko_matches:
-                if m.player_a:
-                    paired.add(m.player_a)
-                if m.player_b:
-                    paired.add(m.player_b)
-
-            # Only form pairings when the full expected pool is known;
-            # for partial pools we keep `advancing` (so the UI shows the
-            # already-qualified players) but skip pairing.
-            expected_n_matches = _KO_LABEL_TO_MATCHES.get(d.ref.label.upper())
-            expected_pool_size = expected_n_matches * 2 if expected_n_matches else None
-            pool_complete = (
-                expected_pool_size is None or len(advancing) >= expected_pool_size
-            )
-            if advancing and pool_complete:
-                leftover_names = [p.name for p in advancing if p.name not in paired]
-                prov = _pair_pyramid(leftover_names)
-            else:
-                prov = ()
-
-            if prov or advancing:
-                final[i] = PhaseDetail(
-                    ref=d.ref,
-                    groups=d.groups,
-                    ko_matches=d.ko_matches,
-                    provisional_qualifiers=d.provisional_qualifiers,
-                    provisional_matches=prov,
-                    provisional_players=advancing,
-                )
 
     return OpenLiveState(
         structure=structure_full,
