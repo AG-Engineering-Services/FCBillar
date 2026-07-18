@@ -2544,6 +2544,79 @@ def _enrich_real_groups_with_projection(
     return added
 
 
+def _reservat_match_key(name: str, club: str) -> tuple[str, str, str]:
+    """Clau robusta per casar un cap de sèrie RESERVAT entre la projecció (PDF
+    RÀNQUING INICIAL) i el viu (HTML FCB): (club, 1r cognom, inicial del nom).
+
+    El PDF de vegades ABREUJA el 2n cognom ("HERNÁNDEZ HDEZ" vs "HERNÁNDEZ
+    HERNÁNDEZ") o s'oblida l'espai després de la coma ("GARCIA ALARCÓN,RICARDO"),
+    així que casar per nom sencer normalitzat falla i afegiria duplicats. El 1r
+    cognom + inicial + club és estable entre les dues fonts."""
+    import re
+    import unicodedata
+
+    def _strip(s: str) -> str:
+        return "".join(
+            c
+            for c in unicodedata.normalize("NFD", s or "")
+            if unicodedata.category(c) != "Mn"
+        ).upper()
+
+    parts = (name or "").split(",")
+    surnames = _strip(parts[0]).split()
+    given = _strip(parts[1]).strip() if len(parts) > 1 else ""
+    surname1 = re.sub(r"[^A-Z]", "", surnames[0]) if surnames else ""
+    given_initial = given[0] if given else ""
+    club_key = re.sub(r"[^A-Z0-9]", "", _strip(club))
+    return (club_key, surname1, given_initial)
+
+
+def _complete_first_ko_reservats(state, proj_phases: list[dict]) -> int:
+    """Completa els RESERVATS del primer KO de l'estat en viu amb els que la
+    projecció (RÀNQUING INICIAL) coneix però la FCB encara no ha llistat al grup
+    "RESERVATS" en directe. Muta `state` in-place; retorna quants n'ha afegit.
+
+    Cas real: a l'inici d'un open la llista "RESERVATS" del web sovint va per
+    darrere del quadre (p.ex. 15 dels 16 caps de sèrie), de manera que als setzens
+    en falta un. La projecció els té tots (`source='reservat'` a la fase KO), així
+    que hi afegim els que hi manquen (casant per `_reservat_match_key`)."""
+    import re
+
+    from fcb_opens.scraper.open_live import GroupStanding, augment_state_reservats
+
+    proj_reservats = [
+        p
+        for ph in proj_phases
+        if ph.get("kind") == "ko"
+        for p in ph.get("provisional_players", [])
+        if p.get("source") == "reservat"
+    ]
+    if not proj_reservats:
+        return 0
+    have = {
+        _reservat_match_key(s.player_name, s.club) for s in state.reservats
+    }
+    extra: list[GroupStanding] = []
+    for p in proj_reservats:
+        key = _reservat_match_key(p.get("name") or "", p.get("club") or "")
+        if key in have:
+            continue
+        have.add(key)
+        # Normalitza l'espai després de la coma perquè casi amb el `seeding`
+        # (rànquing d'Opens) i el reservat quedi ben ordenat entre els caps de sèrie.
+        nom = re.sub(r",\s*", ", ", p.get("name") or "")
+        extra.append(
+            GroupStanding(
+                player_name=nom,
+                club=p.get("club") or "",
+                punts=0,
+                mitjana=0.0,
+            )
+        )
+    augment_state_reservats(state, extra)
+    return len(extra)
+
+
 def _enrich_live_payload(
     payload: dict, sb, open_name: str = "", division_id: int | None = None
 ) -> None:
@@ -2824,6 +2897,29 @@ def publish_live_opens(
         # Sense fases publicades encara (sorteig no penjat): res a mostrar.
         if not state.phases:
             continue
+
+        # AUTO-construeix la projecció (RÀNQUING INICIAL + HORARIS), amb la RONDA
+        # SEGÜENT resolta pels guanyadors SEGURS vius (punts→mitjana→SM). Serveix per:
+        #  (a) COMPLETAR els RESERVATS del primer KO que la FCB encara no ha llistat;
+        #  (b) COMPLETAR els grups reals incomplets — el 3r que la FCB encara no ha
+        #      col·locat (guanyador de la ronda inferior); i
+        #  (c) FONDRE les fases que la FCB encara no ha publicat.
+        # Es re-fa a cada publicació (barat: PDFs en cau) perquè es re-resolgui a
+        # mesura que es tanquen grups. Fallbacks (desada / prèvia) només per fondre.
+        auto = _autobuild_projection_payload(
+            e.division_id,
+            state.structure.name,
+            fetched_at,
+            live_phases=state.phases,
+            force=force,
+        )
+        auto_phases = (auto or {}).get("phases")
+        # (a) Completa els caps de sèrie RESERVATS del primer KO ABANS de serialitzar,
+        # perquè tant els "classificats per a la ronda" com la classificació provisional
+        # comptin els 16 (i no els 15 que la FCB de vegades té llistats al principi).
+        if auto_phases:
+            _complete_first_ko_reservats(state, auto_phases)
+
         payload = _state_payload(state, fetched_at)
         _enrich_live_payload(payload, sb, open_name=state.structure.name, division_id=e.division_id)
         modality = _open_modality(state.structure.name)
@@ -2835,21 +2931,6 @@ def publish_live_opens(
             _open_schedule_by_group(e.division_id, state.structure.name, force=force),
         )
 
-        # AUTO-construeix la projecció (RÀNQUING INICIAL + HORARIS), amb la RONDA
-        # SEGÜENT resolta pels guanyadors SEGURS vius (punts→mitjana→SM). Serveix per:
-        #  (a) COMPLETAR els grups reals incomplets — el 3r que la FCB encara no ha
-        #      col·locat (guanyador de la ronda inferior); i
-        #  (b) FONDRE les fases que la FCB encara no ha publicat.
-        # Es re-fa a cada publicació (barat: PDFs en cau) perquè es re-resolgui a
-        # mesura que es tanquen grups. Fallbacks (desada / prèvia) només per fondre.
-        auto = _autobuild_projection_payload(
-            e.division_id,
-            state.structure.name,
-            fetched_at,
-            live_phases=state.phases,
-            force=force,
-        )
-        auto_phases = (auto or {}).get("phases")
         if auto_phases:
             _enrich_real_groups_with_projection(payload["phases"], auto_phases)
             payload["phases"] = _merge_projected_phases(payload["phases"], auto_phases)
