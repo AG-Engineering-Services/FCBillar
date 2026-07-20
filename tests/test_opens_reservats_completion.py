@@ -112,6 +112,33 @@ def test_complete_first_ko_reservats_adds_only_the_missing_one():
     assert "GARCIA ALARCÓN, RICARDO" in names
 
 
+def test_seed_first_ko_by_projection_uses_ranking_inicial_order():
+    """Els caps de sèrie del primer KO s'ordenen per la Posició del RÀNQUING INICIAL
+    (que porta la projecció), no pel rànquing d'Opens VIGENT (`state.seeding`)."""
+    live = (
+        GroupStanding("ALPHA AA, A", "C.B.A", 0, 0.0),
+        GroupStanding("BETA BB, B", "C.B.B", 0, 0.0),
+        GroupStanding("GAMMA GG, G", "C.B.G", 0, 0.0),
+    )
+    state = _state(live)
+    # Rànquing d'Opens VIGENT (derivat): donaria l'ordre ALPHA, BETA, GAMMA.
+    state.seeding = {"ALPHA AA, A": 1, "BETA BB, B": 2, "GAMMA GG, G": 3}
+    # Projecció (RÀNQUING INICIAL, Posició): l'ordre correcte és GAMMA, ALPHA, BETA.
+    proj_phases = [
+        {
+            "kind": "ko",
+            "label": "Fase Final",
+            "provisional_players": [
+                {"name": "GAMMA GG, G", "club": "C.B.G", "source": "reservat"},
+                {"name": "ALPHA AA, A", "club": "C.B.A", "source": "reservat"},
+                {"name": "BETA BB, B", "club": "C.B.B", "source": "reservat"},
+            ],
+        }
+    ]
+    assert cs._seed_first_ko_by_projection(state, proj_phases) is True
+    assert _setzens_reservats(state) == ["GAMMA GG, G", "ALPHA AA, A", "BETA BB, B"]
+
+
 def test_complete_first_ko_reservats_noop_when_live_is_complete():
     live = (
         GroupStanding("HERNÁNDEZ HERNÁNDEZ, FRANCESC", "C.B.MANRESA", 0, 0.0),

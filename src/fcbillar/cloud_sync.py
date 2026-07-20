@@ -2617,6 +2617,55 @@ def _complete_first_ko_reservats(state, proj_phases: list[dict]) -> int:
     return len(extra)
 
 
+def _seed_first_ko_by_projection(state, proj_phases: list[dict]) -> bool:
+    """Sembra els 16 caps de sèrie del primer KO per l'ordre del RÀNQUING INICIAL
+    (Posició 1..16 del PDF), no pel rànquing d'Opens VIGENT. Muta `state` in-place;
+    retorna si ha reordenat.
+
+    Per què: el sorteig del primer KO empara els caps de sèrie 1..16 amb els pitjors
+    classificats (piràmide 1-N). L'ordre dels caps de sèrie és el que la FEDERACIÓ va
+    fixar en publicar el RÀNQUING INICIAL d'AQUEST open (columna Posició), no el
+    rànquing d'Opens d'ara: entre la publicació i les eliminatòries s'hi juguen més
+    opens i el rànquing viu deriva (p.ex. a Mataró, Jiménez Vasco és Posició 5 però ja
+    ha caigut al 8 del rànquing viu). La projecció ja porta els reservats en ordre de
+    Posició; en derivem una sembra pròpia i recalculem el pool del primer KO.
+    """
+    from fcb_opens.scraper.open_live import (
+        _attach_ko_provisional_players,
+        _norm_name,
+    )
+
+    proj_reservats = [
+        p
+        for ph in proj_phases
+        if ph.get("kind") == "ko"
+        for p in ph.get("provisional_players", [])
+        if p.get("source") == "reservat"
+    ]
+    if not proj_reservats:
+        return False
+    # Posició (1..16) per cap de sèrie, casada de forma robusta amb el viu.
+    pos_by_key: dict[tuple[str, str, str], int] = {}
+    for idx, p in enumerate(proj_reservats, 1):
+        pos_by_key.setdefault(
+            _reservat_match_key(p.get("name") or "", p.get("club") or ""), idx
+        )
+    seeding = dict(state.seeding or {})  # rànquing viu com a fallback
+    reseeded = False
+    for s in state.reservats:
+        pos = pos_by_key.get(_reservat_match_key(s.player_name, s.club))
+        if pos is not None:
+            seeding[_norm_name(s.player_name)] = pos
+            reseeded = True
+    if not reseeded:
+        return False
+    state.seeding = seeding
+    state.phases = _attach_ko_provisional_players(
+        state.phases, state.reservats, seeding
+    )
+    return True
+
+
 def _enrich_live_payload(
     payload: dict, sb, open_name: str = "", division_id: int | None = None
 ) -> None:
@@ -2628,6 +2677,7 @@ def _enrich_live_payload(
         pugui enllaçar cada jugador a la seva fitxa.
     """
     import re
+    import unicodedata
 
     # 1) Agregats PJ/C/E per (grup, jugador) des de les partides jugades.
     for ph in payload.get("phases", []):
@@ -2674,6 +2724,17 @@ def _enrich_live_payload(
             names.add(m.get("player_b") or "")
         for q in ph.get("provisional_qualifiers", []):
             names.add(q.get("player_name") or "")
+        # Caps de sèrie reservats i emparellaments calculats del KO: també han de
+        # resoldre l'fcb_id (si no, un reservat que encara no juga cap grup —p.ex.
+        # el cap de sèrie nº1— es queda sense enllaç ni rànquing 3B → banda 181+).
+        for p in ph.get("provisional_players", []):
+            names.add(p.get("name") or "")
+        for m in ph.get("provisional_matches", []):
+            names.add(m.get("player_a") or "")
+            names.add(m.get("player_b") or "")
+    # Files de la classificació (inclou els que encara juguen, com els reservats).
+    for row in payload.get("classification", []):
+        names.add(row.get("player_name") or "")
     names.discard("")
     if not names:
         payload["player_ids"] = {}
@@ -2695,6 +2756,36 @@ def _enrich_live_payload(
         ids = by_nom.get(n) or by_nom.get(norm[n])
         if ids and len(ids) == 1:
             player_ids[n] = ids[0]
+
+    # Fallback SENSE accents per als noms que no han casat exacte: els noms que
+    # venen del PDF (RÀNQUING INICIAL → caps de sèrie reservats, fases projectades)
+    # de vegades escriuen l'accent diferent de la taska `players` (cas real:
+    # "GARCIA ALARCÓN" al PDF vs "GARCÍA ALARCÓN" a players → el nº4 del rànquing 3B
+    # queia a la banda "181+"). Es casa per nom normalitzat (sense accents, majúscules,
+    # espai després de la coma) i NOMÉS quan el match és únic (no enllaça homònims).
+    unresolved = [n for n in names if n not in player_ids]
+    if unresolved:
+
+        def _key(s: str) -> str:
+            s = "".join(
+                c
+                for c in unicodedata.normalize("NFD", s or "")
+                if unicodedata.category(c) != "Mn"
+            )
+            return re.sub(r",\s*", ", ", " ".join(s.split())).upper()
+
+        by_key: dict[str, set[str]] = {}
+        try:
+            allp = sb.table("players").select("nom,fcb_id").execute().data or []
+        except Exception:  # noqa: BLE001
+            allp = []
+        for r in allp:
+            by_key.setdefault(_key(r["nom"]), set()).add(r["fcb_id"])
+        for n in unresolved:
+            ids = by_key.get(_key(n))
+            if ids and len(ids) == 1:
+                player_ids[n] = next(iter(ids))
+
     payload["player_ids"] = player_ids
 
     # 3) Rànquing de TRES BANDES (modalitat_codi=1, seqüència vigent) per jugador,
@@ -2919,6 +3010,10 @@ def publish_live_opens(
         # comptin els 16 (i no els 15 que la FCB de vegades té llistats al principi).
         if auto_phases:
             _complete_first_ko_reservats(state, auto_phases)
+            # (a-bis) Sembra els caps de sèrie del primer KO per la Posició del
+            # RÀNQUING INICIAL (l'ordre oficial d'aquest open), no pel rànquing
+            # d'Opens vigent (que ja ha derivat des del sorteig).
+            _seed_first_ko_by_projection(state, auto_phases)
 
         payload = _state_payload(state, fetched_at)
         _enrich_live_payload(payload, sb, open_name=state.structure.name, division_id=e.division_id)
