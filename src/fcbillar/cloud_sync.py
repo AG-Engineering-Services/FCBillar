@@ -2677,6 +2677,7 @@ def _enrich_live_payload(
         pugui enllaçar cada jugador a la seva fitxa.
     """
     import re
+    import unicodedata
 
     # 1) Agregats PJ/C/E per (grup, jugador) des de les partides jugades.
     for ph in payload.get("phases", []):
@@ -2755,6 +2756,36 @@ def _enrich_live_payload(
         ids = by_nom.get(n) or by_nom.get(norm[n])
         if ids and len(ids) == 1:
             player_ids[n] = ids[0]
+
+    # Fallback SENSE accents per als noms que no han casat exacte: els noms que
+    # venen del PDF (RÀNQUING INICIAL → caps de sèrie reservats, fases projectades)
+    # de vegades escriuen l'accent diferent de la taska `players` (cas real:
+    # "GARCIA ALARCÓN" al PDF vs "GARCÍA ALARCÓN" a players → el nº4 del rànquing 3B
+    # queia a la banda "181+"). Es casa per nom normalitzat (sense accents, majúscules,
+    # espai després de la coma) i NOMÉS quan el match és únic (no enllaça homònims).
+    unresolved = [n for n in names if n not in player_ids]
+    if unresolved:
+
+        def _key(s: str) -> str:
+            s = "".join(
+                c
+                for c in unicodedata.normalize("NFD", s or "")
+                if unicodedata.category(c) != "Mn"
+            )
+            return re.sub(r",\s*", ", ", " ".join(s.split())).upper()
+
+        by_key: dict[str, set[str]] = {}
+        try:
+            allp = sb.table("players").select("nom,fcb_id").execute().data or []
+        except Exception:  # noqa: BLE001
+            allp = []
+        for r in allp:
+            by_key.setdefault(_key(r["nom"]), set()).add(r["fcb_id"])
+        for n in unresolved:
+            ids = by_key.get(_key(n))
+            if ids and len(ids) == 1:
+                player_ids[n] = next(iter(ids))
+
     payload["player_ids"] = player_ids
 
     # 3) Rànquing de TRES BANDES (modalitat_codi=1, seqüència vigent) per jugador,
