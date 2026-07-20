@@ -1853,22 +1853,67 @@ def publish_estadistiques_computa(
     *,
     dry_run: bool = False,
 ) -> dict[str, int]:
-    """Marca `public.partides.computa` (app Estadístiques) amb la finestra OFICIAL.
+    """Marca `public.partides.computa` i `computa_prox` (app Estadístiques).
 
-    Per a cada jugador seguit (`EST_USERS`) i modalitat (`EST_MOD_BY_FCB`), llegeix
-    les partides que computen al rànquing federatiu vigent (`ranking_game_links`) i
-    casa cada una amb la partida d'Estadístiques per signatura (caramboles propis,
-    del rival, entrades) + data més propera (les dates d'Estadístiques estan
-    entrades a mà i poden anar desplaçades). Reescriu `computa` sencer a cada
-    execució (idempotent). Amb `dry_run=True` només informa, no escriu.
+    Per a cada jugador seguit (`EST_USERS`) i modalitat (`EST_MOD_BY_FCB`) escriu DOS
+    flags, casant cada partida oficial amb la d'Estadístiques per signatura (caramboles
+    propis, del rival, entrades) + data més propera (les dates d'Estadístiques estan
+    entrades a mà i poden anar desplaçades):
+
+    - `computa`: la finestra OFICIAL vigent (`ranking_game_links` del darrer rànquing).
+    - `computa_prox`: la finestra PROJECTADA del PROPER rànquing (les 15 que computaran
+      després de l'actualització) = els games existents que hi resten
+      (`ranking_provisional.window_game_ids`) + les partides pendents encara no
+      publicades (`pending_games`). Sense partides pendents, coincideix amb `computa`.
+
+    Reescriu els dos flags sencers a cada execució (idempotent). Amb `dry_run=True`
+    només informa, no escriu.
     """
     prog: Progress = on_progress or (lambda level, msg: None)
     db_path = db_path or get_settings().db_path
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     pub = get_public_client()  # cal per llegir partides fins i tot en dry-run
+    sb = get_client()  # schema fcbillar: ranking_provisional + pending_games
+
+    def _sigs_for_gids(the_fcb: str, gids: list[str]) -> list[tuple]:
+        """Signatures (co, copp, e, data) dels games locals de `gids`, vistos des de
+        `the_fcb` (per casar la finestra projectada amb les partides d'Estadístiques)."""
+        if not gids:
+            return []
+        ph = ",".join("?" * len(gids))
+        out: list[tuple] = []
+        for g in conn.execute(
+            f"""SELECT CASE WHEN p1.fcb_id = ? THEN g.caramboles1 ELSE g.caramboles2 END co,
+                       CASE WHEN p1.fcb_id = ? THEN g.caramboles2 ELSE g.caramboles1 END copp,
+                       g.entrades e, g.data_partida d
+                FROM games g JOIN players p1 ON p1.id = g.player1_id
+                WHERE g.id IN ({ph})""",
+            (the_fcb, the_fcb, *gids),
+        ):
+            if g["co"] is not None and g["copp"] is not None and g["e"]:
+                out.append((g["co"], g["copp"], g["e"], g["d"]))
+        return out
+
+    def _match_window(by_sig: dict[tuple, list[dict]], items: list[tuple]) -> list:
+        """Casa una finestra (llista de (co, copp, e, data|None)) amb les partides
+        d'Estadístiques, bijectiu, desempatant per data més propera. Torna els ids
+        casats. `used` és propi de la crida (les finestres actual/propera es casen de
+        forma independent: una partida pot ser d'ambdues)."""
+        used: set = set()
+        matched: list = []
+        for co, copp, e, d in items:
+            cand = [p for p in by_sig.get((co, copp, e), []) if p["id"] not in used]
+            if not cand:
+                continue
+            if len(cand) > 1:
+                cand.sort(key=lambda p: _date_dist(p.get("data"), d))
+            used.add(cand[0]["id"])
+            matched.append(cand[0]["id"])
+        return matched
 
     total_true = 0
+    total_prox = 0
     total_unmatched = 0
     for est_uid, fcb_id in EST_USERS.items():
         for codi_fcb, est_mod in EST_MOD_BY_FCB.items():
@@ -1877,6 +1922,7 @@ def publish_estadistiques_computa(
                    WHERE m.codi_fcb = ? ORDER BY r.num_seq DESC LIMIT 1""",
                 (codi_fcb,),
             ).fetchone()
+            # Finestra OFICIAL vigent (games que computen al darrer rànquing).
             window: list[tuple[int, int, int, str]] = []
             if rk is not None:
                 for g in conn.execute(
@@ -1892,6 +1938,46 @@ def publish_estadistiques_computa(
                 ):
                     if g["co"] is not None and g["copp"] is not None and g["e"]:
                         window.append((g["co"], g["copp"], g["e"], g["d"]))
+
+            # Finestra PROJECTADA del proper rànquing: games que hi resten
+            # (ranking_provisional.window_game_ids) + partides pendents (pending_games).
+            # Sense fila a ranking_provisional (cap partida nova) → igual que l'actual.
+            try:
+                rp = (
+                    sb.table("ranking_provisional")
+                    .select("window_game_ids")
+                    .eq("player_fcb_id", fcb_id)
+                    .eq("modalitat_codi", codi_fcb)
+                    .execute()
+                    .data
+                )
+            except Exception:  # noqa: BLE001
+                rp = None
+            if rp:
+                prox = _sigs_for_gids(fcb_id, rp[0].get("window_game_ids") or [])
+                try:
+                    pend = (
+                        sb.table("pending_games")
+                        .select("caramboles,caramboles_opp,entrades")
+                        .eq("player_fcb_id", fcb_id)
+                        .eq("modalitat_codi", codi_fcb)
+                        .execute()
+                        .data
+                        or []
+                    )
+                except Exception:  # noqa: BLE001
+                    pend = []
+                for pr in pend:
+                    if (
+                        pr.get("caramboles") is not None
+                        and pr.get("caramboles_opp") is not None
+                        and pr.get("entrades")
+                    ):
+                        prox.append(
+                            (pr["caramboles"], pr["caramboles_opp"], pr["entrades"], None)
+                        )
+            else:
+                prox = list(window)
 
             rows = (
                 pub.table("partides")
@@ -1911,43 +1997,49 @@ def publish_estadistiques_computa(
                 by_sig.setdefault(
                     (p["caramboles"], p["caramboles_oponent"], p["entrades"]), []
                 ).append(p)
-            used: set = set()
-            matched: list = []
-            unmatched = 0
-            for co, copp, e, d in window:
-                cand = [p for p in by_sig.get((co, copp, e), []) if p["id"] not in used]
-                if not cand:
-                    unmatched += 1
-                    continue
-                if len(cand) > 1:
-                    cand.sort(key=lambda p: _date_dist(p.get("data"), d))
-                used.add(cand[0]["id"])
-                matched.append(cand[0]["id"])
+            matched = _match_window(by_sig, window)
+            matched_prox = _match_window(by_sig, prox)
+            unmatched = len(window) - len(matched)
 
             total_true += len(matched)
+            total_prox += len(matched_prox)
             total_unmatched += unmatched
             prog(
                 "ok",
-                f"computa[u{est_uid}/mod{codi_fcb}]: finestra={len(window)} "
-                f"casades={len(matched)} sense_match={unmatched} (de {len(rows)} partides)"
-                + ("  [DRY]" if dry_run else ""),
+                f"computa[u{est_uid}/mod{codi_fcb}]: oficial={len(window)}→{len(matched)} "
+                f"proper={len(prox)}→{len(matched_prox)} sense_match={unmatched} "
+                f"(de {len(rows)} partides)" + ("  [DRY]" if dry_run else ""),
             )
             if dry_run:
                 continue
 
             font = f"fcbillar:rk{rk['id']}" if rk is not None else None
             # reset a false tot el conjunt usuari+modalitat, després marca les casades
-            pub.table("partides").update({"computa": False, "computa_font": None}).eq(
-                "usuari_id", est_uid
-            ).eq("modalitat_id", est_mod).execute()
+            pub.table("partides").update(
+                {
+                    "computa": False,
+                    "computa_font": None,
+                    "computa_prox": False,
+                    "computa_prox_font": None,
+                }
+            ).eq("usuari_id", est_uid).eq("modalitat_id", est_mod).execute()
             for chunk in _chunks([{"id": i} for i in matched]):
                 ids = [r["id"] for r in chunk]
                 pub.table("partides").update(
                     {"computa": True, "computa_font": font}
                 ).in_("id", ids).execute()
+            for chunk in _chunks([{"id": i} for i in matched_prox]):
+                ids = [r["id"] for r in chunk]
+                pub.table("partides").update(
+                    {"computa_prox": True, "computa_prox_font": font}
+                ).in_("id", ids).execute()
 
     conn.close()
-    return {"estadistiques_computa": total_true, "estadistiques_sense_match": total_unmatched}
+    return {
+        "estadistiques_computa": total_true,
+        "estadistiques_computa_prox": total_prox,
+        "estadistiques_sense_match": total_unmatched,
+    }
 
 
 def publish_player_clubs(
