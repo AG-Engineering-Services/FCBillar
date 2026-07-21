@@ -2098,22 +2098,24 @@ def publish_estadistiques_fitxa(
     seq_last_prev = _last_seq(cur_year - 1) if cur_year is not None else None
 
     def _club_position(the_fcb: str, temporada: str, num_seq: int | None) -> dict | None:
-        """Posició del jugador dins del rànquing 3B dels membres del seu club en una
-        temporada (per mitjana). Torna {nom, temporada, posicio, total} o None."""
+        """Posició del jugador dins del rànquing 3B dels membres del seu CLUB ACTUAL
+        (taula `players.club_fcb_id`, tot el planter federat: inclou els qui aquest
+        any no han jugat però segueixen al club, i tots els equips A/B/C), rankejats
+        per mitjana al rànquing `num_seq`. NO usem `player_clubs` (només recull els qui
+        han jugat la lliga → infravalora). Torna {nom, temporada, posicio, total}."""
         if not temporada or num_seq is None:
             return None
-        pc = (
-            sb.table("player_clubs").select("club")
-            .eq("player_fcb_id", the_fcb).eq("temporada", temporada).execute().data
+        p = (
+            sb.table("players").select("club_fcb_id")
+            .eq("fcb_id", the_fcb).execute().data
         )
-        if not pc:
+        club = p[0].get("club_fcb_id") if p else None
+        if not club:
             return None
-        club = pc[0]["club"]
         members = (
-            sb.table("player_clubs").select("player_fcb_id")
-            .eq("club", club).eq("temporada", temporada).execute().data or []
+            sb.table("players").select("fcb_id").eq("club_fcb_id", club).execute().data or []
         )
-        ids = [m["player_fcb_id"] for m in members]
+        ids = [m["fcb_id"] for m in members]
         if not ids:
             return None
         ent = (
