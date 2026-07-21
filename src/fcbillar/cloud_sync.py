@@ -2335,6 +2335,238 @@ def publish_estadistiques_fitxa(
     return {"estadistiques_fitxa": len(rows)}
 
 
+# Classificació de competició d'un game oficial (a partir de competicio_id + torneig).
+def _est_comp_type(cid: int | None, tnom: str | None) -> str:
+    if cid == 1:
+        return "Lliga"
+    if cid == 3:
+        return "Copa"
+    if cid == 2:
+        if tnom and "OPEN" in tnom.upper():
+            return "Open"
+        return "Campionat de Catalunya" if tnom else "Individual"
+    return "Individual"
+
+
+def _est_comp_from_text(s: str | None) -> str:
+    up = (s or "").upper()
+    if "LLIGA" in up or "LIGA" in up:
+        return "Lliga"
+    if "OPEN" in up:
+        return "Open"
+    if "COPA" in up:
+        return "Copa"
+    if "CATALUNYA" in up or "CAMPIONAT" in up:
+        return "Campionat de Catalunya"
+    return "Individual"
+
+
+def _est_location(cid: int | None, home_club: str | None, tnom: str | None) -> str | None:
+    import re as _re
+
+    if cid == 1 and home_club:  # lliga: seu = club local
+        return home_club
+    if cid == 2 and tnom and "OPEN" in tnom.upper():  # open: ciutat del nom
+        c = _re.sub(r"\b(OPEN|TRES BANDES|3 BANDES|600|\d{4})\b", "", tnom, flags=_re.I).strip(" -")
+        return c.title() or None
+    return None
+
+
+def publish_estadistiques_partides(
+    db_path: Path | None = None, on_progress: Progress | None = None, *, dry_run: bool = False
+) -> dict[str, int]:
+    """Alimenta `public.partides` (app Estadístiques) amb les partides OFICIALS de
+    FCBillar (`games`) i les PENDENTS (`pending_games`) dels jugadors seguits.
+
+    Per a cada jugador (`EST_USERS`) i modalitat (`EST_MOD_BY_FCB`):
+      - casa cada partida federativa amb la del jugador per **signatura (caramboles
+        propis + del rival) + 1r cognom del rival + data més propera** (finestra 60
+        dies, per absorbir dates entrades a mà desplaçades);
+      - a les casades, **adapta** els valors del jugador als de la federació (data,
+        entrades, competició) i **completa** el que hi manqui (sèrie major i lloc:
+        només si la federació en té; si no, es respecta el que hi ha);
+      - **insereix** les federatives que no hi són (evita duplicats: el matching
+        bijectiu ja reconeix les existents) amb `origen='ranquing'`, i **renumera**
+        cronològicament (`renumber_estadistiques`).
+    Idempotent. Amb `dry_run=True` només informa, no escriu."""
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    pub = get_public_client()
+    sb = get_client()
+
+    import re
+    import unicodedata
+
+    def _ntoks(s: str | None) -> set:
+        # Tokens significatius del nom (sense accents, minúscules, ≥2 lletres), per
+        # casar rivals amb formats diferents: "COGNOM, NOM" (federació/León) vs
+        # "Nom Cognom" (Gómez) — es compara per intersecció de tokens.
+        x = "".join(
+            c for c in unicodedata.normalize("NFD", s or "") if unicodedata.category(c) != "Mn"
+        )
+        return {t for t in re.findall(r"[a-z0-9]+", x.lower()) if len(t) > 1}
+
+    def _name_match(a: str | None, b: str | None) -> bool:
+        ta, tb = _ntoks(a), _ntoks(b)
+        return bool(ta) and bool(tb) and len(ta & tb) >= 2
+
+    # Preposicions/articles que van sempre en minúscula (excepte si obren el nom).
+    _PARTICLES = {
+        "de", "del", "dels", "d", "da", "do", "dos", "das", "la", "las", "les",
+        "el", "els", "los", "lo", "l", "i", "y", "van", "von", "der", "den", "e",
+    }
+
+    def _title_name(fcb_nom: str | None) -> str:
+        # "RALITA ROS, JOAN" -> "Joan Ralita Ros"; "DE LA HOZ ALONSO, MIQUEL" ->
+        # "Miquel de la Hoz Alonso" (nom + cognoms, 1a lletra de cada paraula en
+        # majúscula i la resta en minúscula, però preposicions/articles en minúscula).
+        parts = (fcb_nom or "").split(",")
+        surnames = parts[0].strip()
+        given = parts[1].strip() if len(parts) > 1 else ""
+        full = f"{given} {surnames}".strip() if given else surnames
+        out = []
+        for i, w in enumerate(full.split()):
+            out.append(w.lower() if i > 0 and w.lower() in _PARTICLES else w.capitalize())
+        return " ".join(out)
+
+    tot_upd = tot_ins = 0
+    for est_uid, fcb_id in EST_USERS.items():
+        for codi_fcb, est_mod in EST_MOD_BY_FCB.items():
+            feds: list[dict] = []
+            # 1) partides OFICIALS (games) amb classificació de competició + lloc.
+            for g in conn.execute(
+                """SELECT g.data_partida d,
+                     CASE WHEN p1.fcb_id=? THEN g.caramboles1 ELSE g.caramboles2 END co,
+                     CASE WHEN p1.fcb_id=? THEN g.caramboles2 ELSE g.caramboles1 END copp,
+                     g.entrades e,
+                     CASE WHEN p1.fcb_id=? THEN g.serie_max1 ELSE g.serie_max2 END sm,
+                     CASE WHEN p1.fcb_id=? THEN p2.nom ELSE p1.nom END opp,
+                     g.competicio_id cid, ti.nom tnom, cloc.nom home
+                   FROM games g JOIN players p1 ON p1.id=g.player1_id
+                   JOIN players p2 ON p2.id=g.player2_id
+                   JOIN modalitats m ON m.id=g.modalitat_id
+                   LEFT JOIN torneigs_individuals ti ON ti.id=g.torneig_id
+                   LEFT JOIN encontres_lliga el ON el.id=g.encontre_lliga_id
+                   LEFT JOIN equips eq ON eq.id=el.equip_local_id
+                   LEFT JOIN clubs cloc ON cloc.id=eq.club_id
+                   WHERE (p1.fcb_id=? OR p2.fcb_id=?) AND m.codi_fcb=?""",
+                (fcb_id, fcb_id, fcb_id, fcb_id, fcb_id, fcb_id, codi_fcb),
+            ):
+                if g["co"] is None or g["copp"] is None or not g["e"]:
+                    continue
+                feds.append({
+                    "data": g["d"], "co": g["co"], "copp": g["copp"], "e": g["e"], "sm": g["sm"],
+                    "opp": g["opp"], "comp": _est_comp_type(g["cid"], g["tnom"]),
+                    "lloc": _est_location(g["cid"], g["home"], g["tnom"]),
+                })
+            # 2) partides PENDENTS (recents, encara no oficials).
+            try:
+                pend = (
+                    sb.table("pending_games")
+                    .select("opponent_nom,caramboles,caramboles_opp,entrades,serie,competicio")
+                    .eq("player_fcb_id", fcb_id).eq("modalitat_codi", codi_fcb)
+                    .execute().data or []
+                )
+            except Exception:  # noqa: BLE001
+                pend = []
+            for pr in pend:
+                if pr.get("caramboles") is None or pr.get("caramboles_opp") is None or not pr.get("entrades"):
+                    continue
+                feds.append({
+                    "data": None, "co": pr["caramboles"], "copp": pr["caramboles_opp"],
+                    "e": pr["entrades"], "sm": pr.get("serie"), "opp": pr.get("opponent_nom") or "",
+                    "comp": _est_comp_from_text(pr.get("competicio")), "lloc": None,
+                })
+            if not feds:
+                continue
+            # 3) partides actuals a c3b.
+            c3 = (
+                pub.table("partides")
+                .select("id,data,oponent,caramboles,caramboles_oponent,entrades,serie_major,competicio,lloc")
+                .eq("usuari_id", est_uid).eq("modalitat_id", est_mod)
+                .execute().data or []
+            )
+            used: set = set()
+            updates: list[tuple] = []
+            inserts: list[dict] = []
+            for f in sorted(feds, key=lambda x: x["data"] or ""):
+                cand = [
+                    c for c in c3 if c["id"] not in used
+                    and c["caramboles"] == f["co"] and c["caramboles_oponent"] == f["copp"]
+                ]
+                same = [c for c in cand if _name_match(c["oponent"], f["opp"])]
+                pool = same or cand
+                if pool and f["data"]:
+                    pool = sorted(pool, key=lambda c: _date_dist(c["data"], f["data"]))
+                    if _date_dist(pool[0]["data"], f["data"]) > 60:
+                        pool = []  # mateixa signatura però anys enllà: és una altra partida
+                if not pool and f["data"]:
+                    # 2n nivell: mateix rival + data (±2 dies) encara que el MARCADOR
+                    # difereixi — el jugador pot haver entrat el resultat amb error.
+                    # Només si és inequívoc (1 candidat), per no sobreescriure malament;
+                    # evita duplicar la mateixa partida amb un marcador diferent.
+                    fb = [
+                        c for c in c3 if c["id"] not in used
+                        and _name_match(c["oponent"], f["opp"])
+                        and _date_dist(c["data"], f["data"]) <= 2
+                    ]
+                    if len(fb) == 1:
+                        pool = fb
+                if not pool:
+                    inserts.append(f)
+                    continue
+                c = pool[0]
+                used.add(c["id"])
+                upd: dict = {}
+                if c["caramboles"] != f["co"]:
+                    upd["caramboles"] = f["co"]
+                if c["caramboles_oponent"] != f["copp"]:
+                    upd["caramboles_oponent"] = f["copp"]
+                if f["data"] and c["data"] != f["data"]:
+                    upd["data"] = f["data"]
+                if (c["entrades"] or 0) != (f["e"] or 0):
+                    upd["entrades"] = f["e"]
+                if f["sm"] is not None and c["serie_major"] != f["sm"]:
+                    upd["serie_major"] = f["sm"]
+                if c["competicio"] != f["comp"]:
+                    upd["competicio"] = f["comp"]
+                if f["lloc"] and c["lloc"] != f["lloc"]:
+                    upd["lloc"] = f["lloc"]
+                new_name = _title_name(f["opp"])
+                if new_name and c["oponent"] != new_name:
+                    upd["oponent"] = new_name
+                if upd:
+                    upd["mitjana"] = round(f["co"] / f["e"], 4) if f["e"] else None
+                    updates.append((c["id"], upd))
+
+            if not dry_run:
+                for pid, upd in updates:
+                    pub.table("partides").update(upd).eq("id", pid).execute()
+                for f in inserts:
+                    pub.table("partides").insert({
+                        "usuari_id": est_uid, "modalitat_id": est_mod, "num": None,
+                        "data": f["data"], "oponent": _title_name(f["opp"]),
+                        "caramboles": f["co"], "caramboles_oponent": f["copp"], "entrades": f["e"],
+                        "serie_major": f["sm"], "competicio": f["comp"], "lloc": f["lloc"],
+                        "mitjana": round(f["co"] / f["e"], 4) if f["e"] else None,
+                        "mitjana_oponent": round(f["copp"] / f["e"], 4) if f["e"] else None,
+                        "origen": "ranquing",
+                    }).execute()
+                if inserts:
+                    pub.rpc("renumber_estadistiques", {"p_usuari": est_uid, "p_mod": est_mod}).execute()
+
+            tot_upd += len(updates)
+            tot_ins += len(inserts)
+            if updates or inserts:
+                prog("ok", f"partides[u{est_uid}/mod{codi_fcb}]: {len(updates)} adaptades, "
+                     f"{len(inserts)} noves" + ("  [DRY]" if dry_run else ""))
+
+    conn.close()
+    return {"estadistiques_partides_upd": tot_upd, "estadistiques_partides_ins": tot_ins}
+
+
 def publish_player_clubs(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
