@@ -441,6 +441,49 @@
 		return `${d.getMonth() + 1 >= 8 ? d.getFullYear() : d.getFullYear() - 1}-08-01`;
 	})();
 	const seasonKpi = $derived(computeKpi(modGames.filter((g) => (g.data_partida ?? '') >= seasonStart)));
+	// Temporada anterior: finestra [prevSeasonStart, seasonStart).
+	const prevSeasonStart = (() => {
+		const d = new Date();
+		const y = d.getMonth() + 1 >= 8 ? d.getFullYear() : d.getFullYear() - 1;
+		return `${y - 1}-08-01`;
+	})();
+	const prevSeasonKpi = $derived(
+		computeKpi(
+			modGames.filter(
+				(g) => (g.data_partida ?? '') >= prevSeasonStart && (g.data_partida ?? '') < seasonStart
+			)
+		)
+	);
+	// Efectivitat per competició (Lliga / Open / Individual / Copa) sobre la modalitat.
+	// Punts: victòria = 2 (copa 3), empat = 1, derrota = 0.
+	const compBuckets = $derived.by(() => {
+		const kind = (c: string | null): string | null => {
+			const s = (c ?? '').toLowerCase();
+			if (s.includes('lliga') || s.includes('liga')) return 'Lliga';
+			if (s.includes('open')) return 'Open';
+			if (s.includes('individual') || s.includes('catalunya')) return 'Individual';
+			if (s.includes('copa')) return 'Copa';
+			return null;
+		};
+		const map = new Map<string, { w: number; e: number; l: number; n: number }>();
+		for (const g of modGames) {
+			const p = persp(g);
+			const k = kind(p.comp);
+			if (!k) continue;
+			if (!map.has(k)) map.set(k, { w: 0, e: 0, l: 0, n: 0 });
+			const b = map.get(k)!;
+			b.n++;
+			if (p.tie) b.e++;
+			else if (p.won) b.w++;
+			else b.l++;
+		}
+		return [...map.entries()]
+			.map(([tipus, b]) => {
+				const winVal = tipus === 'Copa' ? 3 : 2;
+				return { tipus, ...b, pct: b.n ? Math.round((100 * (b.w * winVal + b.e)) / (b.n * winVal)) : 0 };
+			})
+			.sort((a, b) => b.pct - a.pct);
+	});
 	const displayGames = $derived(
 		serieFilter && kpi.sm > 0
 			? modGames.filter((g) => persp(g).mySerie === kpi.sm)
@@ -448,17 +491,16 @@
 	);
 	// Cara a cara (només històric): rival amb més victòries / derrotes / partides (si >1).
 	const h2h = $derived.by(() => {
-		const map = new Map<string, { nom: string; id: string | null; won: number; lost: number; total: number }>();
+		const map = new Map<string, { nom: string; id: string | null; won: number; draws: number; lost: number; total: number }>();
 		for (const g of modGames) {
 			const p = persp(g);
 			const key = p.oppId ?? p.opp;
-			if (!map.has(key)) map.set(key, { nom: p.opp, id: p.oppId, won: 0, lost: 0, total: 0 });
+			if (!map.has(key)) map.set(key, { nom: p.opp, id: p.oppId, won: 0, draws: 0, lost: 0, total: 0 });
 			const e = map.get(key)!;
 			e.total++;
-			if (!p.tie) {
-				if (p.won) e.won++;
-				else e.lost++;
-			}
+			if (p.tie) e.draws++;
+			else if (p.won) e.won++;
+			else e.lost++;
 		}
 		const arr = [...map.values()];
 		// Només els del valor màxim de cada categoria (i >1); si empaten, tots ells.
@@ -974,6 +1016,20 @@
 				</div>
 				<p class="mt-2 px-1 text-[11px] text-slate-400 dark:text-slate-500">{seasonKpi.w} G · {seasonKpi.l} P{seasonKpi.t ? ` · ${seasonKpi.t} E` : ''}</p>
 			</div>
+			{#if prevSeasonKpi.n}
+				<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+					<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Temporada anterior</div>
+					<div class="grid grid-cols-4 gap-2">
+						{#each [['Partides', prevSeasonKpi.n], ['Mitjana', prevSeasonKpi.mitjana.toFixed(3)], ['Sèrie màx', prevSeasonKpi.sm], ['% vict.', prevSeasonKpi.pct + '%']] as [label, val]}
+							<div class="text-center">
+								<div class="font-mono text-base font-bold tabular-nums">{val}</div>
+								<div class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</div>
+							</div>
+						{/each}
+					</div>
+					<p class="mt-2 px-1 text-[11px] text-slate-400 dark:text-slate-500">{prevSeasonKpi.w} G · {prevSeasonKpi.l} P{prevSeasonKpi.t ? ` · ${prevSeasonKpi.t} E` : ''}</p>
+				</div>
+			{/if}
 			{#if serieFilter}
 				<p class="mb-2 px-1 text-[11px] text-blue-600 dark:text-blue-400">Partides amb la sèrie màxima ({kpi.sm}). Torna a tocar «Sèrie màx» per desfer.</p>
 			{/if}
@@ -1028,6 +1084,21 @@
 						{/if}
 					</p>
 				</div>
+			</div>
+		{/if}
+
+		{#if compBuckets.length}
+			<div class="mb-4 space-y-1.5 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Efectivitat per competició</div>
+				{#each compBuckets as c}
+					<div class="flex items-center gap-2 text-sm">
+						<span class="shrink-0 text-slate-600 dark:text-slate-300">{c.tipus}</span>
+						<span class="min-w-0 flex-1 text-right font-mono text-[11px] tabular-nums">
+							<span class="text-emerald-600 dark:text-emerald-400">{c.w}</span><span class="text-slate-300 dark:text-slate-600">-</span><span class="text-amber-600 dark:text-amber-400">{c.e}</span><span class="text-slate-300 dark:text-slate-600">-</span><span class="text-red-500 dark:text-red-400">{c.l}</span>
+						</span>
+						<span class="w-11 shrink-0 text-right font-mono font-bold tabular-nums">{c.pct}%</span>
+					</div>
+				{/each}
 			</div>
 		{/if}
 
@@ -1112,19 +1183,20 @@
 
 		{#if h2h.played.length || h2h.won.length || h2h.lost.length}
 			<div class="mb-4 space-y-2 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Cara a cara (històric)</div>
-				{#each [['played', 'Més jugat amb', 'total', '', ''], ['won', 'Més guanyat a', 'won', 'text-emerald-600 dark:text-emerald-400', ' G'], ['lost', 'Més perdut amb', 'lost', 'text-red-500 dark:text-red-400', ' P']] as [k, title, field, color, suf]}
-					{@const list = h2h[k]}
+				<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Rivals destacats (històric)</div>
+				{#each [['played', 'Rivals habituals'], ['won', 'Més victòries'], ['lost', 'Més derrotes']] as [k, title]}
+					{@const list = h2h[k as 'played' | 'won' | 'lost']}
 					{#if list.length}
 						<div class="flex items-start gap-2 text-sm">
 							<span class="shrink-0 text-slate-500 dark:text-slate-400">{title}</span>
 							<div class="min-w-0 flex-1 space-y-0.5 text-right font-medium">
-								{#each list as e}{#if kiosk}<span class="block truncate">{e.nom}</span>{:else}<a
-										href="/jugador/{e.id}"
-										class="block truncate active:underline">{e.nom}</a
-									>{/if}{/each}
+								{#each list as e}
+									<div class="truncate">
+										{#if kiosk}<span>{e.nom}</span>{:else}<a href="/jugador/{e.id}" class="active:underline">{e.nom}</a>{/if}
+										<span class="font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500">{#if k === 'played'}({e.total} / <span class="text-emerald-600 dark:text-emerald-400">{e.won}</span>-<span class="text-amber-600 dark:text-amber-400">{e.draws}</span>-<span class="text-red-500 dark:text-red-400">{e.lost}</span>){:else if k === 'won'}(<span class="text-emerald-600 dark:text-emerald-400">{e.won}V</span>){:else}(<span class="text-red-500 dark:text-red-400">{e.lost}D</span>){/if}</span>
+									</div>
+								{/each}
 							</div>
-							<span class="shrink-0 font-mono font-bold tabular-nums {color}">{(list[0] as any)[field]}{suf}</span>
 						</div>
 					{/if}
 				{/each}
