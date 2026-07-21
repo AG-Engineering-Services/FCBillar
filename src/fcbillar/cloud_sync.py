@@ -2126,20 +2126,40 @@ def publish_estadistiques_fitxa(
             )
             oc_all = (
                 sb.table("open_classifications")
-                .select("posicio")
+                .select("open_id,posicio")
                 .eq("player_fcb_id", fcb_id)
                 .execute()
                 .data
                 or []
             )
-            best_open = min(
-                (c["posicio"] for c in oc_all if c["posicio"] is not None), default=None
-            )
+            oc_valid = [c for c in oc_all if c.get("posicio") is not None]
+            best_open = best_open_nom = None
+            if oc_valid:
+                best_row = min(oc_valid, key=lambda c: c["posicio"])
+                best_open = best_row["posicio"]
+                om = (
+                    sb.table("opens")
+                    .select("nom")
+                    .eq("open_id", best_row["open_id"])
+                    .execute()
+                    .data
+                )
+                if om:
+                    # Nom net: treu el sufix de modalitat (" - TRES BANDES", etc.).
+                    import re as _re
+
+                    best_open_nom = _re.sub(
+                        r"\s*-\s*(TRES BANDES|3 BANDES|LLIURE|BANDA|QUADRE[^-]*)\s*$",
+                        "",
+                        (om[0].get("nom") or "").strip(),
+                        flags=_re.IGNORECASE,
+                    ).strip()
             opens = {
                 "posicio": latest["posicio"],
                 "punts": latest["punts"],
                 "millor_posicio": best_pos,
                 "millor_en_open": best_open,
+                "millor_en_open_nom": best_open_nom,
             }
 
         # Radar: rendiment per nivell d'oponent (trams de mitjana del rival).
