@@ -2068,6 +2068,71 @@ def publish_estadistiques_fitxa(
     fetched_at = datetime.now(timezone.utc).isoformat()
     MOD = 1  # 3 Bandes
 
+    # Mapa num_seq → (any, mes) del rànquing 3B i fites de temporada (agost-juliol),
+    # per calcular la posició d'INICI de temporada i la del club (compartit).
+    rk_dates = sb.table("rankings").select("num_seq,mes_pub,any_pub").execute().data or []
+    seqdate: dict[int, tuple[int, int]] = {}
+    for r in rk_dates:
+        if r.get("any_pub") is not None and r.get("mes_pub") is not None:
+            seqdate[r["num_seq"]] = (r["any_pub"], r["mes_pub"])
+    latest_seq = max(seqdate) if seqdate else None
+
+    def _in_season(d: tuple[int, int], start_year: int) -> bool:
+        return (d[0] == start_year and d[1] >= 8) or (d[0] == start_year + 1 and d[1] <= 7)
+
+    def _first_seq(start_year: int) -> int | None:
+        c = [(s, d) for s, d in seqdate.items() if _in_season(d, start_year)]
+        return min(c, key=lambda x: (x[1][0], x[1][1], x[0]))[0] if c else None
+
+    def _last_seq(start_year: int) -> int | None:
+        c = [(s, d) for s, d in seqdate.items() if _in_season(d, start_year)]
+        return max(c, key=lambda x: (x[1][0], x[1][1], x[0]))[0] if c else None
+
+    # Any d'inici de la temporada en curs, derivat del darrer rànquing publicat.
+    cur_year = None
+    if latest_seq is not None:
+        a, m = seqdate[latest_seq]
+        cur_year = a if m >= 8 else a - 1
+    seq_ini_cur = _first_seq(cur_year) if cur_year is not None else None
+    seq_last_cur = latest_seq
+    seq_last_prev = _last_seq(cur_year - 1) if cur_year is not None else None
+
+    def _club_position(the_fcb: str, temporada: str, num_seq: int | None) -> dict | None:
+        """Posició del jugador dins del rànquing 3B dels membres del seu club en una
+        temporada (per mitjana). Torna {nom, temporada, posicio, total} o None."""
+        if not temporada or num_seq is None:
+            return None
+        pc = (
+            sb.table("player_clubs").select("club")
+            .eq("player_fcb_id", the_fcb).eq("temporada", temporada).execute().data
+        )
+        if not pc:
+            return None
+        club = pc[0]["club"]
+        members = (
+            sb.table("player_clubs").select("player_fcb_id")
+            .eq("club", club).eq("temporada", temporada).execute().data or []
+        )
+        ids = [m["player_fcb_id"] for m in members]
+        if not ids:
+            return None
+        ent = (
+            sb.table("ranking_entries").select("player_fcb_id,mitjana_general")
+            .eq("modalitat_codi", MOD).eq("num_seq", num_seq)
+            .in_("player_fcb_id", ids).execute().data or []
+        )
+        ranked = sorted(
+            (e for e in ent if e.get("mitjana_general") is not None),
+            key=lambda e: -e["mitjana_general"],
+        )
+        pos = next((i for i, e in enumerate(ranked, 1) if e["player_fcb_id"] == the_fcb), None)
+        if pos is None:
+            return None
+        return {"nom": club, "temporada": temporada, "posicio": pos, "total": len(ranked)}
+
+    temp_cur = f"{cur_year}-{cur_year + 1}" if cur_year is not None else None
+    temp_prev = f"{cur_year - 1}-{cur_year}" if cur_year is not None else None
+
     rows: list[dict] = []
     for est_uid, fcb_id in EST_USERS.items():
         # Rànquing oficial + provisional (proper).
@@ -2089,7 +2154,7 @@ def publish_estadistiques_fitxa(
         if ranking is not None:
             hist = (
                 sb.table("ranking_entries")
-                .select("posicio,mitjana_general")
+                .select("num_seq,posicio,mitjana_general")
                 .eq("player_fcb_id", fcb_id)
                 .eq("modalitat_codi", MOD)
                 .execute()
@@ -2107,6 +2172,14 @@ def publish_estadistiques_fitxa(
                 ranking["millor_posicio_mitjana"] = best_pos["mitjana_general"]
                 ranking["millor_mitjana"] = best_mj["mitjana_general"]
                 ranking["millor_mitjana_posicio"] = best_mj["posicio"]
+            # Posició a l'INICI de la temporada en curs (primer rànquing de la temporada).
+            if seq_ini_cur is not None:
+                pos_by_seq = {
+                    h["num_seq"]: h["posicio"]
+                    for h in hist
+                    if h.get("num_seq") is not None and h.get("posicio") is not None
+                }
+                ranking["posicio_inici_temporada"] = pos_by_seq.get(seq_ini_cur)
 
         # Rànquing d'Opens 3B (general): darrera ronda + millor posició històrica.
         orr = (
@@ -2226,6 +2299,11 @@ def publish_estadistiques_fitxa(
                     }
                 )
 
+        # Posició dins del rànquing del club de cada temporada (per mitjana). La
+        # temporada actual pren el rànquing vigent; l'anterior, el darrer de la seva.
+        club_actual = _club_position(fcb_id, temp_cur, seq_last_cur) if temp_cur else None
+        club_anterior = _club_position(fcb_id, temp_prev, seq_last_prev) if temp_prev else None
+
         payload = {
             "fcb_id": fcb_id,
             "modalitat": "3 Bandes",
@@ -2233,6 +2311,8 @@ def publish_estadistiques_fitxa(
             "opens": opens,
             "radar": radar,
             "palmares": palmares,
+            "club_actual": club_actual,
+            "club_anterior": club_anterior,
         }
         rows.append(
             {"usuari_id": est_uid, "payload_json": payload, "updated_at": fetched_at}
