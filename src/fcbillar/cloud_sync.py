@@ -2065,6 +2065,8 @@ def publish_estadistiques_fitxa(
     prog: Progress = on_progress or (lambda level, msg: None)
     sb = get_client()  # schema fcbillar
     pub = get_public_client()  # schema public (app Estadístiques)
+    conn = sqlite3.connect(str(get_settings().db_path))  # local: rival de més/menys nivell
+    conn.row_factory = sqlite3.Row
     fetched_at = datetime.now(timezone.utc).isoformat()
     MOD = 1  # 3 Bandes
 
@@ -2260,7 +2262,14 @@ def publish_estadistiques_fitxa(
             .execute()
             .data
         )
-        radar = {"buckets": rb, "index": ri[0] if ri else None} if rb else None
+        if rb:
+            hardest, easiest = _est_nivell_extremes(conn, fcb_id, MOD)
+            radar = {
+                "buckets": rb, "index": ri[0] if ri else None,
+                "hardest": hardest, "easiest": easiest,
+            }
+        else:
+            radar = None
 
         # Palmarès: podis (1r-3r) a opens/campionats.
         podiums = (
@@ -2330,6 +2339,7 @@ def publish_estadistiques_fitxa(
             f"palmarès={len(palmares)}" + ("  [DRY]" if dry_run else ""),
         )
 
+    conn.close()
     if not dry_run and rows:
         pub.table("estadistiques_fitxa").upsert(rows, on_conflict="usuari_id").execute()
     return {"estadistiques_fitxa": len(rows)}
@@ -2370,6 +2380,68 @@ def _est_location(cid: int | None, home_club: str | None, tnom: str | None) -> s
         c = _re.sub(r"\b(OPEN|TRES BANDES|3 BANDES|600|\d{4})\b", "", tnom, flags=_re.I).strip(" -")
         return c.title() or None
     return None
+
+
+_EST_PARTICLES = {
+    "de", "del", "dels", "d", "da", "do", "dos", "das", "la", "las", "les",
+    "el", "els", "los", "lo", "l", "i", "y", "van", "von", "der", "den", "e",
+}
+
+
+def _est_title_name(fcb_nom: str | None) -> str:
+    """"RALITA ROS, JOAN" -> "Joan Ralita Ros" (nom + cognoms, Title Case, amb
+    preposicions/articles en minúscula: "Miquel de la Hoz Alonso")."""
+    parts = (fcb_nom or "").split(",")
+    surnames = parts[0].strip()
+    given = parts[1].strip() if len(parts) > 1 else ""
+    full = f"{given} {surnames}".strip() if given else surnames
+    out = []
+    for i, w in enumerate(full.split()):
+        out.append(w.lower() if i > 0 and w.lower() in _EST_PARTICLES else w.capitalize())
+    return " ".join(out)
+
+
+def _est_nivell_extremes(conn, fcb_id: str, codi_fcb: int) -> tuple[dict | None, dict | None]:
+    """Partit contra el rival de MÉS i de MENYS nivell (mitjana del rànquing del rival
+    en el moment de la partida, link de num_seq mínim; fallback a la mitjana del propi
+    partit). Torna (hardest, easiest) amb {nom, rating, res, myc, oppc} o (None, None)."""
+    sql = """
+        WITH tb AS (SELECT id mid FROM modalitats WHERE codi_fcb=?),
+        subj AS (
+          SELECT g.id gid, g.player2_id opp,
+             CASE WHEN g.guanyador_id=g.player1_id THEN 1
+                  WHEN g.guanyador_id IS NULL THEN 0 ELSE -1 END res,
+             g.caramboles1 myc, g.caramboles2 oppc, g.entrades ent
+          FROM games g JOIN players p1 ON p1.id=g.player1_id
+          WHERE g.modalitat_id=(SELECT mid FROM tb) AND p1.fcb_id=?
+          UNION ALL
+          SELECT g.id, g.player1_id,
+             CASE WHEN g.guanyador_id=g.player2_id THEN 1
+                  WHEN g.guanyador_id IS NULL THEN 0 ELSE -1 END,
+             g.caramboles2, g.caramboles1, g.entrades
+          FROM games g JOIN players p2 ON p2.id=g.player2_id
+          WHERE g.modalitat_id=(SELECT mid FROM tb) AND p2.fcb_id=?),
+        rated AS (SELECT s.*, COALESCE(
+            (SELECT e.mitjana_general FROM ranking_game_links l
+             JOIN rankings r ON r.id=l.ranking_id AND r.modalitat_id=(SELECT mid FROM tb)
+             JOIN ranking_entries e ON e.ranking_id=r.id AND e.player_id=l.player_id_origen
+             WHERE l.game_id=s.gid AND l.player_id_origen=s.opp ORDER BY r.num_seq ASC LIMIT 1),
+            (CAST(s.oppc AS REAL)/NULLIF(s.ent,0))) rating FROM subj s)
+        SELECT r.rating, r.res, r.myc, r.oppc, po.nom
+        FROM rated r JOIN players po ON po.id=r.opp
+        WHERE r.rating IS NOT NULL ORDER BY r.rating DESC
+    """
+    rows = conn.execute(sql, (codi_fcb, fcb_id, fcb_id)).fetchall()
+    if not rows:
+        return None, None
+
+    def _mk(row):
+        return {
+            "nom": _est_title_name(row["nom"]), "rating": round(row["rating"], 3),
+            "res": row["res"], "myc": row["myc"], "oppc": row["oppc"],
+        }
+
+    return _mk(rows[0]), _mk(rows[-1])
 
 
 def publish_estadistiques_partides(
