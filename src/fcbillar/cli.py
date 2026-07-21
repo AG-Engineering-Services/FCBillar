@@ -1029,6 +1029,21 @@ def publish_cloud_cmd() -> None:
     total = ", ".join(f"{k}={v}" for k, v in counts.items())
     console.print(f"[green]OK publicat a Supabase (fcbillar): {total}[/]")
 
+    # App germana "Estadístiques": alimenta public.partides amb els games oficials i
+    # pendents de FCBillar (adapta les del jugador i completa el que hi manqui; evita
+    # duplicats). No fatal. Abans de computa perquè aquest usi les dades reconciliades.
+    try:
+        from fcbillar.cloud_sync import publish_estadistiques_partides
+
+        c1 = publish_estadistiques_partides(on_progress=_prog)
+        console.print(
+            "[green]OK Estadístiques partides: "
+            + ", ".join(f"{k}={v}" for k, v in c1.items())
+            + "[/]"
+        )
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[yellow]Avís: no s'ha pogut alimentar partides a Estadístiques: {exc}[/]")
+
     # App germana "Estadístiques" (schema public): marca computa. No fatal.
     try:
         from fcbillar.cloud_sync import publish_estadistiques_computa
@@ -1095,6 +1110,29 @@ def publish_estadistiques_fitxa_cmd(
 
     try:
         counts = publish_estadistiques_fitxa(on_progress=_prog, dry_run=dry_run)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]Error: {exc}[/]")
+        raise typer.Exit(code=1) from exc
+    total = ", ".join(f"{k}={v}" for k, v in counts.items())
+    pref = "[DRY-RUN] " if dry_run else ""
+    console.print(f"[green]{pref}OK: {total}[/]")
+
+
+@app.command("publish-estadistiques-partides")
+def publish_estadistiques_partides_cmd(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Només informa, no escriu."),
+) -> None:
+    """Alimenta `public.partides` (app Estadístiques) amb les partides oficials i
+    pendents de FCBillar: adapta les del jugador als valors de la federació, completa
+    el que hi manqui (sèrie, competició, lloc, data), normalitza el nom del rival i
+    insereix les que falten (sense duplicar). Es crida també des de `publish-cloud`."""
+    from fcbillar.cloud_sync import publish_estadistiques_partides
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"[dim]  {msg}[/]" if level == "ok" else f"[yellow]{msg}[/]")
+
+    try:
+        counts = publish_estadistiques_partides(on_progress=_prog, dry_run=dry_run)
     except Exception as exc:  # noqa: BLE001
         console.print(f"[red]Error: {exc}[/]")
         raise typer.Exit(code=1) from exc
