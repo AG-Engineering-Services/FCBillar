@@ -2042,6 +2042,193 @@ def publish_estadistiques_computa(
     }
 
 
+def publish_estadistiques_fitxa(
+    on_progress: Progress | None = None, *, dry_run: bool = False
+) -> dict[str, int]:
+    """Publica a `public.estadistiques_fitxa` el resum de la fitxa federativa de 3
+    Bandes de cada jugador seguit (`EST_USERS`), perquè l'app Estadístiques mostri
+    els MATEIXOS indicadors que la fitxa de FCBillar (consistents, del càlcul oficial;
+    no recalculats a c3b):
+
+      - `ranking`   : posició i mitjana OFICIAL i PROVISIONAL (`ranking_provisional`).
+      - `opens`     : posició i punts al Rànquing d'Opens 3B + millor posició
+                      històrica (`open_ranking`) i millor resultat en un open
+                      (`open_classifications`).
+      - `radar`     : rendiment per nivell d'oponent (`player_rating_buckets` +
+                      `player_rating_index`).
+      - `palmares`  : podis (1r-3r) a opens/campionats (`open_classifications`+`opens`).
+
+    Escriu un únic JSON per `usuari_id` (upsert idempotent). Amb `dry_run=True` només
+    informa. Modalitat: 3 Bandes (codi_fcb 1)."""
+    from datetime import datetime, timezone
+
+    prog: Progress = on_progress or (lambda level, msg: None)
+    sb = get_client()  # schema fcbillar
+    pub = get_public_client()  # schema public (app Estadístiques)
+    fetched_at = datetime.now(timezone.utc).isoformat()
+    MOD = 1  # 3 Bandes
+
+    rows: list[dict] = []
+    for est_uid, fcb_id in EST_USERS.items():
+        # Rànquing oficial + provisional (proper).
+        rp = (
+            sb.table("ranking_provisional")
+            .select(
+                "posicio_oficial,mitjana_oficial,posicio_provisional,"
+                "mitjana_provisional,partides_post"
+            )
+            .eq("player_fcb_id", fcb_id)
+            .eq("modalitat_codi", MOD)
+            .execute()
+            .data
+        )
+        ranking = dict(rp[0]) if rp else None
+        # Millor posició i millor mitjana històriques al rànquing 3B, APARELLADES:
+        # de la millor posició en guardem la mitjana d'aquell moment, i de la millor
+        # mitjana la posició que donava (de tot l'historial d'`ranking_entries`).
+        if ranking is not None:
+            hist = (
+                sb.table("ranking_entries")
+                .select("posicio,mitjana_general")
+                .eq("player_fcb_id", fcb_id)
+                .eq("modalitat_codi", MOD)
+                .execute()
+                .data
+                or []
+            )
+            valid = [
+                h for h in hist
+                if h.get("posicio") is not None and h.get("mitjana_general") is not None
+            ]
+            if valid:
+                best_pos = min(valid, key=lambda h: h["posicio"])
+                best_mj = max(valid, key=lambda h: h["mitjana_general"])
+                ranking["millor_posicio"] = best_pos["posicio"]
+                ranking["millor_posicio_mitjana"] = best_pos["mitjana_general"]
+                ranking["millor_mitjana"] = best_mj["mitjana_general"]
+                ranking["millor_mitjana_posicio"] = best_mj["posicio"]
+
+        # Rànquing d'Opens 3B (general): darrera ronda + millor posició històrica.
+        orr = (
+            sb.table("open_ranking")
+            .select("ronda,posicio,punts")
+            .eq("player_fcb_id", fcb_id)
+            .eq("genere", "general")
+            .execute()
+            .data
+            or []
+        )
+        opens = None
+        if orr:
+            latest = max(orr, key=lambda r: r["ronda"])
+            best_pos = min(
+                (r["posicio"] for r in orr if r["posicio"] is not None), default=None
+            )
+            oc_all = (
+                sb.table("open_classifications")
+                .select("posicio")
+                .eq("player_fcb_id", fcb_id)
+                .execute()
+                .data
+                or []
+            )
+            best_open = min(
+                (c["posicio"] for c in oc_all if c["posicio"] is not None), default=None
+            )
+            opens = {
+                "posicio": latest["posicio"],
+                "punts": latest["punts"],
+                "millor_posicio": best_pos,
+                "millor_en_open": best_open,
+            }
+
+        # Radar: rendiment per nivell d'oponent (trams de mitjana del rival).
+        rb = (
+            sb.table("player_rating_buckets")
+            .select("bucket_order,label,wins,losses,draws")
+            .eq("player_fcb_id", fcb_id)
+            .eq("modalitat_codi", MOD)
+            .order("bucket_order")
+            .execute()
+            .data
+            or []
+        )
+        ri = (
+            sb.table("player_rating_index")
+            .select("weighted_index,crossover,total_games")
+            .eq("player_fcb_id", fcb_id)
+            .eq("modalitat_codi", MOD)
+            .execute()
+            .data
+        )
+        radar = {"buckets": rb, "index": ri[0] if ri else None} if rb else None
+
+        # Palmarès: podis (1r-3r) a opens/campionats.
+        podiums = (
+            sb.table("open_classifications")
+            .select("open_id,posicio,club")
+            .eq("player_fcb_id", fcb_id)
+            .gte("posicio", 1)
+            .lte("posicio", 3)
+            .execute()
+            .data
+            or []
+        )
+        palmares: list[dict] = []
+        if podiums:
+            open_ids = list({p["open_id"] for p in podiums})
+            meta = (
+                sb.table("opens")
+                .select("open_id,nom,temporada")
+                .in_("open_id", open_ids)
+                .execute()
+                .data
+                or []
+            )
+            by_id = {o["open_id"]: o for o in meta}
+            for p in sorted(podiums, key=lambda x: x["posicio"]):
+                o = by_id.get(p["open_id"])
+                if not o:
+                    continue
+                nom = (o.get("nom") or "").strip()
+                up = nom.upper()
+                tipus = (
+                    "open"
+                    if "OPEN" in up
+                    else ("campionat" if "CAMPIONAT" in up or "CATALUNYA" in up else "torneig")
+                )
+                palmares.append(
+                    {
+                        "nom": nom,
+                        "temporada": o.get("temporada") or "",
+                        "posicio": p["posicio"],
+                        "tipus": tipus,
+                    }
+                )
+
+        payload = {
+            "fcb_id": fcb_id,
+            "modalitat": "3 Bandes",
+            "ranking": ranking,
+            "opens": opens,
+            "radar": radar,
+            "palmares": palmares,
+        }
+        rows.append(
+            {"usuari_id": est_uid, "payload_json": payload, "updated_at": fetched_at}
+        )
+        prog(
+            "ok",
+            f"fitxa u{est_uid} (fcb {fcb_id}): rànquing={'sí' if ranking else 'no'} "
+            f"opens={'sí' if opens else 'no'} radar={len(rb)} trams "
+            f"palmarès={len(palmares)}" + ("  [DRY]" if dry_run else ""),
+        )
+
+    if not dry_run and rows:
+        pub.table("estadistiques_fitxa").upsert(rows, on_conflict="usuari_id").execute()
+    return {"estadistiques_fitxa": len(rows)}
+
+
 def publish_player_clubs(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:

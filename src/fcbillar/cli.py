@@ -1042,6 +1042,20 @@ def publish_cloud_cmd() -> None:
     except Exception as exc:  # noqa: BLE001
         console.print(f"[yellow]Avís: no s'ha pogut marcar computa a Estadístiques: {exc}[/]")
 
+    # App germana "Estadístiques": resum de la fitxa federativa (rànquing, opens,
+    # radar, palmarès). No fatal.
+    try:
+        from fcbillar.cloud_sync import publish_estadistiques_fitxa
+
+        c3 = publish_estadistiques_fitxa(on_progress=_prog)
+        console.print(
+            "[green]OK Estadístiques fitxa: "
+            + ", ".join(f"{k}={v}" for k, v in c3.items())
+            + "[/]"
+        )
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[yellow]Avís: no s'ha pogut publicar la fitxa a Estadístiques: {exc}[/]")
+
 
 @app.command("publish-estadistiques-computa")
 def publish_estadistiques_computa_cmd(
@@ -1059,6 +1073,28 @@ def publish_estadistiques_computa_cmd(
 
     try:
         counts = publish_estadistiques_computa(on_progress=_prog, dry_run=dry_run)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]Error: {exc}[/]")
+        raise typer.Exit(code=1) from exc
+    total = ", ".join(f"{k}={v}" for k, v in counts.items())
+    pref = "[DRY-RUN] " if dry_run else ""
+    console.print(f"[green]{pref}OK: {total}[/]")
+
+
+@app.command("publish-estadistiques-fitxa")
+def publish_estadistiques_fitxa_cmd(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Només informa, no escriu."),
+) -> None:
+    """Publica el resum de la fitxa federativa (rànquing, opens, radar, palmarès) a
+    `public.estadistiques_fitxa` per a l'app Estadístiques. Consistent amb la fitxa
+    de FCBillar. Es crida també des de `publish-cloud`."""
+    from fcbillar.cloud_sync import publish_estadistiques_fitxa
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"[dim]  {msg}[/]" if level == "ok" else f"[yellow]{msg}[/]")
+
+    try:
+        counts = publish_estadistiques_fitxa(on_progress=_prog, dry_run=dry_run)
     except Exception as exc:  # noqa: BLE001
         console.print(f"[red]Error: {exc}[/]")
         raise typer.Exit(code=1) from exc
