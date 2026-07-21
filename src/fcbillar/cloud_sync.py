@@ -2210,23 +2210,27 @@ def publish_estadistiques_fitxa(
             oc_valid = [c for c in oc_all if c.get("posicio") is not None]
             best_open = best_open_nom = None
             if oc_valid:
-                best_row = min(oc_valid, key=lambda c: c["posicio"])
-                best_open = best_row["posicio"]
-                om = (
-                    sb.table("opens")
-                    .select("nom")
-                    .eq("open_id", best_row["open_id"])
-                    .execute()
-                    .data
+                # Només OPENS de veritat: el títol de l'esdeveniment ha de contenir
+                # "OPEN" (no confondre amb un Campionat de Catalunya).
+                oids = list({c["open_id"] for c in oc_valid})
+                metas = (
+                    sb.table("opens").select("open_id,nom").in_("open_id", oids).execute().data
+                    or []
                 )
-                if om:
-                    # Nom net: treu el sufix de modalitat (" - TRES BANDES", etc.).
+                nom_by_id = {m["open_id"]: (m.get("nom") or "") for m in metas}
+                oc_opens = [
+                    c for c in oc_valid if "OPEN" in nom_by_id.get(c["open_id"], "").upper()
+                ]
+                if oc_opens:
+                    best_row = min(oc_opens, key=lambda c: c["posicio"])
+                    best_open = best_row["posicio"]
                     import re as _re
 
+                    # Nom net: treu el sufix de modalitat (" - TRES BANDES", etc.).
                     best_open_nom = _re.sub(
                         r"\s*-\s*(TRES BANDES|3 BANDES|LLIURE|BANDA|QUADRE[^-]*)\s*$",
                         "",
-                        (om[0].get("nom") or "").strip(),
+                        nom_by_id.get(best_row["open_id"], "").strip(),
                         flags=_re.IGNORECASE,
                     ).strip()
             opens = {
