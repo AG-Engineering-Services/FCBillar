@@ -540,6 +540,39 @@
 		selIdx = null;
 	}
 
+	// Posició del jugador dins del rànquing (per modalitat) dels membres del seu club
+	// (tot el planter federat: players.club_fcb_id), al darrer rànquing publicat.
+	let clubRank = $state<{ posicio: number; total: number } | null>(null);
+	$effect(() => {
+		const cid = clubId;
+		const mod = selMod;
+		const seq = rankHist.at(-1)?.num_seq ?? null;
+		if (cid && mod != null && seq != null) loadClubRank(cid, mod, seq);
+		else clubRank = null;
+	});
+	async function loadClubRank(cid: string, mod: number, seq: number) {
+		const { data: members } = await supabase
+			.from('players')
+			.select('fcb_id')
+			.eq('club_fcb_id', cid);
+		const ids = (members ?? []).map((m) => m.fcb_id);
+		if (!ids.length) {
+			clubRank = null;
+			return;
+		}
+		const { data: ent } = await supabase
+			.from('ranking_entries')
+			.select('player_fcb_id, mitjana_general')
+			.eq('modalitat_codi', mod)
+			.eq('num_seq', seq)
+			.in('player_fcb_id', ids);
+		const ranked = (ent ?? [])
+			.filter((e) => e.mitjana_general != null)
+			.sort((a, b) => (b.mitjana_general ?? 0) - (a.mitjana_general ?? 0));
+		const pos = ranked.findIndex((e) => e.player_fcb_id === fcbId) + 1;
+		clubRank = pos > 0 ? { posicio: pos, total: ranked.length } : null;
+	}
+
 	// Rendiment per nivell d'oponent (aranya, quantils) per a la modalitat seleccionada.
 	let ratingBuckets = $state<{ label: string; wins: number; losses: number; draws: number }[]>([]);
 	let ratingIndex = $state<number | null>(null);
@@ -599,6 +632,18 @@
 	});
 	const lastMitjana = $derived(rankHist.at(-1)?.mitjana ?? null);
 	const currentPos = $derived(rankHist.at(-1)?.posicio ?? null);
+	// Posició a l'inici de la temporada en curs (primer rànquing de la temporada,
+	// agost-juliol), per veure la progressió inici→actual.
+	const seasonStartRank = $derived.by(() => {
+		if (!rankHist.length) return null;
+		const [ly, lm] = ymFromSeq(rankHist[rankHist.length - 1].num_seq);
+		const sy = lm >= 8 ? ly : ly - 1;
+		const inSeason = rankHist.filter((r) => {
+			const [y, m] = ymFromSeq(r.num_seq);
+			return (y === sy && m >= 8) || (y === sy + 1 && m <= 7);
+		});
+		return inSeason.length ? inSeason[0] : null;
+	});
 	const sortedModGames = $derived(
 		[...modGames].sort((a, b) => {
 			const da = a.data_partida ?? '',
@@ -1067,6 +1112,17 @@
 						{/if}
 					</div>
 				</div>
+				{#if seasonStartRank?.posicio != null || clubRank}
+					<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-0.5 px-1 text-[11px] text-slate-500 dark:text-slate-400">
+						{#if seasonStartRank?.posicio != null}
+							{@const dsp = seasonStartRank.posicio - (currentPos ?? seasonStartRank.posicio)}
+							<span>Inici temporada <span class="font-mono font-bold text-slate-700 dark:text-slate-200">#{seasonStartRank.posicio}</span>{#if dsp !== 0}<span class="font-bold {dsp > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}"> {dsp > 0 ? `▲${dsp}` : `▼${-dsp}`}</span>{/if}</span>
+						{/if}
+						{#if clubRank}
+							<span>Al club <span class="font-mono font-bold text-slate-700 dark:text-slate-200">#{clubRank.posicio}</span> de {clubRank.total}</span>
+						{/if}
+					</div>
+				{/if}
 				<div class="mt-2 space-y-1 rounded-lg bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5 text-[11px] text-slate-500 dark:text-slate-400">
 					<p>
 						<span class="font-semibold text-slate-700 dark:text-slate-200">Actual:</span>
