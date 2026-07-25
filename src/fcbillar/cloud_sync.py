@@ -2923,16 +2923,30 @@ def _merge_projected_phases(
     payload d'una projecció (fases del PDF) o el payload REAL previ del mateix
     open (que ja arrossega les fases projectades d'abans, quan la projecció ja
     s'ha plegat i esborrat). Per a cada fase del template: si la federació ja té
-    la fase real (mateix `_phase_code`), guanya la REAL; si no, es manté la del
-    template marcada `projected=True`. Les fases reals que el template no conté
-    (p.ex. una ronda KO nova) s'afegeixen al final. Sense template, es tornen
-    les fases reals tal qual.
+    la/les fase/s real/s (mateix `_phase_code`), guanyen les REALS; si no, es manté
+    la del template marcada `projected=True`. Les fases reals que el template no
+    conté s'afegeixen al final. Sense template, es tornen les fases reals tal qual.
+
+    **Un codi pot casar amb MOLTES fases reals i s'han de conservar TOTES.**
+    `_phase_code` col·lapsa a posta totes les rondes KO a "FINAL" (perquè la
+    "Fase Final (K.O.)" projectada, que és una sola fase, casi amb el quadre real
+    digui's SETZENS o FINAL). Si d'aquest codi només en sortís una fase, publicar
+    un open amb el quadre ja penjat (SETZENS, VUITENS, QUARTS, SEMIFINALS, FINAL)
+    en llençaria quatre — i amb elles els `provisional_players` de cada ronda, que
+    són justament els classificats per a la ronda següent.
     """
     if not template_phases:
         return real_phases
-    real_by_code: dict[str, dict] = {}
+
+    def _real(ph: dict) -> dict:
+        out = dict(ph)
+        out.pop("projected", None)
+        return out
+
+    real_by_code: dict[str, list[dict]] = {}
     for ph in real_phases:
-        real_by_code.setdefault(_phase_code(ph.get("label", ""), ph.get("kind", "")), ph)
+        code = _phase_code(ph.get("label", ""), ph.get("kind", ""))
+        real_by_code.setdefault(code, []).append(ph)
     merged: list[dict] = []
     used: set[str] = set()
     for tph in template_phases:
@@ -2941,20 +2955,16 @@ def _merge_projected_phases(
             continue
         used.add(code)
         if code in real_by_code:
-            rp = dict(real_by_code[code])
-            rp.pop("projected", None)
-            merged.append(rp)
+            merged.extend(_real(rp) for rp in real_by_code[code])
         else:
             pp = dict(tph)
             pp["projected"] = True
             merged.append(pp)
-    for ph in real_phases:
-        code = _phase_code(ph.get("label", ""), ph.get("kind", ""))
-        if code not in used:
-            used.add(code)
-            rp = dict(ph)
-            rp.pop("projected", None)
-            merged.append(rp)
+    for code, group in real_by_code.items():
+        if code in used:
+            continue
+        used.add(code)
+        merged.extend(_real(rp) for rp in group)
     return merged
 
 
