@@ -52,7 +52,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 310
+    timeout-minutes: 320   # 300 del bucle + l'última espera (fins a 10') + preparació
     steps:
       - uses: actions/checkout@v4
 
@@ -82,7 +82,10 @@ jobs:
               echo "fora de la finestra de joc (${H}h UTC) — espero sense raspar"
               NAP=600
             fi
-            [ "$SECONDS" -lt "$END" ] && sleep "$NAP"
+            # `if` i no `A && B`: amb `set -e` (shell per defecte d'Actions) una
+            # llista `&&` que falla deixa el bucle amb estat != 0 i el pas
+            # fallaria just al final — i llavors no s'encadenaria el següent tret.
+            if [ "$SECONDS" -lt "$END" ]; then sleep "$NAP"; fi
           done
 
       # Autoencadenament: si el bucle ha acabat sencer (ningú l'ha rellevat), es
