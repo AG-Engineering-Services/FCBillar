@@ -1005,6 +1005,28 @@ def _winner_from_observations(
     return None
 
 
+def _is_walkover(m: "MatchResult") -> bool:
+    """Partida DECIDIDA sense jugar-se: incompareixença (W.O.).
+
+    La FCB la publica amb els punts del guanyador (2-0) i tota la resta a zero:
+    ni caramboles ni entrades. `is_played` és False —no hi ha entrades— però el
+    resultat és ferm i el guanyador passa de ronda. Cas real: UCEDA-JUÁREZ als
+    setzens de l'Open de Mataró (2026-07-25)."""
+    return (
+        not m.is_played
+        and bool(m.player_a)
+        and bool(m.player_b)
+        and m.punts_a != m.punts_b
+        and m.caramboles_a == 0
+        and m.caramboles_b == 0
+    )
+
+
+def _is_decided(m: "MatchResult") -> bool:
+    """La partida té resultat ferm: jugada o guanyada per incompareixença."""
+    return m.is_played or _is_walkover(m)
+
+
 def _ko_winner(m: "MatchResult") -> str | None:
     """Winner of a single KO match, or None if it can't be decided.
 
@@ -1016,8 +1038,9 @@ def _ko_winner(m: "MatchResult") -> str | None:
       2. else more CARAMBOLES wins (a three-cushion match is won by
          scoring more caramboles, so this never picks the loser);
       3. else fall back to the Observacions tie-break text (1-1 endings).
-    Returns None for an unplayed match or a genuine, unresolvable tie."""
-    if not m.is_played:
+    Returns None for an undecided match or a genuine, unresolvable tie. Una
+    incompareixença (`_is_walkover`) SÍ que es decideix: la resol el pas 1."""
+    if not _is_decided(m):
         return None
     if m.punts_a != m.punts_b:
         return m.player_a if m.punts_a > m.punts_b else m.player_b
@@ -1027,11 +1050,11 @@ def _ko_winner(m: "MatchResult") -> str | None:
 
 
 def _winners_of(matches: tuple["MatchResult", ...]) -> list[str] | None:
-    """Return the list of winners of a played KO round, or None if any
-    match is unplayed or has an unresolvable tie."""
+    """Return the list of winners of a resolved KO round, or None if any
+    match is still undecided or has an unresolvable tie."""
     winners: list[str] = []
     for m in matches:
-        if not m.is_played:
+        if not _is_decided(m):
             return None
         w = _ko_winner(m)
         if w is None:
@@ -1137,16 +1160,17 @@ def compute_advancing_players(
 
     # Subsequent KO: collect every known winner from the previous round,
     # even if that round is partial / incomplete. A "known winner" is one
-    # whose match has been played and has a clear (or tie-break-resolved)
-    # result. The third pass uses pool-size to decide whether to actually
-    # form pairings or just expose the list of qualifiers.
+    # whose match is DECIDED — jugada amb un resultat clar (o desempatada per
+    # observacions) o guanyada per INCOMPAREIXENÇA. The third pass uses
+    # pool-size to decide whether to actually form pairings or just expose the
+    # list of qualifiers.
     prev = phases[idx - 1]
     if prev.ref.kind != "ko":
         return ()
     source_matches = prev.ko_matches if prev.ko_matches else prev.provisional_matches
     winners: list[str] = []
     for m in source_matches:
-        if not m.is_played:
+        if not _is_decided(m):
             continue
         w = _ko_winner(m)
         if w is not None:
@@ -1154,16 +1178,62 @@ def compute_advancing_players(
     if not winners:
         return ()
     stats = _collect_player_stats_in_phase(prev)
-    out = []
+    # Posició que cada jugador ocupava al rànquing de la ronda anterior: és
+    # l'ordre dels qui hi passen per incompareixença (no hi tenen mitjana).
+    prev_pos = {p.name: i + 1 for i, p in enumerate(prev.provisional_players)}
+    ranked: list[AdvancingPlayer] = []
+    walkovers: list[tuple[int, AdvancingPlayer]] = []
     for name in winners:
         s = stats.get(name)
-        out.append(AdvancingPlayer(
+        ap = AdvancingPlayer(
             name=name,
             mitjana=s.mitjana if s else 0.0,
             serie_major=s.serie_major if s else 0,
-            source="previous_winner",
-        ))
-    out.sort(key=lambda p: (-p.mitjana, -p.serie_major, p.name))
+            source="previous_winner" if s else "walkover",
+        )
+        if s is None:
+            walkovers.append((prev_pos.get(name, _NO_SEED), ap))
+        else:
+            ranked.append(ap)
+    ranked.sort(key=lambda p: (-p.mitjana, -p.serie_major, p.name))
+    return _place_walkovers(ranked, walkovers, len(winners))
+
+
+_NO_SEED = 10**9
+
+
+def _place_walkovers(
+    ranked: list[AdvancingPlayer],
+    walkovers: list[tuple[int, AdvancingPlayer]],
+    total: int,
+) -> tuple[AdvancingPlayer, ...]:
+    """Ordre d'entrada a la ronda següent amb qui hi ha passat per INCOMPAREIXENÇA.
+
+    Qui guanya per incompareixença no fa mitjana i no es pot ordenar amb els
+    altres: **manté la posició que ocupava al rànquing de la ronda anterior**
+    (el 7è dels setzens hi entra com a 7è, el 16è com a 16è). Es reserven aquests
+    llocs i la resta de classificats, ordenats per mitjana, omplen els forats.
+
+    Una posició fora de rang —el pool encara és parcial, o el que passa és un
+    classificat de la prèvia amb número alt— cau al final de la llista; quan la
+    ronda es completi, el recàlcul ja el posarà al seu lloc.
+    """
+    if not walkovers:
+        return tuple(ranked)
+    slots: dict[int, AdvancingPlayer] = {}
+    tail: list[AdvancingPlayer] = []
+    for pos, ap in sorted(walkovers, key=lambda t: (t[0], t[1].name)):
+        if 1 <= pos <= total and pos not in slots:
+            slots[pos] = ap
+        else:
+            tail.append(ap)
+    rest = iter(ranked + tail)
+    out: list[AdvancingPlayer] = []
+    for i in range(1, total + 1):
+        ap = slots.get(i) or next(rest, None)
+        if ap is None:
+            break
+        out.append(ap)
     return tuple(out)
 
 
@@ -1404,15 +1474,16 @@ def _confirmed_advancers(
 ) -> set[str]:
     """Players who DEFINITELY advanced past `phase`.
 
-    For KO phases: winners of every played match (with tie-break-resolved
-    ties counted as wins for the named player). For group phases:
-    1st-of-each-group from `provisional_qualifiers`, plus anyone whose
-    name shows up in a later phase's data (handles pre-prèvia → prèvia
-    where multiple players advance per group)."""
+    For KO phases: winners of every DECIDED match — jugada o guanyada per
+    incompareixença — (with tie-break-resolved ties counted as wins for the
+    named player). For group phases: 1st-of-each-group from
+    `provisional_qualifiers`, plus anyone whose name shows up in a later
+    phase's data (handles pre-prèvia → prèvia where multiple players advance
+    per group)."""
     if phase.ref.kind == "ko":
         winners: set[str] = set()
         for m in phase.ko_matches:
-            if not m.is_played:
+            if not _is_decided(m):
                 continue
             if m.punts_a > m.punts_b:
                 winners.add(m.player_a)
@@ -1681,7 +1752,7 @@ def compute_open_classification(
     #      pairing isn't fully known yet but at least one finalist is.
     last = phases[-1]
     if last.ref.kind == "ko" and last.ref.label.upper() == "FINAL":
-        if last.ko_matches and last.ko_matches[0].is_played:
+        if last.ko_matches and _is_decided(last.ko_matches[0]):
             fm = last.ko_matches[0]
             winner_name = _ko_winner(fm)
             if winner_name:
@@ -1949,8 +2020,8 @@ def _dedupe_ko_matches(matches: tuple[MatchResult, ...]) -> tuple[MatchResult, .
     twice (mirrored A/B, e.g. once per arbitre), which would otherwise yield
     duplicate winners and a garbled next round. In a single-elimination round
     each player plays at most once, so any repeated unordered {A, B} pairing is
-    a duplicate: keep the first occurrence, upgrading to a played row if the
-    first copy was still unplayed."""
+    a duplicate: keep the first occurrence, upgrading to a decided row (jugada
+    o per incompareixença) if the first copy was still undecided."""
     best: dict[frozenset[str], MatchResult] = {}
     order: list[frozenset[str]] = []
     for m in matches:
@@ -1961,7 +2032,7 @@ def _dedupe_ko_matches(matches: tuple[MatchResult, ...]) -> tuple[MatchResult, .
         if prev is None:
             best[key] = m
             order.append(key)
-        elif m.is_played and not prev.is_played:
+        elif _is_decided(m) and not _is_decided(prev):
             best[key] = m
     return tuple(best[k] for k in order)
 
@@ -1985,8 +2056,15 @@ def _attach_ko_provisional_players(
     cada ronda KO:
       • calcula el pool d'avançats esperat (guanyadors de grup + RESERVATS al primer
         KO; guanyadors de la ronda anterior després);
-      • treu els ja emparellats a `ko_matches` oficials;
-      • empara en piràmide els restants (1r-vs-Nè per sembra mitjana/SM).
+      • en fa la PIRÀMIDE SENCERA (1-vs-N, 2-vs-(N-1), …) sobre tot el pool;
+      • en descarta els emparellaments que toquen jugadors que la FCB ja ha
+        emparellat a `ko_matches` oficials.
+    La piràmide es fa sobre el pool COMPLET i no sobre "els que queden": el quadre
+    és 1-N sobre els N sembrats, i tornar-lo a fer amb els sobrants desplaça tots
+    els emparellaments (el 2026-07-25, als setzens de Mataró, donava PASTOR(16)
+    contra el 21è quan el quadre real era PASTOR(16)-MAS(17)).
+    Si la FCB ha emparellat algú fora de la piràmide, la seva parella teòrica queda
+    orfe: els orfes es tornen a emparellar entre ells, mantenint l'ordre de sembra.
     `provisional_matches` només conté els emparellaments que falten, perquè la UI els
     pinti al costat dels oficials amb marca "calculat". Idempotent: recalculable amb
     un `reservats` ampliat (p.ex. completant els que la FCB encara no ha llistat)."""
@@ -2026,8 +2104,14 @@ def _attach_ko_provisional_players(
             expected_pool_size is None or len(advancing) >= expected_pool_size
         )
         if advancing and pool_complete:
-            leftover_names = [p.name for p in advancing if p.name not in paired]
-            prov = _pair_pyramid(leftover_names)
+            names = [p.name for p in advancing]
+            prov = tuple(
+                m for m in _pair_pyramid(names)
+                if m.player_a not in paired and m.player_b not in paired
+            )
+            covered = {n for m in prov for n in (m.player_a, m.player_b)}
+            orphans = [n for n in names if n not in paired and n not in covered]
+            prov = prov + _pair_pyramid(orphans)
         else:
             prov = ()
 

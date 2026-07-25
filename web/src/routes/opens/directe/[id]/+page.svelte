@@ -338,11 +338,17 @@
 		return q?.position_in_group ?? 0;
 	}
 
-	// Costat guanyador d'una partida KO jugada: per punts i, si empaten (la FCB
-	// no sempre omple la columna PUNTS al KO), per caramboles. null si no jugada
+	// Incompareixença (W.O.): la FCB la publica amb els punts del guanyador (2-0)
+	// i tota la resta a zero. No s'ha jugat, però el resultat és ferm.
+	function isWalkover(m: OpenLiveMatch): boolean {
+		return !m.is_played && m.punts_a !== m.punts_b && m.caramboles_a === 0 && m.caramboles_b === 0;
+	}
+
+	// Costat guanyador d'una partida KO decidida: per punts i, si empaten (la FCB
+	// no sempre omple la columna PUNTS al KO), per caramboles. null si no decidida
 	// o empat real (es resol per observacions, que aquí no pintem).
 	function koWinnerSide(m: OpenLiveMatch): 'a' | 'b' | null {
-		if (!m.is_played) return null;
+		if (!m.is_played && !isWalkover(m)) return null;
 		if (m.punts_a !== m.punts_b) return m.punts_a > m.punts_b ? 'a' : 'b';
 		if (m.caramboles_a !== m.caramboles_b) return m.caramboles_a > m.caramboles_b ? 'a' : 'b';
 		return null;
@@ -379,20 +385,26 @@
 
 <!-- Una fila d'emparellament KO. `calc` = aparellament calculat (no publicat per la FCB). -->
 {#snippet koMatch(m: OpenLiveMatch, calc: boolean)}
+	{@const wo = isWalkover(m)}
 	{@const w = koWinnerSide(m)}
-	{@const aCls = m.is_played ? (w === 'a' ? 'font-semibold text-emerald-600 dark:text-emerald-400' : w === 'b' ? 'text-red-600 dark:text-red-400' : '') : ''}
-	{@const bCls = m.is_played ? (w === 'b' ? 'font-semibold text-emerald-600 dark:text-emerald-400' : w === 'a' ? 'text-red-600 dark:text-red-400' : '') : ''}
+	{@const decided = m.is_played || wo}
+	{@const aCls = decided ? (w === 'a' ? 'font-semibold text-emerald-600 dark:text-emerald-400' : w === 'b' ? 'text-red-600 dark:text-red-400' : '') : ''}
+	{@const bCls = decided ? (w === 'b' ? 'font-semibold text-emerald-600 dark:text-emerald-400' : w === 'a' ? 'text-red-600 dark:text-red-400' : '') : ''}
 	<li class="border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
 		<div class="flex items-center justify-between gap-2 text-sm">
 			{#if m.player_a}{@render player(m.player_a, 'min-w-0 flex-1 truncate ' + aCls)}{:else}<span class="min-w-0 flex-1 truncate text-slate-400 dark:text-slate-500">—</span>{/if}
-			{#if m.is_played}
+			{#if wo}
+				<span class="shrink-0 font-mono text-[10px] font-semibold uppercase text-slate-500 dark:text-slate-400">w.o.</span>
+			{:else if m.is_played}
 				<span class="shrink-0 font-mono text-xs">{m.caramboles_a}–{m.caramboles_b}</span>
 			{:else}
 				<span class="shrink-0 font-mono text-xs text-slate-300 dark:text-slate-600">vs</span>
 			{/if}
 			{#if m.player_b}{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right ' + bCls)}{:else}<span class="min-w-0 flex-1 truncate text-right text-slate-400 dark:text-slate-500">—</span>{/if}
 		</div>
-		{#if m.is_played}
+		{#if wo}
+			<div class="mt-0.5 text-center text-[10px] text-slate-400 dark:text-slate-500">no presentat · passa de ronda sense jugar</div>
+		{:else if m.is_played}
 			<div class="mt-0.5 text-center text-[10px] text-slate-400 dark:text-slate-500">{m.entrades} ent.</div>
 		{:else}
 			<div class="mt-0.5 text-center text-[10px] {calc ? 'text-sky-600 dark:text-sky-400' : 'text-amber-600 dark:text-amber-400'}">{calc ? 'calculat' : 'pendent'}</div>
@@ -673,6 +685,7 @@
 								<span class="flex min-w-0 flex-1 items-center gap-1">
 									{@render player(s.name, 'truncate')}
 									{#if s.source === 'reservat'}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Cap de sèrie reservat (no juga la prèvia)">res</span>{/if}
+									{#if s.source === 'walkover'}<span class="shrink-0 rounded bg-slate-200 dark:bg-slate-700 px-1 text-[9px] font-semibold uppercase text-slate-600 dark:text-slate-300" title="Ha passat per incompareixença del rival: sense mitjana, manté la posició que tenia a la ronda anterior">w.o.</span>{/if}
 								</span>
 								{#if s.serie_major}<span class="hidden w-10 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline" title="Sèrie major">{s.serie_major}</span>{/if}
 								<span class="w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400" title="Mitjana amb què entra a la ronda">{s.mitjana ? s.mitjana.toFixed(3) : '—'}</span>
