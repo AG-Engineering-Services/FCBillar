@@ -9,31 +9,45 @@ name: Publish live opens
 #   - SUPABASE_URL
 #   - SUPABASE_SERVICE_ROLE_KEY
 #
-# CADÈNCIA: es llança CADA HORA (minut 0), 6–20 UTC. GitHub reparteix els crons
-# HORARIS de manera molt més fiable que els sub-horaris (`*/15`, que estrangula i
-# arriba a saltar-se hores senceres —vist el 2026-07-11, quan el primer tret del
-# dia no va arribar). Cada execució fa un BUCLE INTERN que refresca cada ~2 min;
-# el bucle és llarg (~5 h) a posta: si GitHub deixa caure alguns trets horaris,
-# l'últim que SÍ va arrencar segueix publicant fins que el següent el rellevi
-# (cancel-in-progress). Així n'hi ha prou que arrenqui ~1 tret cada poques hores.
+# CADÈNCIA: cada execució fa un BUCLE INTERN que refresca cada ~2 min; el bucle
+# és llarg (~5 h) a posta: si GitHub deixa caure trets, l'últim que SÍ va arrencar
+# segueix publicant fins que el següent el rellevi (cancel-in-progress). N'hi ha
+# prou que arrenqui ~1 tret cada poques hores.
 #
-# Finestra: DISSABTES i DIUMENGES, 8:00–22:00 hora local (06–20 UTC a l'estiu,
-# CEST=UTC+2; a l'hivern CET=UTC+1 caldria '0 7-21 * * 6,0'). Dies: 6=ds, 0=dg.
+# TRES DEFENSES contra el cron de GitHub (que és "best effort" i deixa caure
+# trets sencers quan hi ha càrrega):
+#   1) MINUTS ESTRANYS (:11 i :41), mai :00 ni :30. Tothom programa a :00/:30;
+#      GitHub encua tots aquests crons alhora i és el primer que descarta. Amb
+#      minut 0 el 2026-07-18 el primer tret del dia no va entrar fins a les
+#      09:37 UTC (11:37 local!) i el 2026-07-25 a les 07:17 UTC encara no havia
+#      entrat cap — amb les partides ja començades.
+#   2) FINESTRA AMPLIADA a partir de les 03 UTC: molts trets independents abans
+#      que comencin les partides; només cal que n'entri UN. Abans de les 06 UTC
+#      el bucle espera sense raspar la federació (no fa feina en va).
+#   3) AUTOENCADENAMENT: en acabar bé el bucle, la pròpia execució es torna a
+#      llançar (workflow_dispatch amb GITHUB_TOKEN SÍ crea execució nova). Així
+#      la cadena es manté viva encara que GitHub no torni a disparar cap cron.
+#      Només en `success()`: si l'execució ha estat CANCEL·LADA (rellevada per un
+#      tret nou) no encadena, perquè si no es cancel·larien en bucle l'una a
+#      l'altra.
+#
+# Finestra: DISSABTES i DIUMENGES. Es publica de 06 a 21 UTC (08–23 local a
+# l'estiu, CEST=UTC+2; 07–22 a l'hivern, CET=UTC+1). Dies: 6=ds, 0=dg.
 
 on:
   schedule:
-    - cron: '0 6-20 * * 6,0'     # cada hora, tota la finestra (ds/dg)
-    # Backup a mig matí: GitHub sol DEIXAR CAURE els primers trets del dia (el
-    # 2026-07-12 va perdre 06h i 07h UTC i no va entrar fins a les 08:21), i les
-    # partides comencen ~09h local. Un segon tret a cada :30 de 6-10h dobla les
-    # opcions que n'entri un d'hora. cancel-in-progress fa que reiniciï net.
-    - cron: '30 6-10 * * 6,0'
+    - cron: '11 3-20 * * 6,0'    # cada hora al minut 11 (ds/dg)
+    - cron: '41 3-10 * * 6,0'    # doble tret al matí, al minut 41
   workflow_dispatch: {}
 
 # Un nou tret reinicia el bucle des de zero (sempre dades fresques, sense pila).
 concurrency:
   group: publish-live-opens
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write                 # autoencadenament (gh workflow run)
 
 jobs:
   publish:
@@ -47,7 +61,7 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Publish live opens (bucle intern ~2 min durant ~70 min)
+      - name: Publish live opens (bucle intern ~2 min durant ~5 h)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -55,9 +69,36 @@ jobs:
           END=$(( SECONDS + 18000 ))   # ~5 h: el bucle no acaba abans del següent tret (GitHub estrangula els crons; cancel-in-progress reinicia)
           i=0
           while [ "$SECONDS" -lt "$END" ]; do
-            i=$(( i + 1 ))
-            echo "::group::publicació #$i (t=${SECONDS}s)"
-            uv run --no-dev fcbillar publish-live-opens || true
-            echo "::endgroup::"
-            [ "$SECONDS" -lt "$END" ] && sleep 120
+            H=$((10#$(date -u +%H)))   # `10#` evita l'error d'octal amb 08/09
+            if [ "$H" -ge 6 ] && [ "$H" -le 21 ]; then
+              i=$(( i + 1 ))
+              echo "::group::publicació #$i (t=${SECONDS}s, ${H}h UTC)"
+              uv run --no-dev fcbillar publish-live-opens || true
+              echo "::endgroup::"
+              NAP=120
+            else
+              # Trets de matinada: mantenim viva l'execució per cobrir l'inici de
+              # les partides, però sense raspar la federació per no res.
+              echo "fora de la finestra de joc (${H}h UTC) — espero sense raspar"
+              NAP=600
+            fi
+            [ "$SECONDS" -lt "$END" ] && sleep "$NAP"
           done
+
+      # Autoencadenament: si el bucle ha acabat sencer (ningú l'ha rellevat), es
+      # torna a llançar per no deixar cap forat si GitHub no dispara cap cron.
+      # `success()` a posta: una execució CANCEL·LADA no ha d'encadenar (es
+      # cancel·larien mútuament en bucle).
+      - name: Encadena el següent tret
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DOW=$(date -u +%u)           # 1=dl … 6=ds, 7=dg
+          H=$((10#$(date -u +%H)))
+          if { [ "$DOW" = "6" ] || [ "$DOW" = "7" ]; } && [ "$H" -lt 21 ]; then
+            echo "Encadeno el següent tret (dow=$DOW, ${H}h UTC)."
+            gh workflow run publish-live-opens.yml --ref "${GITHUB_REF_NAME}"
+          else
+            echo "Fora de finestra (dow=$DOW, ${H}h UTC) — no encadeno."
+          fi

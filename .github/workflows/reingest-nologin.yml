@@ -44,7 +44,9 @@ on:
     # Caps de setmana, cada hora 07-20 UTC (≈9-22 local): manté pending_games
     # (i lliga/copa/opens) fresc mentre hi ha opens en directe. El 'gate' ho
     # OMET si no hi ha cap open en directe, per no fer feina pesada en va.
-    - cron: '0 7-20 * * 6,0'
+    # Minut 26 (mai :00): GitHub encua tots els crons de :00 alhora i és el
+    # primer que descarta quan va carregat — vegeu publish-live-opens.yml.
+    - cron: '26 7-20 * * 6,0'
   workflow_dispatch:
     inputs:
       force:
