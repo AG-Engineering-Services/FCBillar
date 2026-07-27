@@ -1290,8 +1290,37 @@ def publish_opens(
     counts["open_classifications"] = _upsert(
         sb, "open_classifications", classifs, "open_id,player_fcb_id", prog
     )
+    # Poda dels que ja NO són a la BD local. `open_id` és l'id intern de
+    # `torneigs_individuals`: si un torneig es reingereix i n'agafa un de nou,
+    # el vell es quedava al núvol per sempre —l'Open de Mataró sortia DUES
+    # vegades a la temporada 2025-2026 a la web (ids 2831 i 2991). L'upsert sol
+    # no ho pot veure: només escriu, no sap què ha desaparegut.
+    counts["removed"] = _prune_orphan_opens(sb, {o["open_id"] for o in opens}, prog)
     conn.close()
     return counts
+
+
+def _prune_orphan_opens(sb, local_ids: set[int], prog: Progress) -> int:
+    """Esborra de Supabase els opens (i les seves classificacions) que ja no
+    existeixen a la BD local. Torna quants n'ha tret."""
+    try:
+        remote: list[dict] = []
+        for off in range(0, 100_000, 1000):
+            page = sb.table("opens").select("open_id").range(off, off + 999).execute().data or []
+            remote += page
+            if len(page) < 1000:
+                break
+        ghosts = [r["open_id"] for r in remote if r["open_id"] not in local_ids]
+        if not ghosts:
+            return 0
+        # Primer les classificacions (referencien l'open), després l'open.
+        sb.table("open_classifications").delete().in_("open_id", ghosts).execute()
+        sb.table("opens").delete().in_("open_id", ghosts).execute()
+        prog("ok", f"opens: {len(ghosts)} retirats (ja no són a la BD local)")
+        return len(ghosts)
+    except Exception as exc:  # noqa: BLE001 — la poda no ha de tombar la publicació
+        prog("warn", f"no s'han pogut podar els opens obsolets: {exc}")
+        return 0
 
 
 def _rank_players(acc: dict) -> list[tuple]:
