@@ -23,6 +23,7 @@ import unicodedata as _ud
 from collections import defaultdict
 
 from fcb_opens.reglament.puntuacio import points_for_position_femeni
+from fcbillar.opens_club import club_master, real_club
 
 # Modalitats que descarten una prova com a "tres bandes" pel nom.
 _NO3B = ("QUADRE", "LLIURE", "BANDA", "QUILLES", "ARTISTIC", "BIATHL", "600", "71/2", "47/2")
@@ -186,6 +187,8 @@ def femeni_ranking_rows(conn: sqlite3.Connection) -> list[dict]:
             "data": open_date.get(oid) or None, "pos": pos, "punts": pp,
         }
 
+    club_fallback = club_master(conn)  # vegeu opens_club: la FCB hi posa "Cap"
+
     rows: list[dict] = []
     for i in range(1, len(ordered) + 1):
         window = ordered[max(0, i - WINDOW):i]
@@ -194,7 +197,9 @@ def femeni_ranking_rows(conn: sqlite3.Connection) -> list[dict]:
         for oid in window:
             for fcb, nom, club, pos in parts.get(oid, []):
                 pp_player[fcb][oid] = (pos, points_for_position_femeni(pos, is_camp[oid]))
-                info[fcb] = (nom, club)
+                # Un "Cap" de la FCB no ha d'esborrar el club d'una prova anterior.
+                prev_club = info.get(fcb, (None, None))[1]
+                info[fcb] = (nom, real_club(club) or prev_club)
         last = ordered[i - 1]
         rr = []
         for fcb, (nom, club) in info.items():
@@ -216,6 +221,7 @@ def femeni_ranking_rows(conn: sqlite3.Connection) -> list[dict]:
                 "genere": "femeni", "ronda": i, "ronda_nom": onom.get(last),
                 "ronda_data": open_date.get(last) or None, "ronda_temp": tnom.get(last),
                 "posicio": posicio, "player_fcb_id": fcb, "jugador": nom,
-                "club": club, "opens_jugats": njug, "punts": total, "detall": det,
+                "club": club or club_fallback.get(fcb),
+                "opens_jugats": njug, "punts": total, "detall": det,
             })
     return rows
