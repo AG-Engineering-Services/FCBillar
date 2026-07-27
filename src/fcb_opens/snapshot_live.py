@@ -34,6 +34,7 @@ from supabase import Client, create_client
 from .reglament.puntuacio import points_for_position
 from .scraper.classificacio import fetch_classification
 from .scraper.open_live import (
+    _is_decided,
     _norm_name,
     compute_open_classification,
     fetch_final_classification_id,
@@ -161,7 +162,13 @@ def _state_payload(
             )
             is_active = played_total > 0 and pending_total > 0
         else:
-            is_active = len(ko_out) > 0 and any(not m.is_played for m in detail.ko_matches)
+            # DECIDIDES, no jugades: una ronda amb incompareixences (2-0 sense
+            # entrades) ja està tancada. Amb `is_played` es quedava "activa" per
+            # sempre i l'open sortia encallat en aquella fase encara que ja
+            # s'hagués jugat la final — cas Mataró 2026, dos W.O. als setzens.
+            is_active = len(ko_out) > 0 and any(
+                not _is_decided(m) for m in detail.ko_matches
+            )
         prov_quals = [
             {
                 "group_label": q.group_label,

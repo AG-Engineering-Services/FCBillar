@@ -201,6 +201,20 @@ export interface OpenLiveMatch {
 	observations?: string | null;
 	is_played: boolean;
 }
+
+/** Incompareixença (W.O.): la FCB la publica amb els punts del guanyador (2-0)
+ *  i tota la resta a zero. `is_played` és false —no hi ha entrades— però el
+ *  resultat és ferm i el guanyador passa de ronda. */
+export function isWalkover(m: OpenLiveMatch): boolean {
+	return !m.is_played && m.punts_a !== m.punts_b && m.caramboles_a === 0 && m.caramboles_b === 0;
+}
+
+/** Partida amb resultat ferm: jugada o guanyada per incompareixença. Comptar
+ *  només `is_played` deixava una ronda amb W.O. eternament "en joc" i l'open
+ *  encallat a aquella fase encara que ja s'hagués acabat. */
+export function isDecided(m: OpenLiveMatch): boolean {
+	return m.is_played || isWalkover(m);
+}
 // Horari projectat d'un grup (del PDF oficial d'HORARIS): dia, billar (taula) i
 // l'hora de cada partida en ordre de joc (2-3 = 2n vs 3r, 1-P = 1r vs perdedor,
 // 1-G = 1r vs guanyador). Present només als opens projectats amb horaris.
