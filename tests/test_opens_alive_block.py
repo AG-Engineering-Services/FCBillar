@@ -133,3 +133,8 @@ def test_walkover_loser_is_eliminated_not_still_in_competition():
     assert "WIN_B" not in {r.player_name for r in rows if r.round_label == "EN JOC"}
     # El guanyador per incompareixença segueix viu.
     assert by_name["WIN_A"].round_label == "EN JOC"
+    # El no-presentat manté la plaça però es queda sense punts (com als grups) i
+    # va al final del seu tram; qui hi va perdre jugant sí que en cobra.
+    assert by_name["WIN_B"].open_points == 0
+    assert by_name["WIN_C"].open_points > 0
+    assert by_name["WIN_B"].position > by_name["WIN_C"].position

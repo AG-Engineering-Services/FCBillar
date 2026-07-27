@@ -1027,6 +1027,16 @@ def _is_decided(m: "MatchResult") -> bool:
     return m.is_played or _is_walkover(m)
 
 
+def _walkover_absentee(m: "MatchResult") -> str | None:
+    """Qui NO s'ha presentat, en una partida guanyada per incompareixença.
+
+    És el que hi consta amb menys punts: la FCB dóna el 2-0 al que sí que hi era.
+    None si la partida no és una incompareixença."""
+    if not _is_walkover(m):
+        return None
+    return m.player_b if m.punts_a > m.punts_b else m.player_a
+
+
 def _ko_winner(m: "MatchResult") -> str | None:
     """Winner of a single KO match, or None if it can't be decided.
 
@@ -1655,17 +1665,24 @@ def compute_open_classification(
             )
             noshow_names.update(n for n in elim if _noshow(n))
         else:
+            # No-presentats del KO: mateixa regla que als grups —mantenen la
+            # plaça però es queden sense punts d'open— i sempre al final del tram.
+            ko_noshow = {
+                a for a in (_walkover_absentee(m) for m in phase.ko_matches) if a
+            }
             elim = [
                 n for n in phase_stats[i]
                 if n not in advancers and n not in later_known
             ]
             elim.sort(
                 key=lambda n: (
+                    1 if n in ko_noshow else 0,
                     -phase_stats[i][n][0],
                     -phase_stats[i][n][1],
                     n,
                 )
             )
+            noshow_names.update(n for n in elim if n in ko_noshow)
         eliminated_per_phase.append(elim)
 
     rows: list[OpenClassificationRow] = []
@@ -1684,6 +1701,8 @@ def compute_open_classification(
             if not club:
                 club = club_by_player.get(name, "")
             position = n_above + rank
+            # No-presentat: 0 punts, com als grups (manté la plaça, sense punts).
+            pts = 0 if name in noshow_names else points_for_position(position)
             rows.append(
                 OpenClassificationRow(
                     position=position,
@@ -1692,7 +1711,7 @@ def compute_open_classification(
                     round_label=phase.ref.label,
                     mitjana=mg,
                     serie_major=sm,
-                    open_points=points_for_position(position),
+                    open_points=pts,
                 )
             )
 
