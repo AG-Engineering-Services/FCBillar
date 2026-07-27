@@ -10,7 +10,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import { supabase, type OpenLivePhase, type OpenLiveGroup, type OpenLiveMatch, type OpenLiveScore, type OpenLiveClassRow } from '$lib/supabase';
+	import { supabase, isWalkover, isDecided, type OpenLivePhase, type OpenLiveGroup, type OpenLiveMatch, type OpenLiveScore, type OpenLiveClassRow } from '$lib/supabase';
 
 	const id0 = Number($page.params.id);
 	let row = $state<OpenLiveRow | null>(rowCache.get(id0) ?? null);
@@ -324,9 +324,10 @@
 			return p.groups.every(groupClosed) ? 'done' : 'active';
 		}
 		if (p.ko_matches.length === 0) return 'pending';
-		const played = p.ko_matches.filter((m) => m.is_played).length;
-		if (played === 0) return 'pending';
-		return played === p.ko_matches.length ? 'done' : 'active';
+		// Decidides, no jugades: una ronda amb incompareixences ja està tancada.
+		const done = p.ko_matches.filter(isDecided).length;
+		if (done === 0) return 'pending';
+		return done === p.ko_matches.length ? 'done' : 'active';
 	}
 
 	// Posició d'un jugador dins el seu grup segons els classificats provisionals
@@ -338,17 +339,11 @@
 		return q?.position_in_group ?? 0;
 	}
 
-	// Incompareixença (W.O.): la FCB la publica amb els punts del guanyador (2-0)
-	// i tota la resta a zero. No s'ha jugat, però el resultat és ferm.
-	function isWalkover(m: OpenLiveMatch): boolean {
-		return !m.is_played && m.punts_a !== m.punts_b && m.caramboles_a === 0 && m.caramboles_b === 0;
-	}
-
 	// Costat guanyador d'una partida KO decidida: per punts i, si empaten (la FCB
 	// no sempre omple la columna PUNTS al KO), per caramboles. null si no decidida
 	// o empat real (es resol per observacions, que aquí no pintem).
 	function koWinnerSide(m: OpenLiveMatch): 'a' | 'b' | null {
-		if (!m.is_played && !isWalkover(m)) return null;
+		if (!isDecided(m)) return null;
 		if (m.punts_a !== m.punts_b) return m.punts_a > m.punts_b ? 'a' : 'b';
 		if (m.caramboles_a !== m.caramboles_b) return m.caramboles_a > m.caramboles_b ? 'a' : 'b';
 		return null;

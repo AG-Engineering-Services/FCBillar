@@ -64,6 +64,29 @@ def test_played_match_is_not_a_walkover():
     assert _is_walkover(_m("A", "B", punts=(2, 0), car=(40, 25), ent=30)) is False
 
 
+def test_round_with_walkovers_is_not_active_anymore():
+    """Una ronda amb incompareixences ja està tancada. Amb `is_played` es quedava
+    "activa" per sempre i l'open sortia encallat en aquella fase encara que ja
+    s'hagués jugat la final (cas Mataró 2026: dos W.O. als setzens)."""
+    from fcb_opens.scraper.open_live import OpenLiveState, OpenStructure
+    from fcb_opens.snapshot_live import _state_payload
+
+    setzens = PhaseDetail(
+        ref=PhaseRef(label="SETZENS", kind="ko", url=""),
+        ko_matches=(
+            _m("A", "B", punts=(2, 0), car=(40, 25), ent=30),
+            _wo("C", "D"),
+        ),
+    )
+    state = OpenLiveState(
+        structure=OpenStructure(division_id=1, name="OPEN TEST", phase_id=1,
+                                phases=(setzens.ref,)),
+        phases=[setzens],
+    )
+    payload = _state_payload(state, "2026-07-27T00:00:00Z")
+    assert payload["phases"][0]["is_active"] is False
+
+
 # --------------------------------------------------------------------------- #
 # La ronda compta els dos jugadors (si no, el perdedor queda "en competició")
 # --------------------------------------------------------------------------- #

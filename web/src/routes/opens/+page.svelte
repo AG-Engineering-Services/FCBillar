@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase, tipusOf, type Open, type OpenLiveRow } from '$lib/supabase';
+	import { supabase, tipusOf, isDecided, type Open, type OpenLiveRow } from '$lib/supabase';
 
 	let opens = $state<Open[]>([]);
 	let liveOpens = $state<OpenLiveRow[]>([]);
@@ -289,8 +289,10 @@
 			const total = active.groups.reduce((a, g) => a + g.n_matches_total, 0);
 			return `${active.label} · ${played}/${total} partides`;
 		}
-		const played = active.ko_matches.filter((m) => m.is_played).length;
-		return `${active.label} · ${played}/${active.ko_matches.length}`;
+		// Decidides, no jugades: si no, dues incompareixences deixaven l'open
+		// encallat als setzens («14/16») encara que ja s'hagués jugat la final.
+		const done = active.ko_matches.filter(isDecided).length;
+		return `${active.label} · ${done}/${active.ko_matches.length}`;
 	}
 
 	onMount(async () => {
