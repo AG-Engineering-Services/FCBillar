@@ -1388,8 +1388,12 @@ def _phase_player_stats(
 
     For KO rounds: mitjana = caramboles/entrades for the match, sèrie
     major = the player's SM in that match, club is unknown at this layer
-    (resolved later via cross-phase lookup). Only PLAYED matches
-    contribute; pending pairings don't count.
+    (resolved later via cross-phase lookup). Only DECIDED matches
+    contribute; pending pairings don't count. Els dos jugadors d'una
+    INCOMPAREIXENÇA hi entren amb estadístiques a zero: la partida no s'ha
+    jugat, però la ronda els compta com a disputada —si no, el qui no s'hi
+    presenta no consta a la ronda i la classificació el deixa com a "encara
+    en competició" quan en realitat ja és eliminat.
     """
     out: dict[str, tuple[float, int, str]] = {}
     if phase.ref.kind == "group":
@@ -1413,6 +1417,10 @@ def _phase_player_stats(
     else:  # ko
         for m in phase.ko_matches:
             if not m.is_played or not m.entrades:
+                if _is_walkover(m):
+                    for nm in (m.player_a, m.player_b):
+                        if nm:
+                            out.setdefault(nm, (0.0, 0, ""))
                 continue
             avg_a = m.caramboles_a / m.entrades
             avg_b = m.caramboles_b / m.entrades
