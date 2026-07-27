@@ -32,6 +32,36 @@ def test_month_for_publication_date(d: date, expected: tuple[int, int]) -> None:
     assert month_for_publication_date(d) == expected
 
 
+def test_month_override_wins_over_the_derived_label() -> None:
+    """El 124 es va publicar el 27 de juliol: la regla el faria de setembre (com
+    el 102 del 2024), però la federació l'etiqueta d'AGOST. L'excepció mana i
+    sobreviu a les reingestes, que si no tornarien a derivar setembre."""
+    assert month_for_publication_date(date(2026, 7, 27)) == (2026, 9)      # regla
+    assert month_for_publication_date(date(2026, 7, 27), 124) == (2026, 8)  # excepció
+    # Cap altre num_seq de finals de juliol no en queda afectat.
+    assert month_for_publication_date(date(2024, 7, 29), 102) == (2024, 9)
+
+
+def test_reconcile_keeps_the_override_month(tmp_path) -> None:
+    """Una reconciliació de dates no ha de desfer l'etiqueta fixada."""
+    settings = Settings(db_path=tmp_path / "t.db")
+    conn = ensure_schema(settings.db_path)
+    from fcbillar.db.repository import Repository
+
+    Repository(conn).upsert_ranking(
+        Ranking(num_seq=124, modalitat_codi_fcb=1, url="x", format_url="data",
+                any_pub=2026, mes_pub=8)
+    )
+    conn.commit()
+    entries = [HistorialEntry(data=date(2026, 7, 27), rankings={1: ("data", 124)})]
+    result = reconcile_ranking_dates(entries, settings=settings)
+    assert result.changed == []          # res a canviar: ja és agost
+    row = conn.execute(
+        "SELECT any_pub, mes_pub FROM rankings WHERE num_seq=124"
+    ).fetchone()
+    assert (row["any_pub"], row["mes_pub"]) == (2026, 8)
+
+
 def test_reconcile_corrects_wrong_month_and_stores_data_pub(tmp_path) -> None:
     settings = Settings(db_path=tmp_path / "t.db")
     conn = ensure_schema(settings.db_path)
