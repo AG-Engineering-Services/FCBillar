@@ -80,7 +80,7 @@
 	// provisional, però mostrades en línia al darrer rànquing oficial).
 	const provActive = $derived(!isProvView && prov.size > 0 && selSeq === snapshots[0]?.num_seq);
 
-	const filtered = $derived.by(() => {
+	const searched = $derived.by(() => {
 		const t = search.trim();
 		if (!t) return rows;
 		return rows.filter((r) => {
@@ -88,6 +88,21 @@
 			const mc = scope !== 'jugador' && clubMatches(r.club, t);
 			return mp || mc;
 		});
+	});
+
+	// Ordre de la llista. La POSICIÓ oficial no és sempre l'ordre de la mitjana:
+	// la federació hi aplica els seus criteris (mínim de partides, desempats), i
+	// per això val la pena poder veure el rànquing ordenat per PROMIG i comparar.
+	// Sigui quin sigui l'ordre, cada fila segueix mostrant la seva posició oficial.
+	type SortBy = 'posicio' | 'mitjana';
+	let sortBy = $state<SortBy>('posicio');
+	const filtered = $derived.by(() => {
+		if (sortBy === 'posicio') return searched;
+		return [...searched].sort(
+			(a, b) =>
+				(b.mitjana_general ?? -1) - (a.mitjana_general ?? -1) ||
+				(a.posicio ?? Infinity) - (b.posicio ?? Infinity)
+		);
 	});
 
 	onMount(async () => {
@@ -301,6 +316,28 @@
 		puja, <span class="font-semibold text-red-500 dark:text-red-400">vermell</span> baixa. Llisca a la dreta («Provisional calculat») per veure el rànquing sencer recalculat.
 	</p>
 {/if}
+
+<!-- Ordena per posició oficial o per promig (no sempre coincideixen) -->
+<div class="mb-2 flex items-center gap-1.5 px-0.5 text-xs">
+	<span class="text-slate-400 dark:text-slate-500">Ordena per:</span>
+	<button
+		type="button"
+		onclick={() => (sortBy = 'posicio')}
+		class="rounded-full px-2.5 py-1 font-medium transition-colors {sortBy === 'posicio'
+			? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+			: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
+	>Posició</button>
+	<button
+		type="button"
+		onclick={() => (sortBy = 'mitjana')}
+		class="rounded-full px-2.5 py-1 font-medium transition-colors {sortBy === 'mitjana'
+			? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+			: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
+	>Promig</button>
+	{#if sortBy === 'mitjana'}
+		<span class="text-slate-400 dark:text-slate-500">· el número segueix sent la posició oficial</span>
+	{/if}
+</div>
 
 {#if loading}
 	<p class="px-1 py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>

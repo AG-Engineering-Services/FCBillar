@@ -149,7 +149,7 @@ def ingest_ranking(
 
     any_pub = mes_pub = None
     if data_pub is not None:
-        any_pub, mes_pub = month_for_publication_date(data_pub)
+        any_pub, mes_pub = month_for_publication_date(data_pub, num_seq)
 
     conn = ensure_schema(settings.db_path)
     repo = Repository(conn)
@@ -485,7 +485,7 @@ def reconcile_ranking_dates(
     dated = 0
     not_in_db: list[int] = []
     for num_seq, d in sorted(by_seq.items()):
-        ny, nm = month_for_publication_date(d)
+        ny, nm = month_for_publication_date(d, num_seq)
         rows = conn.execute(
             "SELECT id, any_pub, mes_pub FROM rankings WHERE num_seq = ?",
             (num_seq,),
