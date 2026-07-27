@@ -19,6 +19,7 @@ from collections.abc import Callable, Iterable
 from pathlib import Path
 
 from fcbillar.config import PROJECT_ROOT, get_settings
+from fcbillar.opens_club import club_master, real_club
 
 SCHEMA = "fcbillar"
 Progress = Callable[[str, str], None]
@@ -1672,6 +1673,9 @@ def publish_open_ranking(
     ):
         parts[r["oid"]].append((r["fcb_id"], r["nom"], r["club_text"], r["posicio"]))
 
+    # Club de reserva quan cap open de la finestra no en porta (vegeu opens_club).
+    club_fallback = club_master(conn)
+
     # GENERAL = opens NO femenins (els femenins tenen taula de punts pròpia, pendent).
     # Cronologia: divisio_id_extern (la FCB l'assigna creixent per cada open disputat).
     divid = {o["id"]: o["divisio_id_extern"] for o in open_rows}
@@ -1691,6 +1695,7 @@ def publish_open_ranking(
     def _ddet(oid, pos, pp):
         return {"open": onom.get(oid), "temp": tnom.get(oid), "data": open_date.get(oid) or None, "pos": pos, "punts": pp}
 
+
     # Un snapshot per ronda: finestra mòbil dels últims 5 opens fins a la ronda i.
     all_rows = []
     for i in range(1, len(ordered) + 1):
@@ -1700,7 +1705,10 @@ def publish_open_ranking(
         for oid in window:
             for fcb, nom, club, pos in parts.get(oid, []):
                 pp_player[fcb][oid] = (pos, points_for_position(pos))
-                info[fcb] = (nom, club)
+                # El club del darrer open on n'hi consti un de debò: un "Cap"
+                # de la FCB no ha d'esborrar el que ja sabíem.
+                prev_club = info.get(fcb, (None, None))[1]
+                info[fcb] = (nom, real_club(club) or prev_club)
         last_open = ordered[i - 1]
         rows_r = []
         for fcb, (nom, club) in info.items():
@@ -1722,7 +1730,7 @@ def publish_open_ranking(
                 "genere": "general", "ronda": i, "ronda_nom": onom.get(last_open),
                 "ronda_data": open_date.get(last_open) or None, "ronda_temp": tnom.get(last_open),
                 "posicio": posicio, "player_fcb_id": fcb, "jugador": _disp(nom),
-                "club": club, "opens_jugats": njug, "punts": total,
+                "club": club or club_fallback.get(fcb), "opens_jugats": njug, "punts": total,
                 "detall": det, "provisional": False,
             })
     # Penalitzacions del PDF oficial (Art. IV): -20 no presentat injustificat,
