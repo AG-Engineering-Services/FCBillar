@@ -743,20 +743,30 @@ def publish_games(
                 if s2 is None:
                     s2 = hit[1].get(_nm(r["player2_nom"]))
             else:
-                # Fallback (sense vincle exacte): torneig compartit (mateixa
-                # modalitat + temporada). Baixa confiança; només per a partides
-                # que el rànquing no va capturar dins de cap campionat scrapejat.
-                shared = part_idx.get(_nm(r["player1_nom"]), set()) & part_idx.get(
-                    _nm(r["player2_nom"]), set()
-                )
-                cands = [t for t in shared if t[1] == r["modalitat_codi"]]
+                # Fallback (sense vincle exacte): torneig compartit. NOMÉS si és
+                # INEQUÍVOC — un sol torneig de la mateixa modalitat i de la
+                # TEMPORADA de la partida. Si no, es queda l'etiqueta genèrica.
+                #
+                # Abans agafava `cands[0]` i tenia dos forats: (a) si cap candidat
+                # no era de la temporada de la partida, es quedava amb els d'ALTRES
+                # temporades —336 partides mal etiquetades, p.ex. una del 18-07-2026
+                # sortia com a "OPEN TRES BANDES SANTS", que aquests dos jugadors
+                # havien disputat el 2023-24, en comptes del VI Open Mataró—; i
+                # (b) `cands` venia d'un set, o sigui que entre diversos empatats
+                # en triava un a l'atzar i podia canviar d'una publicació a l'altra.
+                # Val més no dir res que dir-ho malament.
                 season = _season_of(r["data_partida"])
                 if season:
-                    sc = [t for t in cands if t[2] == season]
-                    if sc:
-                        cands = sc
-                if cands:
-                    label = cands[0][0]
+                    shared = part_idx.get(_nm(r["player1_nom"]), set()) & part_idx.get(
+                        _nm(r["player2_nom"]), set()
+                    )
+                    noms = {
+                        t[0]
+                        for t in shared
+                        if t[1] == r["modalitat_codi"] and t[2] == season
+                    }
+                    if len(noms) == 1:
+                        label = next(iter(noms))
         elif comp == "COPA":
             sm = copa_sig.get(
                 _sigkey(r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"])
