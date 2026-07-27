@@ -663,15 +663,22 @@
 				{/each}
 			</div>
 		{:else}
-			<!-- Fase KO: classificats ordenats + emparellaments oficials i calculats -->
+			<!-- Fase KO: classificats per a la SEGÜENT ronda + emparellaments.
+			     Cada fase mostra qui n'ha sortit classificat, igual que les fases de
+			     grups: els guanyadors d'aquesta ronda són el pool sembrat de la
+			     següent, o sigui `provisional_players` de la fase de després. -->
 			{@const official = phase.ko_matches}
 			{@const calc = phase.provisional_matches ?? []}
-			{@const seeds = phase.provisional_players ?? []}
+			{@const next = selectedPhase != null ? phases[selectedPhase + 1] : undefined}
+			{@const seeds = next?.provisional_players ?? []}
+			<!-- Cada partida de la ronda dóna un classificat: el total esperat són
+			     els emparellaments, oficials i calculats. -->
+			{@const esperats = official.length + calc.length}
 			{#if seeds.length}
 				<div class="mb-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 p-3 ring-1 ring-sky-200 dark:ring-sky-900/50">
 					<div class="mb-1.5 flex items-center gap-2">
-						<span class="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">Classificats per a aquesta ronda ({seeds.length})</span>
-						{#if official.length === 0}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Provisional</span>{/if}
+						<span class="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">Classificats per a la següent ronda ({seeds.length}{#if esperats > seeds.length}/{esperats}{/if})</span>
+						{#if (next?.ko_matches?.length ?? 0) === 0}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Provisional</span>{/if}
 					</div>
 					<ol class="space-y-0.5">
 						{#each seeds as s, i}
@@ -683,11 +690,11 @@
 									{#if s.source === 'walkover'}<span class="shrink-0 rounded bg-slate-200 dark:bg-slate-700 px-1 text-[9px] font-semibold uppercase text-slate-600 dark:text-slate-300" title="Ha passat per incompareixença del rival: sense mitjana, manté la posició que tenia a la ronda anterior">w.o.</span>{/if}
 								</span>
 								{#if s.serie_major}<span class="hidden w-10 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline" title="Sèrie major">{s.serie_major}</span>{/if}
-								<span class="w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400" title="Mitjana amb què entra a la ronda">{s.mitjana ? s.mitjana.toFixed(3) : '—'}</span>
+								<span class="w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400" title="Mitjana amb què entra a la ronda següent">{s.mitjana ? s.mitjana.toFixed(3) : '—'}</span>
 							</li>
 						{/each}
 					</ol>
-					<p class="mt-1.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">Ordre per la mitjana de la ronda anterior (sèrie major com a desempat). Fixa l'aparellament 1-N de sota.</p>
+					<p class="mt-1.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">Ordre per la mitjana d'<strong>aquesta</strong> ronda (sèrie major com a desempat). Fixa l'aparellament 1-N de <strong>{next?.label?.toLowerCase() ?? 'la ronda següent'}</strong>.</p>
 				</div>
 			{/if}
 
