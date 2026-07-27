@@ -831,8 +831,25 @@
 		const d = step >= 5 ? 0 : step >= 1 ? 1 : step >= 0.1 ? 2 : 3;
 		return v.toFixed(d);
 	}
+	// Àmbit de l'histograma: tot l'històric de la modalitat o només la temporada
+	// en curs. La temporada només s'ofereix si hi ha prou partides per a que la
+	// distribució digui alguna cosa (les mateixes 5 que demana `histo`).
+	type HistoScope = 'tot' | 'temporada';
+	let histoScope = $state<HistoScope>('tot');
+	const histoSeasonGames = $derived(
+		modGames.filter((g) => (g.data_partida ?? '') >= seasonStart)
+	);
+	const histoHasSeason = $derived(
+		histoSeasonGames.map(persp).filter((p) => p.ent > 0).length >= 5
+	);
+	// Si la modalitat triada no té prou partides de temporada, torna a "tot".
+	$effect(() => {
+		if (!histoHasSeason && histoScope === 'temporada') histoScope = 'tot';
+	});
+
 	const histo = $derived.by(() => {
-		const avgs = modGames
+		const src = histoScope === 'temporada' ? histoSeasonGames : modGames;
+		const avgs = src
 			.map(persp)
 			.filter((p) => p.ent > 0)
 			.map((p) => p.myCar / p.ent);
@@ -854,9 +871,11 @@
 			bins[i].count++;
 		}
 		const maxCount = Math.max(...bins.map((b) => b.count));
-		// Desviació típica de les mitjanes per partida respecte la mitjana oficial,
-		// per quantificar i dibuixar la dispersió típica del rendiment (franja ±1σ).
-		const center = kpi.mitjana;
+		// Desviació típica de les mitjanes per partida respecte la mitjana del
+		// mateix àmbit, per quantificar i dibuixar la dispersió típica del
+		// rendiment (franja ±1σ). Amb l'àmbit de temporada, el centre ha de ser
+		// la mitjana de la temporada, no la de tot l'històric.
+		const center = histoScope === 'temporada' ? seasonKpi.mitjana : kpi.mitjana;
 		const sd = Math.sqrt(avgs.reduce((s, a) => s + (a - center) ** 2, 0) / avgs.length);
 		return { bins, maxCount, step, n: avgs.length, lo, hi, mitjana: center, sd };
 	});
@@ -892,7 +911,8 @@
 	let histoSel = $state<number | null>(null);
 	$effect(() => {
 		void selMod;
-		histoSel = null; // reinicia la selecció en canviar de modalitat
+		void histoScope;
+		histoSel = null; // reinicia la selecció en canviar de modalitat o d'àmbit
 	});
 	function pickHisto(ev: MouseEvent) {
 		const el = ev.currentTarget as Element;
@@ -1501,8 +1521,23 @@
 		{#if histo}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-end justify-between">
-					<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Distribució de la mitjana · per partida</span>
-					<div class="flex items-center gap-3">
+					<div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+						<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Distribució de la mitjana · per partida</span>
+						{#if histoHasSeason}
+							<div class="flex shrink-0 items-center gap-1 print:hidden">
+								{#each [['tot', 'Tot'], ['temporada', 'Temporada']] as [val, label]}
+									<button
+										type="button"
+										onclick={() => (histoScope = val as HistoScope)}
+										class="rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors {histoScope === val
+											? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+											: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}"
+									>{label}</button>
+								{/each}
+							</div>
+						{/if}
+					</div>
+					<div class="flex shrink-0 items-center gap-3">
 						<div class="flex items-center gap-1.5">
 							<span class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
 							<span class="font-mono text-base font-bold leading-none tabular-nums">{histo.mitjana.toFixed(3)}</span>
@@ -1541,7 +1576,7 @@
 				<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300 dark:text-slate-600">
 					{#each histoTicks as t}<span>{t}</span>{/each}
 				</div>
-				<p class="mt-1 text-right text-[10px] text-slate-300 dark:text-slate-600">{histo.n} partides · línia = mitjana · franja = ±1σ</p>
+				<p class="mt-1 text-right text-[10px] text-slate-300 dark:text-slate-600">{histo.n} partides{histoScope === 'temporada' ? ' de la temporada' : ''} · línia = mitjana · franja = ±1σ</p>
 			</div>
 		{/if}
 
