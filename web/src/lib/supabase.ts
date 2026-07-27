@@ -251,8 +251,11 @@ export interface OpenLiveClassRow {
 	player_name: string;
 	club: string;
 	round_label: string;
-	mitjana: number;
-	serie_major: number;
+	mitjana: number; // mitjana de TOT l'open (caramboles/entrades de totes les partides)
+	serie_major: number; // millor sèrie de tot l'open
+	partides?: number; // PJ · absents als snapshots anteriors al 2026-07-27
+	caramboles?: number;
+	entrades?: number;
 	open_points: number;
 	is_provisional_position: boolean;
 	rank3b?: number; // posició al rànquing de 3 bandes (per mostrar entre parèntesi)

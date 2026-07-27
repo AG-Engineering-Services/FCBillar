@@ -11,6 +11,8 @@ Tot marcat provisional fins a la classificació definitiva.
 
 from __future__ import annotations
 
+import pytest
+
 from fcb_opens.scraper.open_live import (
     Group,
     GroupStanding,
@@ -106,6 +108,43 @@ def test_without_reservats_previa_is_ordered_by_qualification_not_seeding():
     order = [r.player_name for r in sorted(compute_open_classification(state),
              key=lambda r: r.position) if r.round_label == "EN JOC"]
     assert order == ["WIN_D", "WIN_B", "WIN_A", "WIN_C"]  # mitjana DESC, no seeding
+
+
+def test_classification_carries_the_whole_tournament_totals():
+    """La classificació ha de portar la mitjana de TOT l'open (totes les partides
+    jugades), com la que publica la federació, i no la de la ronda on cau cadascú.
+    Els totals de ronda segueixen manant l'ordre dins del tram."""
+    state = _state(_groups())
+    rows = {r.player_name: r for r in compute_open_classification(state)}
+    # A la prèvia cada jugador d'un grup de 3 juga 2 partides de 30-20 en 40 ent.
+    win = rows["WIN_A"]
+    assert win.partides == 2
+    assert (win.caramboles, win.entrades) == (60, 80)
+    assert win.mitjana_open == pytest.approx(0.75)
+    # El 3r del grup perd les dues: 20 caramboles cada cop.
+    third = rows["A3"]
+    assert (third.partides, third.caramboles, third.entrades) == (2, 40, 80)
+    assert third.mitjana_open == pytest.approx(0.5)
+
+
+def test_walkover_does_not_count_as_a_played_match_in_the_totals():
+    """Guanyar per incompareixença no és haver jugat: ni suma partida ni entrades
+    (si comptés, rebaixaria la mitjana de qui passa sense jugar)."""
+    state = _state(_groups())
+    state.phases[1] = PhaseDetail(
+        ref=state.phases[1].ref,
+        ko_matches=(
+            MatchResult(
+                player_a="WIN_A", player_b="WIN_B", punts_a=2, punts_b=0,
+                caramboles_a=0, caramboles_b=0, serie_major_a=0, serie_major_b=0,
+                entrades=0, arbitre=None,
+            ),
+        ),
+    )
+    rows = {r.player_name: r for r in compute_open_classification(state)}
+    assert rows["WIN_A"].partides == 2          # només les dues de la prèvia
+    assert rows["WIN_A"].entrades == 80
+    assert rows["WIN_B"].partides == 2
 
 
 def test_eliminated_reservat_keeps_its_club():
