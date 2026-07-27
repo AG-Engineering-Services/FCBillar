@@ -756,7 +756,15 @@
 								</span>
 								{#if ec.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial (opens 3 bandes): millor classificat de la seva banda del rànquing">{ec.prize}</span>{/if}
 								{#if !alive && r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
-								<span class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline">{r.mitjana ? r.mitjana.toFixed(3) : '—'}</span>
+								<span
+								class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline"
+								title={r.entrades
+									? `Mitjana de l'open: ${r.caramboles} caramboles en ${r.entrades} entrades · ${r.partides} ${r.partides === 1 ? 'partida' : 'partides'}`
+									: "Mitjana de l'open"}
+							>{r.mitjana ? r.mitjana.toFixed(3) : '—'}</span>
+							{#if r.partides}
+								<span class="hidden w-7 shrink-0 text-right font-mono text-[10px] text-slate-400 dark:text-slate-500 sm:inline" title="Partides jugades a l'open">{r.partides}pj</span>
+							{/if}
 								<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title={alive ? 'Punts pendents: encara en competició' : 'Punts de rànquing segons el lloc (reglament dels opens)'}>{alive ? '—' : r.open_points}</span>
 							</li>
 						{/each}
@@ -764,6 +772,6 @@
 				</div>
 			{/each}
 		</div>
-		<p class="mt-2 text-[10px] leading-tight text-slate-400 dark:text-slate-500"><span class="text-amber-500">*</span> provisional · (n) = rànquing 3B · <span class="text-violet-600 dark:text-violet-300">premi</span> per posició (1-8) o per banda de rànquing. Punts segons el reglament.</p>
+		<p class="mt-2 text-[10px] leading-tight text-slate-400 dark:text-slate-500"><span class="text-amber-500">*</span> provisional · (n) = rànquing 3B · <span class="text-violet-600 dark:text-violet-300">premi</span> per posició (1-8) o per banda de rànquing. Punts segons el reglament. La mitjana és la de <strong>tot l'open</strong> (totes les partides jugades) i <em>pj</em> les partides.</p>
 	</div>
 {/snippet}

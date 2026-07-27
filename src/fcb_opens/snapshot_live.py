@@ -204,8 +204,12 @@ def _state_payload(
                 "player_name": e.player_name,
                 "club": e.club or "",
                 "round_label": round_by_name.get(e.player_name, ""),
+                # Mitjana i sèrie de TOT l'open (la taula oficial ja les dóna així).
                 "mitjana": e.general_average,
                 "serie_major": e.best_series,
+                "partides": e.matches_played,
+                "caramboles": e.caramboles,
+                "entrades": e.entries,
                 # Always derive Art. XVII open points from position; the
                 # FCB 'Punts' column on the official table is the player's
                 # match-wins, not the position-based reward.
@@ -222,8 +226,16 @@ def _state_payload(
                 "player_name": r.player_name,
                 "club": r.club,
                 "round_label": r.round_label,
-                "mitjana": r.mitjana,
-                "serie_major": r.serie_major,
+                # Mitjana i sèrie de TOT l'open, com a la taula oficial: `mitjana`
+                # vol dir el mateix tant si la classificació ve de la federació com
+                # si la calculem nosaltres. Els valors de la RONDA on cau cada
+                # jugador segueixen manant l'ordre dins del tram, però no es
+                # publiquen (dirien una altra cosa amb el mateix nom).
+                "mitjana": r.mitjana_open,
+                "serie_major": r.serie_major_open,
+                "partides": r.partides,
+                "caramboles": r.caramboles,
+                "entrades": r.entrades,
                 "open_points": r.open_points,
                 "is_provisional_position": r.is_provisional_position,
             }

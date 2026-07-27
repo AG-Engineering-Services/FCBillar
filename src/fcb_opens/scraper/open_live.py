@@ -19,7 +19,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from collections.abc import Iterable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from bs4 import BeautifulSoup
 
@@ -1385,6 +1385,20 @@ class OpenClassificationRow:
     serie_major: int
     open_points: int
     is_provisional_position: bool = False
+    # Totals de TOT l'open (no de la ronda): els omple `_tournament_totals` al
+    # final de `compute_open_classification`. `mitjana`/`serie_major` continuen
+    # sent els de la RONDA on cau el jugador —criteri d'ordre dins del tram—,
+    # mentre que la classificació que publica la federació dóna la mitjana del
+    # torneig sencer, que és `mitjana_open`.
+    partides: int = 0
+    caramboles: int = 0
+    entrades: int = 0
+    serie_major_open: int = 0
+
+    @property
+    def mitjana_open(self) -> float:
+        """Mitjana de TOT l'open (caramboles/entrades de totes les partides)."""
+        return (self.caramboles / self.entrades) if self.entrades else 0.0
 
 
 def _phase_player_stats(
@@ -1834,8 +1848,53 @@ def compute_open_classification(
             )
         )
 
+    # Totals de TOT l'open per jugador (PJ/caramboles/entrades/millor sèrie). La
+    # `mitjana` de cada fila és la de la RONDA on ha caigut —és el criteri d'ordre
+    # dins del tram i s'ha de mantenir—, però la classificació final de la
+    # federació dóna la mitjana del TORNEIG, totes les partides sumades. Els dos
+    # valors conviuen: l'ordre no canvia i el payload pot publicar el del torneig.
+    totals = _tournament_totals(phases)
+    rows = [
+        replace(
+            r,
+            partides=totals.get(r.player_name, (0, 0, 0, 0))[0],
+            caramboles=totals.get(r.player_name, (0, 0, 0, 0))[1],
+            entrades=totals.get(r.player_name, (0, 0, 0, 0))[2],
+            serie_major_open=totals.get(r.player_name, (0, 0, 0, 0))[3],
+        )
+        for r in rows
+    ]
     rows.sort(key=lambda r: r.position)
     return tuple(rows)
+
+
+def _tournament_totals(
+    phases: list[PhaseDetail],
+) -> dict[str, tuple[int, int, int, int]]:
+    """`{jugador → (PJ, caramboles, entrades, millor sèrie)}` de TOT l'open.
+
+    Suma les partides JUGADES de totes les fases, grups i KO. Les guanyades per
+    incompareixença no hi compten: no s'han jugat i no tenen ni caramboles ni
+    entrades (comptar-les rebaixaria la mitjana de qui ha passat sense jugar)."""
+    out: dict[str, list[int]] = {}
+
+    def add(name: str, car: int, ent: int, sm: int) -> None:
+        if not name or not ent:
+            return
+        x = out.setdefault(name, [0, 0, 0, 0])
+        x[0] += 1
+        x[1] += int(car or 0)
+        x[2] += int(ent or 0)
+        x[3] = max(x[3], int(sm or 0))
+
+    for ph in phases:
+        matches = [m for g in ph.groups for m in g.matches] + list(ph.ko_matches)
+        for m in matches:
+            if not m.is_played:
+                continue
+            add(m.player_a, m.caramboles_a, m.entrades or 0, m.serie_major_a)
+            add(m.player_b, m.caramboles_b, m.entrades or 0, m.serie_major_b)
+    return {k: (v[0], v[1], v[2], v[3]) for k, v in out.items()}
 
 
 def _alive_classification_rows(
