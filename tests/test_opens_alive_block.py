@@ -108,6 +108,21 @@ def test_without_reservats_previa_is_ordered_by_qualification_not_seeding():
     assert order == ["WIN_D", "WIN_B", "WIN_A", "WIN_C"]  # mitjana DESC, no seeding
 
 
+def test_eliminated_reservat_keeps_its_club():
+    """Els RESERVATS no juguen cap grup i no surten a cap `standings`, així que el
+    club només el porta el grup "RESERVATS". En caure del quadre es quedaven sense
+    club a la classificació — i són els 16 de dalt, els més visibles."""
+    state = _state(_groups(), reservats=[("RES_X", "CX"), ("RES_Y", "CY")])
+    state.phases[1] = PhaseDetail(
+        ref=state.phases[1].ref,
+        ko_matches=(_played("WIN_A", "RES_X"),),
+    )
+    rows = {r.player_name: r for r in compute_open_classification(state)}
+    assert rows["RES_X"].round_label == "QUARTS"    # ja eliminat
+    assert rows["RES_X"].club == "CX"
+    assert rows["RES_Y"].club == "CY"               # encara viu
+
+
 def test_walkover_loser_is_eliminated_not_still_in_competition():
     """Qui perd per incompareixença ja NO passa de ronda: ha de sortir eliminat a
     la seva ronda, no al bloc de «encara en competició». La partida no deixa

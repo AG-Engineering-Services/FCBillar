@@ -1597,7 +1597,14 @@ def compute_open_classification(
     # Cross-phase club lookup: for KO players we don't have a club in the
     # match data, so reach back to the deepest group phase where the
     # player has standings.
-    club_by_player: dict[str, str] = {}
+    #
+    # Els RESERVATS (caps de sèrie que entren directes al primer KO) NO juguen cap
+    # grup i, per tant, no surten a cap `standings`: sense aquesta primera passada
+    # es quedaven sense club a la classificació —els 16 de dalt del quadre, just
+    # els més visibles— tot i que el grup "RESERVATS" sí que el porta.
+    club_by_player: dict[str, str] = {
+        s.player_name: s.club for s in state.reservats if s.player_name and s.club
+    }
     for phase in phases:
         if phase.ref.kind != "group":
             continue
