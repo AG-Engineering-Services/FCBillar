@@ -106,3 +106,30 @@ def test_without_reservats_previa_is_ordered_by_qualification_not_seeding():
     order = [r.player_name for r in sorted(compute_open_classification(state),
              key=lambda r: r.position) if r.round_label == "EN JOC"]
     assert order == ["WIN_D", "WIN_B", "WIN_A", "WIN_C"]  # mitjana DESC, no seeding
+
+
+def test_walkover_loser_is_eliminated_not_still_in_competition():
+    """Qui perd per incompareixença ja NO passa de ronda: ha de sortir eliminat a
+    la seva ronda, no al bloc de «encara en competició». La partida no deixa
+    caramboles ni entrades, i abans això el feia invisible per a la ronda."""
+    state = _state(_groups())
+    quarts = state.phases[1]
+    state.phases[1] = PhaseDetail(
+        ref=quarts.ref,
+        ko_matches=(
+            _played("WIN_D", "WIN_C"),
+            # WIN_A guanya per incompareixença de WIN_B: 2-0 i tot a zero.
+            MatchResult(
+                player_a="WIN_A", player_b="WIN_B", punts_a=2, punts_b=0,
+                caramboles_a=0, caramboles_b=0, serie_major_a=0, serie_major_b=0,
+                entrades=0, arbitre=None,
+            ),
+        ),
+    )
+    rows = compute_open_classification(state)
+    by_name = {r.player_name: r for r in rows}
+    assert by_name["WIN_B"].round_label == "QUARTS"
+    assert by_name["WIN_C"].round_label == "QUARTS"
+    assert "WIN_B" not in {r.player_name for r in rows if r.round_label == "EN JOC"}
+    # El guanyador per incompareixença segueix viu.
+    assert by_name["WIN_A"].round_label == "EN JOC"

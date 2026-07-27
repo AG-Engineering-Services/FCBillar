@@ -21,6 +21,7 @@ from fcb_opens.scraper.open_live import (
     _attach_ko_provisional_players,
     _is_walkover,
     _ko_winner,
+    _phase_player_stats,
     compute_advancing_players,
 )
 
@@ -61,6 +62,37 @@ def test_unplayed_match_without_result_is_not_a_walkover():
 
 def test_played_match_is_not_a_walkover():
     assert _is_walkover(_m("A", "B", punts=(2, 0), car=(40, 25), ent=30)) is False
+
+
+# --------------------------------------------------------------------------- #
+# La ronda compta els dos jugadors (si no, el perdedor queda "en competició")
+# --------------------------------------------------------------------------- #
+
+
+def test_walkover_puts_both_players_in_the_round_stats():
+    """Qui no es presenta ha de constar a la ronda amb estadístiques a zero: és
+    així com la classificació el pot donar per ELIMINAT en comptes de deixar-lo
+    a «encara en competició» (no avança i no surt a cap ronda posterior)."""
+    phase = PhaseDetail(
+        ref=PhaseRef(label="SETZENS", kind="ko", url=""),
+        ko_matches=(
+            _wo("UCEDA", "JUÁREZ"),
+            _m("PINEDA", "NAVARRO", punts=(2, 0), car=(40, 27), ent=35, sm=(4, 4)),
+        ),
+    )
+    stats = _phase_player_stats(phase)
+    assert set(stats) == {"UCEDA", "JUÁREZ", "PINEDA", "NAVARRO"}
+    assert stats["UCEDA"] == (0.0, 0, "")
+    assert stats["JUÁREZ"] == (0.0, 0, "")
+    assert stats["PINEDA"][0] > 0
+
+
+def test_pending_pairing_does_not_enter_the_round_stats():
+    phase = PhaseDetail(
+        ref=PhaseRef(label="SETZENS", kind="ko", url=""),
+        ko_matches=(_m("A", "B"),),
+    )
+    assert _phase_player_stats(phase) == {}
 
 
 # --------------------------------------------------------------------------- #
