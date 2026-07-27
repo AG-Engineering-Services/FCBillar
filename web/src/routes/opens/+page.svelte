@@ -81,6 +81,53 @@
 		return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 	}
 
+	// --- Mitjana del DARRER rànquing de 3 bandes ------------------------------
+	// Columna de context al rànquing d'opens: els punts d'open diuen fins on has
+	// arribat, no a quin nivell jugues. Sempre el rànquing publicat més recent
+	// (modalitat 1 = 3 bandes), independentment de la ronda d'opens que es miri.
+	const CA_MONTHS = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny',
+		'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
+	let mitjanaByFcbId = $state<Map<string, number>>(new Map());
+	let mitjanaSeqLabel = $state('');
+
+	async function loadMitjanes() {
+		const { data: snaps } = await supabase
+			.from('rankings')
+			.select('num_seq, any_pub, mes_pub')
+			.eq('modalitat_codi', 1)
+			.order('num_seq', { ascending: false })
+			.limit(1);
+		const snap = snaps?.[0];
+		if (!snap) return;
+		mitjanaSeqLabel =
+			snap.mes_pub && snap.any_pub
+				? `${CA_MONTHS[(snap.mes_pub - 1) % 12]} ${snap.any_pub}`
+				: `#${snap.num_seq}`;
+		// Paginat: el rànquing de 3 bandes pot passar del límit de 1000 files.
+		const m = new Map<string, number>();
+		for (let from = 0; ; from += 1000) {
+			const { data } = await supabase
+				.from('ranking_full')
+				.select('player_fcb_id, mitjana_general')
+				.eq('modalitat_codi', 1)
+				.eq('num_seq', snap.num_seq)
+				.range(from, from + 999);
+			if (!data?.length) break;
+			for (const r of data as { player_fcb_id: string | null; mitjana_general: number | null }[]) {
+				if (r.player_fcb_id != null && r.mitjana_general != null)
+					m.set(String(r.player_fcb_id), Number(r.mitjana_general));
+			}
+			if (data.length < 1000) break;
+		}
+		mitjanaByFcbId = m;
+	}
+
+	// '—' per als qui no surten al darrer rànquing (sense partides a la finestra).
+	function mitjanaOf(fcbId: string | null | undefined): string {
+		const v = fcbId == null ? undefined : mitjanaByFcbId.get(String(fcbId));
+		return v == null ? '—' : v.toFixed(3);
+	}
+
 	const genRanking = $derived(ranking.filter((r) => r.genere === 'general'));
 	const rondes = $derived([...new Set(genRanking.map((r) => r.ronda as number))].sort((a, b) => a - b));
 
@@ -240,6 +287,7 @@
 			.select('*')
 			.order('fcb_division_id')
 			.then(({ data }) => (liveOpens = (data ?? []) as OpenLiveRow[]));
+		loadMitjanes();   // columna de mitjana: tampoc bloqueja
 		try {
 			const { data, error: e } = await supabase.from('opens').select('*').order('nom');
 			if (e) throw e;
@@ -373,6 +421,7 @@
 				<span class="w-6 text-center">#</span>
 				<span class="flex-1">Jugador</span>
 				<span class="w-7 text-center">Op.</span>
+				<span class="w-12 text-right" title="Mitjana general del darrer rànquing de 3 bandes{mitjanaSeqLabel ? ` (${mitjanaSeqLabel})` : ''}">Mitj.</span>
 				<span class="w-10 text-right">Punts</span>
 			</div>
 			<ul>
@@ -385,6 +434,10 @@
 								{#if r.club}<div class="truncate text-[11px] text-slate-400 dark:text-slate-500">{r.club}</div>{/if}
 							</div>
 							<span class="w-7 shrink-0 text-center text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.opens_jugats}</span>
+							<span
+								class="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400"
+								title="Mitjana general al darrer rànquing de 3 bandes{mitjanaSeqLabel ? ` (${mitjanaSeqLabel})` : ''}"
+							>{mitjanaOf(r.player_fcb_id)}</span>
 							<button
 								onclick={() => (expandedPlayer = expandedPlayer === r.player_fcb_id ? null : r.player_fcb_id)}
 								class="flex w-12 shrink-0 items-center justify-end gap-0.5 font-mono text-sm font-bold tabular-nums"
@@ -415,7 +468,7 @@
 				{/each}
 			</ul>
 		</div>
-		<p class="px-1 py-2 text-center text-[10px] text-slate-400 dark:text-slate-500">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII).{isCalc ? ' Ronda CALCULADA: els 4 darrers opens acabats + l’open en curs amb punts provisionals en directe.' : rondaProvisional ? ' Ronda PROVISIONAL: punts de la classificació final del darrer open, pendent que la federació actualitzi el rànquing oficial.' : ''}</p>
+		<p class="px-1 py-2 text-center text-[10px] text-slate-400 dark:text-slate-500">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII). <strong>Mitj.</strong> = mitjana general al darrer rànquing de 3 bandes{mitjanaSeqLabel ? ` (${mitjanaSeqLabel})` : ''}.{isCalc ? ' Ronda CALCULADA: els 4 darrers opens acabats + l’open en curs amb punts provisionals en directe.' : rondaProvisional ? ' Ronda PROVISIONAL: punts de la classificació final del darrer open, pendent que la federació actualitzi el rànquing oficial.' : ''}</p>
 	{/if}
 {:else if filtered.length === 0}
 	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap open.</p>
