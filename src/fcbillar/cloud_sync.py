@@ -1625,6 +1625,69 @@ def publish_open_partides(
     return {"open_partides": n}
 
 
+def _players_by_norm(conn) -> dict[str, tuple[str, str]]:
+    """`{nom normalitzat → (fcb_id, nom)}` de tots els jugadors federats."""
+    import unicodedata as _ud
+
+    def _n(s):
+        s = "".join(c for c in _ud.normalize("NFD", s or "") if _ud.category(c) != "Mn")
+        return " ".join(s.strip().lower().split())
+
+    return {
+        _n(r["nom"]): (r["fcb_id"], r["nom"])
+        for r in conn.execute("SELECT fcb_id, nom FROM players WHERE fcb_id IS NOT NULL")
+    }
+
+
+def _open_entrants(conn, torneig_id_extern: int, divisio_id_extern: int) -> list[tuple[str, str]]:
+    """`[(fcb_id, nom)]` dels qui han jugat un open, des de les partides reals.
+
+    La FCB publica les partides d'un open (fases + grups → `torneig_partides`) abans
+    de la classificació final. Quan la classificació encara no hi és, aquesta és
+    l'única llista de participants que tenim.
+    """
+    import unicodedata as _ud
+
+    def _n(s):
+        s = "".join(c for c in _ud.normalize("NFD", s or "") if _ud.category(c) != "Mn")
+        return " ".join(s.strip().lower().split())
+
+    by_norm = _players_by_norm(conn)
+    out: dict[str, str] = {}
+    for r in conn.execute(
+        "SELECT player1_nom, player2_nom FROM torneig_partides "
+        "WHERE torneig_id_extern = ? AND divisio_id_extern = ?",
+        (torneig_id_extern, divisio_id_extern),
+    ):
+        for nom in (r["player1_nom"], r["player2_nom"]):
+            hit = by_norm.get(_n(nom))
+            if hit:
+                out[hit[0]] = hit[1]
+    return sorted(out.items())
+
+
+def _match_unique(nom: str, pool: list[str], threshold: float = 0.8) -> str | None:
+    """Casa `nom` amb el pool només si el millor candidat és INEQUÍVOC.
+
+    Els noms del PDF oficial venen bruts: abreviatures ("HERNÁNDEZ HDEZ" per
+    "HERNÁNDEZ HERNÁNDEZ") i, quan el club no porta prefix conegut, el club
+    encastat al nom ("PORQUERAS SABATÉ, VÍCTOR UNIO CORAL"). `match_player` ho
+    resol per cognom + inicial del nom de fonts, però aquesta regla és laxa i
+    dos germans hi encaixarien tots dos. Per això, si un segon candidat arriba
+    al mateix llindar, preferim no casar: val més deixar-lo fora que atribuir
+    els punts a qui no toca.
+    """
+    from fcb_opens.player_matching import match_player
+
+    first = match_player(nom, pool, threshold=threshold)
+    if first is None:
+        return None
+    rest = [c for c in pool if c != first[0]]
+    if match_player(nom, rest, threshold=threshold) is not None:
+        return None  # ambigu
+    return first[0]
+
+
 def publish_open_ranking(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
@@ -1718,6 +1781,7 @@ def publish_open_ranking(
     # GENERAL = opens NO femenins (els femenins tenen taula de punts pròpia, pendent).
     # Cronologia: divisio_id_extern (la FCB l'assigna creixent per cada open disputat).
     divid = {o["id"]: o["divisio_id_extern"] for o in open_rows}
+    extern = {o["id"]: (o["torneig_id_extern"], o["divisio_id_extern"]) for o in open_rows}
     gen_ids = [o["id"] for o in open_rows if "FEMENI" not in (o["nom"] or "").upper()]
     ordered = sorted(gen_ids, key=lambda t: divid.get(t, 0))
 
@@ -1784,6 +1848,16 @@ def publish_open_ranking(
     # nostra finestra per paraula-clau de seu (map_pdf_columns_to_window): el PDF està
     # AL DIA només si totes les columnes casen amb la mateixa posició de la finestra
     # (mapping identitat). Si no, NO apliquem el PDF i marquem la ronda PROVISIONAL.
+    #
+    # 2026-07: l'ordre invers també passa. El XIV Open Les Santes de Mataró va sortir
+    # al PDF del rànquing (28-jul) DIES ABANS de la seva classificació final. La
+    # finestra ja incloïa l'open (l'ordre és per divisio_id_extern, no per
+    # classificació) i les columnes casaven perfectament, però el guard exigia
+    # classificació de tots els opens de la finestra: la ronda es publicava
+    # provisional i Les Santes valia 0 punts per a tothom. Ara el que manda és
+    # l'alineació de columnes: si el mapping és identitat, el PDF és la font
+    # autoritativa dels punts i s'aplica. Els participants que només surten en
+    # aquest open es recuperen de les partides reals (_open_entrants).
     max_ronda = len(ordered)
     window = ordered[max(0, max_ronda - 5):max_ronda]
     prov_latest = True
@@ -1801,15 +1875,88 @@ def publish_open_ranking(
         identity = {i: i for i in range(len(window))}
         pdf_is_current = len(off.opens) == len(window) and colmap == identity
         window_complete = all(parts.get(oid) for oid in window)
-        if max_ronda and window_complete and pdf_is_current:  # alineació posicional segura
-            pdf = {_nm(e.display_name): (e.total_points, tuple(e.points_per_open)) for e in off.entries}
-            for row in all_rows:
-                if row["ronda"] != max_ronda:
+        if max_ronda and pdf_is_current:  # alineació posicional segura
+            latest = [r for r in all_rows if r["ronda"] == max_ronda]
+            # Participants de l'últim open sense classificació publicada: sense
+            # això, qui NOMÉS ha jugat aquest open no sortiria a la ronda tot i
+            # tenir-hi punts al PDF (i desplaçaria les posicions de tots els altres).
+            if not parts.get(window[-1]):
+                known = {r["player_fcb_id"] for r in latest}
+                newest = window[-1]
+                t_ext, d_ext = extern[newest]
+                for fcb, nom in _open_entrants(conn, t_ext, d_ext):
+                    if fcb in known:
+                        continue
+                    row = {
+                        "genere": "general", "ronda": max_ronda, "ronda_nom": onom.get(newest),
+                        "ronda_data": open_date.get(newest) or None, "ronda_temp": tnom.get(newest),
+                        "posicio": 0, "player_fcb_id": fcb, "jugador": _disp(nom),
+                        "club": club_fallback.get(fcb), "opens_jugats": 0, "punts": 0,
+                        "detall": [_ddet(oid, None, 0) for oid in window], "provisional": False,
+                    }
+                    all_rows.append(row)
+                    latest.append(row)
+                    known.add(fcb)
+
+            # Casament PDF -> files. Exacte primer; els noms que el PDF porta bruts
+            # (abreviatures, club encastat) s'intenten per casament inequívoc.
+            by_norm = {_nm(r["jugador"]): r for r in latest}
+            free = {_nm(r["jugador"]): r["jugador"] for r in latest}
+            n_fuzzy = 0
+            pending = []
+            for e in off.entries:
+                row = by_norm.get(_nm(e.display_name))
+                if row is not None:
+                    free.pop(_nm(e.display_name), None)
+                    pending.append((row, e))
+                else:
+                    pending.append((None, e))
+            for idx, (row, e) in enumerate(pending):
+                if row is not None:
                     continue
-                hit = pdf.get(_nm(row["jugador"]))
-                if not hit:
+                hit = _match_unique(e.display_name, list(free.values()))
+                if hit is None:
                     continue
-                total, ppo = hit
+                pending[idx] = (by_norm[_nm(hit)], e)
+                free.pop(_nm(hit), None)
+                n_fuzzy += 1
+
+            # Encara sense casar: jugadors federats que el PDF llista però que no
+            # són a la ronda perquè no han jugat cap open de la finestra. Passa amb
+            # els qui només hi surten per una penalització (Art. IV: -20 per no
+            # presentar-se), que no genera cap fila de participació. Nom EXACTE
+            # només: aquí el pool és tot el cens i el casament laxe no és segur.
+            n_pdf_only = 0
+            if any(row is None for row, _ in pending):
+                cens = _players_by_norm(conn)
+                seen_fcb = {r["player_fcb_id"] for r in latest}
+                for idx, (row, e) in enumerate(pending):
+                    if row is not None:
+                        continue
+                    hit = cens.get(_nm(e.display_name))
+                    if hit is None or hit[0] in seen_fcb:
+                        continue
+                    fcb, nom = hit
+                    row = {
+                        "genere": "general", "ronda": max_ronda, "ronda_nom": onom.get(window[-1]),
+                        "ronda_data": open_date.get(window[-1]) or None,
+                        "ronda_temp": tnom.get(window[-1]),
+                        "posicio": 0, "player_fcb_id": fcb, "jugador": _disp(nom),
+                        "club": club_fallback.get(fcb), "opens_jugats": 0, "punts": 0,
+                        "detall": [_ddet(oid, None, 0) for oid in window], "provisional": False,
+                    }
+                    all_rows.append(row)
+                    latest.append(row)
+                    seen_fcb.add(fcb)
+                    pending[idx] = (row, e)
+                    n_pdf_only += 1
+
+            n_hit = 0
+            for row, e in pending:
+                if row is None:
+                    continue
+                n_hit += 1
+                ppo = tuple(e.points_per_open)
                 for i, d in enumerate(row["detall"]):
                     pts = ppo[i] if i < len(ppo) else None
                     if pts is None:  # no inscrit
@@ -1820,14 +1967,18 @@ def publish_open_ranking(
                             d["pos"], d["penal"] = None, True
                         elif pts == 0:  # absència justificada
                             d["pos"], d["absent"] = None, True
-                row["punts"] = total
+                row["punts"] = e.total_points
                 row["opens_jugats"] = sum(1 for v in ppo if v is not None and v > 0)
-            latest = [r for r in all_rows if r["ronda"] == max_ronda]
             latest.sort(key=lambda r: (-r["punts"], -mitj.get(r["player_fcb_id"], 0.0), r["jugador"] or ""))
             for posicio, r in enumerate(latest, start=1):
                 r["posicio"] = posicio
             prov_latest = False
-            prog("ok", f"penalitzacions oficials aplicades ({len(off.entries)} entrades PDF)")
+            prog(
+                "ok",
+                f"rànquing oficial aplicat: {n_hit}/{len(off.entries)} entrades PDF "
+                f"({n_fuzzy} per casament de nom, {n_pdf_only} només al PDF)"
+                + ("" if window_complete else "; l'últim open encara no té classificació final"),
+            )
         elif not window_complete:
             prog("ok", "ronda provisional: l'open més recent encara no té classificació final")
         else:
