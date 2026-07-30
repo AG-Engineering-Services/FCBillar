@@ -983,6 +983,7 @@ def publish_cloud_cmd() -> None:
     l'entorn). Idempotent: es pot reexecutar després de cada actualització.
     """
     from fcbillar.cloud_sync import (
+        publish_calendari,
         publish_copa,
         publish_copa_encontres,
         publish_copa_player_rankings,
@@ -1023,6 +1024,7 @@ def publish_cloud_cmd() -> None:
         counts.update(publish_open_ranking_femeni(on_progress=_prog))
         counts.update(publish_player_clubs(on_progress=_prog))
         counts.update(publish_rating_buckets(on_progress=_prog))
+        counts.update(publish_calendari(on_progress=_prog))
     except Exception as exc:  # noqa: BLE001
         console.print(f"[red]Error publicant al núvol: {exc}[/]")
         raise typer.Exit(code=1) from exc
@@ -1517,6 +1519,101 @@ def open_import_inscrits_cmd(
         f"[green]OK '{open_name}': {proj['num_inscriptions']} inscrits "
         f"({n_linked} enllaçats a fitxa), estructura {struct} → projecció #{proj_id} desada.[/]"
     )
+
+
+@app.command("ingest-calendari")
+def ingest_calendari_cmd(
+    url: str = typer.Option(None, "--url", help="URL del PDF (per defecte, la RFEB de la temporada en curs)."),
+    fitxer: str = typer.Option(None, "--fitxer", help="Llegeix un PDF local en lloc de baixar-lo."),
+    font: str = typer.Option("RFEB", "--font", help="Federació que publica el calendari: RFEB | FCB."),
+    force: bool = typer.Option(False, "--force", help="Reparseja encara que el PDF no hagi canviat."),
+) -> None:
+    """Ingesta el calendari esportiu federatiu (PDF) i n'apunta els canvis.
+
+    Pensat per executar-se periòdicament: la RFEB va publicant revisions del
+    mateix fitxer. Si no ha canviat res, no fa feina; si ha canviat, llista què
+    s'ha mogut respecte de la revisió anterior.
+
+    Sense `--url` ni `--fitxer` prova la temporada en curs I la següent: la RFEB
+    publica la del curs vinent al juliol, molt abans que se n'acabi l'actual.
+    """
+    from pathlib import Path
+
+    import httpx
+
+    from fcbillar.calendari_fed import ingest_calendari, rfeb_url, temporada_actual
+
+    if fitxer:
+        feines: list[tuple[str | None, bytes | None]] = [(None, Path(fitxer).read_bytes())]
+    elif url:
+        feines = [(url, None)]
+    else:
+        any_actual = temporada_actual()
+        feines = [(rfeb_url(a), None) for a in (any_actual, any_actual + 1)]
+
+    fets = 0
+    for u, dades in feines:
+        try:
+            res = ingest_calendari(
+                get_settings().db_path, url=u, font=font, force=force, pdf_bytes=dades
+            )
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 404 and len(feines) > 1:
+                console.print(f"[dim]{u}: encara no publicat (404).[/]")
+                continue
+            console.print(f"[red]Error ingestant el calendari: {exc}[/]")
+            raise typer.Exit(code=1) from exc
+        except Exception as exc:  # noqa: BLE001
+            console.print(f"[red]Error ingestant el calendari: {exc}[/]")
+            raise typer.Exit(code=1) from exc
+        fets += 1
+
+        if res["estat"] == "sense-canvis":
+            console.print(f"[dim]Calendari {font} sense canvis ({res['motiu']}).[/]")
+            continue
+        console.print(
+            f"[green]Calendari {font} {res['temporada']} {res.get('versio') or ''} "
+            f"({res.get('data_versio') or 's/d'}): {res['n_events']} esdeveniments, "
+            f"{res['n_canvis']} canvis.[/]"
+        )
+        canvis = res.get("canvis") or []
+        if canvis:
+            taula = Table(title=f"Canvis del calendari {res['temporada']}")
+            taula.add_column("Setmana")
+            taula.add_column("Què")
+            taula.add_column("Canvi")
+            taula.add_column("Abans/Després")
+            for c in canvis[:50]:
+                que = " · ".join(p for p in (c.disciplina, c.ambit, c.tipus) if p)
+                if c.tipus_canvi == "modificacio":
+                    detall = f"{c.abans} → {c.despres}"
+                else:
+                    detall = c.despres or f"(treta) {c.abans}"
+                taula.add_row(c.setmana.isoformat(), que, c.tipus_canvi, detall)
+            console.print(taula)
+            if len(canvis) > 50:
+                console.print(f"[dim]…i {len(canvis) - 50} canvis més.[/]")
+    # Font FCB: només detecció. La graella de la FCB és diferent de la de la RFEB i
+    # de la temporada vinent encara no n'hi ha res publicat (/media/2026-2027 → 404);
+    # el que fem és apuntar quina versió hi ha i la seva URL, perquè la web pugui
+    # enllaçar el PDF oficial i avisar el dia que el pengin. Mai fatal.
+    if not fitxer and not url:
+        try:
+            from fcbillar.calendari_fed import registra_fcb
+
+            res_fcb = registra_fcb(get_settings().db_path)
+            for c in res_fcb["calendaris"]:
+                console.print(f"[dim]  FCB {c.temporada} {c.versio or ''}: {c.nom_fitxer}[/]")
+            if not res_fcb["trobats"]:
+                console.print("[dim]  FCB: cap calendari enllaçat al web.[/]")
+            elif res_fcb["nous"]:
+                console.print(f"[green]FCB: {res_fcb['nous']} calendari(s) nou(s) detectat(s).[/]")
+        except Exception as exc:  # noqa: BLE001
+            console.print(f"[yellow]Avís: no s'ha pogut comprovar el calendari de la FCB: {exc}[/]")
+
+    if not fets:
+        console.print("[yellow]Cap calendari disponible per ingestar.[/]")
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

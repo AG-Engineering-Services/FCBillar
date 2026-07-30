@@ -4001,3 +4001,87 @@ def publish_live_opens(
         "superseded": superseded,
         "errors": errors,
     }
+
+
+def publish_calendari(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Puja el calendari esportiu federatiu (PDF de la RFEB) per a la pestanya web.
+
+    Reemplaça per (font, temporada): la RFEB va publicant revisions on treu i mou
+    competicions, i un upsert sol deixaria les baixes penjades. La columna `raw`
+    (línies crues del PDF) es queda al PC: només serveix per auditar el parser.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+
+    taules = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if "calendari_events" not in taules:
+        prog("warn", "calendari: sense dades locals (executa `fcbillar ingest-calendari`)")
+        conn.close()
+        return {"calendari_events": 0}
+
+    camps = (
+        "font,temporada,setmana,disciplina,ambit,grup,tipus,data_inici,data_fi,"
+        "titol,seu,dissabte,diumenge,col_span"
+    )
+    events = [dict(r) for r in conn.execute(f"SELECT {camps} FROM calendari_events")]
+    revisions = [
+        dict(r)
+        for r in conn.execute(
+            "SELECT font, temporada, sha256, versio, data_versio, url, n_events, n_canvis, "
+            "ingested_at, last_checked_at FROM calendari_versions"
+        )
+    ]
+    canvis = [
+        {
+            "font": r["font"],
+            "temporada": r["temporada"],
+            "sha256": r["sha256"],
+            "ord": r["ord"],
+            "tipus_canvi": r["tipus_canvi"],
+            "setmana": r["setmana"],
+            "disciplina": r["disciplina"],
+            "ambit": r["ambit"],
+            "grup": r["grup"],
+            "tipus": r["tipus"],
+            "abans": r["abans"],
+            "despres": r["despres"],
+        }
+        for r in conn.execute(
+            "SELECT v.font, v.temporada, v.sha256, c.tipus_canvi, c.setmana, c.disciplina, "
+            "       c.ambit, c.grup, c.tipus, c.abans, c.despres, "
+            "       ROW_NUMBER() OVER (PARTITION BY c.versio_id ORDER BY c.setmana, c.disciplina, "
+            "                          c.ambit, c.grup, c.tipus) - 1 AS ord "
+            "FROM calendari_canvis c JOIN calendari_versions v ON v.id = c.versio_id"
+        )
+    ]
+    combinacions = sorted(
+        {(r["font"], r["temporada"]) for r in events}
+        | {(r["font"], r["temporada"]) for r in revisions}
+    )
+    conn.close()
+
+    # Les dates ISO de SQLite ('2026-09-07') ja són vàlides per a `date` a Postgres;
+    # els segells de temps són 'YYYY-MM-DD HH:MM:SS' en UTC (datetime('now')).
+    for r in revisions:
+        for camp in ("ingested_at", "last_checked_at"):
+            if r.get(camp):
+                r[camp] = r[camp].replace(" ", "T") + "Z"
+
+    sb = get_client()
+    for font, temporada in combinacions:
+        for taula in ("calendari_events", "calendari_canvis", "calendari_revisions"):
+            sb.table(taula).delete().eq("font", font).eq("temporada", temporada).execute()
+    n_ev = _upsert(
+        sb,
+        "calendari_events",
+        events,
+        "font,temporada,setmana,disciplina,ambit,grup,tipus",
+        prog,
+    )
+    n_rev = _upsert(sb, "calendari_revisions", revisions, "font,temporada,sha256", prog)
+    n_can = _upsert(sb, "calendari_canvis", canvis, "font,temporada,sha256,ord", prog)
+    return {"calendari_events": n_ev, "calendari_revisions": n_rev, "calendari_canvis": n_can}

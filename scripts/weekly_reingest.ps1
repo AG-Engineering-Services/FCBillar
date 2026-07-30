@@ -30,6 +30,7 @@
         4. fcbillar ingest-copa <edicio>   Copa Catalana
         5. fcb_opens scrape-current-opens  opens (BD fcb_opens)
         6. fcb_opens scrape-lliga 36 --full lliga Tres Bandes (BD fcb_opens)
+        7. fcbillar ingest-calendari       calendari federatiu (PDF RFEB + FCB)
 
       PUBLICACIÓ NÚVOL  ->  Supabase (schemes fcbillar + fcb_opens)
         6. fcbillar publish-cloud          rànquings/partides/lliga/copa/opens(+femení)
@@ -191,6 +192,11 @@ Invoke-Step 'link-individuals (games <-> torneig)'                       @($uv, 
 Invoke-Step 'ingest-copa'                                                @($uv, 'run', 'fcbillar', 'ingest-copa', "$CopaEdicio")
 Invoke-Step 'fcb_opens scrape-current-opens'                             @($uv, 'run', 'python', '-m', 'fcb_opens.cli', 'scrape-current-opens')
 Invoke-Step 'fcb_opens scrape-lliga 36 (--full)'                         @($uv, 'run', 'python', '-m', 'fcb_opens.cli', 'scrape-lliga', '36', '--full')
+# Calendari esportiu federatiu (PDF de la RFEB + detecció del de la FCB). No cal
+# login: es baixa per HTTP. Idempotent i barat -- si el PDF no ha canviat surt per
+# ETag sense parsejar res. Cal passar-hi sovint perque van publicant revisions
+# (la FCB ja va per la V-9 de la 25/26).
+Invoke-Step 'ingest-calendari (RFEB + deteccio FCB)'                     @($uv, 'run', 'fcbillar', 'ingest-calendari')
 
 # --- PUBLICACIÓ AL NÚVOL ----------------------------------------------------
 if ($SkipPublish) {

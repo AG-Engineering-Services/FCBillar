@@ -153,6 +153,13 @@ jobs:
           run "scrape-current-opens" uv run --no-dev python -m fcb_opens.cli scrape-current-opens
           run "scrape-lliga"         uv run --no-dev python -m fcb_opens.cli scrape-lliga 36 --full
 
+          # Calendari esportiu federatiu: PDF de la RFEB (i detecció del de la FCB).
+          # Va aquí perquè és HTTP pur, sense login ni Chromium, i perquè les
+          # federacions en publiquen revisions sovint (la FCB ja va per la V-9 de
+          # la 25/26): passar-hi cada dia és el que manté la pestanya al dia. Si el
+          # PDF no ha canviat, surt per ETag sense parsejar res.
+          run "ingest-calendari"     uv run --no-dev fcbillar ingest-calendari
+
           # Publicació a Supabase (fcbillar publica tot des de la BD; els rànquings
           # coincideixen amb els que el PC ja va pujar al release → idempotent).
           run "publish-cloud"        uv run --no-dev fcbillar publish-cloud
