@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
+	import { onDestroy } from 'svelte';
 	import Billar from '$lib/biblia/billar/Billar.svelte';
 	import Reproductor from '$lib/biblia/billar/Reproductor.svelte';
 	import VideoSincronitzat from '$lib/biblia/billar/VideoSincronitzat.svelte';
@@ -101,7 +102,28 @@
 			(Math.sign(gruixGuess) === Math.sign(correctGruix) || correctGruix === 0)
 	);
 
+	// En encertar, salta sol a la següent posició al cap de 5 s (amb compte enrere).
+	let compte = $state(0);
+	let timerSalt: ReturnType<typeof setInterval> | null = null;
+	function cancelaSalt() {
+		if (timerSalt) {
+			clearInterval(timerSalt);
+			timerSalt = null;
+		}
+		compte = 0;
+	}
+	function programaSalt() {
+		cancelaSalt();
+		compte = 5;
+		timerSalt = setInterval(() => {
+			compte -= 1;
+			if (compte <= 0) seguent();
+		}, 1000);
+	}
+	onDestroy(cancelaSalt);
+
 	function prepara() {
+		cancelaSalt();
 		revelat = false;
 		efecteGuess = null;
 		gruixGuess = 4;
@@ -109,6 +131,7 @@
 		frameExtern = null;
 	}
 	async function seguent() {
+		cancelaSalt();
 		index++;
 		prepara();
 		// En acabar el lot, en carrega de fresques (posicions noves a l'atzar).
@@ -122,13 +145,20 @@
 		seleccio = i;
 		revelat = true;
 		total++;
-		if (i === opcions.correctIdx) encerts++;
+		if (i === opcions.correctIdx) {
+			encerts++;
+			programaSalt();
+		}
 	}
 	function comprova() {
 		if (revelat) return;
 		revelat = true;
 		total++;
-		if (data.mode === 'efecte' ? efecteOk : efecteOk && gruixOk) encerts++;
+		const encertat = data.mode === 'efecte' ? efecteOk : efecteOk && gruixOk;
+		if (encertat) {
+			encerts++;
+			programaSalt();
+		}
 	}
 
 	const enllacVideo = $derived(
@@ -250,6 +280,9 @@
 							<a class="video" href={enllacVideo} target="_blank" rel="noopener"
 								>▶ Veure la tirada al vídeo ↗</a
 							>
+						{/if}
+						{#if compte > 0}
+							<p class="compte">✔ Salta a la següent en {compte} s…</p>
 						{/if}
 						<button class="seguent" onclick={seguent}>Següent →</button>
 					</div>
@@ -385,6 +418,11 @@
 	}
 	.video {
 		font-size: 0.9rem;
+	}
+	.compte {
+		margin: 0;
+		font-weight: 600;
+		color: #2fbf5b;
 	}
 	.buit {
 		color: var(--text-suau);

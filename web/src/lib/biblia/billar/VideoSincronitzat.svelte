@@ -31,6 +31,13 @@
 		onframe
 	}: Props = $props();
 
+	// fps efectiu: billiard-bible NO sincronitza l'animació amb el vídeo, així que
+	// no hi ha un fps "real". Per encaixar-los, fem que l'animació ompli el clip:
+	// el fotograma 0 cau a `inici` i el darrer (`maxFrame`) a `fi`.
+	const fpsUsat = $derived(
+		fi != null && fi > inici && maxFrame > 0 ? maxFrame / (fi - inici) : fps
+	);
+
 	let el: HTMLDivElement;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let player: any = null;
@@ -61,7 +68,7 @@
 	}
 	export function vesA(frame: number) {
 		try {
-			player?.seekTo?.(inici + frame / fps, true);
+			player?.seekTo?.(inici + frame / fpsUsat, true);
 		} catch {
 			/* ignora */
 		}
@@ -70,7 +77,7 @@
 	function actualitza() {
 		if (!player?.getCurrentTime) return;
 		const t = player.getCurrentTime() as number;
-		onframe(Math.max(0, Math.min(maxFrame, (t - inici) * fps)));
+		onframe(Math.max(0, Math.min(maxFrame, (t - inici) * fpsUsat)));
 	}
 	function bucle() {
 		actualitza();
