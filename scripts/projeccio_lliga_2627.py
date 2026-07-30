@@ -26,44 +26,50 @@ DIVORD = {"Honor": 0, "1a": 1, "2a": 2, "3a": 3, "4a": 4}
 DIST = {"Honor": 40, "1a": 35, "2a": 30, "3a": 25, "4a": 25}
 DIV2526 = {148: "Honor", 149: "1a", 150: "2a", 151: "3a", 152: "4a"}
 
-# Composició projectada 2026-27: (nom de club a la BD, lletra d'equip)
+# Composició i ORDRE OFICIALS, tal com surten a "CLASSIFICACIO FINAL LLIGUES TRES
+# BANDES" de la FCB. L'ordre és el de sembra: primer els que baixen de la divisió
+# de sobre, després els que s'hi mantenen intercalats per posició de grup, i al
+# final els que hi pugen. Verificat: coincideix equip per equip amb la composició
+# que derivàvem dels play-offs.
 COMP: dict[str, list[tuple[str, str]]] = {
     "Honor": [
-        ("C.B.MATARÓ", "A"), ("C.B.SANT ADRIÀ", "A"), ("C.B.LLINARS", "A"), ("C.B.SANT BOI", "A"),
-        ("C.B.LLEIDA", "A"), ("C.B.SANT ADRIÀ", "B"), ("SB FOMENT MOLINS", "A"),
-        ("B.C.GRANOLLERS", "A"), ("C.B.MOLLET", "A"), ("C.B.MONFORTE", "A"),
-        ("C.B.BARCELONA", "A"), ("B.C.GRANOLLERS", "B"), ("C.B.MONT-ROIG", "A"),
-        ("C.B.MONFORTE", "B"), ("BC OLESA", "UNICO"), ("CASAL DE CERVERA", "UNICO"),
+        ("C.B.MATARÓ", "A"), ("B.C.GRANOLLERS", "A"), ("C.B.MOLLET", "A"), ("C.B.SANT ADRIÀ", "A"),
+        ("C.B.MONFORTE", "A"), ("C.B.LLINARS", "A"), ("C.B.BARCELONA", "A"), ("C.B.LLEIDA", "A"),
+        ("C.B.SANT ADRIÀ", "B"), ("B.C.GRANOLLERS", "B"), ("SB FOMENT MOLINS", "A"),
+        ("C.B.MONT-ROIG", "A"), ("C.B.SANT BOI", "A"), ("CASAL DE CERVERA", "UNICO"),
+        ("BC OLESA", "UNICO"), ("C.B.MONFORTE", "B"),
     ],
     "1a": [
-        ("C.B.2000 CERDANYOLA", "A"), ("S.B.LA GRAN PENYA", "A"), ("C.B. CANET", "A"),
-        ("B.LA UNIÓ CORAL", "A"), ("C.B.MANRESA", "A"), ("C.B.SANTS", "B"), ("C.B.MONFORTE", "C"),
-        ("C.B.MOLLET", "B"), ("C.B.PRAT", "A"), ("C.B.SANTS", "A"), ("C.B.BANYOLES", "A"),
-        ("S.B.P.E.CENTELLES", "A"), ("C.B.MATARÓ", "B"), ("C.B.ALBA", "UNICO"),
-        ("C.B.MONT-ROIG", "B"), ("C.B.SANT ADRIÀ", "C"),
+        ("S.B.P.E.CENTELLES", "A"), ("C.B.BANYOLES", "A"), ("C.B.SANTS", "A"),
+        ("C.B.2000 CERDANYOLA", "A"), ("S.B.LA GRAN PENYA", "A"), ("C.B.SANTS", "B"),
+        ("C.B. CANET", "A"), ("C.B.MONFORTE", "C"), ("B.LA UNIÓ CORAL", "A"), ("C.B.MOLLET", "B"),
+        ("C.B.MANRESA", "A"), ("C.B.PRAT", "A"), ("C.B.MONT-ROIG", "B"), ("C.B.SANT ADRIÀ", "C"),
+        ("C.B.MATARÓ", "B"), ("C.B.ALBA", "UNICO"),
     ],
     "2a": [
-        ("S.B.CORAL COLÓN", "A"), ("C.B.TARRAGONA", "B"), ("C.B.BLANES", "A"), ("C.B.VIC", "UNICO"),
-        ("C.B.SANT BOI", "B"), ("C.B.PREMIÀ", "UNICO"), ("SB FOMENT MOLINS", "C"),
-        ("C.B.BANYOLES", "B"), ("C.B.LLINARS", "B"), ("SB FOMENT MOLINS", "B"),
-        ("C.B.TARRAGONA", "A"), ("C.B.LLEIDA", "B"), ("C.B.CARDONA", "UNICO"),
-        ("C.B.BARCELONA", "B"), ("C.B.2000 CERDANYOLA", "B"), ("C.B. CANET", "B"),
+        ("C.B.LLEIDA", "B"), ("C.B.LLINARS", "B"), ("C.B.TARRAGONA", "A"),
+        ("SB FOMENT MOLINS", "B"), ("S.B.CORAL COLÓN", "A"), ("C.B.SANT BOI", "B"),
+        ("C.B.TARRAGONA", "B"), ("C.B.PREMIÀ", "UNICO"), ("C.B.BLANES", "A"),
+        ("SB FOMENT MOLINS", "C"), ("C.B.BANYOLES", "B"), ("C.B.VIC", "UNICO"),
+        ("C.B. CANET", "B"), ("C.B.2000 CERDANYOLA", "B"), ("C.B.CARDONA", "UNICO"),
+        ("C.B.BARCELONA", "B"),
     ],
     "3a": [
-        ("C.B.MONFORTE", "D"), ("S.B.P.E.CENTELLES", "B"), ("C.B.PRAT", "B"),
-        ("B. EL MASNOU", "UNICO"), ("C.B.LLINARS", "C"), ("B.C.GRANOLLERS", "C"),
-        ("B.C.GRANOLLERS", "D"), ("C.B.SANTS", "C"), ("S.B.ESPLUGUES L'AVENÇ", "A"),
-        ("C.B.LLIÇÀ D'AMUNT", "B"), ("C.B.LLIÇÀ D'AMUNT", "A"), ("S.B. GEiEG", "UNICO"),
-        ("C.B.SANT ADRIÀ", "D"), ("C.B.SANTS", "D"), ("S.B.LA GRAN PENYA", "B"),
-        ("C.B.MATARÓ", "C"),
+        ("C.B.LLIÇÀ D'AMUNT", "A"), ("S.B. GEiEG", "UNICO"), ("C.B.SANT ADRIÀ", "D"),
+        ("C.B.SANTS", "D"), ("B.C.GRANOLLERS", "C"), ("C.B.MONFORTE", "D"),
+        ("B.C.GRANOLLERS", "D"), ("S.B.P.E.CENTELLES", "B"), ("C.B.SANTS", "C"),
+        ("C.B.PRAT", "B"), ("S.B.ESPLUGUES L'AVENÇ", "A"), ("B. EL MASNOU", "UNICO"),
+        ("C.B.LLIÇÀ D'AMUNT", "B"), ("C.B.LLINARS", "C"), ("C.B.MATARÓ", "C"),
+        ("S.B.LA GRAN PENYA", "B"),
     ],
     "4a": [
-        ("C.B. CANET", "C"), ("C.B.MONT-ROIG", "C"), ("C.B.LLINARS", "D"), ("B.LA UNIÓ CORAL", "B"),
-        ("C.B.MONFORTE", "E"), ("C.B.2000 CERDANYOLA", "C"), ("C.B.BANYOLES", "C"),
-        ("C.B.MATARÓ", "D"), ("C.B.LLINARS", "E"), ("C.B. BORGES", "UNICO"), ("C.B.BLANES", "B"),
-        ("S.B.CORAL COLÓN", "B"), ("B.C.SANT FELIU DE CODINES", "UNICO"),
-        ("S.B.ESPLUGUES L'AVENÇ", "B"), ("C.B.MANRESA", "B"), ("C.B.SANTS", "E"),
-        ("C.B.BARCELONA", "C"), ("C.B.SANT BOI", "C"), ("C.B.VILANOVA", "UNICO"),
+        ("C.B.SANT BOI", "C"), ("C.B.VILANOVA", "UNICO"), ("C.B. BORGES", "UNICO"),
+        ("C.B. CANET", "C"), ("C.B.BLANES", "B"), ("C.B.MONT-ROIG", "C"),
+        ("S.B.CORAL COLÓN", "B"), ("C.B.LLINARS", "D"), ("B.LA UNIÓ CORAL", "B"),
+        ("B.C.SANT FELIU DE CODINES", "UNICO"), ("C.B.MONFORTE", "E"),
+        ("S.B.ESPLUGUES L'AVENÇ", "B"), ("C.B.2000 CERDANYOLA", "C"), ("C.B.BANYOLES", "C"),
+        ("C.B.MANRESA", "B"), ("C.B.MATARÓ", "D"), ("C.B.SANTS", "E"), ("C.B.LLINARS", "E"),
+        ("C.B.BARCELONA", "C"),
     ],
 }
 
@@ -191,6 +197,52 @@ ESQUEMES = {
 LLETRES = ["A", "B", "C", "D", "E"]
 
 
+def forma_grups(ordre: list[tuple[str, str]]) -> tuple[list[int], list[int], list[dict]]:
+    """Reparteix una divisió en dos grups pel serpentí A-B-B-A sobre l'ordre de
+    sembra —1-4-5-8-9-12-13-16 al grup A i 2-3-6-7-10-11-14-15 al B, estirat igual
+    a 4a amb 19 equips— i hi fa les permutes necessàries perquè dos equips d'un
+    mateix club no coincideixin de grup.
+
+    Una permuta intercanvia dos equips que ocupen el MATEIX slot dins del seu grup;
+    com que els slots homòlegs són sempre posicions consecutives de la sembra
+    (A2=4 i B2=3, A3=5 i B3=6…), el canvi és mínim. Es tria a cada pas la permuta
+    que deixa menys conflictes. Retorna les posicions (0-based) de cada grup i les
+    permutes fetes."""
+    n = len(ordre)
+    serp = ["A" if (p - 1) % 4 in (0, 3) else "B" for p in range(1, n + 1)]
+    A = [i for i in range(n) if serp[i] == "A"]
+    B = [i for i in range(n) if serp[i] == "B"]
+
+    def conflictes() -> list[tuple[str, int, int]]:
+        out = []
+        for lst, nom in ((A, "A"), (B, "B")):
+            comptador = collections.Counter(ordre[i][0] for i in lst)
+            out += [(nom, slot, i) for slot, i in enumerate(lst) if comptador[ordre[i][0]] > 1]
+        return out
+
+    permutes: list[dict] = []
+    for _ in range(40):
+        conf = conflictes()
+        if not conf:
+            break
+        millor = None
+        for nom, slot, i in conf:
+            altre = B if nom == "A" else A
+            if slot >= len(altre):
+                continue  # a 4a el grup B té un slot més: no té homòleg
+            A[slot], B[slot] = B[slot], A[slot]
+            queden = len(conflictes())
+            A[slot], B[slot] = B[slot], A[slot]
+            if millor is None or queden < millor[0]:
+                millor = (queden, slot, i, altre[slot])
+        if millor is None or millor[0] >= len(conf):
+            break  # no hi ha permuta que millori: ho deixem i es veurà marcat
+        _, slot, i, j = millor
+        A[slot], B[slot] = B[slot], A[slot]
+        permutes.append(dict(slot=slot + 1, seed_a=i + 1, seed_b=j + 1))
+    return A, B, permutes
+
+
 def banda(num: int, esquema: str = "fcb") -> str:
     """A quina banda de la llista única cau el jugador nº `num`."""
     for lletra, tall in zip(LLETRES, ESQUEMES[esquema]["talls"], strict=False):
@@ -294,15 +346,21 @@ def build(db: str = DB) -> dict:
     per_club = {c["club"]: c for c in out["clubs"]}
     for div in ["Honor", "1a", "2a", "3a", "4a"]:
         equips = []
-        for club, lletra in COMP[div]:
+        for seed, (club, lletra) in enumerate(COMP[div], 1):
             c = per_club[club]
             antiga = "" if lletra == "UNICO" else lletra
             e = next(x for x in c["equips"] if x["lletra_2526"] == antiga)
             equips.append(dict(
-                club=club, nom=nom_club(club), lletra=e["lletra"], unic=e["unic"],
+                seed=seed, club=club, nom=nom_club(club), lletra=e["lletra"], unic=e["unic"],
                 lletra_2526=e["lletra_2526"], div_2526=e["div_2526"], motiu=e["motiu"],
             ))
-        out["divisions"][div] = dict(distancia=DIST[div], equips=equips)
+        A, B, permutes = forma_grups(COMP[div])
+        moguts = {p["seed_a"] for p in permutes} | {p["seed_b"] for p in permutes}
+        grups = [dict(lletra=g, seeds=[i + 1 for i in lst]) for g, lst in (("A", A), ("B", B))]
+        out["divisions"][div] = dict(
+            distancia=DIST[div], equips=equips, grups=grups, permutes=permutes,
+            moguts=sorted(moguts),
+        )
     return out
 
 
