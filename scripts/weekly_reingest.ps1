@@ -25,6 +25,8 @@
                                            les modalitats (import-temporada NO
                                            baixa partides)                   [LOGIN]
         3. fcbillar ingest-individuals     opens / torneigs individuals
+        3b. ingest_open_games.py           partides reals dels torneigs (fases+grups)
+        3c. fcbillar link-individuals      games INDIVIDUAL -> torneig concret
         4. fcbillar ingest-copa <edicio>   Copa Catalana
         5. fcb_opens scrape-current-opens  opens (BD fcb_opens)
         6. fcb_opens scrape-lliga 36 --full lliga Tres Bandes (BD fcb_opens)
@@ -177,6 +179,15 @@ foreach ($mod in @(1, 2, 3, 4, 6)) {
     Invoke-Step "backfill partides modalitat $mod (rànquing actual) [LOGIN]" @($uv, 'run', 'fcbillar', 'backfill', "$mod")
 }
 Invoke-Step 'ingest-individuals (opens / torneigs individuals)'          @($uv, 'run', 'fcbillar', 'ingest-individuals')
+# Resultats REALS de cada open/campionat (fases + grups -> torneig_partides) i
+# vinculació de les partides INDIVIDUAL del rànquing amb el torneig concret.
+# Sense aquests dos passos, les partides d'un open queden etiquetades només com
+# a 'INDIVIDUAL' genèric a la fitxa del jugador (cas XIV Open Les Santes de
+# Mataró, juliol 2026: res vinculat des del 24-maig perquè els dos passos només
+# es corrien a mà). Es limita a la temporada actual: recórrer tot l'històric són
+# ~470 divisions i no cal, ja hi és.
+Invoke-Step 'ingest_open_games (partides reals dels torneigs, temporada actual)' @($uv, 'run', 'python', 'scripts/ingest_open_games.py', '--temporada', 'current')
+Invoke-Step 'link-individuals (games <-> torneig)'                       @($uv, 'run', 'fcbillar', 'link-individuals')
 Invoke-Step 'ingest-copa'                                                @($uv, 'run', 'fcbillar', 'ingest-copa', "$CopaEdicio")
 Invoke-Step 'fcb_opens scrape-current-opens'                             @($uv, 'run', 'python', '-m', 'fcb_opens.cli', 'scrape-current-opens')
 Invoke-Step 'fcb_opens scrape-lliga 36 (--full)'                         @($uv, 'run', 'python', '-m', 'fcb_opens.cli', 'scrape-lliga', '36', '--full')

@@ -29,6 +29,7 @@
 	};
 	type Club = { club: string; nom: string; multi: boolean; equips: Equip[]; llista: Jugador[] };
 	type EquipDiv = {
+		seed: number;
 		club: string;
 		nom: string;
 		lletra: string;
@@ -37,9 +38,16 @@
 		div_2526: string;
 		motiu: string | null;
 	};
+	type DivData = {
+		distancia: number;
+		equips: EquipDiv[];
+		grups: { lletra: string; seeds: number[] }[];
+		permutes: { slot: number; seed_a: number; seed_b: number }[];
+		moguts: number[];
+	};
 
 	const clubs = projeccio.clubs as Club[];
-	const divisions = projeccio.divisions as Record<string, { distancia: number; equips: EquipDiv[] }>;
+	const divisions = projeccio.divisions as Record<string, DivData>;
 	const DIVS = ['Honor', '1a', '2a', '3a', '4a'];
 	const LLETRES = ['A', 'B', 'C', 'D', 'E'];
 
@@ -106,35 +114,33 @@
 		return t.length ? t.reduce((a, p) => a + p.mitjana, 0) / t.length : 0;
 	};
 
-	/** Serpentí A-B-B-A sobre l'ordre de la categoria: 1-4-5-8-9-12-13-16 al grup A
-	 *  i 2-3-6-7-10-11-14-15 al B. A 4a divisió, amb 19 equips, s'hi estira igual. */
-	const grupDe = (pos: number) => ([0, 3].includes((pos - 1) % 4) ? 'A' : 'B');
-
 	const matchJugador = (llista: Jugador[]) => llista.some((p) => norm(p.nom).includes(norm(q.trim())));
 
-	/** Cada divisió amb els equips ordenats per mitjana projectada, amb el número de
-	 *  cap de sèrie i el grup que els toca. Base de les vistes per divisió i per grups. */
+	/** Cada divisió en l'ordre de sembra oficial, amb el grup que li toca a cada
+	 *  equip (serpentí + permutes, calculats al generador). Base de les tres vistes. */
 	const ordenades = $derived.by(() =>
 		DIVS.map((d) => {
-			const amb = divisions[d].equips.map((e) => {
-				const club = clubPerClau.get(e.club)!;
-				return {
-					e,
-					club,
-					tit: referents(club.llista, e.lletra, esquema),
-					plantilla: plantilla(club.llista, e.lletra, esquema),
-					mit: mitjanaEquip(club.llista, e.lletra, esquema)
-				};
-			});
-			amb.sort((a, b) => b.mit - a.mit);
-			const equips = amb.map((x, i) => ({ ...x, pos: i + 1, grup: grupDe(i + 1) }));
-			// dos equips d'un mateix club al mateix grup: la federació els sol separar
-			const compta = new Map<string, number>();
-			for (const x of equips) compta.set(x.grup + x.e.club, (compta.get(x.grup + x.e.club) ?? 0) + 1);
+			const D = divisions[d];
+			const grupPerSeed = new Map<number, string>();
+			for (const g of D.grups) for (const s of g.seeds) grupPerSeed.set(s, g.lletra);
+			const moguts = new Set(D.moguts);
 			return {
 				nom: d,
-				distancia: divisions[d].distancia,
-				equips: equips.map((x) => ({ ...x, xoc: (compta.get(x.grup + x.e.club) ?? 0) > 1 }))
+				distancia: D.distancia,
+				permutes: D.permutes,
+				equips: D.equips.map((e) => {
+					const club = clubPerClau.get(e.club)!;
+					return {
+						e,
+						club,
+						pos: e.seed,
+						grup: grupPerSeed.get(e.seed) ?? 'A',
+						mogut: moguts.has(e.seed),
+						tit: referents(club.llista, e.lletra, esquema),
+						plantilla: plantilla(club.llista, e.lletra, esquema),
+						mit: mitjanaEquip(club.llista, e.lletra, esquema)
+					};
+				})
 			};
 		})
 	);
@@ -160,6 +166,7 @@
 			.map((d) => ({
 				nom: d.nom,
 				distancia: d.distancia,
+				permutes: d.permutes,
 				grups: (['A', 'B'] as const).map((g) => {
 					const eq = d.equips.filter((x) => x.grup === g);
 					return {
@@ -297,7 +304,11 @@
 					{etiquetaDiv(d.nom)}
 				</h2>
 				<span class="text-[11px] text-slate-400 dark:text-slate-500">
-					serpentí 1-4-5-8… · desequilibri {Math.abs(
+					serpentí 1-4-5-8… · {d.permutes.length === 0
+						? 'cap permuta'
+						: d.permutes.length === 1
+							? '1 permuta'
+							: `${d.permutes.length} permutes`} · desequilibri {Math.abs(
 						d.grups[0].mitjana - d.grups[1].mitjana
 					).toFixed(3)}
 				</span>
@@ -316,30 +327,50 @@
 						</header>
 						<ul class="divide-y divide-slate-100 dark:divide-slate-800">
 							{#each g.equips as x}
-								<li class="flex items-baseline gap-2 px-3 py-1.5">
-									<span
-										class="w-5 shrink-0 text-right font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500"
-										>{x.pos}</span
-									>
-									<span class="min-w-0 flex-1 truncate text-sm">
-										{nomEquip(x.e)}{#if puja(x.e.motiu)}<span
-												class="ml-1 text-[11px] text-emerald-600 dark:text-emerald-400">▲</span
-											>{:else if baixa(x.e.motiu)}<span class="ml-1 text-[11px] text-red-600 dark:text-red-400"
-												>▼</span
-											>{/if}{#if x.xoc}<span
-												class="ml-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
-												title="hi ha un altre equip del mateix club en aquest grup">⚠ mateix club</span
+								<li class="px-3 py-1.5">
+									<div class="flex items-baseline gap-2">
+										<span
+											class="w-5 shrink-0 text-right font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500"
+											>{x.pos}</span
+										>
+										<span class="min-w-0 flex-1 truncate text-sm font-medium">
+											{nomEquip(x.e)}{#if puja(x.e.motiu)}<span
+													class="ml-1 text-[11px] text-emerald-600 dark:text-emerald-400">▲</span
+												>{:else if baixa(x.e.motiu)}<span class="ml-1 text-[11px] text-red-600 dark:text-red-400"
+													>▼</span
+												>{/if}{#if x.mogut}<span
+													class="ml-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
+													title="permutat amb l'equip del mateix slot de l'altre grup per no coincidir amb un altre equip del seu club"
+													>⇄ permutat</span
+												>{/if}
+										</span>
+										<span class="shrink-0 font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400"
+											>{x.mit.toFixed(3)}</span
+										>
+									</div>
+									<p class="ml-7 text-[11px] leading-snug">
+										{#each x.plantilla.slice(0, MAX_FILES) as f, i}<span
+												class={f.titular
+													? 'text-slate-600 dark:text-slate-300'
+													: 'text-slate-400 dark:text-slate-500'}
+												>{i > 0 ? ' · ' : ''}<span class="font-mono">{f.p.num}</span>&nbsp;{cognom(f.p.nom)}</span
+											>{/each}{#if x.plantilla.length > MAX_FILES}<span
+												class="text-slate-400 dark:text-slate-500"> · +{x.plantilla.length - MAX_FILES}</span
 											>{/if}
-									</span>
-									<span class="shrink-0 font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400"
-										>{x.mit.toFixed(3)}</span
-									>
+									</p>
 								</li>
 							{/each}
 						</ul>
 					</div>
 				{/each}
 			</div>
+			{#if d.permutes.length}
+				<p class="mt-1.5 text-[11px] leading-snug text-slate-400 dark:text-slate-500">
+					<span class="font-semibold text-amber-600 dark:text-amber-400">⇄ permutes</span>
+					{#each d.permutes as p, i}{i > 0 ? ' · ' : ' '}slot {p.slot}: caps de sèrie
+						<span class="font-mono">{p.seed_a}</span> i <span class="font-mono">{p.seed_b}</span>{/each}
+				</p>
+			{/if}
 		</section>
 	{/each}
 {:else if vista === 'divisio'}
@@ -536,19 +567,24 @@
 		<p>
 			<b>Divisions.</b> Puja el campió de cada grup, baixa el vuitè, i el setè es juga la plaça a anada
 			i tornada contra el segon de la divisió inferior. Els vuit play-offs del 4 i 5 de juliol de 2026
-			ja s'han disputat i la composició quadra amb la classificació final oficial. Dues eliminatòries
-			van quedar igualades en punts de match i en parcials, i el desempat és per
-			<b>caramboles a fora</b>: Sant Adrià C hi puja (102 a fora contra 95 del Lleida B) i Canet B es
-			queda a 2a (84 contra 83 del Sants D). Pel total de caramboles el segon cas donaria la volta
-			—Sants D 178-177—, o sigui que és el criteri de fora el que manda.
+			ja s'han disputat. Dues eliminatòries van quedar igualades en punts de match i en parcials, i el
+			desempat és per <b>caramboles a fora</b>: Sant Adrià C hi puja (102 a fora contra 95 del Lleida
+			B) i Canet B es queda a 2a (84 contra 83 del Sants D). Pel total de caramboles el segon cas
+			donaria la volta —Sants D 178-177—, o sigui que és el criteri de fora el que manda.
+			<b>La composició i l'ordre de sembra són els oficials</b>, presos de la «Classificació final
+			lligues tres bandes» de la FCB, i coincideixen equip per equip amb el que havíem derivat: primer
+			els que baixen de la divisió de sobre, després els que s'hi mantenen intercalats per posició de
+			grup, i al final els que hi pugen.
 		</p>
 		<p>
-			<b>Grups.</b> Serpentí <span class="font-mono">A-B-B-A</span> sobre l'ordre de la categoria:
+			<b>Grups.</b> Serpentí <span class="font-mono">A-B-B-A</span> sobre l'ordre de sembra:
 			1-4-5-8-9-12-13-16 al grup A i 2-3-6-7-10-11-14-15 al B. A 4a divisió, amb 19 equips, s'estira
-			igual (el 17 a l'A; el 18 i el 19 al B). L'ordre de partida que hi apliquem és la mitjana
-			projectada d'equip, que no és el cap de sèrie oficial de la federació: si ella ordena per la
-			classificació del 2025-26, els grups es mouen. Amb ⚠ marquem els casos en què dos equips d'un
-			mateix club cauen al mateix grup, que és el que la federació sol evitar.
+			igual (el 17 a l'A; el 18 i el 19 al B). Després s'hi fan les <b>permutes</b> necessàries perquè
+			dos equips d'un mateix club no coincideixin de grup: s'intercanvien els dos equips que ocupen el
+			mateix slot dins del seu grup, que a la sembra són sempre posicions consecutives (l'A2 és el 4 i
+			el B2 el 3; l'A3 és el 5 i el B3 el 6…), i a cada pas es tria la permuta que deixa menys
+			conflictes. En surten sis en total —dues a Honor, una a 1a, una a 2a i dues a 3a— i cap divisió
+			no queda amb equips del mateix club junts. Els equips moguts van marcats amb ⇄.
 		</p>
 		<p>
 			<b>Llistes.</b> El pool de cada club són els jugadors que van disputar la lliga 2025-26, ordenats

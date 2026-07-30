@@ -5222,6 +5222,7 @@
    "distancia": 40,
    "equips": [
     {
+     "seed": 1,
      "club": "C.B.MATARÓ",
      "nom": "C.B. Mataró",
      "lletra": "A",
@@ -5231,60 +5232,7 @@
      "motiu": null
     },
     {
-     "club": "C.B.SANT ADRIÀ",
-     "nom": "C.B. Sant Adrià",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "Honor",
-     "motiu": null
-    },
-    {
-     "club": "C.B.LLINARS",
-     "nom": "C.B. Llinars",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "Honor",
-     "motiu": null
-    },
-    {
-     "club": "C.B.SANT BOI",
-     "nom": "C.B. Sant Boi",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "Honor",
-     "motiu": null
-    },
-    {
-     "club": "C.B.LLEIDA",
-     "nom": "C.B. Lleida",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "Honor",
-     "motiu": null
-    },
-    {
-     "club": "C.B.SANT ADRIÀ",
-     "nom": "C.B. Sant Adrià",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "Honor",
-     "motiu": null
-    },
-    {
-     "club": "SB FOMENT MOLINS",
-     "nom": "S.B. Foment Molins",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "Honor",
-     "motiu": null
-    },
-    {
+     "seed": 2,
      "club": "B.C.GRANOLLERS",
      "nom": "B.C. Granollers",
      "lletra": "A",
@@ -5294,6 +5242,7 @@
      "motiu": null
     },
     {
+     "seed": 3,
      "club": "C.B.MOLLET",
      "nom": "C.B. Mollet",
      "lletra": "A",
@@ -5303,6 +5252,17 @@
      "motiu": null
     },
     {
+     "seed": 4,
+     "club": "C.B.SANT ADRIÀ",
+     "nom": "C.B. Sant Adrià",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "seed": 5,
      "club": "C.B.MONFORTE",
      "nom": "C.B. Monforte",
      "lletra": "A",
@@ -5312,6 +5272,17 @@
      "motiu": null
     },
     {
+     "seed": 6,
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "seed": 7,
      "club": "C.B.BARCELONA",
      "nom": "C.B. Barcelona",
      "lletra": "A",
@@ -5321,6 +5292,27 @@
      "motiu": null
     },
     {
+     "seed": 8,
+     "club": "C.B.LLEIDA",
+     "nom": "C.B. Lleida",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "seed": 9,
+     "club": "C.B.SANT ADRIÀ",
+     "nom": "C.B. Sant Adrià",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "seed": 10,
      "club": "B.C.GRANOLLERS",
      "nom": "B.C. Granollers",
      "lletra": "B",
@@ -5330,6 +5322,17 @@
      "motiu": null
     },
     {
+     "seed": 11,
+     "club": "SB FOMENT MOLINS",
+     "nom": "S.B. Foment Molins",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "seed": 12,
      "club": "C.B.MONT-ROIG",
      "nom": "C.B. Mont-roig",
      "lletra": "A",
@@ -5339,15 +5342,27 @@
      "motiu": null
     },
     {
-     "club": "C.B.MONFORTE",
-     "nom": "C.B. Monforte",
-     "lletra": "B",
+     "seed": 13,
+     "club": "C.B.SANT BOI",
+     "nom": "C.B. Sant Boi",
+     "lletra": "A",
      "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "1a",
-     "motiu": "puja · campió 1a A"
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
     },
     {
+     "seed": 14,
+     "club": "CASAL DE CERVERA",
+     "nom": "Casal de Cervera",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "1a",
+     "motiu": "puja · play-off guanyat a Centelles A"
+    },
+    {
+     "seed": 15,
      "club": "BC OLESA",
      "nom": "B.C. Olesa",
      "lletra": "A",
@@ -5357,119 +5372,68 @@
      "motiu": "puja · campió 1a B"
     },
     {
-     "club": "CASAL DE CERVERA",
-     "nom": "Casal de Cervera",
-     "lletra": "A",
-     "unic": true,
-     "lletra_2526": "",
+     "seed": 16,
+     "club": "C.B.MONFORTE",
+     "nom": "C.B. Monforte",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
      "div_2526": "1a",
-     "motiu": "puja · play-off guanyat a Centelles A"
+     "motiu": "puja · campió 1a A"
     }
+   ],
+   "grups": [
+    {
+     "lletra": "A",
+     "seeds": [
+      1,
+      4,
+      6,
+      8,
+      10,
+      12,
+      13,
+      16
+     ]
+    },
+    {
+     "lletra": "B",
+     "seeds": [
+      2,
+      3,
+      5,
+      7,
+      9,
+      11,
+      14,
+      15
+     ]
+    }
+   ],
+   "permutes": [
+    {
+     "slot": 5,
+     "seed_a": 9,
+     "seed_b": 10
+    },
+    {
+     "slot": 3,
+     "seed_a": 5,
+     "seed_b": 6
+    }
+   ],
+   "moguts": [
+    5,
+    6,
+    9,
+    10
    ]
   },
   "1a": {
    "distancia": 35,
    "equips": [
     {
-     "club": "C.B.2000 CERDANYOLA",
-     "nom": "C.B. 2000 Cerdanyola",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "1a",
-     "motiu": null
-    },
-    {
-     "club": "S.B.LA GRAN PENYA",
-     "nom": "S.B. La Gran Penya",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "1a",
-     "motiu": null
-    },
-    {
-     "club": "C.B. CANET",
-     "nom": "C.B. Canet",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "1a",
-     "motiu": null
-    },
-    {
-     "club": "B.LA UNIÓ CORAL",
-     "nom": "B. La Unió Coral",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "1a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.MANRESA",
-     "nom": "C.B. Manresa",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "1a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.SANTS",
-     "nom": "C.B. Sants",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "1a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.MONFORTE",
-     "nom": "C.B. Monforte",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "1a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.MOLLET",
-     "nom": "C.B. Mollet",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "1a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.PRAT",
-     "nom": "C.B. Prat",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "1a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.SANTS",
-     "nom": "C.B. Sants",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "Honor",
-     "motiu": "baixa · 8è Honor A"
-    },
-    {
-     "club": "C.B.BANYOLES",
-     "nom": "C.B. Banyoles",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "Honor",
-     "motiu": "baixa · 8è Honor B"
-    },
-    {
+     "seed": 1,
      "club": "S.B.P.E.CENTELLES",
      "nom": "S.B.P.E. Centelles",
      "lletra": "A",
@@ -5479,24 +5443,117 @@
      "motiu": "baixa · play-off perdut amb Casal Cervera"
     },
     {
-     "club": "C.B.MATARÓ",
-     "nom": "C.B. Mataró",
+     "seed": 2,
+     "club": "C.B.BANYOLES",
+     "nom": "C.B. Banyoles",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": "baixa · 8è Honor B"
+    },
+    {
+     "seed": 3,
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": "baixa · 8è Honor A"
+    },
+    {
+     "seed": 4,
+     "club": "C.B.2000 CERDANYOLA",
+     "nom": "C.B. 2000 Cerdanyola",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "seed": 5,
+     "club": "S.B.LA GRAN PENYA",
+     "nom": "S.B. La Gran Penya",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "seed": 6,
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
      "lletra": "B",
      "unic": false,
      "lletra_2526": "B",
-     "div_2526": "2a",
-     "motiu": "puja · campió 2a A"
+     "div_2526": "1a",
+     "motiu": null
     },
     {
-     "club": "C.B.ALBA",
-     "nom": "C.B. Alba",
+     "seed": 7,
+     "club": "C.B. CANET",
+     "nom": "C.B. Canet",
      "lletra": "A",
-     "unic": true,
-     "lletra_2526": "",
-     "div_2526": "2a",
-     "motiu": "puja · campió 2a B"
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
     },
     {
+     "seed": 8,
+     "club": "C.B.MONFORTE",
+     "nom": "C.B. Monforte",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "seed": 9,
+     "club": "B.LA UNIÓ CORAL",
+     "nom": "B. La Unió Coral",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "seed": 10,
+     "club": "C.B.MOLLET",
+     "nom": "C.B. Mollet",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "seed": 11,
+     "club": "C.B.MANRESA",
+     "nom": "C.B. Manresa",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "seed": 12,
+     "club": "C.B.PRAT",
+     "nom": "C.B. Prat",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "seed": 13,
      "club": "C.B.MONT-ROIG",
      "nom": "C.B. Mont-roig",
      "lletra": "B",
@@ -5506,6 +5563,7 @@
      "motiu": "puja · play-off guanyat a Llinars B"
     },
     {
+     "seed": 14,
      "club": "C.B.SANT ADRIÀ",
      "nom": "C.B. Sant Adrià",
      "lletra": "C",
@@ -5513,112 +5571,73 @@
      "lletra_2526": "C",
      "div_2526": "2a",
      "motiu": "puja · play-off amb Lleida B, desempat per caramboles a fora (102-95)"
+    },
+    {
+     "seed": 15,
+     "club": "C.B.MATARÓ",
+     "nom": "C.B. Mataró",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": "puja · campió 2a A"
+    },
+    {
+     "seed": 16,
+     "club": "C.B.ALBA",
+     "nom": "C.B. Alba",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": "puja · campió 2a B"
     }
+   ],
+   "grups": [
+    {
+     "lletra": "A",
+     "seeds": [
+      1,
+      3,
+      5,
+      8,
+      9,
+      12,
+      13,
+      16
+     ]
+    },
+    {
+     "lletra": "B",
+     "seeds": [
+      2,
+      4,
+      6,
+      7,
+      10,
+      11,
+      14,
+      15
+     ]
+    }
+   ],
+   "permutes": [
+    {
+     "slot": 2,
+     "seed_a": 3,
+     "seed_b": 4
+    }
+   ],
+   "moguts": [
+    3,
+    4
    ]
   },
   "2a": {
    "distancia": 30,
    "equips": [
     {
-     "club": "S.B.CORAL COLÓN",
-     "nom": "S.B. Coral Colón",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "2a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.TARRAGONA",
-     "nom": "C.B. Tarragona",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "2a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.BLANES",
-     "nom": "C.B. Blanes",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "2a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.VIC",
-     "nom": "C.B. Vic",
-     "lletra": "A",
-     "unic": true,
-     "lletra_2526": "",
-     "div_2526": "2a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.SANT BOI",
-     "nom": "C.B. Sant Boi",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "2a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.PREMIÀ",
-     "nom": "C.B. Premià",
-     "lletra": "A",
-     "unic": true,
-     "lletra_2526": "",
-     "div_2526": "2a",
-     "motiu": null
-    },
-    {
-     "club": "SB FOMENT MOLINS",
-     "nom": "S.B. Foment Molins",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "2a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.BANYOLES",
-     "nom": "C.B. Banyoles",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "2a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.LLINARS",
-     "nom": "C.B. Llinars",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "1a",
-     "motiu": "baixa · play-off perdut amb Mont-roig B"
-    },
-    {
-     "club": "SB FOMENT MOLINS",
-     "nom": "S.B. Foment Molins",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "1a",
-     "motiu": "baixa · 8è 1a A"
-    },
-    {
-     "club": "C.B.TARRAGONA",
-     "nom": "C.B. Tarragona",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "1a",
-     "motiu": "baixa · 8è 1a B"
-    },
-    {
+     "seed": 1,
      "club": "C.B.LLEIDA",
      "nom": "C.B. Lleida",
      "lletra": "B",
@@ -5628,24 +5647,127 @@
      "motiu": "baixa · play-off amb Sant Adrià C, desempat per caramboles a fora (95-102)"
     },
     {
-     "club": "C.B.CARDONA",
-     "nom": "C.B. Cardona",
-     "lletra": "A",
-     "unic": true,
-     "lletra_2526": "",
-     "div_2526": "3a",
-     "motiu": "puja · campió 3a A"
-    },
-    {
-     "club": "C.B.BARCELONA",
-     "nom": "C.B. Barcelona",
+     "seed": 2,
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
      "lletra": "B",
      "unic": false,
      "lletra_2526": "B",
-     "div_2526": "3a",
-     "motiu": "puja · campió 3a B"
+     "div_2526": "1a",
+     "motiu": "baixa · play-off perdut amb Mont-roig B"
     },
     {
+     "seed": 3,
+     "club": "C.B.TARRAGONA",
+     "nom": "C.B. Tarragona",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": "baixa · 8è 1a B"
+    },
+    {
+     "seed": 4,
+     "club": "SB FOMENT MOLINS",
+     "nom": "S.B. Foment Molins",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": "baixa · 8è 1a A"
+    },
+    {
+     "seed": 5,
+     "club": "S.B.CORAL COLÓN",
+     "nom": "S.B. Coral Colón",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "seed": 6,
+     "club": "C.B.SANT BOI",
+     "nom": "C.B. Sant Boi",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "seed": 7,
+     "club": "C.B.TARRAGONA",
+     "nom": "C.B. Tarragona",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "seed": 8,
+     "club": "C.B.PREMIÀ",
+     "nom": "C.B. Premià",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "seed": 9,
+     "club": "C.B.BLANES",
+     "nom": "C.B. Blanes",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "seed": 10,
+     "club": "SB FOMENT MOLINS",
+     "nom": "S.B. Foment Molins",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "seed": 11,
+     "club": "C.B.BANYOLES",
+     "nom": "C.B. Banyoles",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "seed": 12,
+     "club": "C.B.VIC",
+     "nom": "C.B. Vic",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "seed": 13,
+     "club": "C.B. CANET",
+     "nom": "C.B. Canet",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "seed": 14,
      "club": "C.B.2000 CERDANYOLA",
      "nom": "C.B. 2000 Cerdanyola",
      "lletra": "B",
@@ -5655,110 +5777,71 @@
      "motiu": "puja · play-off guanyat a Lliçà d'Amunt A"
     },
     {
-     "club": "C.B. CANET",
-     "nom": "C.B. Canet",
+     "seed": 15,
+     "club": "C.B.CARDONA",
+     "nom": "C.B. Cardona",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "3a",
+     "motiu": "puja · campió 3a A"
+    },
+    {
+     "seed": 16,
+     "club": "C.B.BARCELONA",
+     "nom": "C.B. Barcelona",
      "lletra": "B",
      "unic": false,
      "lletra_2526": "B",
-     "div_2526": "2a",
-     "motiu": null
+     "div_2526": "3a",
+     "motiu": "puja · campió 3a B"
     }
+   ],
+   "grups": [
+    {
+     "lletra": "A",
+     "seeds": [
+      1,
+      4,
+      5,
+      7,
+      9,
+      12,
+      13,
+      16
+     ]
+    },
+    {
+     "lletra": "B",
+     "seeds": [
+      2,
+      3,
+      6,
+      8,
+      10,
+      11,
+      14,
+      15
+     ]
+    }
+   ],
+   "permutes": [
+    {
+     "slot": 4,
+     "seed_a": 7,
+     "seed_b": 8
+    }
+   ],
+   "moguts": [
+    7,
+    8
    ]
   },
   "3a": {
    "distancia": 25,
    "equips": [
     {
-     "club": "C.B.MONFORTE",
-     "nom": "C.B. Monforte",
-     "lletra": "D",
-     "unic": false,
-     "lletra_2526": "D",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
-     "club": "S.B.P.E.CENTELLES",
-     "nom": "S.B.P.E. Centelles",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.PRAT",
-     "nom": "C.B. Prat",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
-     "club": "B. EL MASNOU",
-     "nom": "B. El Masnou",
-     "lletra": "A",
-     "unic": true,
-     "lletra_2526": "",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.LLINARS",
-     "nom": "C.B. Llinars",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
-     "club": "B.C.GRANOLLERS",
-     "nom": "B.C. Granollers",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
-     "club": "B.C.GRANOLLERS",
-     "nom": "B.C. Granollers",
-     "lletra": "D",
-     "unic": false,
-     "lletra_2526": "D",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.SANTS",
-     "nom": "C.B. Sants",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
-     "club": "S.B.ESPLUGUES L'AVENÇ",
-     "nom": "S.B. Esplugues l'Avenç",
-     "lletra": "A",
-     "unic": false,
-     "lletra_2526": "A",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.LLIÇÀ D'AMUNT",
-     "nom": "C.B. Lliçà d'Amunt",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "3a",
-     "motiu": null
-    },
-    {
+     "seed": 1,
      "club": "C.B.LLIÇÀ D'AMUNT",
      "nom": "C.B. Lliçà d'Amunt",
      "lletra": "A",
@@ -5768,6 +5851,7 @@
      "motiu": "baixa · play-off perdut amb Cerdanyola B"
     },
     {
+     "seed": 2,
      "club": "S.B. GEiEG",
      "nom": "S.B. GEiEG",
      "lletra": "A",
@@ -5777,6 +5861,7 @@
      "motiu": "baixa · 8è 2a A"
     },
     {
+     "seed": 3,
      "club": "C.B.SANT ADRIÀ",
      "nom": "C.B. Sant Adrià",
      "lletra": "D",
@@ -5786,6 +5871,7 @@
      "motiu": "baixa · 8è 2a B"
     },
     {
+     "seed": 4,
      "club": "C.B.SANTS",
      "nom": "C.B. Sants",
      "lletra": "D",
@@ -5795,15 +5881,107 @@
      "motiu": null
     },
     {
-     "club": "S.B.LA GRAN PENYA",
-     "nom": "S.B. La Gran Penya",
+     "seed": 5,
+     "club": "B.C.GRANOLLERS",
+     "nom": "B.C. Granollers",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "seed": 6,
+     "club": "C.B.MONFORTE",
+     "nom": "C.B. Monforte",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "seed": 7,
+     "club": "B.C.GRANOLLERS",
+     "nom": "B.C. Granollers",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "seed": 8,
+     "club": "S.B.P.E.CENTELLES",
+     "nom": "S.B.P.E. Centelles",
      "lletra": "B",
      "unic": false,
      "lletra_2526": "B",
-     "div_2526": "4a",
-     "motiu": "puja · campió 4a A"
+     "div_2526": "3a",
+     "motiu": null
     },
     {
+     "seed": 9,
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "seed": 10,
+     "club": "C.B.PRAT",
+     "nom": "C.B. Prat",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "seed": 11,
+     "club": "S.B.ESPLUGUES L'AVENÇ",
+     "nom": "S.B. Esplugues l'Avenç",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "seed": 12,
+     "club": "B. EL MASNOU",
+     "nom": "B. El Masnou",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "seed": 13,
+     "club": "C.B.LLIÇÀ D'AMUNT",
+     "nom": "C.B. Lliçà d'Amunt",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "seed": 14,
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "seed": 15,
      "club": "C.B.MATARÓ",
      "nom": "C.B. Mataró",
      "lletra": "C",
@@ -5811,166 +5989,70 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": "puja · campió 4a B"
+    },
+    {
+     "seed": 16,
+     "club": "S.B.LA GRAN PENYA",
+     "nom": "S.B. La Gran Penya",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": "puja · campió 4a A"
     }
+   ],
+   "grups": [
+    {
+     "lletra": "A",
+     "seeds": [
+      2,
+      3,
+      5,
+      8,
+      9,
+      12,
+      13,
+      16
+     ]
+    },
+    {
+     "lletra": "B",
+     "seeds": [
+      1,
+      4,
+      6,
+      7,
+      10,
+      11,
+      14,
+      15
+     ]
+    }
+   ],
+   "permutes": [
+    {
+     "slot": 1,
+     "seed_a": 1,
+     "seed_b": 2
+    },
+    {
+     "slot": 2,
+     "seed_a": 4,
+     "seed_b": 3
+    }
+   ],
+   "moguts": [
+    1,
+    2,
+    3,
+    4
    ]
   },
   "4a": {
    "distancia": 25,
    "equips": [
     {
-     "club": "C.B. CANET",
-     "nom": "C.B. Canet",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.MONT-ROIG",
-     "nom": "C.B. Mont-roig",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.LLINARS",
-     "nom": "C.B. Llinars",
-     "lletra": "D",
-     "unic": false,
-     "lletra_2526": "D",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "B.LA UNIÓ CORAL",
-     "nom": "B. La Unió Coral",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.MONFORTE",
-     "nom": "C.B. Monforte",
-     "lletra": "E",
-     "unic": false,
-     "lletra_2526": "E",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.2000 CERDANYOLA",
-     "nom": "C.B. 2000 Cerdanyola",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.BANYOLES",
-     "nom": "C.B. Banyoles",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.MATARÓ",
-     "nom": "C.B. Mataró",
-     "lletra": "D",
-     "unic": false,
-     "lletra_2526": "D",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.LLINARS",
-     "nom": "C.B. Llinars",
-     "lletra": "E",
-     "unic": false,
-     "lletra_2526": "E",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B. BORGES",
-     "nom": "C.B. Borges",
-     "lletra": "A",
-     "unic": true,
-     "lletra_2526": "",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.BLANES",
-     "nom": "C.B. Blanes",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "S.B.CORAL COLÓN",
-     "nom": "S.B. Coral Colón",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "B.C.SANT FELIU DE CODINES",
-     "nom": "B.C. Sant Feliu de Codines",
-     "lletra": "A",
-     "unic": true,
-     "lletra_2526": "",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "S.B.ESPLUGUES L'AVENÇ",
-     "nom": "S.B. Esplugues l'Avenç",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.MANRESA",
-     "nom": "C.B. Manresa",
-     "lletra": "B",
-     "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.SANTS",
-     "nom": "C.B. Sants",
-     "lletra": "E",
-     "unic": false,
-     "lletra_2526": "E",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
-     "club": "C.B.BARCELONA",
-     "nom": "C.B. Barcelona",
-     "lletra": "C",
-     "unic": false,
-     "lletra_2526": "C",
-     "div_2526": "4a",
-     "motiu": null
-    },
-    {
+     "seed": 1,
      "club": "C.B.SANT BOI",
      "nom": "C.B. Sant Boi",
      "lletra": "C",
@@ -5980,6 +6062,7 @@
      "motiu": "baixa · 8è 3a A"
     },
     {
+     "seed": 2,
      "club": "C.B.VILANOVA",
      "nom": "C.B. Vilanova",
      "lletra": "A",
@@ -5987,8 +6070,211 @@
      "lletra_2526": "",
      "div_2526": "3a",
      "motiu": "baixa · 8è 3a B"
+    },
+    {
+     "seed": 3,
+     "club": "C.B. BORGES",
+     "nom": "C.B. Borges",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 4,
+     "club": "C.B. CANET",
+     "nom": "C.B. Canet",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 5,
+     "club": "C.B.BLANES",
+     "nom": "C.B. Blanes",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 6,
+     "club": "C.B.MONT-ROIG",
+     "nom": "C.B. Mont-roig",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 7,
+     "club": "S.B.CORAL COLÓN",
+     "nom": "S.B. Coral Colón",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 8,
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 9,
+     "club": "B.LA UNIÓ CORAL",
+     "nom": "B. La Unió Coral",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 10,
+     "club": "B.C.SANT FELIU DE CODINES",
+     "nom": "B.C. Sant Feliu de Codines",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 11,
+     "club": "C.B.MONFORTE",
+     "nom": "C.B. Monforte",
+     "lletra": "E",
+     "unic": false,
+     "lletra_2526": "E",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 12,
+     "club": "S.B.ESPLUGUES L'AVENÇ",
+     "nom": "S.B. Esplugues l'Avenç",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 13,
+     "club": "C.B.2000 CERDANYOLA",
+     "nom": "C.B. 2000 Cerdanyola",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 14,
+     "club": "C.B.BANYOLES",
+     "nom": "C.B. Banyoles",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 15,
+     "club": "C.B.MANRESA",
+     "nom": "C.B. Manresa",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 16,
+     "club": "C.B.MATARÓ",
+     "nom": "C.B. Mataró",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 17,
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
+     "lletra": "E",
+     "unic": false,
+     "lletra_2526": "E",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 18,
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
+     "lletra": "E",
+     "unic": false,
+     "lletra_2526": "E",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "seed": 19,
+     "club": "C.B.BARCELONA",
+     "nom": "C.B. Barcelona",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
     }
-   ]
+   ],
+   "grups": [
+    {
+     "lletra": "A",
+     "seeds": [
+      1,
+      4,
+      5,
+      8,
+      9,
+      12,
+      13,
+      16,
+      17
+     ]
+    },
+    {
+     "lletra": "B",
+     "seeds": [
+      2,
+      3,
+      6,
+      7,
+      10,
+      11,
+      14,
+      15,
+      18,
+      19
+     ]
+    }
+   ],
+   "permutes": [],
+   "moguts": []
   }
  }
 }

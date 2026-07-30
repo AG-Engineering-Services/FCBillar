@@ -469,7 +469,7 @@
 						{#if expandedPlayer === r.player_fcb_id && r.detall?.length}
 							<div class="space-y-0.5 bg-slate-50 dark:bg-slate-800/50 px-3 pb-2 pl-11 pt-1">
 								{#each r.detall as d}
-									<div class="flex items-center justify-between gap-2 text-[11px] {d.pos || d.penal || d.absent ? '' : 'opacity-50'}">
+									<div class="flex items-center justify-between gap-2 text-[11px] {d.pos || d.penal || d.absent || d.punts ? '' : 'opacity-50'}">
 										<span class="min-w-0 truncate {d.penal ? 'font-medium text-red-500 dark:text-red-400' : d.prov ? 'font-medium text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}">
 											{d.open}{d.temp ? ` ${d.temp}` : ''} · {d.penal
 												? 'no presentat'
@@ -477,7 +477,9 @@
 													? 'absència justif.'
 													: d.pos
 														? `${d.pos}è${d.prov ? ' (prov.)' : ''}`
-														: 'no inscrit'}
+														: d.punts
+															? 'classif. pendent'
+															: 'no inscrit'}
 										</span>
 										<span class="shrink-0 font-mono font-semibold {d.penal ? 'text-red-500 dark:text-red-400' : d.prov ? 'text-amber-600 dark:text-amber-400' : 'text-slate-700 dark:text-slate-200'}">{d.punts}</span>
 									</div>
