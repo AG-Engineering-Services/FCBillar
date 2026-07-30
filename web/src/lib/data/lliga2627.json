@@ -1,0 +1,8873 @@
+{
+ "rank_id": 832,
+ "clubs": [
+  {
+   "club": "B. EL MASNOU",
+   "nom": "B. El Masnou",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "",
+     "div_2526": "3a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SÁNCHEZ LÁZARO, DAVID",
+     "mitjana": 0.4674,
+     "pos": 229,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MIRAVET ARIZA, LLUIS",
+     "mitjana": 0.4633,
+     "pos": 450,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "ANDRÉS AULADELL, LLUIS",
+     "mitjana": 0.4459,
+     "pos": 251,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CARMONA LÓPEZ, ANTONIO",
+     "mitjana": 0.3594,
+     "pos": null,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "FARRAN FERNÁNDEZ, MARTÍ",
+     "mitjana": 0.3459,
+     "pos": 509,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PROHOM DURÁN, DANIEL",
+     "mitjana": 0.3457,
+     "pos": 353,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "RUIZ LARA, JOSÉ",
+     "mitjana": 0.3382,
+     "pos": 519,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "APARICIO ESCUDERO, SERGI",
+     "mitjana": 0.3138,
+     "pos": 536,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "AGUILÓ ANDREU, MIGUEL",
+     "mitjana": 0.3,
+     "pos": 549,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "B.C.GRANOLLERS",
+   "nom": "B.C. Granollers",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "B",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "lletra": "D",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "D",
+     "div_2526": "3a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MAS CANADELL, JOSEP Mª",
+     "mitjana": 1.6366,
+     "pos": 1,
+     "de_club": "C.B. Llinars"
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "JIMÉNEZ GALERA, SERGI",
+     "mitjana": 1.6288,
+     "pos": 2,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MATA PARDO, ESTEVE",
+     "mitjana": 1.2516,
+     "pos": 6,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "PARERAS MÉNDEZ, JOAN CARLES",
+     "mitjana": 1.1901,
+     "pos": 8,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "HERNÁNDEZ PARRA, ANTONI",
+     "mitjana": 1.09,
+     "pos": 13,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ESPINASA SÁNCHEZ, JOAN",
+     "mitjana": 1.0744,
+     "pos": 14,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "NAVARRO CARMONA, JOAN ANT.",
+     "mitjana": 0.7534,
+     "pos": 44,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MARTÍN VÍLCHEZ, JOSEP",
+     "mitjana": 0.6858,
+     "pos": 67,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MORENO MEDINA, JUAN CARLOS",
+     "mitjana": 0.6223,
+     "pos": 97,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "GASSÓ CHUMILLAS, JORDI",
+     "mitjana": 0.5824,
+     "pos": 123,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "GARCÍA MARTÍNEZ, MANUEL",
+     "mitjana": 0.537,
+     "pos": 159,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CUEVAS GALAN, PABLO",
+     "mitjana": 0.5341,
+     "pos": 165,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "BERENGUERAS COSTA, F. XAVIER",
+     "mitjana": 0.5327,
+     "pos": 169,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "JIMÉNEZ PÉREZ, FERNANDO",
+     "mitjana": 0.4674,
+     "pos": 228,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "ARDISSON VIEIRA DOS SANTOS, ANTON",
+     "mitjana": 0.4505,
+     "pos": 242,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "PLANTADA MARTORELL, JOAN",
+     "mitjana": 0.4377,
+     "pos": 461,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CAMPOS FERNÁNDEZ, FRANCESC",
+     "mitjana": 0.4266,
+     "pos": 276,
+     "de_club": null
+    },
+    {
+     "num": 18,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "VARELA PEÑA, ANGEL M.",
+     "mitjana": 0.4215,
+     "pos": 281,
+     "de_club": null
+    },
+    {
+     "num": 19,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "TAPIA MORDILLO, ANTONI",
+     "mitjana": 0.4155,
+     "pos": 290,
+     "de_club": null
+    },
+    {
+     "num": 20,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CANTOS GAMIZ, ANTONIO",
+     "mitjana": 0.3556,
+     "pos": 506,
+     "de_club": null
+    },
+    {
+     "num": 21,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "MASACHS XENA, SALVADÓ",
+     "mitjana": 0.3533,
+     "pos": 349,
+     "de_club": null
+    },
+    {
+     "num": 22,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "PERTIÑEZ CAMPOS, MANUEL",
+     "mitjana": 0.3232,
+     "pos": 529,
+     "de_club": null
+    },
+    {
+     "num": 23,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "MESAS SECO, JAVIER",
+     "mitjana": 0.2729,
+     "pos": 566,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "B.C.SANT FELIU DE CODINES",
+   "nom": "B.C. Sant Feliu de Codines",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SERRATS ANGRILL, ALEIX",
+     "mitjana": 0.5069,
+     "pos": 439,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "JANES AUTONELL, RAMÓN",
+     "mitjana": 0.4231,
+     "pos": 280,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "PUJAL AMETLLER, CARLES",
+     "mitjana": 0.3888,
+     "pos": 483,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GIMÉNEZ FONT, FRANCESC XAVIER",
+     "mitjana": 0.3642,
+     "pos": 337,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "RODRÍGUEZ JUÁREZ, CARLOS",
+     "mitjana": 0.349,
+     "pos": 352,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ESTÉVEZ PINTOR, JOSÉ",
+     "mitjana": 0.3235,
+     "pos": 363,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BADIA LÓPEZ, JOAQUIM",
+     "mitjana": 0.3075,
+     "pos": 374,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ HEREDIA, CRISTÓBAL",
+     "mitjana": 0.2925,
+     "pos": 556,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GRAU PICÓ, FRANCESC XAVIER",
+     "mitjana": 0.2747,
+     "pos": 565,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GARCÍA SANTOS, JOAN",
+     "mitjana": 0.2033,
+     "pos": 596,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "B.LA UNIÓ CORAL",
+   "nom": "B. La Unió Coral",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "LÓPEZ PULIDO, CARLOS",
+     "mitjana": 0.7195,
+     "pos": 56,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GARCÍA GARCÍA, JORDI",
+     "mitjana": 0.5613,
+     "pos": 138,
+     "de_club": "S.B. Foment Molins"
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "AGULLO TABOAS, JOSEP",
+     "mitjana": 0.5234,
+     "pos": 183,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "FAURA TUBAU, JAUME",
+     "mitjana": 0.5203,
+     "pos": 184,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MORALES BECERRA, WILSON ANDRÉS",
+     "mitjana": 0.4888,
+     "pos": 209,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "DAUDE COSTA, ALBERTO",
+     "mitjana": 0.4633,
+     "pos": 233,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BECERRA GÓMEZ, CIPRIANO",
+     "mitjana": 0.3789,
+     "pos": 326,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LAKISZYK KOWALCZUK, OSCAR ERNESTO",
+     "mitjana": 0.3131,
+     "pos": 371,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ FERNÁNDEZ, RAFAEL",
+     "mitjana": 0.308,
+     "pos": 542,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "PRETEL PÉREZ, JOSÉ",
+     "mitjana": 0.2963,
+     "pos": 382,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "BC OLESA",
+   "nom": "B.C. Olesa",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "",
+     "div_2526": "1a",
+     "motiu": "puja · campió 1a B"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "YESTE DE PABLO, ANTONI XAVIER",
+     "mitjana": 1.1589,
+     "pos": 406,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "ROS GUARRO, JOAN",
+     "mitjana": 0.7724,
+     "pos": 38,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CASADEVALL SARDAÑES, VALERO",
+     "mitjana": 0.6895,
+     "pos": 66,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "AMADO GAMBOA, JAVIER IGNACIO",
+     "mitjana": 0.5327,
+     "pos": 168,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ CARBONELL, ANTONI",
+     "mitjana": 0.4947,
+     "pos": 205,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "DELGADO BOSCH, Jº Mª",
+     "mitjana": 0.4723,
+     "pos": 225,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "AMADO GAMBOA, JOSE MANUEL",
+     "mitjana": 0.4321,
+     "pos": 266,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "C.B. BORGES",
+   "nom": "C.B. Borges",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MARTÍNEZ MATEU, ALBERT",
+     "mitjana": 0.4771,
+     "pos": 221,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GORGUES SENDRA, ANTONIO",
+     "mitjana": 0.4444,
+     "pos": 254,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "POLO CAMARASA, JOSEP Mª",
+     "mitjana": 0.4435,
+     "pos": 255,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GONZÁLEZ MARTÍN, JOAN",
+     "mitjana": 0.4257,
+     "pos": 278,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MINGUELLA PRINCEP, JORDI",
+     "mitjana": 0.4163,
+     "pos": 473,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SALVANY REÑE, JOSÉ MARÍA",
+     "mitjana": 0.385,
+     "pos": 321,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SOLÉ RUESTES, ROBERT",
+     "mitjana": 0.2709,
+     "pos": 569,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PORTA CONEJO, ANTONIO",
+     "mitjana": 0.2685,
+     "pos": 571,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "C.B. CANET",
+   "nom": "C.B. Canet",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": "baixa · play-off amb Sants D, desempat per caramboles (177-178)"
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "DE LA HOZ ALONSO, MIQUEL",
+     "mitjana": 0.6714,
+     "pos": 78,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MONTIEL SOLER, SERGI",
+     "mitjana": 0.6531,
+     "pos": 84,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "LÓPEZ PEÑARETE, JULIAN ALBERTO",
+     "mitjana": 0.5401,
+     "pos": 156,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "GÓMEZ PÉREZ, ARTURO",
+     "mitjana": 0.5369,
+     "pos": 160,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GRIS PERALBA, TONI",
+     "mitjana": 0.5292,
+     "pos": 174,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "AMORETTI VIDAL, LLUIS",
+     "mitjana": 0.5274,
+     "pos": 177,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "VILCHEZ VELASCO, ÁNGEL",
+     "mitjana": 0.5036,
+     "pos": 441,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MOYA MORENO, ROSENDO",
+     "mitjana": 0.4992,
+     "pos": 200,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "GÁLVEZ PAREJO, JOSÉ MARÍA",
+     "mitjana": 0.4891,
+     "pos": 208,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "COLLADO BANCHS, FRANCESC",
+     "mitjana": 0.4298,
+     "pos": 272,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MONTAÑÉS TATO, JOSEP",
+     "mitjana": 0.4174,
+     "pos": 288,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MARTORI VILA, JOAQUIM",
+     "mitjana": 0.4097,
+     "pos": 298,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "MANCIPE SEGURA, YEIMY ANDREA",
+     "mitjana": 0.3914,
+     "pos": 316,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "TORRENTS VILLARROYA, JOSEP MARIA",
+     "mitjana": 0.3567,
+     "pos": 504,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "CUARTAS CÁRDENAS, MARINO",
+     "mitjana": 0.3503,
+     "pos": 351,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "FORTUNY ROS, JORDI",
+     "mitjana": 0.282,
+     "pos": 388,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "BARRERA PERDIGÓN, DAMIÁN",
+     "mitjana": 0.238,
+     "pos": 401,
+     "de_club": null
+    },
+    {
+     "num": 18,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "ALEMANY ROS, LEANDRO",
+     "mitjana": 0.2,
+     "pos": 597,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.2000 CERDANYOLA",
+   "nom": "C.B. 2000 Cerdanyola",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": "puja · play-off guanyat a Lliçà d'Amunt A"
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MUÑOZ MUÑOZ, PERE",
+     "mitjana": 0.8566,
+     "pos": 25,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MAJUA PERIS, JOSEP LLUIS",
+     "mitjana": 0.656,
+     "pos": 83,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SOTO OLIVER, LLUÍS",
+     "mitjana": 0.6214,
+     "pos": 98,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "AGUILERA TORRES, JUAN ANTONIO",
+     "mitjana": 0.5859,
+     "pos": 121,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ LÓPEZ, SATURIO",
+     "mitjana": 0.55,
+     "pos": 145,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SABIO MONFORT, DANIEL",
+     "mitjana": 0.5446,
+     "pos": 426,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MIGUEL MATEU, JULIO RAMÓN",
+     "mitjana": 0.5286,
+     "pos": 175,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CADILLAC JODAR, JORDI",
+     "mitjana": 0.4929,
+     "pos": 207,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "SARRATE POCH, PERE",
+     "mitjana": 0.4495,
+     "pos": 245,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MOTA CALDERÓN, JOSÉ",
+     "mitjana": 0.4084,
+     "pos": 299,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "GARCÍA GONZÁLEZ, JOSÉ LUIS",
+     "mitjana": 0.3957,
+     "pos": 310,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "BALANTA PÉREZ, ANDRÉS",
+     "mitjana": 0.3853,
+     "pos": 486,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "SALAZAR PRADA, JUAN CARLOS",
+     "mitjana": 0.3585,
+     "pos": 502,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "PÉREZ CLARIANA, XAVIER",
+     "mitjana": 0.2961,
+     "pos": 553,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "FORNIÉS ARGILES, CÉSAR AUGUSTO",
+     "mitjana": 0.2879,
+     "pos": 386,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ NAVAS, MARTÍN",
+     "mitjana": 0.2839,
+     "pos": 387,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "FERNÁNDEZ CALLEJÓN, ALFREDO",
+     "mitjana": 0.2673,
+     "pos": 573,
+     "de_club": null
+    },
+    {
+     "num": 18,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "DORADO CHÁVEZ, JUAN",
+     "mitjana": 0.1711,
+     "pos": 605,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.ALBA",
+   "nom": "C.B. Alba",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": "puja · campió 2a B"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SANTAMARÍA BARBARÁ, JORDI",
+     "mitjana": 0.6092,
+     "pos": 104,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GARCÍA OLIVA, ANTONIO MANUEL",
+     "mitjana": 0.5464,
+     "pos": 153,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "PÉREZ GARCÍA, MIGUEL",
+     "mitjana": 0.5322,
+     "pos": 170,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "HERNÁNDEZ MAÑAS JOSÉ",
+     "mitjana": 0.52,
+     "pos": 436,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LINDO ALVARADO, ENRIC",
+     "mitjana": 0.4862,
+     "pos": 213,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GARCÍA MARQUÉS, CÉSAR",
+     "mitjana": 0.42,
+     "pos": 472,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "TORRENT COT, JOSEP",
+     "mitjana": 0.3452,
+     "pos": 510,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "C.B.BANYOLES",
+   "nom": "C.B. Banyoles",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": "baixa · 8è Honor B"
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "RODRÍGUEZ MAIA, MARIO FELIPE",
+     "mitjana": 0.8325,
+     "pos": 27,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "AMETLLER CONGOST, LLUIS",
+     "mitjana": 0.7778,
+     "pos": 35,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "COROMINAS FRANCH, ESTEVE",
+     "mitjana": 0.7726,
+     "pos": 37,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "GÓMEZ AMETLLER, ALBERT",
+     "mitjana": 0.5798,
+     "pos": 124,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "RODRIGUEZ JIMÉNEZ, EDUARD",
+     "mitjana": 0.5777,
+     "pos": 126,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "RESTREPO HERNÁNDEZ, CARLOS",
+     "mitjana": 0.5557,
+     "pos": 140,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "NADAL FONT, JOSEP Mª",
+     "mitjana": 0.5393,
+     "pos": 158,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "RAMIREZ MATEOS, EDUARD",
+     "mitjana": 0.4862,
+     "pos": 214,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "RALITA ROS, JOAN",
+     "mitjana": 0.4482,
+     "pos": 247,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "AGUILAR SALA, RAMÓN",
+     "mitjana": 0.4272,
+     "pos": 275,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CAMPS ESTELA, RAMÓN",
+     "mitjana": 0.3351,
+     "pos": 521,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "TURRÓ VIERT, JOAQUIM",
+     "mitjana": 0.3076,
+     "pos": 543,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "PARNAU PAGES, JOAN",
+     "mitjana": 0.2905,
+     "pos": 558,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "DA SILVA RIVILLA, ÁLVARO",
+     "mitjana": 0.2894,
+     "pos": 384,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "SÁNCHEZ ESCOFET, JAUME",
+     "mitjana": 0.285,
+     "pos": 560,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "GARCIA TARRATS, ALBERT",
+     "mitjana": 0.2773,
+     "pos": 390,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "SALGAS CASTAÑO, MÓNICA",
+     "mitjana": 0.2012,
+     "pos": 403,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.BARCELONA",
+   "nom": "C.B. Barcelona",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": "puja · campió 3a B"
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MINGUELL ROSSELLÓ, XAVIER",
+     "mitjana": 1.0236,
+     "pos": 17,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "LIMONES VILLALBA, JORDI",
+     "mitjana": 0.856,
+     "pos": 26,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MAYMÓ TORNÉ, MARC",
+     "mitjana": 0.7595,
+     "pos": 42,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "GUTIÉRREZ CONTRERAS, ARNOLD",
+     "mitjana": 0.7285,
+     "pos": 53,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "RICART MARTÍNEZ, FRANCESC",
+     "mitjana": 0.7149,
+     "pos": 409,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ARBIOL MORERA, RAMON",
+     "mitjana": 0.5634,
+     "pos": 135,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LIMONES VILLALBA, ANTONIO",
+     "mitjana": 0.5626,
+     "pos": 136,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "JORBA HOMAR, PAU",
+     "mitjana": 0.5547,
+     "pos": 142,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "FONT BORDERAS, JORDI",
+     "mitjana": 0.5544,
+     "pos": 424,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "RIERA PRATS, CARLES",
+     "mitjana": 0.3649,
+     "pos": 335,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "SÁNCHEZ MECA, RUBÉN",
+     "mitjana": 0.3287,
+     "pos": 524,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MEDIAVILLA CEINOS, GUILLERMO",
+     "mitjana": 0.3118,
+     "pos": 539,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "SÁNCHEZ FERNÁNDEZ, BARTOLOMÉ",
+     "mitjana": 0.3044,
+     "pos": 375,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "TOMÁS SÁNCHEZ, JOAN FRANCESC",
+     "mitjana": 0.275,
+     "pos": 564,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "BELTRAN CORTES, JAUME",
+     "mitjana": 0.1806,
+     "pos": 404,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.BLANES",
+   "nom": "C.B. Blanes",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "A",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "VILLEGAS VILAS, RICARD",
+     "mitjana": 0.7616,
+     "pos": 41,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SILVA GAVIRÍA, ÓSCAR ALONSO",
+     "mitjana": 0.5516,
+     "pos": 425,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "POTENCIANO ORTEGA, CARLES",
+     "mitjana": 0.5369,
+     "pos": 161,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "MARTÍNEZ PONCE, SERAFIN",
+     "mitjana": 0.5264,
+     "pos": 178,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PARÉS HERRERA, MANEL",
+     "mitjana": 0.4409,
+     "pos": 257,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GOMEZ LOPEZ, FRANCISCO",
+     "mitjana": 0.4335,
+     "pos": 264,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BARRERA GASCÓN, ENRIQUE",
+     "mitjana": 0.431,
+     "pos": 270,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "RODRIGUEZ CARRILLO, FRANCISCO",
+     "mitjana": 0.3979,
+     "pos": 309,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "RIPOLL ROMAGUERA, JOAQUIM",
+     "mitjana": 0.3924,
+     "pos": 482,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ÁLVAREZ-BUYLLA PASCUAL, RAMÓN",
+     "mitjana": 0.361,
+     "pos": 499,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "RIBAS MURIEL, MARC",
+     "mitjana": 0.3602,
+     "pos": 500,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "SEGUÍ GUASCH, ERNEST",
+     "mitjana": 0.2133,
+     "pos": 592,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.CARDONA",
+   "nom": "C.B. Cardona",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "",
+     "div_2526": "3a",
+     "motiu": "puja · campió 3a A"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GARCÍA SORIANO, ANTONI",
+     "mitjana": 0.57,
+     "pos": 130,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "PÉREZ DONAIRE, JAVIER",
+     "mitjana": 0.5464,
+     "pos": 152,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "HUERTAS GARRIDO, MIGUEL",
+     "mitjana": 0.4571,
+     "pos": 237,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SERRANO CHAMORRO, JOSÉ",
+     "mitjana": 0.3918,
+     "pos": 315,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CORDÓN SOSA, JUAN",
+     "mitjana": 0.3297,
+     "pos": 361,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PORCEL CABRERA, JOSÉ EMILIO",
+     "mitjana": 0.3265,
+     "pos": 528,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PRIETO TRINIDAD, ANTONIO",
+     "mitjana": 0.2241,
+     "pos": 586,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GARRIGA GARRIGA, JAUME",
+     "mitjana": 0.2213,
+     "pos": 587,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "C.B.LLEIDA",
+   "nom": "C.B. Lleida",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": "baixa · play-off amb Sant Adrià C, desempat per caramboles (186-201)"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MARTÍ SENDRA, JORDI",
+     "mitjana": 0.8877,
+     "pos": 24,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "ORREGO CARDONA, YIBETH ANDRÉS",
+     "mitjana": 0.8126,
+     "pos": 31,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CARDOZO TALERO, NELSON ALIRIO",
+     "mitjana": 0.762,
+     "pos": 40,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "TORRES EZEQUIEL, JAUME MANEL",
+     "mitjana": 0.6805,
+     "pos": 69,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CARDET CALDERÓ, ISIDOR",
+     "mitjana": 0.5647,
+     "pos": 134,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "DAVILA SILVA, HENRY",
+     "mitjana": 0.5554,
+     "pos": 141,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "TOLSA XIXONS, NORBERT",
+     "mitjana": 0.5436,
+     "pos": 154,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MARTÍNEZ BELLMUNT, JORDI",
+     "mitjana": 0.5248,
+     "pos": 180,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "FUENTE MONTANE, NICOLAU",
+     "mitjana": 0.4375,
+     "pos": 462,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "GRACIA RODRIGUEZ, EMILIO",
+     "mitjana": 0.4312,
+     "pos": 466,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ROPERO VILARÓ, ADRIÀ",
+     "mitjana": 0.4178,
+     "pos": 286,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "NOUVILES SERRA, JAUME",
+     "mitjana": 0.3873,
+     "pos": 484,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MARTÍ TALAVERA, SALVADOR",
+     "mitjana": 0.3191,
+     "pos": 533,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ÁLVAREZ ÁLVAREZ, ALEJANDRO",
+     "mitjana": 0.3035,
+     "pos": 376,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ MASEGOSA, FRANCISCO",
+     "mitjana": 0.2518,
+     "pos": 579,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.LLINARS",
+   "nom": "C.B. Llinars",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": "baixa · play-off perdut amb Mont-roig B"
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "lletra": "D",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "D",
+     "div_2526": "4a",
+     "motiu": null
+    },
+    {
+     "lletra": "E",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "E",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "ALVES DA CUNHA, DAVID M.",
+     "mitjana": 0.7834,
+     "pos": 34,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CORPAS NATOLI, FERNANDO",
+     "mitjana": 0.7532,
+     "pos": 45,
+     "de_club": "B.C. Granollers"
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MARTÍNEZ CARRILLO, ANTONI",
+     "mitjana": 0.7512,
+     "pos": 46,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "FERRÉ GUALLAR, JAUME",
+     "mitjana": 0.6163,
+     "pos": 100,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PÉREZ VIÑA, MANUEL",
+     "mitjana": 0.5336,
+     "pos": 166,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MARÍN VICIOSO, BARTOLOMÉ",
+     "mitjana": 0.5111,
+     "pos": 192,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "VILASECA PERRAMON, JORDI",
+     "mitjana": 0.4856,
+     "pos": 215,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ORTA BERNARDINO, MANEL",
+     "mitjana": 0.4736,
+     "pos": 224,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CALVACHE BANÚS, JORDI",
+     "mitjana": 0.4714,
+     "pos": 226,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CLAPÉS MIRÓ, JORDI",
+     "mitjana": 0.4479,
+     "pos": 248,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "SOLÉ MARSIÑACH, JOSEP MARIA",
+     "mitjana": 0.4305,
+     "pos": 271,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "JOVE BADIA, EDUARD",
+     "mitjana": 0.4282,
+     "pos": 274,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "SURÓS SÁNCHEZ, FRANCESC",
+     "mitjana": 0.4113,
+     "pos": 294,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "MARTÍN TOVAR, FRANCISCO",
+     "mitjana": 0.4003,
+     "pos": 307,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "TURU ROSELL, JOSEP",
+     "mitjana": 0.363,
+     "pos": 339,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "GÁLVEZ JURADO, FRANCISCO",
+     "mitjana": 0.3414,
+     "pos": 356,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "VILLACAMPA DE LA CRUZ, VÍCTOR M.",
+     "mitjana": 0.3383,
+     "pos": 518,
+     "de_club": null
+    },
+    {
+     "num": 18,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "VILA PALAU, JAUME",
+     "mitjana": 0.3171,
+     "pos": 534,
+     "de_club": null
+    },
+    {
+     "num": 19,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CORANTI DEL CASTILLO, ANDRÉS",
+     "mitjana": 0.3163,
+     "pos": 535,
+     "de_club": null
+    },
+    {
+     "num": 20,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "MASFERRER BAYE, PERE",
+     "mitjana": 0.3134,
+     "pos": 370,
+     "de_club": null
+    },
+    {
+     "num": 21,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "AULADELL CODINA, JOSEP",
+     "mitjana": 0.2882,
+     "pos": 385,
+     "de_club": null
+    },
+    {
+     "num": 22,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ NAVAJAS, CARLOS",
+     "mitjana": 0.2744,
+     "pos": 392,
+     "de_club": null
+    },
+    {
+     "num": 23,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "JUSTICIA RODRÍGUEZ, EMILIO",
+     "mitjana": 0.269,
+     "pos": 396,
+     "de_club": null
+    },
+    {
+     "num": 24,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "ACED QUILEZ, LUIS",
+     "mitjana": 0.2615,
+     "pos": 575,
+     "de_club": null
+    },
+    {
+     "num": 25,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "SÁNCHEZ ROSO, ANTONIO",
+     "mitjana": 0.176,
+     "pos": 603,
+     "de_club": null
+    },
+    {
+     "num": 26,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "BUITRAGO DEL MORAL, IKER",
+     "mitjana": 0.1752,
+     "pos": 604,
+     "de_club": null
+    },
+    {
+     "num": 27,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "ARRIBAS GARCÍA, PEDRO",
+     "mitjana": 0.14,
+     "pos": 610,
+     "de_club": null
+    },
+    {
+     "num": 28,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CHIVA CERVERA, ALFONSO",
+     "mitjana": 0.0267,
+     "pos": 613,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.LLIÇÀ D'AMUNT",
+   "nom": "C.B. Lliçà d'Amunt",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "A",
+     "div_2526": "2a",
+     "motiu": "baixa · play-off perdut amb Cerdanyola B"
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "TAZA GARCÍA, JOAN CARLES",
+     "mitjana": 0.7561,
+     "pos": 43,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GAVILAN RAYA, JOSE ANTONIO",
+     "mitjana": 0.4933,
+     "pos": 206,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "BASTIDA SALA, XAVIER",
+     "mitjana": 0.4696,
+     "pos": 227,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "PI VILARDELL, XAVIER",
+     "mitjana": 0.4652,
+     "pos": 230,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "VÁZQUEZ TRABADO, MANUEL",
+     "mitjana": 0.437,
+     "pos": 463,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "JOSÉ TORRISCO, ENRIQUE",
+     "mitjana": 0.4158,
+     "pos": 289,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CREGO GUERRERO, DIDIER",
+     "mitjana": 0.4062,
+     "pos": 300,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CALLS SARROCA, JOSEP",
+     "mitjana": 0.3933,
+     "pos": 311,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "HUGUET PASCUAL, JORDI",
+     "mitjana": 0.388,
+     "pos": 318,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CARRIÓ LACASA, CARLES",
+     "mitjana": 0.366,
+     "pos": 333,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CRUZ LORENZANZA, ÁNGEL",
+     "mitjana": 0.34,
+     "pos": 514,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "GUARINO GUTIERREZ, MATEO",
+     "mitjana": 0.3007,
+     "pos": 379,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.MANRESA",
+   "nom": "C.B. Manresa",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "HERNÁNDEZ HERNÁNDEZ, FRANCESC",
+     "mitjana": 0.7169,
+     "pos": 59,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SÁEZ ROMERO, ANTONIO",
+     "mitjana": 0.606,
+     "pos": 106,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GONZÁLEZ SÁNCHEZ, JOSEP LL.",
+     "mitjana": 0.5464,
+     "pos": 151,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "LOZANO DE LA TORRE, MANEL",
+     "mitjana": 0.5074,
+     "pos": 194,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "HERMIDA DÍAZ, EVA MARÍA",
+     "mitjana": 0.3932,
+     "pos": 312,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SÁNCHEZ NARVÁEZ, JACINTO",
+     "mitjana": 0.3766,
+     "pos": 328,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PANADÉS ZAFRA, JOAN",
+     "mitjana": 0.3392,
+     "pos": 516,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ROMERA OCAÑA, JOSÉ MANUEL",
+     "mitjana": 0.3392,
+     "pos": 357,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "VICENT ESPINAR, FRANCISCO MANUEL",
+     "mitjana": 0.3229,
+     "pos": 364,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "PELEGRÍN MARTÍNEZ, JORGE",
+     "mitjana": 0.322,
+     "pos": 366,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ANGHEL TURMAC, GEORGETA",
+     "mitjana": 0.2286,
+     "pos": 402,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.MATARÓ",
+   "nom": "C.B. Mataró",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": "puja · campió 2a A"
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": "puja · campió 4a B"
+    },
+    {
+     "lletra": "D",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "D",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GARRIGA COMAS, JORDI",
+     "mitjana": 1.3218,
+     "pos": 4,
+     "de_club": "C.B. Sant Adrià"
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "LEGIDO FERNÁNDEZ, SERGIO",
+     "mitjana": 1.1496,
+     "pos": 10,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "BENITEZ REINA, PAU",
+     "mitjana": 1.142,
+     "pos": 11,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "UCEDA LÓPEZ, RAÚL",
+     "mitjana": 1.0488,
+     "pos": 15,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MARTÍNEZ AVILÉS, SERGIO",
+     "mitjana": 1.0459,
+     "pos": 16,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SEGARRA SOLÉ, ALBERT",
+     "mitjana": 0.9404,
+     "pos": 19,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "VAN KESSEL, MARK STEFAN",
+     "mitjana": 0.8889,
+     "pos": 23,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SÁNCHEZ GALLEGO, JOEL",
+     "mitjana": 0.7432,
+     "pos": 50,
+     "de_club": "S.B. Foment Molins"
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "SALAZAR HERNÁNDEZ, RAFAEL",
+     "mitjana": 0.6492,
+     "pos": 92,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "PLANDOLIT MARTÍN, MIQUEL",
+     "mitjana": 0.6085,
+     "pos": 105,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MARTÍNEZ MORENO, DANIEL",
+     "mitjana": 0.5583,
+     "pos": 139,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "SAURÍ RABAT, JOAN",
+     "mitjana": 0.5179,
+     "pos": 189,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "BORT CARIÑENA, SALVADOR",
+     "mitjana": 0.4758,
+     "pos": 222,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "RIBAS TORRES, PERE",
+     "mitjana": 0.3818,
+     "pos": 323,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "TORRES TORRES, FRANCISCO",
+     "mitjana": 0.369,
+     "pos": 494,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ SALVADOR, MARTI",
+     "mitjana": 0.3638,
+     "pos": 338,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "PÉREZ REQUENA, JOSÉ ANTONIO",
+     "mitjana": 0.357,
+     "pos": 346,
+     "de_club": null
+    },
+    {
+     "num": 18,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "RODRIGUEZ DIAZ, JOAN MANEL",
+     "mitjana": 0.3223,
+     "pos": 365,
+     "de_club": null
+    },
+    {
+     "num": 19,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "DE LOS RÍOS MARTÍNEZ, JOSÉ",
+     "mitjana": 0.2828,
+     "pos": 562,
+     "de_club": null
+    },
+    {
+     "num": 20,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "VILLAR GARCÍA, LLUIS",
+     "mitjana": 0.2718,
+     "pos": 395,
+     "de_club": null
+    },
+    {
+     "num": 21,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "MAYOR GARCÍA, JAUME",
+     "mitjana": 0.2585,
+     "pos": 399,
+     "de_club": null
+    },
+    {
+     "num": 22,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "BAÑOBRE PICOS, VICENTE",
+     "mitjana": 0.219,
+     "pos": 589,
+     "de_club": null
+    },
+    {
+     "num": 23,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ ESQUERDO, JOSÉ RAMÓN",
+     "mitjana": 0.2067,
+     "pos": 595,
+     "de_club": null
+    },
+    {
+     "num": 24,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "GARCÍA BURGUEÑO, EDUARDO",
+     "mitjana": 0.1777,
+     "pos": 602,
+     "de_club": null
+    },
+    {
+     "num": 25,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ FERNÁNDEZ, MARTA FABIANA",
+     "mitjana": 0.0657,
+     "pos": 405,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.MOLLET",
+   "nom": "C.B. Mollet",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "PÉREZ ANDREU, ALEJANDRO",
+     "mitjana": 1.1558,
+     "pos": 9,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "BOUTERIN BOTE, JOAN",
+     "mitjana": 1.1255,
+     "pos": 12,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MAS CANADELL, CÉSAR",
+     "mitjana": 0.8974,
+     "pos": 22,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "MARTÍNEZ ALBERTO, XAVIER",
+     "mitjana": 0.7916,
+     "pos": 33,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PÉREZ ZORRILLA, RAFAEL",
+     "mitjana": 0.7019,
+     "pos": 64,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "FELIU PI, PERE",
+     "mitjana": 0.6033,
+     "pos": 109,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ACOSTA CANO, JOSÉ CRUZ",
+     "mitjana": 0.5875,
+     "pos": 117,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "DEIBIS FERNÁNDEZ, YHOJAN",
+     "mitjana": 0.5863,
+     "pos": 119,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ORTIZ ALAMILLO, JACINTO",
+     "mitjana": 0.4915,
+     "pos": 444,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "BUSQUETS TROSES, ROMÀ",
+     "mitjana": 0.456,
+     "pos": 238,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ROMÁN LOZANO, BIBIANO",
+     "mitjana": 0.4003,
+     "pos": 305,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.MONFORTE",
+   "nom": "C.B. Monforte",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": "puja · campió 1a A"
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "C",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "lletra": "D",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "D",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "lletra": "E",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "E",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GARCÍA ALARCÓN, RICARDO",
+     "mitjana": 1.3016,
+     "pos": 5,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "ZULETA GIRALDO, JOHN JAIRO",
+     "mitjana": 0.8165,
+     "pos": 30,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "LOZANO HERRERO, MANUEL",
+     "mitjana": 0.7511,
+     "pos": 47,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "JUÁREZ DE ALARCÓN, JORGE",
+     "mitjana": 0.7173,
+     "pos": 58,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ GALLEGO, CRISTIAN",
+     "mitjana": 0.7045,
+     "pos": 61,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CARDONA GALLEGO, JULIÁN ALBERTO",
+     "mitjana": 0.7044,
+     "pos": 62,
+     "de_club": "S.B. Esplugues l'Avenç"
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "FARIÑA VILLANUEVA, FRANCISCO",
+     "mitjana": 0.6989,
+     "pos": 65,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "OQUENDO RAVE, CARLOS ANDRÉS",
+     "mitjana": 0.6832,
+     "pos": 68,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "FONELLOSA CASANOVAS, XAVIER",
+     "mitjana": 0.677,
+     "pos": 72,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MUÑOZ LÓPEZ, JAVIER",
+     "mitjana": 0.6572,
+     "pos": 82,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "OLIVER SINCA, JORDI",
+     "mitjana": 0.6509,
+     "pos": 90,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CASTRO TÉLLEZ, HENRY",
+     "mitjana": 0.6142,
+     "pos": 101,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "BONET MORENO, PAU",
+     "mitjana": 0.5947,
+     "pos": 418,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "LOZANO VILLEGAS, MAURICIO",
+     "mitjana": 0.5882,
+     "pos": 116,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "CHUECOS ENRIQUEZ, LUIS",
+     "mitjana": 0.5198,
+     "pos": 186,
+     "de_club": "C.B. Sants"
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "GARCÍA ZALDIVAR, RICARDO",
+     "mitjana": 0.5098,
+     "pos": 438,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "PUIG LATRE, ISAAC",
+     "mitjana": 0.4832,
+     "pos": 217,
+     "de_club": null
+    },
+    {
+     "num": 18,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "ADELL CASARRAMONA, PERE",
+     "mitjana": 0.4787,
+     "pos": 219,
+     "de_club": null
+    },
+    {
+     "num": 19,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "SEGURA MONDRIÁ, FRANCESC XAVIER",
+     "mitjana": 0.4782,
+     "pos": 220,
+     "de_club": null
+    },
+    {
+     "num": 20,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "SEGURA GONZÁLVEZ, FERNANDO",
+     "mitjana": 0.4511,
+     "pos": 241,
+     "de_club": null
+    },
+    {
+     "num": 21,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CANO POIRRIER LALANNE, SANTIAGO",
+     "mitjana": 0.4466,
+     "pos": 250,
+     "de_club": null
+    },
+    {
+     "num": 22,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "BARRAGÁN DE LA CRUZ, LUIS",
+     "mitjana": 0.4448,
+     "pos": 253,
+     "de_club": null
+    },
+    {
+     "num": 23,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CHENOLL CASTRO, ENRIC",
+     "mitjana": 0.4333,
+     "pos": 465,
+     "de_club": null
+    },
+    {
+     "num": 24,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CAMPOS GONZÁLEZ, JºMª",
+     "mitjana": 0.42,
+     "pos": 283,
+     "de_club": null
+    },
+    {
+     "num": 25,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "ARIS GUITART, ALBERT",
+     "mitjana": 0.412,
+     "pos": 293,
+     "de_club": null
+    },
+    {
+     "num": 26,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CERVERA SANS, GABRIEL",
+     "mitjana": 0.3856,
+     "pos": 320,
+     "de_club": null
+    },
+    {
+     "num": 27,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "TORMO CALATAYUD, JORGE",
+     "mitjana": 0.3605,
+     "pos": 341,
+     "de_club": null
+    },
+    {
+     "num": 28,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "FERNÁNDEZ NÚÑEZ, MANUEL",
+     "mitjana": 0.3587,
+     "pos": 344,
+     "de_club": null
+    },
+    {
+     "num": 29,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "SÁNCHEZ TRIGUEROS, JAIME",
+     "mitjana": 0.3564,
+     "pos": 505,
+     "de_club": null
+    },
+    {
+     "num": 30,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "VILLATE MALAGÓN, BRIAN STEVEN",
+     "mitjana": 0.3462,
+     "pos": 508,
+     "de_club": null
+    },
+    {
+     "num": 31,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "HERNÁNDEZ FALCO, IGNASI",
+     "mitjana": 0.3309,
+     "pos": 523,
+     "de_club": null
+    },
+    {
+     "num": 32,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "GILI BERTRAL, JOAN",
+     "mitjana": 0.3206,
+     "pos": 367,
+     "de_club": null
+    },
+    {
+     "num": 33,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "OBANDO QUINTERO, CARLOS ARIEL",
+     "mitjana": 0.32,
+     "pos": null,
+     "de_club": null
+    },
+    {
+     "num": 34,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "RODRÍGUEZ SÁNCHEZ, CÉSAR",
+     "mitjana": 0.3175,
+     "pos": 368,
+     "de_club": null
+    },
+    {
+     "num": 35,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "TIRADO GUTIERREZ, FRANCISCO",
+     "mitjana": 0.2743,
+     "pos": 393,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.MONT-ROIG",
+   "nom": "C.B. Mont-roig",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": "puja · play-off guanyat a Llinars B"
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CHACÓN LÓPEZ, CARLOS J.",
+     "mitjana": 0.9855,
+     "pos": 18,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "FONT GIMÉNEZ, JOAN ANTON",
+     "mitjana": 0.7624,
+     "pos": 39,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "ANGARITA CRISTANCHO, ALEXANDER",
+     "mitjana": 0.7143,
+     "pos": 60,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "PRATS PERI, IVÁN",
+     "mitjana": 0.6761,
+     "pos": 73,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ARNAU FONT, RICARD",
+     "mitjana": 0.5314,
+     "pos": 431,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MORUNO RAYA, IGNACIO",
+     "mitjana": 0.5304,
+     "pos": 172,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PRATS QUIÑONES, JOSEP Mª",
+     "mitjana": 0.5277,
+     "pos": 176,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BARENYS PINILLA, MIQUEL",
+     "mitjana": 0.4575,
+     "pos": 236,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "KESIM, SEDAT",
+     "mitjana": 0.4393,
+     "pos": 459,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MAGDALENO CARREÑO, ANTONI",
+     "mitjana": 0.4343,
+     "pos": 261,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "FERNÁNDEZ BARRAGAN, JORGE",
+     "mitjana": 0.4337,
+     "pos": 263,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "FERRANDO PAPIO, RAMÓN",
+     "mitjana": 0.4329,
+     "pos": 265,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "JUAN DOMÈNECH, JOSEP MARIA",
+     "mitjana": 0.4112,
+     "pos": 295,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "MORCILLO MARIN, JUAN",
+     "mitjana": 0.4021,
+     "pos": 479,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "BAZ VERGARA, ISIDRE",
+     "mitjana": 0.392,
+     "pos": 314,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "MARTÍ TORRENTE, DAMIÀ",
+     "mitjana": 0.3654,
+     "pos": 334,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "VERSCHELDEN DE RYBEL, LUC",
+     "mitjana": 0.2992,
+     "pos": 551,
+     "de_club": null
+    },
+    {
+     "num": 18,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "GARCÍA FORÉS, MANEL",
+     "mitjana": 0.2492,
+     "pos": 580,
+     "de_club": null
+    },
+    {
+     "num": 19,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "MORENO VERA, JULIÀ",
+     "mitjana": 0.2166,
+     "pos": 590,
+     "de_club": null
+    },
+    {
+     "num": 20,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "TEIXIDO GORT, JORDI",
+     "mitjana": 0.2,
+     "pos": 598,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.PRAT",
+   "nom": "C.B. Prat",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SÁNCHEZ BARRERA, JORGE A.",
+     "mitjana": 0.6777,
+     "pos": 71,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "BERNAD DAZA, JAIME",
+     "mitjana": 0.6518,
+     "pos": 88,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "IÑIGO GRISALEÑA, ALEJANDRO",
+     "mitjana": 0.6099,
+     "pos": 102,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "PEÑA MARTÍNEZ, FRANCISCO",
+     "mitjana": 0.5931,
+     "pos": 114,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BONALUQUE SÁNCHEZ, MANUEL",
+     "mitjana": 0.496,
+     "pos": 203,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LLAMAS SÁNCHEZ, MANUEL",
+     "mitjana": 0.4639,
+     "pos": 232,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "VALENTIN GERMAN, IONEL",
+     "mitjana": 0.4108,
+     "pos": 297,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MARTÍNEZ OROZCO, PEDRO",
+     "mitjana": 0.3948,
+     "pos": 481,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "IÑIGUEZ TRIQUELL, ISIDRO",
+     "mitjana": 0.393,
+     "pos": 313,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "BELLOT BOTELLO, FRANCISCO",
+     "mitjana": 0.3589,
+     "pos": 343,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "BOLOIX SEDO, RAMÓN",
+     "mitjana": 0.2964,
+     "pos": 381,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.PREMIÀ",
+   "nom": "C.B. Premià",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "LLOVERAS MARTÍNEZ, FCO. JOSÉ",
+     "mitjana": 0.6047,
+     "pos": 107,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "BAS PASTOR, ENRIC",
+     "mitjana": 0.5466,
+     "pos": 150,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MARÍN ROMERA, FELICIÀ",
+     "mitjana": 0.4955,
+     "pos": 204,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PRATS RINS, JAIME",
+     "mitjana": 0.4749,
+     "pos": 448,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CRISTÓBAL CEBOLLA, CARLOS",
+     "mitjana": 0.4497,
+     "pos": 244,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CHECA FUENTES, DIONISIO",
+     "mitjana": 0.3433,
+     "pos": 354,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "RODRIGUEZ SANTIN, JUAN JOSÉ",
+     "mitjana": 0.298,
+     "pos": 552,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "C.B.SANT ADRIÀ",
+   "nom": "C.B. Sant Adrià",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "B",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "C",
+     "div_2526": "2a",
+     "motiu": "puja · play-off amb Lleida B, desempat per caramboles (201-186)"
+    },
+    {
+     "lletra": "D",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "D",
+     "div_2526": "2a",
+     "motiu": "baixa · 8è 2a B"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MONTES MONFERRER, ANTONIO",
+     "mitjana": 1.5946,
+     "pos": 3,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "PINEDA LAFUENTE, JOAN JOSEP",
+     "mitjana": 0.9391,
+     "pos": 20,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "LUQUE MARTÍNEZ, JESÚS",
+     "mitjana": 0.9102,
+     "pos": 21,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "GUERRERO GONZÁLEZ, MIQUEL A.",
+     "mitjana": 0.8266,
+     "pos": 28,
+     "de_club": "B.C. Granollers"
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "JIMÉNEZ VASCO, JOAN CARLES",
+     "mitjana": 0.818,
+     "pos": 29,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "HERNÁNDEZ LÓPEZ, JONATAN",
+     "mitjana": 0.7766,
+     "pos": 36,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GIL PÉREZ, ALBERT",
+     "mitjana": 0.6608,
+     "pos": 81,
+     "de_club": "C.B. Monforte"
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BOSQUED TORE, DAVID",
+     "mitjana": 0.6528,
+     "pos": 86,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CALVET LLACH, JOAN",
+     "mitjana": 0.6323,
+     "pos": 94,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "SOTOMAYOR PLATA, MANUEL",
+     "mitjana": 0.5952,
+     "pos": 112,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "YÁÑEZ ACUÑA, ENRIQUE",
+     "mitjana": 0.5759,
+     "pos": 127,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "PORQUERAS SABATÉ, VÍCTOR",
+     "mitjana": 0.5668,
+     "pos": 132,
+     "de_club": "B. La Unió Coral"
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "MONTES GALLARDO, ANTONIO",
+     "mitjana": 0.5471,
+     "pos": 149,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "NUÉVALOS PÉREZ, CARLOS",
+     "mitjana": 0.533,
+     "pos": 167,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "SOGUÉS BELTRÁN, CARLOS",
+     "mitjana": 0.5129,
+     "pos": 191,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "JIMÉNEZ BOTIAS, MAX",
+     "mitjana": 0.4879,
+     "pos": 210,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "SUÁREZ LASSO, HÉCTOR FABIO",
+     "mitjana": 0.4632,
+     "pos": 234,
+     "de_club": null
+    },
+    {
+     "num": 18,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "LORENTE GARCÍA, JOSEP MANEL",
+     "mitjana": 0.443,
+     "pos": 256,
+     "de_club": null
+    },
+    {
+     "num": 19,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "ARIAS HERRERO, JOSÉ",
+     "mitjana": 0.4391,
+     "pos": 258,
+     "de_club": null
+    },
+    {
+     "num": 20,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "JIMÉNEZ JIMÉNEZ, JOSÉ",
+     "mitjana": 0.4059,
+     "pos": 301,
+     "de_club": null
+    },
+    {
+     "num": 21,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "RODRÍGUEZ MONTESINOS, ROQUE",
+     "mitjana": 0.3674,
+     "pos": 496,
+     "de_club": null
+    },
+    {
+     "num": 22,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "ORTA LÓPEZ, LUIS",
+     "mitjana": 0.364,
+     "pos": 498,
+     "de_club": null
+    },
+    {
+     "num": 23,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "MARTÍNEZ MARTÍNEZ, MIGUEL",
+     "mitjana": 0.3583,
+     "pos": 345,
+     "de_club": null
+    },
+    {
+     "num": 24,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "SALA CAMPS, RAMÓN",
+     "mitjana": 0.3101,
+     "pos": 541,
+     "de_club": null
+    },
+    {
+     "num": 25,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "AMIGÓ BARBERÁN, JOAQUIM",
+     "mitjana": 0.2615,
+     "pos": 398,
+     "de_club": null
+    },
+    {
+     "num": 26,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "VAL AINA, JOSEP MARIA",
+     "mitjana": 0.2324,
+     "pos": 583,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.SANT BOI",
+   "nom": "C.B. Sant Boi",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": "baixa · 8è 3a A"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GASCÓN REYES, RAFAEL",
+     "mitjana": 0.7372,
+     "pos": 52,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "PASTOR RIVAS, MANUEL",
+     "mitjana": 0.7282,
+     "pos": 54,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MEGIAS NAVAS, MATEU",
+     "mitjana": 0.6719,
+     "pos": 77,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "LÓPEZ BALBOA, ALEJANDRO",
+     "mitjana": 0.6025,
+     "pos": 110,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "FONTES FULQUET, MANEL",
+     "mitjana": 0.5658,
+     "pos": 133,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ALBERICH SÁNCHEZ, VICENTE",
+     "mitjana": 0.5484,
+     "pos": 147,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "QUESADA MARTOS, JOSÉ LUIS",
+     "mitjana": 0.4558,
+     "pos": 239,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "JOU MORA, FERRÀN",
+     "mitjana": 0.4467,
+     "pos": 249,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "GARCÍA ESPIGARES, JOSÉ",
+     "mitjana": 0.4345,
+     "pos": 260,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "LLORENS ROCA, JORDI",
+     "mitjana": 0.4338,
+     "pos": 262,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ROJALS VALLS, JOAN",
+     "mitjana": 0.4319,
+     "pos": 268,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "SANTIAGO ROMERO, JUAN",
+     "mitjana": 0.4184,
+     "pos": 285,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "MARTÍN SÁNCHEZ, ANDREU",
+     "mitjana": 0.398,
+     "pos": 308,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "SAEZ RODRIGUEZ, JOSÉ MANUEL",
+     "mitjana": 0.3593,
+     "pos": 342,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "GARCÍA CORBALÁN, JESÚS",
+     "mitjana": 0.3338,
+     "pos": 358,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "GÓMEZ GONZÁLEZ, JOSEP",
+     "mitjana": 0.2745,
+     "pos": 391,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "CANTERO LLORENTE, FRANCESC M.",
+     "mitjana": 0.2551,
+     "pos": 400,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.SANTS",
+   "nom": "C.B. Sants",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": "baixa · 8è Honor A"
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "D",
+     "div_2526": "3a",
+     "motiu": "puja · play-off amb Canet B, desempat per caramboles (178-177)"
+    },
+    {
+     "lletra": "D",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "lletra": "E",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "E",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MULA CALLEJÓN, FRANCISCO",
+     "mitjana": 0.7449,
+     "pos": 48,
+     "de_club": "C.B. Mont-roig"
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MARTÍN LIMA, MELCHOR",
+     "mitjana": 0.7448,
+     "pos": 49,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SÁNCHEZ MARTÍNEZ, PASCUAL",
+     "mitjana": 0.7391,
+     "pos": 51,
+     "de_club": "C.B. Sant Boi"
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "VARELA LOSADA, FRANCESC",
+     "mitjana": 0.6644,
+     "pos": 80,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MARTÍNEZ TORRES, JORDI",
+     "mitjana": 0.6259,
+     "pos": 95,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GALLEGO MARTÍN, JOSEP LL.",
+     "mitjana": 0.6038,
+     "pos": 108,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "DALMAU SUÑE, ENRIC",
+     "mitjana": 0.5787,
+     "pos": 125,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ARTIGAS BENTANACHS, XAVIER",
+     "mitjana": 0.5616,
+     "pos": 137,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "BOTERO BERRIO, CARLOS ALBERTO",
+     "mitjana": 0.5273,
+     "pos": 432,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "VEIGA CARRETE, DAVID",
+     "mitjana": 0.5197,
+     "pos": 187,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "FERNÁNDEZ TORRES, DANIEL",
+     "mitjana": 0.5136,
+     "pos": 190,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "GARCÍA DURÁN, CARMELO",
+     "mitjana": 0.5101,
+     "pos": 193,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "ROJAS ARAUJO, ÓSCAR",
+     "mitjana": 0.5024,
+     "pos": 196,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "ARMENGOL BERTRAN, JORDI",
+     "mitjana": 0.5016,
+     "pos": 197,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "SÁNCHEZ TRIGUEROS, CARLES",
+     "mitjana": 0.4807,
+     "pos": 218,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "PALOMO MORILLAS, JOSEP LLUIS",
+     "mitjana": 0.4553,
+     "pos": 240,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "BONET CARMONA, SEBASTIÀ",
+     "mitjana": 0.4511,
+     "pos": 456,
+     "de_club": null
+    },
+    {
+     "num": 18,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "DOMINGO JUAN, JORGE",
+     "mitjana": 0.4454,
+     "pos": 252,
+     "de_club": null
+    },
+    {
+     "num": 19,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "DUQUE GIRALDO, CARLOS ALBERTO",
+     "mitjana": 0.4175,
+     "pos": 287,
+     "de_club": null
+    },
+    {
+     "num": 20,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "LÓPEZ ARJONA, EMILIO",
+     "mitjana": 0.4149,
+     "pos": 474,
+     "de_club": null
+    },
+    {
+     "num": 21,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "LEÓN PUIG, ESTEBAN",
+     "mitjana": 0.4003,
+     "pos": 306,
+     "de_club": null
+    },
+    {
+     "num": 22,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CASTRO CALVO, MANUEL",
+     "mitjana": 0.3724,
+     "pos": 330,
+     "de_club": null
+    },
+    {
+     "num": 23,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "VILA CLOPES, JOSEP",
+     "mitjana": 0.3507,
+     "pos": 507,
+     "de_club": null
+    },
+    {
+     "num": 24,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CHUMILLAS INVERNON, CRISTOBAL",
+     "mitjana": 0.3148,
+     "pos": 369,
+     "de_club": null
+    },
+    {
+     "num": 25,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "IBAÑEZ APARICIO, JULIÀ",
+     "mitjana": 0.31,
+     "pos": 373,
+     "de_club": null
+    },
+    {
+     "num": 26,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "ROSES GUITART, ANTONI",
+     "mitjana": 0.2987,
+     "pos": 380,
+     "de_club": null
+    },
+    {
+     "num": 27,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "MATEOS SÁNCHEZ, FRANCISCO",
+     "mitjana": 0.2945,
+     "pos": 383,
+     "de_club": null
+    },
+    {
+     "num": 28,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CANDEAL DOMINGUEZ, MANUEL",
+     "mitjana": 0.2933,
+     "pos": 555,
+     "de_club": null
+    },
+    {
+     "num": 29,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "CASTILLO ALGAR, JUAN CARLOS",
+     "mitjana": 0.2812,
+     "pos": 389,
+     "de_club": null
+    },
+    {
+     "num": 30,
+     "banda": "E",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "swing": false,
+     "nom": "NARVAEZ SÁNCHEZ, FRANCISCO",
+     "mitjana": 0.2727,
+     "pos": 394,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.TARRAGONA",
+   "nom": "C.B. Tarragona",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": "baixa · 8è 1a B"
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "ARNAU ABILLEIRA, ALEIX",
+     "mitjana": 0.6176,
+     "pos": 99,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CASADÓ ROCA, ALEX",
+     "mitjana": 0.5997,
+     "pos": 111,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SOTO DÍAZ, FÉLIX ESTEVE",
+     "mitjana": 0.5802,
+     "pos": 421,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "PASTOR BALAGUÉ, JORDI",
+     "mitjana": 0.5496,
+     "pos": 146,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ORELLANA CUBEROS, JUAN DIEGO",
+     "mitjana": 0.5478,
+     "pos": 148,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MIRÓ GINÉ, JOAQUIM",
+     "mitjana": 0.5014,
+     "pos": 198,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MORENO CARRETERO, FERNANDO",
+     "mitjana": 0.498,
+     "pos": 443,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ROBLEDO GONZÁLEZ, ISIDRE",
+     "mitjana": 0.4875,
+     "pos": 211,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MANRESA VIÑALS, JOAQUIM",
+     "mitjana": 0.4866,
+     "pos": 212,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "PRINZIVALLI CARRUBBA, PIETRO",
+     "mitjana": 0.4723,
+     "pos": 449,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "VERDU BOTAM, JOSEP",
+     "mitjana": 0.4193,
+     "pos": 284,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "C.B.VIC",
+   "nom": "C.B. Vic",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "BARNOLAS PARÉS, JOAN",
+     "mitjana": 0.5257,
+     "pos": 179,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "LLUMA VERGARA, PERE",
+     "mitjana": 0.4976,
+     "pos": 201,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "MALLOL RUIZ, BONAVENTURA",
+     "mitjana": 0.4392,
+     "pos": 460,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MUÑOZ PEÑA, JOSÉ DAVID",
+     "mitjana": 0.4049,
+     "pos": 302,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "VILAPLANA PENELLA, JAUME",
+     "mitjana": 0.3807,
+     "pos": 324,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GARCÍA ROMÁN, FRANCISCO JAVIER",
+     "mitjana": 0.3338,
+     "pos": 359,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "PUJOL GARCÍA, JAUME",
+     "mitjana": 0.3026,
+     "pos": 377,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GARCÍA CASTILLO, ANTONIO",
+     "mitjana": 0.2133,
+     "pos": 591,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "C.B.VILANOVA",
+   "nom": "C.B. Vilanova",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "",
+     "div_2526": "3a",
+     "motiu": "baixa · 8è 3a B"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SEGURA CORRALES, ALBERT",
+     "mitjana": 0.6472,
+     "pos": 93,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CERVERA MUR, JORDI",
+     "mitjana": 0.3756,
+     "pos": 329,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "PÉREZ BLANCH, ROMÀ",
+     "mitjana": 0.3267,
+     "pos": 526,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CAMAROS SERRA, JORDI",
+     "mitjana": 0.3121,
+     "pos": 537,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BAÑOS PIZARRO, ANTONIO",
+     "mitjana": 0.295,
+     "pos": 554,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GARCÍA CAMARGO, JOSÉ MANUEL",
+     "mitjana": 0.2828,
+     "pos": 563,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SISTANÉ PLANELLA, JAUME",
+     "mitjana": 0.2628,
+     "pos": 397,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ÁLVAREZ FERNÁNDEZ, MANUEL",
+     "mitjana": 0.2311,
+     "pos": 584,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "JEREZ LOZANO, GUILLERMO",
+     "mitjana": 0.1646,
+     "pos": 606,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "CASAL DE CERVERA",
+   "nom": "Casal de Cervera",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "",
+     "div_2526": "1a",
+     "motiu": "puja · play-off guanyat a Centelles A"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CAMPAÑA COMINO, GREGORI",
+     "mitjana": 0.653,
+     "pos": 85,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SERAROLS MONTES, JOSEP",
+     "mitjana": 0.6522,
+     "pos": 87,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SERRANO FERNÁNDEZ, JORDI",
+     "mitjana": 0.6233,
+     "pos": 96,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GRAELLS BOSCH, JOAN",
+     "mitjana": 0.5506,
+     "pos": 143,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LONGARÓN CALLE, ANTONI G.",
+     "mitjana": 0.5434,
+     "pos": 155,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "S.B. GEiEG",
+   "nom": "S.B. GEiEG",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": true,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": "baixa · 8è 2a A"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CALLE ORTEGA, EUSEBI",
+     "mitjana": 0.6781,
+     "pos": 70,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "RODRÍGUEZ NAVARRA, FERRÁN",
+     "mitjana": 0.6746,
+     "pos": 74,
+     "de_club": "C.B. Llinars"
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CARMONA MARTÍN, ENRIQUE",
+     "mitjana": 0.4241,
+     "pos": 470,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SACREST ROCA, CARLES",
+     "mitjana": 0.4119,
+     "pos": 476,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GALEANO AMADO, RAMÓN",
+     "mitjana": 0.3881,
+     "pos": 317,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "CALLE ORTEGA, ANTONI",
+     "mitjana": 0.3567,
+     "pos": 347,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SELLARÉS BURGUÉS, JAIME",
+     "mitjana": 0.352,
+     "pos": 350,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": false,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MATAIX GARCÍA, JORDI",
+     "mitjana": 0.3121,
+     "pos": 372,
+     "de_club": null
+    }
+   ],
+   "multi": false
+  },
+  {
+   "club": "S.B.CORAL COLÓN",
+   "nom": "S.B. Coral Colón",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "A",
+     "div_2526": "2a",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "VÍLCHEZ PARDO, FRANCISCO",
+     "mitjana": 0.5861,
+     "pos": 120,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "PÉREZ LÓPEZ, JOSEP ANT.",
+     "mitjana": 0.54,
+     "pos": 157,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CORTÉS SÁNCHEZ, JOSÉ",
+     "mitjana": 0.5237,
+     "pos": 182,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "TRULLÁS VERA, YURI",
+     "mitjana": 0.5195,
+     "pos": 188,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LAGUARDA BURON, CARLOS",
+     "mitjana": 0.465,
+     "pos": 231,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "NICOLÁS ROMÁN, JUAN",
+     "mitjana": 0.4486,
+     "pos": 246,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "YUBERO VÁZQUEZ, JOSE ANTONIO",
+     "mitjana": 0.4262,
+     "pos": 277,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "COMABELLA HUGUET, JOSÉ RAMÓN",
+     "mitjana": 0.4242,
+     "pos": 279,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "MOYA GÁLVEZ, RAFAEL",
+     "mitjana": 0.4012,
+     "pos": 480,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ZAPLANA HERNÁNDEZ, JOAN",
+     "mitjana": 0.3548,
+     "pos": 348,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "FLORES BLAY, SERGI",
+     "mitjana": 0.3265,
+     "pos": 362,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ROCA CUSCO, JORDI",
+     "mitjana": 0.3046,
+     "pos": 546,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "S.B.ESPLUGUES L'AVENÇ",
+   "nom": "S.B. Esplugues l'Avenç",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "A",
+     "div_2526": "3a",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "4a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "CARDONA VARGAS, ÁLVARO",
+     "mitjana": 0.6096,
+     "pos": 103,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "ANDREU, JORDI",
+     "mitjana": 0.5849,
+     "pos": 122,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "GUERRA GARCÍA, RAMÓN",
+     "mitjana": 0.5296,
+     "pos": 173,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "HOLGADO MARTÍN, JAVIER",
+     "mitjana": 0.4134,
+     "pos": 291,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "NORIA SILVESTRE, JOAQUIM",
+     "mitjana": 0.4133,
+     "pos": 292,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ROMERO ROMERO, PEDRO",
+     "mitjana": 0.4015,
+     "pos": 303,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "MINGO FERNÁNDEZ, MATÍAS",
+     "mitjana": 0.3773,
+     "pos": 327,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "JURADO LUQUE, MIGUEL",
+     "mitjana": 0.3678,
+     "pos": 495,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "PAJUELO NOVILLO, FLORENCIO",
+     "mitjana": 0.2723,
+     "pos": 568,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "GUIL PALACIO, GREGORIO",
+     "mitjana": 0.24,
+     "pos": 582,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "NAVARRO GARCÍA, MIGUEL ÁNGEL",
+     "mitjana": 0.1467,
+     "pos": 609,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "NAVARRO CIÉRCOLES, MIGUEL",
+     "mitjana": 0.12,
+     "pos": 611,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "S.B.LA GRAN PENYA",
+   "nom": "S.B. La Gran Penya",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": "puja · campió 4a A"
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "HERNÁNDEZ SANABRIA, YEISON",
+     "mitjana": 0.6144,
+     "pos": 417,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "TORRENTS CASAS, SERGI",
+     "mitjana": 0.5898,
+     "pos": 115,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "BLANCH GIMENO, JOAQUIM",
+     "mitjana": 0.5871,
+     "pos": 118,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "GARCÍA GAVILÁN, MARIO",
+     "mitjana": 0.5729,
+     "pos": 128,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GUIJO LOBATO, MANEL",
+     "mitjana": 0.5503,
+     "pos": 144,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GIMÉNEZ FIGUERA, LAUREÀ",
+     "mitjana": 0.524,
+     "pos": 181,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ROSSELLÓ RODRIGUEZ, JAUME",
+     "mitjana": 0.4006,
+     "pos": 304,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "DUARTE RODRIGUEZ, DANIEL",
+     "mitjana": 0.3679,
+     "pos": 332,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "BUSQUET CATALÁN, JOAN",
+     "mitjana": 0.3427,
+     "pos": 355,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "PLANAS FREIXEDES, MANEL",
+     "mitjana": 0.3267,
+     "pos": 527,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "S.B.P.E.CENTELLES",
+   "nom": "S.B.P.E. Centelles",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "1a",
+     "distancia": 35,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": "baixa · play-off perdut amb Casal Cervera"
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "RAMIS BARDEM, JORDI",
+     "mitjana": 0.685,
+     "pos": 412,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "DURÁN SALGADO, JHON EDER",
+     "mitjana": 0.672,
+     "pos": 76,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "JIMÉNEZ LARA, MANUEL",
+     "mitjana": 0.6678,
+     "pos": 79,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "DIEZ AYZA, XAVIER",
+     "mitjana": 0.6493,
+     "pos": 91,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BAUTISTA VICENTE, MIQUEL",
+     "mitjana": 0.5676,
+     "pos": 131,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BASTIDA PARAREDA, JOSEP ANT.",
+     "mitjana": 0.4774,
+     "pos": 447,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "LA ROSA PUJOL, ELOI",
+     "mitjana": 0.4493,
+     "pos": 458,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SPINELLI, MIGUEL ANGEL",
+     "mitjana": 0.438,
+     "pos": 259,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "AGUILAR SERRA, JORDI",
+     "mitjana": 0.432,
+     "pos": 267,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "AGUILERA BUENOSVINOS, JOSÉ MANUEL",
+     "mitjana": 0.3693,
+     "pos": 331,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "JIMÉNEZ MARTÍNEZ, JESÚS",
+     "mitjana": 0.3622,
+     "pos": 340,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CABRERIZO MÁS, VICTOR",
+     "mitjana": 0.33,
+     "pos": 360,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "PLANAS SITJÀ, TOMÀS",
+     "mitjana": 0.3221,
+     "pos": 531,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "RAULET CLOS, ESTEVE",
+     "mitjana": 0.2593,
+     "pos": 577,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "COLOMINA SAMSO, JOSEP",
+     "mitjana": 0.21,
+     "pos": 594,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  },
+  {
+   "club": "SB FOMENT MOLINS",
+   "nom": "S.B. Foment Molins",
+   "equips": [
+    {
+     "lletra": "A",
+     "unic": false,
+     "divisio": "Honor",
+     "distancia": 40,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null
+    },
+    {
+     "lletra": "B",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": "baixa · 8è 1a A"
+    },
+    {
+     "lletra": "C",
+     "unic": false,
+     "divisio": "2a",
+     "distancia": 30,
+     "lletra_2526": "C",
+     "div_2526": "2a",
+     "motiu": null
+    }
+   ],
+   "llista": [
+    {
+     "num": 1,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "PERALES SANZ, JOAN",
+     "mitjana": 0.8058,
+     "pos": 32,
+     "de_club": null
+    },
+    {
+     "num": 2,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "SÁNCHEZ BARRERA, MIGUEL",
+     "mitjana": 0.7195,
+     "pos": 57,
+     "de_club": null
+    },
+    {
+     "num": 3,
+     "banda": "A",
+     "titular": true,
+     "reserva_de": [],
+     "swing": false,
+     "nom": "TORMO BLANCO, FÉLIX",
+     "mitjana": 0.7037,
+     "pos": 63,
+     "de_club": null
+    },
+    {
+     "num": 4,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": true,
+     "nom": "FONTANET BELLES, JOAN CARLES",
+     "mitjana": 0.6734,
+     "pos": 75,
+     "de_club": null
+    },
+    {
+     "num": 5,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "GÓMEZ MORÁN, LLUIS",
+     "mitjana": 0.6509,
+     "pos": 89,
+     "de_club": null
+    },
+    {
+     "num": 6,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "ANDREU PÉREZ, JAUME",
+     "mitjana": 0.5946,
+     "pos": 113,
+     "de_club": null
+    },
+    {
+     "num": 7,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "BRIZZI, LINO",
+     "mitjana": 0.5913,
+     "pos": 420,
+     "de_club": null
+    },
+    {
+     "num": 8,
+     "banda": "B",
+     "titular": true,
+     "reserva_de": [
+      "A"
+     ],
+     "swing": false,
+     "nom": "SANTIGOSA GASSET, DELFÍ",
+     "mitjana": 0.5343,
+     "pos": 163,
+     "de_club": null
+    },
+    {
+     "num": 9,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CARBONELL ROGER, GUILLEM",
+     "mitjana": 0.5341,
+     "pos": 164,
+     "de_club": null
+    },
+    {
+     "num": 10,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "ORTEGA DIAZ, ALBERTO",
+     "mitjana": 0.5305,
+     "pos": 171,
+     "de_club": null
+    },
+    {
+     "num": 11,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "CHAVES ROMERO, FERNEY",
+     "mitjana": 0.4993,
+     "pos": 199,
+     "de_club": null
+    },
+    {
+     "num": 12,
+     "banda": "C",
+     "titular": true,
+     "reserva_de": [
+      "A",
+      "B"
+     ],
+     "swing": false,
+     "nom": "RUIZ LÓPEZ, JUAN",
+     "mitjana": 0.4963,
+     "pos": 202,
+     "de_club": null
+    },
+    {
+     "num": 13,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "QUIÑONERO MORCILLO, JOSÉ Mª",
+     "mitjana": 0.4498,
+     "pos": 243,
+     "de_club": null
+    },
+    {
+     "num": 14,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "MOLINA MASPOCH, JOSEP RAMÓN",
+     "mitjana": 0.4311,
+     "pos": 269,
+     "de_club": null
+    },
+    {
+     "num": 15,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "OBRADORS CATALÁN, JORDI",
+     "mitjana": 0.4109,
+     "pos": 296,
+     "de_club": null
+    },
+    {
+     "num": 16,
+     "banda": "D",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "BONET PASCUAL, CÉSAR",
+     "mitjana": 0.3795,
+     "pos": 325,
+     "de_club": null
+    },
+    {
+     "num": 17,
+     "banda": "E",
+     "titular": false,
+     "reserva_de": [
+      "A",
+      "B",
+      "C"
+     ],
+     "swing": false,
+     "nom": "TUSET MALLOL, CARLES",
+     "mitjana": 0.0,
+     "pos": null,
+     "de_club": null
+    }
+   ],
+   "multi": true
+  }
+ ],
+ "divisions": {
+  "Honor": {
+   "distancia": 40,
+   "equips": [
+    {
+     "club": "B.C.GRANOLLERS",
+     "nom": "B.C. Granollers",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 1.4267750000000001
+    },
+    {
+     "club": "C.B.MATARÓ",
+     "nom": "C.B. Mataró",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 1.16555
+    },
+    {
+     "club": "C.B.SANT ADRIÀ",
+     "nom": "C.B. Sant Adrià",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 1.067625
+    },
+    {
+     "club": "C.B.MOLLET",
+     "nom": "C.B. Mollet",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.992575
+    },
+    {
+     "club": "B.C.GRANOLLERS",
+     "nom": "B.C. Granollers",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.9009
+    },
+    {
+     "club": "C.B.MONFORTE",
+     "nom": "C.B. Monforte",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.896625
+    },
+    {
+     "club": "C.B.BARCELONA",
+     "nom": "C.B. Barcelona",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.8419
+    },
+    {
+     "club": "BC OLESA",
+     "nom": "B.C. Olesa",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "1a",
+     "motiu": "puja · campió 1a B",
+     "mitjana_equip": 0.788375
+    },
+    {
+     "club": "C.B.LLEIDA",
+     "nom": "C.B. Lleida",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.7857000000000001
+    },
+    {
+     "club": "C.B.MONT-ROIG",
+     "nom": "C.B. Mont-roig",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.784575
+    },
+    {
+     "club": "C.B.SANT ADRIÀ",
+     "nom": "C.B. Sant Adrià",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.72705
+    },
+    {
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.7260249999999999
+    },
+    {
+     "club": "SB FOMENT MOLINS",
+     "nom": "S.B. Foment Molins",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.7256
+    },
+    {
+     "club": "C.B.MONFORTE",
+     "nom": "C.B. Monforte",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": "puja · campió 1a A",
+     "mitjana_equip": 0.69775
+    },
+    {
+     "club": "C.B.SANT BOI",
+     "nom": "C.B. Sant Boi",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": null,
+     "mitjana_equip": 0.68495
+    },
+    {
+     "club": "CASAL DE CERVERA",
+     "nom": "Casal de Cervera",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "1a",
+     "motiu": "puja · play-off guanyat a Centelles A",
+     "mitjana_equip": 0.619775
+    }
+   ]
+  },
+  "1a": {
+   "distancia": 35,
+   "equips": [
+    {
+     "club": "C.B.MATARÓ",
+     "nom": "C.B. Mataró",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": "puja · campió 2a A",
+     "mitjana_equip": 0.9046000000000001
+    },
+    {
+     "club": "C.B.BANYOLES",
+     "nom": "C.B. Banyoles",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": "baixa · 8è Honor B",
+     "mitjana_equip": 0.740675
+    },
+    {
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": "baixa · 8è Honor A",
+     "mitjana_equip": 0.7233
+    },
+    {
+     "club": "C.B.2000 CERDANYOLA",
+     "nom": "C.B. 2000 Cerdanyola",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null,
+     "mitjana_equip": 0.679975
+    },
+    {
+     "club": "S.B.P.E.CENTELLES",
+     "nom": "S.B.P.E. Centelles",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "Honor",
+     "motiu": "baixa · play-off perdut amb Casal Cervera",
+     "mitjana_equip": 0.668525
+    },
+    {
+     "club": "C.B.MONFORTE",
+     "nom": "C.B. Monforte",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "1a",
+     "motiu": null,
+     "mitjana_equip": 0.649825
+    },
+    {
+     "club": "C.B.PRAT",
+     "nom": "C.B. Prat",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null,
+     "mitjana_equip": 0.6331249999999999
+    },
+    {
+     "club": "C.B.MOLLET",
+     "nom": "C.B. Mollet",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": null,
+     "mitjana_equip": 0.61975
+    },
+    {
+     "club": "C.B. CANET",
+     "nom": "C.B. Canet",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null,
+     "mitjana_equip": 0.600375
+    },
+    {
+     "club": "C.B.MANRESA",
+     "nom": "C.B. Manresa",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null,
+     "mitjana_equip": 0.594175
+    },
+    {
+     "club": "C.B.SANT ADRIÀ",
+     "nom": "C.B. Sant Adrià",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "2a",
+     "motiu": "puja · play-off amb Lleida B, desempat per caramboles (201-186)",
+     "mitjana_equip": 0.5925499999999999
+    },
+    {
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": null,
+     "mitjana_equip": 0.5925
+    },
+    {
+     "club": "S.B.LA GRAN PENYA",
+     "nom": "S.B. La Gran Penya",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null,
+     "mitjana_equip": 0.59105
+    },
+    {
+     "club": "B.LA UNIÓ CORAL",
+     "nom": "B. La Unió Coral",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": null,
+     "mitjana_equip": 0.581125
+    },
+    {
+     "club": "C.B.ALBA",
+     "nom": "C.B. Alba",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": "puja · campió 2a B",
+     "mitjana_equip": 0.5519499999999999
+    },
+    {
+     "club": "C.B.MONT-ROIG",
+     "nom": "C.B. Mont-roig",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": "puja · play-off guanyat a Llinars B",
+     "mitjana_equip": 0.5117499999999999
+    }
+   ]
+  },
+  "2a": {
+   "distancia": 30,
+   "equips": [
+    {
+     "club": "C.B.BARCELONA",
+     "nom": "C.B. Barcelona",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": "puja · campió 3a B",
+     "mitjana_equip": 0.5989
+    },
+    {
+     "club": "C.B.BLANES",
+     "nom": "C.B. Blanes",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "2a",
+     "motiu": null,
+     "mitjana_equip": 0.594125
+    },
+    {
+     "club": "SB FOMENT MOLINS",
+     "nom": "S.B. Foment Molins",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": "baixa · 8è 1a A",
+     "mitjana_equip": 0.592775
+    },
+    {
+     "club": "C.B.TARRAGONA",
+     "nom": "C.B. Tarragona",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "1a",
+     "motiu": "baixa · 8è 1a B",
+     "mitjana_equip": 0.586775
+    },
+    {
+     "club": "C.B.LLEIDA",
+     "nom": "C.B. Lleida",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": "baixa · play-off amb Sant Adrià C, desempat per caramboles (186-201)",
+     "mitjana_equip": 0.547125
+    },
+    {
+     "club": "S.B.CORAL COLÓN",
+     "nom": "S.B. Coral Colón",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "2a",
+     "motiu": null,
+     "mitjana_equip": 0.542325
+    },
+    {
+     "club": "C.B.BANYOLES",
+     "nom": "C.B. Banyoles",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null,
+     "mitjana_equip": 0.539725
+    },
+    {
+     "club": "C.B.PREMIÀ",
+     "nom": "C.B. Premià",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": null,
+     "mitjana_equip": 0.530425
+    },
+    {
+     "club": "C.B.2000 CERDANYOLA",
+     "nom": "C.B. 2000 Cerdanyola",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": "puja · play-off guanyat a Lliçà d'Amunt A",
+     "mitjana_equip": 0.529025
+    },
+    {
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "3a",
+     "motiu": "puja · play-off amb Canet B, desempat per caramboles (178-177)",
+     "mitjana_equip": 0.517675
+    },
+    {
+     "club": "SB FOMENT MOLINS",
+     "nom": "S.B. Foment Molins",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "2a",
+     "motiu": null,
+     "mitjana_equip": 0.51505
+    },
+    {
+     "club": "C.B.TARRAGONA",
+     "nom": "C.B. Tarragona",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null,
+     "mitjana_equip": 0.508675
+    },
+    {
+     "club": "C.B.SANT BOI",
+     "nom": "C.B. Sant Boi",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null,
+     "mitjana_equip": 0.504175
+    },
+    {
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "1a",
+     "motiu": "baixa · play-off perdut amb Mont-roig B",
+     "mitjana_equip": 0.500975
+    },
+    {
+     "club": "C.B.CARDONA",
+     "nom": "C.B. Cardona",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "3a",
+     "motiu": "puja · campió 3a A",
+     "mitjana_equip": 0.491325
+    },
+    {
+     "club": "C.B.VIC",
+     "nom": "C.B. Vic",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": null,
+     "mitjana_equip": 0.46685
+    }
+   ]
+  },
+  "3a": {
+   "distancia": 25,
+   "equips": [
+    {
+     "club": "C.B.MATARÓ",
+     "nom": "C.B. Mataró",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": "puja · campió 4a B",
+     "mitjana_equip": 0.583475
+    },
+    {
+     "club": "B.C.GRANOLLERS",
+     "nom": "B.C. Granollers",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.5689500000000001
+    },
+    {
+     "club": "C.B.MONFORTE",
+     "nom": "C.B. Monforte",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.553125
+    },
+    {
+     "club": "S.B. GEiEG",
+     "nom": "S.B. GEiEG",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "2a",
+     "motiu": "baixa · 8è 2a A",
+     "mitjana_equip": 0.547175
+    },
+    {
+     "club": "C.B.LLIÇÀ D'AMUNT",
+     "nom": "C.B. Lliçà d'Amunt",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "2a",
+     "motiu": "baixa · play-off perdut amb Cerdanyola B",
+     "mitjana_equip": 0.54605
+    },
+    {
+     "club": "S.B.ESPLUGUES L'AVENÇ",
+     "nom": "S.B. Esplugues l'Avenç",
+     "lletra": "A",
+     "unic": false,
+     "lletra_2526": "A",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.534375
+    },
+    {
+     "club": "C.B.SANT ADRIÀ",
+     "nom": "C.B. Sant Adrià",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "2a",
+     "motiu": "baixa · 8è 2a B",
+     "mitjana_equip": 0.520225
+    },
+    {
+     "club": "C.B. CANET",
+     "nom": "C.B. Canet",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": "baixa · play-off amb Sants D, desempat per caramboles (177-178)",
+     "mitjana_equip": 0.51485
+    },
+    {
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.485
+    },
+    {
+     "club": "S.B.P.E.CENTELLES",
+     "nom": "S.B.P.E. Centelles",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.483075
+    },
+    {
+     "club": "B.C.GRANOLLERS",
+     "nom": "B.C. Granollers",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.47207499999999997
+    },
+    {
+     "club": "S.B.LA GRAN PENYA",
+     "nom": "S.B. La Gran Penya",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": "puja · campió 4a A",
+     "mitjana_equip": 0.4607
+    },
+    {
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.4445
+    },
+    {
+     "club": "C.B.PRAT",
+     "nom": "C.B. Prat",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.44137499999999996
+    },
+    {
+     "club": "B. EL MASNOU",
+     "nom": "B. El Masnou",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.434
+    },
+    {
+     "club": "C.B.LLIÇÀ D'AMUNT",
+     "nom": "C.B. Lliçà d'Amunt",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "3a",
+     "motiu": null,
+     "mitjana_equip": 0.41307499999999997
+    }
+   ]
+  },
+  "4a": {
+   "distancia": 25,
+   "equips": [
+    {
+     "club": "C.B.MONFORTE",
+     "nom": "C.B. Monforte",
+     "lletra": "E",
+     "unic": false,
+     "lletra_2526": "E",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.4728
+    },
+    {
+     "club": "C.B. BORGES",
+     "nom": "C.B. Borges",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.44767500000000005
+    },
+    {
+     "club": "S.B.CORAL COLÓN",
+     "nom": "S.B. Coral Colón",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.441
+    },
+    {
+     "club": "C.B. CANET",
+     "nom": "C.B. Canet",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.4365
+    },
+    {
+     "club": "C.B.MONT-ROIG",
+     "nom": "C.B. Mont-roig",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.43505
+    },
+    {
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
+     "lletra": "E",
+     "unic": false,
+     "lletra_2526": "E",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.43222499999999997
+    },
+    {
+     "club": "C.B.SANT BOI",
+     "nom": "C.B. Sant Boi",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "3a",
+     "motiu": "baixa · 8è 3a A",
+     "mitjana_equip": 0.42965
+    },
+    {
+     "club": "C.B.BLANES",
+     "nom": "C.B. Blanes",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.425825
+    },
+    {
+     "club": "B.C.SANT FELIU DE CODINES",
+     "nom": "B.C. Sant Feliu de Codines",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.42075
+    },
+    {
+     "club": "C.B.VILANOVA",
+     "nom": "C.B. Vilanova",
+     "lletra": "A",
+     "unic": true,
+     "lletra_2526": "",
+     "div_2526": "3a",
+     "motiu": "baixa · 8è 3a B",
+     "mitjana_equip": 0.4154
+    },
+    {
+     "club": "B.LA UNIÓ CORAL",
+     "nom": "B. La Unió Coral",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.411025
+    },
+    {
+     "club": "C.B.2000 CERDANYOLA",
+     "nom": "C.B. 2000 Cerdanyola",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.409725
+    },
+    {
+     "club": "C.B.MATARÓ",
+     "nom": "C.B. Mataró",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.3976
+    },
+    {
+     "club": "S.B.ESPLUGUES L'AVENÇ",
+     "nom": "S.B. Esplugues l'Avenç",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.389975
+    },
+    {
+     "club": "C.B.BARCELONA",
+     "nom": "C.B. Barcelona",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.38995
+    },
+    {
+     "club": "C.B.BANYOLES",
+     "nom": "C.B. Banyoles",
+     "lletra": "C",
+     "unic": false,
+     "lletra_2526": "C",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.379525
+    },
+    {
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
+     "lletra": "D",
+     "unic": false,
+     "lletra_2526": "D",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.379
+    },
+    {
+     "club": "C.B.MANRESA",
+     "nom": "C.B. Manresa",
+     "lletra": "B",
+     "unic": false,
+     "lletra_2526": "B",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.36205
+    },
+    {
+     "club": "C.B.LLINARS",
+     "nom": "C.B. Llinars",
+     "lletra": "E",
+     "unic": false,
+     "lletra_2526": "E",
+     "div_2526": "4a",
+     "motiu": null,
+     "mitjana_equip": 0.321275
+    }
+   ]
+  }
+ }
+}

@@ -45,7 +45,12 @@
 
 	const tabs = [
 		{ href: '/', label: 'Rànquings', match: (p: string) => p === '/' || p.startsWith('/jugador') },
-		{ href: '/lliga', label: 'Lliga', match: (p: string) => p.startsWith('/lliga') },
+		{ href: '/lliga', label: 'Lliga', match: (p: string) => p === '/lliga' || p.startsWith('/lliga/') },
+		{
+			href: '/lliga-2627',
+			label: 'Lliga 26/27',
+			match: (p: string) => p.startsWith('/lliga-2627')
+		},
 		{ href: '/copa', label: 'Copa', match: (p: string) => p.startsWith('/copa') },
 		{ href: '/opens', label: 'Opens', match: (p: string) => p.startsWith('/opens') },
 		{ href: '/campionats', label: 'Camp. Cat.', match: (p: string) => p.startsWith('/campionats') },
