@@ -3,19 +3,20 @@
 	// seccions, NO llegeix de Supabase: és una foto derivada de les classificacions
 	// oficials 2025-26 + els play-offs de promoció del 4-5 de juliol de 2026, que es
 	// regenera amb `python scripts/projeccio_lliga_2627.py --json web/src/lib/data/lliga2627.json`.
+	//
+	// El JSON només porta la POSICIÓ de cada jugador a la llista única del club; la
+	// banda (a quin equip pot jugar) es deriva aquí segons el repartiment triat,
+	// perquè n'hi ha dos sobre la taula. Mateixos talls que `ESQUEMES` al generador.
 	import { norm } from '$lib/search';
 	import projeccio from '$lib/data/lliga2627.json';
 
 	type Jugador = {
 		num: number;
-		banda: string;
-		titular: boolean;
-		reserva_de: string[];
-		swing: boolean;
 		nom: string;
 		mitjana: number;
 		pos: number | null;
 		de_club: string | null;
+		retorn: boolean;
 	};
 	type Equip = {
 		lletra: string;
@@ -35,43 +36,83 @@
 		unic: boolean;
 		div_2526: string;
 		motiu: string | null;
-		mitjana_equip: number;
 	};
 
 	const clubs = projeccio.clubs as Club[];
 	const divisions = projeccio.divisions as Record<string, { distancia: number; equips: EquipDiv[] }>;
 	const DIVS = ['Honor', '1a', '2a', '3a', '4a'];
-	const RANG: Record<string, string> = { A: '1-3', B: '4-8', C: '9-12', D: '13-16', E: '17+' };
+	const LLETRES = ['A', 'B', 'C', 'D', 'E'];
 
-	let vista = $state<'divisio' | 'club'>('divisio');
+	type Esquema = 'fcb' | 'alt';
+	const ESQUEMES: Record<
+		Esquema,
+		{ etiqueta: string; talls: number[]; inici: Record<string, number>; rangs: Record<string, string> }
+	> = {
+		fcb: {
+			etiqueta: '3-5-4-4',
+			talls: [3, 8, 12, 16],
+			inici: { A: 1, B: 5, C: 9, D: 13, E: 17 },
+			rangs: { A: '1-3', B: '4-8', C: '9-12', D: '13-16', E: '17+' }
+		},
+		alt: {
+			etiqueta: '4-6-6-6',
+			talls: [4, 10, 16, 22],
+			inici: { A: 1, B: 5, C: 11, D: 17, E: 23 },
+			rangs: { A: '1-4', B: '5-10', C: '11-16', D: '17-22', E: '23+' }
+		}
+	};
+
+	let vista = $state<'club' | 'divisio'>('club');
+	let esquema = $state<Esquema>('fcb');
 	let selDiv = $state<string | null>(null);
 	let q = $state('');
 
 	const clubPerClau = new Map(clubs.map((c) => [c.club, c]));
 
-	/** Els quatre que formen l'alineació en jornada regular. L'equip A només té tres
-	 *  jugadors propis (1-3) i el quart surt de la banda del B —normalment el nº 4—,
-	 *  així que el B tira dels nº 5-8. Mateixa regla que al generador Python. */
-	function referents(llista: Jugador[], lletra: string): Jugador[] {
-		if (lletra === 'A') return llista.filter((p) => p.num <= 4);
-		if (lletra === 'B') return llista.filter((p) => p.num >= 5 && p.num <= 8);
-		return llista.filter((p) => p.banda === lletra).slice(0, 4);
+	/** A quina banda de la llista única cau el jugador nº num. */
+	function banda(num: number, esq: Esquema): string {
+		const t = ESQUEMES[esq].talls;
+		for (let i = 0; i < t.length; i++) if (num <= t[i]) return LLETRES[i];
+		return 'E';
 	}
+	/** Els quatre que formen l'alineació d'un equip en jornada regular. */
+	function referents(llista: Jugador[], lletra: string, esq: Esquema): Jugador[] {
+		const s = ESQUEMES[esq].inici[lletra];
+		return llista.filter((p) => p.num >= s && p.num <= s + 3);
+	}
+	const mitjanaEquip = (llista: Jugador[], lletra: string, esq: Esquema) => {
+		const t = referents(llista, lletra, esq);
+		return t.length ? t.reduce((a, p) => a + p.mitjana, 0) / t.length : 0;
+	};
 
 	const matchJugador = (llista: Jugador[]) => llista.some((p) => norm(p.nom).includes(norm(q.trim())));
 
 	const divisionsFiltrades = $derived.by(() => {
 		const t = q.trim();
-		return DIVS.filter((d) => selDiv === null || selDiv === d).map((d) => ({
-			nom: d,
-			distancia: divisions[d].distancia,
-			total: divisions[d].equips.length,
-			equips: divisions[d].equips.filter((e) => {
-				if (!t) return true;
-				const club = clubPerClau.get(e.club);
-				return norm(e.nom).includes(norm(t)) || (club ? matchJugador(referents(club.llista, e.lletra)) : false);
-			})
-		}));
+		return DIVS.filter((d) => selDiv === null || selDiv === d).map((d) => {
+			const amb = divisions[d].equips.map((e) => {
+				const club = clubPerClau.get(e.club)!;
+				return { e, club, tit: referents(club.llista, e.lletra, esquema) };
+			});
+			amb.sort(
+				(a, b) =>
+					mitjanaEquip(b.club.llista, b.e.lletra, esquema) -
+					mitjanaEquip(a.club.llista, a.e.lletra, esquema)
+			);
+			return {
+				nom: d,
+				distancia: divisions[d].distancia,
+				total: amb.length,
+				equips: amb
+					.map((x, i) => ({ ...x, pos: i + 1 }))
+					.filter(
+						(x) =>
+							!t ||
+							norm(x.e.nom).includes(norm(t)) ||
+							x.tit.some((p) => norm(p.nom).includes(norm(t)))
+					)
+			};
+		});
 	});
 
 	const clubsFiltrats = $derived.by(() => {
@@ -89,11 +130,35 @@
 	const nomPropi = (n: string) => (n.includes(',') ? n.slice(n.indexOf(',') + 1).trim() : '');
 	const etiquetaDiv = (d: string) => (d === 'Honor' ? "Divisió d'Honor" : `${d} divisió`);
 	function llistaLletres(ls: string[]): string {
+		if (!ls.length) return '';
 		if (ls.length === 1) return `l'${ls[0]}`;
 		return `${ls.slice(0, -1).join(', ')} i ${ls[ls.length - 1]}`;
 	}
 	const puja = (m: string | null) => !!m && m.startsWith('puja');
 	const baixa = (m: string | null) => !!m && m.startsWith('baixa');
+	const esSwing = (p: Jugador, c: Club) => esquema === 'fcb' && p.num === 4 && c.multi;
+
+	/** Files de la llista d'un club, amb la capçalera de banda quan canvia. */
+	function bandes(c: Club) {
+		const lletres = c.equips.map((e) => e.lletra);
+		const files: { cap?: { b: string; titular: boolean; reserva_de: string[] }; p: Jugador }[] = [];
+		let vist: string | null = null;
+		for (const p of c.llista) {
+			const b = banda(p.num, esquema);
+			let cap;
+			if (b !== vist) {
+				vist = b;
+				const titular = lletres.includes(b);
+				cap = {
+					b,
+					titular,
+					reserva_de: titular ? lletres.filter((x) => x < b) : lletres.slice()
+				};
+			}
+			files.push({ cap, p });
+		}
+		return files;
+	}
 </script>
 
 <svelte:head><title>Lliga 26/27 · FCBillar</title></svelte:head>
@@ -101,26 +166,59 @@
 <h1 class="mb-1 text-lg font-bold tracking-tight md:text-xl">Lliga de Tres Bandes 2026-27</h1>
 <p class="mb-3 text-sm leading-snug text-slate-500 dark:text-slate-400">
 	Projecció a partir de les classificacions oficials del 2025-26 i dels play-offs de promoció del 4 i
-	5 de juliol de 2026. Les alineacions surten d'ordenar cada club pel rànquing vigent i aplicar-hi
-	les bandes d'inscripció de la federació.
+	5 de juliol de 2026. Cada club inscriu una sola llista de jugadors, ordenada per rànquing, i les
+	bandes diuen a quin equip pot jugar cadascú.
 </p>
 
-<!-- selector de vista -->
-<div class="mb-3 inline-flex rounded-lg bg-slate-100 p-0.5 text-sm dark:bg-slate-800">
-	<button
-		type="button"
-		onclick={() => (vista = 'divisio')}
-		class="rounded-md px-3 py-1 font-medium {vista === 'divisio'
-			? 'bg-white shadow-sm dark:bg-slate-700'
-			: 'text-slate-500 dark:text-slate-400'}">Per divisió</button
-	>
-	<button
-		type="button"
-		onclick={() => (vista = 'club')}
-		class="rounded-md px-3 py-1 font-medium {vista === 'club'
-			? 'bg-white shadow-sm dark:bg-slate-700'
-			: 'text-slate-500 dark:text-slate-400'}">Per club</button
-	>
+<!-- selector de vista i repartiment -->
+<div class="mb-3 flex flex-wrap gap-2">
+	<div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-sm dark:bg-slate-800">
+		<button
+			type="button"
+			onclick={() => {
+				vista = 'club';
+				esquema = 'fcb';
+			}}
+			class="rounded-md px-3 py-1 font-medium {vista === 'club' && esquema === 'fcb'
+				? 'bg-white shadow-sm dark:bg-slate-700'
+				: 'text-slate-500 dark:text-slate-400'}"
+			>Club <span class="font-mono text-xs">3-5-4-4</span></button
+		>
+		<button
+			type="button"
+			onclick={() => {
+				vista = 'club';
+				esquema = 'alt';
+			}}
+			class="rounded-md px-3 py-1 font-medium {vista === 'club' && esquema === 'alt'
+				? 'bg-white shadow-sm dark:bg-slate-700'
+				: 'text-slate-500 dark:text-slate-400'}"
+			>Club <span class="font-mono text-xs">4-6-6-6</span></button
+		>
+		<button
+			type="button"
+			onclick={() => (vista = 'divisio')}
+			class="rounded-md px-3 py-1 font-medium {vista === 'divisio'
+				? 'bg-white shadow-sm dark:bg-slate-700'
+				: 'text-slate-500 dark:text-slate-400'}">Per divisió</button
+		>
+	</div>
+	{#if vista === 'divisio'}
+		<div class="inline-flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+			<span>bandes</span>
+			<div class="inline-flex rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">
+				{#each Object.keys(ESQUEMES) as k}
+					<button
+						type="button"
+						onclick={() => (esquema = k as Esquema)}
+						class="rounded-md px-2 py-0.5 font-mono {esquema === k
+							? 'bg-white shadow-sm dark:bg-slate-700'
+							: ''}">{ESQUEMES[k as Esquema].etiqueta}</button
+					>
+				{/each}
+			</div>
+		</div>
+	{/if}
 </div>
 
 <!-- filtre de divisió -->
@@ -155,7 +253,9 @@
 	{/if}
 	{#each divisionsFiltrades as d}
 		{#if d.equips.length}
-			<section class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+			<section
+				class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
+			>
 				<header
 					class="flex items-baseline gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50"
 				>
@@ -167,41 +267,40 @@
 					>
 				</header>
 				<ul class="divide-y divide-slate-100 dark:divide-slate-800">
-					{#each d.equips as e, i}
-						{@const club = clubPerClau.get(e.club)}
-						{@const tit = club ? referents(club.llista, e.lletra) : []}
+					{#each d.equips as x}
 						<li class="px-3 py-2.5">
 							<div class="flex items-baseline gap-2">
 								<span
 									class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-400 dark:text-slate-500"
-									>{i + 1}</span
+									>{x.pos}</span
 								>
 								<span class="min-w-0 flex-1 truncate text-sm font-semibold"
-									>{e.nom}{#if !e.unic}&nbsp;{e.lletra}{/if}{#if !e.unic && e.lletra_2526 && e.lletra_2526 !== e.lletra}<span
+									>{x.e.nom}{#if !x.e.unic}&nbsp;{x.e.lletra}{/if}{#if !x.e.unic && x.e.lletra_2526 && x.e.lletra_2526 !== x.e.lletra}<span
 											class="ml-1 text-[11px] font-normal text-amber-600 dark:text-amber-400"
-											>era la {e.lletra_2526}</span
+											>era la {x.e.lletra_2526}</span
 										>{/if}</span
 								>
-								{#if puja(e.motiu)}
+								{#if puja(x.e.motiu)}
 									<span class="shrink-0 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400"
-										>▲ {e.div_2526}</span
+										>▲ {x.e.div_2526}</span
 									>
-								{:else if baixa(e.motiu)}
+								{:else if baixa(x.e.motiu)}
 									<span class="shrink-0 text-[11px] font-semibold text-red-600 dark:text-red-400"
-										>▼ {e.div_2526}</span
+										>▼ {x.e.div_2526}</span
 									>
 								{/if}
 								<span class="w-12 shrink-0 text-right font-mono text-sm font-bold tabular-nums"
-									>{e.mitjana_equip.toFixed(3)}</span
+									>{mitjanaEquip(x.club.llista, x.e.lletra, esquema).toFixed(3)}</span
 								>
 							</div>
-							{#if e.motiu}
-								<p class="ml-7 text-[11px] text-slate-400 dark:text-slate-500">{e.motiu}</p>
+							{#if x.e.motiu}
+								<p class="ml-7 text-[11px] text-slate-400 dark:text-slate-500">{x.e.motiu}</p>
 							{/if}
 							<ol class="ml-7 mt-1.5 space-y-0.5">
-								{#each tit as p}
+								{#each x.tit as p}
 									<li class="flex items-baseline gap-2">
-										<span class="w-4 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500"
+										<span
+											class="w-4 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500"
 											>{p.num}</span
 										>
 										<span class="min-w-0 flex-1 truncate text-xs">
@@ -210,8 +309,10 @@
 											>
 											{#if p.de_club}<span class="ml-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400"
 													>⇄ {p.de_club}</span
-												>{:else if p.swing}<span class="ml-1 text-[10px] text-amber-600 dark:text-amber-400"
-													>nº4</span
+												>{:else if p.retorn}<span
+													class="ml-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400">↩ es reincorpora</span
+												>{:else if esSwing(p, x.club)}<span
+													class="ml-1 text-[10px] text-amber-600 dark:text-amber-400">nº4</span
 												>{/if}
 										</span>
 										<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400"
@@ -231,7 +332,9 @@
 		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap club coincideix.</p>
 	{/if}
 	{#each clubsFiltrats as c}
-		<section class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+		<section
+			class="mb-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
+		>
 			<header class="border-b border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50">
 				<h2 class="text-sm font-bold">{c.nom}</h2>
 				<div class="mt-1.5 flex flex-wrap gap-1.5">
@@ -258,51 +361,60 @@
 				</div>
 			</header>
 
-			{#each c.llista as p, i}
-				{#if i === 0 || c.llista[i - 1].banda !== p.banda}
+			{#each bandes(c) as fila}
+				{#if fila.cap}
 					<div
-						class="flex items-baseline gap-2 border-t border-slate-100 px-3 py-1.5 first:border-t-0 dark:border-slate-800"
+						class="flex items-baseline gap-2 border-t border-slate-100 px-3 py-1.5 dark:border-slate-800"
 					>
 						<span
-							class="rounded px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums {p.titular
+							class="rounded px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums {fila.cap.titular
 								? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-								: 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}">{RANG[p.banda]}</span
+								: 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}"
+							>{ESQUEMES[esquema].rangs[fila.cap.b]}</span
 						>
-						{#if p.titular}
+						{#if fila.cap.titular}
 							<span class="text-xs font-semibold"
-								>{c.equips.length === 1 && p.banda === 'A' ? 'Equip únic' : `Equip ${p.banda}`}</span
+								>{c.equips.length === 1 && fila.cap.b === 'A' ? 'Equip únic' : `Equip ${fila.cap.b}`}</span
 							>
-							{#if p.reserva_de.length}
+							{#if fila.cap.reserva_de.length}
 								<span class="text-[11px] text-slate-400 dark:text-slate-500"
-									>i reserves de {llistaLletres(p.reserva_de)}</span
+									>i suplents de {llistaLletres(fila.cap.reserva_de)}</span
 								>
 							{/if}
 						{:else}
-							<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Reserves</span>
-							<span class="text-[11px] text-slate-400 dark:text-slate-500">de {llistaLletres(p.reserva_de)}</span>
+							<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Suplents</span>
+							<span class="text-[11px] text-slate-400 dark:text-slate-500"
+								>de {llistaLletres(fila.cap.reserva_de)}</span
+							>
 						{/if}
 					</div>
 				{/if}
 				<div class="flex items-baseline gap-2 px-3 py-1">
 					<span class="w-6 shrink-0 text-right font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500"
-						>{p.num}</span
+						>{fila.p.num}</span
 					>
 					<span class="min-w-0 flex-1">
-						<span class="text-sm font-medium">{cognom(p.nom)}</span><span
-							class="text-sm text-slate-500 dark:text-slate-400">, {nomPropi(p.nom)}</span
+						<span class="text-sm font-medium">{cognom(fila.p.nom)}</span><span
+							class="text-sm text-slate-500 dark:text-slate-400">, {nomPropi(fila.p.nom)}</span
 						>
-						{#if p.de_club}
-							<span class="block text-[10px] font-semibold text-sky-600 dark:text-sky-400">⇄ ve de {p.de_club}</span>
-						{:else if p.swing}
+						{#if fila.p.de_club}
+							<span class="block text-[10px] font-semibold text-sky-600 dark:text-sky-400"
+								>⇄ ve de {fila.p.de_club}</span
+							>
+						{:else if fila.p.retorn}
+							<span class="block text-[10px] font-semibold text-sky-600 dark:text-sky-400"
+								>↩ es reincorpora: no va jugar la lliga 2025-26</span
+							>
+						{:else if esSwing(fila.p, c)}
 							<span class="block text-[10px] text-amber-600 dark:text-amber-400"
 								>nº 4: mínim 6 jornades amb el B per jugar-hi les decisives</span
 							>
 						{/if}
 					</span>
 					<span class="shrink-0 text-right font-mono text-xs tabular-nums">
-						{p.mitjana.toFixed(3)}
+						{fila.p.mitjana.toFixed(3)}
 						<span class="block text-[10px] text-slate-400 dark:text-slate-500"
-							>{p.pos ? `#${p.pos}` : 's/r'}</span
+							>{fila.p.pos ? `#${fila.p.pos}` : 's/r'}</span
 						>
 					</span>
 				</div>
@@ -322,24 +434,33 @@
 			aplica un altre desempat, aquestes dues places s'intercanvien.
 		</p>
 		<p>
-			<b>Lletres.</b> Es reparteixen de nou cada temporada per categoria: l'A és sempre l'equip de més
-			divisió, i després B, C, D i E. Per això on el 2025-26 van quedar creuades —el Sants va pujar
-			la D a 2a mentre la C es quedava a 3a— aquí surten ja intercanviades, amb la nota «era la…».
-		</p>
-		<p>
 			<b>Llistes.</b> El pool de cada club són els jugadors que van disputar la lliga 2025-26, ordenats
 			per la mitjana del rànquing de tres bandes vigent (núm. 124, 27-07-2026) — el mateix criteri que
-			aplica la federació sobre la llista única d'inscripció. Bandes: 1-3 només equip A; 4-8 titulars
-			del B i reserves de l'A; 9-12 titulars del C; 13-16 titulars del D; la resta, equip E i/o
-			reserves. L'equip A només té tres jugadors propis, o sigui que el quart de cada encontre surt
-			sempre de les reserves; i el nº 4, als clubs amb més d'un equip, només pot jugar les dues
-			últimes jornades regulars i les finals o promocions amb el B si abans hi ha fet un mínim de 6
-			jornades (Assemblea 03/06/23).
+			aplica la federació sobre la llista única d'inscripció. Tothom pot fer de suplent dels equips
+			que té per sobre.
 		</p>
 		<p>
-			<b>Què no cobreix.</b> Altes i baixes de llicència més enllà dels traspassos coneguts (marcats amb
-			⇄), jugadors que el club decideixi no inscriure, equips nous a 4a divisió i renúncies a la plaça
-			guanyada.
+			<b>Repartiment <span class="font-mono">3-5-4-4</span>.</b> 1-3 només equip A; 4-8 titulars del B
+			i suplents de l'A; 9-12 el C; 13-16 el D; la resta, E i/o suplents. L'equip A només té tres
+			jugadors propis, o sigui que el quart de cada encontre surt de les suplències; i el nº 4, als
+			clubs amb més d'un equip, només pot jugar les dues últimes jornades regulars i les finals o
+			promocions amb el B si abans hi ha fet un mínim de 6 jornades (Assemblea 03/06/23). Per això, a
+			la vista per divisió, l'A hi surt amb els nº 1-4 i el B amb els 5-8.
+		</p>
+		<p>
+			<b>Repartiment <span class="font-mono">4-6-6-6</span>.</b> 1-4 equip A; 5-10 equip B; 11-16 el C;
+			17-22 el D; la resta, E. Cada equip té els seus quatre titulars propis i el B, el C i el D
+			porten dos suplents més dins de la seva banda, així que desapareix el jugador frontissa.
+		</p>
+		<p>
+			<b>Lletres.</b> Es reparteixen de nou cada temporada per categoria: l'A és sempre l'equip de més
+			divisió, i després B, C, D i E. Per això on el 2025-26 van quedar creuades —el Sants va pujar la
+			D a 2a mentre la C es quedava a 3a— aquí surten ja intercanviades, amb la nota «era la…».
+		</p>
+		<p>
+			<b>Què no cobreix.</b> Altes i baixes de llicència més enllà dels canvis coneguts (marcats amb ⇄
+			o ↩), jugadors que el club decideixi no inscriure, equips nous a 4a divisió i renúncies a la
+			plaça guanyada.
 		</p>
 	</div>
 </details>
