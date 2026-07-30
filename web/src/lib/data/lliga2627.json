@@ -697,11 +697,11 @@
     {
      "lletra": "B",
      "unic": false,
-     "divisio": "3a",
-     "distancia": 25,
+     "divisio": "2a",
+     "distancia": 30,
      "lletra_2526": "B",
      "div_2526": "2a",
-     "motiu": "baixa · play-off amb Sants D, desempat per caramboles (177-178)"
+     "motiu": null
     },
     {
      "lletra": "C",
@@ -1676,7 +1676,7 @@
      "distancia": 30,
      "lletra_2526": "B",
      "div_2526": "1a",
-     "motiu": "baixa · play-off amb Sant Adrià C, desempat per caramboles (186-201)"
+     "motiu": "baixa · play-off amb Sant Adrià C, desempat per caramboles a fora (95-102)"
     }
    ],
    "llista": [
@@ -3427,7 +3427,7 @@
      "distancia": 35,
      "lletra_2526": "C",
      "div_2526": "2a",
-     "motiu": "puja · play-off amb Lleida B, desempat per caramboles (201-186)"
+     "motiu": "puja · play-off amb Lleida B, desempat per caramboles a fora (102-95)"
     },
     {
      "lletra": "D",
@@ -3848,18 +3848,18 @@
     {
      "lletra": "C",
      "unic": false,
-     "divisio": "2a",
-     "distancia": 30,
-     "lletra_2526": "D",
+     "divisio": "3a",
+     "distancia": 25,
+     "lletra_2526": "C",
      "div_2526": "3a",
-     "motiu": "puja · play-off amb Canet B, desempat per caramboles (178-177)"
+     "motiu": null
     },
     {
      "lletra": "D",
      "unic": false,
      "divisio": "3a",
      "distancia": 25,
-     "lletra_2526": "C",
+     "lletra_2526": "D",
      "div_2526": "3a",
      "motiu": null
     },
@@ -5512,7 +5512,7 @@
      "unic": false,
      "lletra_2526": "C",
      "div_2526": "2a",
-     "motiu": "puja · play-off amb Lleida B, desempat per caramboles (201-186)"
+     "motiu": "puja · play-off amb Lleida B, desempat per caramboles a fora (102-95)"
     }
    ]
   },
@@ -5625,7 +5625,7 @@
      "unic": false,
      "lletra_2526": "B",
      "div_2526": "1a",
-     "motiu": "baixa · play-off amb Sant Adrià C, desempat per caramboles (186-201)"
+     "motiu": "baixa · play-off amb Sant Adrià C, desempat per caramboles a fora (95-102)"
     },
     {
      "club": "C.B.CARDONA",
@@ -5655,13 +5655,13 @@
      "motiu": "puja · play-off guanyat a Lliçà d'Amunt A"
     },
     {
-     "club": "C.B.SANTS",
-     "nom": "C.B. Sants",
-     "lletra": "C",
+     "club": "C.B. CANET",
+     "nom": "C.B. Canet",
+     "lletra": "B",
      "unic": false,
-     "lletra_2526": "D",
-     "div_2526": "3a",
-     "motiu": "puja · play-off amb Canet B, desempat per caramboles (178-177)"
+     "lletra_2526": "B",
+     "div_2526": "2a",
+     "motiu": null
     }
    ]
   },
@@ -5734,7 +5734,7 @@
     {
      "club": "C.B.SANTS",
      "nom": "C.B. Sants",
-     "lletra": "D",
+     "lletra": "C",
      "unic": false,
      "lletra_2526": "C",
      "div_2526": "3a",
@@ -5786,13 +5786,13 @@
      "motiu": "baixa · 8è 2a B"
     },
     {
-     "club": "C.B. CANET",
-     "nom": "C.B. Canet",
-     "lletra": "B",
+     "club": "C.B.SANTS",
+     "nom": "C.B. Sants",
+     "lletra": "D",
      "unic": false,
-     "lletra_2526": "B",
-     "div_2526": "2a",
-     "motiu": "baixa · play-off amb Sants D, desempat per caramboles (177-178)"
+     "lletra_2526": "D",
+     "div_2526": "3a",
+     "motiu": null
     },
     {
      "club": "S.B.LA GRAN PENYA",
