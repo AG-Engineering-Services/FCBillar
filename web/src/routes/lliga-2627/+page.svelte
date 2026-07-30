@@ -86,10 +86,24 @@
 	function bandaDe(llista: Jugador[], lletra: string, esq: Esquema): Jugador[] {
 		return llista.filter((p) => banda(p.num, esq) === lletra);
 	}
-	function suplentsBanda(llista: Jugador[], lletra: string, esq: Esquema): Jugador[] {
-		const nums = new Set(referents(llista, lletra, esq).map((p) => p.num));
-		return bandaDe(llista, lletra, esq).filter((p) => !nums.has(p.num));
+	/** La plantilla que la fitxa d'equip ensenya: tota la banda, amb els quatre
+	 *  titulars marcats. Amb 3-5-4-4 l'A només té tres jugadors de banda, així que
+	 *  s'hi afegeix el nº 4, que és qui n'ocupa la quarta taula. */
+	function plantilla(
+		llista: Jugador[],
+		lletra: string,
+		esq: Esquema
+	): { p: Jugador; titular: boolean }[] {
+		const tit = referents(llista, lletra, esq);
+		const nums = new Set(tit.map((p) => p.num));
+		const banda_ = bandaDe(llista, lletra, esq);
+		const vistos = new Set<number>();
+		return [...tit, ...banda_]
+			.filter((p) => (vistos.has(p.num) ? false : vistos.add(p.num)))
+			.sort((a, b) => a.num - b.num)
+			.map((p) => ({ p, titular: nums.has(p.num) }));
 	}
+	const MAX_FILES = 8;
 	const mitjanaEquip = (llista: Jugador[], lletra: string, esq: Esquema) => {
 		const t = referents(llista, lletra, esq);
 		return t.length ? t.reduce((a, p) => a + p.mitjana, 0) / t.length : 0;
@@ -106,7 +120,7 @@
 					e,
 					club,
 					tit: referents(club.llista, e.lletra, esquema),
-					sup: suplentsBanda(club.llista, e.lletra, esquema)
+					plantilla: plantilla(club.llista, e.lletra, esquema)
 				};
 			});
 			amb.sort(
@@ -297,37 +311,37 @@
 								del club{#if x.e.motiu}&nbsp;· {x.e.motiu}{/if}
 							</p>
 							<ol class="ml-7 mt-1.5 space-y-0.5">
-								{#each x.tit as p}
-									<li class="flex items-baseline gap-2">
+								{#each x.plantilla.slice(0, MAX_FILES) as f}
+									<li class="flex items-baseline gap-2 {f.titular ? '' : 'opacity-60'}">
 										<span
 											class="w-4 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500"
-											>{p.num}</span
+											>{f.p.num}</span
 										>
 										<span class="min-w-0 flex-1 truncate text-xs">
-											<span class="font-medium">{cognom(p.nom)}</span><span
-												class="text-slate-500 dark:text-slate-400">, {nomPropi(p.nom)}</span
+											<span class={f.titular ? 'font-medium' : ''}>{cognom(f.p.nom)}</span><span
+												class="text-slate-500 dark:text-slate-400">, {nomPropi(f.p.nom)}</span
 											>
-											{#if p.de_club}<span class="ml-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400"
-													>⇄ {p.de_club}</span
-												>{:else if p.retorn}<span
+											{#if !f.titular}<span class="ml-1 text-[10px] text-slate-400 dark:text-slate-500"
+													>suplent</span
+												>{/if}
+											{#if f.p.de_club}<span
+													class="ml-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400">⇄ {f.p.de_club}</span
+												>{:else if f.p.retorn}<span
 													class="ml-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400">↩ es reincorpora</span
-												>{:else if esSwing(p, x.club)}<span
-													class="ml-1 text-[10px] text-amber-600 dark:text-amber-400">nº4</span
+												>{:else if esSwing(f.p, x.club)}<span
+													class="ml-1 text-[10px] text-amber-600 dark:text-amber-400"
+													>{f.titular ? 'nº4' : "nº4 · juga amb l'A"}</span
 												>{/if}
 										</span>
 										<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400"
-											>{p.mitjana.toFixed(3)}</span
+											>{f.p.mitjana.toFixed(3)}</span
 										>
 									</li>
 								{/each}
 							</ol>
-							{#if x.sup.length}
-								<p class="ml-7 mt-1 text-[11px] leading-snug text-slate-400 dark:text-slate-500">
-									<span class="font-semibold">suplents de la banda:</span>
-									{#each x.sup.slice(0, 4) as p, i}{i > 0 ? ' · ' : ' '}<span class="font-mono">{p.num}</span
-										>&nbsp;{cognom(p.nom)}{#if esSwing(p, x.club)}<span
-											class="text-amber-600 dark:text-amber-400">&nbsp;(juga amb l'A)</span
-										>{/if}{/each}{#if x.sup.length > 4}&nbsp;· i {x.sup.length - 4} més{/if}
+							{#if x.plantilla.length > MAX_FILES}
+								<p class="ml-7 mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+									i {x.plantilla.length - MAX_FILES} suplents més a la banda
 								</p>
 							{/if}
 						</li>
