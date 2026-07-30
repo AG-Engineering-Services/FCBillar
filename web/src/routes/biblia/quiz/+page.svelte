@@ -44,6 +44,23 @@
 			: 0
 	);
 
+	// Camí de la bola TIRADORA (la que recorre més distància: 3 bandes + cops).
+	// Cal ensenyar-lo a l'enunciat: si no, no se sap quin dels tirs possibles es
+	// demana i les opcions d'efecte/quantitat serien ambigües.
+	const tracesTiradora = $derived.by(() => {
+		if (!shot) return [] as { color: string; punts: { x: number; y: number }[] }[];
+		const cands = [
+			{ color: '#eaf1f8', t: shot.tracaBlanca },
+			{ color: '#ffcf3a', t: shot.tracaGroga },
+			{ color: '#ff6b5e', t: shot.tracaVermella }
+		].filter((c) => c.t.length >= 2);
+		if (!cands.length) return [];
+		const llarg = (t: { x: number; y: number }[]) =>
+			t.reduce((s, p, i) => (i ? s + Math.hypot(p.x - t[i - 1].x, p.y - t[i - 1].y) : 0), 0);
+		const tira = cands.reduce((a, b) => (llarg(b.t) > llarg(a.t) ? b : a));
+		return [{ color: tira.color, punts: tira.t.map((f) => ({ x: f.x, y: f.y })) }];
+	});
+
 	function rng(seed: number) {
 		let s = seed >>> 0;
 		return () => {
@@ -166,7 +183,7 @@
 						{/key}
 					{/if}
 				{:else}
-					<Billar boles={shot.boles} mode="visor" />
+					<Billar boles={shot.boles} traces={tracesTiradora} mode="visor" />
 				{/if}
 				<div class="peu-taula">{familiaCat(shot.familia)} · #{shot.id}</div>
 			</div>
