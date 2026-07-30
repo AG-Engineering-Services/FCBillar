@@ -92,23 +92,37 @@
 	function bandaDe(llista: Jugador[], lletra: string, esq: Esquema): Jugador[] {
 		return llista.filter((p) => banda(p.num, esq) === lletra);
 	}
+	/** Posició en què arrenca la banda d'una lletra (no la dels titulars: amb
+	 *  3-5-4-4 la banda del B comença al nº 4, que és qui fa la quarta taula de l'A). */
+	function bandaInici(lletra: string, esq: Esquema): number {
+		const i = LLETRES.indexOf(lletra);
+		return i === 0 ? 1 : ESQUEMES[esq].talls[i - 1] + 1;
+	}
 	/** La plantilla que la fitxa d'equip ensenya: tota la banda, amb els quatre
 	 *  titulars marcats. Amb 3-5-4-4 l'A només té tres jugadors de banda, així que
-	 *  s'hi afegeix el nº 4, que és qui n'ocupa la quarta taula. */
+	 *  s'hi afegeix el nº 4, que és qui n'ocupa la quarta taula.
+	 *
+	 *  A l'ÚLTIM equip del club s'hi posa tota la cua de la llista, encara que
+	 *  passi dels sis: la seva banda és oberta i qui hi hagi a sota només pot
+	 *  jugar amb ell o fer de suplent dels de sobre. */
 	function plantilla(
 		llista: Jugador[],
 		lletra: string,
-		esq: Esquema
+		esq: Esquema,
+		ultim = false
 	): { p: Jugador; titular: boolean }[] {
 		const tit = referents(llista, lletra, esq);
 		const nums = new Set(tit.map((p) => p.num));
+		const membres = ultim
+			? llista.filter((p) => p.num >= bandaInici(lletra, esq))
+			: bandaDe(llista, lletra, esq);
 		const vistos = new Set<number>();
-		return [...tit, ...bandaDe(llista, lletra, esq)]
+		return [...tit, ...membres]
 			.filter((p) => (vistos.has(p.num) ? false : vistos.add(p.num)))
 			.sort((a, b) => a.num - b.num)
 			.map((p) => ({ p, titular: nums.has(p.num) }));
 	}
-	const MAX_FILES = 8;
+	const esUltim = (c: Club, lletra: string) => c.equips[c.equips.length - 1].lletra === lletra;
 	const mitjanaEquip = (llista: Jugador[], lletra: string, esq: Esquema) => {
 		const t = referents(llista, lletra, esq);
 		return t.length ? t.reduce((a, p) => a + p.mitjana, 0) / t.length : 0;
@@ -137,7 +151,7 @@
 						grup: grupPerSeed.get(e.seed) ?? 'A',
 						mogut: moguts.has(e.seed),
 						tit: referents(club.llista, e.lletra, esquema),
-						plantilla: plantilla(club.llista, e.lletra, esquema),
+						plantilla: plantilla(club.llista, e.lletra, esquema, esUltim(club, e.lletra)),
 						mit: mitjanaEquip(club.llista, e.lletra, esquema)
 					};
 				})
@@ -349,14 +363,12 @@
 										>
 									</div>
 									<p class="ml-7 text-[11px] leading-snug">
-										{#each x.plantilla.slice(0, MAX_FILES) as f, i}<span
+										{#each x.plantilla as f, i}<span
 												class={f.titular
 													? 'text-slate-600 dark:text-slate-300'
 													: 'text-slate-400 dark:text-slate-500'}
 												>{i > 0 ? ' · ' : ''}<span class="font-mono">{f.p.num}</span>&nbsp;{cognom(f.p.nom)}</span
-											>{/each}{#if x.plantilla.length > MAX_FILES}<span
-												class="text-slate-400 dark:text-slate-500"> · +{x.plantilla.length - MAX_FILES}</span
-											>{/if}
+											>{/each}
 									</p>
 								</li>
 							{/each}
@@ -428,7 +440,7 @@
 								del club{#if x.e.motiu}&nbsp;· {x.e.motiu}{/if}
 							</p>
 							<ol class="ml-7 mt-1.5 space-y-0.5">
-								{#each x.plantilla.slice(0, MAX_FILES) as f}
+								{#each x.plantilla as f}
 									<li class="flex items-baseline gap-2 {f.titular ? '' : 'opacity-60'}">
 										<span
 											class="w-4 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500"
@@ -456,11 +468,6 @@
 									</li>
 								{/each}
 							</ol>
-							{#if x.plantilla.length > MAX_FILES}
-								<p class="ml-7 mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
-									i {x.plantilla.length - MAX_FILES} suplents més a la banda
-								</p>
-							{/if}
 						</li>
 					{/each}
 				</ul>
@@ -592,7 +599,9 @@
 			<b>Llistes.</b> El pool de cada club són els jugadors que van disputar la lliga 2025-26, ordenats
 			per la mitjana del rànquing de tres bandes vigent (núm. 124, 27-07-2026) — el mateix criteri que
 			aplica la federació sobre la llista única d'inscripció. Tothom pot fer de suplent dels equips
-			que té per sobre.
+			que té per sobre, i a l'<b>últim equip</b> del club hi consten tots els jugadors que queden,
+			encara que passin dels sis: la seva banda és oberta i qui hi hagi a sota només pot jugar amb ell
+			o fer de suplent dels de dalt.
 		</p>
 		<p>
 			<b>Repartiment <span class="font-mono">3-5-4-4</span>.</b> 1-3 només equip A; 4-8 titulars del B
