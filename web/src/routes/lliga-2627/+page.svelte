@@ -80,6 +80,16 @@
 		const s = ESQUEMES[esq].inici[lletra];
 		return llista.filter((p) => p.num >= s && p.num <= s + 3);
 	}
+	/** Tota la banda d'un equip: els titulars més els suplents que li pertoquen.
+	 *  És on es veu el repartiment: amb 3-5-4-4 el B té el nº 4 (que juga amb l'A)
+	 *  i amb 4-6-6-6 en té dos de propis al final de la banda. */
+	function bandaDe(llista: Jugador[], lletra: string, esq: Esquema): Jugador[] {
+		return llista.filter((p) => banda(p.num, esq) === lletra);
+	}
+	function suplentsBanda(llista: Jugador[], lletra: string, esq: Esquema): Jugador[] {
+		const nums = new Set(referents(llista, lletra, esq).map((p) => p.num));
+		return bandaDe(llista, lletra, esq).filter((p) => !nums.has(p.num));
+	}
 	const mitjanaEquip = (llista: Jugador[], lletra: string, esq: Esquema) => {
 		const t = referents(llista, lletra, esq);
 		return t.length ? t.reduce((a, p) => a + p.mitjana, 0) / t.length : 0;
@@ -92,7 +102,12 @@
 		return DIVS.filter((d) => selDiv === null || selDiv === d).map((d) => {
 			const amb = divisions[d].equips.map((e) => {
 				const club = clubPerClau.get(e.club)!;
-				return { e, club, tit: referents(club.llista, e.lletra, esquema) };
+				return {
+					e,
+					club,
+					tit: referents(club.llista, e.lletra, esquema),
+					sup: suplentsBanda(club.llista, e.lletra, esquema)
+				};
 			});
 			amb.sort(
 				(a, b) =>
@@ -170,30 +185,16 @@
 	bandes diuen a quin equip pot jugar cadascú.
 </p>
 
-<!-- selector de vista i repartiment -->
-<div class="mb-3 flex flex-wrap gap-2">
+<!-- selector de vista i de repartiment: dos controls independents, perquè el
+     repartiment val per a totes dues vistes -->
+<div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
 	<div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-sm dark:bg-slate-800">
 		<button
 			type="button"
-			onclick={() => {
-				vista = 'club';
-				esquema = 'fcb';
-			}}
-			class="rounded-md px-3 py-1 font-medium {vista === 'club' && esquema === 'fcb'
+			onclick={() => (vista = 'club')}
+			class="rounded-md px-3 py-1 font-medium {vista === 'club'
 				? 'bg-white shadow-sm dark:bg-slate-700'
-				: 'text-slate-500 dark:text-slate-400'}"
-			>Club <span class="font-mono text-xs">3-5-4-4</span></button
-		>
-		<button
-			type="button"
-			onclick={() => {
-				vista = 'club';
-				esquema = 'alt';
-			}}
-			class="rounded-md px-3 py-1 font-medium {vista === 'club' && esquema === 'alt'
-				? 'bg-white shadow-sm dark:bg-slate-700'
-				: 'text-slate-500 dark:text-slate-400'}"
-			>Club <span class="font-mono text-xs">4-6-6-6</span></button
+				: 'text-slate-500 dark:text-slate-400'}">Per club</button
 		>
 		<button
 			type="button"
@@ -203,22 +204,20 @@
 				: 'text-slate-500 dark:text-slate-400'}">Per divisió</button
 		>
 	</div>
-	{#if vista === 'divisio'}
-		<div class="inline-flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
-			<span>bandes</span>
-			<div class="inline-flex rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">
-				{#each Object.keys(ESQUEMES) as k}
-					<button
-						type="button"
-						onclick={() => (esquema = k as Esquema)}
-						class="rounded-md px-2 py-0.5 font-mono {esquema === k
-							? 'bg-white shadow-sm dark:bg-slate-700'
-							: ''}">{ESQUEMES[k as Esquema].etiqueta}</button
-					>
-				{/each}
-			</div>
+	<div class="inline-flex items-center gap-1.5">
+		<span class="text-xs text-slate-400 dark:text-slate-500">bandes</span>
+		<div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-sm dark:bg-slate-800">
+			{#each ['fcb', 'alt'] as k}
+				<button
+					type="button"
+					onclick={() => (esquema = k as Esquema)}
+					class="rounded-md px-2.5 py-1 font-mono text-xs {esquema === k
+						? 'bg-white shadow-sm dark:bg-slate-700'
+						: 'text-slate-500 dark:text-slate-400'}">{ESQUEMES[k as Esquema].etiqueta}</button
+				>
+			{/each}
 		</div>
-	{/if}
+	</div>
 </div>
 
 <!-- filtre de divisió -->
@@ -293,9 +292,10 @@
 									>{mitjanaEquip(x.club.llista, x.e.lletra, esquema).toFixed(3)}</span
 								>
 							</div>
-							{#if x.e.motiu}
-								<p class="ml-7 text-[11px] text-slate-400 dark:text-slate-500">{x.e.motiu}</p>
-							{/if}
+							<p class="ml-7 text-[11px] text-slate-400 dark:text-slate-500">
+								banda <span class="font-mono">{ESQUEMES[esquema].rangs[x.e.lletra]}</span> de la llista
+								del club{#if x.e.motiu}&nbsp;· {x.e.motiu}{/if}
+							</p>
 							<ol class="ml-7 mt-1.5 space-y-0.5">
 								{#each x.tit as p}
 									<li class="flex items-baseline gap-2">
@@ -321,6 +321,15 @@
 									</li>
 								{/each}
 							</ol>
+							{#if x.sup.length}
+								<p class="ml-7 mt-1 text-[11px] leading-snug text-slate-400 dark:text-slate-500">
+									<span class="font-semibold">suplents de la banda:</span>
+									{#each x.sup.slice(0, 4) as p, i}{i > 0 ? ' · ' : ' '}<span class="font-mono">{p.num}</span
+										>&nbsp;{cognom(p.nom)}{#if esSwing(p, x.club)}<span
+											class="text-amber-600 dark:text-amber-400">&nbsp;(juga amb l'A)</span
+										>{/if}{/each}{#if x.sup.length > 4}&nbsp;· i {x.sup.length - 4} més{/if}
+								</p>
+							{/if}
 						</li>
 					{/each}
 				</ul>
@@ -451,6 +460,14 @@
 			<b>Repartiment <span class="font-mono">4-6-6-6</span>.</b> 1-4 equip A; 5-10 equip B; 11-16 el C;
 			17-22 el D; la resta, E. Cada equip té els seus quatre titulars propis i el B, el C i el D
 			porten dos suplents més dins de la seva banda, així que desapareix el jugador frontissa.
+		</p>
+		<p>
+			<b>Què canvia entre els dos.</b> Els equips A i B tenen els mateixos quatre titulars en tots dos
+			casos (1-4 i 5-8), o sigui que la Divisió d'Honor i la 1a —gairebé tots equips A i B— no es
+			mouen de mitjana; el que hi canvia és qui els fa de suplent. Els titulars sí que canvien de la C
+			cap avall, on la banda arrenca dues posicions més amunt amb <span class="font-mono">3-5-4-4</span
+			> (9-12 i 13-16) que amb <span class="font-mono">4-6-6-6</span> (11-16 i 17-22): són 22 dels 83
+			equips, i tots hi perden mitjana amb el segon repartiment.
 		</p>
 		<p>
 			<b>Lletres.</b> Es reparteixen de nou cada temporada per categoria: l'A és sempre l'equip de més
