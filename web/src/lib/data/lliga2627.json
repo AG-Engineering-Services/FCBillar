@@ -2868,6 +2868,14 @@
     },
     {
      "num": 18,
+     "nom": "ROCHA VERA, JEFERSON",
+     "mitjana": 0.4796,
+     "pos": 446,
+     "de_club": null,
+     "retorn": true
+    },
+    {
+     "num": 19,
      "nom": "ADELL CASARRAMONA, PERE",
      "mitjana": 0.4787,
      "pos": 219,
@@ -2875,7 +2883,7 @@
      "retorn": false
     },
     {
-     "num": 19,
+     "num": 20,
      "nom": "SEGURA MONDRIÁ, FRANCESC XAVIER",
      "mitjana": 0.4782,
      "pos": 220,
@@ -2883,7 +2891,7 @@
      "retorn": false
     },
     {
-     "num": 20,
+     "num": 21,
      "nom": "SEGURA GONZÁLVEZ, FERNANDO",
      "mitjana": 0.4511,
      "pos": 241,
@@ -2891,7 +2899,7 @@
      "retorn": false
     },
     {
-     "num": 21,
+     "num": 22,
      "nom": "CANO POIRRIER LALANNE, SANTIAGO",
      "mitjana": 0.4466,
      "pos": 250,
@@ -2899,7 +2907,7 @@
      "retorn": false
     },
     {
-     "num": 22,
+     "num": 23,
      "nom": "BARRAGÁN DE LA CRUZ, LUIS",
      "mitjana": 0.4448,
      "pos": 253,
@@ -2907,7 +2915,7 @@
      "retorn": false
     },
     {
-     "num": 23,
+     "num": 24,
      "nom": "CHENOLL CASTRO, ENRIC",
      "mitjana": 0.4333,
      "pos": 465,
@@ -2915,7 +2923,7 @@
      "retorn": false
     },
     {
-     "num": 24,
+     "num": 25,
      "nom": "CAMPOS GONZÁLEZ, JºMª",
      "mitjana": 0.42,
      "pos": 283,
@@ -2923,7 +2931,7 @@
      "retorn": false
     },
     {
-     "num": 25,
+     "num": 26,
      "nom": "ARIS GUITART, ALBERT",
      "mitjana": 0.412,
      "pos": 293,
@@ -2931,7 +2939,7 @@
      "retorn": false
     },
     {
-     "num": 26,
+     "num": 27,
      "nom": "CERVERA SANS, GABRIEL",
      "mitjana": 0.3856,
      "pos": 320,
@@ -2939,7 +2947,7 @@
      "retorn": false
     },
     {
-     "num": 27,
+     "num": 28,
      "nom": "TORMO CALATAYUD, JORGE",
      "mitjana": 0.3605,
      "pos": 341,
@@ -2947,7 +2955,7 @@
      "retorn": false
     },
     {
-     "num": 28,
+     "num": 29,
      "nom": "FERNÁNDEZ NÚÑEZ, MANUEL",
      "mitjana": 0.3587,
      "pos": 344,
@@ -2955,7 +2963,7 @@
      "retorn": false
     },
     {
-     "num": 29,
+     "num": 30,
      "nom": "SÁNCHEZ TRIGUEROS, JAIME",
      "mitjana": 0.3564,
      "pos": 505,
@@ -2963,7 +2971,7 @@
      "retorn": false
     },
     {
-     "num": 30,
+     "num": 31,
      "nom": "VILLATE MALAGÓN, BRIAN STEVEN",
      "mitjana": 0.3462,
      "pos": 508,
@@ -2971,7 +2979,7 @@
      "retorn": false
     },
     {
-     "num": 31,
+     "num": 32,
      "nom": "HERNÁNDEZ FALCO, IGNASI",
      "mitjana": 0.3309,
      "pos": 523,
@@ -2979,7 +2987,7 @@
      "retorn": false
     },
     {
-     "num": 32,
+     "num": 33,
      "nom": "GILI BERTRAL, JOAN",
      "mitjana": 0.3206,
      "pos": 367,
@@ -2987,7 +2995,7 @@
      "retorn": false
     },
     {
-     "num": 33,
+     "num": 34,
      "nom": "OBANDO QUINTERO, CARLOS ARIEL",
      "mitjana": 0.32,
      "pos": null,
@@ -2995,7 +3003,7 @@
      "retorn": false
     },
     {
-     "num": 34,
+     "num": 35,
      "nom": "RODRÍGUEZ SÁNCHEZ, CÉSAR",
      "mitjana": 0.3175,
      "pos": 368,
@@ -3003,7 +3011,7 @@
      "retorn": false
     },
     {
-     "num": 35,
+     "num": 36,
      "nom": "TIRADO GUTIERREZ, FRANCISCO",
      "mitjana": 0.2743,
      "pos": 393,
