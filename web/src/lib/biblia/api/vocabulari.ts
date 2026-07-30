@@ -11,7 +11,7 @@ export const FAMILIES = [
 	{ idx: 3, ca: 'Endarrere', ko: '뒤돌리기' },
 	{ idx: 4, ca: 'De costat', ko: '옆돌리기' },
 	{ idx: 5, ca: 'Endavant', ko: '앞돌리기' },
-	{ idx: 6, ca: 'Rasant', ko: '비껴치기' },
+	{ idx: 6, ca: 'Tocar la bola fina', ko: '비껴치기' },
 	{ idx: 7, ca: 'Gran rotació', ko: '대회전' },
 	{ idx: 8, ca: 'Vertical', ko: '세워치기' },
 	{ idx: 9, ca: 'Doble banda', ko: '더블쿠션' },
