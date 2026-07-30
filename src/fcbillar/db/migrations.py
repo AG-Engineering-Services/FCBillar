@@ -26,6 +26,9 @@ Versions:
      autoritativa per a any_pub/mes_pub (substitueix la heurística monòtona).
 - 11: lliga_pending_partides — partides de lliga jugades encara no al rànquing
      oficial; font de pendents per a la fitxa (la crea l'executescript).
+- 12: calendari esportiu federatiu (calendari_events, calendari_versions,
+     calendari_canvis) — el PDF de la RFEB parsejat, amb historial de revisions.
+     Taules noves: les crea l'executescript.
 """
 
 from __future__ import annotations
@@ -37,7 +40,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 11
+SCHEMA_VERSION = 12
 
 
 def _read_schema_sql() -> str:

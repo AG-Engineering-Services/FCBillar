@@ -354,3 +354,66 @@ CREATE TABLE IF NOT EXISTS lliga_pending_partides (
 );
 CREATE INDEX IF NOT EXISTS ix_lliga_pending_enc
     ON lliga_pending_partides(encontre_lliga_id);
+
+-- v12: Calendari esportiu federatiu (PDF de la RFEB; la FCB quan el publiqui).
+-- Una fila per cel·la de la graella del PDF: setmana × columna. La clau natural
+-- (font, temporada, setmana, disciplina, ambit, grup, tipus) permet reingestar
+-- revisions amb UPSERT i comparar-les. Vegeu fcbillar/calendari_fed.py.
+CREATE TABLE IF NOT EXISTS calendari_events (
+    font        TEXT NOT NULL,              -- 'RFEB' | 'FCB'
+    temporada   TEXT NOT NULL,              -- '2026/2027'
+    setmana     TEXT NOT NULL,              -- ISO, dilluns de la setmana
+    disciplina  TEXT NOT NULL,              -- carambola | pool | snooker
+    ambit       TEXT NOT NULL,              -- nacional | internacional | mixt | tot
+    grup        TEXT NOT NULL DEFAULT '',   -- subgrup de modalitats ('' = cap)
+    tipus       TEXT NOT NULL DEFAULT '',   -- equips | individual | '' (no aplica)
+    data_inici  TEXT NOT NULL,
+    data_fi     TEXT NOT NULL,
+    titol       TEXT NOT NULL,
+    seu         TEXT,
+    dissabte    TEXT,                       -- què es juga el ds (patró LIGA NACIONAL)
+    diumenge    TEXT,
+    col_span    INTEGER NOT NULL DEFAULT 1, -- >1 = cel·la fusionada (NADAL, S. SANTA)
+    raw         TEXT NOT NULL,              -- línies crues del PDF, per auditar
+    PRIMARY KEY (font, temporada, setmana, disciplina, ambit, grup, tipus)
+);
+CREATE INDEX IF NOT EXISTS ix_calendari_events_setmana
+    ON calendari_events(setmana);
+
+-- Revisions del PDF: la RFEB en va publicant de noves («V.1 actualizado a …»)
+-- sobre la mateixa URL. Es desa una fila per descàrrega amb contingut NOU (sha256
+-- diferent), amb l'ETag per poder fer peticions condicionals i estalviar feina.
+CREATE TABLE IF NOT EXISTS calendari_versions (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    font          TEXT NOT NULL,
+    temporada     TEXT NOT NULL,
+    versio        TEXT,                     -- 'V.1' tal com ho escriu el PDF
+    data_versio   TEXT,                     -- data del "actualizado a dd/mm/aaaa"
+    sha256        TEXT NOT NULL,
+    etag          TEXT,
+    last_modified TEXT,
+    url           TEXT,
+    n_events      INTEGER NOT NULL DEFAULT 0,
+    n_canvis      INTEGER NOT NULL DEFAULT 0,
+    ingested_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    -- Es refresca a CADA comprovació, tingui canvis o no: és el que permet
+    -- veure a la web que la revisió periòdica del PDF segueix corrent.
+    last_checked_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (font, temporada, sha256)
+);
+
+-- Diferències respecte de la revisió anterior. És el que fa útil revisar el PDF
+-- periòdicament: no només tenir-lo al dia, sinó poder veure QUÈ han mogut.
+CREATE TABLE IF NOT EXISTS calendari_canvis (
+    versio_id   INTEGER NOT NULL REFERENCES calendari_versions(id) ON DELETE CASCADE,
+    tipus_canvi TEXT NOT NULL,              -- alta | baixa | modificacio
+    setmana     TEXT NOT NULL,
+    disciplina  TEXT NOT NULL,
+    ambit       TEXT NOT NULL,
+    grup        TEXT,
+    tipus       TEXT,
+    abans       TEXT,
+    despres     TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_calendari_canvis_versio
+    ON calendari_canvis(versio_id);
