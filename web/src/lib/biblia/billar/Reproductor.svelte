@@ -18,6 +18,14 @@
 		mostraNumeros?: boolean;
 		/** Si es dona, el fotograma el controla l'exterior (p. ex. el vídeo). */
 		frameExtern?: number | null;
+		/** Hi ha un vídeo mestre: els controls comanden el vídeo, no el rellotge intern. */
+		teVideo?: boolean;
+		/** Estat de reproducció del vídeo mestre (per pintar el botó). */
+		reproduintExtern?: boolean;
+		onReprodueix?: () => void;
+		onPausa?: () => void;
+		onReinicia?: () => void;
+		onVesA?: (frame: number) => void;
 	}
 
 	let {
@@ -26,7 +34,13 @@
 		tracaGroga = [],
 		tracaVermella = [],
 		mostraNumeros = false,
-		frameExtern = null
+		frameExtern = null,
+		teVideo = false,
+		reproduintExtern = false,
+		onReprodueix,
+		onPausa,
+		onReinicia,
+		onVesA
 	}: Props = $props();
 
 	const maxFrame = $derived(
@@ -123,6 +137,7 @@
 	// Bucle d'animació amb requestAnimationFrame (només si NO el controla el vídeo).
 	$effect(() => {
 		if (frameExtern != null) return;
+		if (teVideo) return; // amb vídeo mestre, el rellotge intern no corre mai
 		if (!teAnimacio || !reproduint) return;
 		let raf = 0;
 		let anterior = performance.now();
@@ -138,20 +153,38 @@
 	});
 
 	function alterna() {
-		reproduint = !reproduint;
+		if (teVideo) {
+			// El vídeo mana: engega'l o atura'l, i l'animació el seguirà.
+			if (reproduintExtern) onPausa?.();
+			else onReprodueix?.();
+		} else {
+			reproduint = !reproduint;
+		}
 	}
 	function reinicia() {
 		frame = 0;
+		if (teVideo) onReinicia?.();
 	}
+	function scrub(v: number) {
+		if (teVideo) {
+			onVesA?.(v);
+		} else {
+			reproduint = false;
+			frame = v;
+		}
+	}
+
+	// Botó reflecteix l'estat del vídeo quan aquest mana; si no, el rellotge intern.
+	const enMarxa = $derived(teVideo ? reproduintExtern : reproduint);
 </script>
 
 <div class="reproductor">
 	<Billar {boles} {traces} mode="visor" {mostraNumeros} />
 
-	{#if teAnimacio && frameExtern == null}
+	{#if teAnimacio && (teVideo || frameExtern == null)}
 		<div class="controls">
-			<button class="rodo" onclick={alterna} aria-label={reproduint ? 'Pausa' : 'Reprodueix'}>
-				{reproduint ? '❚❚' : '▶'}
+			<button class="rodo" onclick={alterna} aria-label={enMarxa ? 'Pausa' : 'Reprodueix'}>
+				{enMarxa ? '❚❚' : '▶'}
 			</button>
 			<button class="rodo" onclick={reinicia} aria-label="Reinicia">↺</button>
 			<input
@@ -160,17 +193,19 @@
 				max={maxFrame}
 				step="1"
 				value={Math.round(frameActiu)}
-				oninput={(e) => {
-					reproduint = false;
-					frame = +e.currentTarget.value;
-				}}
+				oninput={(e) => scrub(+e.currentTarget.value)}
 			/>
-			<select bind:value={velocitat} aria-label="Velocitat">
-				<option value={0.5}>0,5×</option>
-				<option value={1}>1×</option>
-				<option value={2}>2×</option>
-			</select>
+			{#if !teVideo}
+				<select bind:value={velocitat} aria-label="Velocitat">
+					<option value={0.5}>0,5×</option>
+					<option value={1}>1×</option>
+					<option value={2}>2×</option>
+				</select>
+			{/if}
 		</div>
+		{#if teVideo}
+			<p class="sync-nota">▶ reprodueix vídeo i animació alhora, sincronitzats</p>
+		{/if}
 	{/if}
 </div>
 
@@ -204,5 +239,10 @@
 	}
 	select {
 		padding: 0.3rem 0.4rem;
+	}
+	.sync-nota {
+		margin: 0;
+		font-size: 0.78rem;
+		color: var(--text-suau);
 	}
 </style>
