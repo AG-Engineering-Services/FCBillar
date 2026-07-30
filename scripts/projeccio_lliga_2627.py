@@ -139,12 +139,16 @@ TRASPASSOS = [
     ("SÁNCHEZ GALLEGO, JOEL", "C.B.MATARÓ"),
     ("MULA CALLEJÓN, FRANCISCO", "C.B.SANTS"),
     ("SÁNCHEZ MARTÍNEZ, PASCUAL", "C.B.SANTS"),
+    ("MERCADER BOSCH, JOSEP", "C.B.BANYOLES"),
 ]
 
 
 def aplica_traspassos(conn, pool: dict, rk: dict) -> None:
-    """Mou jugadors d'un pool de club a un altre. Els que no van jugar la lliga
-    2025-26 s'incorporen des del rànquing amb 0 partides."""
+    """Mou jugadors d'un pool de club a un altre.
+
+    Qui no va jugar la lliga 2025-26 s'incorpora des del rànquing amb 0 partides.
+    Si ja tenia llicència al club de destí és una reincorporació, no un traspàs:
+    es marca com a `retorn` perquè la interfície no digui que ve d'un altre club."""
     for nom, desti in TRASPASSOS:
         row = conn.execute(
             "select p.id, c.nom from players p left join clubs c on c.id=p.club_id where p.nom=?",
@@ -161,8 +165,11 @@ def aplica_traspassos(conn, pool: dict, rk: dict) -> None:
             agg = pool[origen].pop(pid)
             agg["de_club"] = origen
         elif pid in rk:
-            agg = dict(nom=nom, pj=0, car=0, ent=0, equips=collections.Counter(),
-                       de_club=club_llicencia or "sense club")
+            agg = dict(nom=nom, pj=0, car=0, ent=0, equips=collections.Counter())
+            if club_llicencia == desti:
+                agg["retorn"] = True
+            else:
+                agg["de_club"] = club_llicencia or "sense club"
         else:
             print(f"AVÍS: sense mitjana de referència -> {nom}", file=sys.stderr)
             continue
@@ -170,32 +177,34 @@ def aplica_traspassos(conn, pool: dict, rk: dict) -> None:
         pool[desti][pid] = agg
 
 
-def banda(num: int) -> str:
-    """Bandes d'inscripció de la FCB: els clubs presenten UNA sola llista i la
-    federació l'ordena per rànquing. 1-3 només equip A; 4-8 titulars del B i
-    reserves de l'A; 9-12 titulars del C; 13-16 titulars del D; la resta, equip E
-    i/o reserves."""
-    if num <= 3:
-        return "A"
-    if num <= 8:
-        return "B"
-    if num <= 12:
-        return "C"
-    if num <= 16:
-        return "D"
+# Repartiments de la llista única en bandes. Els clubs inscriuen tots els jugadors
+# en una sola llista i la federació els ordena per rànquing; la banda diu a quin
+# equip pot jugar cadascú, i sempre pot fer de suplent dels equips que té per sobre.
+#
+#   fcb  → 3-5-4-4: l'equip A només té tres jugadors propis i el quart de cada
+#          encontre surt de la banda del B (normalment el nº 4, amb la limitació
+#          de l'Assemblea 03/06/23), de manera que el B tira dels nº 5-8.
+#   alt  → 4-6-6-6: cada equip té els seus quatre titulars propis i el B, el C i
+#          el D porten dos suplents més a la seva banda.
+ESQUEMES = {
+    "fcb": {"talls": [3, 8, 12, 16], "inici": {"A": 1, "B": 5, "C": 9, "D": 13, "E": 17}},
+    "alt": {"talls": [4, 10, 16, 22], "inici": {"A": 1, "B": 5, "C": 11, "D": 17, "E": 23}},
+}
+LLETRES = ["A", "B", "C", "D", "E"]
+
+
+def banda(num: int, esquema: str = "fcb") -> str:
+    """A quina banda de la llista única cau el jugador nº `num`."""
+    for lletra, tall in zip(LLETRES, ESQUEMES[esquema]["talls"], strict=False):
+        if num <= tall:
+            return lletra
     return "E"
 
 
-def referents(llista: list[dict], lletra: str) -> list[dict]:
-    """Els quatre jugadors que, en jornada regular, formen l'alineació d'un equip.
-
-    L'equip A només té tres jugadors propis (1-3): el quart surt de la banda del B,
-    normalment el nº 4. Per això el B, en jornada regular, tira dels nº 5-8."""
-    if lletra == "A":
-        return [p for p in llista if p["num"] <= 4]
-    if lletra == "B":
-        return [p for p in llista if 5 <= p["num"] <= 8]
-    return [p for p in llista if p["banda"] == lletra][:4]
+def referents(llista: list[dict], lletra: str, esquema: str = "fcb") -> list[dict]:
+    """Els quatre jugadors que, en jornada regular, formen l'alineació d'un equip."""
+    inici = ESQUEMES[esquema]["inici"][lletra]
+    return [p for p in llista if inici <= p["num"] <= inici + 3]
 
 
 def build(db: str = DB) -> dict:
@@ -263,24 +272,17 @@ def build(db: str = DB) -> dict:
                 dict(
                     pid=pid, nom=a["nom"], mitjana=m, pos=pos, pj=a["pj"],
                     equip_2526=a["equips"].most_common(1)[0][0] if a["equips"] else None,
-                    de_club=a.get("de_club"),
+                    de_club=a.get("de_club"), retorn=bool(a.get("retorn")),
                 )
             )
         ranked.sort(key=lambda x: -x["mitjana"])
-        lletres = [t[1] for t in teams]
-        div_de = {t[1]: t[2] for t in teams}
         multi = len(teams) > 1
-        llista = []
-        for i, p in enumerate(ranked, 1):
-            b = banda(i)
-            titular = b in div_de
-            llista.append(dict(
-                num=i, banda=b, titular=titular,
-                reserva_de=[x for x in lletres if x < b] if titular else lletres[:],
-                swing=(i == 4 and multi),
-                nom=p["nom"], mitjana=round(p["mitjana"], 4), pos=p["pos"],
-                de_club=nom_club(p["de_club"]) if p["de_club"] else None,
-            ))
+        # La banda depèn del repartiment triat, i el repartiment es tria a la
+        # interfície: aquí només desem la posició a la llista única.
+        llista = [dict(
+            num=i, nom=p["nom"], mitjana=round(p["mitjana"], 4), pos=p["pos"],
+            de_club=nom_club(p["de_club"]) if p["de_club"] else None, retorn=p["retorn"],
+        ) for i, p in enumerate(ranked, 1)]
         equips = [dict(lletra=lt, unic=(not multi), divisio=dv, distancia=DIST[dv],
                        lletra_2526=("" if antiga == "UNICO" else antiga),
                        div_2526=prev_div.get((club, antiga)), motiu=MOTIU.get((club, antiga)))
@@ -289,21 +291,19 @@ def build(db: str = DB) -> dict:
             club=club, nom=nom_club(club), equips=equips, llista=llista, multi=multi,
         ))
 
-    # La vista per divisió només guarda la referència a l'equip: la banda i els
-    # quatre titulars es deriven de la llista del club (mateixa funció `referents`).
+    # La vista per divisió només guarda la referència a l'equip; els quatre titulars
+    # i la mitjana d'equip es deriven de la llista del club amb el repartiment actiu.
     per_club = {c["club"]: c for c in out["clubs"]}
     for div in ["Honor", "1a", "2a", "3a", "4a"]:
         equips = []
         for club, lletra in COMP[div]:
             c = per_club[club]
-            e = next(x for x in c["equips"] if x["lletra_2526"] == ("" if lletra == "UNICO" else lletra))
-            tit = referents(c["llista"], e["lletra"])
+            antiga = "" if lletra == "UNICO" else lletra
+            e = next(x for x in c["equips"] if x["lletra_2526"] == antiga)
             equips.append(dict(
                 club=club, nom=nom_club(club), lletra=e["lletra"], unic=e["unic"],
                 lletra_2526=e["lletra_2526"], div_2526=e["div_2526"], motiu=e["motiu"],
-                mitjana_equip=(sum(t["mitjana"] for t in tit) / len(tit) if tit else 0.0),
             ))
-        equips.sort(key=lambda e: -e["mitjana_equip"])
         out["divisions"][div] = dict(distancia=DIST[div], equips=equips)
     return out
 
@@ -311,6 +311,8 @@ def build(db: str = DB) -> dict:
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", help="desa el resultat en JSON")
+    ap.add_argument("--esquema", choices=sorted(ESQUEMES), default="fcb",
+                    help="repartiment en bandes per a la sortida de text")
     args = ap.parse_args()
     data = build()
     if args.json:
@@ -318,16 +320,21 @@ if __name__ == "__main__":
             json.dump(data, fh, ensure_ascii=False, indent=1)
         print(f"OK -> {args.json}")
     else:
+        esq = args.esquema
         for c in data["clubs"]:
             eq = " · ".join(f"{e['lletra']} a {e['divisio']}" for e in c["equips"])
+            lletres = [e["lletra"] for e in c["equips"]]
             print(f"\n{'=' * 72}\n{c['club']}   [{eq}]")
             vist = None
             for p in c["llista"]:
-                if p["banda"] != vist:
-                    vist = p["banda"]
-                    rol = (f"titulars equip {vist}" if p["titular"]
-                           else "reserves de " + ", ".join(p["reserva_de"]))
-                    print(f"  -- banda {vist}: {rol} --")
-                mk = f"  <- {p['de_club']}" if p["de_club"] else ""
-                sw = "  (nº4: limitat amb el B)" if p["swing"] else ""
+                b = banda(p["num"], esq)
+                if b != vist:
+                    vist = b
+                    rol = (f"titulars equip {b}" if b in lletres
+                           else "reserves de " + ", ".join(lletres))
+                    print(f"  -- banda {b}: {rol} --")
+                mk = (f"  <- {p['de_club']}" if p["de_club"]
+                      else "  (reincorporacio)" if p["retorn"] else "")
+                sw = ("  (nº4: limitat amb el B)"
+                      if esq == "fcb" and p["num"] == 4 and c["multi"] else "")
                 print(f"    {p['num']:3d}. {p['nom']:34s} {p['mitjana']:.4f}{sw}{mk}")
