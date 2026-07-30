@@ -59,7 +59,8 @@
 		{ href: '/cerca', label: 'Cerca', match: (p: string) => p.startsWith('/cerca') },
 		{ href: '/comparar', label: 'Comparar', match: (p: string) => p.startsWith('/comparar') },
 		{ href: '/records', label: 'Rècords', match: (p: string) => p.startsWith('/records') },
-		{ href: '/seguiment', label: '★ Seguits', match: (p: string) => p.startsWith('/seguiment') }
+		{ href: '/seguiment', label: '★ Seguits', match: (p: string) => p.startsWith('/seguiment') },
+		{ href: '/biblia', label: 'Bíblia', match: (p: string) => p.startsWith('/biblia') }
 	];
 	const path = $derived($page.url.pathname);
 	// Vista aïllada (/fitxa/[id]): sense capçalera/navbar, perquè no es pugui accedir

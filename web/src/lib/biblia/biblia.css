@@ -1,0 +1,99 @@
+/* Estils de la secció Bíblia del Billar, dins l'embolcall .biblia perquè no
+   afectin la resta de FCBillar (que fa servir Tailwind). */
+
+.biblia {
+	--fons: #14171c;
+	--fons-2: #1c2128;
+	--fons-3: #262d36;
+	--vora: #333c47;
+	--text: #e7ecf2;
+	--text-suau: #9aa7b4;
+	--accent: #4dd2ff;
+	--accent-fosc: #1a7a49;
+	--perill: #d02b1f;
+	--radi: 10px;
+	--ombra: 0 2px 12px rgba(0, 0, 0, 0.35);
+
+	background: var(--fons);
+	color: var(--text);
+	font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	line-height: 1.5;
+	min-height: 100vh;
+}
+
+.biblia a {
+	color: var(--accent);
+	text-decoration: none;
+}
+.biblia a:hover {
+	text-decoration: underline;
+}
+
+.biblia button {
+	font: inherit;
+	color: var(--text);
+	background: var(--fons-3);
+	border: 1px solid var(--vora);
+	border-radius: 8px;
+	padding: 0.45rem 0.85rem;
+	cursor: pointer;
+	transition: background 0.12s ease, border-color 0.12s ease;
+}
+.biblia button:hover {
+	background: #2f3742;
+}
+.biblia button.actiu {
+	background: var(--accent-fosc);
+	border-color: var(--accent-fosc);
+	color: #fff;
+}
+
+.biblia input,
+.biblia select,
+.biblia textarea {
+	font: inherit;
+	color: var(--text);
+	background: var(--fons-2);
+	border: 1px solid var(--vora);
+	border-radius: 8px;
+	padding: 0.45rem 0.6rem;
+}
+
+.biblia .contenidor {
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 1.5rem 1.25rem 4rem;
+}
+
+.biblia .targeta {
+	background: var(--fons-2);
+	border: 1px solid var(--vora);
+	border-radius: var(--radi);
+	box-shadow: var(--ombra);
+}
+
+.biblia-nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+	padding: 0.7rem 1.25rem;
+	border-bottom: 1px solid var(--vora);
+	background: var(--fons-2);
+}
+.biblia-nav a {
+	padding: 0.3rem 0.7rem;
+	border: 1px solid var(--vora);
+	border-radius: 999px;
+	color: var(--text);
+}
+.biblia-nav a:hover {
+	border-color: var(--accent);
+	color: var(--accent);
+	text-decoration: none;
+}
+.biblia-nav .nota {
+	margin-left: auto;
+	color: var(--text-suau);
+	font-size: 0.78rem;
+}
