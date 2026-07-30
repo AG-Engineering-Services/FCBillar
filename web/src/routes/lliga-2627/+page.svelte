@@ -580,11 +580,13 @@
 			<b>Grups.</b> Serpentí <span class="font-mono">A-B-B-A</span> sobre l'ordre de sembra:
 			1-4-5-8-9-12-13-16 al grup A i 2-3-6-7-10-11-14-15 al B. A 4a divisió, amb 19 equips, s'estira
 			igual (el 17 a l'A; el 18 i el 19 al B). Després s'hi fan les <b>permutes</b> necessàries perquè
-			dos equips d'un mateix club no coincideixin de grup: s'intercanvien els dos equips que ocupen el
-			mateix slot dins del seu grup, que a la sembra són sempre posicions consecutives (l'A2 és el 4 i
-			el B2 el 3; l'A3 és el 5 i el B3 el 6…), i a cada pas es tria la permuta que deixa menys
-			conflictes. En surten sis en total —dues a Honor, una a 1a, una a 2a i dues a 3a— i cap divisió
-			no queda amb equips del mateix club junts. Els equips moguts van marcats amb ⇄.
+			dos equips d'un mateix club no coincideixin de grup: es mou sempre el <b>segon</b> equip del club
+			dins del grup, mai el primer, i s'intercanvia amb l'equip que ocupa el mateix slot a l'altre
+			grup. Si el Monforte A és el 3r del grup i el Monforte B el 8è, es permuta el Monforte B amb el
+			8è de l'altre grup. Així el millor classificat es queda on el posa la sembra i el moviment és
+			mínim, perquè els slots homòlegs són sempre posicions consecutives de l'ordre oficial (l'A2 és el
+			4 i el B2 el 3; l'A3 és el 5 i el B3 el 6…). En surten sis —dues a Honor, una a 1a, una a 2a i
+			dues a 3a— i cap divisió no queda amb equips del mateix club junts. Els moguts van marcats amb ⇄.
 		</p>
 		<p>
 			<b>Llistes.</b> El pool de cada club són els jugadors que van disputar la lliga 2025-26, ordenats

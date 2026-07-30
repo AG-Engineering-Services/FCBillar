@@ -203,41 +203,44 @@ def forma_grups(ordre: list[tuple[str, str]]) -> tuple[list[int], list[int], lis
     a 4a amb 19 equips— i hi fa les permutes necessàries perquè dos equips d'un
     mateix club no coincideixin de grup.
 
-    Una permuta intercanvia dos equips que ocupen el MATEIX slot dins del seu grup;
-    com que els slots homòlegs són sempre posicions consecutives de la sembra
-    (A2=4 i B2=3, A3=5 i B3=6…), el canvi és mínim. Es tria a cada pas la permuta
-    que deixa menys conflictes. Retorna les posicions (0-based) de cada grup i les
-    permutes fetes."""
+    Es mou sempre el SEGON equip del club dins del grup, no el primer, i s'intercanvia
+    amb l'equip que ocupa el mateix slot a l'altre grup. Exemple: si el Monforte A és
+    el 3r del grup i el Monforte B el 8è, es permuta el Monforte B amb el 8è de l'altre
+    grup. Així l'equip millor classificat es queda on el posa la sembra i el moviment
+    és el mínim possible: els slots homòlegs són sempre posicions consecutives de
+    l'ordre oficial (l'A2 és el 4 i el B2 el 3; l'A3 és el 5 i el B3 el 6…).
+
+    Retorna les posicions (0-based) de cada grup i les permutes fetes."""
     n = len(ordre)
     serp = ["A" if (p - 1) % 4 in (0, 3) else "B" for p in range(1, n + 1)]
     A = [i for i in range(n) if serp[i] == "A"]
     B = [i for i in range(n) if serp[i] == "B"]
 
-    def conflictes() -> list[tuple[str, int, int]]:
-        out = []
+    def segon_repetit() -> tuple[str, int, int] | None:
+        """El primer cas de dos equips del mateix club en un grup: en retorna el segon."""
         for lst, nom in ((A, "A"), (B, "B")):
-            comptador = collections.Counter(ordre[i][0] for i in lst)
-            out += [(nom, slot, i) for slot, i in enumerate(lst) if comptador[ordre[i][0]] > 1]
-        return out
+            vistos: set[str] = set()
+            for slot, i in enumerate(lst):
+                club = ordre[i][0]
+                if club in vistos:
+                    return nom, slot, i
+                vistos.add(club)
+        return None
 
     permutes: list[dict] = []
+    estats: set[tuple[int, ...]] = set()
     for _ in range(40):
-        conf = conflictes()
-        if not conf:
+        objectiu = segon_repetit()
+        if objectiu is None:
             break
-        millor = None
-        for nom, slot, i in conf:
-            altre = B if nom == "A" else A
-            if slot >= len(altre):
-                continue  # a 4a el grup B té un slot més: no té homòleg
-            A[slot], B[slot] = B[slot], A[slot]
-            queden = len(conflictes())
-            A[slot], B[slot] = B[slot], A[slot]
-            if millor is None or queden < millor[0]:
-                millor = (queden, slot, i, altre[slot])
-        if millor is None or millor[0] >= len(conf):
-            break  # no hi ha permuta que millori: ho deixem i es veurà marcat
-        _, slot, i, j = millor
+        estat = tuple(A + B)
+        if estat in estats:
+            break  # ja hi hem passat: no convergeix, ho deixem com està
+        estats.add(estat)
+        _nom, slot, i = objectiu
+        if slot >= len(A) or slot >= len(B):
+            break  # a 4a el grup B té un slot més: aquell no té homòleg
+        j = B[slot] if A[slot] == i else A[slot]
         A[slot], B[slot] = B[slot], A[slot]
         permutes.append(dict(slot=slot + 1, seed_a=i + 1, seed_b=j + 1))
     return A, B, permutes
