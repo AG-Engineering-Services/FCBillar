@@ -20,6 +20,24 @@
 		)
 	);
 
+	// Vídeo mestre: si la tirada té vídeo i animació, l'animació el segueix i van
+	// junts i sincronitzats. Sense vídeo, l'anima el rellotge intern (com abans).
+	let vid = $state<{
+		reprodueix: () => void;
+		pausa: () => void;
+		reinicia: () => void;
+		vesA: (f: number) => void;
+	} | null>(null);
+	let reproduintVideo = $state(false);
+	const teVideoMestre = $derived(!!d.video && maxFrame > 0);
+
+	// Amb vídeo, l'animació NO s'auto-reprodueix: es queda al fotograma 0 fins que
+	// s'engega el vídeo. En canviar de tirada, es reinicia l'estat.
+	$effect(() => {
+		frameExtern = teVideoMestre ? 0 : null;
+		reproduintVideo = false;
+	});
+
 	const videoWatch = $derived(d.video ? `https://youtu.be/${d.video.id}?t=${d.video.inici ?? 0}` : null);
 
 	function mmss(s: number): string {
@@ -57,6 +75,12 @@
 					tracaGroga={d.tracaGroga}
 					tracaVermella={d.tracaVermella}
 					{frameExtern}
+					teVideo={teVideoMestre}
+					reproduintExtern={reproduintVideo}
+					onReprodueix={() => vid?.reprodueix()}
+					onPausa={() => vid?.pausa()}
+					onReinicia={() => vid?.reinicia()}
+					onVesA={(f) => vid?.vesA(f)}
 				/>
 			{/key}
 
@@ -106,6 +130,8 @@
 				<div class="videobloc">
 					{#key d.id}
 						<VideoSincronitzat
+							bind:this={vid}
+							bind:reproduint={reproduintVideo}
 							videoId={d.video.id}
 							inici={d.video.inici ?? 0}
 							fi={d.video.fi}

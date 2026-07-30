@@ -15,16 +15,57 @@
 		fi?: number | null;
 		maxFrame: number;
 		fps?: number;
+		/** Cert mentre el vídeo s'està reproduint (per reflectir-ho al control). */
+		reproduint?: boolean;
 		/** Emet el fotograma actual (o null quan el vídeo no mana). */
 		onframe: (f: number | null) => void;
 	}
 
-	let { videoId, inici, fi = null, maxFrame, fps = 30, onframe }: Props = $props();
+	let {
+		videoId,
+		inici,
+		fi = null,
+		maxFrame,
+		fps = 30,
+		reproduint = $bindable(false),
+		onframe
+	}: Props = $props();
 
 	let el: HTMLDivElement;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let player: any = null;
 	let raf = 0;
+
+	// Controls imperatius perquè l'animació i el vídeo vagin junts i sincronitzats.
+	export function reprodueix() {
+		try {
+			player?.playVideo?.();
+		} catch {
+			/* el reproductor encara no és a punt */
+		}
+	}
+	export function pausa() {
+		try {
+			player?.pauseVideo?.();
+		} catch {
+			/* ignora */
+		}
+	}
+	export function reinicia() {
+		try {
+			player?.seekTo?.(inici, true);
+			player?.playVideo?.();
+		} catch {
+			/* ignora */
+		}
+	}
+	export function vesA(frame: number) {
+		try {
+			player?.seekTo?.(inici + frame / fps, true);
+		} catch {
+			/* ignora */
+		}
+	}
 
 	function actualitza() {
 		if (!player?.getCurrentTime) return;
@@ -53,9 +94,11 @@
 				events: {
 					onStateChange: (e: { data: number }) => {
 						if (e.data === YT.PlayerState.PLAYING) {
+							reproduint = true;
 							cancelAnimationFrame(raf);
 							bucle();
 						} else {
+							reproduint = false;
 							cancelAnimationFrame(raf);
 							actualitza(); // congela al fotograma actual
 						}
