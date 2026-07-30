@@ -25,6 +25,7 @@
 	let nomesCarambola = $state(true);
 	let mostraCanvis = $state(false);
 	let mostraPassat = $state(false);
+	let vista = $state<'llista' | 'mes'>('llista');
 
 	const OPCIONS_TIPUS: [string, string][] = [
 		['tot', 'Tot'],
@@ -141,21 +142,27 @@
 			.order('ord')
 			.range(0, 999)
 			.then(({ data }) => {
-				if (viu) canvis = (data ?? []) as CalendariCanvi[];
+				// Fora els festius també aquí: si no es llisten, tampoc no interessa
+				// que la federació els hagi mogut de setmana.
+				if (viu) canvis = ((data ?? []) as CalendariCanvi[]).filter((c) => c.ambit !== 'tot');
 			});
 		return () => {
 			viu = false;
 		};
 	});
 
+	// Els períodes festius (Nadal, Setmana Santa) no es mostren. Al PDF són cel·les
+	// fusionades que travessen columnes —per això arriben amb `ambit = 'tot'`— i
+	// només diuen que aquelles setmanes no es juga, cosa que la llista ja ensenya
+	// no llistant-hi res. S'ingesten igualment: la BD ha de reflectir el PDF.
+	const esFestiu = (e: CalendariEvent) => e.ambit === 'tot';
+
 	const filtrats = $derived(
 		events
-			.filter((e) => e.temporada === temporada)
+			.filter((e) => e.temporada === temporada && !esFestiu(e))
 			.filter((e) => (nomesCarambola ? e.disciplina === 'carambola' : true))
-			// Els blocs fusionats del PDF (Nadal, Setmana Santa) no tenen tipus ni
-			// àmbit: són avisos de «aquesta setmana no es juga» i no s'han de filtrar.
-			.filter((e) => tipus === 'tot' || e.tipus === tipus || e.ambit === 'tot')
-			.filter((e) => ambit === 'tot' || e.ambit === ambit || e.ambit === 'tot')
+			.filter((e) => tipus === 'tot' || e.tipus === tipus)
+			.filter((e) => ambit === 'tot' || e.ambit === ambit)
 	);
 
 	interface Setmana {
@@ -190,6 +197,116 @@
 	// què VE. El passat queda plegat darrere d'un botó.
 	const passades = $derived(setmanes.filter((s) => s.setmana < avui));
 	const llista = $derived(mostraPassat ? setmanes : setmanes.filter((s) => s.setmana >= avui));
+
+	// --- Vista de graella mensual -------------------------------------------
+	//
+	// A la graella hi caben set columnes i prou, i al mòbil això són uns 45px per
+	// dia: no hi ha lloc per a text. Per això la cel·la porta punts de color (un
+	// per competició) i el detall va a sota, en tocar el dia. A partir de `md` sí
+	// que hi cap una línia de títol dins la cel·la.
+	const DIES_CURT = ['dl', 'dt', 'dc', 'dj', 'dv', 'ds', 'dg'];
+
+	function isoDe(any: number, mes: number, dia: number): string {
+		const p = (n: number) => String(n).padStart(2, '0');
+		return `${any}-${p(mes + 1)}-${p(dia)}`;
+	}
+
+	// Mesos que cobreix la temporada. Es calculen sobre TOTS els esdeveniments de la
+	// temporada, no sobre els filtrats, perquè la navegació entre mesos no s'ha
+	// d'encongir quan es filtra per «equips» o «internacional».
+	const mesos = $derived.by(() => {
+		const dates = events
+			.filter((e) => e.temporada === temporada && !esFestiu(e))
+			.map((e) => e.data_inici)
+			.sort();
+		if (!dates.length) return [] as string[];
+		const primer = d(dates[0]);
+		const ultim = d(dates[dates.length - 1]);
+		const out: string[] = [];
+		for (
+			let m = new Date(primer.getFullYear(), primer.getMonth(), 1);
+			m <= ultim;
+			m.setMonth(m.getMonth() + 1)
+		) {
+			out.push(`${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`);
+		}
+		return out;
+	});
+
+	let mesSel = $state('');
+	// Situa la graella en un mes vàlid: el d'avui si la temporada hi arriba, i si no
+	// el primer que en tingui. També corregeix el mes en canviar de temporada.
+	$effect(() => {
+		if (!mesos.length) return;
+		if (mesos.includes(mesSel)) return;
+		mesSel = mesos.includes(avui.slice(0, 7)) ? avui.slice(0, 7) : mesos[0];
+	});
+	const mesIdx = $derived(mesos.indexOf(mesSel));
+
+	// dia ISO -> competicions que l'ocupen. Un esdeveniment cobreix de data_inici a
+	// data_fi (normalment dissabte i diumenge), així que s'expandeix per dies.
+	const perDia = $derived.by(() => {
+		const m = new Map<string, CalendariEvent[]>();
+		for (const e of filtrats) {
+			for (let x = d(e.data_inici); x <= d(e.data_fi); x.setDate(x.getDate() + 1)) {
+				const k = isoDe(x.getFullYear(), x.getMonth(), x.getDate());
+				m.set(k, [...(m.get(k) ?? []), e]);
+			}
+		}
+		return m;
+	});
+
+	interface Cella {
+		iso: string;
+		dia: number;
+		dinsMes: boolean;
+		items: CalendariEvent[];
+	}
+	// Graella de setmanes senceres (dilluns a diumenge) que conté el mes triat.
+	const graella = $derived.by(() => {
+		if (!mesSel) return [] as Cella[][];
+		const [any, mes] = mesSel.split('-').map(Number);
+		const primer = new Date(any, mes - 1, 1);
+		const cursor = new Date(primer);
+		cursor.setDate(cursor.getDate() - ((cursor.getDay() + 6) % 7)); // fins al dilluns
+		const files: Cella[][] = [];
+		while (true) {
+			const fila: Cella[] = [];
+			for (let i = 0; i < 7; i++) {
+				const iso = isoDe(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
+				fila.push({
+					iso,
+					dia: cursor.getDate(),
+					dinsMes: cursor.getMonth() === mes - 1,
+					items: perDia.get(iso) ?? []
+				});
+				cursor.setDate(cursor.getDate() + 1);
+			}
+			files.push(fila);
+			// Prou files quan la següent ja no toca el mes. El límit de 6 és una
+			// xarxa: cap mes no ocupa més setmanes.
+			if ((cursor.getMonth() !== mes - 1 && cursor > primer) || files.length >= 6) break;
+		}
+		return files;
+	});
+
+	let diaSel = $state<string | null>(null);
+	// En canviar de mes, deixa de tenir sentit el dia triat del mes anterior.
+	$effect(() => {
+		if (diaSel && diaSel.slice(0, 7) !== mesSel) diaSel = null;
+	});
+	const itemsDiaSel = $derived(diaSel ? (perDia.get(diaSel) ?? []) : []);
+	const totalMes = $derived(graella.flat().filter((c) => c.dinsMes && c.items.length).length);
+
+	const PUNT: Record<string, string> = {
+		equips: 'bg-indigo-500',
+		individual: 'bg-emerald-500'
+	};
+	const avuiIso = (() => {
+		const t = new Date();
+		const p = (n: number) => String(n).padStart(2, '0');
+		return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())}`;
+	})();
 
 	const BADGE_TIPUS: Record<string, string> = {
 		equips:
@@ -284,6 +401,129 @@
 		{/if}
 	</section>
 
+	<!-- Commutador de vista. La llista respon a «què ve ara»; la graella, a «com
+	     queda repartit el mes». -->
+	<div
+		class="mb-3 inline-flex rounded-lg p-0.5 ring-1 ring-slate-200 dark:ring-slate-800"
+		role="group"
+	>
+		{#each [['llista', 'Llista'], ['mes', 'Mes']] as [v, lbl] (v)}
+			<button
+				type="button"
+				onclick={() => (vista = v as 'llista' | 'mes')}
+				class="rounded-md px-3 py-1 text-xs font-semibold {vista === v
+					? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+					: 'text-slate-500 dark:text-slate-400'}">{lbl}</button
+			>
+		{/each}
+	</div>
+
+	{#if vista === 'mes'}
+		{#if !mesos.length}
+			<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+				Cap competició en aquesta temporada.
+			</p>
+		{:else}
+			<section
+				class="rounded-xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
+			>
+				<div class="mb-2 flex items-center justify-between gap-2">
+					<button
+						type="button"
+						disabled={mesIdx <= 0}
+						onclick={() => (mesSel = mesos[mesIdx - 1])}
+						class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 disabled:opacity-25 dark:text-slate-400"
+						aria-label="Mes anterior">‹</button
+					>
+					<h2 class="text-sm font-semibold capitalize">{mesTitol(mesSel + '-01')}</h2>
+					<button
+						type="button"
+						disabled={mesIdx >= mesos.length - 1}
+						onclick={() => (mesSel = mesos[mesIdx + 1])}
+						class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 disabled:opacity-25 dark:text-slate-400"
+						aria-label="Mes següent">›</button
+					>
+				</div>
+
+				<div class="grid grid-cols-7 gap-px text-center">
+					{#each DIES_CURT as dia (dia)}
+						<div class="pb-1 text-[10px] uppercase text-slate-400 dark:text-slate-500">{dia}</div>
+					{/each}
+				</div>
+				<div class="grid grid-cols-7 gap-px overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800">
+					{#each graella as fila, fi (fi)}
+						{#each fila as c (c.iso)}
+							<button
+								type="button"
+								disabled={!c.items.length}
+								onclick={() => (diaSel = diaSel === c.iso ? null : c.iso)}
+								class="flex min-h-[3.25rem] flex-col items-stretch gap-0.5 p-1 text-left md:min-h-[4.75rem] {c.dinsMes
+									? 'bg-white dark:bg-slate-900'
+									: 'bg-slate-50 dark:bg-slate-950'} {diaSel === c.iso
+									? 'ring-2 ring-inset ring-slate-900 dark:ring-slate-100'
+									: ''} {c.items.length ? 'cursor-pointer' : 'cursor-default'}"
+							>
+								<span
+									class="text-[11px] leading-none {c.iso === avuiIso
+										? 'font-bold text-red-600 dark:text-red-400'
+										: c.dinsMes
+											? 'text-slate-600 dark:text-slate-300'
+											: 'text-slate-300 dark:text-slate-600'}">{c.dia}</span
+								>
+								{#if c.items.length}
+									<!-- Mòbil: punts. Des de `md`, també el títol retallat. -->
+									<span class="flex flex-wrap gap-0.5 md:hidden">
+										{#each c.items.slice(0, 4) as e (e.ambit + e.tipus + e.titol)}
+											<span class="h-1.5 w-1.5 rounded-full {PUNT[e.tipus] ?? 'bg-slate-400'}"></span>
+										{/each}
+									</span>
+									<span class="hidden flex-col gap-0.5 md:flex">
+										{#each c.items.slice(0, 2) as e (e.ambit + e.tipus + e.titol)}
+											<span
+												class="truncate rounded px-1 text-[9px] leading-tight {e.tipus === 'equips'
+													? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300'
+													: e.tipus === 'individual'
+														? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+														: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}"
+												>{e.titol}</span
+											>
+										{/each}
+										{#if c.items.length > 2}
+											<span class="px-1 text-[9px] text-slate-400 dark:text-slate-500"
+												>+{c.items.length - 2}</span
+											>
+										{/if}
+									</span>
+								{/if}
+							</button>
+						{/each}
+					{/each}
+				</div>
+
+				<!-- Detall: el dia triat, o tot el mes si no n'hi ha cap. -->
+				{#if diaSel && itemsDiaSel.length}
+					<div class="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+						<h3
+							class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+						>
+							{DIES_CURT[(d(diaSel).getDay() + 6) % 7]}
+							{fmtCurt(diaSel)}
+						</h3>
+						{@render blocs(itemsDiaSel)}
+					</div>
+				{:else if totalMes}
+					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-400 dark:border-slate-800 dark:text-slate-500">
+						{totalMes}
+						{totalMes === 1 ? 'dia' : 'dies'} amb competició. Toca un dia per veure'n el detall.
+					</p>
+				{:else}
+					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-400 dark:border-slate-800 dark:text-slate-500">
+						Cap competició aquest mes amb aquests filtres.
+					</p>
+				{/if}
+			</section>
+		{/if}
+	{:else}
 	{#if !llista.length}
 		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">
 			Cap competició amb aquests filtres.
@@ -326,6 +566,7 @@
 			class="mt-2 w-full rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400"
 			>Mostra també les {passades.length} setmanes ja jugades</button
 		>
+	{/if}
 	{/if}
 
 	{#if canvis.length}
