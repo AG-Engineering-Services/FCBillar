@@ -25,6 +25,7 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 
 from fcbillar.config import get_settings
+from fcbillar.pipeline import _current_temporada_label
 from fcbillar.scraper.client import ScraperClient
 
 BASE = "https://www.fcbillar.cat"
@@ -102,6 +103,13 @@ def main() -> None:
         help="IDs externs separats per comes; per defecte processa tots els torneigs",
     )
     parser.add_argument(
+        "--temporada",
+        help=(
+            "Limita a una temporada ('current' per a l'actual, o '2025-2026'); "
+            "per defecte, totes"
+        ),
+    )
+    parser.add_argument(
         "--cache",
         action="store_true",
         help="Permet servir HTML de la cache (per defecte, fresc per detectar partides noves)",
@@ -117,9 +125,16 @@ def main() -> None:
     s = get_settings()
     conn = sqlite3.connect(str(s.db_path))
     conn.row_factory = sqlite3.Row
-    opens = conn.execute(
-        "SELECT DISTINCT torneig_id_extern, divisio_id_extern FROM torneigs_individuals"
-    ).fetchall()
+    sql = "SELECT DISTINCT torneig_id_extern, divisio_id_extern FROM torneigs_individuals"
+    params: tuple = ()
+    if args.temporada:
+        temporada = (
+            _current_temporada_label() if args.temporada == "current" else args.temporada
+        )
+        sql += " WHERE temporada_id IN (SELECT id FROM temporades WHERE nom = ?)"
+        params = (temporada,)
+        print(f"Temporada: {temporada}", flush=True)
+    opens = conn.execute(sql, params).fetchall()
     if selected is not None:
         opens = [row for row in opens if row["torneig_id_extern"] in selected]
     total = 0
