@@ -336,3 +336,52 @@ export interface OpenClassification {
 	mitjana_particular: number | null;
 	serie_max: number | null;
 }
+
+// Calendari esportiu federatiu (taules fcbillar.calendari_*). Origen: el PDF que
+// publica la RFEB per temporada, parsejat per `fcbillar.calendari_fed`. El PDF
+// només concreta el CAP DE SETMANA: `setmana` és el dilluns i data_inici/data_fi
+// el rang de dies que la cel·la ocupa a la graella.
+export interface CalendariEvent {
+	font: string; // 'RFEB' | 'FCB'
+	temporada: string; // '2026/2027'
+	setmana: string; // ISO, dilluns
+	disciplina: string; // carambola | pool | snooker
+	ambit: string; // nacional | internacional | mixt | tot
+	grup: string; // 'Tres bandes' | 'Jocs de sèrie…' | ''
+	tipus: string; // equips | individual | ''
+	data_inici: string;
+	data_fi: string;
+	titol: string;
+	seu: string | null;
+	dissabte: string | null; // què es juga el ds (patró LIGA NACIONAL)
+	diumenge: string | null;
+	col_span: number; // >1 = cel·la fusionada al PDF (Nadal, Setmana Santa)
+}
+
+export interface CalendariRevisio {
+	font: string;
+	temporada: string;
+	sha256: string;
+	versio: string | null;
+	data_versio: string | null;
+	url: string | null;
+	n_events: number;
+	n_canvis: number;
+	ingested_at: string | null;
+	last_checked_at: string | null;
+}
+
+export interface CalendariCanvi {
+	font: string;
+	temporada: string;
+	sha256: string;
+	ord: number;
+	tipus_canvi: string; // alta | baixa | modificacio
+	setmana: string;
+	disciplina: string;
+	ambit: string;
+	grup: string | null;
+	tipus: string | null;
+	abans: string | null;
+	despres: string | null;
+}
