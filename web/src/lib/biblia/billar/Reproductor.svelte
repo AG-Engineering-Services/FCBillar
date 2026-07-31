@@ -137,6 +137,7 @@
 	// Rellotge intern amb requestAnimationFrame NOMÉS quan no hi ha vídeo mestre.
 	$effect(() => {
 		if (frameExtern != null) return;
+		if (teVideo) return; // amb vídeo mestre l'animació segueix el vídeo; mai auto-play intern
 		if (!teAnimacio || !reproduint) return;
 		let raf = 0;
 		let anterior = performance.now();
