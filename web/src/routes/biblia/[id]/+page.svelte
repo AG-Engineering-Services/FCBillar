@@ -9,8 +9,6 @@
 
 	const d = $derived(data.detall);
 
-	// Fotograma controlat pel vídeo (null = l'anima el rellotge intern del Reproductor).
-	let frameExtern = $state<number | null>(null);
 	const maxFrame = $derived(
 		Math.max(
 			0,
@@ -20,8 +18,9 @@
 		)
 	);
 
-	// Vídeo mestre: si la tirada té vídeo i animació, l'animació el segueix i van
-	// junts i sincronitzats. Sense vídeo, l'anima el rellotge intern (com abans).
+	// Vídeo company: si la tirada té vídeo i animació, la mateixa botonera reprodueix
+	// animació i vídeo alhora. L'animació corre al fps del clip (maxFrame/durada), de
+	// manera que dura el mateix que el clip i acaben junts.
 	let vid = $state<{
 		reprodueix: () => void;
 		pausa: () => void;
@@ -30,12 +29,11 @@
 	} | null>(null);
 	let reproduintVideo = $state(false);
 	const teVideoMestre = $derived(!!d.video && maxFrame > 0);
-
-	// Amb vídeo, l'animació NO s'auto-reprodueix: es queda al fotograma 0 fins que
-	// s'engega el vídeo. En canviar de tirada, es reinicia l'estat.
-	$effect(() => {
-		frameExtern = teVideoMestre ? 0 : null;
-		reproduintVideo = false;
+	const fpsDerivat = $derived.by(() => {
+		const v = d.video;
+		const ini = v?.inici ?? 0;
+		if (v && v.fi != null && v.fi > ini && maxFrame > 0) return maxFrame / (v.fi - ini);
+		return 30;
 	});
 
 	const videoWatch = $derived(d.video ? `https://youtu.be/${d.video.id}?t=${d.video.inici ?? 0}` : null);
@@ -74,7 +72,7 @@
 					tracaBlanca={d.tracaBlanca}
 					tracaGroga={d.tracaGroga}
 					tracaVermella={d.tracaVermella}
-					{frameExtern}
+					fps={fpsDerivat}
 					teVideo={teVideoMestre}
 					reproduintExtern={reproduintVideo}
 					onReprodueix={() => vid?.reprodueix()}
@@ -136,7 +134,6 @@
 							inici={d.video.inici ?? 0}
 							fi={d.video.fi}
 							{maxFrame}
-							onframe={(f) => (frameExtern = f)}
 						/>
 					{/key}
 					{#if videoWatch}

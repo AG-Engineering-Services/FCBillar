@@ -16,11 +16,11 @@
 		tracaGroga?: Fotograma[];
 		tracaVermella?: Fotograma[];
 		mostraNumeros?: boolean;
-		/** Si es dona, el fotograma el controla l'exterior (p. ex. el vídeo). */
-		frameExtern?: number | null;
-		/** Hi ha un vídeo mestre: els controls comanden el vídeo, no el rellotge intern. */
+		/** Fotogrames per segon del rellotge intern (derivat del clip: maxFrame/durada). */
+		fps?: number;
+		/** Hi ha un vídeo que s'ha de reproduir alhora amb la mateixa botonera. */
 		teVideo?: boolean;
-		/** Estat de reproducció del vídeo mestre (per pintar el botó). */
+		/** Estat de reproducció del vídeo (per engegar l'animació quan arrenca el vídeo). */
 		reproduintExtern?: boolean;
 		onReprodueix?: () => void;
 		onPausa?: () => void;
@@ -34,7 +34,7 @@
 		tracaGroga = [],
 		tracaVermella = [],
 		mostraNumeros = false,
-		frameExtern = null,
+		fps = 30,
 		teVideo = false,
 		reproduintExtern = false,
 		onReprodueix,
@@ -56,13 +56,19 @@
 	const teAnimacio = $derived(maxFrame > 0);
 
 	let frame = $state(0);
-	let reproduint = $state(true);
+	// Amb vídeo, no s'auto-reprodueix: espera que premis play (que engega tots dos).
+	// teVideo és estable (el component es recrea per tirada); el valor inicial és correcte.
+	// svelte-ignore state_referenced_locally
+	let reproduint = $state(!teVideo);
 	let velocitat = $state(1);
 
-	const FPS = 30;
+	const frameActiu = $derived(frame);
 
-	// Fotograma efectiu: el del vídeo si es controla des de fora, si no l'intern.
-	const frameActiu = $derived(frameExtern ?? frame);
+	// Quan el vídeo arrenca (també si el poses des dels seus controls), engega
+	// l'animació perquè vagin junts.
+	$effect(() => {
+		if (teVideo && reproduintExtern) reproduint = true;
+	});
 
 	function puntBola(traca: Fotograma[], fallback: [number, number]): [number, number] {
 		const p = posicioAlFrame(traca, frameActiu);
@@ -134,18 +140,23 @@
 		].filter((t) => t.punts.length > 1)
 	);
 
-	// Bucle d'animació amb requestAnimationFrame (només si NO el controla el vídeo).
+	// Bucle d'animació amb requestAnimationFrame (rellotge intern, al fps del clip).
 	$effect(() => {
-		if (frameExtern != null) return;
-		if (teVideo) return; // amb vídeo mestre, el rellotge intern no corre mai
 		if (!teAnimacio || !reproduint) return;
 		let raf = 0;
 		let anterior = performance.now();
 		const passa = (ara: number) => {
 			const dt = (ara - anterior) / 1000;
 			anterior = ara;
-			frame += dt * FPS * velocitat;
-			if (frame >= maxFrame) frame = 0; // bucle
+			frame += dt * fps * velocitat;
+			if (frame >= maxFrame) {
+				if (teVideo) {
+					frame = maxFrame;
+					reproduint = false; // amb vídeo, s'atura al final (no fa bucle)
+					return;
+				}
+				frame = 0; // sense vídeo, bucle
+			}
 			raf = requestAnimationFrame(passa);
 		};
 		raf = requestAnimationFrame(passa);
@@ -153,35 +164,31 @@
 	});
 
 	function alterna() {
-		if (teVideo) {
-			// El vídeo mana: engega'l o atura'l, i l'animació el seguirà.
-			if (reproduintExtern) onPausa?.();
-			else onReprodueix?.();
-		} else {
-			reproduint = !reproduint;
-		}
+		reproduint = !reproduint;
+		// El mateix botó engega/atura el vídeo perquè vagin junts.
+		if (teVideo) (reproduint ? onReprodueix : onPausa)?.();
 	}
 	function reinicia() {
 		frame = 0;
+		reproduint = true;
 		if (teVideo) onReinicia?.();
 	}
 	function scrub(v: number) {
+		reproduint = false;
+		frame = v;
 		if (teVideo) {
+			onPausa?.();
 			onVesA?.(v);
-		} else {
-			reproduint = false;
-			frame = v;
 		}
 	}
 
-	// Botó reflecteix l'estat del vídeo quan aquest mana; si no, el rellotge intern.
-	const enMarxa = $derived(teVideo ? reproduintExtern : reproduint);
+	const enMarxa = $derived(reproduint);
 </script>
 
 <div class="reproductor">
 	<Billar {boles} {traces} mode="visor" {mostraNumeros} />
 
-	{#if teAnimacio && (teVideo || frameExtern == null)}
+	{#if teAnimacio}
 		<div class="controls">
 			<button class="rodo" onclick={alterna} aria-label={enMarxa ? 'Pausa' : 'Reprodueix'}>
 				{enMarxa ? '❚❚' : '▶'}
