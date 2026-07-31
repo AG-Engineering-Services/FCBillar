@@ -56,7 +56,10 @@
 </script>
 
 <svg viewBox="0 0 150 100" role="img" aria-label="Efecte i quantitat de bola">
-	<!-- Bola tiradora (blanca) amb el rellotge d'efecte -->
+	<!-- Bola objectiu (vermella) al darrere: l'encavalcament amb la tiradora
+	     indica la quantitat de bola -->
+	<circle cx={objCx} cy={CY} r={R} class="obj" />
+	<!-- Bola tiradora (blanca) en primer pla, amb el rellotge d'efecte -->
 	<circle cx={CX} cy={CY} r={R} class="cara" />
 	<line x1={CX - R + 2} y1={CY} x2={CX + R - 2} y2={CY} class="creu" />
 	<line x1={CX} y1={CY - R + 2} x2={CX} y2={CY + R - 2} class="creu" />
@@ -77,10 +80,6 @@
 	{#if pPunt}
 		<circle cx={pPunt.x} cy={pPunt.y} r="4.6" class="punt" />
 	{/if}
-
-	<!-- Bola objectiu superposada (quantitat de bola), semitransparent perquè es
-	     vegi el rellotge a sota -->
-	<circle cx={objCx} cy={CY} r={R} class="obj" />
 
 	<text x={CX} y="94" class="etiqueta">{etiqueta}</text>
 </svg>
@@ -121,10 +120,9 @@
 		stroke-width: 1.2;
 	}
 	.obj {
-		fill: #ffbb00;
-		fill-opacity: 0.5;
-		stroke: #b98500;
-		stroke-width: 1.3;
+		fill: #e10000;
+		stroke: #14110c;
+		stroke-width: 1.4;
 	}
 	.etiqueta {
 		fill: var(--text-suau);
