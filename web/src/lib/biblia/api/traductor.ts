@@ -81,6 +81,22 @@ function desa(): void {
 	// cache en memòria, que ja s'ha mutat al mapa `memoria`.
 }
 
+// Mapa text→traducció del bundle, ignorant el prefix `motor:model` de la clau.
+// Així el bundle pre-traduït s'usa SEMPRE, encara que l'etiqueta activa (que
+// depèn de si hi ha NVIDIA_API_KEY a l'entorn de Vercel) no coincideixi amb la
+// que es va fer servir en empaquetar. Sense això, a Vercel (sense clau)
+// l'etiqueta és "google:v2" i mai troba les claus "nvidia:…" del bundle.
+let perText: Map<string, string> | null = null;
+function bundlePerText(): Map<string, string> {
+	if (perText) return perText;
+	perText = new Map();
+	for (const [k, v] of Object.entries(carrega())) {
+		const i = k.indexOf(' ');
+		if (i > 0) perText.set(k.slice(i + 1), v);
+	}
+	return perText;
+}
+
 // ---------------------------------------------------------------------------
 // Motor NVIDIA (LLM)
 // ---------------------------------------------------------------------------
@@ -178,6 +194,10 @@ export async function tradueixKoCa(fetch: typeof globalThis.fetch, text: string)
 	const cache = carrega();
 	const clauCache = `${etiqueta} ${t}`;
 	if (clauCache in cache) return cache[clauCache];
+	// Bundle pre-traduït (per text, independent del motor): és el cas normal a
+	// producció i evita traduir en directe (lent/inestable a Vercel).
+	const preTraduit = bundlePerText().get(t);
+	if (preTraduit !== undefined) return preTraduit;
 
 	let trad: string;
 	let esFallback = false;
