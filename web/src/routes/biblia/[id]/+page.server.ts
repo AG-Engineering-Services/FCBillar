@@ -14,6 +14,8 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 		fetchJugadors(fetch)
 	]);
 
+	if (!detall.id) throw error(404, 'Tirada no trobada');
+
 	const jugador = jugadors.find((j) => j.id === detall.jugadorId) ?? null;
 
 	// Traducció al català del text d'entrenament. NO l'esperem: es transmet
