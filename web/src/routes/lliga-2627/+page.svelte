@@ -51,7 +51,7 @@
 	const DIVS = ['Honor', '1a', '2a', '3a', '4a'];
 	const LLETRES = ['A', 'B', 'C', 'D', 'E'];
 
-	type Esquema = 'fcb' | 'alt';
+	type Esquema = 'fcb' | 'opt' | 'alt';
 	const ESQUEMES: Record<
 		Esquema,
 		{ etiqueta: string; talls: number[]; inici: Record<string, number>; rangs: Record<string, string> }
@@ -61,6 +61,12 @@
 			talls: [3, 8, 12, 16],
 			inici: { A: 1, B: 5, C: 9, D: 13, E: 17 },
 			rangs: { A: '1-3', B: '4-8', C: '9-12', D: '13-16', E: '17+' }
+		},
+		opt: {
+			etiqueta: '4-4-4-4-4',
+			talls: [4, 8, 12, 16],
+			inici: { A: 1, B: 5, C: 9, D: 13, E: 17 },
+			rangs: { A: '1-4', B: '5-8', C: '9-12', D: '13-16', E: '17+' }
 		},
 		alt: {
 			etiqueta: '4-6-6-6',
@@ -268,7 +274,7 @@
 	<div class="inline-flex items-center gap-1.5">
 		<span class="text-xs text-slate-400 dark:text-slate-500">bandes</span>
 		<div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-sm dark:bg-slate-800">
-			{#each ['fcb', 'alt'] as k}
+			{#each ['fcb', 'opt', 'alt'] as k}
 				<button
 					type="button"
 					onclick={() => (esquema = k as Esquema)}
@@ -611,17 +617,27 @@
 			promocions amb el B si abans hi ha fet un mínim de 6 jornades (Assemblea 03/06/23).
 		</p>
 		<p>
+			<b>Repartiment <span class="font-mono">4-4-4-4-4</span>.</b> 1-4 equip A; 5-8 el B; 9-12 el C;
+			13-16 el D; la resta, E. Cada equip amb els seus quatre i cap de compartit: és la millor
+			combinació que un club pot presentar en una jornada, perquè tothom juga a l'equip que li toca
+			pel rànquing sense haver de cedir ningú. Els quatre titulars són els mateixos que amb
+			<span class="font-mono">3-5-4-4</span> —i per tant les mitjanes d'equip i la classificació
+			projectada no canvien—; el que desapareix és el jugador frontissa i, amb ell, la incertesa de
+			saber amb quin equip juga cada jornada.
+		</p>
+		<p>
 			<b>Repartiment <span class="font-mono">4-6-6-6</span>.</b> 1-4 equip A; 5-10 equip B; 11-16 el C;
 			17-22 el D; la resta, E. Cada equip té els seus quatre titulars propis i el B, el C i el D
 			porten dos suplents més dins de la seva banda, així que desapareix el jugador frontissa.
 		</p>
 		<p>
-			<b>Què canvia entre els dos.</b> Els equips A i B tenen els mateixos quatre titulars en tots dos
-			casos (1-4 i 5-8), o sigui que la Divisió d'Honor i la 1a —gairebé tots equips A i B— no es
-			mouen de mitjana; el que hi canvia és qui els fa de suplent. Els titulars sí que canvien de la C
-			cap avall: són 22 dels 83 equips, i tots hi perden mitjana amb el <span class="font-mono"
-				>4-6-6-6</span
-			>. Com que l'ordre de la categoria en depèn, els grups també es mouen.
+			<b>Què canvia entre els tres.</b> El <span class="font-mono">3-5-4-4</span> i el
+			<span class="font-mono">4-4-4-4-4</span> donen exactament els mateixos quatre titulars a tots els
+			equips: només es diferencien en qui hi fa de suplent i en si hi ha jugador frontissa. El
+			<span class="font-mono">4-6-6-6</span>, en canvi, mou els titulars de la C cap avall —la banda hi
+			arrenca dues posicions més avall—, i afecta 22 dels 83 equips, tots amb pèrdua de mitjana. Els
+			equips A i B no es mouen amb cap dels tres, o sigui que la Divisió d'Honor i la 1a, gairebé totes
+			d'equips A i B, són sempre iguals.
 		</p>
 		<p>
 			<b>Lletres.</b> Es reparteixen de nou cada temporada per categoria: l'A és sempre l'equip de més

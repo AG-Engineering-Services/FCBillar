@@ -189,10 +189,14 @@ def aplica_traspassos(conn, pool: dict, rk: dict) -> None:
 #   fcb  → 3-5-4-4: l'equip A només té tres jugadors propis i el quart de cada
 #          encontre surt de la banda del B (normalment el nº 4, amb la limitació
 #          de l'Assemblea 03/06/23), de manera que el B tira dels nº 5-8.
+#   opt  → 4-4-4-4-4: cada equip amb els seus quatre i cap de compartit. És la
+#          millor combinació que un club pot presentar en una jornada, perquè
+#          tothom juga a l'equip que li toca per rànquing sense cedir ningú.
 #   alt  → 4-6-6-6: cada equip té els seus quatre titulars propis i el B, el C i
 #          el D porten dos suplents més a la seva banda.
 ESQUEMES = {
     "fcb": {"talls": [3, 8, 12, 16], "inici": {"A": 1, "B": 5, "C": 9, "D": 13, "E": 17}},
+    "opt": {"talls": [4, 8, 12, 16], "inici": {"A": 1, "B": 5, "C": 9, "D": 13, "E": 17}},
     "alt": {"talls": [4, 10, 16, 22], "inici": {"A": 1, "B": 5, "C": 11, "D": 17, "E": 23}},
 }
 LLETRES = ["A", "B", "C", "D", "E"]
