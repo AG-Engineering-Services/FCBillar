@@ -249,7 +249,7 @@ export async function fetchDetall(
 		velocitat: (d.rail_speed as number) ?? 0,
 		descripcio: netejaText(d.description_arrangement as string),
 		consell: netejaText(d.description_tip as string),
-		prevId: typeof d.prev_shot_id === 'number' && d.prev_shot_id > 0 ? d.prev_shot_id : null,
-		nextId: typeof d.next_shot_id === 'number' && d.next_shot_id > 0 ? d.next_shot_id : null
+		prevId: typeof d.next_shot_id === 'number' && d.next_shot_id > 0 ? d.next_shot_id : null,
+		nextId: typeof d.prev_shot_id === 'number' && d.prev_shot_id > 0 ? d.prev_shot_id : null
 	};
 }
