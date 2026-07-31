@@ -6,6 +6,7 @@
 	import VideoSincronitzat from '$lib/biblia/billar/VideoSincronitzat.svelte';
 	import CaraBola from '$lib/biblia/billar/CaraBola.svelte';
 	import QuantitatBola from '$lib/biblia/billar/QuantitatBola.svelte';
+	import EfecteQuantitat from '$lib/biblia/billar/EfecteQuantitat.svelte';
 	import { familiaCat } from '$lib/biblia/api/vocabulari';
 	import type { PageData } from './$types';
 
@@ -243,8 +244,7 @@
 								disabled={revelat}
 								onclick={() => comprovaMultiple(i)}
 							>
-								<div class="mini-cara"><CaraBola punt={op.efecte} /></div>
-								<QuantitatBola gruix={op.gruix} />
+								<EfecteQuantitat punt={op.efecte} gruix={op.gruix} />
 							</button>
 						{/each}
 					</div>
@@ -397,9 +397,6 @@
 	.opcio.erronia {
 		border-color: var(--perill);
 		background: #331416;
-	}
-	.mini-cara {
-		width: 74px;
 	}
 	.cara-gran {
 		width: 100%;
