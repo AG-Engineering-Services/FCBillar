@@ -31,6 +31,12 @@
 		onframe
 	}: Props = $props();
 
+	// fps de sincronització: l'animació omple el clip (fotograma 0 a `inici`, últim
+	// a `fi`), que és el mínim avançament possible amb el vídeo mestre.
+	const fpsUsat = $derived(
+		fi != null && fi > inici && maxFrame > 0 ? maxFrame / (fi - inici) : fps
+	);
+
 	let el: HTMLDivElement;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let player: any = null;
@@ -61,7 +67,7 @@
 	}
 	export function vesA(frame: number) {
 		try {
-			player?.seekTo?.(inici + frame / fps, true);
+			player?.seekTo?.(inici + frame / fpsUsat, true);
 		} catch {
 			/* ignora */
 		}
@@ -70,7 +76,7 @@
 	function actualitza() {
 		if (!player?.getCurrentTime || !onframe) return;
 		const t = player.getCurrentTime() as number;
-		onframe(Math.max(0, Math.min(maxFrame, (t - inici) * fps)));
+		onframe(Math.max(0, Math.min(maxFrame, (t - inici) * fpsUsat)));
 	}
 	function bucle() {
 		actualitza();
