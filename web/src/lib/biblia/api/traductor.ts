@@ -24,7 +24,7 @@ function clauNvidia(): string | undefined {
 function modelNvidia(): string {
 	// mistral-medium: bona qualitat i prou ràpid al tier gratuït (els models de
 	// 70B+ hi fan timeout de servidor sovint).
-	return env.NVIDIA_MODEL?.trim() || 'deepseek-ai/deepseek-v4-pro';
+	return env.NVIDIA_MODEL?.trim() || 'meta/llama-3.3-70b-instruct';
 }
 
 // ---------------------------------------------------------------------------
@@ -90,15 +90,14 @@ let perText: Map<string, string> | null = null;
 function bundlePerText(): Map<string, string> {
 	if (perText) return perText;
 	perText = new Map();
-	const entrades = Object.entries(carrega());
-	const posa = (k: string, v: string) => {
+	// Preferència de qualitat: deepseek > llama > (mistral/google). Ordenem
+	// ascendent i posem l'últim (millor) perquè guanyi per a cada text.
+	const pref = (k: string) => (k.includes('deepseek') ? 3 : k.includes('llama') ? 2 : 1);
+	const entrades = Object.entries(carrega()).sort((a, b) => pref(a[0]) - pref(b[0]));
+	for (const [k, v] of entrades) {
 		const i = k.indexOf(' ');
-		if (i > 0) perText!.set(k.slice(i + 1), v);
-	};
-	// Primer els altres motors (fallback), després deepseek (millor qualitat) perquè
-	// guanyi allà on ja s'ha re-traduït.
-	for (const [k, v] of entrades) if (!k.includes('deepseek')) posa(k, v);
-	for (const [k, v] of entrades) if (k.includes('deepseek')) posa(k, v);
+		if (i > 0) perText.set(k.slice(i + 1), v);
+	}
 	return perText;
 }
 
