@@ -17,8 +17,8 @@
 		fps?: number;
 		/** Cert mentre el vídeo s'està reproduint (per reflectir-ho al control). */
 		reproduint?: boolean;
-		/** Emet el fotograma actual (o null quan el vídeo no mana). */
-		onframe: (f: number | null) => void;
+		/** Opcional: emet el fotograma actual segons el temps del vídeo. */
+		onframe?: (f: number | null) => void;
 	}
 
 	let {
@@ -75,7 +75,7 @@
 	}
 
 	function actualitza() {
-		if (!player?.getCurrentTime) return;
+		if (!player?.getCurrentTime || !onframe) return;
 		const t = player.getCurrentTime() as number;
 		onframe(Math.max(0, Math.min(maxFrame, (t - inici) * fpsUsat)));
 	}
@@ -137,7 +137,7 @@
 			} catch {
 				// ignora
 			}
-			onframe(null);
+			onframe?.(null);
 		};
 	});
 </script>

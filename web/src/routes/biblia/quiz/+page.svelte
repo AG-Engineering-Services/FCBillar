@@ -11,8 +11,15 @@
 
 	let { data }: { data: PageData } = $props();
 
-	// Sincronització vídeo↔animació a la revelació.
-	let frameExtern = $state<number | null>(null);
+	// Vídeo company a la revelació: la mateixa botonera reprodueix animació i vídeo
+	// alhora, al ritme del clip.
+	let vid = $state<{
+		reprodueix: () => void;
+		pausa: () => void;
+		reinicia: () => void;
+		vesA: (f: number) => void;
+	} | null>(null);
+	let reproduintVideo = $state(false);
 
 	const MODES = [
 		{ id: 'multiple', nom: '4 opcions' },
@@ -44,6 +51,13 @@
 				)
 			: 0
 	);
+
+	const fpsDerivat = $derived.by(() => {
+		const v = shot?.video;
+		const ini = v?.inici ?? 0;
+		if (v && v.fi != null && v.fi > ini && maxFrame > 0) return maxFrame / (v.fi - ini);
+		return 30;
+	});
 
 	// Camí de la bola TIRADORA, que sempre és la BLANCA (수구 = bola 1). Cal
 	// ensenyar-lo a l'enunciat: si no, no se sap quin dels tirs possibles es demana
@@ -128,7 +142,7 @@
 		efecteGuess = null;
 		gruixGuess = 4;
 		seleccio = null;
-		frameExtern = null;
+		reproduintVideo = false;
 	}
 	async function seguent() {
 		cancelaSalt();
@@ -168,7 +182,7 @@
 
 <div class="contenidor">
 	<div class="cap">
-		<h1>Quiz del punt de contacte</h1>
+		<h1>Test del punt de contacte</h1>
 		<div class="marcador">Encerts: <strong>{encerts}</strong> / {total}</div>
 	</div>
 
@@ -191,16 +205,23 @@
 						tracaBlanca={shot.tracaBlanca}
 						tracaGroga={shot.tracaGroga}
 						tracaVermella={shot.tracaVermella}
-						{frameExtern}
+						fps={fpsDerivat}
+						teVideo={!!shot.video}
+						reproduintExtern={reproduintVideo}
+						onReprodueix={() => vid?.reprodueix()}
+						onPausa={() => vid?.pausa()}
+						onReinicia={() => vid?.reinicia()}
+						onVesA={(f) => vid?.vesA(f)}
 					/>
 					{#if shot.video}
 						{#key shot.id}
 							<VideoSincronitzat
+								bind:this={vid}
+								bind:reproduint={reproduintVideo}
 								videoId={shot.video.id}
 								inici={shot.video.inici ?? 0}
 								fi={shot.video.fi}
 								{maxFrame}
-								onframe={(f) => (frameExtern = f)}
 							/>
 						{/key}
 					{/if}
