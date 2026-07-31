@@ -27,11 +27,16 @@ DIVORD = {"Honor": 0, "1a": 1, "2a": 2, "3a": 3, "4a": 4}
 DIST = {"Honor": 40, "1a": 35, "2a": 30, "3a": 25, "4a": 25}
 DIV2526 = {148: "Honor", 149: "1a", 150: "2a", 151: "3a", 152: "4a"}
 
-# Composició i ORDRE OFICIALS, tal com surten a "CLASSIFICACIO FINAL LLIGUES TRES
-# BANDES" de la FCB. L'ordre és el de sembra: primer els que baixen de la divisió
-# de sobre, després els que s'hi mantenen intercalats per posició de grup, i al
-# final els que hi pugen. Verificat: coincideix equip per equip amb la composició
-# que derivàvem dels play-offs.
+# Composició i ORDRE de sembra, presos de la "CLASSIFICACIO FINAL LLIGUES TRES
+# BANDES" de la FCB: primer els que baixen de la divisió de sobre, després els que
+# s'hi mantenen intercalats per posició de grup, i al final els que hi pugen.
+#
+# CORRECCIÓ sobre el document: el play-off Sants D - Canet B el va guanyar el
+# SANTS D, no el Canet B. El desempat de les eliminatòries igualades és, doncs,
+# el TOTAL de caramboles (178-177), que és també el que decideix l'altra
+# (Sant Adrià C 201-186 Lleida B). Sants D puja a 2a i Canet B baixa a 3a, i
+# cadascun va al bloc que li toca —els que pugen, al final; els que baixen, al
+# principi—; la posició exacta dins del bloc és inferència nostra.
 COMP: dict[str, list[tuple[str, str]]] = {
     "Honor": [
         ("C.B.MATARÓ", "A"), ("B.C.GRANOLLERS", "A"), ("C.B.MOLLET", "A"), ("C.B.SANT ADRIÀ", "A"),
@@ -48,20 +53,28 @@ COMP: dict[str, list[tuple[str, str]]] = {
         ("C.B.MATARÓ", "B"), ("C.B.ALBA", "UNICO"),
     ],
     "2a": [
+        # baixen de 1a
         ("C.B.LLEIDA", "B"), ("C.B.LLINARS", "B"), ("C.B.TARRAGONA", "A"),
-        ("SB FOMENT MOLINS", "B"), ("S.B.CORAL COLÓN", "A"), ("C.B.SANT BOI", "B"),
-        ("C.B.TARRAGONA", "B"), ("C.B.PREMIÀ", "UNICO"), ("C.B.BLANES", "A"),
-        ("SB FOMENT MOLINS", "C"), ("C.B.BANYOLES", "B"), ("C.B.VIC", "UNICO"),
-        ("C.B. CANET", "B"), ("C.B.2000 CERDANYOLA", "B"), ("C.B.CARDONA", "UNICO"),
+        ("SB FOMENT MOLINS", "B"),
+        # s'hi mantenen
+        ("S.B.CORAL COLÓN", "A"), ("C.B.SANT BOI", "B"), ("C.B.TARRAGONA", "B"),
+        ("C.B.PREMIÀ", "UNICO"), ("C.B.BLANES", "A"), ("SB FOMENT MOLINS", "C"),
+        ("C.B.BANYOLES", "B"), ("C.B.VIC", "UNICO"),
+        # hi pugen: primer els de play-off, després els campions
+        ("C.B.2000 CERDANYOLA", "B"), ("C.B.SANTS", "D"), ("C.B.CARDONA", "UNICO"),
         ("C.B.BARCELONA", "B"),
     ],
     "3a": [
-        ("C.B.LLIÇÀ D'AMUNT", "A"), ("S.B. GEiEG", "UNICO"), ("C.B.SANT ADRIÀ", "D"),
-        ("C.B.SANTS", "D"), ("B.C.GRANOLLERS", "C"), ("C.B.MONFORTE", "D"),
-        ("B.C.GRANOLLERS", "D"), ("S.B.P.E.CENTELLES", "B"), ("C.B.SANTS", "C"),
-        ("C.B.PRAT", "B"), ("S.B.ESPLUGUES L'AVENÇ", "A"), ("B. EL MASNOU", "UNICO"),
-        ("C.B.LLIÇÀ D'AMUNT", "B"), ("C.B.LLINARS", "C"), ("C.B.MATARÓ", "C"),
-        ("S.B.LA GRAN PENYA", "B"),
+        # baixen de 2a: primer els de play-off, després els vuitens
+        ("C.B.LLIÇÀ D'AMUNT", "A"), ("C.B. CANET", "B"), ("S.B. GEiEG", "UNICO"),
+        ("C.B.SANT ADRIÀ", "D"),
+        # s'hi mantenen
+        ("B.C.GRANOLLERS", "C"), ("C.B.MONFORTE", "D"), ("B.C.GRANOLLERS", "D"),
+        ("S.B.P.E.CENTELLES", "B"), ("C.B.SANTS", "C"), ("C.B.PRAT", "B"),
+        ("S.B.ESPLUGUES L'AVENÇ", "A"), ("B. EL MASNOU", "UNICO"),
+        ("C.B.LLIÇÀ D'AMUNT", "B"), ("C.B.LLINARS", "C"),
+        # hi pugen
+        ("C.B.MATARÓ", "C"), ("S.B.LA GRAN PENYA", "B"),
     ],
     "4a": [
         ("C.B.SANT BOI", "C"), ("C.B.VILANOVA", "UNICO"), ("C.B. BORGES", "UNICO"),
@@ -111,11 +124,13 @@ MOTIU = {
     ("C.B.MATARÓ", "B"): "puja · campió 2a A",
     ("C.B.ALBA", "UNICO"): "puja · campió 2a B",
     ("C.B.MONT-ROIG", "B"): "puja · play-off guanyat a Llinars B",
-    ("C.B.SANT ADRIÀ", "C"): "puja · play-off amb Lleida B, desempat per caramboles a fora (102-95)",
+    ("C.B.SANT ADRIÀ", "C"): "puja · play-off amb Lleida B, desempat per caramboles (201-186)",
+    ("C.B.SANTS", "D"): "puja · play-off amb Canet B, desempat per caramboles (178-177)",
     ("SB FOMENT MOLINS", "B"): "baixa · 8è 1a A",
     ("C.B.TARRAGONA", "A"): "baixa · 8è 1a B",
     ("C.B.LLINARS", "B"): "baixa · play-off perdut amb Mont-roig B",
-    ("C.B.LLEIDA", "B"): "baixa · play-off amb Sant Adrià C, desempat per caramboles a fora (95-102)",
+    ("C.B.LLEIDA", "B"): "baixa · play-off amb Sant Adrià C, desempat per caramboles (186-201)",
+    ("C.B. CANET", "B"): "baixa · play-off amb Sants D, desempat per caramboles (177-178)",
     ("C.B.CARDONA", "UNICO"): "puja · campió 3a A",
     ("C.B.BARCELONA", "B"): "puja · campió 3a B",
     ("C.B.2000 CERDANYOLA", "B"): "puja · play-off guanyat a Lliçà d'Amunt A",

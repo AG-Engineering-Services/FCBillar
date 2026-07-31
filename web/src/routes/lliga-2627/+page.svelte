@@ -619,13 +619,13 @@
 			<b>Divisions.</b> Puja el campió de cada grup, baixa el vuitè, i el setè es juga la plaça a anada
 			i tornada contra el segon de la divisió inferior. Els vuit play-offs del 4 i 5 de juliol de 2026
 			ja s'han disputat. Dues eliminatòries van quedar igualades en punts de match i en parcials, i el
-			desempat és per <b>caramboles a fora</b>: Sant Adrià C hi puja (102 a fora contra 95 del Lleida
-			B) i Canet B es queda a 2a (84 contra 83 del Sants D). Pel total de caramboles el segon cas
-			donaria la volta —Sants D 178-177—, o sigui que és el criteri de fora el que manda.
-			<b>La composició i l'ordre de sembra són els oficials</b>, presos de la «Classificació final
-			lligues tres bandes» de la FCB, i coincideixen equip per equip amb el que havíem derivat: primer
-			els que baixen de la divisió de sobre, després els que s'hi mantenen intercalats per posició de
-			grup, i al final els que hi pugen.
+			desempat és el <b>total de caramboles</b>: Sant Adrià C hi puja (201-186 al Lleida B) i Sants D
+			també (178-177 al Canet B, per una sola carambola). <b>L'ordre de sembra és l'oficial</b>, pres
+			de la «Classificació final lligues tres bandes» de la FCB: primer els que baixen de la divisió
+			de sobre, després els que s'hi mantenen intercalats per posició de grup, i al final els que hi
+			pugen. Aquell document, però, dona el play-off al Canet B: aquí hi corregim la composició —Sants
+			D a 2a i Canet B a 3a— i col·loquem cadascun al bloc que li toca, tot i que la posició exacta
+			dins del bloc és inferència nostra.
 		</p>
 		<p>
 			<b>Grups.</b> Serpentí <span class="font-mono">A-B-B-A</span> sobre l'ordre de sembra:
@@ -692,8 +692,9 @@
 		</p>
 		<p>
 			<b>Lletres.</b> Es reparteixen de nou cada temporada per categoria: l'A és sempre l'equip de més
-			divisió, i després B, C, D i E. Amb aquesta composició cap club no les té creuades i totes es
-			mantenen; si alguna canviés, la fitxa ho diria amb un «era la…».
+			divisió, i després B, C, D i E. L'únic club que les té creuades és el Sants: la seva D puja a 2a
+			i la C es queda a 3a, o sigui que passen a ser <b>Sants C</b> i <b>Sants D</b> respectivament.
+			Ho marquem amb un «era la…».
 		</p>
 		<p>
 			<b>Què no cobreix.</b> Altes i baixes de llicència més enllà dels canvis coneguts (marcats amb ⇄
