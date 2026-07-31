@@ -30,6 +30,11 @@
 	type Club = { club: string; nom: string; multi: boolean; equips: Equip[]; llista: Jugador[] };
 	type EquipDiv = {
 		seed: number;
+		p_1r: number;
+		p_2n: number;
+		p_penultim: number;
+		p_ultim: number;
+		pos_mitjana: number;
 		club: string;
 		nom: string;
 		lletra: string;
@@ -144,6 +149,20 @@
 			const grupPerSeed = new Map<number, string>();
 			for (const g of D.grups) for (const s of g.seeds) grupPerSeed.set(s, g.lletra);
 			const moguts = new Set(D.moguts);
+			// El favorit de cada plaça és, dins del seu grup, qui té més probabilitat
+			// de quedar-hi: 1r puja, 2n juga la promoció, penúltim la permanència i
+			// últim baixa.
+			// Es marquen quatre equips DIFERENTS per grup: si el mateix equip és el
+			// favorit de dues places, la segona va al següent candidat.
+			const fav = new Map<number, string>();
+			for (const g of D.grups) {
+				const eq = g.seeds.map((sd) => D.equips.find((x) => x.seed === sd)!);
+				for (const camp of ['p_1r', 'p_2n', 'p_penultim', 'p_ultim'] as const) {
+					const lliures = eq.filter((x) => !fav.has(x.seed));
+					if (!lliures.length) break;
+					fav.set(lliures.reduce((a, b) => (b[camp] > a[camp] ? b : a)).seed, camp);
+				}
+			}
 			return {
 				nom: d,
 				distancia: D.distancia,
@@ -156,6 +175,7 @@
 						pos: e.seed,
 						grup: grupPerSeed.get(e.seed) ?? 'A',
 						mogut: moguts.has(e.seed),
+						fav: fav.get(e.seed) ?? null,
 						tit: referents(club.llista, e.lletra, esquema),
 						plantilla: plantilla(club.llista, e.lletra, esquema, esUltim(club, e.lletra)),
 						mit: mitjanaEquip(club.llista, e.lletra, esquema)
@@ -228,6 +248,13 @@
 	const puja = (m: string | null) => !!m && m.startsWith('puja');
 	const baixa = (m: string | null) => !!m && m.startsWith('baixa');
 	const esSwing = (p: Jugador, c: Club) => esquema === 'fcb' && p.num === 4 && c.multi;
+	const FAV: Record<string, { text: string; classe: string }> = {
+		p_1r: { text: '1r', classe: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' },
+		p_2n: { text: '2n', classe: 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300' },
+		p_penultim: { text: 'penúlt.', classe: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300' },
+		p_ultim: { text: 'últim', classe: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' }
+	};
+	const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 	/** Files de la llista d'un club, amb la capçalera de banda quan canvia. */
 	function bandes(c: Club) {
@@ -354,7 +381,11 @@
 											>{x.pos}</span
 										>
 										<span class="min-w-0 flex-1 truncate text-sm font-medium">
-											{nomEquip(x.e)}{#if puja(x.e.motiu)}<span
+											{nomEquip(x.e)}{#if x.fav}<span
+													class="ml-1 rounded px-1 py-0.5 text-[10px] font-bold {FAV[x.fav].classe}"
+													title="favorit per quedar {FAV[x.fav].text} del grup"
+													>{FAV[x.fav].text} {pct(x.e[x.fav as keyof EquipDiv] as number)}</span
+												>{/if}{#if puja(x.e.motiu)}<span
 													class="ml-1 text-[11px] text-emerald-600 dark:text-emerald-400">▲</span
 												>{:else if baixa(x.e.motiu)}<span class="ml-1 text-[11px] text-red-600 dark:text-red-400"
 													>▼</span
@@ -428,6 +459,13 @@
 									class="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-bold dark:bg-slate-800"
 									>grup {x.grup}</span
 								>
+								{#if x.fav}
+									<span
+										class="shrink-0 rounded px-1 py-0.5 text-[10px] font-bold {FAV[x.fav].classe}"
+										title="favorit per quedar {FAV[x.fav].text} del grup"
+										>{FAV[x.fav].text} {pct(x.e[x.fav as keyof EquipDiv] as number)}</span
+									>
+								{/if}
 								{#if puja(x.e.motiu)}
 									<span class="shrink-0 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400"
 										>▲ {x.e.div_2526}</span
@@ -600,6 +638,19 @@
 			mínim, perquè els slots homòlegs són sempre posicions consecutives de l'ordre oficial (l'A2 és el
 			4 i el B2 el 3; l'A3 és el 5 i el B3 el 6…). En surten sis —dues a Honor, una a 1a, una a 2a i
 			dues a 3a— i cap divisió no queda amb equips del mateix club junts. Els moguts van marcats amb ⇄.
+		</p>
+		<p>
+			<b>Pronòstic.</b> Els xips <span class="font-semibold">1r</span>,
+			<span class="font-semibold">2n</span>, <span class="font-semibold">penúlt.</span> i
+			<span class="font-semibold">últim</span> marquen el favorit de cada plaça dins del seu grup, amb
+			la seva probabilitat. Surten de simular 20.000 vegades la lliga doble de cada grup, aparellant
+			els quatre titulars per ordre —el nº 1 contra el nº 1— i resolent cada partida amb un model
+			calibrat sobre les 2.433 partides de la lliga 2025-26: la probabilitat de guanyar surt de la
+			diferència de mitjanes més l'avantatge de camp, que és real i mesurable (els locals s'enduen el
+			55,1% dels parcials, i amb mitjanes iguals el local guanya el 54,5% de les partides). Els punts
+			són 3/1/0 i el desempat, els parcials, com fa la federació. Validat per trams, el model encerta
+			la freqüència real dins d'un o dos punts. No hi entren ni les incompareixences, ni les
+			sancions, ni els canvis d'alineació durant la temporada.
 		</p>
 		<p>
 			<b>Llistes.</b> El pool de cada club són els jugadors que van disputar la lliga 2025-26, ordenats
