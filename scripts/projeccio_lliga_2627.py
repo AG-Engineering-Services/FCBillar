@@ -15,6 +15,7 @@ import argparse
 import collections
 import io
 import json
+import math
 import sqlite3
 import sys
 
@@ -202,6 +203,92 @@ ESQUEMES = {
 LLETRES = ["A", "B", "C", "D", "E"]
 
 
+# ---------------------------------------------------------------------------
+# Pronòstic de grup
+#
+# Model de partida individual calibrat amb les 2.433 partides de la lliga
+# 2025-26 (rànquing vigent en cada jornada, no el final):
+#
+#     P(guanya el local) = (1 - P_TAULES) · sigmoide(K · Δmitjana + LOCAL)
+#
+# K i LOCAL surten d'una màxima versemblança conjunta. L'avantatge de camp és
+# real i mesurable: els locals s'enduen el 55,1% dels parcials, i amb mitjanes
+# iguals el local guanya el 54,5% de les partides. Validat per trams, el model
+# encerta la freqüència real dins d'un o dos punts.
+K_MITJANA = 8.00
+AVANTATGE_LOCAL = 0.18
+P_TAULES = 0.05
+N_SIMS = 20000
+
+
+def _dist_encontre(mit_local: list[float], mit_visitant: list[float]):
+    """Distribució dels parcials del local (0..8) en un encontre de quatre taules.
+
+    Les taules s'aparellen per ordre: el nº 1 d'un equip contra el nº 1 de l'altre."""
+    import numpy as np
+
+    dist = np.zeros(9)
+    dist[0] = 1.0
+    for t in range(4):
+        dm = (mit_local[t] if t < len(mit_local) else 0.0) - (
+            mit_visitant[t] if t < len(mit_visitant) else 0.0
+        )
+        p = 1.0 / (1.0 + math.exp(-(K_MITJANA * dm + AVANTATGE_LOCAL)))
+        pw, pd, pl = (1 - P_TAULES) * p, P_TAULES, (1 - P_TAULES) * (1 - p)
+        nova = np.zeros(9)
+        for v in range(9):
+            if dist[v] == 0.0:
+                continue
+            if v + 2 <= 8:
+                nova[v + 2] += dist[v] * pw
+            if v + 1 <= 8:
+                nova[v + 1] += dist[v] * pd
+            nova[v] += dist[v] * pl
+        dist = nova
+    return dist
+
+
+def pronostic_grup(mitjanes: list[list[float]], llavor: int) -> list[dict]:
+    """Simula la lliga doble d'un grup i retorna, per equip, la probabilitat de
+    quedar 1r, 2n, penúltim i últim, i la posició mitjana.
+
+    Cada encontre es resol mostrejant els parcials del local; els punts de match
+    són 3/1/0 i el desempat, els parcials, com fa la federació."""
+    import numpy as np
+
+    n = len(mitjanes)
+    parelles = [(i, j) for i in range(n) for j in range(n) if i != j]
+    cdfs = np.array([np.cumsum(_dist_encontre(mitjanes[i], mitjanes[j])) for i, j in parelles])
+    rng = np.random.default_rng(llavor)
+    u = rng.random((N_SIMS, len(parelles)))
+    parcials_local = (u[:, :, None] > cdfs[None, :, :]).sum(axis=2)
+
+    pm = np.zeros((N_SIMS, n), dtype=np.int32)
+    pp = np.zeros((N_SIMS, n), dtype=np.int32)
+    for idx, (i, j) in enumerate(parelles):
+        h = parcials_local[:, idx]
+        a = 8 - h
+        pp[:, i] += h
+        pp[:, j] += a
+        pm[:, i] += np.where(h > 4, 3, np.where(h == 4, 1, 0))
+        pm[:, j] += np.where(a > 4, 3, np.where(a == 4, 1, 0))
+
+    score = pm * 1000 + pp
+    ordre = np.argsort(-score, axis=1, kind="stable")
+    pos = np.empty_like(ordre)
+    np.put_along_axis(pos, ordre, np.arange(n)[None, :].repeat(N_SIMS, 0), axis=1)
+    return [
+        dict(
+            p_1r=round(float((pos[:, i] == 0).mean()), 4),
+            p_2n=round(float((pos[:, i] == 1).mean()), 4),
+            p_penultim=round(float((pos[:, i] == n - 2).mean()), 4),
+            p_ultim=round(float((pos[:, i] == n - 1).mean()), 4),
+            pos_mitjana=round(float(pos[:, i].mean()) + 1, 2),
+        )
+        for i in range(n)
+    ]
+
+
 def forma_grups(ordre: list[tuple[str, str]]) -> tuple[list[int], list[int], list[dict]]:
     """Reparteix una divisió en dos grups pel serpentí A-B-B-A sobre l'ordre de
     sembra —1-4-5-8-9-12-13-16 al grup A i 2-3-6-7-10-11-14-15 al B, estirat igual
@@ -364,7 +451,21 @@ def build(db: str = DB) -> dict:
             ))
         A, B, permutes = forma_grups(COMP[div])
         moguts = {p["seed_a"] for p in permutes} | {p["seed_b"] for p in permutes}
-        grups = [dict(lletra=g, seeds=[i + 1 for i in lst]) for g, lst in (("A", A), ("B", B))]
+        # Pronòstic: es simula cada grup amb els quatre titulars de cada equip
+        # (els mateixos amb 3-5-4-4 i amb 4-4-4-4-4).
+        per_seed = {e["seed"]: e for e in equips}
+        grups = []
+        for g, lst in (("A", A), ("B", B)):
+            seeds = [i + 1 for i in lst]
+            mitjanes = []
+            for sd in seeds:
+                e = per_seed[sd]
+                tit = referents(per_club[e["club"]]["llista"], e["lletra"], "fcb")
+                mitjanes.append([t["mitjana"] for t in tit])
+            pron = pronostic_grup(mitjanes, llavor=hash((div, g)) & 0xFFFF)
+            for sd, pr in zip(seeds, pron, strict=True):
+                per_seed[sd].update(pr)
+            grups.append(dict(lletra=g, seeds=seeds))
         out["divisions"][div] = dict(
             distancia=DIST[div], equips=equips, grups=grups, permutes=permutes,
             moguts=sorted(moguts),
