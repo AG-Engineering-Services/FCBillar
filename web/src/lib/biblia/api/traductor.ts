@@ -24,7 +24,7 @@ function clauNvidia(): string | undefined {
 function modelNvidia(): string {
 	// mistral-medium: bona qualitat i prou ràpid al tier gratuït (els models de
 	// 70B+ hi fan timeout de servidor sovint).
-	return env.NVIDIA_MODEL?.trim() || 'mistralai/mistral-medium-3.5-128b';
+	return env.NVIDIA_MODEL?.trim() || 'deepseek-ai/deepseek-v4-pro';
 }
 
 // ---------------------------------------------------------------------------
@@ -41,7 +41,7 @@ const GLOSSARI: Array<[string, string]> = [
 	['뒤돌리기', 'endarrere'],
 	['옆돌리기', 'de costat'],
 	['앞돌리기', 'endavant'],
-	['비껴치기', 'rasant'],
+	['비껴치기', 'tocar la bola fina'],
 	['대회전', 'gran rotació'],
 	['더블쿠션', 'doble banda'],
 	['리버스', 'reverse'],
@@ -90,10 +90,15 @@ let perText: Map<string, string> | null = null;
 function bundlePerText(): Map<string, string> {
 	if (perText) return perText;
 	perText = new Map();
-	for (const [k, v] of Object.entries(carrega())) {
+	const entrades = Object.entries(carrega());
+	const posa = (k: string, v: string) => {
 		const i = k.indexOf(' ');
-		if (i > 0) perText.set(k.slice(i + 1), v);
-	}
+		if (i > 0) perText!.set(k.slice(i + 1), v);
+	};
+	// Primer els altres motors (fallback), després deepseek (millor qualitat) perquè
+	// guanyi allà on ja s'ha re-traduït.
+	for (const [k, v] of entrades) if (!k.includes('deepseek')) posa(k, v);
+	for (const [k, v] of entrades) if (k.includes('deepseek')) posa(k, v);
 	return perText;
 }
 
@@ -118,7 +123,7 @@ async function tradueixNvidia(
 	const ctrl = new AbortController();
 	// Timeout llarg: la traducció es transmet (streaming) i no bloqueja la pàgina,
 	// així que podem esperar encara que el tier gratuït vagi lent.
-	const temporitzador = setTimeout(() => ctrl.abort(), 45000);
+	const temporitzador = setTimeout(() => ctrl.abort(), 130000);
 	try {
 		const r = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
 			method: 'POST',
