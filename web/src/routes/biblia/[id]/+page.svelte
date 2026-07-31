@@ -33,6 +33,7 @@
 	// Amb vídeo, l'animació el segueix des del fotograma 0; en canviar de tirada,
 	// es reinicia l'estat.
 	$effect(() => {
+		void d.id; // depèn de la tirada: reinicia l'estat a CADA navegació (encara que les dues tinguin vídeo)
 		frameExtern = teVideoMestre ? 0 : null;
 		reproduintVideo = false;
 	});
