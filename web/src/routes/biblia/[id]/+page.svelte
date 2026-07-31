@@ -18,9 +18,9 @@
 		)
 	);
 
-	// Vídeo company: si la tirada té vídeo i animació, la mateixa botonera reprodueix
-	// animació i vídeo alhora. L'animació corre al fps del clip (maxFrame/durada), de
-	// manera que dura el mateix que el clip i acaben junts.
+	// Vídeo mestre: amb vídeo, l'animació SEGUEIX el temps real del vídeo
+	// (frameExtern ve de getCurrentTime); la mateixa botonera engega tots dos.
+	let frameExtern = $state<number | null>(null);
 	let vid = $state<{
 		reprodueix: () => void;
 		pausa: () => void;
@@ -29,11 +29,12 @@
 	} | null>(null);
 	let reproduintVideo = $state(false);
 	const teVideoMestre = $derived(!!d.video && maxFrame > 0);
-	const fpsDerivat = $derived.by(() => {
-		const v = d.video;
-		const ini = v?.inici ?? 0;
-		if (v && v.fi != null && v.fi > ini && maxFrame > 0) return maxFrame / (v.fi - ini);
-		return 30;
+
+	// Amb vídeo, l'animació el segueix des del fotograma 0; en canviar de tirada,
+	// es reinicia l'estat.
+	$effect(() => {
+		frameExtern = teVideoMestre ? 0 : null;
+		reproduintVideo = false;
 	});
 
 	const videoWatch = $derived(d.video ? `https://youtu.be/${d.video.id}?t=${d.video.inici ?? 0}` : null);
@@ -72,7 +73,7 @@
 					tracaBlanca={d.tracaBlanca}
 					tracaGroga={d.tracaGroga}
 					tracaVermella={d.tracaVermella}
-					fps={fpsDerivat}
+					{frameExtern}
 					teVideo={teVideoMestre}
 					reproduintExtern={reproduintVideo}
 					onReprodueix={() => vid?.reprodueix()}
@@ -134,6 +135,7 @@
 							inici={d.video.inici ?? 0}
 							fi={d.video.fi}
 							{maxFrame}
+							onframe={(f) => (frameExtern = f)}
 						/>
 					{/key}
 					{#if videoWatch}

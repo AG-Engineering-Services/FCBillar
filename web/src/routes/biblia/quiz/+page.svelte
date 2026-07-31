@@ -52,11 +52,11 @@
 			: 0
 	);
 
-	const fpsDerivat = $derived.by(() => {
-		const v = shot?.video;
-		const ini = v?.inici ?? 0;
-		if (v && v.fi != null && v.fi > ini && maxFrame > 0) return maxFrame / (v.fi - ini);
-		return 30;
+	// Vídeo mestre: en revelar i havent-hi vídeo, l'animació segueix el temps real
+	// del vídeo (frameExtern); si no, es queda al fotograma 0.
+	let frameExtern = $state<number | null>(null);
+	$effect(() => {
+		frameExtern = revelat && shot?.video ? 0 : null;
 	});
 
 	// Camí de la bola TIRADORA, que sempre és la BLANCA (수구 = bola 1). Cal
@@ -187,7 +187,7 @@
 						tracaBlanca={shot.tracaBlanca}
 						tracaGroga={shot.tracaGroga}
 						tracaVermella={shot.tracaVermella}
-						fps={fpsDerivat}
+						{frameExtern}
 						teVideo={!!shot.video}
 						reproduintExtern={reproduintVideo}
 						onReprodueix={() => vid?.reprodueix()}
@@ -204,6 +204,7 @@
 								inici={shot.video.inici ?? 0}
 								fi={shot.video.fi}
 								{maxFrame}
+								onframe={(f) => (frameExtern = f)}
 							/>
 						{/key}
 					{/if}
