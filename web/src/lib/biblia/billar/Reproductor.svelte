@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Billar from './Billar.svelte';
+	import { onDestroy } from 'svelte';
 	import { posicioAlFrame, type Fotograma } from './mapatge';
 	import { RADI_BOLA_DIAMANTS } from './geometria';
 	import type { Boles } from './tipus';
@@ -57,18 +58,33 @@
 
 	let frame = $state(0);
 	// Amb vídeo, no s'auto-reprodueix: espera que premis play (que engega tots dos).
-	// teVideo és estable (el component es recrea per tirada); el valor inicial és correcte.
 	// svelte-ignore state_referenced_locally
 	let reproduint = $state(!teVideo);
 	let velocitat = $state(1);
 
 	const frameActiu = $derived(frame);
 
-	// Quan el vídeo arrenca (també si el poses des dels seus controls), engega
-	// l'animació perquè vagin junts.
-	$effect(() => {
-		if (teVideo && reproduintExtern) reproduint = true;
-	});
+	// Retard de sincronització: en prémer play s'engega el vídeo i l'animació
+	// s'endarrereix uns segons perquè el vídeo mostri la preparació (apuntada)
+	// abans del cop; així el moviment de les boles no va avançat respecte al vídeo.
+	const RETARD_SYNC_MS = 3000;
+	let esperantVideo = $state(false);
+	let timerArrenca: ReturnType<typeof setTimeout> | null = null;
+	function neteja() {
+		if (timerArrenca) {
+			clearTimeout(timerArrenca);
+			timerArrenca = null;
+		}
+	}
+	function programaArrenca() {
+		neteja();
+		esperantVideo = true;
+		timerArrenca = setTimeout(() => {
+			esperantVideo = false;
+			reproduint = true;
+		}, RETARD_SYNC_MS);
+	}
+	onDestroy(neteja);
 
 	function puntBola(traca: Fotograma[], fallback: [number, number]): [number, number] {
 		const p = posicioAlFrame(traca, frameActiu);
@@ -164,17 +180,35 @@
 	});
 
 	function alterna() {
-		reproduint = !reproduint;
-		// El mateix botó engega/atura el vídeo perquè vagin junts.
-		if (teVideo) (reproduint ? onReprodueix : onPausa)?.();
+		if (!teVideo) {
+			reproduint = !reproduint;
+			return;
+		}
+		if (reproduint || esperantVideo) {
+			reproduint = false;
+			esperantVideo = false;
+			neteja();
+			onPausa?.();
+		} else {
+			// Engega el vídeo ja, i l'animació amb el retard de sincronització.
+			onReprodueix?.();
+			programaArrenca();
+		}
 	}
 	function reinicia() {
 		frame = 0;
-		reproduint = true;
-		if (teVideo) onReinicia?.();
+		if (teVideo) {
+			reproduint = false;
+			onReinicia?.();
+			programaArrenca();
+		} else {
+			reproduint = true;
+		}
 	}
 	function scrub(v: number) {
 		reproduint = false;
+		esperantVideo = false;
+		neteja();
 		frame = v;
 		if (teVideo) {
 			onPausa?.();
@@ -182,7 +216,7 @@
 		}
 	}
 
-	const enMarxa = $derived(reproduint);
+	const enMarxa = $derived(reproduint || esperantVideo);
 </script>
 
 <div class="reproductor">
