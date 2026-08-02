@@ -332,10 +332,18 @@
 			display: flex;
 			flex-direction: column;
 			gap: 0.9rem;
+			align-items: stretch;
 		}
 		.taula,
 		.info {
 			display: contents;
+		}
+		/* Tots els blocs a tota l'amplada (el vídeo té l'amplada de l'animació). */
+		.blk-anim,
+		.blk-video,
+		.blk-dades,
+		.blk-text {
+			width: 100%;
 		}
 		.blk-anim {
 			order: 1;
