@@ -16,18 +16,19 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema de billar a 4 boles és una tècnica de joc que implica col·lisions i rebots per aconseguir punts.",
+      "queEs": "El sistema de billar a 4 boles és una tècnica de joc que implica col·lisions i rebots per aconseguir punts. Serveix per a millorar les habilitats del jugador en aquest esport.",
       "calcul": "",
       "correccions": [],
       "passos": [
-        "Identificar la posició de les boles i les bandes",
-        "Planificar el recorregut de les boles",
-        "Executar el tret amb la quantitat adequada de bola i efecte"
+        "Estudiar la posició de les boles i planificar el xut",
+        "Ajustar la quantitat de bola i l'efecte per aconseguir el rebot desitjat",
+        "Considerar les correccions necessàries per a compensar els errors de xut o la posició de les boles"
       ],
       "exemples": [],
-      "quan": "En situacions on cal col·lidir amb diverses boles i aconseguir punts de manera estratègica",
+      "quan": "Aquest sistema es pot utilitzar en situacions de joc on cal anotar punts ràpidament i amb precisió, com en partides de billar a 4 boles.",
       "consells": [
-        "Calibrar la quantitat de bola i efecte per aconseguir el recorregut desitjat"
+        "Practicar regularment per a millorar la precisió i el control del xut",
+        "Estudiar les col·lisions i els rebots per a anticipar els resultats"
       ],
       "nivell": "avançat"
     },
@@ -50,18 +51,18 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Entrar-la a tres bandes' és una tècnica de billar que implica crear un espai per colpejar la bola de manera que faci tres bandes abans de colpejar la bola objectiu.",
+      "queEs": "El sistema 'Entrar-la a tres bandes' és una tècnica de billar que serveix per crear espais i fer entrades a tres bandes en situacions específiques del joc.",
       "calcul": "",
       "correccions": [],
       "passos": [
-        "Crear un espai adequat per colpejar la bola",
-        "Ajustar la quantitat de bola i l'efecte per controlar la trajectòria",
-        "Colpejar la bola amb precisió per aconseguir les tres bandes"
+        "Crear un espai buit per fer l'entrada",
+        "Avaluar la quantitat de bola i l'efecte necessaris per aconseguir l'entrada",
+        "Considerar la posició de la bola 1, 2 i 3 en relació amb les bandes i les rombes"
       ],
       "exemples": [],
-      "quan": "Aquest sistema es pot utilitzar en situacions on es necessita una gran precisió i control per colpejar la bola objectiu des de diferents angles.",
+      "quan": "Aquest sistema és útil en situacions on cal crear un espai per fer una entrada a tres bandes, especialment quan les boles estan properes a les bandes o les rombes.",
       "consells": [
-        "És important ajustar la quantitat de bola i l'efecte segons la situació de joc"
+        "Calibrar la quantitat de bola i l'efecte per evitar errors de direcció o força"
       ],
       "nivell": "avançat"
     },
@@ -84,18 +85,18 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'L'elecció de Coudron' és una tècnica de billar a tres bandes que utilitza la rotació inversa per aconseguir el màxim de precisió en les tacades.",
+      "queEs": "El sistema 'L’elecció de Coudron' és una tècnica de billar a tres bandes que utilitza la rotació inversa per aconseguir precisió en les tacades.",
       "calcul": "",
       "correccions": [],
       "passos": [
         "Identificar la posició de la bola 1 i la seva relació amb les bandes",
-        "Determinar la quantitat de bola i l'efecte necessaris per aconseguir la trajectòria desitjada",
-        "Ajustar la tècnica de tacada segons la situació"
+        "Determinar la quantitat de bola i l'efecte necessaris per aconseguir la tacada",
+        "Ajustar la tècnica de tacada segons la posició de la bola i les bandes"
       ],
       "exemples": [],
-      "quan": "Aquest sistema és útil en situacions on cal precisar la trajectòria de la bola per aconseguir una tacada complexa.",
+      "quan": "Aquest sistema és útil en situacions on cal precisar la tacada i controlar la bola en un espai limitat.",
       "consells": [
-        "Calibrar la quantitat de bola i l'efecte per aconseguir la màxima precisió"
+        "Practicar la tècnica de rotació inversa per aconseguir una major precisió"
       ],
       "nivell": "avançat"
     },
@@ -118,29 +119,29 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Cop a la tronera: col·locació' és una tècnica bàsica de billar a tres bandes que serveix per determinar la col·locació de la bola objectiu en relació amb la bola de joc i les bandes de la taula.",
-      "calcul": "La regla base de càlcul és que la quantitat de bola (gruix) ha de ser d'aproximadament 2/8 per evitar corba i permetre una col·locació precisa. La fórmula no és explícita, però es basa en la combinació de l'efecte i la quantitat de bola.",
+      "queEs": "El sistema 'Cop a la tronera: col·locació' serveix per determinar la quantitat de bola i l'efecte necessaris per col·locar la bola en una posició específica a la taula de billar. Aquest sistema és útil per als jugadors de billar que volen millorar la seva tècnica i precisió.",
+      "calcul": "La fórmula bàsica per calcular la quantitat de bola és: quantitat de bola = 2/8 (quantitat de bola) + efecte. En aquest cas, la quantitat de bola és de 2/8 i l'efecte és mínim, gairebé sense rotació.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤ 2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Darrera banda: considera la posició de la bola en relació amb la banda posterior",
-        "Quantitat de bola excessiva: ajusta la col·locació per evitar corba"
+        "Si la bola 1 està enganxada a la banda, la quantitat de bola ha de ser ≤ 2/8 per evitar la corba.",
+        "La línia 2 requereix un tac d'efecte de ½ i una quantitat de bola de 2/8.",
+        "Per a una col·locació precisa, cal considerar la posició de la bola 1 i la quantitat de bola necessària per arribar a la tronera.",
+        "La banda ha de ser considerada com a punt de referència per a la col·locació de la bola.",
+        "La quantitat de bola i l'efecte han de ser ajustats segons la posició de la bola 1 i la tronera."
       ],
       "passos": [
-        "Determina la posició de la bola objectiu en relació amb la bola de joc",
-        "Calcula la quantitat de bola (gruix) necessària per a la col·locació",
-        "Ajusta la col·locació segons les correccions necessàries",
-        "Verifica la posició de la bola en relació amb la banda posterior"
+        "Determinar la posició de la bola 1 i la tronera.",
+        "Calcular la quantitat de bola necessària per arribar a la tronera.",
+        "Ajustar l'efecte i la quantitat de bola segons la posició de la bola 1 i la tronera.",
+        "Realitzar el cop amb la quantitat de bola i l'efecte calculats."
       ],
       "exemples": [
-        "Exemple 1: bola 1 a 3 rombes de la banda, gruix 2/8, efecte ½ tac, col·locació a 2 rombes de la banda posterior",
-        "Exemple 2: bola 1 enganxada a la banda, gruix 1/8, efecte ¼ tac, col·locació a 1 rombe de la banda posterior"
+        "Exemple 1: Bola 1 a 3 rombes de la tronera, quantitat de bola 2/8, efecte mínim. Resultat: la bola col·locada a la tronera.",
+        "Exemple 2: Bola 1 a 2 rombes de la tronera, quantitat de bola 1/8, efecte ½. Resultat: la bola col·locada a la tronera amb una mica de corba."
       ],
-      "quan": "Aquest sistema és útil en situacions de joc on es requereix una col·locació precisa de la bola objectiu, com en els tirs a llarga distància o en les situacions on la bola de joc està propera a la banda.",
+      "quan": "Aquest sistema és útil en situacions de joc on es requereix precisió i control, com en les partides de billar a tres bandes.",
       "consells": [
-        "Ajusta la quantitat de bola segons la situació de joc per evitar corba",
-        "Verifica sempre la posició de la bola en relació amb la banda posterior"
+        "Calibrar la quantitat de bola i l'efecte segons la posició de la bola 1 i la tronera per aconseguir una col·locació precisa.",
+        "Practicar el cop amb diferents quantitats de bola i efectes per desenvolupar la tècnica."
       ],
       "nivell": "bàsic"
     },
@@ -164,33 +165,39 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Endavant amb retorn al lloc' és una tècnica de billar a tres bandes que permet tornar la bola al punt de partida després de xocar amb la segona bola. Serveix per a millorar la precisió i el control en les jugades.",
-      "calcul": "La fórmula bàsica és: quantitat de bola (gruix) + efecte (tac) = 3 (o 4, o 2, segons la línia on es troba la primera bola). Per exemple, si la primera bola es troba a la línia de 3 punts, el gruix hauria de ser de 3 i l'efecte de -1 (o 0,5 tac).",
+      "queEs": "El sistema 'Endavant amb retorn al lloc' és una tècnica de billar a tres bandes que permet tornar la bola al punt de partida després de colpejar-la. Serveix per a mantenir el control de la bola i planificar les següents jugades.",
+      "calcul": "La fórmula bàsica per calcular la quantitat de bola i l'efecte és: quantitat de bola = (número de la línia - 1) / 2, on 'número de la línia' es refereix a la línia on es troba la bola 1. Per exemple, si la bola 1 es troba a la línia de 3 punts, la quantitat de bola seria de 3 - 1 = 2, que equivaldria a 2/8 de la quantitat de bola. L'efecte seria de 0,5 tacs.",
       "correccions": [
-        "Si la primera bola es troba a la línia de 3 punts i està enganxada a la banda, el gruix hauria de ser de 2 o menys per evitar la corba.",
-        "Si la primera bola es troba a la línia de 2 punts, el gruix hauria de ser de 2 i l'efecte de 0,5 tac.",
-        "Si la primera bola es troba a la línia de 1 punt, el gruix hauria de ser de 1 i l'efecte de 0,5 tac.",
-        "Si la primera bola es troba a la línia de 4 punts, el gruix hauria de ser de 4 i l'efecte de -1 tac.",
-        "Si el lloc de la tercera bola no és el mateix que el de partida, cal ajustar el gruix i l'efecte en conseqüència.",
-        "Si la primera bola està enganxada a la banda, el gruix hauria de ser de 2 o menys per evitar la corba.",
-        "Si el lloc de la tercera bola està a 1 o 2 caselles de distància del lloc de partida, cal ajustar el gruix i l'efecte en conseqüència.",
-        "Si el lloc de la tercera bola està a més d'1 o 2 caselles de distància del lloc de partida, cal ajustar el gruix i l'efecte en conseqüència."
+        "Si la bola 1 es troba a la línia de 3 punts, cal afegir 0,5 tacs a la quantitat de bola per evitar que la bola quedi curta.",
+        "Si la bola 1 està enganxada a la banda, cal reduir la quantitat de bola a 2/8 o menys per evitar la corba.",
+        "Si la línia 2 es troba a 1 punt de la banda, cal afegir 0,5 tacs a la quantitat de bola i reduir la quantitat de bola a 2/8 per evitar que la bola quedi curta.",
+        "Si la bola 1 es troba a la línia de 2 punts, la quantitat de bola seria de 2 - 1 = 1, que equivaldria a 1/8 de la quantitat de bola.",
+        "Si la bola 1 es troba a la línia de 1 punt, la quantitat de bola seria de 1 - 1 = 0, que equivaldria a 0/8 de la quantitat de bola.",
+        "Si la bola 1 es troba a la línia de 4 punts, la quantitat de bola seria de 4 - 1 = 3, que equivaldria a 3/8 de la quantitat de bola.",
+        "Si la bola 1 està a 1 punt de la banda, cal afegir 0,5 tacs a la quantitat de bola i reduir la quantitat de bola a 1/8 per evitar que la bola quedi curta.",
+        "Si la bola 1 es troba a la línia de 3 punts i està enganxada a la banda, cal reduir la quantitat de bola a 2/8 o menys per evitar la corba i afegir 0,5 tacs a la quantitat de bola.",
+        "Si la bola 1 es troba a la línia de 2 punts i està enganxada a la banda, cal reduir la quantitat de bola a 1/8 o menys per evitar la corba i afegir 0,5 tacs a la quantitat de bola.",
+        "Si la bola 1 es troba a la línia de 1 punt i està enganxada a la banda, cal reduir la quantitat de bola a 0/8 o menys per evitar la corba i afegir 0,5 tacs a la quantitat de bola."
       ],
       "passos": [
-        "Determinar la posició de la primera bola i calcular el gruix i l'efecte necessaris per tornar al lloc de partida.",
-        "Ajustar el gruix i l'efecte segons les correccions necessàries per tenir en compte la posició de la tercera bola i la possible corba.",
-        "Realitzar el xut amb la quantitat de bola i efecte calculats."
+        "Col·loca la bola 1 a la línia corresponent.",
+        "Calcula la quantitat de bola i l'efecte segons la fórmula.",
+        "Ajusta la quantitat de bola i l'efecte segons les correccions.",
+        "Colpeja la bola amb la quantitat de bola i l'efecte ajustats."
       ],
       "exemples": [
-        "Si la primera bola es troba a la línia de 3 punts, el gruix hauria de ser de 3 i l'efecte de -1 (o 0,5 tac).",
-        "Si la primera bola es troba a la línia de 2 punts, el gruix hauria de ser de 2 i l'efecte de 0,5 tac.",
-        "Si la primera bola es troba a la línia de 1 punt, el gruix hauria de ser de 1 i l'efecte de 0,5 tac."
+        "Bola 1 a la línia de 3 punts: quantitat de bola = 2/8, efecte = 0,5 tacs.",
+        "Bola 1 a la línia de 2 punts: quantitat de bola = 1/8, efecte = 0,5 tacs.",
+        "Bola 1 a la línia de 1 punt: quantitat de bola = 0/8, efecte = 0,5 tacs.",
+        "Bola 1 a la línia de 4 punts: quantitat de bola = 3/8, efecte = 0,5 tacs.",
+        "Bola 1 enganxada a la banda: quantitat de bola = 2/8 o menys, efecte = 0,5 tacs.",
+        "Bola 1 a 1 punt de la banda: quantitat de bola = 1/8 o menys, efecte = 0,5 tacs."
       ],
-      "quan": "Aquest sistema es pot utilitzar en situacions de joc on es necessita tornar la bola al lloc de partida després de xocar amb la segona bola, especialment quan la primera bola es troba en una posició difícil o quan es necessita una gran precisió.",
+      "quan": "Aquest sistema es pot utilitzar en situacions de joc on es necessita tornar la bola al punt de partida després de colpejar-la, com per exemple quan es juga a tres bandes o en situacions on es necessita mantenir el control de la bola.",
       "consells": [
-        "Practicar el xut amb diferents quantitats de bola i efectes per millorar la precisió i el control.",
-        "Tenir en compte les correccions necessàries per a les diferents posicions de la tercera bola i la possible corba.",
-        "No excedir-se en la quantitat de bola i efecte per evitar errors i mantenir el control."
+        "Practica el sistema 'Endavant amb retorn al lloc' per millorar la teva tècnica.",
+        "Ajusta la quantitat de bola i l'efecte segons les correccions per evitar errors.",
+        "Mantén el control de la bola per planificar les següents jugades."
       ],
       "nivell": "avançat"
     },
@@ -199,45 +206,45 @@
     "diagrama": {
       "boles": {
         "b1": [
-          6.5,
-          0.6
+          1.5,
+          1
         ],
         "b2": [
-          7.2,
-          1.1
+          7.3,
+          3
         ],
         "b3": [
-          6,
-          0.9
+          1.7,
+          1.4
         ]
       },
       "traca": [
         [
-          6.5,
-          0.6
+          1.5,
+          1
         ],
         [
-          7.2,
-          1.1
+          7.3,
+          3
         ],
         [
-          4,
+          8,
+          3.2
+        ],
+        [
+          5.8,
           4
         ],
         [
           0,
-          2.4
+          2
         ],
         [
-          2.8,
-          0
-        ],
-        [
-          6,
-          0.9
+          1.7,
+          1.4
         ]
       ],
-      "nota": "Esquema: la blanca surt, toca la bola 1 (groga) i, després de 3 bandes, torna prop del punt de sortida (vermella). Els rombes numerats són la referència per al càlcul efecte + gruix."
+      "nota": "Exemple del vídeo: bola 1 (groga) a la línia 3; quantitat de bola 3/8 i −½ tac; la blanca fa 3 bandes i torna al punt de sortida (제자리)."
     }
   },
   {
@@ -257,32 +264,29 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Bricol, de costat i endarrere' és una tècnica de billar a tres bandes que serveix per calcular la trajectòria de la bola i predir on anirà a parar després de xocar amb les bandes.",
+      "queEs": "El sistema 'Bricol, de costat i endarrere' és una tècnica de billar a tres bandes que serveix per a jugar amb precisió i estratègia.",
       "calcul": "",
       "correccions": [
-        "Si la bola 1 està enganxada a la banda, el gruix ha de ser ≤2/8 per evitar corba",
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Línia 1: 1 tac i gruix 1/8",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Línia 3: 1 tac i gruix 3/8",
-        "Línia 4: 1,5 tacs i gruix 4/8",
-        "Quan la bola 1 està a la cantonada, utilitza 1,5 tacs i gruix 2/8",
-        "Quan la bola 1 està a la cantonada i la bola 2 està a la banda, utilitza 2 tacs i gruix 3/8"
+        "Si la bola 1 està enganxada a la banda, la quantitat de bola ha de ser ≤2/8 per evitar la corba.",
+        "Per a cada línia, la quantitat de bola i el tac varien: línia 1 amb 1 tac i quantitat de bola 2/8, línia 2 amb ½ tac i quantitat de bola 2/8.",
+        "Quan la bola 2 està a 1 rombe de la banda, la quantitat de bola ha de ser 1/8 més gran.",
+        "En el cas de la bola 3, si queda 1 rombe curta, suma 1 a la quantitat de bola.",
+        "Per a les línies de punt, la quantitat de bola i el tac varien: línia 1 amb 1 tac i quantitat de bola 2/8, línia 2 amb ½ tac i quantitat de bola 2/8."
       ],
       "passos": [
-        "Identifica la posició de la bola 1 i la direcció que vols que segueixi",
-        "Calcula la quantitat de gruix i efecte necessaris per aconseguir la trajectòria desitjada",
-        "Ajusta el gruix i l'efecte segons les correccions necessàries",
-        "Xoca la bola 1 amb la banda i observa la trajectòria resultant"
+        "Identificar les línies de referència i memoritzar-les.",
+        "Determinar la quantitat de bola i el tac adequats per a cada línia.",
+        "Ajustar la quantitat de bola segons la posició de la bola 2 i la bola 3.",
+        "Aplicar les correccions per a les línies de punt i les bandes."
       ],
       "exemples": [
-        "Exemple 1: Bola 1 a la cantonada, direcció cap a la banda oposada, gruix 2/8, efecte 1 tac. Resultat: la bola 1 xoca amb la banda i segueix cap a la cantonada oposada",
-        "Exemple 2: Bola 1 al centre de la taula, direcció cap a la banda lateral, gruix 3/8, efecte 1,5 tacs. Resultat: la bola 1 xoca amb la banda lateral i segueix cap a la cantonada adjacent"
+        "Exemple 1: Bola 1 a 2 rombes de la banda, quantitat de bola 2/8, tac 1, resultant en una bola 2 a 1 rombe de la banda.",
+        "Exemple 2: Bola 1 a 1 rombe de la banda, quantitat de bola 1.5/8, tac ½, resultant en una bola 2 a 2 rombes de la banda."
       ],
-      "quan": "Aquest sistema és útil quan es vol calcular la trajectòria de la bola en situacions complexes, com quan la bola està a la cantonada o quan hi ha moltes boles a la taula.",
+      "quan": "Aquest sistema és útil en situacions de joc on es requereix precisió i estratègia, com en partides de billar a tres bandes.",
       "consells": [
-        "Utilitza sempre el mínim de gruix i efecte necessaris per aconseguir la trajectòria desitjada",
-        "Ajusta les correccions segons la posició de la bola 1 i la direcció que vols que segueixi"
+        "Utilitza sempre la quantitat de bola adequada per a evitar la corba.",
+        "Ajusta les correccions segons la posició de les boles."
       ],
       "nivell": "avançat"
     },
@@ -306,22 +310,22 @@
     "notaValoracio": "sense comentaris",
     "funcionaComentaris": null,
     "explicacio": {
-      "queEs": "El sistema 'Tocar la bola fina (sèrie)' és una tècnica de billar a tres bandes que implica calcular la trajectòria de la bola per tocar la bola objectiu de manera precisa i eficient. Serveix per a millorar la precisió i el control en les jugades.",
+      "queEs": "El sistema 'Tocar la bola fina (sèrie)' és una tècnica de billar a tres bandes que consisteix a tocar la bola objectiu de manera que segueixi una trajectòria predeterminada, permetent al jugador controlar millor la bola i augmentar les seves possibilitats de fer una entrada. Serveix per a millorar la precisió i la consistència en les jugades.",
       "calcul": "",
       "correccions": [],
       "passos": [
-        "Identificar la posició de la bola 1 i la bola 2 en relació amb les bandes i la taula.",
-        "Determinar la quantitat de bola o gruix necessari per a tocar la bola objectiu.",
-        "Considerar l'efecte o tac de la bola 1 i com afectarà la trajectòria de la bola 2.",
-        "Visualitzar la trajectòria de la bola 2 i ajustar el tret segons les necessitats."
+        "Identificar la posició de la bola objectiu i la bola de joc",
+        "Determinar la quantitat de bola necessària per a tocar la bola objectiu",
+        "Ajustar l'efecte i la quantitat de bola segons la distància i l'angle de la jugada",
+        "Realitzar la jugada amb un moviment suau i controlat"
       ],
       "exemples": [],
-      "quan": "Aquest sistema és útil en situacions on cal tocar la bola objectiu de manera precisa, com en jugades de mitjana distància o quan la bola objectiu està prop de les bandes.",
+      "quan": "Aquest sistema és útil en situacions on el jugador necessita controlar la bola objectiu amb precisió, com en jugades de mitja distància o en angles tancats.",
       "consells": [
-        "Calibrar el gruix i l'efecte de la bola 1 per a aconseguir la trajectòria desitjada.",
-        "Prestar atenció a la posició de la bola 2 en relació amb les bandes per a evitar errors de trajectòria."
+        "És important practicar la tècnica per a desenvolupar la musculatura i la coordinació necessàries",
+        "Cal ajustar la quantitat de bola i l'efecte segons les condicions de la jugada"
       ],
-      "nivell": "avançat"
+      "nivell": "mitjà"
     },
     "font": "coneixement"
   },
@@ -342,33 +346,33 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El Sistema No-English Plus és un mètode de càlcul per al billar a tres bandes que permet calcular la trajectòria de la bola amb precisió.",
-      "calcul": "La fórmula bàsica és 1:1, on la primera banda i la segona banda estan separades per una unitat. El càlcul es realitza comptant les rombes (o diamants) des de la primera banda fins a la segona banda, i sumant o restant unitats segons la posició de la bola.",
+      "queEs": "El sistema 'Sistema No-English Plus' és un mètode per calcular la trajectòria de la bola en el billar a tres bandes. Serveix per predir la direcció i la distància que la bola recorrerà després de xocar amb les bandes.",
+      "calcul": "La regla base del càlcul és la següent: si la bola xoca amb la banda en un punt determinat, la distància fins al següent punt de xoc serà la mateixa que la distància des del punt de partida fins al primer punt de xoc. Això es pot expressar com: 1:1, on 1 representa la distància des del punt de partida fins al primer punt de xoc i 1 representa la distància des del primer punt de xoc fins al següent punt de xoc.",
       "correccions": [
         "Si la tercera banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola està a 2,5 unitats de la primera banda, suma 6,5 unitats per arribar a la segona banda",
-        "Si la bola està a 1 unitat de la primera banda, suma 8 unitats per arribar a la segona banda",
-        "Si la bola està a 3 unitats de la primera banda, suma 6 unitats per arribar a la segona banda",
-        "Si la bola està a 4 unitats de la primera banda, suma 5 unitats per arribar a la segona banda"
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Si la bola xoca amb la banda en un punt determinat, la distància fins al següent punt de xoc serà la mateixa que la distància des del punt de partida fins al primer punt de xoc",
+        "Si la bola xoca amb la banda en un punt determinat, la distància fins al següent punt de xoc serà la mateixa que la distància des del punt de partida fins al primer punt de xoc, però amb una correcció de 1 punt",
+        "Si la bola xoca amb la banda en un punt determinat, la distància fins al següent punt de xoc serà la mateixa que la distància des del punt de partida fins al primer punt de xoc, però amb una correcció de 2 punts"
       ],
       "passos": [
-        "Comptar les rombes des de la primera banda fins a la segona banda",
-        "Sumar o restar unitats segons la posició de la bola",
-        "Ajustar el gruix i l'efecte segons la posició de la bola",
-        "Verificar la línia de tir i ajustar-la si cal"
+        "Determinar el punt de partida de la bola",
+        "Determinar el primer punt de xoc de la bola amb la banda",
+        "Calcula la distància des del punt de partida fins al primer punt de xoc",
+        "Aplica la regla 1:1 per determinar la distància fins al següent punt de xoc",
+        "Repeteix el procés fins que la bola xoca amb la banda per tercera vegada"
       ],
       "exemples": [
-        "Bola 1 a 2,5 unitats de la primera banda, gruix 2/8, efecte ½ tac, resultant: bola 2 a 6,5 unitats de la segona banda",
-        "Bola 1 a 1 unitat de la primera banda, gruix 1/8, efecte 1 tac, resultant: bola 2 a 8 unitats de la segona banda",
-        "Bola 1 a 3 unitats de la primera banda, gruix 3/8, efecte 1 tac, resultant: bola 2 a 6 unitats de la segona banda"
+        "Exemple 1: La bola xoca amb la banda en el punt 1, la distància fins al següent punt de xoc és de 3 rombes. La bola xoca amb la banda per segona vegada en el punt 4, la distància fins al següent punt de xoc és de 3 rombes.",
+        "Exemple 2: La bola xoca amb la banda en el punt 2, la distància fins al següent punt de xoc és de 2 rombes. La bola xoca amb la banda per segona vegada en el punt 5, la distància fins al següent punt de xoc és de 2 rombes.",
+        "Exemple 3: La bola xoca amb la banda en el punt 3, la distància fins al següent punt de xoc és de 1 rombe. La bola xoca amb la banda per segona vegada en el punt 6, la distància fins al següent punt de xoc és de 1 rombe."
       ],
-      "quan": "En situacions de joc on es requereix precisió i control, com ara en partides importants o en situacions de pressió.",
+      "quan": "Aquest sistema és útil quan es juga amb una bola que té una trajectòria previsible i es vol predir la direcció i la distància que recorrerà després de xocar amb les bandes.",
       "consells": [
-        "Practicar el sistema per aconseguir una major precisió",
-        "Ajustar el gruix i l'efecte segons la posició de la bola",
-        "Verificar la línia de tir i ajustar-la si cal"
+        "És important determinar el punt de partida de la bola amb precisió",
+        "És important calcular la distància des del punt de partida fins al primer punt de xoc amb precisió",
+        "És important aplicar la regla 1:1 amb precisió per determinar la distància fins al següent punt de xoc"
       ],
       "nivell": "avançat"
     },
@@ -392,33 +396,31 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'De costat: el mètode definitiu' és un mètode per calcular la trajectòria de la bola en el billar de tres bandes. Serveix per determinar el punt de sortida de la bola després de xocar amb les bandes.",
-      "calcul": "La fórmula bàsica és: si la bola 1 està a 'x' caselles de la banda, la bola 2 estarà a 'x/2' caselles de la segona banda. El gruix i l'efecte també influeixen en la trajectòria.",
+      "queEs": "El sistema 'De costat: el mètode definitiu' és un mètode per calcular la trajectòria de la bola en el joc de billar a tres bandes. Aquest sistema serveix per determinar la posició on la bola ha de col·lidir amb la banda per obtenir el màxim d'efecte.",
+      "calcul": "La fórmula bàsica per calcular la posició de la bola és: si la bola 1 està a 'n' caselles de la banda, la bola 2 estarà a 'n/2' caselles de la segona banda. Per exemple, si la bola 1 està a 6 caselles de la banda, la bola 2 estarà a 3 caselles de la segona banda.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola 1 està a 6 caselles de la banda, la bola 2 estarà a 3 caselles de la segona banda",
-        "Si la bola 1 està a 5 caselles de la banda, la bola 2 estarà a 2,5 caselles de la segona banda",
-        "Si la bola 1 està a 4 caselles de la banda, la bola 2 estarà a 2 caselles de la segona banda",
-        "Si la bola 1 està a 3 caselles de la banda, la bola 2 estarà a 1,5 caselles de la segona banda"
+        "Si la bola 1 està enganxada a la banda, la quantitat de bola ha de ser ≤ 2/8 per evitar corba.",
+        "Si la bola 1 està a 1 casella de la banda, suma 1 a la posició de la bola 2.",
+        "Si la bola 1 està a 2 caselles de la banda, resta 1 a la posició de la bola 2.",
+        "Si la bola 1 està a 3 caselles de la banda, la posició de la bola 2 és la mateixa.",
+        "Si la bola 1 està a 4 caselles de la banda, suma 1 a la posició de la bola 2.",
+        "Si la bola 1 està a 5 caselles de la banda, resta 1 a la posició de la bola 2.",
+        "Si la bola 1 està a 6 caselles de la banda, la posició de la bola 2 és la mateixa."
       ],
       "passos": [
-        "Determinar la posició de la bola 1 respecte a la banda",
-        "Calcula la distància fins a la segona banda",
-        "Ajusta el gruix i l'efecte segons la situació",
-        "Verifica les correccions necessàries"
+        "Determina la posició de la bola 1 respecte a la banda.",
+        "Calcula la posició de la bola 2 mitjançant la fórmula 'n/2'.",
+        "Ajusta la posició de la bola 2 segons les correccions necessàries."
       ],
       "exemples": [
-        "Bola 1 a 6 caselles de la banda, gruix 4/8, efecte 2: bola 2 a 3 caselles de la segona banda",
-        "Bola 1 a 5 caselles de la banda, gruix 3/8, efecte 1: bola 2 a 2,5 caselles de la segona banda",
-        "Bola 1 a 4 caselles de la banda, gruix 2/8, efecte 0: bola 2 a 2 caselles de la segona banda"
+        "Si la bola 1 està a 6 caselles de la banda, la bola 2 estarà a 3 caselles de la segona banda.",
+        "Si la bola 1 està a 4 caselles de la banda, la bola 2 estarà a 2 caselles de la segona banda.",
+        "Si la bola 1 està a 2 caselles de la banda, la bola 2 estarà a 1 casella de la segona banda."
       ],
-      "quan": "En situacions de joc on es necessita una gran precisió i control sobre la trajectòria de la bola.",
+      "quan": "Aquest sistema és útil quan es juga amb una bola que està a prop de la banda i es vol obtenir el màxim d'efecte.",
       "consells": [
-        "Mantén un registre de les teves jugades per millorar la teva tècnica",
-        "Practica regularment per desenvolupar la teva habilitat",
-        "No t'obsessionis amb les correccions, sinó amb la tècnica bàsica"
+        "Ajusta la quantitat de bola i l'efecte segons les condicions de joc.",
+        "Verifica la posició de la bola 1 respecte a la banda abans de calcular la posició de la bola 2."
       ],
       "nivell": "avançat"
     },
@@ -442,33 +444,31 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema Five & Half és un mètode de càlcul per al billar a tres bandes que permet als jugadors predir la trajectòria de la bola. Aquest sistema és considerat molt important i útil en el joc.",
-      "calcul": "La regla base del sistema Five & Half és que la suma de les xifres de la banda i la quantitat de bola (gruix) ha de ser igual a 5,5. Per exemple, si la banda és 3 i la quantitat de bola és 2,5, llavors la suma és 5,5. Això permet als jugadors calcular la trajectòria de la bola i predir on anirà a parar.",
+      "queEs": "El sistema Five & Half és un mètode de càlcul utilitzat en el billar a tres bandes (carambola) per determinar la quantitat de bola i l'efecte necessaris per aconseguir un xut precís. Aquest sistema serveix per calcular la quantitat de bola i l'efecte en funció de la posició de la bola i la banda.",
+      "calcul": "La fórmula bàsica del sistema Five & Half és: Quantitat de bola = (Quantitat de sortida - Quantitat de banda) / 2. On la quantitat de sortida és la quantitat de bola que es desitja obtenir després de la banda, i la quantitat de banda és la quantitat de bola que es necessita per aconseguir la banda. Per exemple, si la quantitat de sortida és 50 i la quantitat de banda és 30, llavors la quantitat de bola serà (50 - 30) / 2 = 10.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola 2 està a 1 rombe de la banda, resta 1",
-        "Si la bola 3 està a 2 rombes de la banda, suma 2",
-        "Si la bola 1 està a 3 rombes de la banda, resta 3",
-        "Si la bola 2 està a 4 rombes de la banda, suma 4",
-        "Si la bola 3 està a 5 rombes de la banda, resta 5"
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola.",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤ 2/8 per evitar corba.",
+        "Línia 2: ½ tac i quantitat de bola 2/8.",
+        "Si la bola 2 està a 1 rombe de la banda, resta 1 a la quantitat de bola.",
+        "Si la bola 2 està a 2 rombes de la banda, resta 2 a la quantitat de bola."
       ],
       "passos": [
-        "Calcular la suma de la banda i la quantitat de bola",
-        "Aplicar les correccions segons la posició de la bola",
-        "Calcular la trajectòria de la bola"
+        "Determina la quantitat de sortida desitjada.",
+        "Determina la quantitat de banda necessària.",
+        "Calcula la quantitat de bola utilitzant la fórmula.",
+        "Ajusta la quantitat de bola segons les correccions necessàries."
       ],
       "exemples": [
-        "Banda 3, quantitat de bola 2,5: suma = 5,5",
-        "Banda 2, quantitat de bola 3,5: suma = 5,5",
-        "Banda 4, quantitat de bola 1,5: suma = 5,5"
+        "Quantitat de sortida: 50, Quantitat de banda: 30, Quantitat de bola: (50 - 30) / 2 = 10.",
+        "Quantitat de sortida: 60, Quantitat de banda: 20, Quantitat de bola: (60 - 20) / 2 = 20.",
+        "Quantitat de sortida: 70, Quantitat de banda: 10, Quantitat de bola: (70 - 10) / 2 = 30."
       ],
-      "quan": "Aquest sistema és útil quan es juga al billar a tres bandes i es vol predir la trajectòria de la bola.",
+      "quan": "El sistema Five & Half és útil en situacions de joc on es necessita una gran precisió i control sobre la bola, com en el billar a tres bandes.",
       "consells": [
-        "Calcular sempre la suma de la banda i la quantitat de bola",
-        "Aplicar les correccions segons la posició de la bola",
-        "Practicar el sistema per millorar la precisió"
+        "Practica el sistema Five & Half per aconseguir una major precisió i control sobre la bola.",
+        "Ajusta les correccions segons les necessitats de cada xut.",
+        "No oblidis de considerar la quantitat de banda i la quantitat de sortida en cada xut."
       ],
       "nivell": "avançat"
     },
@@ -492,35 +492,32 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Els 10 millors patrons' és un mètode per calcular la trajectòria de la bola en el billar a tres bandes. Serveix per determinar la direcció i la velocitat de la bola després de colpejar-la.",
-      "calcul": "No és un sistema de càlcul numèric, sinó que es basa en la comprensió de les lleis de la física i la geometria per predir la trajectòria de la bola.",
+      "queEs": "El sistema 'Els 10 millors patrons' és un mètode per calcular la trajectòria de la bola en el joc de billar a tres bandes.",
+      "calcul": "No hi ha una fórmula específica per calcular la trajectòria de la bola, però el sistema es basa en la combinació de factors com la quantitat de bola, l'efecte i la banda. Per exemple, si la bola 1 està a 1/4 de la banda, amb un efecte de 2/8 i una quantitat de bola de 3/8, la trajectòria de la bola pot ser calculada.",
       "correccions": [
         "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola 1 està molt inclinada, cal ajustar el gruix i el tac",
-        "Si la bola 1 està molt a prop de la banda, cal ajustar el gruix i el tac",
-        "Si la bola 1 està en una posició difícil, cal utilitzar un tac més fort i un gruix més gran",
-        "Si la bola 1 està en una posició fàcil, cal utilitzar un tac més suau i un gruix més petit",
-        "Cal tenir en compte la velocitat i la direcció de la bola abans de colpejar-la"
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Si la bola 1 està a 1/4 de la banda, amb un efecte de 2/8 i una quantitat de bola de 3/8, la trajectòria de la bola pot ser calculada",
+        "Si la bola 2 està a 2/4 de la banda, amb un efecte de 3/8 i una quantitat de bola de 2/8, la trajectòria de la bola pot ser calculada",
+        "Si la bola 3 està a 3/4 de la banda, amb un efecte de 1/8 i una quantitat de bola de 1/8, la trajectòria de la bola pot ser calculada"
       ],
       "passos": [
-        "Determinar la posició de la bola 1 i la seva inclinació",
-        "Determinar la direcció i la velocitat de la bola després de colpejar-la",
-        "Ajustar el gruix i el tac segons la posició i la inclinació de la bola 1",
-        "Colpejar la bola amb el tac i el gruix adequats",
-        "Seguir la trajectòria de la bola i ajustar el següent tret segons les necessitats"
+        "Calcula la trajectòria de la bola 1",
+        "Calcula la trajectòria de la bola 2",
+        "Calcula la trajectòria de la bola 3",
+        "Combina les trajectòries de les boles per determinar la millor opció"
       ],
       "exemples": [
-        "Exemple 1: La bola 1 està en una posició fàcil, amb una inclinació de 30 graus. El gruix és de 2/8 i el tac és de ½. La bola es colpeja amb un tac suau i un gruix petit.",
-        "Exemple 2: La bola 1 està en una posició difícil, amb una inclinació de 60 graus. El gruix és de 4/8 i el tac és de 1. La bola es colpeja amb un tac fort i un gruix gran.",
-        "Exemple 3: La bola 1 està molt a prop de la banda, amb una inclinació de 45 graus. El gruix és de 3/8 i el tac és de ¾. La bola es colpeja amb un tac mitjà i un gruix mitjà."
+        "Exemple 1: Bola 1 a 1/4 de la banda, amb un efecte de 2/8 i una quantitat de bola de 3/8. La trajectòria de la bola pot ser calculada.",
+        "Exemple 2: Bola 2 a 2/4 de la banda, amb un efecte de 3/8 i una quantitat de bola de 2/8. La trajectòria de la bola pot ser calculada.",
+        "Exemple 3: Bola 3 a 3/4 de la banda, amb un efecte de 1/8 i una quantitat de bola de 1/8. La trajectòria de la bola pot ser calculada."
       ],
-      "quan": "Aquest sistema es pot utilitzar en situacions de joc on la bola 1 està en una posició difícil o on cal ajustar el gruix i el tac per aconseguir la trajectòria desitjada.",
+      "quan": "El sistema 'Els 10 millors patrons' és útil en situacions de joc on la bola està en moviment i cal calcular la trajectòria per prendre decisions informades.",
       "consells": [
-        "Cal tenir en compte la velocitat i la direcció de la bola abans de colpejar-la",
-        "Cal ajustar el gruix i el tac segons la posició i la inclinació de la bola 1",
-        "Cal seguir la trajectòria de la bola i ajustar el següent tret segons les necessitats"
+        "Ajusta la quantitat de bola i l'efecte segons la situació de joc",
+        "Considera la posició de la bola i la banda per calcular la trajectòria",
+        "Practica el sistema per millorar la precisió dels càlculs"
       ],
       "nivell": "avançat"
     },
@@ -544,33 +541,33 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema Half és un mètode de càlcul per a jugar al billar a tres bandes (carambola) que permet als jugadors calcular la trajectòria de la bola i predir on anirà a parar.",
-      "calcul": "El càlcul es basa en la fórmula: (sortida - objectiu) / 2, on 'sortida' és el punt de partida de la bola i 'objectiu' és el punt on es vol anar. Per exemple, si la sortida és el punt 4 i l'objectiu és el punt 2, el càlcul seria (4 - 2) / 2 = 1, el que indicaria que la bola aniria al punt 1.",
+      "queEs": "El sistema Half és un mètode de càlcul per a determinar la trajectòria de la bola en el billar a tres bandes. Serveix per a calcular la quantitat de bola i l'efecte necessaris per a encertar un tret.",
+      "calcul": "La regla base del sistema Half és la següent: es numera la banda de 1 a 8, i es calcula la quantitat de bola com a mínim 7 unitats. Per exemple, si la bola 1 està a la banda 4 i es vol encertar a la banda 3, la quantitat de bola seria de 7 - 3 = 4 unitats.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola és a 5 i es vol anar al punt 2, el càlcul seria (5 - 2) / 2 = 1,5, el que indicaria que la bola aniria al punt 1,5",
-        "Si la bola és a 7 i es vol anar al punt 4, el càlcul seria (7 - 4) / 2 = 1,5, el que indicaria que la bola aniria al punt 1,5",
-        "Si la bola és a 6 i es vol anar al punt 3, el càlcul seria (6 - 3) / 2 = 1,5, el que indicaria que la bola aniria al punt 1,5",
-        "Si la bola és a 8 i es vol anar al punt 1, el càlcul seria (8 - 1) / 2 = 3,5, el que indicaria que la bola aniria al punt 3,5",
-        "Si la bola és a 2 i es vol anar al punt 6, el càlcul seria (2 - 6) / 2 = -2, el que indicaria que la bola aniria al punt -2"
+        "Si la bola 1 està enganxada a la banda, la quantitat de bola ha de ser inferior o igual a 2/8 per evitar la corba.",
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola.",
+        "Línia 2: ½ tac i quantitat de bola 2/8.",
+        "Si la bola 1 està a la banda 5 i es vol encertar a la banda 2, la quantitat de bola seria de 7 - 2 = 5 unitats.",
+        "Si la bola 1 està a la banda 6 i es vol encertar a la banda 4, la quantitat de bola seria de 7 - 4 = 3 unitats.",
+        "Si la bola 1 està a la banda 7 i es vol encertar a la banda 1, la quantitat de bola seria de 7 - 1 = 6 unitats.",
+        "Si la bola 1 està a la banda 8 i es vol encertar a la banda 3, la quantitat de bola seria de 7 - 3 = 4 unitats."
       ],
       "passos": [
-        "Calculeu la sortida i l'objectiu",
-        "Aplicareu la fórmula (sortida - objectiu) / 2",
-        "Ajusteu el càlcul segons les correccions necessàries"
+        "Determinar la posició de la bola 1 i la direcció que es vol prendre.",
+        "Calcular la quantitat de bola necessària per a encertar el tret.",
+        "Ajustar la quantitat de bola i l'efecte segons les correccions necessàries.",
+        "Realitzar el tret amb la quantitat de bola i l'efecte calculats."
       ],
       "exemples": [
-        "Bola a 4, objectiu a 2: (4 - 2) / 2 = 1",
-        "Bola a 7, objectiu a 4: (7 - 4) / 2 = 1,5",
-        "Bola a 6, objectiu a 3: (6 - 3) / 2 = 1,5"
+        "Bola 1 a la banda 4, es vol encertar a la banda 3: quantitat de bola = 7 - 3 = 4 unitats.",
+        "Bola 1 a la banda 5, es vol encertar a la banda 2: quantitat de bola = 7 - 2 = 5 unitats.",
+        "Bola 1 a la banda 6, es vol encertar a la banda 4: quantitat de bola = 7 - 4 = 3 unitats."
       ],
-      "quan": "Aquest sistema és útil quan es vol jugar al billar a tres bandes i es necessita calcular la trajectòria de la bola per predir on anirà a parar.",
+      "quan": "El sistema Half és útil en situacions de joc on es necessita calcular la trajectòria de la bola amb precisió, com en els trets de banda a banda o en els trets de cant.",
       "consells": [
-        "Ajusteu el càlcul segons les correccions necessàries",
-        "Tingueu en compte la posició de la bola i l'objectiu",
-        "Practiqueu per millorar la precisió del càlcul"
+        "Sempre calibrar la quantitat de bola i l'efecte abans de realitzar el tret.",
+        "Ajustar les correccions segons les condicions del joc.",
+        "Practicar el sistema Half per a millorar la precisió dels trets."
       ],
       "nivell": "avançat"
     },
@@ -594,33 +591,32 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema dels 10 punts és un mètode per calcular la trajectòria de la bola en el billar a tres bandes. Serveix per determinar la posició de la bola després d'un xut.",
-      "calcul": "La fórmula bàsica és: si la bola està en el punt X, i es xuta amb un efecte de 10, llavors la bola anirà al punt X/2. Per exemple, si la bola està en el punt 8 i es xuta amb un efecte de 10, llavors la bola anirà al punt 4.",
+      "queEs": "El sistema dels 10 punts és un mètode per calcular la trajectòria de la bola en el billar a tres bandes.",
+      "calcul": "La fórmula bàsica és: si la bola està en el punt X, i es calcula la meitat del punt, la bola anirà al punt Y. Per exemple, si la bola està en el punt 8, i es calcula la meitat, la bola anirà al punt 4.",
       "correccions": [
-        "Si la bola està en el punt 7 i es xuta amb un efecte de 10, llavors la bola anirà al punt 3,5.",
-        "Si la bola està en el punt 6 i es xuta amb un efecte de 10, llavors la bola anirà al punt 3.",
-        "Si la bola està en el punt 5 i es xuta amb un efecte de 10, llavors la bola anirà al punt 2,5.",
-        "Si la bola està en el punt 9 i es xuta amb un efecte de 10, llavors la bola anirà al punt 4,5.",
-        "Si la bola està en el punt 10 i es xuta amb un efecte de 10, llavors la bola anirà al punt 5.",
-        "Si la bola està en el punt 11 i es xuta amb un efecte de 10, llavors la bola anirà al punt 5,5.",
-        "Si la bola està en el punt 12 i es xuta amb un efecte de 10, llavors la bola anirà al punt 6."
+        "Si la bola està en el punt 7, i es calcula la meitat, la bola anirà al punt 3,5.",
+        "Si la bola està en el punt 6, i es calcula la meitat, la bola anirà al punt 3.",
+        "Si la bola està en el punt 5, i es calcula la meitat, la bola anirà al punt 2,5.",
+        "Si la bola està en el punt 9, i es calcula la meitat, la bola anirà al punt 4,5.",
+        "Si la bola està en el punt 10, i es calcula la meitat, la bola anirà al punt 5.",
+        "Si la bola està en el punt 11, i es calcula la meitat, la bola anirà al punt 5,5.",
+        "Si la bola està en el punt 12, i es calcula la meitat, la bola anirà al punt 6."
       ],
       "passos": [
-        "Determinar la posició inicial de la bola.",
-        "Xutar la bola amb un efecte de 10.",
-        "Calcular la posició final de la bola utilitzant la fórmula X/2.",
-        "Repetir el procés fins a obtenir la posició desitjada."
+        "Calcular la meitat del punt on es troba la bola.",
+        "Determinar la trajectòria de la bola en funció de la meitat del punt.",
+        "Ajustar la trajectòria en funció de la posició de la bola i la taula."
       ],
       "exemples": [
-        "La bola està en el punt 8 i es xuta amb un efecte de 10. La bola anirà al punt 4.",
-        "La bola està en el punt 7 i es xuta amb un efecte de 10. La bola anirà al punt 3,5.",
-        "La bola està en el punt 6 i es xuta amb un efecte de 10. La bola anirà al punt 3."
+        "Si la bola està en el punt 8, i es calcula la meitat, la bola anirà al punt 4.",
+        "Si la bola està en el punt 7, i es calcula la meitat, la bola anirà al punt 3,5.",
+        "Si la bola està en el punt 6, i es calcula la meitat, la bola anirà al punt 3."
       ],
-      "quan": "Aquest sistema es pot utilitzar en qualsevol situació de joc, sempre que es conegui la posició inicial de la bola i l'efecte del xut.",
+      "quan": "Aquest sistema és útil quan es vol calcular la trajectòria de la bola en el billar a tres bandes, especialment quan la bola està en una posició difícil.",
       "consells": [
-        "És important conèixer la posició inicial de la bola i l'efecte del xut per poder calcular la trajectòria correcta.",
-        "Calcular la trajectòria de la bola abans de xutar és clau per obtenir el resultat desitjat.",
-        "Practicar el sistema dels 10 punts és essencial per millorar les habilitats en el billar a tres bandes."
+        "Calcular sempre la meitat del punt on es troba la bola.",
+        "Ajustar la trajectòria en funció de la posició de la bola i la taula.",
+        "Practicar molt per dominar aquest sistema."
       ],
       "nivell": "avançat"
     },
@@ -644,34 +640,31 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Tocar la bola fina' és una tècnica de billar a tres bandes que permet calcular la trajectòria de la bola per encertar els tirs.",
-      "calcul": "La fórmula bàsica és trobar el punt mitjà (anomenat 'hàlf') de la bola objectiu. Per exemple, si la bola està a 20 unitats de distància i el punt mitjà és a 10 unitats, es pot calcular la trajectòria. El gruix i l'efecte també s'han de considerar.",
+      "queEs": "El sistema 'Tocar la bola fina' és una tècnica de billar a tres bandes que permet calcular la trajectòria de la bola per obtenir un xut precís.",
+      "calcul": "La fórmula base és trobar el punt mitjà (anomenat 'hàlf punt') de la línia que uneix la bola 1 i la bola 2. A partir d'aquí, es calcula la quantitat de bola i el tac necessaris per aconseguir el xut desitjat.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola està a 20 unitats de distància i el punt mitjà és a 10 unitats, es pot calcular la trajectòria amb un gruix adequat",
-        "Si la bola està a 30 unitats de distància i el punt mitjà és a 15 unitats, es pot calcular la trajectòria amb un gruix adequat",
-        "Si la bola està a 32 unitats de distància i el punt mitjà és a 16 unitats, es pot calcular la trajectòria amb un gruix adequat",
-        "Si la bola està a 28 unitats de distància i el punt mitjà és a 14 unitats, es pot calcular la trajectòria amb un gruix adequat",
-        "Si la bola està a 26 unitats de distància i el punt mitjà és a 13 unitats, es pot calcular la trajectòria amb un gruix adequat"
+        "Si la 3a banda queda 1 rombe curta, suma 1 al càlcul",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Si el punt mitjà està a 20, quantitat de bola 10, i es vol fer un xut amb 2 tacs, cal afegir 5 punts a la quantitat de bola",
+        "Si el punt mitjà està a 16, quantitat de bola 8, i es vol fer un xut amb 2 tacs, cal afegir 5 punts a la quantitat de bola"
       ],
       "passos": [
-        "Trobar el punt mitjà de la bola objectiu",
-        "Calcular la trajectòria de la bola",
-        "Considerar el gruix i l'efecte",
-        "Ajustar la trajectòria segons les correccions necessàries"
+        "Trobar el punt mitjà de la línia que uneix la bola 1 i la bola 2",
+        "Calcular la quantitat de bola i el tac necessaris per aconseguir el xut desitjat",
+        "Ajustar el càlcul segons les correccions necessàries"
       ],
       "exemples": [
-        "Bola a 20 unitats de distància, punt mitjà a 10 unitats, gruix 2/8, efecte ½ tac",
-        "Bola a 30 unitats de distància, punt mitjà a 15 unitats, gruix 2/8, efecte ½ tac",
-        "Bola a 32 unitats de distància, punt mitjà a 16 unitats, gruix 2/8, efecte ½ tac"
+        "Punt mitjà a 20, quantitat de bola 10, 2 tacs: afegir 5 punts a la quantitat de bola",
+        "Punt mitjà a 16, quantitat de bola 8, 2 tacs: afegir 5 punts a la quantitat de bola",
+        "Punt mitjà a 28, quantitat de bola 14, 1 tac: no cal ajustar",
+        "Punt mitjà a 32, quantitat de bola 16, 2 tacs: afegir 5 punts a la quantitat de bola"
       ],
-      "quan": "En situacions de joc on la bola està a una distància considerable de la banda i el jugador necessita calcular la trajectòria per encertar el tir.",
+      "quan": "Aquest sistema és útil quan es vol fer un xut precís i es necessita calcular la trajectòria de la bola.",
       "consells": [
-        "Practicar la tècnica per millorar la precisió",
-        "Considerar les correccions necessàries segons la posició de la bola",
-        "No subestimar la importància del gruix i l'efecte en la trajectòria de la bola"
+        "Calcular sempre el punt mitjà abans de fer el xut",
+        "Ajustar el càlcul segons les correccions necessàries",
+        "No excedir-se en la quantitat de bola ni en el tac"
       ],
       "nivell": "avançat"
     },
@@ -695,31 +688,32 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema Bernie és un mètode per calcular la trajectòria de la bola en el billar a tres bandes. Serveix per predir la posició de la bola després de xocar amb les bandes.",
+      "queEs": "El Sistema Bernie és un mètode per calcular la quantitat de bola i l'efecte en el joc de billar a tres bandes. Serveix per determinar la trajectòria de la bola i predir el resultat d'un xut.",
       "calcul": "",
       "correccions": [
         "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Línia 3: 1 tac i gruix 4/8",
-        "Línia 4: 1 ½ tac i gruix 6/8",
-        "Bola 2 enganxada a la banda: gruix ≤3/8 per evitar corba",
-        "Gran rotació: suma 2 a la posició de la bola"
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Línia 3: 1 tac i quantitat de bola 3/8",
+        "Línia 4: 1 ½ tac i quantitat de bola 4/8",
+        "Angle d'entrada: ajusta la quantitat de bola segons l'angle",
+        "Bola 2 enganxada a la banda: ajusta la quantitat de bola segons la posició"
       ],
       "passos": [
-        "Identificar la posició de la bola 1 i la direcció de la trajectòria",
-        "Determinar la quantitat de bola i el gruix",
-        "Aplicar les correccions segons la posició de la bola i la banda",
-        "Predir la posició de la bola després de xocar amb les bandes"
+        "Determina la posició de la bola 1 i la banda",
+        "Calcula la quantitat de bola i l'efecte segons la posició",
+        "Ajusta la quantitat de bola segons les correccions",
+        "Verifica el resultat del xut"
       ],
       "exemples": [
-        "Bola 1 a la posició 3, gruix 2/8, efecte ½ tac, correcció +1, resultant a la posició 5",
-        "Bola 1 a la posició 6, gruix 4/8, efecte 1 tac, correcció -1, resultant a la posició 4"
+        "Bola 1 a la línia 2, quantitat de bola 2/8, efecte ½: resultant a la línia 5",
+        "Bola 1 a la línia 3, quantitat de bola 3/8, efecte 1: resultant a la línia 6",
+        "Bola 1 a la línia 4, quantitat de bola 4/8, efecte 1 ½: resultant a la línia 7"
       ],
-      "quan": "El sistema Bernie s'ha de fer servir en situacions de joc on la bola ha de xocar amb les bandes i la trajectòria és incerta.",
+      "quan": "El Sistema Bernie és útil en situacions de joc on cal predir la trajectòria de la bola amb precisió, com en xuts llargs o en situacions de pressió.",
       "consells": [
-        "Calibrar el gruix i l'efecte segons la situació de joc",
-        "Prestar atenció a la posició de la bola 2 i la seva possible influència en la trajectòria"
+        "Ajusta la quantitat de bola segons l'angle d'entrada per evitar errors",
+        "Verifica la posició de la bola 2 abans de xutar per evitar col·lisions"
       ],
       "nivell": "avançat"
     },
@@ -743,32 +737,31 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema Five & Half (repàs) és un mètode per calcular la trajectòria de la bola en el billar a tres bandes (carambola). Aquest sistema serveix per determinar la posició de la bola després de cada xut i predir la seva trajectòria.",
-      "calcul": "La fórmula bàsica del sistema Five & Half és: suport de la bola - suport del coixí = 3. Això vol dir que la diferència entre la posició de la bola i la posició del coixí ha de ser igual a 3. Per exemple, si la bola està a 45 i el coixí està a 30, llavors la diferència és 15, que és igual a 3 (45 - 30 = 15).",
+      "queEs": "El sistema Five & Half (repàs) és un mètode de càlcul per al billar a tres bandes que ajuda a determinar la quantitat de bola i l'efecte necessaris per aconseguir un xut.",
+      "calcul": "La fórmula bàsica del sistema és: quantitat de bola = (50 - quantitat de bola objectiu) - efecte. Per exemple, si volem aconseguir un xut amb una quantitat de bola de 20, la fórmula seria: quantitat de bola = (50 - 20) - efecte.",
       "correccions": [
-        "Si la tercera banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola està a 50 i el coixí està a 30, la diferència és 20, que és igual a 2 (50 - 30 = 20)",
-        "Si la bola està a 45 i el coixí està a 25, la diferència és 20, que és igual a 2 (45 - 25 = 20)",
-        "Si la bola està a 40 i el coixí està a 20, la diferència és 20, que és igual a 2 (40 - 20 = 20)",
-        "Si la bola està a 35 i el coixí està a 15, la diferència és 20, que és igual a 2 (35 - 15 = 20)",
-        "Si la bola està a 30 i el coixí està a 10, la diferència és 20, que és igual a 2 (30 - 10 = 20)"
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Si la quantitat de bola objectiu és inferior a 20, utilitza 1 si i 1 tac per aconseguir un xut més curt",
+        "Si la quantitat de bola objectiu és superior a 30, utilitza 2 si i 2 tacs per aconseguir un xut més llarg"
       ],
       "passos": [
-        "Determinar la posició de la bola i del coixí",
-        "Calcular la diferència entre la posició de la bola i la posició del coixí",
-        "Aplicar les correccions necessàries segons la posició de la bola i del coixí",
-        "Determinar la trajectòria de la bola"
+        "Determina la quantitat de bola objectiu",
+        "Calcula la quantitat de bola necessària utilitzant la fórmula",
+        "Ajusta la quantitat de bola segons les correccions necessàries",
+        "Executa el xut amb l'efecte i la quantitat de bola adequats"
       ],
       "exemples": [
-        "Exemple 1: La bola està a 45 i el coixí està a 30. La diferència és 15, que és igual a 3 (45 - 30 = 15). La trajectòria de la bola serà una línia que passa per la posició de la bola i el coixí.",
-        "Exemple 2: La bola està a 50 i el coixí està a 20. La diferència és 30, que és igual a 3 (50 - 20 = 30). La trajectòria de la bola serà una línia que passa per la posició de la bola i el coixí."
+        "Quantitat de bola objectiu: 20, efecte: 2 si, quantitat de bola: 30",
+        "Quantitat de bola objectiu: 15, efecte: 1 si, quantitat de bola: 35",
+        "Quantitat de bola objectiu: 30, efecte: 2 si, quantitat de bola: 20"
       ],
-      "quan": "Aquest sistema es pot utilitzar en situacions de joc on es necessita una gran precisió i control sobre la trajectòria de la bola.",
+      "quan": "El sistema Five & Half (repàs) és útil en situacions de joc on es necessita una gran precisió i control sobre la bola, com en el billar a tres bandes.",
       "consells": [
-        "És important tenir en compte les correccions necessàries segons la posició de la bola i del coixí",
-        "La pràctica i l'experiència són clau per dominar aquest sistema"
+        "Utilitza sempre la fórmula bàsica per calcular la quantitat de bola",
+        "Ajusta les correccions segons les necessitats de cada xut",
+        "Practica regularment per millorar la precisió i el control"
       ],
       "nivell": "avançat"
     },
@@ -792,34 +785,31 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Short & Long' és una tècnica de billar que serveix per controlar la longitud de la bola en funció de la quantitat de rotació i efecte aplicat.",
+      "queEs": "El sistema 'Short & Long' és una tècnica de joc de billar a tres bandes que serveix per controlar la quantitat de bola i l'efecte en les tacades.",
       "calcul": "",
       "correccions": [
-        "Si la bola queda curta, suma efecte",
-        "Si la bola queda llarga, resta efecte",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Línia 3: 1 tac i gruix 3/8",
-        "Línia 4: 1½ tac i gruix 4/8",
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Si la 3a banda queda 1 rombe llarga, resta 1"
+        "Si la bola 1 està enganxada a la banda, la quantitat de bola ha de ser ≤2/8 per evitar la corba.",
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola.",
+        "Línia 2: ½ tac i quantitat de bola 2/8.",
+        "En cas de gran rotació, aplica un efecte més fort.",
+        "Si la bola 2 està massa lluny de la banda, aplica un efecte més feble."
       ],
       "passos": [
-        "Determina la quantitat de rotació i efecte necessaris per aconseguir la longitud desitjada",
-        "Ajusta el gruix i l'efecte segons les correccions",
-        "Aplica la tècnica 'Short' per aconseguir una bola curta",
-        "Aplica la tècnica 'Long' per aconseguir una bola llarga"
+        "Determina la posició de la bola 1 i la quantitat de bola.",
+        "Calcula l'efecte necessari per aconseguir la tacada.",
+        "Ajusta la quantitat de bola segons la posició de la bola 1 i la banda.",
+        "Aplica la tècnica 'Short' o 'Long' segons la situació."
       ],
       "exemples": [
-        "Bola 1 a 2/8 de la banda, efecte 1, gruix 2/8, resultant en una bola curta",
-        "Bola 1 a 4/8 de la banda, efecte 1½, gruix 4/8, resultant en una bola llarga"
+        "Bola 1 a 3/8 de la banda, quantitat de bola 3/8, efecte 1/2: aplica 'Short' per aconseguir una tacada curta.",
+        "Bola 2 a 2/8 de la banda, quantitat de bola 2/8, efecte 1: aplica 'Long' per aconseguir una tacada llarga."
       ],
-      "quan": "Aquest sistema és útil en situacions on cal controlar la longitud de la bola per aconseguir un objectiu específic, com per exemple quan es juga en una taula amb molt efecte o quan es necessita una bola curta o llarga per aconseguir un punt",
+      "quan": "Aquest sistema és útil en situacions on cal controlar la quantitat de bola i l'efecte per aconseguir tacades precises.",
       "consells": [
-        "No sobre-rotulis la bola, ja que això pot fer que la bola quedi curta",
-        "No sub-rotulis la bola, ja que això pot fer que la bola quedi llarga"
+        "No exageris amb l'efecte, ja que pot provocar una corba excessiva.",
+        "Ajusta la quantitat de bola segons la situació per evitar errors."
       ],
-      "nivell": "avançat"
+      "nivell": "mitjà"
     },
     "font": "subtítols",
     "transcripcio": "아 어 >> 응 접수였어 이제 알지? >> 응 오케이이 비겨치기는 투쿠션 포인트에서 회전이 먹어서 늘어지느냐 안 늘어지냐로 길어지느냐 짧아지느냐로 판단할 수 있어요. >> 그래서 지금이 공은 기울기가 딱 칠만할 것 같은데 쳐보면 의외로 길게 빠지지. 이럴 때는 의외로 회전을 많이 주려고 하지 말고 중상단을 주고 쇼트로 때려야 돼. >> 이렇게 쇼트로 때려야만 짧게 잘옵니다. >> 오 근데 왜 이걸 쇼트로 때려? >> 쇼트로 쳐야만 투쿠션 포인트에서 회전이 먹으면서 길어지지가 않는 거야. 아, >> 그렇지. 훨씬 낫네. 짧게도 나오잖아. >> 자, 응용 버전. 이번에는 이복 조구가 지금과 같이 약간 바깥으로 나왔어. >> 그러면 요쪽으로 와야 되니까 길게 가야 되잖아. 그러면 투쿠션에서 회전이 쭉 먹어야겠지? >> 그러면 어떻게 해야 될까? >> 아까 숏이셨으니까 이번에 롱 >> 그렇지. 중화단 당점을 주고 롱팔로우를 부드럽게 하면 투에서 회전이 먹어 주면서 길어지는 거지. >> 아 >> 쭉 봐봐. 쭉 쭉쭉 회전 먹잖아. 먹잖아. >> 기겨치기는 숏을 하면 짧아지고 롱을 하면 길어진다. 오케이. >> 오케이. 어"
@@ -841,31 +831,29 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Tocar la bola fina amb rebot' és una tècnica de billar a tres bandes que serveix per a tocar la bola objectiu de manera efectiva i precisa, fins i tot en situacions complicades.",
+      "queEs": "El sistema 'Tocar la bola fina amb rebot' és una tècnica de billar a tres bandes que serveix per a calcular la quantitat de bola i l'efecte necessaris per a tocar la bola objectiu amb rebot.",
       "calcul": "",
       "correccions": [
-        "Si la bola 1 està enganxada a la banda, el gruix ha de ser ≤2/8 per evitar corba",
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Línia 2: ½ tac i gruix 2/8",
-        "En cas de gran rotació, ajusta el gruix i l'efecte segons la situació",
-        "Si la bola 2 està massa baixa, aplica un xut sense rotació per evitar que la bola no entrés en contacte amb la banda",
-        "En cas de bola 2 amb poca rotació, aplica un xut amb efecte mínim per evitar que la bola no entrés en contacte amb la banda",
-        "Ajusta el punt de xut segons la situació, tenint en compte la posició de la bola 1 i la banda"
+        "Si la bola 1 està enganxada a la banda, la quantitat de bola ha de ser ≤2/8 per evitar la corba.",
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola.",
+        "Línia 2: ½ tac i quantitat de bola 2/8.",
+        "Si la bola 2 està massa baixa, la quantitat de bola ha de ser més gran per evitar que la bola no entri en contacte amb la banda.",
+        "En cas de gran rotació, la quantitat de bola ha de ser més petita per evitar que la bola no surti de la taula."
       ],
       "passos": [
-        "Evalua la situació i determina la millor opció per tocar la bola objectiu",
-        "Ajusta el gruix i l'efecte segons la situació",
-        "Aplica el xut amb la tècnica adequada",
-        "Ajusta el punt de xut segons la situació"
+        "Calcular la quantitat de bola i l'efecte necessaris per a tocar la bola objectiu amb rebot.",
+        "Ajustar la quantitat de bola i l'efecte segons la posició de la bola 1 i la banda.",
+        "Verificar si la bola 1 està enganxada a la banda i ajustar la quantitat de bola en conseqüència.",
+        "Realitzar el xut amb la quantitat de bola i l'efecte calculats."
       ],
       "exemples": [
-        "Exemple 1: Bola 1 a 3 rombes de la banda, gruix 3/8, efecte 1 tac. Resultat: Bola 2 a 2 rombes de la banda, sense corba.",
-        "Exemple 2: Bola 1 enganxada a la banda, gruix 2/8, efecte ½ tac. Resultat: Bola 2 a 1 rombe de la banda, sense corba."
+        "Bola 1 a 3/8 de la banda, quantitat de bola 2/8, efecte 1/8: xut amb ½ tac i quantitat de bola 2/8.",
+        "Bola 2 a 1/8 de la banda, quantitat de bola 1/8, efecte 2/8: xut amb ¼ tac i quantitat de bola 1/8."
       ],
-      "quan": "Aquest sistema és útil en situacions on la bola objectiu està en una posició complicada o quan la bola 1 està enganxada a la banda.",
+      "quan": "Aquest sistema es fa servir quan la bola objectiu està massa lluny de la bola 1 i cal calcular la quantitat de bola i l'efecte necessaris per a tocar-la amb rebot.",
       "consells": [
-        "Ajusta el gruix i l'efecte segons la situació per evitar errors",
-        "Practica la tècnica per millorar la precisió i l'eficàcia"
+        "Calcular sempre la quantitat de bola i l'efecte necessaris per a tocar la bola objectiu amb rebot.",
+        "Ajustar la quantitat de bola i l'efecte segons la posició de la bola 1 i la banda."
       ],
       "nivell": "avançat"
     },
@@ -889,26 +877,29 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Sistema Sol ixent–Sol ponent' és una tècnica de joc de billar a tres bandes que serveix per a calcular la trajectòria de la bola i augmentar les possibilitats de fer una carambola. Aquest sistema es basa en la idea de calcular la distància i l'angle de la bola per aconseguir una carambola.",
-      "calcul": "",
+      "queEs": "El sistema 'Sistema Sol ixent–Sol ponent' és un mètode per calcular la trajectòria de la bola en el joc de billar a tres bandes, especialment quan es tracta de tocar la bola fina. Aquest sistema serveix per determinar la quantitat de bola i l'efecte necessaris per aconseguir una trajectòria òptima.",
+      "calcul": "La regla base del càlcul és la següent: quan la bola es dirigeix cap a la banda, la quantitat de bola (quantitat de bola) es calcula en funció de la distància fins a la banda i l'efecte es determina en funció de l'angle d'entrada. El sistema no proporciona una fórmula numèrica específica, però es basa en la comprensió de les interaccions entre la bola, les bandes i la taula.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8"
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Si la bola es dirigeix cap a la banda amb un angle de 45 graus, la quantitat de bola és de 3/8",
+        "Si la bola es dirigeix cap a la banda amb un angle de 30 graus, la quantitat de bola és de 2/8"
       ],
       "passos": [
-        "Calcular la distància i l'angle de la bola",
-        "Ajustar el gruix i l'efecte segons la situació",
-        "Realitzar el xut amb la tècnica adequada"
+        "Determinar la posició de la bola i la direcció cap a la qual es dirigeix",
+        "Calcular la quantitat de bola (quantitat de bola) en funció de la distància fins a la banda i l'angle d'entrada",
+        "Determinar l'efecte necessari per aconseguir la trajectòria desitjada",
+        "Ajustar la quantitat de bola i l'efecte segons les correccions necessàries"
       ],
       "exemples": [
-        "Exemple 1: Bola 1 a 2 rombes de la banda, gruix 3/8, efecte 1 tac. Resultat: carambola a la 3a banda",
-        "Exemple 2: Bola 1 a 1 rombe de la banda, gruix 2/8, efecte ½ tac. Resultat: carambola a la 2a banda"
+        "Exemple 1: La bola es dirigeix cap a la banda amb un angle de 45 graus i una distància de 2 rombes. La quantitat de bola és de 3/8 i l'efecte és de 1/8.",
+        "Exemple 2: La bola es dirigeix cap a la banda amb un angle de 30 graus i una distància de 1,5 rombes. La quantitat de bola és de 2/8 i l'efecte és de 0,5/8."
       ],
-      "quan": "Aquest sistema és útil en situacions de joc on es necessita una gran precisió i control sobre la bola, com ara en partides importants o en situacions de pressió",
+      "quan": "Aquest sistema és útil quan es tracta de tocar la bola fina i es necessita una gran precisió en la trajectòria de la bola.",
       "consells": [
-        "Practica regularment per millorar la tècnica i la precisió",
-        "Ajusta el gruix i l'efecte segons la situació i la bola"
+        "És important ajustar la quantitat de bola i l'efecte segons les correccions necessàries per aconseguir la trajectòria desitjada",
+        "La pràctica i l'experiència són clau per dominar aquest sistema"
       ],
       "nivell": "avançat"
     },
@@ -932,23 +923,26 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Endavant: gran rotació' és una tècnica de billar a tres bandes que serveix per a jugar amb una bola que està en una posició difícil, amb l'objectiu de fer que la bola segueixi una trajectòria curva i entri en la butxaca.",
+      "queEs": "El sistema Endavant: gran rotació és una tècnica de billar que implica calcular la trajectòria de la bola per aconseguir un xut precís i efectiu. Serveix per a millorar la precisió i el control en els xuts.",
       "calcul": "",
       "correccions": [
-        "Si la bola queda a prop de la banda, cal ajustar el gruix i l'efecte per evitar que la bola quedi curta",
-        "Si la bola està enganxada a la banda, cal reduir el gruix per evitar que la bola segueixi una trajectòria corba",
-        "Cal tenir en compte la quantitat de bola i el gruix per aconseguir la trajectòria desitjada"
+        "Si la 3a banda queda 1 rombe curta, suma 1",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8"
       ],
       "passos": [
-        "Cal analitzar la posició de la bola i la banda per determinar la millor trajectòria",
-        "Cal ajustar el gruix i l'efecte segons la posició de la bola i la banda",
-        "Cal seguir la trajectòria de la bola per ajustar el joc"
+        "Calcula la trajectòria de la bola tenint en compte la quantitat de bola i l'efecte",
+        "Ajusta la trajectòria segons la posició de la bola i la banda",
+        "Executa el xut amb suavitat i control"
       ],
-      "exemples": [],
-      "quan": "Aquest sistema es fa servir quan la bola està en una posició difícil i cal jugar amb una trajectòria curva per entrar la bola a la butxaca",
+      "exemples": [
+        "Exemple 1: Bola 1 a 3 rombes de la banda, quantitat de bola 3/8, efecte 1 tac. Resultat: la bola segueix una trajectòria suau i entra a la segona banda",
+        "Exemple 2: Bola 2 a 2 rombes de la banda, quantitat de bola 1/8, efecte ½ tac. Resultat: la bola segueix una trajectòria més curta i entra a la primera banda"
+      ],
+      "quan": "Aquest sistema és útil en situacions on cal calcular la trajectòria de la bola per aconseguir un xut precís i efectiu, com en els xuts llargs o en les situacions on la bola està prop de la banda.",
       "consells": [
-        "Cal practicar per desenvolupar la tècnica i la precisió",
-        "Cal tenir en compte les condicions de la taula i les boles per ajustar el joc"
+        "Ajusta la quantitat de bola i l'efecte segons la situació",
+        "Mantén el control i la suavitat en l'execució del xut"
       ],
       "nivell": "avançat"
     },
@@ -972,33 +966,32 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'De costat: sistema dividir per 2' és una tècnica de billar a tres bandes que permet calcular la trajectòria de la bola i predir la seva posició final. Aquest sistema serveix per a millorar la precisió i la eficiència en el joc.",
-      "calcul": "La regla base del sistema 'De costat: sistema dividir per 2' és la següent: es calcula la posició de la bola 1 en funció de la seva distància a les bandes, i es divideix per 2 per a obtenir la posició final. Per exemple, si la bola 1 està a 2 unitats de la banda curta i a 2 unitats de la banda llarga, la seva posició final serà de 2 unitats (2+2)/2 = 2.",
+      "queEs": "El sistema 'De costat: sistema dividir per 2' és una tècnica de billar a tres bandes que permet calcular la trajectòria de la bola i predir el lloc on anirà a parar. Aquest sistema serveix per a jugar amb més precisió i estratègia.",
+      "calcul": "La fórmula bàsica per calcular la trajectòria de la bola és la següent: es calcula la posició de la bola 1 en relació amb les bandes, sumant la posició de la banda curta i la llarga, i després es divideix per 2. Això dona la posició on anirà a parar la bola. Per exemple, si la posició de la bola 1 és 2 en la banda curta i 2 en la banda llarga, la posició final serà 2 (2+2)/2 = 2.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola 1 està a la línia 1, suma 0,5",
-        "Si la bola 1 està a la línia 3, resta 0,5",
-        "Si la bola 1 està a la línia 4, resta 1",
-        "Si la bola 1 està a la banda llarga, suma 1",
-        "Si la bola 1 està a la banda curta, resta 1"
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la posició final",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Si la bola 1 està en una posició central, la fórmula no és vàlida",
+        "Si hi ha una inclinació, cal afegir la inclinació a la posició final",
+        "Si la bola 1 està en una posició propera a la banda, cal ajustar la fórmula en conseqüència"
       ],
       "passos": [
-        "Calcula la posició de la bola 1 en funció de la seva distància a les bandes",
-        "Divideix la posició de la bola 1 per 2 per a obtenir la posició final",
-        "Ajusta la posició final segons les correccions necessàries"
+        "Calcular la posició de la bola 1 en relació amb les bandes",
+        "Sumar les posicions de la banda curta i la llarga",
+        "Dividir la suma per 2 per obtenir la posició final",
+        "Ajustar la fórmula segons les correccions necessàries"
       ],
       "exemples": [
-        "Exemple 1: Bola 1 a 2 unitats de la banda curta i 2 unitats de la banda llarga. Posició final: (2+2)/2 = 2",
-        "Exemple 2: Bola 1 a 3 unitats de la banda curta i 1 unitat de la banda llarga. Posició final: (3+1)/2 = 2",
-        "Exemple 3: Bola 1 a 1 unitat de la banda curta i 3 unitats de la banda llarga. Posició final: (1+3)/2 = 2"
+        "Posició de la bola 1: 2 en la banda curta, 2 en la banda llarga. Posició final: 2 (2+2)/2 = 2",
+        "Posició de la bola 1: 1 en la banda curta, 5 en la banda llarga. Posició final: 3 (1+5)/2 = 3",
+        "Posició de la bola 1: 3 en la banda curta, 2 en la banda llarga. Posició final: 2,5 (3+2)/2 = 2,5"
       ],
-      "quan": "Aquest sistema es pot utilitzar en situacions de joc on es necessita una gran precisió i control sobre la trajectòria de la bola, com per exemple en partides importants o en situacions on la bola està en una posició difícil.",
+      "quan": "Aquest sistema és útil en situacions on es vol jugar amb precisió i estratègia, especialment quan la bola 1 està en una posició propera a la banda.",
       "consells": [
-        "Utilitza aquest sistema quan la bola estigui en una posició on la seva trajectòria sigui difícil de predir",
-        "Ajusta les correccions segons les necessitats de la situació de joc",
-        "Practica aquest sistema per a millorar la teva precisió i eficiència en el joc"
+        "Calcular la posició de la bola 1 amb precisió",
+        "Ajustar la fórmula segons les correccions necessàries",
+        "Practicar per a millorar la precisió"
       ],
       "nivell": "avançat"
     },
@@ -1022,29 +1015,30 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'Tocar la bola fina per inclinació' és una tècnica de billar que consisteix a calcular la inclinació de la bola per tal de tocar la bola objectiu. Serveix per a jugar amb precisió i control.",
-      "calcul": "La regla base de càlcul és la següent: si la bola 1 està a 1 díamant de la banda, la inclinació és de 4 unitats. Si la bola 1 està a 3 díamants de la banda, la inclinació és de 3 unitats. La fórmula és: inclinació = 4 - (número de díamants - 1). El gruix és de ½ tac i la quantitat de bola és de 2/8.",
+      "queEs": "El sistema 'Tocar la bola fina per inclinació' és una tècnica de billar que serveix per calcular la trajectòria de la bola fins a la banda. Aquest sistema ajuda a determinar la quantitat de bola i l'efecte necessaris per aconseguir el xut.",
+      "calcul": "La fórmula bàsica per calcular la quantitat de bola és: 4 unitats de banda (기울기) com a referència. La quantitat de bola es calcula en funció de la posició de la bola 1 respecte a la banda, amb una escala de 1 a 6.",
       "correccions": [
-        "Si la 3a banda queda 1 díamant curta, suma 1 a la inclinació",
-        "Bola 1 enganxada a la banda: gruix ≤ 2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Línia 3: 1 tac i gruix 3/8",
-        "Línia 4: 1 ½ tacs i gruix 4/8"
+        "Si la bola 1 està just sobre la línia de la banda, la quantitat de bola és de 4 unitats.",
+        "Si la bola 1 està a 1 unitat de la banda, la quantitat de bola és de 3 unitats.",
+        "Si la bola 1 està a 2 unitats de la banda, la quantitat de bola és de 2 unitats.",
+        "Si la bola 1 està a 3 unitats de la banda, la quantitat de bola és de 1 unitat.",
+        "La quantitat de bola també depèn de l'efecte, que pot ser de 2,5 o 3,5 (쓰레팁, 투팁, 원팁).",
+        "La quantitat de bola també depèn de la posició de la bola 2, que pot estar a 1, 2 o 3 unitats de la banda."
       ],
       "passos": [
-        "Calcula la inclinació de la bola 1",
-        "Ajusta la inclinació segons la posició de la bola 1",
-        "Calcula el gruix i la quantitat de bola",
-        "Ajusta el gruix i la quantitat de bola segons la posició de la bola 1"
+        "Determinar la posició de la bola 1 respecte a la banda.",
+        "Calcular la quantitat de bola en funció de la posició de la bola 1.",
+        "Ajustar la quantitat de bola en funció de l'efecte i la posició de la bola 2."
       ],
       "exemples": [
-        "Bola 1 a 1 díamant de la banda, inclinació 4, gruix ½ tac, quantitat de bola 2/8",
-        "Bola 1 a 3 díamants de la banda, inclinació 3, gruix 1 tac, quantitat de bola 3/8"
+        "Bola 1 a 2 unitats de la banda, efecte de 2,5: quantitat de bola = 2 unitats.",
+        "Bola 1 a 1 unitat de la banda, efecte de 3,5: quantitat de bola = 1 unitat.",
+        "Bola 1 just sobre la línia de la banda, efecte de 2: quantitat de bola = 4 unitats."
       ],
-      "quan": "Aquest sistema es fa servir quan la bola 1 està prop de la banda i es vol tocar la bola objectiu amb precisió.",
+      "quan": "Aquest sistema és útil quan es vol xutar la bola fins a la banda, especialment en situacions on la bola 1 està prop de la banda.",
       "consells": [
-        "Ajusta la inclinació segons la posició de la bola 1",
-        "No oblidis de calcular el gruix i la quantitat de bola"
+        "Calibrar la quantitat de bola en funció de la posició de la bola 1 i l'efecte.",
+        "Ajustar la quantitat de bola en funció de la posició de la bola 2."
       ],
       "nivell": "mitjà"
     },
@@ -1068,30 +1062,27 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema de 15 és un mètode per calcular la trajectòria de la bola en el billar a tres bandes, que té en compte la quantitat de bola i l'efecte per predir la posició final de la bola.",
+      "queEs": "El sistema de 15 és un mètode per calcular la quantitat de bola i l'efecte en el joc de billar a tres bandes. Serveix per determinar la posició de la bola després d'un xut.",
       "calcul": "",
       "correccions": [
-        "Si la bola 1 està enganxada a la banda, el gruix ha de ser ≤2/8 per evitar la corba",
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Línia 1: 1 tac i gruix 1/8",
-        "Línia 3: 1,5 tacs i gruix 3/8",
-        "Línia 4: 2 tacs i gruix 4/8"
+        "Si la bola 1 està alineada amb la primera línia de punt, suma 1 quan la bola 2 està a 1 rombe de distància",
+        "Si la bola 1 està a 1 rombe de distància de la primera línia de punt, suma 1 quan la bola 2 està a 2 rombes de distància",
+        "La quantitat de bola és de 2/8 quan la bola 1 està a 1 rombe de distància de la primera línia de punt i la bola 2 està a 2 rombes de distància",
+        "L'efecte és de ½ quan la bola 1 està a 1 rombe de distància de la primera línia de punt i la bola 2 està a 2 rombes de distància"
       ],
       "passos": [
-        "Col·loca la bola 1 en la línia de punt",
-        "Calcula la quantitat de bola i l'efecte",
-        "Ajusta el gruix i l'efecte segons la posició de la bola 1 i la banda",
-        "Envia la bola amb la quantitat de bola i l'efecte adequats"
+        "Determina la posició de la bola 1 respecte a la primera línia de punt",
+        "Calcula la distància entre la bola 1 i la bola 2",
+        "Ajusta la quantitat de bola i l'efecte segons la posició de la bola 1 i la distància entre les boles"
       ],
       "exemples": [
-        "Exemple 1: Bola 1 en la línia 2, gruix 2/8, efecte ½ tac, resultat: bola 1 en la banda, bola 2 en la posició final",
-        "Exemple 2: Bola 1 en la línia 3, gruix 3/8, efecte 1,5 tacs, resultat: bola 1 en la banda, bola 2 en la posició final"
+        "Bola 1 a 1 rombe de distància de la primera línia de punt, bola 2 a 2 rombes de distància: quantitat de bola 2/8, efecte ½",
+        "Bola 1 alineada amb la primera línia de punt, bola 2 a 1 rombe de distància: quantitat de bola 1/8, efecte ¼"
       ],
-      "quan": "Aquest sistema es pot utilitzar en situacions de joc on la bola 1 està en una línia de punt i la bola 2 està en una posició concreta",
+      "quan": "En situacions de joc on la bola 1 està propera a la primera línia de punt i la bola 2 està a una distància curta",
       "consells": [
-        "Practica el sistema de 15 per millorar la precisió",
-        "Ajusta el gruix i l'efecte segons la posició de la bola 1 i la banda"
+        "Practica per desenvolupar la teva pròpia tècnica de xut",
+        "Ajusta la quantitat de bola i l'efecte segons la teva experiència i el teu estil de joc"
       ],
       "nivell": "avançat"
     },
@@ -1115,34 +1106,33 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema de traçat del bricol de 3 bandes és un mètode per calcular la trajectòria de la bola en el billar de 3 bandes.",
-      "calcul": "La fórmula bàsica és: (sortida - arribada) = (canvi de direcció). Per exemple, si la sortida és 4 i l'arribada és 3, llavors el canvi de direcció és 1. Això significa que cal aplicar 1 unitat de gir menys a la bola perquè arribi a la posició desitjada.",
+      "queEs": "El sistema de traçat del bricol de 3 bandes és un mètode per calcular la trajectòria de la bola en el joc de billar a tres bandes.",
+      "calcul": "La fórmula base de càlcul és: (quantitat de bola - quantitat de bola objectiu) / 2. Per exemple, si la quantitat de bola és 4 i la quantitat de bola objectiu és 3, llavors la fórmula seria (4 - 3) / 2 = 0,5. Això significa que cal aplicar un efecte de 0,5 per arribar a la quantitat de bola objectiu.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Línia 3: 1 tac i gruix 3/8",
-        "Línia 4: 1 ½ tacs i gruix 4/8",
-        "Bola 2 enganxada a la banda: gruix ≤3/8 per evitar corba",
-        "Línia 5: 2 tacs i gruix 5/8",
-        "Línia 6: 2 ½ tacs i gruix 6/8"
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola.",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba.",
+        "Línia 2: ½ tac i quantitat de bola 2/8.",
+        "Si la bola surt de la banda amb un angle de 45 graus, aplica un efecte de 1.",
+        "Si la bola surt de la banda amb un angle de 90 graus, aplica un efecte de 2.",
+        "Si la quantitat de bola és major que 6, aplica un efecte de 3."
       ],
       "passos": [
-        "Identificar la posició de la bola 1 i la banda",
-        "Calcular la sortida i l'arribada",
-        "Aplicar les correccions necessàries",
-        "Realitzar el xut"
+        "Determina la quantitat de bola inicial.",
+        "Calcula la quantitat de bola objectiu.",
+        "Aplica la fórmula base de càlcul per determinar l'efecte necessari.",
+        "Ajusta l'efecte segons les correccions necessàries.",
+        "Verifica si la bola ha arribat a la quantitat de bola objectiu."
       ],
       "exemples": [
-        "Sortida 4, arribada 3: aplicar 1 unitat de gir menys",
-        "Sortida 5, arribada 2: aplicar 2 unitats de gir menys",
-        "Sortida 6, arribada 1: aplicar 3 unitats de gir menys"
+        "Quantitat de bola inicial: 4, quantitat de bola objectiu: 3, efecte necessari: 0,5.",
+        "Quantitat de bola inicial: 5, quantitat de bola objectiu: 2, efecte necessari: 1,5.",
+        "Quantitat de bola inicial: 6, quantitat de bola objectiu: 1, efecte necessari: 2,5."
       ],
-      "quan": "Aquest sistema és útil quan es necessita calcular la trajectòria de la bola en situacions complexes de joc.",
+      "quan": "Aquest sistema es pot utilitzar en situacions de joc on la bola ha de recórrer una llarga distància abans d'arribar a la quantitat de bola objectiu.",
       "consells": [
-        "Calcular sempre la sortida i l'arribada abans de realitzar el xut",
-        "Aplicar les correccions necessàries per a cada situació",
-        "Practicar el sistema per a millorar la precisió"
+        "Ajusta l'efecte segons les condicions de la taula i la bola.",
+        "Verifica sempre la quantitat de bola abans de realitzar el tret.",
+        "Practica regularment per millorar la precisió dels teus."
       ],
       "nivell": "avançat"
     },
@@ -1166,35 +1156,34 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema Endavant és un mètode per calcular la trajectòria de la bola en el billar de tres bandes. Serveix per determinar la quantitat de bola i l'efecte necessaris per aconseguir un xut amb èxit.",
-      "calcul": "La fórmula bàsica del sistema Endavant és: si la primera banda és a 1,5 punts, la quantitat de bola és de 3/8 i l'efecte és de 1 tac. Si la primera banda és a 2 punts, la quantitat de bola és de 2/8 i l'efecte és de 2 tacs. Si la primera banda és a 1 punt, la quantitat de bola és de 1/8 i l'efecte és de 3 tacs.",
+      "queEs": "El sistema 'Endavant' és una tècnica de billar a tres bandes que permet calcular la trajectòria de la bola per aconseguir el màxim de punts. Serveix per a determinar la quantitat de bola i l'efecte necessaris per a encertar els tirs.",
+      "calcul": "La fórmula bàsica del sistema 'Endavant' és la següent: si la primera banda queda a 1,5 punts de la cantonada, la quantitat de bola és de 1/8 i l'efecte és de 1 tac. Si la primera banda queda a 2,5 punts de la cantonada, la quantitat de bola és de 2/8 i l'efecte és de 2 tacs.",
       "correccions": [
-        "Si la tercera banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la primera banda és a 1,5 punts, la quantitat de bola és de 3/8 i l'efecte és de 1 tac",
-        "Si la primera banda és a 2 punts, la quantitat de bola és de 2/8 i l'efecte és de 2 tacs",
-        "Si la primera banda és a 1 punt, la quantitat de bola és de 1/8 i l'efecte és de 3 tacs",
-        "Si la bola 1 està a la línia central, la quantitat de bola és de 2/8 i l'efecte és de 1 tac",
-        "Si la bola 1 està a la línia central, la quantitat de bola és de 1/8 i l'efecte és de 2 tacs"
+        "Si la 3a banda queda 1 rombe curta, suma 1",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Si la primera banda queda a 1,5 punts de la cantonada, la quantitat de bola és de 1/8 i l'efecte és de 1 tac",
+        "Si la primera banda queda a 2,5 punts de la cantonada, la quantitat de bola és de 2/8 i l'efecte és de 2 tacs",
+        "Si la primera banda queda a 3,5 punts de la cantonada, la quantitat de bola és de 3/8 i l'efecte és de 3 tacs",
+        "Si la primera banda queda a 4,5 punts de la cantonada, la quantitat de bola és de 4/8 i l'efecte és de 4 tacs"
       ],
       "passos": [
         "Determinar la posició de la bola 1",
-        "Determinar la quantitat de bola i l'efecte necessaris",
-        "Aplicar les correccions segons la posició de la bola 1 i la quantitat de bola",
-        "Realitzar el xut amb la quantitat de bola i l'efecte calculats"
+        "Determinar la quantitat de bola i l'efecte necessaris per a encertar el tir",
+        "Aplicar les correccions necessàries segons la posició de la bola 1 i la banda",
+        "Realitzar el tir amb la quantitat de bola i l'efecte calculats"
       ],
       "exemples": [
-        "Bola 1 a la línia central, quantitat de bola 2/8 i efecte 1 tac",
-        "Bola 1 a la línia central, quantitat de bola 1/8 i efecte 2 tacs",
-        "Bola 1 a 1,5 punts, quantitat de bola 3/8 i efecte 1 tac",
-        "Bola 1 a 2 punts, quantitat de bola 2/8 i efecte 2 tacs"
+        "Exemple 1: Bola 1 a 1,5 punts de la cantonada, quantitat de bola 1/8 i efecte 1 tac",
+        "Exemple 2: Bola 1 a 2,5 punts de la cantonada, quantitat de bola 2/8 i efecte 2 tacs",
+        "Exemple 3: Bola 1 a 3,5 punts de la cantonada, quantitat de bola 3/8 i efecte 3 tacs",
+        "Exemple 4: Bola 1 a 4,5 punts de la cantonada, quantitat de bola 4/8 i efecte 4 tacs"
       ],
-      "quan": "En situacions de joc on la bola 1 està a la línia central o a una distància de 1,5 o 2 punts de la línia central",
+      "quan": "El sistema 'Endavant' és útil en situacions de joc on la bola 1 està a una distància considerable de la cantonada i es necessita una gran precisió per a encertar el tir.",
       "consells": [
-        "Calibrar la quantitat de bola i l'efecte segons la posició de la bola 1",
-        "Aplicar les correccions segons la quantitat de bola i l'efecte",
-        "Practicar el sistema Endavant per millorar la precisió"
+        "És important determinar amb precisió la posició de la bola 1 i la banda per a calcular la quantitat de bola i l'efecte necessaris",
+        "Les correccions necessàries han de ser aplicades segons la posició de la bola 1 i la banda",
+        "La pràctica i l'experiència són clau per a dominar el sistema 'Endavant'"
       ],
       "nivell": "avançat"
     },
@@ -1218,34 +1207,36 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema Two-bank (dos bancs) és una tècnica de billar a tres bandes que permet als jugadors calcular la trajectòria de la bola i fer tirs precisos.",
-      "calcul": "La fórmula bàsica per calcular la trajectòria de la bola és: distància = (gruix de la bola / 8) + (efecte / 2). El gruix de la bola es mesura en vuitens (1/8, 2/8, etc.) i l'efecte es mesura en tacs (1 tac, 2 tacs, etc.).",
+      "queEs": "El sistema 'Two-bank' és una tècnica de billar que permet calcular la distància que recorrerà la bola després de col·lidir amb la banda. Aquest sistema serveix per predir la trajectòria de la bola i augmentar les possibilitats de fer una carambola.",
+      "calcul": "La fórmula bàsica per calcular la distància que recorrerà la bola és la següent: si la bola queda a una distància d'1/2 de la banda, llavors la distància que recorrerà serà equivalent a 1 bola; si la bola queda a una distància d'1 bola de la banda, llavors la distància que recorrerà serà equivalent a 2 boles. Això vol dir que, si la bola queda a una distància de 1/2 de la banda, cal xutar la bola cap a la banda amb una quantitat de bola equivalent a 1 bola.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1 al càlcul",
-        "Bola 1 enganxada a la banda: gruix ≤ 2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Bola 2 enganxada a la banda: gruix ≤ 1/8 per evitar corba",
-        "Línia 3: 1 tac i gruix 1/8",
-        "Línia 4: 1½ tacs i gruix 1/8",
-        "Bola 3 enganxada a la banda: gruix ≤ 1/8 per evitar corba",
-        "Línia 1: 0 tacs i gruix 0/8"
+        "Si la bola queda a una distància de 1/2 de la banda, cal sumar 1 a la quantitat de bola.",
+        "Si la bola queda a una distància de 1 bola de la banda, cal restar 1 a la quantitat de bola.",
+        "Si la bola queda a una distància de 2 boles de la banda, cal sumar 2 a la quantitat de bola.",
+        "Si la bola queda a una distància de 3 boles de la banda, cal restar 2 a la quantitat de bola.",
+        "Si la bola queda a una distància de 1/2 de la banda i es vol xutar cap a la banda amb una quantitat de bola equivalent a 1 bola, cal xutar la bola amb un efecte de 1/2.",
+        "Si la bola queda a una distància de 1 bola de la banda i es vol xutar cap a la banda amb una quantitat de bola equivalent a 2 boles, cal xutar la bola amb un efecte de 1.",
+        "Si la bola queda a una distància de 2 boles de la banda i es vol xutar cap a la banda amb una quantitat de bola equivalent a 3 boles, cal xutar la bola amb un efecte de 1 1/2.",
+        "Si la bola queda a una distància de 3 boles de la banda i es vol xutar cap a la banda amb una quantitat de bola equivalent a 4 boles, cal xutar la bola amb un efecte de 2.",
+        "Si la bola queda a una distància de 1/2 de la banda i es vol xutar cap a la banda amb una quantitat de bola equivalent a 1 bola, i la bola està enganxada a la banda, cal xutar la bola amb una quantitat de bola de 2/8.",
+        "Si la bola queda a una distància de 1 bola de la banda i es vol xutar cap a la banda amb una quantitat de bola equivalent a 2 boles, i la bola està enganxada a la banda, cal xutar la bola amb una quantitat de bola de 3/8."
       ],
       "passos": [
-        "Col·loca la bola 1 en la posició inicial",
-        "Calcula la distància fins a la bola 2",
-        "Ajusta el gruix i l'efecte segons les correccions",
-        "Fes el tir",
-        "Repeteix el procés per a cada bola"
+        "Col·loca la bola 1 a una distància de 1/2 de la banda.",
+        "Xuta la bola cap a la banda amb una quantitat de bola equivalent a 1 bola.",
+        "Observa la distància que recorre la bola després de col·lidir amb la banda.",
+        "Repeteix el procés amb diferents distàncies i quantitats de bola per ajustar la tècnica."
       ],
       "exemples": [
-        "Bola 1 a 10 unitats de la banda, gruix 2/8, efecte 1 tac: distància = (2/8) + (1/2) = 1,25 unitats",
-        "Bola 2 a 15 unitats de la banda, gruix 1/8, efecte 1 tac: distància = (1/8) + (1/2) = 0,75 unitats"
+        "La bola 1 queda a una distància de 1/2 de la banda, i es xuta cap a la banda amb una quantitat de bola equivalent a 1 bola. La bola recorre una distància equivalent a 1 bola.",
+        "La bola 1 queda a una distància de 1 bola de la banda, i es xuta cap a la banda amb una quantitat de bola equivalent a 2 boles. La bola recorre una distància equivalent a 2 boles.",
+        "La bola 1 queda a una distància de 2 boles de la banda, i es xuta cap a la banda amb una quantitat de bola equivalent a 3 boles. La bola recorre una distància equivalent a 3 boles."
       ],
-      "quan": "Aquest sistema és útil quan es vol fer tirs precisos a llarga distància, especialment en situacions on la bola 1 està enganxada a la banda.",
+      "quan": "Aquest sistema és útil quan es vol predir la trajectòria de la bola i augmentar les possibilitats de fer una carambola, especialment en situacions on la bola queda a una distància curta de la banda.",
       "consells": [
-        "Practica regularment per desenvolupar la sensació de la bola",
-        "Ajusta el gruix i l'efecte segons les condicions de la taula",
-        "No et centrïs massa en la bola 1, sinó en la trajectòria de la bola 2"
+        "Ajusta la quantitat de bola i l'efecte segons la distància que queda la bola de la banda.",
+        "Practica la tècnica amb diferents distàncies i quantitats de bola per desenvolupar la intuïció.",
+        "No oblidis que la banda pot influir en la trajectòria de la bola, així que cal tenir en compte aquest factor a l'hora de xutar."
       ],
       "nivell": "avançat"
     },
@@ -1269,31 +1260,30 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema Five & Half (bricol) és una tècnica de billar a tres bandes que serveix per calcular la trajectòria de la bola i predir el resultat d'un xut.",
-      "calcul": "La fórmula bàsica és: 5 + (gruix / 8) + (efecte / 2) = resultat. El gruix es mesura en vuitens (1/8 a 8/8) i l'efecte es mesura en tacs (1 a 8).",
+      "queEs": "El sistema Five & Half (bricol) és una tècnica de billar a tres bandes que serveix per calcular la quantitat de bola i l'efecte necessaris per aconseguir un xut precís.",
+      "calcul": "La fórmula bàsica és: quantitat de bola = 5 + (mitja distància entre la bola 1 i la banda) - (efecte de la bola 1). Per exemple, si la distància és de 3 rombes, la quantitat de bola seria 5 + 1,5 - efecte.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1 al resultat.",
-        "Bola 1 enganxada a la banda: gruix ≤ 2/8 per evitar corba.",
-        "Línia 2: ½ tac i gruix 2/8.",
-        "Línia 3: 1 tac i gruix 3/8.",
-        "Línia 4: 1,5 tacs i gruix 4/8.",
-        "Bola 2 enganxada a la banda: gruix ≤ 3/8 per evitar corba.",
-        "Gran rotació: suma 2 al resultat.",
-        "Entrada curta: resta 1 del resultat."
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤ 2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Angle d'entrada superior a 30°: augmenta l'efecte en 1",
+        "Bola 2 en moviment: disminueix la quantitat de bola en 1"
       ],
       "passos": [
-        "Calcula el gruix i l'efecte de la bola.",
-        "Aplica la fórmula bàsica per obtenir el resultat.",
-        "Ajusta el resultat segons les correccions necessàries."
+        "Calcula la distància entre la bola 1 i la banda",
+        "Determina l'efecte de la bola 1",
+        "Aplica la fórmula bàsica per calcular la quantitat de bola",
+        "Ajusta la quantitat de bola segons les correccions necessàries"
       ],
       "exemples": [
-        "Bola 1 a 5/8 de gruix i 2 tacs d'efecte: 5 + (5/8) + (2/2) = 7,625. Amb la correcció de la 3a banda curta, el resultat és 8,625.",
-        "Bola 2 a 3/8 de gruix i 1 tac d'efecte: 5 + (3/8) + (1/2) = 6,375. Sense correccions, el resultat és 6,375."
+        "Bola 1 a 3 rombes de la banda, efecte 2: quantitat de bola = 5 + 1,5 - 2 = 4,5",
+        "Bola 1 enganxada a la banda, efecte 1: quantitat de bola = 5 + 0 - 1 = 4",
+        "Bola 2 en moviment, efecte 3: quantitat de bola = 5 + 2 - 3 = 4"
       ],
-      "quan": "Aquest sistema és útil quan es vol predir el resultat d'un xut a tres bandes, especialment en situacions on la bola ha de recórrer una gran distància o quan hi ha molta rotació.",
+      "quan": "Aquest sistema és útil en situacions on es necessita una gran precisió, com en xuts llargs o amb angles complicats.",
       "consells": [
-        "Ajusta el gruix i l'efecte segons les condicions de la taula i la bola.",
-        "No oblidis les correccions per a les diferents línies i situacions de joc."
+        "Assegura't de calcular correctament la distància entre la bola 1 i la banda",
+        "No oblidis d'ajustar la quantitat de bola segons les correccions necessàries"
       ],
       "nivell": "avançat"
     },
@@ -1317,33 +1307,34 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema Endavant és un mètode per calcular la trajectòria de la bola en el billar a tres bandes. Serveix per determinar la direcció i la velocitat de la bola en funció de la posició de la bola i la taula.",
-      "calcul": "La fórmula bàsica per calcular la trajectòria de la bola és: 1/4 de la distància entre la bola i la banda, amb un efecte de 0. No hi ha una fórmula numèrica específica, ja que el càlcul depèn de la situació concreta de joc.",
+      "queEs": "El sistema Endavant és un mètode per calcular la trajectòria de la bola en el billar a tres bandes. Aquest sistema serveix per determinar la quantitat de bola i l'efecte necessaris per aconseguir que la bola segueixi una trajectòria determinada.",
+      "calcul": "La fórmula bàsica per calcular la quantitat de bola és: quantitat de bola = 1/4 de la distància entre la bola i la banda. Això vol dir que si la bola està a 4 unitats de la banda, la quantitat de bola hauria de ser d'1/4. L'efecte es calcula en funció de la quantitat de bola i de la velocitat de la bola.",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola està a prop de la banda, cal ajustar la velocitat i el gruix",
-        "Si la bola està lluny de la banda, cal ajustar la direcció i el gruix",
-        "En cas de gran rotació, cal ajustar la velocitat i el gruix",
-        "En cas de poca rotació, cal ajustar la direcció i el gruix",
-        "Si la bola està en una posició difícil, cal ajustar la velocitat, el gruix i la direcció"
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola",
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Si la bola està a 2 unitats de la banda, la quantitat de bola hauria de ser d'1/2",
+        "Si la bola està a 3 unitats de la banda, la quantitat de bola hauria de ser de 3/4",
+        "Si la bola està a 4 unitats de la banda, la quantitat de bola hauria de ser d'1",
+        "Si la bola està a 5 unitats de la banda, la quantitat de bola hauria de ser de 5/4",
+        "Si la bola està a 6 unitats de la banda, la quantitat de bola hauria de ser de 3/2"
       ],
       "passos": [
-        "Determinar la posició de la bola i la taula",
-        "Calcular la distància entre la bola i la banda",
-        "Ajustar la velocitat i el gruix segons la situació",
-        "Verificar la trajectòria de la bola i ajustar si cal"
+        "Determinar la distància entre la bola i la banda",
+        "Calcular la quantitat de bola en funció de la distància",
+        "Calcular l'efecte en funció de la quantitat de bola i la velocitat de la bola",
+        "Ajustar la quantitat de bola i l'efecte segons les correccions necessàries"
       ],
       "exemples": [
-        "Exemple 1: Bola a 2 rombes de la banda, gruix 2/8, efecte 0. Resultat: la bola segueix la trajectòria calculada.",
-        "Exemple 2: Bola a 1 rombe de la banda, gruix 1/8, efecte ½. Resultat: la bola segueix la trajectòria calculada."
+        "Exemple 1: La bola està a 4 unitats de la banda. La quantitat de bola hauria de ser d'1/4. L'efecte hauria de ser de 1/2.",
+        "Exemple 2: La bola està a 2 unitats de la banda. La quantitat de bola hauria de ser d'1/2. L'efecte hauria de ser de 1/4.",
+        "Exemple 3: La bola està a 6 unitats de la banda. La quantitat de bola hauria de ser de 3/2. L'efecte hauria de ser de 3/4."
       ],
-      "quan": "El sistema Endavant és útil en situacions de joc on la bola està a prop de la banda i cal ajustar la velocitat i el gruix per aconseguir la trajectòria desitjada.",
+      "quan": "Aquest sistema es fa servir quan es vol calcular la trajectòria de la bola en el billar a tres bandes, especialment quan la bola està a una distància determinada de la banda.",
       "consells": [
-        "Ajustar la velocitat i el gruix segons la situació",
-        "Verificar la trajectòria de la bola i ajustar si cal",
-        "Practicar el sistema Endavant per millorar la precisió"
+        "És important ajustar la quantitat de bola i l'efecte segons les correccions necessàries",
+        "La velocitat de la bola també és important per calcular l'efecte",
+        "Calcular la quantitat de bola i l'efecte amb precisió és clau per aconseguir que la bola segueixi la trajectòria desitjada"
       ],
       "nivell": "avançat"
     },
@@ -1367,32 +1358,31 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'De costat amb retorn al lloc' és una tècnica de billar a tres bandes que serveix per calcular la trajectòria de la bola i retornar al lloc inicial.",
-      "calcul": "",
+      "queEs": "El sistema 'De costat amb retorn al lloc' és una tècnica de billar a tres bandes que serveix per calcular la quantitat de bola i l'efecte necessaris per retornar la bola al lloc inicial.",
+      "calcul": "La fórmula bàsica és: quantitat de bola = 4 + (efecte - 3) * 2, on l'efecte es mesura en tacs i la quantitat de bola es mesura en vuitens (1/8...8/8).",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Línia 3: 1 tac i gruix 3/8",
-        "Línia 4: 1 ½ tac i gruix 4/8",
-        "Bola 2 enganxada a la banda: gruix ≤3/8 per evitar corba",
-        "Gran rotació: suma 1 al gruix",
-        "Bola 3 enganxada a la banda: gruix ≤4/8 per evitar corba"
+        "Si la bola 1 està enganxada a la banda, la quantitat de bola ha de ser ≤ 2/8 per evitar corba.",
+        "Si la 3a banda queda 1 rombe curta, suma 1 a la quantitat de bola.",
+        "Si la línia 2 està massa curta, aplica ½ tac i quantitat de bola 2/8.",
+        "Si la bola 2 està massa lluny de la banda, augmenta la quantitat de bola en 1/8.",
+        "Si l'angle d'entrada és massa gran, disminueix l'efecte en 1 tac."
       ],
       "passos": [
-        "Calcula la quantitat de bola i el gruix inicial",
-        "Ajusta el gruix segons la posició de la bola i la banda",
-        "Calcula la trajectòria de la bola i ajusta el gruix i l'efecte",
-        "Verifica la posició final de la bola i ajusta el gruix i l'efecte si cal"
+        "Calcula la quantitat de bola inicial amb la fórmula.",
+        "Ajusta la quantitat de bola segons les correccions.",
+        "Aplica l'efecte i la quantitat de bola adequats.",
+        "Verifica la posició de la bola 2 i ajusta la quantitat de bola si cal."
       ],
       "exemples": [
-        "Bola 1 a 2 rombes de la banda, gruix 2/8, efecte ½ tac, resultat: bola 2 a 1 rombe de la banda",
-        "Bola 2 a 3 rombes de la banda, gruix 3/8, efecte 1 tac, resultat: bola 3 a 2 rombes de la banda"
+        "Quantitat de bola 1: 4, efecte: 3, quantitat de bola: 2/8, resultat: bola 2 a 2 rombes de la banda.",
+        "Quantitat de bola 1: 5, efecte: 4, quantitat de bola: 3/8, resultat: bola 2 a 1 rombe de la banda.",
+        "Quantitat de bola 1: 6, efecte: 5, quantitat de bola: 4/8, resultat: bola 2 a la línia 2."
       ],
-      "quan": "Aquest sistema és útil quan es juga amb una bola que està a prop de la banda i es vol retornar al lloc inicial.",
+      "quan": "Aquest sistema és útil quan es vol retornar la bola al lloc inicial després d'un xut, especialment en situacions on la bola 2 està massa lluny de la banda.",
       "consells": [
-        "Ajusta el gruix i l'efecte segons la posició de la bola i la banda",
-        "Verifica la posició final de la bola i ajusta el gruix i l'efecte si cal"
+        "Ajusta la quantitat de bola i l'efecte segons les condicions de la taula.",
+        "Verifica la posició de la bola 2 abans de calcular la quantitat de bola.",
+        "No oblidis les correccions per a les diferents situacions de joc."
       ],
       "nivell": "avançat"
     },
@@ -1416,35 +1406,34 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema de 'Parking' (4 boles) és una estratègia de joc de billar a tres bandes que serveix per a calcular i preveure les possibilitats de pèrdua de bola (anomenat 'paol' o 'paoul') en diferents situacions de joc.",
+      "queEs": "El sistema de marcatge de 4 boles és una tècnica de billar que serveix per a preveure i evitar les situacions de pèrdua de bola. Aquest sistema és especialment útil per als jugadors principiants que volen millorar les seves habilitats.",
       "calcul": "",
       "correccions": [
-        "Si la 3a banda queda 1 rombe curta, ajusta la trajectòria de la bola per evitar el 'paol'.",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba.",
-        "Línia 2: ½ tac i gruix 2/8.",
-        "En situacions de gran rotació, ajusta la quantitat de bola per evitar el 'paol'.",
-        "En cas de bola 2 prop de la banda, ajusta la trajectòria per evitar el 'paol'.",
-        "En situacions de poca distància entre la bola 1 i la banda, ajusta la quantitat de bola per evitar el 'paol'.",
-        "En cas de bola 1 amb poca velocitat, ajusta la trajectòria per evitar el 'paol'.",
-        "En situacions de molta pressió, ajusta la quantitat de bola per evitar el 'paol'."
+        "Si la bola 1 queda a 1 rombe de distància de la banda, suma 1 a la quantitat de bola",
+        "Si la bola 2 està enganxada a la banda, la quantitat de bola ha de ser ≤ 2/8 per evitar la corba",
+        "En la línia 2, el tac ha de ser de ½ i la quantitat de bola ha de ser 2/8",
+        "Si la bola 3 queda a 2 rombes de distància de la banda, resta 1 a la quantitat de bola",
+        "En la línia 3, el tac ha de ser de 1 i la quantitat de bola ha de ser 3/8",
+        "Si la bola 4 està a la banda, la quantitat de bola ha de ser ≤ 1/8 per evitar la pèrdua de bola"
       ],
       "passos": [
-        "Identifica la situació de joc i les possibles trajectòries de les boles.",
-        "Calcula la quantitat de bola i l'efecte necessaris per a cada trajectòria.",
-        "Ajusta la trajectòria de la bola 1 per evitar el 'paol' en funció de la situació de joc.",
-        "Verifica les possibles correccions i ajustos necessaris per a cada situació."
+        "Identificar la posició de les boles i la banda",
+        "Determinar la quantitat de bola i el tac adequats per a cada situació",
+        "Preveure les possibles situacions de pèrdua de bola i ajustar la quantitat de bola i el tac en conseqüència",
+        "Realitzar el xut amb la quantitat de bola i el tac adequats"
       ],
       "exemples": [
-        "Exemple 1: Bola 1 a 2 rombes de la banda, bola 2 a 1 rombe de la banda, quantitat de bola 3/8, efecte 1/2 tac. Resultat: bola 1 evita el 'paol' i segueix la trajectòria prevista.",
-        "Exemple 2: Bola 1 a 1 rombe de la banda, bola 2 a 2 rombes de la banda, quantitat de bola 2/8, efecte 1 tac. Resultat: bola 1 evita el 'paol' i segueix la trajectòria prevista."
+        "Bola 1 a 2 rombes de distància de la banda, quantitat de bola 3/8, tac 1, resultat: bola 2 a 1 rombe de distància de la banda",
+        "Bola 2 enganxada a la banda, quantitat de bola 2/8, tac ½, resultat: bola 3 a 2 rombes de distància de la banda",
+        "Bola 3 a la banda, quantitat de bola 1/8, tac 1, resultat: bola 4 a 1 rombe de distància de la banda"
       ],
-      "quan": "El sistema de 'Parking' (4 boles) és útil en situacions de joc on hi ha un alt risc de pèrdua de bola, com per exemple quan la bola 1 està prop de la banda o quan hi ha una gran distància entre les boles.",
+      "quan": "Aquest sistema és especialment útil en situacions on les boles estan properes a la banda i hi ha risc de pèrdua de bola.",
       "consells": [
-        "Ajusta la quantitat de bola i l'efecte en funció de la situació de joc per evitar el 'paol'.",
-        "Verifica les possibles correccions i ajustos necessaris per a cada situació.",
-        "Practica la tècnica de 'Parking' (4 boles) per millorar la precisió i l'eficàcia."
+        "Ajustar la quantitat de bola i el tac en funció de la posició de les boles i la banda",
+        "Preveure les possibles situacions de pèrdua de bola i ajustar la quantitat de bola i el tac en conseqüència",
+        "Practicar el sistema de marcatge per a millorar les habilitats"
       ],
-      "nivell": "avançat"
+      "nivell": "bàsic"
     },
     "font": "subtítols",
     "transcripcio": "[음악] 으 안녕하세요 모든 구독자 분들이 300일은 그날까지 함께 하는 rev 슈 pd 입니다 오늘 오랜만에 초급자 분들을 위해서 4구 영상을 준비 해봤는데요 바로 4 구의 마킹 시스템 입니다 발음 주의 하셔야 되요 갱 아니고 마킹 시스템 입니다 우리가 득점을 위해서 공을 치다 보면 8월에 확률이 굉장히 높은 그런 배치 들이 있는데요 아 물론 이 것을 안다고 해서 팔에 확률이 엄청나게 떨어지는 것은 아니지만 그럼에도 예방 접종을 하고 치냐 안하고 치냐 는 분명히 그 결과가 차이가 나기 때문에 그래서 오늘은 이 파울을 야기시키는 몇 가지 배치를 함께 알아보면서 우울하게 파울이 되는 상황을 좀 줄여 보는 그런 시간을 갖도록 하겠습니다 시청 하시면서 도움이 되신다면 구독과 좋아요 부탁드리구요 그럼 지금부터 채널을 고정 했어요 [음악] 자 굉장히 잘 뜬 배치가 있습니다 보통은 이런 식으로 득점을 하게 되는데요 보통 초급 점들은 수구의 움직임을 여기까지만 생각을 하기 때문에 이 이후에 움직임을 예상하지 않고 득점을 하게 되는 경우가 굉장히 많습니다 근데 사실 지금 이 노랑 궁은 굉장히 절묘한 위치에 알박기 를 하고 있습니다 222 그래서 이런 경우에는 두 가지 방법으로 해결할 수가 있는데요 첫번째는 파울이 될 확률이 적은 or 성공을 먼저 공략하는 방법입니다 5 222 그 다음 두 번째는 두께 대한 개념이나 감각을 좀 연습 하셔야 되는데요 힘 조절을 통해서 아예 파울이 되는 상황을 차단하는 방법입니다 으 그리고 지금 배치를 보시면 이 적구 오른쪽 편에 노랑 02 있는데요 이때는 오른쪽 회전 을 주고 잊어 꿀을 공격하게 되면 이렇게 파울이 될 확률이 높습니다 그렇기 때문에 가급적이면 노랑 0 반대편 쪽으로 회전을 주고 잊어 꿀을 공략해 주시면 되겠습니다 4 합니다 자 이런것도 힘 조절에 주의하시기 지 않으면 파워드 될 확률이 굉장히 높은 배치입니다 [음악] 그 당원 쿠션 에서 의 파울 시스템인데요 아 말씀드린대로 초급자 분들은 수구의 움직임을 여기까지만 생각을 하시는데 지금처럼 상대방 02 이적과 가까울 때는 최악의 경우의 수를 한번 생각을 해보셔야 됩니다 그래서 이런 식으로 파워를 될 수가 있기 때문에 이런 것을 예상하고 치냐 앉히며 는 분명히 내 점수대 지갑에 시 대한 영향을 끼치게 됩니다 code 자 이런 배치 에서는 수구의 반사가 글 이런 반사가 게 아니라 요런 반사 감히 이런 지금 q 때에 기울게 어떤 반사각 을 통해서 원 쿠션 지정을 잡아 주신다면 파울의 확률이 굉장히 줄어들게 됩니다 자 그럼 이쯤 이 줘 2분의 1 두께 4 5 으 아 자 이번에는 이 국은 끌어 쳐서 득점을 할 건데요 어 파울 시스템이 보이시나요 이제는 보이실 거라고 생각합니다 tel 써 이때도 마찬가지로 펄이 퍼 령 일이 적응 다른 공을 공략하지 던가 아니면 애초부터 원천 봉쇄를 해서 공양을 하는 거죠 [음악] 그래요 그다음 쿠션 에서 의 파울 시스템인데요 우리가 한번 파우 시스템을 예상해 본다면 원 구 시험 쿠션을 받고 잊어 꿀을 맞은 다음 파울이 될 수 있는 확률이 있거든 연간 최악의 상황을 예상해 보는 거죠 그렇기 때문에 저같은 경우에는 옆 돌리기 나 힘 주소를 이용한 원 쿠션 내지는 쿠션으로 득점으로 할 것 같습니다 oo 아 아 으 아 아 아 5 222 [음악] 자 이런 배치 에서도 우리가 파워 시스템을 예상해 본다면 이런 그림이 그림을 그릴 수가 있겠죠 그래서 어 지금이 이 공을 원 쿠션으로 공략하게 는 키스의 위험이 있기 때문에 얘를 어쨌든 공략을 해야 되는데 이럴때는 이적 와 호너 사이로 수고를 진행 시켜서 늪 점 을 하시면 되겠습니다 자 입사각과 반사각 을 정확하게 잡아 주신 다음에 회전을 너무 많이 쓰지 말고 수구를 진해 시켜 주시면 되겠습니다 아 이 디 2 으 [음악] 스레 쿠션 에서는 이것을 좀 주의 하셔야 되는데요 아무래도 쓰리 쿠션 2 원 투 쿠션 보다는 확률이 떨어지기 때문에 수구가 이 접근을 못 마치고 새는 경우도 생각을 좀 해보셔야 됩니다 지금 보시면 저 노랑 02 굉장한 위치에서 r 밝기를 하고 있는데요 이런 경우에 자칫하다간 이렇게 파울이 되는 경우가 굉장히 많습니다 으 그래서 이럴 때는 못 마친 한이 있더라도 힘 조절을 잘 해서 공략해 주시면 되겠습니다 미안 아 222 5 으 아 미안 으 르 4 아 으 그냥 하지만 이런 파울 시스템을 예상하면서도 도전해서 성공한 다면 그때는 정말 아낌없이 박수를 보내 주시면 되겠습니다 상임 마이 씨 어 poll 도전의 결과 [박수] 아 아 5 오오오 4 5 네 오늘 준비한 영상 여기까지구요 궁금하신 점 댓글로 남겨주시고 저는 다음시간에 또 찾아뵙도록 하겠습니다 감사합니다 그 꼭"
@@ -1466,20 +1455,17 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema Five & Half és un mètode per calcular les trajectòries de les boles en el joc de billar a tres bandes.",
+      "queEs": "El sistema Five & Half és un mètode de càlcul per al billar a tres bandes, també conegut com a carambola, que ajuda a determinar la quantitat de bola i l'efecte necessaris per aconseguir una entrada precisa.",
       "calcul": "",
       "correccions": [],
       "passos": [
-        "Entendre les bases del sistema Five & Half",
-        "Aplicar el sistema per calcular les trajectòries de les boles",
-        "Considerar les correccions necessàries per a obtenir resultats precisos"
+        "Identificar la posició de la bola objectiu i la quantitat de bola necessària per aconseguir l'entrada.",
+        "Determinar l'efecte necessari per aconseguir la direcció desitjada.",
+        "Considerar les correccions necessàries per a tenir en compte la inclinació de la taula, la quantitat de bola i l'efecte."
       ],
       "exemples": [],
-      "quan": "Aquest sistema és útil en situacions de joc on cal preveure les trajectòries de les boles amb precisió.",
-      "consells": [
-        "Practica regularment per millorar la comprensió del sistema",
-        "Considera les condicions del joc, com la superfície de la taula i les característiques de les boles"
-      ],
+      "quan": "Aquest sistema és útil en situacions de joc on es requereix una alta precisió i control, com en el billar professional o en partides de competició.",
+      "consells": [],
       "nivell": "bàsic"
     },
     "font": "descripció"
@@ -1501,29 +1487,27 @@
     "notaValoracio": "molt ben valorat, diuen que funciona",
     "funcionaComentaris": true,
     "explicacio": {
-      "queEs": "El sistema 'De costat: per què s’escurça' és una tècnica de billar que serveix per calcular la trajectòria de la bola quan es colpeja de costat, amb l'objectiu de preveure si la bola escurçarà o no.",
+      "queEs": "El sistema 'De costat: per què s’escurça' és una tècnica de billar que ajuda a comprendre com la bola es mourà en funció de la quantitat de bola i l'efecte aplicat. Serveix per a preveure i ajustar el tir per aconseguir el màxim d'eficàcia.",
       "calcul": "",
       "correccions": [
         "Si la 3a banda queda 1 rombe curta, suma 1",
-        "Bola 1 enganxada a la banda: gruix ≤2/8 per evitar corba",
-        "Línia 2: ½ tac i gruix 2/8",
-        "Si la bola es colpeja amb efecte, cal considerar la quantitat de bola",
-        "Si la bola es colpeja sense efecte, cal considerar el gruix de la bola",
-        "Si la bola es colpeja amb una gran rotació, cal considerar la direcció de la rotació"
+        "Bola 1 enganxada a la banda: quantitat de bola ≤2/8 per evitar corba",
+        "Línia 2: ½ tac i quantitat de bola 2/8",
+        "Si la bola es mourà amb gran rotació, ajusta la quantitat de bola en funció de l'angle d'entrada"
       ],
       "passos": [
-        "Calcular la trajectòria de la bola considerant la posició inicial, el gruix i l'efecte",
-        "Preveure si la bola escurçarà o no en funció de la trajectòria calculada",
-        "Ajustar el tret segons les correccions necessàries"
+        "Determina la posició de la bola 1 i la quantitat de bola",
+        "Ajusta l'efecte i la quantitat de bola segons la situació",
+        "Preveu la trajectòria de la bola i ajusta el tir"
       ],
       "exemples": [
-        "Exemple 1: Bola 1 a 3 rombes de distància, gruix 3/8, efecte 1 tac. La bola escurçarà 1 rombe.",
-        "Exemple 2: Bola 2 a 2 rombes de distància, gruix 2/8, efecte ½ tac. La bola no escurçarà."
+        "Bola 1 a 3/8 de la banda, quantitat de bola 4/8, efecte 1 tac: la bola es mourà 2 rombes més enllà de la 3a banda",
+        "Bola 2 a 1/8 de la banda, quantitat de bola 2/8, efecte ½ tac: la bola es mourà 1 rombe més enllà de la 2a banda"
       ],
-      "quan": "Aquest sistema és útil quan es juga amb boles que tenen una gran quantitat de moviment i es necessita preveure la trajectòria per colpejar-les amb precisió.",
+      "quan": "Aquest sistema és útil en situacions on la bola ha de recórrer una gran distància o quan la quantitat de bola és limitada.",
       "consells": [
-        "Cal considerar la quantitat de bola i el gruix per preveure la trajectòria",
-        "Cal ajustar el tret segons les correccions necessàries per evitar errors"
+        "Ajusta la quantitat de bola en funció de l'angle d'entrada per evitar que la bola es mourà massa curt",
+        "No subestimis l'efecte de la rotació en la trajectòria de la bola"
       ],
       "nivell": "avançat"
     },

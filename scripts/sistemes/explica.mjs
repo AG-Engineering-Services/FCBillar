@@ -32,6 +32,18 @@ const TMP = join(ARREL, '_subs');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Terminologia: "quantitat de bola" (mai "gruix"). Ajusta també l'article.
+function normalitza(s) {
+	return String(s)
+		.replace(/\bdel gruix\b/gi, 'de la quantitat de bola')
+		.replace(/\bal gruix\b/gi, 'a la quantitat de bola')
+		.replace(/\bel gruix\b/gi, 'la quantitat de bola')
+		.replace(/\bun gruix\b/gi, 'una quantitat de bola')
+		.replace(/\baquest gruix\b/gi, 'aquesta quantitat de bola')
+		.replace(/\bgruixos\b/gi, 'quantitats de bola')
+		.replace(/\bgruix\b/gi, 'quantitat de bola');
+}
+
 // --- 1) Transcripció (subtítols coreans) via yt-dlp ---
 function transcripcio(id) {
 	try { rmSync(TMP, { recursive: true, force: true }); } catch {}
@@ -89,7 +101,7 @@ async function nvidia(sys, user) {
 			model: MODEL,
 			messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
 			temperature: 0.3,
-			max_tokens: 2000
+			max_tokens: 2600
 		})
 	});
 	if (!r.ok) throw new Error('nvidia ' + r.status);
@@ -107,8 +119,9 @@ async function explica(v, trans, desc) {
 	// Només amb transcripció real extraiem el càlcul a fons; amb només descripció
 	// o nom, prohibim inventar correccions/exemples numèrics.
 	const reglaFons = trans
-		? `- APROFUNDEIX: extreu TOTES les regles, correccions i casos que dóna el vídeo (correccions de 3a banda ±caselles, casos per cada línia 1/2/3/4, bola enganxada a banda, variants de gran rotació…). Posa'ls a "correccions" (com més complet millor, fins a 8 elements).
-- "exemples": 2-4 casos resolts del vídeo amb totes les xifres. Si el vídeo només en mostra un, posa'n un.`
+		? `- APROFUNDEIX AL MÀXIM: extreu TOTES les regles, correccions i casos que dóna el vídeo, un per un (correccions de 3a banda ±caselles, TOTS els casos per línia/posició 1/2/3/4, bola enganxada a banda, angle d'entrada, variants de gran rotació…). Posa'ls a "correccions" (com més complet millor, fins a 10 elements). Si el vídeo recita una TAULA de valors (p.ex. per a cada línia la quantitat de bola i el tac), reprodueix-la entrada per entrada.
+- "exemples": posa TOTS els casos resolts que mostri el vídeo amb les xifres completes (fins a 6). No en deixis cap si el vídeo el desenvolupa.
+- No repeteixis dues correccions que diguin el mateix; cada element ha d'aportar informació nova.`
 		: `- MATERIAL LIMITAT: només tens una descripció curta o el nom, NO la lliçó sencera. NO t'inventis correccions ni exemples numèrics: deixa "calcul":"", "correccions":[] i "exemples":[] EXCEPTE que el text els contingui explícitament. Dóna queEs i uns passos qualitatius, i sigues honest sobre el que el material no concreta.`;
 
 	const sys = `Ets un mestre de billar a tres bandes (carambola) que ensenya en CATALÀ. Et donen material en coreà d'un vídeo de YouTube sobre el sistema "${v.nom}" (categoria: ${v.categoria}). La teva feina és entendre'l i escriure'n una explicació DIDÀCTICA i DETALLADA que ENSENYI EL CÀLCUL A FONS, en català.
@@ -130,7 +143,7 @@ ${reglaFons}
 - "calcul" = la regla base clara amb la fórmula i els números (buit si el material no en dóna).
 - Numera i anomena com ho fa el vídeo (rombes/diamants, línies de punt, gruixos en vuitens 1/8…8/8, tacs d'efecte, ±).
 - No inventis xifres que contradiguin el material. Si el material no dóna càlcul numèric, deixa "calcul":"", "correccions":[] i "exemples":[] i explica-ho qualitativament als passos.
-- Terminologia catalana: banda, efecte (tac), quantitat de bola/gruix, bola 1/2/3, rombe/diamant, entrada. Concís, sense repetir-te, tot en català.`;
+- Terminologia catalana OBLIGATÒRIA: fes servir SEMPRE "quantitat de bola" (MAI "gruix"), en vuitens 1/8…8/8; "efecte" o "tac"; bola 1/2/3; banda; rombe/diamant; entrada. Concís, sense repetir-te, tot en català.`;
 
 	let out = '';
 	for (let a = 0; a < 6 && !out; a++) {
@@ -149,13 +162,13 @@ ${reglaFons}
 		// compat: "exemple" (string antic) → "exemples" (array)
 		const exemples = j.exemples ? arr(j.exemples) : arr(j.exemple);
 		return {
-			queEs: String(j.queEs),
-			calcul: j.calcul ? String(j.calcul) : '',
-			correccions: arr(j.correccions),
-			passos: arr(j.passos),
-			exemples,
-			quan: j.quan ? String(j.quan) : '',
-			consells: arr(j.consells),
+			queEs: normalitza(j.queEs),
+			calcul: j.calcul ? normalitza(j.calcul) : '',
+			correccions: arr(j.correccions).map(normalitza),
+			passos: arr(j.passos).map(normalitza),
+			exemples: exemples.map(normalitza),
+			quan: j.quan ? normalitza(j.quan) : '',
+			consells: arr(j.consells).map(normalitza),
 			nivell: ['bàsic', 'mitjà', 'avançat'].includes(j.nivell) ? j.nivell : 'mitjà'
 		};
 	} catch {
