@@ -236,6 +236,30 @@ P_TAULES = 0.05
 N_SIMS = 20000
 
 
+def alineacio_efectiva(pool: list[tuple[float, float]], llavor: int, n: int = 4000) -> list[float]:
+    """Mitjana esperada a cada taula (1..4) d'un equip, mostrejant qui hi juga.
+
+    `pool` són els candidats de l'equip amb el seu pes de presència. Els equips
+    que roden molt hi perden: si els millors només fan la meitat de les jornades,
+    la taula 1 no té sempre la seva millor mitjana. Sense això el model dona per
+    fet que els quatre titulars juguen sempre, cosa que només passa a 34 dels 83
+    equips."""
+    import numpy as np
+
+    m = np.array([x[0] for x in pool], dtype=float)
+    if len(pool) <= 4:
+        v = sorted(m, reverse=True)
+        return [v[i] if i < len(v) else (v[-1] if v else 0.0) for i in range(4)]
+    w = np.clip(np.array([x[1] for x in pool], dtype=float), 0.02, None)
+    prob = w / w.sum()
+    rng = np.random.default_rng(llavor)
+    acc = np.zeros(4)
+    for _ in range(n):
+        idx = rng.choice(len(pool), size=4, replace=False, p=prob)
+        acc += np.sort(m[idx])[::-1]
+    return list(acc / n)
+
+
 def _dist_encontre(mit_local: list[float], mit_visitant: list[float]):
     """Distribució dels parcials del local (0..8) en un encontre de quatre taules.
 
@@ -353,7 +377,7 @@ def forma_grups(ordre: list[tuple[str, str]]) -> tuple[list[int], list[int], lis
     return A, B, permutes
 
 
-def banda(num: int, esquema: str = "fcb") -> str:
+def banda_de(num: int, esquema: str = "fcb") -> str:
     """A quina banda de la llista única cau el jugador nº `num`."""
     for lletra, tall in zip(LLETRES, ESQUEMES[esquema]["talls"], strict=False):
         if num <= tall:
@@ -388,6 +412,21 @@ def build(db: str = DB) -> dict:
     select cl.nom, coalesce(q.lletra,'UNICO'), p.d, p.pl, pl.nom, count(*), sum(p.car), sum(p.ent)
     from p join equips q on q.id=p.eq join clubs cl on cl.id=q.club_id join players pl on pl.id=p.pl
     group by q.id, p.pl"""
+    # Jornades que va disputar cada equip el 2025-26: és el denominador de la taxa
+    # de presència, i ha de ser el de l'equip on va jugar el jugador —no el del
+    # club—, perquè els grups de 4a divisió tenen més jornades que la resta.
+    jornades_equip: dict[tuple[str, str], int] = collections.Counter()
+    qj = """
+    select cl.nom, coalesce(eq.lletra, 'UNICO') from encontres_lliga e
+    join equips eq on eq.id = e.equip_local_id join clubs cl on cl.id = eq.club_id
+    where e.temporada_id=1 and e.lliga_id=36
+    union all
+    select cl.nom, coalesce(eq.lletra, 'UNICO') from encontres_lliga e
+    join equips eq on eq.id = e.equip_visitant_id join clubs cl on cl.id = eq.club_id
+    where e.temporada_id=1 and e.lliga_id=36"""
+    for cnom, lletra in conn.execute(qj):
+        jornades_equip[(cnom, lletra)] += 1
+
     pool: dict[str, dict[int, dict]] = collections.defaultdict(dict)
     prev_div: dict[tuple[str, str], str] = {}
     for club, lletra, d, pid, nom, n, car, ent in conn.execute(q):
@@ -439,9 +478,22 @@ def build(db: str = DB) -> dict:
         multi = len(teams) > 1
         # La banda depèn del repartiment triat, i el repartiment es tria a la
         # interfície: aquí només desem la posició a la llista única.
+        # Presència: quina part de les jornades del club va jugar cadascú el 2025-26.
+        # És l'ingredient que falta a les mitjanes — hi ha jugadors forts que amb
+        # prou feines juguen— i serveix tant per marcar l'alineació habitual com
+        # per no sobreestimar els equips que roden molt.
+        def taxa_de(p: dict, _club: str = club) -> float | None:
+            if not p["pj"] or not p["equip_2526"]:
+                return None
+            ref = jornades_equip.get((_club, p["equip_2526"])) or 14
+            return round(min(1.0, p["pj"] / ref), 3)
+
+        conegudes = [t for t in (taxa_de(p) for p in ranked) if t is not None]
+        per_defecte = sorted(conegudes)[len(conegudes) // 2] if conegudes else 0.5
         llista = [dict(
             num=i, nom=p["nom"], mitjana=round(p["mitjana"], 4), pos=p["pos"],
             de_club=nom_club(p["de_club"]) if p["de_club"] else None, retorn=p["retorn"],
+            pj=p["pj"], taxa=(taxa_de(p) if taxa_de(p) is not None else per_defecte),
         ) for i, p in enumerate(ranked, 1)]
         equips = [dict(lletra=lt, unic=(not multi), divisio=dv, distancia=DIST[dv],
                        lletra_2526=("" if antiga == "UNICO" else antiga),
@@ -475,8 +527,20 @@ def build(db: str = DB) -> dict:
             mitjanes = []
             for sd in seeds:
                 e = per_seed[sd]
-                tit = referents(per_club[e["club"]]["llista"], e["lletra"], "fcb")
-                mitjanes.append([t["mitjana"] for t in tit])
+                llista_club = per_club[e["club"]]["llista"]
+                lletres = [x["lletra"] for x in per_club[e["club"]]["equips"]]
+                ultim = lletres[-1] == e["lletra"]
+                banda = [x for x in llista_club if banda_de(x["num"], "fcb") == e["lletra"]]
+                tit = referents(llista_club, e["lletra"], "fcb")
+                nums = {x["num"] for x in banda} | {x["num"] for x in tit}
+                # qui pot cobrir una baixa: els dos següents de la llista, o tota
+                # la cua si és l'últim equip del club
+                fi = max(nums) if nums else 0
+                extra = [x for x in llista_club if fi < x["num"] <= (fi + 99 if ultim else fi + 2)]
+                pool = [(x["mitjana"], x["taxa"]) for x in
+                        sorted({x["num"]: x for x in banda + tit + extra}.values(),
+                               key=lambda x: x["num"])]
+                mitjanes.append(alineacio_efectiva(pool, llavor=sd * 7919 + len(pool)))
             pron = pronostic_grup(mitjanes, llavor=hash((div, g)) & 0xFFFF)
             for sd, pr in zip(seeds, pron, strict=True):
                 per_seed[sd].update(pr)
@@ -507,7 +571,7 @@ if __name__ == "__main__":
             print(f"\n{'=' * 72}\n{c['club']}   [{eq}]")
             vist = None
             for p in c["llista"]:
-                b = banda(p["num"], esq)
+                b = banda_de(p["num"], esq)
                 if b != vist:
                     vist = b
                     rol = (f"titulars equip {b}" if b in lletres
