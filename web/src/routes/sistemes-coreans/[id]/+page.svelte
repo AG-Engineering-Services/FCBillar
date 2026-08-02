@@ -6,7 +6,9 @@
 
 	interface Explicacio {
 		queEs: string;
+		calcul?: string;
 		passos: string[];
+		exemple?: string;
 		quan: string;
 		consells: string[];
 		nivell: string;
@@ -151,16 +153,34 @@
 						<p class="text-slate-700 dark:text-slate-200">{s.explicacio.queEs}</p>
 					</div>
 
+					{#if s.explicacio.calcul}
+						<div class="rounded-lg border border-indigo-200 bg-indigo-50 p-3 dark:border-indigo-900 dark:bg-indigo-950/40">
+							<h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
+								Com es calcula
+							</h2>
+							<p class="whitespace-pre-line text-slate-700 dark:text-slate-200">{s.explicacio.calcul}</p>
+						</div>
+					{/if}
+
 					{#if s.explicacio.passos.length}
 						<div>
 							<h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-								Com s'aplica
+								Pas a pas
 							</h2>
 							<ol class="list-decimal space-y-1 pl-5 text-slate-700 dark:text-slate-200">
 								{#each s.explicacio.passos as p}
 									<li>{p}</li>
 								{/each}
 							</ol>
+						</div>
+					{/if}
+
+					{#if s.explicacio.exemple}
+						<div>
+							<h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+								Exemple
+							</h2>
+							<p class="whitespace-pre-line text-slate-700 dark:text-slate-200">{s.explicacio.exemple}</p>
 						</div>
 					{/if}
 

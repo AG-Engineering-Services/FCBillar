@@ -89,7 +89,7 @@ async function nvidia(sys, user) {
 			model: MODEL,
 			messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
 			temperature: 0.3,
-			max_tokens: 900
+			max_tokens: 1300
 		})
 	});
 	if (!r.ok) throw new Error('nvidia ' + r.status);
@@ -99,28 +99,30 @@ async function nvidia(sys, user) {
 
 async function explica(v, trans, desc) {
 	const material = trans
-		? `TRANSCRIPCIÓ (subtítols coreans del vídeo):\n${trans.slice(0, 6000)}`
+		? `TRANSCRIPCIÓ (subtítols coreans del vídeo):\n${trans.slice(0, 8000)}`
 		: desc
 			? `DESCRIPCIÓ del vídeo (coreà):\n${desc.slice(0, 2000)}`
 			: `(No hi ha text del vídeo. Explica el sistema "${v.nom}" amb el teu coneixement de billar a tres bandes.)`;
 
-	const sys = `Ets un mestre de billar a tres bandes (carambola) que ensenya en CATALÀ. Et donen material en coreà d'un vídeo de YouTube sobre el sistema "${v.nom}" (categoria: ${v.categoria}). La teva feina és entendre'l i escriure'n una explicació DIDÀCTICA en català.
+	const sys = `Ets un mestre de billar a tres bandes (carambola) que ensenya en CATALÀ. Et donen material en coreà d'un vídeo de YouTube sobre el sistema "${v.nom}" (categoria: ${v.categoria}). La teva feina és entendre'l i escriure'n una explicació DIDÀCTICA que ENSENYI EL CÀLCUL, en català.
 
 Respon NOMÉS amb aquest JSON (sense text abans ni després):
 {
-  "queEs": "<2-4 frases: què és el sistema i per a què serveix>",
-  "passos": ["<idea o pas clau 1>", "<pas 2>", "..."],
+  "queEs": "<2-3 frases: què és el sistema i per a què serveix>",
+  "calcul": "<LA REGLA DE CÀLCUL concreta, amb NÚMEROS: la fórmula, com es numeren bandes/rombes, com es combinen efecte i gruix, i com es corregeix. Si el vídeo dóna una regla numèrica, escriu-la EXPLÍCITAMENT. Si NO és un sistema de càlcul, posa ''>",
+  "passos": ["<pas concret 1, amb números>", "<pas 2>", "..."],
+  "exemple": "<un cas resolt tal com el mostra el vídeo, amb xifres concretes (posició bola 1, gruix, efecte, resultat). '' si no n'hi ha>",
   "quan": "<1-2 frases: en quines situacions de joc fer-lo servir>",
-  "consells": ["<consell pràctic o error típic>", "..."],
+  "consells": ["<consell pràctic, correcció o error típic, amb números>", "..."],
   "nivell": "<bàsic|mitjà|avançat>"
 }
 
-Regles:
-- Explica DE VERITAT el mètode: números, línies, punts de banda, quantitat de bola, efecte i força, si el material ho permet. "passos" ha de tenir 2-6 elements en ordre.
-- "consells": 0-3 elements (errors típics, matisos d'efecte/força). Pot ser [].
-- Terminologia catalana de billar: banda, efecte, quantitat de bola, bola 1/2/3, diamant/rombe, entrada.
-- No inventis dades que contradiguin el material. Si el material és pobre, recolza't en el teu coneixement del sistema pel nom, però no t'inventis xifres concretes falses.
-- Concís i clar, sense floritures. Tot en català.`;
+Regles CLAU:
+- El més important és "calcul": explica COM ES CALCULA de veritat. Res de "cal calcular la quantitat de bola" sense dir COM. Escriu la fórmula/regla amb els números del vídeo (exemple d'estil: "efecte + gruix = número de la línia de la bola 1; a la línia 3 → 0,5 de tac i gruix 3/8; si la tercera banda queda 1 rombe curta, suma 1").
+- "exemple": posa un cas resolt del vídeo amb xifres.
+- Numera i anomena com ho fa el vídeo (rombes/diamants, línies de punt, gruixos en vuitens 1/8…8/8, tacs d'efecte).
+- No inventis xifres que contradiguin el material. Si el material no dóna càlcul numèric, deixa "calcul":"" i "exemple":"" i explica-ho qualitativament als passos.
+- Terminologia catalana: banda, efecte (tac), quantitat de bola/gruix, bola 1/2/3, rombe/diamant, entrada. Concís i tot en català.`;
 
 	let out = '';
 	for (let a = 0; a < 6 && !out; a++) {
@@ -139,7 +141,9 @@ Regles:
 		if (!Array.isArray(j.consells)) j.consells = j.consells ? [String(j.consells)] : [];
 		return {
 			queEs: String(j.queEs),
+			calcul: j.calcul ? String(j.calcul) : '',
 			passos: j.passos.map(String).filter(Boolean),
+			exemple: j.exemple ? String(j.exemple) : '',
 			quan: j.quan ? String(j.quan) : '',
 			consells: j.consells.map(String).filter(Boolean),
 			nivell: ['bàsic', 'mitjà', 'avançat'].includes(j.nivell) ? j.nivell : 'mitjà'
