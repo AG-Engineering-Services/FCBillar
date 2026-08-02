@@ -742,17 +742,19 @@
 		<p>
 			<b>Pronòstic.</b> Els xips <span class="font-semibold">1r</span>,
 			<span class="font-semibold">2n</span>, <span class="font-semibold">penúlt.</span> i
-			<span class="font-semibold">últim</span> marquen el favorit de cada plaça dins del seu grup, amb
-			la seva probabilitat. Surten de simular 20.000 vegades la lliga doble de cada grup, aparellant
-			els quatre titulars per ordre —el nº 1 contra el nº 1— i resolent cada partida amb un model
+			<span class="font-semibold">últim</span> marquen el favorit de cada plaça dins del seu grup,
+			amb la seva probabilitat. Surten de simular <b>10.000 temporades senceres</b>: les cinc
+			divisions i els deu grups alhora, jornada a jornada sobre un calendari de doble volta. A cada
+			jornada es sorteja qui està a disposició de cada club segons la seva presència i després els
+			equips trien per ordre de categoria —els millors disponibles de la seva banda i, si no n'hi ha
+			prou, pujant-ne de les de sota—, de manera que <b>un jugador no juga mai amb dos equips el
+			mateix dia</b> i que quan l'A puja algú, el B se'n ressent. Cada partida es resol amb un model
 			calibrat sobre les 2.433 partides de la lliga 2025-26: la probabilitat de guanyar surt de la
 			diferència de mitjanes més l'avantatge de camp, que és real i mesurable (els locals s'enduen el
-			55,1% dels parcials, i amb mitjanes iguals el local guanya el 54,5% de les partides). Els punts
-			són 3/1/0 i el desempat, els parcials, com fa la federació. Validat per trams, el model encerta
-			la freqüència real dins d'un o dos punts. L'alineació no es dona per fixa: cada equip
-			s'hi presenta amb quatre dels seus candidats, sortejats segons la presència de cadascú, de
-			manera que els equips que roden molt hi valen menys del que diu la seva mitjana. No hi entren
-			ni les incompareixences, ni les sancions, ni els fitxatges que no coneguem.
+			55,1% dels parcials, i amb mitjanes iguals el local guanya el 54,5%). Els punts són 3/1/0 i el
+			desempat, els parcials, com fa la federació. Validat per trams, el model encerta la freqüència
+			real dins d'un o dos punts. No hi entren ni les incompareixences, ni les sancions, ni els
+			fitxatges que no coneguem.
 		</p>
 		<p>
 			<b>Llistes.</b> El pool de cada club són els jugadors que van disputar la lliga 2025-26, ordenats
