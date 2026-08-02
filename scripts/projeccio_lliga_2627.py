@@ -428,7 +428,8 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
     # --- clubs: equips per ordre de categoria i jugadors amb la seva banda --
     clubs: dict[str, dict] = {}
     for i, e in enumerate(equips):
-        clubs.setdefault(e["club"], {"equips": [], "jug": None})["equips"].append((i, e["lletra"]))
+        clubs.setdefault(e["club"], {"equips": [], "jug": None, "nom": e["club"]})["equips"].append(
+            (i, e["lletra"]))
     for nom, c in clubs.items():
         c["equips"].sort(key=lambda t: LLETRA_ORD[t[1]])
         c["equips"] = [(i, LLETRA_ORD[lt]) for i, lt in c["equips"]]
@@ -457,6 +458,17 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
     comptes = [[0, 0, 0, 0] for _ in range(n_eq)]
     suma_pos = [0.0] * n_eq
     sense_quatre = 0
+    # Comptem dues coses per equip: quantes jornades juga cada jugador i quantes
+    # vegades surt cada combinació de quatre. L'alineació més probable és la
+    # combinació que més es repeteix, no els quatre jugadors més freqüents per
+    # separat —que podrien no haver coincidit mai a la mateixa taula.
+    cops: list[dict[int, int]] = [{} for _ in range(n_eq)]
+    combos: list[dict[tuple, int]] = [{} for _ in range(n_eq)]
+    # El mode de cada equip per separat pot no quadrar dins del club: dos equips
+    # podrien tenir el mateix jugador a la seva alineació més freqüent, tot i que
+    # cap jornada no hi coincideixen. Per això es compta també el repartiment
+    # SENCER del club, i el que més es repeteix és el que es publica.
+    combos_club: dict[str, dict[tuple, int]] = {nom: {} for nom in clubs}
 
     for _ in range(n_sims):
         pm = [0] * n_eq
@@ -480,6 +492,7 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
                 #    límit, l'A i el B buiden la banda de l'últim equip.
                 disp = {pj[0] for pj in c["jug"] if aleatori() < pj[2]}
                 usats: set[int] = set()
+                repartiment: list[tuple[int, tuple]] = []
                 for n_fets, (idx_eq, ordre_eq) in enumerate(juguen):
                     resten = len(juguen) - n_fets - 1
                     propis, sota = [], []
@@ -508,6 +521,17 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
                         usats.add(pj[0])
                     tria.sort(key=lambda pj: -pj[1])
                     alin[idx_eq] = [pj[1] for pj in tria]
+                    c_eq = cops[idx_eq]
+                    for pj in tria:
+                        c_eq[pj[0]] = c_eq.get(pj[0], 0) + 1
+                    clau = tuple(sorted(pj[0] for pj in tria))
+                    cmb = combos[idx_eq]
+                    cmb[clau] = cmb.get(clau, 0) + 1
+                    repartiment.append((idx_eq, clau))
+                if len(juguen) == len(c["equips"]):
+                    cc = combos_club[c["nom"]]
+                    k_club = tuple(repartiment)
+                    cc[k_club] = cc.get(k_club, 0) + 1
 
             for k, ids in per_grup.items():
                 if j >= len(cal[k]):
@@ -564,8 +588,35 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
     if sense_quatre:
         print(f"nota: en un {sense_quatre / (n_sims * n_eq * 14) * 100:.1f}% dels encontres el club "
               f"ha hagut de completar l'equip amb algú de fora dels disponibles", file=sys.stderr)
+    jugades = [len(juga[i]) or 1 for i in range(n_eq)]
+
+    # el repartiment de club més freqüent mana; si un club no té mai tots els
+    # equips jugant el mateix dia, cada equip es queda amb el seu mode
+    del_club: dict[int, list[int]] = {}
+    for cc in combos_club.values():
+        if not cc:
+            continue
+        k_club, _ = max(cc.items(), key=lambda t: t[1])
+        for idx_eq, clau in k_club:
+            del_club[idx_eq] = list(clau)
+
+    def _millor(i: int) -> tuple[list[int], float]:
+        if not combos[i]:
+            return [], 0.0
+        nums = del_club.get(i)
+        if nums is None:
+            nums = list(max(combos[i].items(), key=lambda t: t[1])[0])
+        n = combos[i].get(tuple(sorted(nums)), 0)
+        return nums, round(n / (n_sims * jugades[i]), 3)
+
     return {
         (e["div"], e["seed"]): dict(
+            alineacio=_millor(i)[0],
+            p_alineacio=_millor(i)[1],
+            presencia=[
+                dict(num=k, p=round(v / (n_sims * jugades[i]), 3))
+                for k, v in sorted(cops[i].items(), key=lambda t: -t[1])
+            ],
             p_1r=round(comptes[i][0] / n_sims, 4),
             p_2n=round(comptes[i][1] / n_sims, 4),
             p_penultim=round(comptes[i][2] / n_sims, 4),

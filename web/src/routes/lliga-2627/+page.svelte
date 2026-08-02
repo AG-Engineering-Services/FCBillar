@@ -33,6 +33,9 @@
 	type Club = { club: string; nom: string; multi: boolean; equips: Equip[]; llista: Jugador[] };
 	type EquipDiv = {
 		seed: number;
+		alineacio: number[];
+		p_alineacio: number;
+		presencia: { num: number; p: number }[];
 		p_1r: number;
 		p_2n: number;
 		p_penultim: number;
@@ -148,37 +151,29 @@
 	 *  presència, que no sempre són els quatre de més mitjana. Hi ha jugadors
 	 *  forts que amb prou feines juguen, i és el que decanta molts equips. */
 	const habituals = (c: Club, lletra: string) => new Set(alineacio(c, lletra).map((p) => p.num));
-	/** Alineació més probable de CADA equip del club, assignada de dalt a baix.
-	 *
-	 *  Un jugador no pot jugar la mateixa jornada amb dos equips: si és dels quatre
-	 *  més probables de l'A, ja no compta per al B. Per això es reparteix per ordre
-	 *  de categoria i cada equip tria entre els que queden lliures. Sense això, el
-	 *  nº 4 —que amb la norma és de la banda del B però fa la quarta taula de l'A—
-	 *  sortiria comptat dues vegades. */
-	function alineacionsClub(c: Club): Map<string, Jugador[]> {
-		const out = new Map<string, Jugador[]>();
-		const agafats = new Set<number>();
-		for (const e of c.equips) {
-			const lliures = plantilla(c.llista, e.lletra, esquema, esUltim(c, e.lletra)).filter(
-				(f) => !agafats.has(f.p.num)
-			);
-			const tria = [...lliures]
-				.sort((a, b) => b.p.taxa - a.p.taxa || b.p.mitjana - a.p.mitjana)
-				.slice(0, 4);
-			for (const f of tria) agafats.add(f.p.num);
-			out.set(
-				e.lletra,
-				tria.map((f) => f.p).sort((a, b) => b.mitjana - a.mitjana)
-			);
+	/** L'alineació més probable de cada equip surt de la simulació: és la
+	 *  combinació de quatre que més es repeteix en les 10.000 temporades, no els
+	 *  quatre de més mitjana ni els quatre més presents per separat. Al motor,
+	 *  cada jornada es sorteja qui està disponible i els equips trien per ordre de
+	 *  categoria, o sigui que ja hi va inclòs que un jugador no juga amb dos
+	 *  equips el mateix dia i que quan l'A puja algú, el B se'n ressent. */
+	const alineacioEquip = new Map<string, { nums: number[]; p: number }>();
+	for (const d of DIVS) {
+		for (const e of divisions[d].equips) {
+			alineacioEquip.set(`${e.club}|${e.lletra}`, { nums: e.alineacio, p: e.p_alineacio });
 		}
-		return out;
 	}
-	const alineacions = $derived.by(() => {
-		const m = new Map<string, Map<string, Jugador[]>>();
-		for (const c of clubs) m.set(c.club, alineacionsClub(c));
-		return m;
-	});
-	const alineacio = (c: Club, lletra: string) => alineacions.get(c.club)?.get(lletra) ?? [];
+	function alineacio(c: Club, lletra: string): Jugador[] {
+		const a = alineacioEquip.get(`${c.club}|${lletra}`);
+		if (!a) return [];
+		const per = new Map(c.llista.map((p) => [p.num, p]));
+		return a.nums
+			.map((n) => per.get(n))
+			.filter((p): p is Jugador => !!p)
+			.sort((x, y) => y.mitjana - x.mitjana);
+	}
+	const pAlineacio = (c: Club, lletra: string) =>
+		alineacioEquip.get(`${c.club}|${lletra}`)?.p ?? 0;
 	const esUltim = (c: Club, lletra: string) => c.equips[c.equips.length - 1].lletra === lletra;
 	/** Els quatre que juguen. Amb el repartiment «més probable» són els de més
 	 *  presència de la plantilla; amb la resta, els de més mitjana de la banda. */
@@ -546,6 +541,8 @@
 							<p class="ml-7 mt-0.5 text-[11px] leading-snug">
 								<span class="font-semibold text-slate-600 dark:text-slate-300"
 									>alineació més probable</span
+								><span class="text-slate-400 dark:text-slate-500"
+									>&nbsp;({pct(pAlineacio(x.club, x.e.lletra))} de les jornades)</span
 								>
 								{#each alineacio(x.club, x.e.lletra) as p, i}<span class="text-slate-500 dark:text-slate-400"
 										>{i > 0 ? ' · ' : ' '}<span class="font-mono">{i + 1}</span>&nbsp;{cognom(p.nom)}</span
