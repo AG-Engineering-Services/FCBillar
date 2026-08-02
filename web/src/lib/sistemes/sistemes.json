@@ -206,45 +206,45 @@
     "diagrama": {
       "boles": {
         "b1": [
-          1.5,
-          1
+          2.3,
+          2.1
         ],
         "b2": [
-          7.3,
+          5.3,
           3
         ],
         "b3": [
-          1.7,
-          1.4
+          1,
+          2.4
         ]
       },
       "traca": [
         [
-          1.5,
-          1
+          2.3,
+          2.1
         ],
         [
-          7.3,
+          5.3,
           3
         ],
         [
           8,
-          3.2
+          3.6
         ],
         [
-          5.8,
+          5.5,
           4
         ],
         [
-          0,
-          2
+          0.4,
+          1.4
         ],
         [
-          1.7,
-          1.4
+          2.3,
+          2.1
         ]
       ],
-      "nota": "Exemple del vídeo: bola 1 (groga) a la línia 3; quantitat de bola 3/8 i −½ tac; la blanca fa 3 bandes i torna al punt de sortida (제자리)."
+      "nota": "Posicions de l’exemple del vídeo (bola 1 groga a la línia 3). El recorregut és una reconstrucció orientativa: la trajectòria real va amb efecte (corba) i torna al punt de sortida (제자리)."
     }
   },
   {
