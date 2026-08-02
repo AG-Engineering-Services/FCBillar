@@ -3,12 +3,20 @@
 	import { page } from '$app/stores';
 	import { supabase } from '$lib/supabase';
 	import { onMount } from 'svelte';
+	import DiagramaSistema from '$lib/sistemes/DiagramaSistema.svelte';
 
+	interface Diagrama {
+		boles: { b1: [number, number]; b2: [number, number]; b3: [number, number] };
+		traca?: [number, number][];
+		traca2?: [number, number][];
+		nota?: string;
+	}
 	interface Explicacio {
 		queEs: string;
 		calcul?: string;
+		correccions?: string[];
 		passos: string[];
-		exemple?: string;
+		exemples?: string[];
 		quan: string;
 		consells: string[];
 		nivell: string;
@@ -24,6 +32,7 @@
 		data: string;
 		miniatura: string;
 		explicacio?: Explicacio;
+		diagrama?: Diagrama;
 		transcripcio?: string;
 		font?: string;
 	}
@@ -124,6 +133,15 @@
 				>▶ Obre a YouTube ↗</a
 			>
 
+			{#if s.diagrama}
+				<div class="mt-4">
+					<h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+						Diagrama del sistema
+					</h2>
+					<DiagramaSistema diagrama={s.diagrama} />
+				</div>
+			{/if}
+
 			{#if esAdmin}
 				<div class="mt-4 flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
 					<button
@@ -162,6 +180,19 @@
 						</div>
 					{/if}
 
+					{#if s.explicacio.correccions?.length}
+						<div>
+							<h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+								Correccions i casos
+							</h2>
+							<ul class="space-y-1 text-slate-700 dark:text-slate-200">
+								{#each s.explicacio.correccions as c}
+									<li class="flex gap-2"><span class="text-indigo-500">±</span>{c}</li>
+								{/each}
+							</ul>
+						</div>
+					{/if}
+
 					{#if s.explicacio.passos.length}
 						<div>
 							<h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -175,12 +206,18 @@
 						</div>
 					{/if}
 
-					{#if s.explicacio.exemple}
+					{#if s.explicacio.exemples?.length}
 						<div>
 							<h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-								Exemple
+								{s.explicacio.exemples.length > 1 ? 'Exemples' : 'Exemple'}
 							</h2>
-							<p class="whitespace-pre-line text-slate-700 dark:text-slate-200">{s.explicacio.exemple}</p>
+							<div class="space-y-2">
+								{#each s.explicacio.exemples as ex, i}
+									<div class="rounded-md bg-slate-50 p-2 text-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+										{#if s.explicacio.exemples.length > 1}<span class="mr-1 font-semibold text-slate-400">{i + 1}.</span>{/if}<span class="whitespace-pre-line">{ex}</span>
+									</div>
+								{/each}
+							</div>
 						</div>
 					{/if}
 
