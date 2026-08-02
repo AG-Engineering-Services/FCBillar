@@ -45,7 +45,7 @@ const GLOSSARI: Array<[string, string]> = [
 	['대회전', 'gran rotació'],
 	['더블쿠션', 'doble banda'],
 	['리버스', 'reverse'],
-	['뱅크샷', 'bank shot'],
+	['뱅크샷', 'bricol'],
 	['샷', 'tir']
 ];
 

@@ -19,7 +19,7 @@ export const FAMILIES = [
 	{ idx: 11, ca: 'Reverse', ko: '리버스' },
 	{ idx: 12, ca: 'Tornada', ko: '되돌아오기' },
 	{ idx: 13, ca: 'Bounding', ko: '바운딩' },
-	{ idx: 14, ca: 'Bank shot', ko: '뱅크샷' }
+	{ idx: 14, ca: 'Bricol', ko: '뱅크샷' }
 ] as const;
 
 export function familiaCat(idx: number): string {
