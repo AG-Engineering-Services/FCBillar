@@ -173,6 +173,24 @@
 	}
 	const taulesEquip = (c: Club, lletra: string) =>
 		alineacioEquip.get(`${c.club}|${lletra}`)?.taules ?? [];
+
+	/** Amb quin equip del club acaba jugant cada jugador, i amb quina freqüència.
+	 *  Surt de la mateixa simulació: com que cada jornada els equips trien per
+	 *  ordre de categoria, un mateix jugador pot repartir-se entre dos equips —fa
+	 *  de titular al seu i puja a cobrir baixes al de sobre. */
+	const equipsPerJugador = new Map<string, { lletra: string; p: number }[]>();
+	for (const d of DIVS) {
+		for (const e of divisions[d].equips) {
+			for (const pr of e.presencia) {
+				const k = `${e.club}|${pr.num}`;
+				const arr = equipsPerJugador.get(k) ?? [];
+				if (pr.p >= 0.005) arr.push({ lletra: e.lletra, p: pr.p });
+				equipsPerJugador.set(k, arr);
+			}
+		}
+	}
+	for (const v of equipsPerJugador.values()) v.sort((a, b) => b.p - a.p);
+	const equipsDe = (c: Club, num: number) => equipsPerJugador.get(`${c.club}|${num}`) ?? [];
 	function alineacio(c: Club, lletra: string): Jugador[] {
 		const a = alineacioEquip.get(`${c.club}|${lletra}`);
 		if (!a) return [];
@@ -707,6 +725,16 @@
 							<span class="block text-[10px] text-amber-600 dark:text-amber-400"
 								>nº 4: mínim 6 jornades amb el B per jugar-hi les decisives</span
 							>
+						{/if}
+						{#if equipsDe(c, fila.p.num).length}
+							<span class="block text-[10px] text-slate-500 dark:text-slate-400">
+								{#each equipsDe(c, fila.p.num) as e, i}<span
+										title="jornades que jugaria amb l'equip {e.lletra}"
+										>{i > 0 ? ' · ' : ''}<span class="font-semibold"
+											>{c.equips.length === 1 ? 'equip únic' : e.lletra}</span
+										>&nbsp;{pct(e.p)}</span
+									>{/each}
+							</span>
 						{/if}
 					</span>
 					<span class="shrink-0 text-right font-mono text-xs tabular-nums">
