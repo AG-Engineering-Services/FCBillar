@@ -233,7 +233,7 @@ LLETRES = ["A", "B", "C", "D", "E"]
 K_MITJANA = 8.00
 AVANTATGE_LOCAL = 0.18
 P_TAULES = 0.05
-N_SIMS = 20000
+N_SIMS = 10000
 
 
 def alineacio_probable(club: dict, lletra: str) -> list[int]:
@@ -352,6 +352,228 @@ def pronostic_grup(mitjanes: list[list[float]], llavor: int) -> list[dict]:
         )
         for i in range(n)
     ]
+
+
+# ---------------------------------------------------------------------------
+# Pronòstic: TOTA la lliga, jornada a jornada
+#
+# Simular cada grup per separat no podia respectar la regla que de debò lliga els
+# equips d'un club: un jugador no juga la mateixa jornada amb dos equips. Ara se
+# simula el calendari sencer —les cinc divisions i els deu grups alhora— i, a
+# cada jornada:
+#
+#   1. per a cada jugador es sorteja si està disponible, amb la seva presència;
+#   2. cada club reparteix els disponibles entre els seus equips per ordre de
+#      categoria: l'A tria primer, i cadascú agafa els de la seva banda i, si no
+#      n'hi ha prou, puja els millors de les de sota, que és el que diu el
+#      reglament —es pot fer de suplent dels equips que es tenen per sobre;
+#   3. es resolen els encontres amb les alineacions que han quedat.
+#
+# Si un equip no arriba a quatre jugadors, les taules que li falten es donen per
+# perdudes, com una incompareixença parcial.
+LLETRA_ORD = {lt: i for i, lt in enumerate(LLETRES)}
+
+
+def calendari(n: int) -> list[list[tuple[int, int]]]:
+    """Calendari de lliga a doble volta per a n equips (mètode del cercle).
+
+    Retorna, per jornada, les parelles (local, visitant) amb índexs 0..n-1. Amb un
+    nombre senar d'equips cada jornada un equip descansa."""
+    idx = list(range(n)) + ([-1] if n % 2 else [])
+    m = len(idx)
+    anada: list[list[tuple[int, int]]] = []
+    for r in range(m - 1):
+        parelles = []
+        for i in range(m // 2):
+            a, b = idx[i], idx[m - 1 - i]
+            if a != -1 and b != -1:
+                parelles.append((a, b) if (r + i) % 2 == 0 else (b, a))
+        anada.append(parelles)
+        idx = [idx[0], idx[-1], *idx[1:-1]]
+    return anada + [[(b, a) for a, b in jor] for jor in anada]
+
+
+def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 20260802) -> dict:
+    """Simula n_sims temporades senceres i retorna, per (divisió, cap de sèrie), la
+    probabilitat de cada equip de quedar 1r, 2n, penúltim i últim del seu grup."""
+    import random
+
+    rnd = random.Random(llavor)
+    aleatori = rnd.random
+
+    # --- equips de tota la lliga ------------------------------------------
+    equips: list[dict] = []
+    per_grup: dict[tuple[str, str], list[int]] = {}
+    for div, dades in divisions.items():
+        per_seed = {e["seed"]: e for e in dades["equips"]}
+        for g in dades["grups"]:
+            ids = []
+            for seed in g["seeds"]:
+                e = per_seed[seed]
+                ids.append(len(equips))
+                equips.append(dict(div=div, seed=seed, club=e["club"], lletra=e["lletra"],
+                                   grup=(div, g["lletra"])))
+            per_grup[(div, g["lletra"])] = ids
+
+    # --- calendaris i en quines jornades juga cada equip -------------------
+    cal = {k: calendari(len(ids)) for k, ids in per_grup.items()}
+    n_jor = max(len(v) for v in cal.values())
+    juga: list[set[int]] = [set() for _ in equips]
+    for k, ids in per_grup.items():
+        for j, jornada in enumerate(cal[k]):
+            for il, iv in jornada:
+                juga[ids[il]].add(j)
+                juga[ids[iv]].add(j)
+
+    # --- clubs: equips per ordre de categoria i jugadors amb la seva banda --
+    clubs: dict[str, dict] = {}
+    for i, e in enumerate(equips):
+        clubs.setdefault(e["club"], {"equips": [], "jug": None})["equips"].append((i, e["lletra"]))
+    for nom, c in clubs.items():
+        c["equips"].sort(key=lambda t: LLETRA_ORD[t[1]])
+        c["equips"] = [(i, LLETRA_ORD[lt]) for i, lt in c["equips"]]
+        # La presència es va mesurar amb l'estructura d'equips de l'any passat i
+        # el club en té una altra: cal reescalar-la perquè, en conjunt, cobreixi
+        # les places que ara ha d'omplir cada jornada, amb un marge del 15% que
+        # és el que permet que hi hagi rotació de debò. L'ordre relatiu no es
+        # toca: qui jugava la meitat de les jornades en segueix jugant menys que
+        # qui no en fallava cap.
+        taxes = [p["taxa"] for p in per_club[nom]["llista"]]
+        objectiu = min(4 * len(c["equips"]) * 1.15, len(taxes))
+        lo, hi = 0.5, 50.0
+        for _ in range(40):
+            f = (lo + hi) / 2
+            if sum(min(1.0, t * f) for t in taxes) < objectiu:
+                lo = f
+            else:
+                hi = f
+        f = (lo + hi) / 2
+        c["jug"] = [(p["num"], p["mitjana"], min(1.0, p["taxa"] * f),
+                     LLETRA_ORD[banda_de(p["num"], "fcb")])
+                    for p in per_club[nom]["llista"]]
+    llista_clubs = list(clubs.values())
+
+    n_eq = len(equips)
+    comptes = [[0, 0, 0, 0] for _ in range(n_eq)]
+    suma_pos = [0.0] * n_eq
+    sense_quatre = 0
+
+    for _ in range(n_sims):
+        pm = [0] * n_eq
+        pp = [0] * n_eq
+        for j in range(n_jor):
+            alin: dict[int, list[float]] = {}
+            for c in llista_clubs:
+                juguen = [(i, o) for i, o in c["equips"] if j in juga[i]]
+                if not juguen:
+                    continue
+                # Repartiment de la jornada, en dos passos.
+                #
+                # 1) Qui és a disposició del club: cada jugador, amb la seva
+                #    presència. És el que fa que un equip no tregui sempre els
+                #    seus millors promitjos —al Granollers, els tres primers del
+                #    rànquing català juguen la meitat de les jornades.
+                # 2) Els equips trien per ordre de categoria i, dins de cadascun,
+                #    els MILLORS disponibles: primer els de la seva banda i, si no
+                #    n'hi ha prou, pujant-ne de les de sota. Un equip només pot
+                #    pujar-ne si en queden prou per als de sota; sense aquest
+                #    límit, l'A i el B buiden la banda de l'últim equip.
+                disp = {pj[0] for pj in c["jug"] if aleatori() < pj[2]}
+                usats: set[int] = set()
+                for n_fets, (idx_eq, ordre_eq) in enumerate(juguen):
+                    resten = len(juguen) - n_fets - 1
+                    propis, sota = [], []
+                    for pj in c["jug"]:
+                        if pj[0] in usats or pj[0] not in disp:
+                            continue
+                        if pj[3] == ordre_eq:
+                            propis.append(pj)
+                        elif pj[3] > ordre_eq:
+                            sota.append(pj)
+                    propis.sort(key=lambda pj: -pj[1])
+                    tria = propis[:4]
+                    if len(tria) < 4:
+                        sota.sort(key=lambda pj: -pj[1])
+                        marge = len(sota) - 4 * resten
+                        max_sota = max(4 - len(propis), min(4, marge)) if resten else 4
+                        tria = tria + sota[: min(4 - len(tria), max(0, max_sota))]
+                    if len(tria) < 4:
+                        # el club acaba trobant qui completi l'equip
+                        reserva = [pj for pj in c["jug"]
+                                   if pj[3] >= ordre_eq and pj[0] not in usats and pj[0] not in disp]
+                        reserva.sort(key=lambda pj: -pj[1])
+                        tria = tria + reserva[: 4 - len(tria)]
+                        sense_quatre += 1
+                    for pj in tria:
+                        usats.add(pj[0])
+                    tria.sort(key=lambda pj: -pj[1])
+                    alin[idx_eq] = [pj[1] for pj in tria]
+
+            for k, ids in per_grup.items():
+                if j >= len(cal[k]):
+                    continue
+                for il, iv in cal[k][j]:
+                    loc, vis = ids[il], ids[iv]
+                    ml = alin.get(loc) or []
+                    mv = alin.get(vis) or []
+                    a = b = 0
+                    for t in range(4):
+                        hi_l, hi_v = t < len(ml), t < len(mv)
+                        if not hi_l and not hi_v:
+                            continue
+                        if not hi_l:
+                            b += 2
+                            continue
+                        if not hi_v:
+                            a += 2
+                            continue
+                        u = aleatori()
+                        if u < P_TAULES:
+                            a += 1
+                            b += 1
+                        else:
+                            p = 1.0 / (1.0 + math.exp(
+                                -(K_MITJANA * (ml[t] - mv[t]) + AVANTATGE_LOCAL)))
+                            if u < P_TAULES + (1 - P_TAULES) * p:
+                                a += 2
+                            else:
+                                b += 2
+                    pp[loc] += a
+                    pp[vis] += b
+                    if a > b:
+                        pm[loc] += 3
+                    elif b > a:
+                        pm[vis] += 3
+                    else:
+                        pm[loc] += 1
+                        pm[vis] += 1
+
+        for ids in per_grup.values():
+            n = len(ids)
+            for lloc, i in enumerate(sorted(ids, key=lambda i: (-pm[i], -pp[i]))):
+                suma_pos[i] += lloc + 1
+                if lloc == 0:
+                    comptes[i][0] += 1
+                elif lloc == 1:
+                    comptes[i][1] += 1
+                if lloc == n - 2:
+                    comptes[i][2] += 1
+                elif lloc == n - 1:
+                    comptes[i][3] += 1
+
+    if sense_quatre:
+        print(f"nota: en un {sense_quatre / (n_sims * n_eq * 14) * 100:.1f}% dels encontres el club "
+              f"ha hagut de completar l'equip amb algú de fora dels disponibles", file=sys.stderr)
+    return {
+        (e["div"], e["seed"]): dict(
+            p_1r=round(comptes[i][0] / n_sims, 4),
+            p_2n=round(comptes[i][1] / n_sims, 4),
+            p_penultim=round(comptes[i][2] / n_sims, 4),
+            p_ultim=round(comptes[i][3] / n_sims, 4),
+            pos_mitjana=round(suma_pos[i] / n_sims, 2),
+        )
+        for i, e in enumerate(equips)
+    }
 
 
 def forma_grups(ordre: list[tuple[str, str]]) -> tuple[list[int], list[int], list[dict]]:
@@ -564,47 +786,18 @@ def build(db: str = DB) -> dict:
             ))
         A, B, permutes = forma_grups(COMP[div])
         moguts = {p["seed_a"] for p in permutes} | {p["seed_b"] for p in permutes}
-        # Pronòstic: es simula cada grup amb els quatre titulars de cada equip
-        # (els mateixos amb 3-5-4-4 i amb 4-4-4-4-4).
-        per_seed = {e["seed"]: e for e in equips}
-        grups = []
-        for g, lst in (("A", A), ("B", B)):
-            seeds = [i + 1 for i in lst]
-            mitjanes = []
-            for sd in seeds:
-                e = per_seed[sd]
-                c = per_club[e["club"]]
-                llista_club = c["llista"]
-                lletres = [x["lletra"] for x in c["equips"]]
-                ultim = lletres[-1] == e["lletra"]
-                banda = [x for x in llista_club if banda_de(x["num"], "fcb") == e["lletra"]]
-                tit = referents(llista_club, e["lletra"], "fcb")
-                nums = {x["num"] for x in banda} | {x["num"] for x in tit}
-                # qui pot cobrir una baixa: els dos següents de la llista, o tota
-                # la cua si és l'últim equip del club
-                fi = max(nums) if nums else 0
-                extra = [x for x in llista_club if fi < x["num"] <= (fi + 99 if ultim else fi + 2)]
-                # Un jugador no juga la mateixa jornada amb dos equips: els que ja
-                # té compromesos un equip de més categoria del mateix club queden
-                # fora d'aquest pool.
-                reservats = set()
-                for lt in lletres:
-                    if lt == e["lletra"]:
-                        break
-                    reservats |= set(alineacio_probable(c, lt))
-                pool = [(x["mitjana"], x["taxa"]) for x in
-                        sorted({x["num"]: x for x in banda + tit + extra}.values(),
-                               key=lambda x: x["num"])
-                        if x["num"] not in reservats]
-                mitjanes.append(alineacio_efectiva(pool, llavor=sd * 7919 + len(pool)))
-            pron = pronostic_grup(mitjanes, llavor=hash((div, g)) & 0xFFFF)
-            for sd, pr in zip(seeds, pron, strict=True):
-                per_seed[sd].update(pr)
-            grups.append(dict(lletra=g, seeds=seeds))
+        grups = [dict(lletra=g, seeds=[i + 1 for i in lst]) for g, lst in (("A", A), ("B", B))]
         out["divisions"][div] = dict(
             distancia=DIST[div], equips=equips, grups=grups, permutes=permutes,
             moguts=sorted(moguts),
         )
+
+    # El pronòstic es fa amb TOTA la lliga alhora, no grup per grup: cal, perquè
+    # un jugador no pot jugar la mateixa jornada amb dos equips del seu club.
+    pron = simula_lliga(per_club, out["divisions"], N_SIMS)
+    for div, dades in out["divisions"].items():
+        for e in dades["equips"]:
+            e.update(pron[(div, e["seed"])])
     return out
 
 
