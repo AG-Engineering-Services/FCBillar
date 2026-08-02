@@ -469,6 +469,10 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
     # cap jornada no hi coincideixen. Per això es compta també el repartiment
     # SENCER del club, i el que més es repeteix és el que es publica.
     combos_club: dict[str, dict[tuple, int]] = {nom: {} for nom in clubs}
+    # i qui ocupa cada taula: la taula 1 és el de més mitjana dels quatre que
+    # juguen, o sigui que un jugador pot rondar entre la 2 i la 3 segons qui
+    # l'acompanyi aquell dia
+    per_taula: list[list[dict[int, int]]] = [[{} for _ in range(4)] for _ in range(n_eq)]
 
     for _ in range(n_sims):
         pm = [0] * n_eq
@@ -524,6 +528,9 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
                     c_eq = cops[idx_eq]
                     for pj in tria:
                         c_eq[pj[0]] = c_eq.get(pj[0], 0) + 1
+                    pt = per_taula[idx_eq]
+                    for t, pj in enumerate(tria):
+                        pt[t][pj[0]] = pt[t].get(pj[0], 0) + 1
                     clau = tuple(sorted(pj[0] for pj in tria))
                     cmb = combos[idx_eq]
                     cmb[clau] = cmb.get(clau, 0) + 1
@@ -609,10 +616,20 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
         n = combos[i].get(tuple(sorted(nums)), 0)
         return nums, round(n / (n_sims * jugades[i]), 3)
 
+    def _taules(i: int, nums: list[int]) -> list[dict]:
+        """Per a cada taula, el jugador de l'alineació modal i la probabilitat que
+        hi jugui ell. Va ordenat per mitjana, que és com es formen les taules."""
+        mit = {p["num"]: p["mitjana"] for p in per_club[equips[i]["club"]]["llista"]}
+        ordenats = sorted(nums, key=lambda n: -mit.get(n, 0))
+        total = n_sims * jugades[i]
+        return [dict(num=n, taula=t + 1, p=round(per_taula[i][t].get(n, 0) / total, 3))
+                for t, n in enumerate(ordenats)]
+
     return {
         (e["div"], e["seed"]): dict(
             alineacio=_millor(i)[0],
             p_alineacio=_millor(i)[1],
+            taules=_taules(i, _millor(i)[0]),
             presencia=[
                 dict(num=k, p=round(v / (n_sims * jugades[i]), 3))
                 for k, v in sorted(cops[i].items(), key=lambda t: -t[1])

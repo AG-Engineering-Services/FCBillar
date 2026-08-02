@@ -35,6 +35,7 @@
 		seed: number;
 		alineacio: number[];
 		p_alineacio: number;
+		taules: { num: number; taula: number; p: number }[];
 		presencia: { num: number; p: number }[];
 		p_1r: number;
 		p_2n: number;
@@ -157,12 +158,21 @@
 	 *  cada jornada es sorteja qui està disponible i els equips trien per ordre de
 	 *  categoria, o sigui que ja hi va inclòs que un jugador no juga amb dos
 	 *  equips el mateix dia i que quan l'A puja algú, el B se'n ressent. */
-	const alineacioEquip = new Map<string, { nums: number[]; p: number }>();
+	const alineacioEquip = new Map<
+		string,
+		{ nums: number[]; p: number; taules: { num: number; taula: number; p: number }[] }
+	>();
 	for (const d of DIVS) {
 		for (const e of divisions[d].equips) {
-			alineacioEquip.set(`${e.club}|${e.lletra}`, { nums: e.alineacio, p: e.p_alineacio });
+			alineacioEquip.set(`${e.club}|${e.lletra}`, {
+				nums: e.alineacio,
+				p: e.p_alineacio,
+				taules: e.taules
+			});
 		}
 	}
+	const taulesEquip = (c: Club, lletra: string) =>
+		alineacioEquip.get(`${c.club}|${lletra}`)?.taules ?? [];
 	function alineacio(c: Club, lletra: string): Jugador[] {
 		const a = alineacioEquip.get(`${c.club}|${lletra}`);
 		if (!a) return [];
@@ -544,8 +554,13 @@
 								><span class="text-slate-400 dark:text-slate-500"
 									>&nbsp;({pct(pAlineacio(x.club, x.e.lletra))} de les jornades)</span
 								>
-								{#each alineacio(x.club, x.e.lletra) as p, i}<span class="text-slate-500 dark:text-slate-400"
-										>{i > 0 ? ' · ' : ' '}<span class="font-mono">{i + 1}</span>&nbsp;{cognom(p.nom)}</span
+								{#each taulesEquip(x.club, x.e.lletra) as t}{@const j = x.club.llista.find(
+										(p) => p.num === t.num
+									)}<span class="text-slate-500 dark:text-slate-400"
+										>{t.taula > 1 ? ' · ' : ' '}<span class="font-mono">{t.taula}</span
+										>&nbsp;{j ? cognom(j.nom) : t.num}<span class="text-slate-400 dark:text-slate-500"
+											>&nbsp;{pct(t.p)}</span
+										></span
 									>{/each}
 							</p>
 							{/if}
