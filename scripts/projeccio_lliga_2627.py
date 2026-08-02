@@ -412,20 +412,39 @@ def build(db: str = DB) -> dict:
     select cl.nom, coalesce(q.lletra,'UNICO'), p.d, p.pl, pl.nom, count(*), sum(p.car), sum(p.ent)
     from p join equips q on q.id=p.eq join clubs cl on cl.id=q.club_id join players pl on pl.id=p.pl
     group by q.id, p.pl"""
-    # Jornades que va disputar cada equip el 2025-26: és el denominador de la taxa
-    # de presència, i ha de ser el de l'equip on va jugar el jugador —no el del
-    # club—, perquè els grups de 4a divisió tenen més jornades que la resta.
-    jornades_equip: dict[tuple[str, str], int] = collections.Counter()
-    qj = """
-    select cl.nom, coalesce(eq.lletra, 'UNICO') from encontres_lliga e
-    join equips eq on eq.id = e.equip_local_id join clubs cl on cl.id = eq.club_id
-    where e.temporada_id=1 and e.lliga_id=36
-    union all
-    select cl.nom, coalesce(eq.lletra, 'UNICO') from encontres_lliga e
-    join equips eq on eq.id = e.equip_visitant_id join clubs cl on cl.id = eq.club_id
-    where e.temporada_id=1 and e.lliga_id=36"""
-    for cnom, lletra in conn.execute(qj):
-        jornades_equip[(cnom, lletra)] += 1
+    # Presència: quina part de les jornades va jugar cadascú, mesurada sobre les
+    # DUES últimes temporades. El denominador és sempre el de l'equip on va jugar
+    # més aquella temporada —no el del club—, perquè els grups de 4a divisió tenen
+    # més jornades que la resta. La temporada en curs pesa el doble que l'anterior:
+    # qui acaba d'agafar la titularitat no ha d'arrossegar l'any que no jugava.
+    TEMPORADES = ((1, 36, 2.0), (405, 34, 1.0))  # (temporada_id, lliga_id, pes)
+    presencia: dict[int, list[tuple[float, float]]] = collections.defaultdict(list)
+    for temp_id, lliga_id, pes in TEMPORADES:
+        jorn: dict[int, int] = collections.Counter()
+        for camp in ("equip_local_id", "equip_visitant_id"):
+            for (eq,) in conn.execute(
+                f"select {camp} from encontres_lliga where temporada_id=? and lliga_id=?",
+                (temp_id, lliga_id),
+            ):
+                jorn[eq] += 1
+        qp = """
+        with p as (
+         select g.equip1_id eq, g.player1_id pl from games g
+           join encontres_lliga e on e.id=g.encontre_lliga_id
+          where e.temporada_id=? and e.lliga_id=?
+         union all
+         select g.equip2_id, g.player2_id from games g
+           join encontres_lliga e on e.id=g.encontre_lliga_id
+          where e.temporada_id=? and e.lliga_id=?)
+        select pl, eq, count(*) from p group by pl, eq"""
+        per_jug: dict[int, list[tuple[int, int]]] = collections.defaultdict(list)
+        for pid, eq, n in conn.execute(qp, (temp_id, lliga_id, temp_id, lliga_id)):
+            per_jug[pid].append((eq, n))
+        for pid, files in per_jug.items():
+            total = sum(n for _, n in files)
+            principal = max(files, key=lambda x: x[1])[0]
+            ref = jorn.get(principal) or 14
+            presencia[pid].append((min(1.0, total / ref), pes))
 
     pool: dict[str, dict[int, dict]] = collections.defaultdict(dict)
     prev_div: dict[tuple[str, str], str] = {}
@@ -482,18 +501,19 @@ def build(db: str = DB) -> dict:
         # És l'ingredient que falta a les mitjanes — hi ha jugadors forts que amb
         # prou feines juguen— i serveix tant per marcar l'alineació habitual com
         # per no sobreestimar els equips que roden molt.
-        def taxa_de(p: dict, _club: str = club) -> float | None:
-            if not p["pj"] or not p["equip_2526"]:
+        def taxa_de(p: dict) -> float | None:
+            files = presencia.get(p["pid"])
+            if not files:
                 return None
-            ref = jornades_equip.get((_club, p["equip_2526"])) or 14
-            return round(min(1.0, p["pj"] / ref), 3)
+            return round(sum(r * w for r, w in files) / sum(w for _, w in files), 3)
 
         conegudes = [t for t in (taxa_de(p) for p in ranked) if t is not None]
         per_defecte = sorted(conegudes)[len(conegudes) // 2] if conegudes else 0.5
         llista = [dict(
             num=i, nom=p["nom"], mitjana=round(p["mitjana"], 4), pos=p["pos"],
             de_club=nom_club(p["de_club"]) if p["de_club"] else None, retorn=p["retorn"],
-            pj=p["pj"], taxa=(taxa_de(p) if taxa_de(p) is not None else per_defecte),
+            pj=p["pj"], temporades=len(presencia.get(p["pid"], [])),
+            taxa=(taxa_de(p) if taxa_de(p) is not None else per_defecte),
         ) for i, p in enumerate(ranked, 1)]
         equips = [dict(lletra=lt, unic=(not multi), divisio=dv, distancia=DIST[dv],
                        lletra_2526=("" if antiga == "UNICO" else antiga),
