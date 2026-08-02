@@ -17,6 +17,8 @@
 		pos: number | null;
 		de_club: string | null;
 		retorn: boolean;
+		pj: number;
+		taxa: number;
 	};
 	type Equip = {
 		lletra: string;
@@ -132,6 +134,18 @@
 			.filter((p) => (vistos.has(p.num) ? false : vistos.add(p.num)))
 			.sort((a, b) => a.num - b.num)
 			.map((p) => ({ p, titular: nums.has(p.num) }));
+	}
+	/** L'alineació habitual més probable: els quatre de la plantilla amb més
+	 *  presència, que no sempre són els quatre de més mitjana. Hi ha jugadors
+	 *  forts que amb prou feines juguen, i és el que decanta molts equips. */
+	function habituals(pl: { p: Jugador; titular: boolean }[]): Set<number> {
+		if (pl.length <= 4) return new Set(); // sense candidats de sobra no hi ha res a triar
+		return new Set(
+			[...pl]
+				.sort((a, b) => b.p.taxa - a.p.taxa || b.p.mitjana - a.p.mitjana)
+				.slice(0, 4)
+				.map((x) => x.p.num)
+		);
 	}
 	const esUltim = (c: Club, lletra: string) => c.equips[c.equips.length - 1].lletra === lletra;
 	const mitjanaEquip = (llista: Jugador[], lletra: string, esq: Esquema) => {
@@ -374,6 +388,7 @@
 						</header>
 						<ul class="divide-y divide-slate-100 dark:divide-slate-800">
 							{#each g.equips as x}
+								{@const hab = habituals(x.plantilla)}
 								<li class="px-3 py-1.5">
 									<div class="flex items-baseline gap-2">
 										<span
@@ -401,9 +416,14 @@
 									</div>
 									<p class="ml-7 text-[11px] leading-snug">
 										{#each x.plantilla as f, i}<span
-												class={f.titular
-													? 'text-slate-600 dark:text-slate-300'
-													: 'text-slate-400 dark:text-slate-500'}
+												class={hab.has(f.p.num)
+													? 'font-semibold text-slate-700 dark:text-slate-200'
+													: f.titular
+														? 'text-slate-500 dark:text-slate-400'
+														: 'text-slate-400 dark:text-slate-500'}
+												title={hab.has(f.p.num)
+													? `alineació habitual · ${pct(f.p.taxa)} de presència`
+													: `${pct(f.p.taxa)} de presència`}
 												>{i > 0 ? ' · ' : ''}<span class="font-mono">{f.p.num}</span>&nbsp;{cognom(f.p.nom)}</span
 											>{/each}
 									</p>
@@ -443,6 +463,7 @@
 				</header>
 				<ul class="divide-y divide-slate-100 dark:divide-slate-800">
 					{#each d.visibles as x}
+						{@const hab = habituals(x.plantilla)}
 						<li class="px-3 py-2.5">
 							<div class="flex items-baseline gap-2">
 								<span
@@ -487,6 +508,12 @@
 								{#each x.plantilla as f}
 									<li class="flex items-baseline gap-2 {f.titular ? '' : 'opacity-60'}">
 										<span
+											class="w-3 shrink-0 text-center text-[10px] leading-none {hab.has(f.p.num)
+												? 'text-slate-900 dark:text-slate-100'
+												: 'text-transparent'}"
+											title={hab.has(f.p.num) ? "de l'alineació habitual més probable" : ''}>●</span
+										>
+										<span
 											class="w-4 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500"
 											>{f.p.num}</span
 										>
@@ -508,6 +535,10 @@
 										</span>
 										<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400"
 											>{f.p.mitjana.toFixed(3)}</span
+										>
+										<span
+											class="w-8 shrink-0 text-right font-mono text-[10px] tabular-nums text-slate-400 dark:text-slate-500"
+											title="jornades que va jugar el 2025-26">{pct(f.p.taxa)}</span
 										>
 									</li>
 								{/each}
@@ -606,6 +637,13 @@
 							>{fila.p.pos ? `#${fila.p.pos}` : 's/r'}</span
 						>
 					</span>
+					<span
+						class="w-10 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400"
+						title="presència: {fila.p.pj} partides el 2025-26"
+					>
+						{pct(fila.p.taxa)}
+						<span class="block text-[10px] text-slate-400 dark:text-slate-500">pres.</span>
+					</span>
 				</div>
 			{/each}
 		</section>
@@ -640,6 +678,15 @@
 			dues a 3a— i cap divisió no queda amb equips del mateix club junts. Els moguts van marcats amb ⇄.
 		</p>
 		<p>
+			<b>Presència i alineació habitual.</b> Cada jugador porta el percentatge de jornades que va
+			jugar el 2025-26 amb el seu equip. És l'ingredient que les mitjanes no diuen: només
+			<b>34 dels 83 equips</b> cobreixen el 80% de les seves taules amb quatre jugadors, i n'hi ha
+			que en fan servir catorze. El punt <b>●</b> marca l'<b>alineació habitual més probable</b>: els
+			quatre de la plantilla amb més presència, que no sempre són els quatre de més mitjana. El cas
+			extrem és el Granollers A, on Mas Canadell, Jiménez Galera i Mata Pardo, els tres millors
+			promitjos de la categoria, van jugar entre el 44% i el 69% de les jornades.
+		</p>
+		<p>
 			<b>Pronòstic.</b> Els xips <span class="font-semibold">1r</span>,
 			<span class="font-semibold">2n</span>, <span class="font-semibold">penúlt.</span> i
 			<span class="font-semibold">últim</span> marquen el favorit de cada plaça dins del seu grup, amb
@@ -649,8 +696,10 @@
 			diferència de mitjanes més l'avantatge de camp, que és real i mesurable (els locals s'enduen el
 			55,1% dels parcials, i amb mitjanes iguals el local guanya el 54,5% de les partides). Els punts
 			són 3/1/0 i el desempat, els parcials, com fa la federació. Validat per trams, el model encerta
-			la freqüència real dins d'un o dos punts. No hi entren ni les incompareixences, ni les
-			sancions, ni els canvis d'alineació durant la temporada.
+			la freqüència real dins d'un o dos punts. L'alineació no es dona per fixa: cada equip
+			s'hi presenta amb quatre dels seus candidats, sortejats segons la presència de cadascú, de
+			manera que els equips que roden molt hi valen menys del que diu la seva mitjana. No hi entren
+			ni les incompareixences, ni les sancions, ni els fitxatges que no coneguem.
 		</p>
 		<p>
 			<b>Llistes.</b> El pool de cada club són els jugadors que van disputar la lliga 2025-26, ordenats

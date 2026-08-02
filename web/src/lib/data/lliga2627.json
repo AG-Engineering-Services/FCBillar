@@ -22,7 +22,9 @@
      "mitjana": 0.4674,
      "pos": 229,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 2,
@@ -30,7 +32,9 @@
      "mitjana": 0.4633,
      "pos": 450,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 3,
@@ -38,7 +42,9 @@
      "mitjana": 0.4459,
      "pos": 251,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.214
     },
     {
      "num": 4,
@@ -46,7 +52,9 @@
      "mitjana": 0.3594,
      "pos": null,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.286
     },
     {
      "num": 5,
@@ -54,7 +62,9 @@
      "mitjana": 0.3459,
      "pos": 509,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 6,
@@ -62,7 +72,9 @@
      "mitjana": 0.3457,
      "pos": 353,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 7,
@@ -70,7 +82,9 @@
      "mitjana": 0.3382,
      "pos": 519,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 8,
@@ -78,7 +92,9 @@
      "mitjana": 0.3138,
      "pos": 536,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.357
     },
     {
      "num": 9,
@@ -86,7 +102,9 @@
      "mitjana": 0.3,
      "pos": 549,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.214
     }
    ],
    "multi": false
@@ -139,7 +157,9 @@
      "mitjana": 1.6366,
      "pos": 1,
      "de_club": "C.B. Llinars",
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.688
     },
     {
      "num": 2,
@@ -147,7 +167,9 @@
      "mitjana": 1.6288,
      "pos": 2,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 3,
@@ -155,7 +177,9 @@
      "mitjana": 1.2516,
      "pos": 6,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 4,
@@ -163,7 +187,9 @@
      "mitjana": 1.1901,
      "pos": 8,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 5,
@@ -171,7 +197,9 @@
      "mitjana": 1.09,
      "pos": 13,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 6,
@@ -179,7 +207,9 @@
      "mitjana": 1.0744,
      "pos": 14,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.562
     },
     {
      "num": 7,
@@ -187,7 +217,9 @@
      "mitjana": 0.7534,
      "pos": 44,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 8,
@@ -195,7 +227,9 @@
      "mitjana": 0.6858,
      "pos": 67,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.688
     },
     {
      "num": 9,
@@ -203,7 +237,9 @@
      "mitjana": 0.6223,
      "pos": 97,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 10,
@@ -211,7 +247,9 @@
      "mitjana": 0.5824,
      "pos": 123,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 11,
@@ -219,7 +257,9 @@
      "mitjana": 0.537,
      "pos": 159,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 12,
@@ -227,7 +267,9 @@
      "mitjana": 0.5341,
      "pos": 165,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 13,
@@ -235,7 +277,9 @@
      "mitjana": 0.5327,
      "pos": 169,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 14,
@@ -243,7 +287,9 @@
      "mitjana": 0.4674,
      "pos": 228,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 15,
@@ -251,7 +297,9 @@
      "mitjana": 0.4505,
      "pos": 242,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 16,
@@ -259,7 +307,9 @@
      "mitjana": 0.4377,
      "pos": 461,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 17,
@@ -267,7 +317,9 @@
      "mitjana": 0.4266,
      "pos": 276,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 18,
@@ -275,7 +327,9 @@
      "mitjana": 0.4215,
      "pos": 281,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 19,
@@ -283,7 +337,9 @@
      "mitjana": 0.4155,
      "pos": 290,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 20,
@@ -291,7 +347,9 @@
      "mitjana": 0.3556,
      "pos": 506,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 21,
@@ -299,7 +357,9 @@
      "mitjana": 0.3533,
      "pos": 349,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.357
     },
     {
      "num": 22,
@@ -307,7 +367,9 @@
      "mitjana": 0.3232,
      "pos": 529,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 23,
@@ -315,7 +377,9 @@
      "mitjana": 0.2729,
      "pos": 566,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.286
     }
    ],
    "multi": true
@@ -341,7 +405,9 @@
      "mitjana": 0.5069,
      "pos": 439,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.312
     },
     {
      "num": 2,
@@ -349,7 +415,9 @@
      "mitjana": 0.4231,
      "pos": 280,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.5
     },
     {
      "num": 3,
@@ -357,7 +425,9 @@
      "mitjana": 0.3888,
      "pos": 483,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.312
     },
     {
      "num": 4,
@@ -365,7 +435,9 @@
      "mitjana": 0.3642,
      "pos": 337,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.25
     },
     {
      "num": 5,
@@ -373,7 +445,9 @@
      "mitjana": 0.349,
      "pos": 352,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.625
     },
     {
      "num": 6,
@@ -381,7 +455,9 @@
      "mitjana": 0.3235,
      "pos": 363,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 7,
@@ -389,7 +465,9 @@
      "mitjana": 0.3075,
      "pos": 374,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.625
     },
     {
      "num": 8,
@@ -397,7 +475,9 @@
      "mitjana": 0.2925,
      "pos": 556,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.188
     },
     {
      "num": 9,
@@ -405,7 +485,9 @@
      "mitjana": 0.2747,
      "pos": 565,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.25
     },
     {
      "num": 10,
@@ -413,7 +495,9 @@
      "mitjana": 0.2033,
      "pos": 596,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.25
     }
    ],
    "multi": false
@@ -448,7 +532,9 @@
      "mitjana": 0.7195,
      "pos": 56,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 2,
@@ -456,7 +542,9 @@
      "mitjana": 0.5613,
      "pos": 138,
      "de_club": "S.B. Foment Molins",
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.833
     },
     {
      "num": 3,
@@ -464,7 +552,9 @@
      "mitjana": 0.5234,
      "pos": 183,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 17,
+     "taxa": 0.944
     },
     {
      "num": 4,
@@ -472,7 +562,9 @@
      "mitjana": 0.5203,
      "pos": 184,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 5,
@@ -480,7 +572,9 @@
      "mitjana": 0.4888,
      "pos": 209,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 6,
@@ -488,7 +582,9 @@
      "mitjana": 0.4633,
      "pos": 233,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 17,
+     "taxa": 0.944
     },
     {
      "num": 7,
@@ -496,7 +592,9 @@
      "mitjana": 0.3789,
      "pos": 326,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.833
     },
     {
      "num": 8,
@@ -504,7 +602,9 @@
      "mitjana": 0.3131,
      "pos": 371,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 9,
@@ -512,7 +612,9 @@
      "mitjana": 0.308,
      "pos": 542,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.111
     },
     {
      "num": 10,
@@ -520,7 +622,9 @@
      "mitjana": 0.2963,
      "pos": 382,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.833
     }
    ],
    "multi": true
@@ -546,7 +650,9 @@
      "mitjana": 1.1589,
      "pos": 406,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.25
     },
     {
      "num": 2,
@@ -554,7 +660,9 @@
      "mitjana": 0.7724,
      "pos": 38,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -562,7 +670,9 @@
      "mitjana": 0.6895,
      "pos": 66,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -570,7 +680,9 @@
      "mitjana": 0.5327,
      "pos": 168,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.5
     },
     {
      "num": 5,
@@ -578,7 +690,9 @@
      "mitjana": 0.4947,
      "pos": 205,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.375
     },
     {
      "num": 6,
@@ -586,7 +700,9 @@
      "mitjana": 0.4723,
      "pos": 225,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 7,
@@ -594,7 +710,9 @@
      "mitjana": 0.4321,
      "pos": 266,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     }
    ],
    "multi": false
@@ -620,7 +738,9 @@
      "mitjana": 0.4771,
      "pos": 221,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.471
     },
     {
      "num": 2,
@@ -628,7 +748,9 @@
      "mitjana": 0.4444,
      "pos": 254,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.824
     },
     {
      "num": 3,
@@ -636,7 +758,9 @@
      "mitjana": 0.4435,
      "pos": 255,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.588
     },
     {
      "num": 4,
@@ -644,7 +768,9 @@
      "mitjana": 0.4257,
      "pos": 278,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.765
     },
     {
      "num": 5,
@@ -652,7 +778,9 @@
      "mitjana": 0.4163,
      "pos": 473,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.176
     },
     {
      "num": 6,
@@ -660,7 +788,9 @@
      "mitjana": 0.385,
      "pos": 321,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.765
     },
     {
      "num": 7,
@@ -668,7 +798,9 @@
      "mitjana": 0.2709,
      "pos": 569,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.118
     },
     {
      "num": 8,
@@ -676,7 +808,9 @@
      "mitjana": 0.2685,
      "pos": 571,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.059
     }
    ],
    "multi": false
@@ -720,7 +854,9 @@
      "mitjana": 0.6714,
      "pos": 78,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 2,
@@ -728,7 +864,9 @@
      "mitjana": 0.6531,
      "pos": 84,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 3,
@@ -736,7 +874,9 @@
      "mitjana": 0.5401,
      "pos": 156,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -744,7 +884,9 @@
      "mitjana": 0.5369,
      "pos": 160,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 5,
@@ -752,7 +894,9 @@
      "mitjana": 0.5292,
      "pos": 174,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 6,
@@ -760,7 +904,9 @@
      "mitjana": 0.5274,
      "pos": 177,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 7,
@@ -768,7 +914,9 @@
      "mitjana": 0.5036,
      "pos": 441,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.15
     },
     {
      "num": 8,
@@ -776,7 +924,9 @@
      "mitjana": 0.4992,
      "pos": 200,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 9,
@@ -784,7 +934,9 @@
      "mitjana": 0.4891,
      "pos": 208,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 10,
@@ -792,7 +944,9 @@
      "mitjana": 0.4298,
      "pos": 272,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 18,
+     "taxa": 0.9
     },
     {
      "num": 11,
@@ -800,7 +954,9 @@
      "mitjana": 0.4174,
      "pos": 288,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.5
     },
     {
      "num": 12,
@@ -808,7 +964,9 @@
      "mitjana": 0.4097,
      "pos": 298,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 19,
+     "taxa": 0.95
     },
     {
      "num": 13,
@@ -816,7 +974,9 @@
      "mitjana": 0.3914,
      "pos": 316,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.25
     },
     {
      "num": 14,
@@ -824,7 +984,9 @@
      "mitjana": 0.3567,
      "pos": 504,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.15
     },
     {
      "num": 15,
@@ -832,7 +994,9 @@
      "mitjana": 0.3503,
      "pos": 351,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.55
     },
     {
      "num": 16,
@@ -840,7 +1004,9 @@
      "mitjana": 0.282,
      "pos": 388,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.5
     },
     {
      "num": 17,
@@ -848,7 +1014,9 @@
      "mitjana": 0.238,
      "pos": 401,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.45
     },
     {
      "num": 18,
@@ -856,7 +1024,9 @@
      "mitjana": 0.2,
      "pos": 597,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     }
    ],
    "multi": true
@@ -900,7 +1070,9 @@
      "mitjana": 0.8566,
      "pos": 25,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 2,
@@ -908,7 +1080,9 @@
      "mitjana": 0.656,
      "pos": 83,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -916,7 +1090,9 @@
      "mitjana": 0.6214,
      "pos": 98,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.733
     },
     {
      "num": 4,
@@ -924,7 +1100,9 @@
      "mitjana": 0.5859,
      "pos": 121,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 5,
@@ -932,7 +1110,9 @@
      "mitjana": 0.55,
      "pos": 145,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 6,
@@ -940,7 +1120,9 @@
      "mitjana": 0.5446,
      "pos": 426,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.533
     },
     {
      "num": 7,
@@ -948,7 +1130,9 @@
      "mitjana": 0.5286,
      "pos": 175,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.933
     },
     {
      "num": 8,
@@ -956,7 +1140,9 @@
      "mitjana": 0.4929,
      "pos": 207,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.733
     },
     {
      "num": 9,
@@ -964,7 +1150,9 @@
      "mitjana": 0.4495,
      "pos": 245,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.933
     },
     {
      "num": 10,
@@ -972,7 +1160,9 @@
      "mitjana": 0.4084,
      "pos": 299,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.333
     },
     {
      "num": 11,
@@ -980,7 +1170,9 @@
      "mitjana": 0.3957,
      "pos": 310,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.611
     },
     {
      "num": 12,
@@ -988,7 +1180,9 @@
      "mitjana": 0.3853,
      "pos": 486,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 13,
@@ -996,7 +1190,9 @@
      "mitjana": 0.3585,
      "pos": 502,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.333
     },
     {
      "num": 14,
@@ -1004,7 +1200,9 @@
      "mitjana": 0.2961,
      "pos": 553,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.222
     },
     {
      "num": 15,
@@ -1012,7 +1210,9 @@
      "mitjana": 0.2879,
      "pos": 386,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 16,
@@ -1020,7 +1220,9 @@
      "mitjana": 0.2839,
      "pos": 387,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 17,
@@ -1028,7 +1230,9 @@
      "mitjana": 0.2673,
      "pos": 573,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.111
     },
     {
      "num": 18,
@@ -1036,7 +1240,9 @@
      "mitjana": 0.1711,
      "pos": 605,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.333
     }
    ],
    "multi": true
@@ -1062,7 +1268,9 @@
      "mitjana": 0.6092,
      "pos": 104,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.867
     },
     {
      "num": 2,
@@ -1070,7 +1278,9 @@
      "mitjana": 0.5464,
      "pos": 153,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -1078,7 +1288,9 @@
      "mitjana": 0.5322,
      "pos": 170,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.867
     },
     {
      "num": 4,
@@ -1086,7 +1298,9 @@
      "mitjana": 0.52,
      "pos": 436,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.133
     },
     {
      "num": 5,
@@ -1094,7 +1308,9 @@
      "mitjana": 0.4862,
      "pos": 213,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 6,
@@ -1102,7 +1318,9 @@
      "mitjana": 0.42,
      "pos": 472,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.067
     },
     {
      "num": 7,
@@ -1110,7 +1328,9 @@
      "mitjana": 0.3452,
      "pos": 510,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.067
     }
    ],
    "multi": false
@@ -1154,7 +1374,9 @@
      "mitjana": 0.8325,
      "pos": 27,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 2,
@@ -1162,7 +1384,9 @@
      "mitjana": 0.7778,
      "pos": 35,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -1170,7 +1394,9 @@
      "mitjana": 0.7726,
      "pos": 37,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -1178,7 +1404,9 @@
      "mitjana": 0.5798,
      "pos": 124,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 5,
@@ -1186,7 +1414,9 @@
      "mitjana": 0.5777,
      "pos": 126,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 6,
@@ -1194,7 +1424,9 @@
      "mitjana": 0.5557,
      "pos": 140,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 7,
@@ -1202,7 +1434,9 @@
      "mitjana": 0.5393,
      "pos": 158,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 8,
@@ -1210,7 +1444,9 @@
      "mitjana": 0.4862,
      "pos": 214,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 9,
@@ -1218,7 +1454,9 @@
      "mitjana": 0.4482,
      "pos": 247,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.778
     },
     {
      "num": 10,
@@ -1226,7 +1464,9 @@
      "mitjana": 0.4272,
      "pos": 275,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 11,
@@ -1234,7 +1474,9 @@
      "mitjana": 0.3643,
      "pos": 336,
      "de_club": null,
-     "retorn": true
+     "retorn": true,
+     "pj": 0,
+     "taxa": 0.714
     },
     {
      "num": 12,
@@ -1242,7 +1484,9 @@
      "mitjana": 0.3351,
      "pos": 521,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.444
     },
     {
      "num": 13,
@@ -1250,7 +1494,9 @@
      "mitjana": 0.3076,
      "pos": 543,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.444
     },
     {
      "num": 14,
@@ -1258,7 +1504,9 @@
      "mitjana": 0.2905,
      "pos": 558,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.333
     },
     {
      "num": 15,
@@ -1266,7 +1514,9 @@
      "mitjana": 0.2894,
      "pos": 384,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 16,
@@ -1274,7 +1524,9 @@
      "mitjana": 0.285,
      "pos": 560,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.667
     },
     {
      "num": 17,
@@ -1282,7 +1534,9 @@
      "mitjana": 0.2773,
      "pos": 390,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 18,
@@ -1290,7 +1544,9 @@
      "mitjana": 0.2012,
      "pos": 403,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.278
     }
    ],
    "multi": true
@@ -1334,7 +1590,9 @@
      "mitjana": 1.0236,
      "pos": 17,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 2,
@@ -1342,7 +1600,9 @@
      "mitjana": 0.856,
      "pos": 26,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -1350,7 +1610,9 @@
      "mitjana": 0.7595,
      "pos": 42,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 4,
@@ -1358,7 +1620,9 @@
      "mitjana": 0.7285,
      "pos": 53,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 5,
@@ -1366,7 +1630,9 @@
      "mitjana": 0.7149,
      "pos": 409,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.933
     },
     {
      "num": 6,
@@ -1374,7 +1640,9 @@
      "mitjana": 0.5634,
      "pos": 135,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.933
     },
     {
      "num": 7,
@@ -1382,7 +1650,9 @@
      "mitjana": 0.5626,
      "pos": 136,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 8,
@@ -1390,7 +1660,9 @@
      "mitjana": 0.5547,
      "pos": 142,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 9,
@@ -1398,7 +1670,9 @@
      "mitjana": 0.5544,
      "pos": 424,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.067
     },
     {
      "num": 10,
@@ -1406,7 +1680,9 @@
      "mitjana": 0.3649,
      "pos": 335,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.812
     },
     {
      "num": 11,
@@ -1414,7 +1690,9 @@
      "mitjana": 0.3287,
      "pos": 524,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.25
     },
     {
      "num": 12,
@@ -1422,7 +1700,9 @@
      "mitjana": 0.3118,
      "pos": 539,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.062
     },
     {
      "num": 13,
@@ -1430,7 +1710,9 @@
      "mitjana": 0.3044,
      "pos": 375,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.812
     },
     {
      "num": 14,
@@ -1438,7 +1720,9 @@
      "mitjana": 0.275,
      "pos": 564,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.5
     },
     {
      "num": 15,
@@ -1446,7 +1730,9 @@
      "mitjana": 0.1806,
      "pos": 404,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.75
     }
    ],
    "multi": true
@@ -1481,7 +1767,9 @@
      "mitjana": 0.7616,
      "pos": 41,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 2,
@@ -1489,7 +1777,9 @@
      "mitjana": 0.5516,
      "pos": 425,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.688
     },
     {
      "num": 3,
@@ -1497,7 +1787,9 @@
      "mitjana": 0.5369,
      "pos": 161,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 4,
@@ -1505,7 +1797,9 @@
      "mitjana": 0.5264,
      "pos": 178,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 5,
@@ -1513,7 +1807,9 @@
      "mitjana": 0.4409,
      "pos": 257,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.75
     },
     {
      "num": 6,
@@ -1521,7 +1817,9 @@
      "mitjana": 0.4335,
      "pos": 264,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.75
     },
     {
      "num": 7,
@@ -1529,7 +1827,9 @@
      "mitjana": 0.431,
      "pos": 270,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 8,
@@ -1537,7 +1837,9 @@
      "mitjana": 0.3979,
      "pos": 309,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 9,
@@ -1545,7 +1847,9 @@
      "mitjana": 0.3924,
      "pos": 482,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.75
     },
     {
      "num": 10,
@@ -1553,7 +1857,9 @@
      "mitjana": 0.361,
      "pos": 499,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.375
     },
     {
      "num": 11,
@@ -1561,7 +1867,9 @@
      "mitjana": 0.3602,
      "pos": 500,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.375
     },
     {
      "num": 12,
@@ -1569,7 +1877,9 @@
      "mitjana": 0.2133,
      "pos": 592,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.375
     }
    ],
    "multi": true
@@ -1595,7 +1905,9 @@
      "mitjana": 0.57,
      "pos": 130,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 2,
@@ -1603,7 +1915,9 @@
      "mitjana": 0.5464,
      "pos": 152,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -1611,7 +1925,9 @@
      "mitjana": 0.4571,
      "pos": 237,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.875
     },
     {
      "num": 4,
@@ -1619,7 +1935,9 @@
      "mitjana": 0.3918,
      "pos": 315,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.562
     },
     {
      "num": 5,
@@ -1627,7 +1945,9 @@
      "mitjana": 0.3297,
      "pos": 361,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 6,
@@ -1635,7 +1955,9 @@
      "mitjana": 0.3265,
      "pos": 528,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.062
     },
     {
      "num": 7,
@@ -1643,7 +1965,9 @@
      "mitjana": 0.2241,
      "pos": 586,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.062
     },
     {
      "num": 8,
@@ -1651,7 +1975,9 @@
      "mitjana": 0.2213,
      "pos": 587,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.062
     }
    ],
    "multi": false
@@ -1686,7 +2012,9 @@
      "mitjana": 0.8877,
      "pos": 24,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 2,
@@ -1694,7 +2022,9 @@
      "mitjana": 0.8126,
      "pos": 31,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 3,
@@ -1702,7 +2032,9 @@
      "mitjana": 0.762,
      "pos": 40,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -1710,7 +2042,9 @@
      "mitjana": 0.6805,
      "pos": 69,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 5,
@@ -1718,7 +2052,9 @@
      "mitjana": 0.5647,
      "pos": 134,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 6,
@@ -1726,7 +2062,9 @@
      "mitjana": 0.5554,
      "pos": 141,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 7,
@@ -1734,7 +2072,9 @@
      "mitjana": 0.5436,
      "pos": 154,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 8,
@@ -1742,7 +2082,9 @@
      "mitjana": 0.5248,
      "pos": 180,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 9,
@@ -1750,7 +2092,9 @@
      "mitjana": 0.4375,
      "pos": 462,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 10,
@@ -1758,7 +2102,9 @@
      "mitjana": 0.4312,
      "pos": 466,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 11,
@@ -1766,7 +2112,9 @@
      "mitjana": 0.4178,
      "pos": 286,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.143
     },
     {
      "num": 12,
@@ -1774,7 +2122,9 @@
      "mitjana": 0.3873,
      "pos": 484,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.214
     },
     {
      "num": 13,
@@ -1782,7 +2132,9 @@
      "mitjana": 0.3191,
      "pos": 533,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 14,
@@ -1790,7 +2142,9 @@
      "mitjana": 0.3035,
      "pos": 376,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.143
     },
     {
      "num": 15,
@@ -1798,7 +2152,9 @@
      "mitjana": 0.2518,
      "pos": 579,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     }
    ],
    "multi": true
@@ -1860,7 +2216,9 @@
      "mitjana": 0.7834,
      "pos": 34,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 2,
@@ -1868,7 +2226,9 @@
      "mitjana": 0.7532,
      "pos": 45,
      "de_club": "B.C. Granollers",
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.667
     },
     {
      "num": 3,
@@ -1876,7 +2236,9 @@
      "mitjana": 0.7512,
      "pos": 46,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -1884,7 +2246,9 @@
      "mitjana": 0.6163,
      "pos": 100,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 5,
@@ -1892,7 +2256,9 @@
      "mitjana": 0.5336,
      "pos": 166,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 6,
@@ -1900,7 +2266,9 @@
      "mitjana": 0.5111,
      "pos": 192,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 7,
@@ -1908,7 +2276,9 @@
      "mitjana": 0.4856,
      "pos": 215,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 8,
@@ -1916,7 +2286,9 @@
      "mitjana": 0.4736,
      "pos": 224,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 9,
@@ -1924,7 +2296,9 @@
      "mitjana": 0.4714,
      "pos": 226,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 10,
@@ -1932,7 +2306,9 @@
      "mitjana": 0.4479,
      "pos": 248,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 11,
@@ -1940,7 +2316,9 @@
      "mitjana": 0.4305,
      "pos": 271,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 12,
@@ -1948,7 +2326,9 @@
      "mitjana": 0.4282,
      "pos": 274,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 13,
@@ -1956,7 +2336,9 @@
      "mitjana": 0.4113,
      "pos": 294,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.667
     },
     {
      "num": 14,
@@ -1964,7 +2346,9 @@
      "mitjana": 0.4003,
      "pos": 307,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.778
     },
     {
      "num": 15,
@@ -1972,7 +2356,9 @@
      "mitjana": 0.363,
      "pos": 339,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 16,
@@ -1980,7 +2366,9 @@
      "mitjana": 0.3414,
      "pos": 356,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.667
     },
     {
      "num": 17,
@@ -1988,7 +2376,9 @@
      "mitjana": 0.3383,
      "pos": 518,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.611
     },
     {
      "num": 18,
@@ -1996,7 +2386,9 @@
      "mitjana": 0.3171,
      "pos": 534,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.333
     },
     {
      "num": 19,
@@ -2004,7 +2396,9 @@
      "mitjana": 0.3163,
      "pos": 535,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.722
     },
     {
      "num": 20,
@@ -2012,7 +2406,9 @@
      "mitjana": 0.3134,
      "pos": 370,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.833
     },
     {
      "num": 21,
@@ -2020,7 +2416,9 @@
      "mitjana": 0.2882,
      "pos": 385,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.667
     },
     {
      "num": 22,
@@ -2028,7 +2426,9 @@
      "mitjana": 0.2744,
      "pos": 392,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 23,
@@ -2036,7 +2436,9 @@
      "mitjana": 0.269,
      "pos": 396,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.611
     },
     {
      "num": 24,
@@ -2044,7 +2446,9 @@
      "mitjana": 0.2615,
      "pos": 575,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.333
     },
     {
      "num": 25,
@@ -2052,7 +2456,9 @@
      "mitjana": 0.176,
      "pos": 603,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 26,
@@ -2060,7 +2466,9 @@
      "mitjana": 0.1752,
      "pos": 604,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.056
     },
     {
      "num": 27,
@@ -2068,7 +2476,9 @@
      "mitjana": 0.14,
      "pos": 610,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.222
     },
     {
      "num": 28,
@@ -2076,7 +2486,9 @@
      "mitjana": 0.0267,
      "pos": 613,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.056
     }
    ],
    "multi": true
@@ -2111,7 +2523,9 @@
      "mitjana": 0.7561,
      "pos": 43,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 2,
@@ -2119,7 +2533,9 @@
      "mitjana": 0.4933,
      "pos": 206,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -2127,7 +2543,9 @@
      "mitjana": 0.4696,
      "pos": 227,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 4,
@@ -2135,7 +2553,9 @@
      "mitjana": 0.4652,
      "pos": 230,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 5,
@@ -2143,7 +2563,9 @@
      "mitjana": 0.437,
      "pos": 463,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 6,
@@ -2151,7 +2573,9 @@
      "mitjana": 0.4158,
      "pos": 289,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 7,
@@ -2159,7 +2583,9 @@
      "mitjana": 0.4062,
      "pos": 300,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 8,
@@ -2167,7 +2593,9 @@
      "mitjana": 0.3933,
      "pos": 311,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 9,
@@ -2175,7 +2603,9 @@
      "mitjana": 0.388,
      "pos": 318,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 10,
@@ -2183,7 +2613,9 @@
      "mitjana": 0.366,
      "pos": 333,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 11,
@@ -2191,7 +2623,9 @@
      "mitjana": 0.34,
      "pos": 514,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 12,
@@ -2199,7 +2633,9 @@
      "mitjana": 0.3007,
      "pos": 379,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     }
    ],
    "multi": true
@@ -2234,7 +2670,9 @@
      "mitjana": 0.7169,
      "pos": 59,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 2,
@@ -2242,7 +2680,9 @@
      "mitjana": 0.606,
      "pos": 106,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -2250,7 +2690,9 @@
      "mitjana": 0.5464,
      "pos": 151,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -2258,7 +2700,9 @@
      "mitjana": 0.5074,
      "pos": 194,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 5,
@@ -2266,7 +2710,9 @@
      "mitjana": 0.3932,
      "pos": 312,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.562
     },
     {
      "num": 6,
@@ -2274,7 +2720,9 @@
      "mitjana": 0.3766,
      "pos": 328,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.688
     },
     {
      "num": 7,
@@ -2282,7 +2730,9 @@
      "mitjana": 0.3392,
      "pos": 516,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.062
     },
     {
      "num": 8,
@@ -2290,7 +2740,9 @@
      "mitjana": 0.3392,
      "pos": 357,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.562
     },
     {
      "num": 9,
@@ -2298,7 +2750,9 @@
      "mitjana": 0.3229,
      "pos": 364,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.688
     },
     {
      "num": 10,
@@ -2306,7 +2760,9 @@
      "mitjana": 0.322,
      "pos": 366,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.625
     },
     {
      "num": 11,
@@ -2314,7 +2770,9 @@
      "mitjana": 0.2286,
      "pos": 402,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.562
     }
    ],
    "multi": true
@@ -2367,7 +2825,9 @@
      "mitjana": 1.3218,
      "pos": 4,
      "de_club": "C.B. Sant Adrià",
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.706
     },
     {
      "num": 2,
@@ -2375,7 +2835,9 @@
      "mitjana": 1.1496,
      "pos": 10,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 3,
@@ -2383,7 +2845,9 @@
      "mitjana": 1.142,
      "pos": 11,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.625
     },
     {
      "num": 4,
@@ -2391,7 +2855,9 @@
      "mitjana": 1.0488,
      "pos": 15,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 5,
@@ -2399,7 +2865,9 @@
      "mitjana": 1.0459,
      "pos": 16,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 6,
@@ -2407,7 +2875,9 @@
      "mitjana": 0.9404,
      "pos": 19,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 7,
@@ -2415,7 +2885,9 @@
      "mitjana": 0.8889,
      "pos": 23,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.933
     },
     {
      "num": 8,
@@ -2423,7 +2895,9 @@
      "mitjana": 0.7432,
      "pos": 50,
      "de_club": "S.B. Foment Molins",
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.706
     },
     {
      "num": 9,
@@ -2431,7 +2905,9 @@
      "mitjana": 0.6492,
      "pos": 92,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.8
     },
     {
      "num": 10,
@@ -2439,7 +2915,9 @@
      "mitjana": 0.6085,
      "pos": 105,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.706
     },
     {
      "num": 11,
@@ -2447,7 +2925,9 @@
      "mitjana": 0.5583,
      "pos": 139,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.867
     },
     {
      "num": 12,
@@ -2455,7 +2935,9 @@
      "mitjana": 0.5179,
      "pos": 189,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.824
     },
     {
      "num": 13,
@@ -2463,7 +2945,9 @@
      "mitjana": 0.4758,
      "pos": 222,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 18,
+     "taxa": 1.0
     },
     {
      "num": 14,
@@ -2471,7 +2955,9 @@
      "mitjana": 0.3818,
      "pos": 323,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 17,
+     "taxa": 1.0
     },
     {
      "num": 15,
@@ -2479,7 +2965,9 @@
      "mitjana": 0.369,
      "pos": 494,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 16,
@@ -2487,7 +2975,9 @@
      "mitjana": 0.3638,
      "pos": 338,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.389
     },
     {
      "num": 17,
@@ -2495,7 +2985,9 @@
      "mitjana": 0.357,
      "pos": 346,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.722
     },
     {
      "num": 18,
@@ -2503,7 +2995,9 @@
      "mitjana": 0.3223,
      "pos": 365,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.588
     },
     {
      "num": 19,
@@ -2511,7 +3005,9 @@
      "mitjana": 0.2828,
      "pos": 562,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 20,
@@ -2519,7 +3015,9 @@
      "mitjana": 0.2718,
      "pos": 395,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.444
     },
     {
      "num": 21,
@@ -2527,7 +3025,9 @@
      "mitjana": 0.2585,
      "pos": 399,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 22,
@@ -2535,7 +3035,9 @@
      "mitjana": 0.219,
      "pos": 589,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.333
     },
     {
      "num": 23,
@@ -2543,7 +3045,9 @@
      "mitjana": 0.2067,
      "pos": 595,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 24,
@@ -2551,7 +3055,9 @@
      "mitjana": 0.1777,
      "pos": 602,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.278
     },
     {
      "num": 25,
@@ -2559,7 +3065,9 @@
      "mitjana": 0.0657,
      "pos": 405,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.278
     }
    ],
    "multi": true
@@ -2594,7 +3102,9 @@
      "mitjana": 1.1558,
      "pos": 9,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.733
     },
     {
      "num": 2,
@@ -2602,7 +3112,9 @@
      "mitjana": 1.1255,
      "pos": 12,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.933
     },
     {
      "num": 3,
@@ -2610,7 +3122,9 @@
      "mitjana": 0.8974,
      "pos": 22,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.733
     },
     {
      "num": 4,
@@ -2618,7 +3132,9 @@
      "mitjana": 0.7916,
      "pos": 33,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.733
     },
     {
      "num": 5,
@@ -2626,7 +3142,9 @@
      "mitjana": 0.7019,
      "pos": 64,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.867
     },
     {
      "num": 6,
@@ -2634,7 +3152,9 @@
      "mitjana": 0.6033,
      "pos": 109,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 7,
@@ -2642,7 +3162,9 @@
      "mitjana": 0.5875,
      "pos": 117,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 8,
@@ -2650,7 +3172,9 @@
      "mitjana": 0.5863,
      "pos": 119,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 9,
@@ -2658,7 +3182,9 @@
      "mitjana": 0.4915,
      "pos": 444,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 10,
@@ -2666,7 +3192,9 @@
      "mitjana": 0.456,
      "pos": 238,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 11,
@@ -2674,7 +3202,9 @@
      "mitjana": 0.4003,
      "pos": 305,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     }
    ],
    "multi": true
@@ -2736,7 +3266,9 @@
      "mitjana": 1.3016,
      "pos": 5,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 2,
@@ -2744,7 +3276,9 @@
      "mitjana": 0.8165,
      "pos": 30,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -2752,7 +3286,9 @@
      "mitjana": 0.7511,
      "pos": 47,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 4,
@@ -2760,7 +3296,9 @@
      "mitjana": 0.7173,
      "pos": 58,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.867
     },
     {
      "num": 5,
@@ -2768,7 +3306,9 @@
      "mitjana": 0.7045,
      "pos": 61,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 6,
@@ -2776,7 +3316,9 @@
      "mitjana": 0.7044,
      "pos": 62,
      "de_club": "S.B. Esplugues l'Avenç",
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.571
     },
     {
      "num": 7,
@@ -2784,7 +3326,9 @@
      "mitjana": 0.6989,
      "pos": 65,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 8,
@@ -2792,7 +3336,9 @@
      "mitjana": 0.6832,
      "pos": 68,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.933
     },
     {
      "num": 9,
@@ -2800,7 +3346,9 @@
      "mitjana": 0.677,
      "pos": 72,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.4
     },
     {
      "num": 10,
@@ -2808,7 +3356,9 @@
      "mitjana": 0.6572,
      "pos": 82,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 11,
@@ -2816,7 +3366,9 @@
      "mitjana": 0.6509,
      "pos": 90,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.733
     },
     {
      "num": 12,
@@ -2824,7 +3376,9 @@
      "mitjana": 0.6142,
      "pos": 101,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.933
     },
     {
      "num": 13,
@@ -2832,7 +3386,9 @@
      "mitjana": 0.5947,
      "pos": 418,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.357
     },
     {
      "num": 14,
@@ -2840,7 +3396,9 @@
      "mitjana": 0.5882,
      "pos": 116,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 15,
@@ -2848,7 +3406,9 @@
      "mitjana": 0.5198,
      "pos": 186,
      "de_club": "C.B. Sants",
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 0.571
     },
     {
      "num": 16,
@@ -2856,7 +3416,9 @@
      "mitjana": 0.5098,
      "pos": 438,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.286
     },
     {
      "num": 17,
@@ -2864,7 +3426,9 @@
      "mitjana": 0.4832,
      "pos": 217,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 18,
@@ -2872,7 +3436,9 @@
      "mitjana": 0.4796,
      "pos": 446,
      "de_club": null,
-     "retorn": true
+     "retorn": true,
+     "pj": 0,
+     "taxa": 0.571
     },
     {
      "num": 19,
@@ -2880,7 +3446,9 @@
      "mitjana": 0.4787,
      "pos": 219,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 20,
@@ -2888,7 +3456,9 @@
      "mitjana": 0.4782,
      "pos": 220,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 21,
@@ -2896,7 +3466,9 @@
      "mitjana": 0.4511,
      "pos": 241,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 22,
@@ -2904,7 +3476,9 @@
      "mitjana": 0.4466,
      "pos": 250,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 23,
@@ -2912,7 +3486,9 @@
      "mitjana": 0.4448,
      "pos": 253,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 24,
@@ -2920,7 +3496,9 @@
      "mitjana": 0.4333,
      "pos": 465,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 25,
@@ -2928,7 +3506,9 @@
      "mitjana": 0.42,
      "pos": 283,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 26,
@@ -2936,7 +3516,9 @@
      "mitjana": 0.412,
      "pos": 293,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 27,
@@ -2944,7 +3526,9 @@
      "mitjana": 0.3856,
      "pos": 320,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.778
     },
     {
      "num": 28,
@@ -2952,7 +3536,9 @@
      "mitjana": 0.3605,
      "pos": 341,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 29,
@@ -2960,7 +3546,9 @@
      "mitjana": 0.3587,
      "pos": 344,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.389
     },
     {
      "num": 30,
@@ -2968,7 +3556,9 @@
      "mitjana": 0.3564,
      "pos": 505,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.444
     },
     {
      "num": 31,
@@ -2976,7 +3566,9 @@
      "mitjana": 0.3462,
      "pos": 508,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 32,
@@ -2984,7 +3576,9 @@
      "mitjana": 0.3309,
      "pos": 523,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.167
     },
     {
      "num": 33,
@@ -2992,7 +3586,9 @@
      "mitjana": 0.3206,
      "pos": 367,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 34,
@@ -3000,7 +3596,9 @@
      "mitjana": 0.32,
      "pos": null,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 35,
@@ -3008,7 +3606,9 @@
      "mitjana": 0.3175,
      "pos": 368,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 36,
@@ -3016,7 +3616,9 @@
      "mitjana": 0.2743,
      "pos": 393,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.333
     }
    ],
    "multi": true
@@ -3060,7 +3662,9 @@
      "mitjana": 0.9855,
      "pos": 18,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 2,
@@ -3068,7 +3672,9 @@
      "mitjana": 0.7624,
      "pos": 39,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 3,
@@ -3076,7 +3682,9 @@
      "mitjana": 0.7143,
      "pos": 60,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -3084,7 +3692,9 @@
      "mitjana": 0.6761,
      "pos": 73,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 5,
@@ -3092,7 +3702,9 @@
      "mitjana": 0.5314,
      "pos": 431,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.25
     },
     {
      "num": 6,
@@ -3100,7 +3712,9 @@
      "mitjana": 0.5304,
      "pos": 172,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 7,
@@ -3108,7 +3722,9 @@
      "mitjana": 0.5277,
      "pos": 176,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 8,
@@ -3116,7 +3732,9 @@
      "mitjana": 0.4575,
      "pos": 236,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.222
     },
     {
      "num": 9,
@@ -3124,7 +3742,9 @@
      "mitjana": 0.4393,
      "pos": 459,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.056
     },
     {
      "num": 10,
@@ -3132,7 +3752,9 @@
      "mitjana": 0.4343,
      "pos": 261,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.688
     },
     {
      "num": 11,
@@ -3140,7 +3762,9 @@
      "mitjana": 0.4337,
      "pos": 263,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 12,
@@ -3148,7 +3772,9 @@
      "mitjana": 0.4329,
      "pos": 265,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.611
     },
     {
      "num": 13,
@@ -3156,7 +3782,9 @@
      "mitjana": 0.4112,
      "pos": 295,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 14,
@@ -3164,7 +3792,9 @@
      "mitjana": 0.4021,
      "pos": 479,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.125
     },
     {
      "num": 15,
@@ -3172,7 +3802,9 @@
      "mitjana": 0.392,
      "pos": 314,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.444
     },
     {
      "num": 16,
@@ -3180,7 +3812,9 @@
      "mitjana": 0.3654,
      "pos": 334,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.556
     },
     {
      "num": 17,
@@ -3188,7 +3822,9 @@
      "mitjana": 0.2992,
      "pos": 551,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.5
     },
     {
      "num": 18,
@@ -3196,7 +3832,9 @@
      "mitjana": 0.2492,
      "pos": 580,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.167
     },
     {
      "num": 19,
@@ -3204,7 +3842,9 @@
      "mitjana": 0.2166,
      "pos": 590,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.389
     },
     {
      "num": 20,
@@ -3212,7 +3852,9 @@
      "mitjana": 0.2,
      "pos": 598,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.111
     }
    ],
    "multi": true
@@ -3247,7 +3889,9 @@
      "mitjana": 0.6777,
      "pos": 71,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 2,
@@ -3255,7 +3899,9 @@
      "mitjana": 0.6518,
      "pos": 88,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 3,
@@ -3263,7 +3909,9 @@
      "mitjana": 0.6099,
      "pos": 102,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -3271,7 +3919,9 @@
      "mitjana": 0.5931,
      "pos": 114,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 5,
@@ -3279,7 +3929,9 @@
      "mitjana": 0.496,
      "pos": 203,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 6,
@@ -3287,7 +3939,9 @@
      "mitjana": 0.4639,
      "pos": 232,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 7,
@@ -3295,7 +3949,9 @@
      "mitjana": 0.4108,
      "pos": 297,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 8,
@@ -3303,7 +3959,9 @@
      "mitjana": 0.3948,
      "pos": 481,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.214
     },
     {
      "num": 9,
@@ -3311,7 +3969,9 @@
      "mitjana": 0.393,
      "pos": 313,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 10,
@@ -3319,7 +3979,9 @@
      "mitjana": 0.3589,
      "pos": 343,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 11,
@@ -3327,7 +3989,9 @@
      "mitjana": 0.2964,
      "pos": 381,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.286
     }
    ],
    "multi": true
@@ -3353,7 +4017,9 @@
      "mitjana": 0.6047,
      "pos": 107,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 2,
@@ -3361,7 +4027,9 @@
      "mitjana": 0.5466,
      "pos": 150,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 3,
@@ -3369,7 +4037,9 @@
      "mitjana": 0.4955,
      "pos": 204,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 4,
@@ -3377,7 +4047,9 @@
      "mitjana": 0.4749,
      "pos": 448,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 5,
@@ -3385,7 +4057,9 @@
      "mitjana": 0.4497,
      "pos": 244,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 6,
@@ -3393,7 +4067,9 @@
      "mitjana": 0.3433,
      "pos": 354,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 7,
@@ -3401,7 +4077,9 @@
      "mitjana": 0.298,
      "pos": 552,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.143
     }
    ],
    "multi": false
@@ -3454,7 +4132,9 @@
      "mitjana": 1.5946,
      "pos": 3,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.2
     },
     {
      "num": 2,
@@ -3462,7 +4142,9 @@
      "mitjana": 0.9391,
      "pos": 20,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.933
     },
     {
      "num": 3,
@@ -3470,7 +4152,9 @@
      "mitjana": 0.9102,
      "pos": 21,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -3478,7 +4162,9 @@
      "mitjana": 0.8266,
      "pos": 28,
      "de_club": "B.C. Granollers",
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.688
     },
     {
      "num": 5,
@@ -3486,7 +4172,9 @@
      "mitjana": 0.818,
      "pos": 29,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 6,
@@ -3494,7 +4182,9 @@
      "mitjana": 0.7766,
      "pos": 36,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.867
     },
     {
      "num": 7,
@@ -3502,7 +4192,9 @@
      "mitjana": 0.6608,
      "pos": 81,
      "de_club": "C.B. Monforte",
-     "retorn": false
+     "retorn": false,
+     "pj": 0,
+     "taxa": 0.688
     },
     {
      "num": 8,
@@ -3510,7 +4202,9 @@
      "mitjana": 0.6528,
      "pos": 86,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 9,
@@ -3518,7 +4212,9 @@
      "mitjana": 0.6323,
      "pos": 94,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 10,
@@ -3526,7 +4222,9 @@
      "mitjana": 0.5952,
      "pos": 112,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.75
     },
     {
      "num": 11,
@@ -3534,7 +4232,9 @@
      "mitjana": 0.5759,
      "pos": 127,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 12,
@@ -3542,7 +4242,9 @@
      "mitjana": 0.5668,
      "pos": 132,
      "de_club": "B. La Unió Coral",
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.688
     },
     {
      "num": 13,
@@ -3550,7 +4252,9 @@
      "mitjana": 0.5471,
      "pos": 149,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 14,
@@ -3558,7 +4262,9 @@
      "mitjana": 0.533,
      "pos": 167,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.812
     },
     {
      "num": 15,
@@ -3566,7 +4272,9 @@
      "mitjana": 0.5129,
      "pos": 191,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.688
     },
     {
      "num": 16,
@@ -3574,7 +4282,9 @@
      "mitjana": 0.4879,
      "pos": 210,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.625
     },
     {
      "num": 17,
@@ -3582,7 +4292,9 @@
      "mitjana": 0.4632,
      "pos": 234,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 18,
@@ -3590,7 +4302,9 @@
      "mitjana": 0.443,
      "pos": 256,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 19,
@@ -3598,7 +4312,9 @@
      "mitjana": 0.4391,
      "pos": 258,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 20,
@@ -3606,7 +4322,9 @@
      "mitjana": 0.4059,
      "pos": 301,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 21,
@@ -3614,7 +4332,9 @@
      "mitjana": 0.3674,
      "pos": 496,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.286
     },
     {
      "num": 22,
@@ -3622,7 +4342,9 @@
      "mitjana": 0.364,
      "pos": 498,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 23,
@@ -3630,7 +4352,9 @@
      "mitjana": 0.3583,
      "pos": 345,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.357
     },
     {
      "num": 24,
@@ -3638,7 +4362,9 @@
      "mitjana": 0.3101,
      "pos": 541,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.286
     },
     {
      "num": 25,
@@ -3646,7 +4372,9 @@
      "mitjana": 0.2615,
      "pos": 398,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 26,
@@ -3654,7 +4382,9 @@
      "mitjana": 0.2324,
      "pos": 583,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.357
     }
    ],
    "multi": true
@@ -3698,7 +4428,9 @@
      "mitjana": 0.7372,
      "pos": 52,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 2,
@@ -3706,7 +4438,9 @@
      "mitjana": 0.7282,
      "pos": 54,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -3714,7 +4448,9 @@
      "mitjana": 0.6719,
      "pos": 77,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -3722,7 +4458,9 @@
      "mitjana": 0.6025,
      "pos": 110,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 5,
@@ -3730,7 +4468,9 @@
      "mitjana": 0.5658,
      "pos": 133,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 6,
@@ -3738,7 +4478,9 @@
      "mitjana": 0.5484,
      "pos": 147,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 7,
@@ -3746,7 +4488,9 @@
      "mitjana": 0.4558,
      "pos": 239,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 8,
@@ -3754,7 +4498,9 @@
      "mitjana": 0.4467,
      "pos": 249,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 9,
@@ -3762,7 +4508,9 @@
      "mitjana": 0.4345,
      "pos": 260,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.286
     },
     {
      "num": 10,
@@ -3770,7 +4518,9 @@
      "mitjana": 0.4338,
      "pos": 262,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 11,
@@ -3778,7 +4528,9 @@
      "mitjana": 0.4319,
      "pos": 268,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 12,
@@ -3786,7 +4538,9 @@
      "mitjana": 0.4184,
      "pos": 285,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 13,
@@ -3794,7 +4548,9 @@
      "mitjana": 0.398,
      "pos": 308,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 14,
@@ -3802,7 +4558,9 @@
      "mitjana": 0.3593,
      "pos": 342,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 15,
@@ -3810,7 +4568,9 @@
      "mitjana": 0.3338,
      "pos": 358,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 16,
@@ -3818,7 +4578,9 @@
      "mitjana": 0.2745,
      "pos": 391,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 17,
@@ -3826,7 +4588,9 @@
      "mitjana": 0.2551,
      "pos": 400,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.143
     }
    ],
    "multi": true
@@ -3888,7 +4652,9 @@
      "mitjana": 0.7449,
      "pos": 48,
      "de_club": "C.B. Mont-roig",
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.786
     },
     {
      "num": 2,
@@ -3896,7 +4662,9 @@
      "mitjana": 0.7448,
      "pos": 49,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -3904,7 +4672,9 @@
      "mitjana": 0.7391,
      "pos": 51,
      "de_club": "C.B. Sant Boi",
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.786
     },
     {
      "num": 4,
@@ -3912,7 +4682,9 @@
      "mitjana": 0.6644,
      "pos": 80,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 5,
@@ -3920,7 +4692,9 @@
      "mitjana": 0.6259,
      "pos": 95,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 6,
@@ -3928,7 +4702,9 @@
      "mitjana": 0.6038,
      "pos": 108,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 7,
@@ -3936,7 +4712,9 @@
      "mitjana": 0.5787,
      "pos": 125,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 8,
@@ -3944,7 +4722,9 @@
      "mitjana": 0.5616,
      "pos": 137,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 9,
@@ -3952,7 +4732,9 @@
      "mitjana": 0.5273,
      "pos": 432,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 10,
@@ -3960,7 +4742,9 @@
      "mitjana": 0.5197,
      "pos": 187,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 11,
@@ -3968,7 +4752,9 @@
      "mitjana": 0.5136,
      "pos": 190,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 12,
@@ -3976,7 +4762,9 @@
      "mitjana": 0.5101,
      "pos": 193,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 13,
@@ -3984,7 +4772,9 @@
      "mitjana": 0.5024,
      "pos": 196,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.875
     },
     {
      "num": 14,
@@ -3992,7 +4782,9 @@
      "mitjana": 0.5016,
      "pos": 197,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 15,
@@ -4000,7 +4792,9 @@
      "mitjana": 0.4807,
      "pos": 218,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 16,
@@ -4008,7 +4802,9 @@
      "mitjana": 0.4553,
      "pos": 240,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 17,
@@ -4016,7 +4812,9 @@
      "mitjana": 0.4511,
      "pos": 456,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.125
     },
     {
      "num": 18,
@@ -4024,7 +4822,9 @@
      "mitjana": 0.4454,
      "pos": 252,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.375
     },
     {
      "num": 19,
@@ -4032,7 +4832,9 @@
      "mitjana": 0.4175,
      "pos": 287,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 20,
@@ -4040,7 +4842,9 @@
      "mitjana": 0.4149,
      "pos": 474,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.125
     },
     {
      "num": 21,
@@ -4048,7 +4852,9 @@
      "mitjana": 0.4003,
      "pos": 306,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.688
     },
     {
      "num": 22,
@@ -4056,7 +4862,9 @@
      "mitjana": 0.3724,
      "pos": 330,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.5
     },
     {
      "num": 23,
@@ -4064,7 +4872,9 @@
      "mitjana": 0.3507,
      "pos": 507,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 24,
@@ -4072,7 +4882,9 @@
      "mitjana": 0.3148,
      "pos": 369,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.188
     },
     {
      "num": 25,
@@ -4080,7 +4892,9 @@
      "mitjana": 0.31,
      "pos": 373,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.375
     },
     {
      "num": 26,
@@ -4088,7 +4902,9 @@
      "mitjana": 0.2987,
      "pos": 380,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.562
     },
     {
      "num": 27,
@@ -4096,7 +4912,9 @@
      "mitjana": 0.2945,
      "pos": 383,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 28,
@@ -4104,7 +4922,9 @@
      "mitjana": 0.2933,
      "pos": 555,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.188
     },
     {
      "num": 29,
@@ -4112,7 +4932,9 @@
      "mitjana": 0.2812,
      "pos": 389,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 30,
@@ -4120,7 +4942,9 @@
      "mitjana": 0.2727,
      "pos": 394,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.312
     }
    ],
    "multi": true
@@ -4155,7 +4979,9 @@
      "mitjana": 0.6176,
      "pos": 99,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 2,
@@ -4163,7 +4989,9 @@
      "mitjana": 0.5997,
      "pos": 111,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 3,
@@ -4171,7 +4999,9 @@
      "mitjana": 0.5802,
      "pos": 421,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.214
     },
     {
      "num": 4,
@@ -4179,7 +5009,9 @@
      "mitjana": 0.5496,
      "pos": 146,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 5,
@@ -4187,7 +5019,9 @@
      "mitjana": 0.5478,
      "pos": 148,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 6,
@@ -4195,7 +5029,9 @@
      "mitjana": 0.5014,
      "pos": 198,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 7,
@@ -4203,7 +5039,9 @@
      "mitjana": 0.498,
      "pos": 443,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.143
     },
     {
      "num": 8,
@@ -4211,7 +5049,9 @@
      "mitjana": 0.4875,
      "pos": 211,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 9,
@@ -4219,7 +5059,9 @@
      "mitjana": 0.4866,
      "pos": 212,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 10,
@@ -4227,7 +5069,9 @@
      "mitjana": 0.4723,
      "pos": 449,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 11,
@@ -4235,7 +5079,9 @@
      "mitjana": 0.4193,
      "pos": 284,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     }
    ],
    "multi": true
@@ -4261,7 +5107,9 @@
      "mitjana": 0.5257,
      "pos": 179,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 2,
@@ -4269,7 +5117,9 @@
      "mitjana": 0.4976,
      "pos": 201,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 3,
@@ -4277,7 +5127,9 @@
      "mitjana": 0.4392,
      "pos": 460,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 4,
@@ -4285,7 +5137,9 @@
      "mitjana": 0.4049,
      "pos": 302,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 5,
@@ -4293,7 +5147,9 @@
      "mitjana": 0.3807,
      "pos": 324,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.143
     },
     {
      "num": 6,
@@ -4301,7 +5157,9 @@
      "mitjana": 0.3338,
      "pos": 359,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.214
     },
     {
      "num": 7,
@@ -4309,7 +5167,9 @@
      "mitjana": 0.3026,
      "pos": 377,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 8,
@@ -4317,7 +5177,9 @@
      "mitjana": 0.2133,
      "pos": 591,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     }
    ],
    "multi": false
@@ -4343,7 +5205,9 @@
      "mitjana": 0.6472,
      "pos": 93,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 2,
@@ -4351,7 +5215,9 @@
      "mitjana": 0.3756,
      "pos": 329,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 3,
@@ -4359,7 +5225,9 @@
      "mitjana": 0.3267,
      "pos": 526,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 4,
@@ -4367,7 +5235,9 @@
      "mitjana": 0.3121,
      "pos": 537,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 5,
@@ -4375,7 +5245,9 @@
      "mitjana": 0.295,
      "pos": 554,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.143
     },
     {
      "num": 6,
@@ -4383,7 +5255,9 @@
      "mitjana": 0.2828,
      "pos": 563,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 7,
@@ -4391,7 +5265,9 @@
      "mitjana": 0.2628,
      "pos": 397,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 8,
@@ -4399,7 +5275,9 @@
      "mitjana": 0.2311,
      "pos": 584,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.286
     },
     {
      "num": 9,
@@ -4407,7 +5285,9 @@
      "mitjana": 0.1646,
      "pos": 606,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     }
    ],
    "multi": false
@@ -4433,7 +5313,9 @@
      "mitjana": 0.653,
      "pos": 85,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 2,
@@ -4441,7 +5323,9 @@
      "mitjana": 0.6522,
      "pos": 87,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.938
     },
     {
      "num": 3,
@@ -4449,7 +5333,9 @@
      "mitjana": 0.6233,
      "pos": 96,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 1.0
     },
     {
      "num": 4,
@@ -4457,7 +5343,9 @@
      "mitjana": 0.5506,
      "pos": 143,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.562
     },
     {
      "num": 5,
@@ -4465,7 +5353,9 @@
      "mitjana": 0.5434,
      "pos": 155,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.562
     }
    ],
    "multi": false
@@ -4491,7 +5381,9 @@
      "mitjana": 0.6781,
      "pos": 70,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 1.0
     },
     {
      "num": 2,
@@ -4499,7 +5391,9 @@
      "mitjana": 0.6746,
      "pos": 74,
      "de_club": "C.B. Llinars",
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.5
     },
     {
      "num": 3,
@@ -4507,7 +5401,9 @@
      "mitjana": 0.4241,
      "pos": 470,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.143
     },
     {
      "num": 4,
@@ -4515,7 +5411,9 @@
      "mitjana": 0.4119,
      "pos": 476,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.357
     },
     {
      "num": 5,
@@ -4523,7 +5421,9 @@
      "mitjana": 0.3881,
      "pos": 317,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 6,
@@ -4531,7 +5431,9 @@
      "mitjana": 0.3567,
      "pos": 347,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 7,
@@ -4539,7 +5441,9 @@
      "mitjana": 0.352,
      "pos": 350,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 8,
@@ -4547,7 +5451,9 @@
      "mitjana": 0.3121,
      "pos": 372,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 5,
+     "taxa": 0.357
     }
    ],
    "multi": false
@@ -4582,7 +5488,9 @@
      "mitjana": 0.5861,
      "pos": 120,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 2,
@@ -4590,7 +5498,9 @@
      "mitjana": 0.54,
      "pos": 157,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 3,
@@ -4598,7 +5508,9 @@
      "mitjana": 0.5237,
      "pos": 182,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 4,
@@ -4606,7 +5518,9 @@
      "mitjana": 0.5195,
      "pos": 188,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.375
     },
     {
      "num": 5,
@@ -4614,7 +5528,9 @@
      "mitjana": 0.465,
      "pos": 231,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.875
     },
     {
      "num": 6,
@@ -4622,7 +5538,9 @@
      "mitjana": 0.4486,
      "pos": 246,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 7,
@@ -4630,7 +5548,9 @@
      "mitjana": 0.4262,
      "pos": 277,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.625
     },
     {
      "num": 8,
@@ -4638,7 +5558,9 @@
      "mitjana": 0.4242,
      "pos": 279,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.75
     },
     {
      "num": 9,
@@ -4646,7 +5568,9 @@
      "mitjana": 0.4012,
      "pos": 480,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.25
     },
     {
      "num": 10,
@@ -4654,7 +5578,9 @@
      "mitjana": 0.3548,
      "pos": 348,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 11,
@@ -4662,7 +5588,9 @@
      "mitjana": 0.3265,
      "pos": 362,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 12,
@@ -4670,7 +5598,9 @@
      "mitjana": 0.3046,
      "pos": 546,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     }
    ],
    "multi": true
@@ -4705,7 +5635,9 @@
      "mitjana": 0.6096,
      "pos": 103,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.562
     },
     {
      "num": 2,
@@ -4713,7 +5645,9 @@
      "mitjana": 0.5849,
      "pos": 122,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 3,
@@ -4721,7 +5655,9 @@
      "mitjana": 0.5296,
      "pos": 173,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 4,
@@ -4729,7 +5665,9 @@
      "mitjana": 0.4134,
      "pos": 291,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 0.875
     },
     {
      "num": 5,
@@ -4737,7 +5675,9 @@
      "mitjana": 0.4133,
      "pos": 292,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 6,
@@ -4745,7 +5685,9 @@
      "mitjana": 0.4015,
      "pos": 303,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 7,
@@ -4753,7 +5695,9 @@
      "mitjana": 0.3773,
      "pos": 327,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.812
     },
     {
      "num": 8,
@@ -4761,7 +5705,9 @@
      "mitjana": 0.3678,
      "pos": 495,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.438
     },
     {
      "num": 9,
@@ -4769,7 +5715,9 @@
      "mitjana": 0.2723,
      "pos": 568,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.625
     },
     {
      "num": 10,
@@ -4777,7 +5725,9 @@
      "mitjana": 0.24,
      "pos": 582,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.062
     },
     {
      "num": 11,
@@ -4785,7 +5735,9 @@
      "mitjana": 0.1467,
      "pos": 609,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.188
     },
     {
      "num": 12,
@@ -4793,7 +5745,9 @@
      "mitjana": 0.12,
      "pos": 611,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.188
     }
    ],
    "multi": true
@@ -4828,7 +5782,9 @@
      "mitjana": 0.6144,
      "pos": 417,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 2,
@@ -4836,7 +5792,9 @@
      "mitjana": 0.5898,
      "pos": 115,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 3,
@@ -4844,7 +5802,9 @@
      "mitjana": 0.5871,
      "pos": 118,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 4,
@@ -4852,7 +5812,9 @@
      "mitjana": 0.5729,
      "pos": 128,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 18,
+     "taxa": 1.0
     },
     {
      "num": 5,
@@ -4860,7 +5822,9 @@
      "mitjana": 0.5503,
      "pos": 144,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 20,
+     "taxa": 1.0
     },
     {
      "num": 6,
@@ -4868,7 +5832,9 @@
      "mitjana": 0.524,
      "pos": 181,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 16,
+     "taxa": 0.8
     },
     {
      "num": 7,
@@ -4876,7 +5842,9 @@
      "mitjana": 0.4006,
      "pos": 304,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.75
     },
     {
      "num": 8,
@@ -4884,7 +5852,9 @@
      "mitjana": 0.3679,
      "pos": 332,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 15,
+     "taxa": 0.75
     },
     {
      "num": 9,
@@ -4892,7 +5862,9 @@
      "mitjana": 0.3427,
      "pos": 355,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 17,
+     "taxa": 0.85
     },
     {
      "num": 10,
@@ -4900,7 +5872,9 @@
      "mitjana": 0.3267,
      "pos": 527,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.05
     }
    ],
    "multi": true
@@ -4935,7 +5909,9 @@
      "mitjana": 0.685,
      "pos": 412,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 2,
@@ -4943,7 +5919,9 @@
      "mitjana": 0.672,
      "pos": 76,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 3,
@@ -4951,7 +5929,9 @@
      "mitjana": 0.6678,
      "pos": 79,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 4,
@@ -4959,7 +5939,9 @@
      "mitjana": 0.6493,
      "pos": 91,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 5,
@@ -4967,7 +5949,9 @@
      "mitjana": 0.5676,
      "pos": 131,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 6,
@@ -4975,7 +5959,9 @@
      "mitjana": 0.4774,
      "pos": 447,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 7,
@@ -4983,7 +5969,9 @@
      "mitjana": 0.4493,
      "pos": 458,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.214
     },
     {
      "num": 8,
@@ -4991,7 +5979,9 @@
      "mitjana": 0.438,
      "pos": 259,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 9,
@@ -4999,7 +5989,9 @@
      "mitjana": 0.432,
      "pos": 267,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 10,
@@ -5007,7 +5999,9 @@
      "mitjana": 0.3693,
      "pos": 331,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 11,
@@ -5015,7 +6009,9 @@
      "mitjana": 0.3622,
      "pos": 340,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 7,
+     "taxa": 0.5
     },
     {
      "num": 12,
@@ -5023,7 +6019,9 @@
      "mitjana": 0.33,
      "pos": 360,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 4,
+     "taxa": 0.286
     },
     {
      "num": 13,
@@ -5031,7 +6029,9 @@
      "mitjana": 0.3221,
      "pos": 531,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 14,
@@ -5039,7 +6039,9 @@
      "mitjana": 0.2593,
      "pos": 577,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 15,
@@ -5047,7 +6049,9 @@
      "mitjana": 0.21,
      "pos": 594,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 2,
+     "taxa": 0.143
     }
    ],
    "multi": true
@@ -5091,7 +6095,9 @@
      "mitjana": 0.8058,
      "pos": 32,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 9,
+     "taxa": 0.643
     },
     {
      "num": 2,
@@ -5099,7 +6105,9 @@
      "mitjana": 0.7195,
      "pos": 57,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 3,
@@ -5107,7 +6115,9 @@
      "mitjana": 0.7037,
      "pos": 63,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 4,
@@ -5115,7 +6125,9 @@
      "mitjana": 0.6734,
      "pos": 75,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 14,
+     "taxa": 1.0
     },
     {
      "num": 5,
@@ -5123,7 +6135,9 @@
      "mitjana": 0.6509,
      "pos": 89,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 11,
+     "taxa": 0.786
     },
     {
      "num": 6,
@@ -5131,7 +6145,9 @@
      "mitjana": 0.5946,
      "pos": 113,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 13,
+     "taxa": 0.929
     },
     {
      "num": 7,
@@ -5139,7 +6155,9 @@
      "mitjana": 0.5913,
      "pos": 420,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.214
     },
     {
      "num": 8,
@@ -5147,7 +6165,9 @@
      "mitjana": 0.5343,
      "pos": 163,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 9,
@@ -5155,7 +6175,9 @@
      "mitjana": 0.5341,
      "pos": 164,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 3,
+     "taxa": 0.214
     },
     {
      "num": 10,
@@ -5163,7 +6185,9 @@
      "mitjana": 0.5305,
      "pos": 171,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 12,
+     "taxa": 0.857
     },
     {
      "num": 11,
@@ -5171,7 +6195,9 @@
      "mitjana": 0.4993,
      "pos": 199,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 12,
@@ -5179,7 +6205,9 @@
      "mitjana": 0.4963,
      "pos": 202,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 8,
+     "taxa": 0.571
     },
     {
      "num": 13,
@@ -5187,7 +6215,9 @@
      "mitjana": 0.4498,
      "pos": 243,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 6,
+     "taxa": 0.429
     },
     {
      "num": 14,
@@ -5195,7 +6225,9 @@
      "mitjana": 0.4311,
      "pos": 269,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 15,
@@ -5203,7 +6235,9 @@
      "mitjana": 0.4109,
      "pos": 296,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     },
     {
      "num": 16,
@@ -5211,7 +6245,9 @@
      "mitjana": 0.3795,
      "pos": 325,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 10,
+     "taxa": 0.714
     },
     {
      "num": 17,
@@ -5219,7 +6255,9 @@
      "mitjana": 0.0,
      "pos": null,
      "de_club": null,
-     "retorn": false
+     "retorn": false,
+     "pj": 1,
+     "taxa": 0.071
     }
    ],
    "multi": true
@@ -5238,11 +6276,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": null,
-     "p_1r": 0.9536,
-     "p_2n": 0.0462,
+     "p_1r": 0.9964,
+     "p_2n": 0.0034,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
-     "pos_mitjana": 1.05
+     "pos_mitjana": 1.0
     },
     {
      "seed": 2,
@@ -5254,7 +6292,7 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 1.0,
-     "p_2n": 0.0001,
+     "p_2n": 0.0,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
      "pos_mitjana": 1.0
@@ -5268,11 +6306,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": null,
-     "p_1r": 0.0001,
-     "p_2n": 0.982,
+     "p_1r": 0.0,
+     "p_2n": 0.9235,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
-     "pos_mitjana": 2.02
+     "pos_mitjana": 2.08
     },
     {
      "seed": 4,
@@ -5283,11 +6321,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": null,
-     "p_1r": 0.0464,
-     "p_2n": 0.9322,
+     "p_1r": 0.0031,
+     "p_2n": 0.7103,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
-     "pos_mitjana": 1.98
+     "pos_mitjana": 2.35
     },
     {
      "seed": 5,
@@ -5298,11 +6336,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": null,
-     "p_1r": 0.0,
-     "p_2n": 0.008,
-     "p_penultim": 0.0063,
-     "p_ultim": 0.0003,
-     "pos_mitjana": 3.74
+     "p_1r": 0.0001,
+     "p_2n": 0.0795,
+     "p_penultim": 0.0001,
+     "p_ultim": 0.0,
+     "pos_mitjana": 3.6
     },
     {
      "seed": 6,
@@ -5315,9 +6353,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0001,
-     "p_penultim": 0.1631,
-     "p_ultim": 0.0249,
-     "pos_mitjana": 5.3
+     "p_penultim": 0.4084,
+     "p_ultim": 0.195,
+     "pos_mitjana": 6.56
     },
     {
      "seed": 7,
@@ -5329,10 +6367,10 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0179,
-     "p_penultim": 0.0009,
-     "p_ultim": 0.0,
-     "pos_mitjana": 3.09
+     "p_2n": 0.0692,
+     "p_penultim": 0.0034,
+     "p_ultim": 0.0003,
+     "pos_mitjana": 3.27
     },
     {
      "seed": 8,
@@ -5345,9 +6383,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0001,
-     "p_penultim": 0.2071,
-     "p_ultim": 0.0394,
-     "pos_mitjana": 5.72
+     "p_penultim": 0.1313,
+     "p_ultim": 0.0406,
+     "pos_mitjana": 5.71
     },
     {
      "seed": 9,
@@ -5359,10 +6397,10 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0,
-     "p_penultim": 0.1706,
-     "p_ultim": 0.0238,
-     "pos_mitjana": 5.33
+     "p_2n": 0.0053,
+     "p_penultim": 0.0703,
+     "p_ultim": 0.0162,
+     "pos_mitjana": 4.73
     },
     {
      "seed": 10,
@@ -5373,11 +6411,11 @@
      "lletra_2526": "B",
      "div_2526": "Honor",
      "motiu": null,
-     "p_1r": 0.0,
-     "p_2n": 0.0135,
-     "p_penultim": 0.0031,
-     "p_ultim": 0.0001,
-     "pos_mitjana": 3.54
+     "p_1r": 0.0004,
+     "p_2n": 0.2069,
+     "p_penultim": 0.0,
+     "p_ultim": 0.0,
+     "pos_mitjana": 3.11
     },
     {
      "seed": 11,
@@ -5389,10 +6427,10 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0,
-     "p_penultim": 0.1769,
-     "p_ultim": 0.0247,
-     "pos_mitjana": 5.35
+     "p_2n": 0.0006,
+     "p_penultim": 0.1721,
+     "p_ultim": 0.0522,
+     "pos_mitjana": 5.51
     },
     {
      "seed": 12,
@@ -5405,9 +6443,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0,
-     "p_penultim": 0.2828,
-     "p_ultim": 0.0635,
-     "pos_mitjana": 6.0
+     "p_penultim": 0.141,
+     "p_ultim": 0.0474,
+     "pos_mitjana": 5.77
     },
     {
      "seed": 13,
@@ -5420,9 +6458,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0,
-     "p_penultim": 0.1437,
-     "p_ultim": 0.8014,
-     "pos_mitjana": 7.73
+     "p_penultim": 0.4088,
+     "p_ultim": 0.3686,
+     "pos_mitjana": 7.09
     },
     {
      "seed": 14,
@@ -5435,9 +6473,9 @@
      "motiu": "puja · play-off guanyat a Centelles A",
      "p_1r": 0.0,
      "p_2n": 0.0,
-     "p_penultim": 0.1149,
-     "p_ultim": 0.8468,
-     "pos_mitjana": 7.8
+     "p_penultim": 0.2066,
+     "p_ultim": 0.7004,
+     "pos_mitjana": 7.57
     },
     {
      "seed": 15,
@@ -5450,9 +6488,9 @@
      "motiu": "puja · campió 1a B",
      "p_1r": 0.0,
      "p_2n": 0.0,
-     "p_penultim": 0.357,
-     "p_ultim": 0.0953,
-     "pos_mitjana": 6.25
+     "p_penultim": 0.3186,
+     "p_ultim": 0.5433,
+     "pos_mitjana": 7.37
     },
     {
      "seed": 16,
@@ -5464,10 +6502,10 @@
      "div_2526": "1a",
      "motiu": "puja · campió 1a A",
      "p_1r": 0.0,
-     "p_2n": 0.0,
-     "p_penultim": 0.3735,
-     "p_ultim": 0.0799,
-     "pos_mitjana": 6.12
+     "p_2n": 0.0014,
+     "p_penultim": 0.1393,
+     "p_ultim": 0.036,
+     "pos_mitjana": 5.27
     }
    ],
    "grups": [
@@ -5529,11 +6567,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": "baixa · play-off perdut amb Casal Cervera",
-     "p_1r": 0.3432,
-     "p_2n": 0.2941,
-     "p_penultim": 0.0015,
-     "p_ultim": 0.0003,
-     "pos_mitjana": 2.24
+     "p_1r": 0.2564,
+     "p_2n": 0.2732,
+     "p_penultim": 0.0071,
+     "p_ultim": 0.0021,
+     "pos_mitjana": 2.59
     },
     {
      "seed": 2,
@@ -5544,11 +6582,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": "baixa · 8è Honor B",
-     "p_1r": 0.0066,
-     "p_2n": 0.5987,
-     "p_penultim": 0.0001,
+     "p_1r": 0.0046,
+     "p_2n": 0.4841,
+     "p_penultim": 0.0006,
      "p_ultim": 0.0001,
-     "pos_mitjana": 2.42
+     "pos_mitjana": 2.58
     },
     {
      "seed": 3,
@@ -5559,11 +6597,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": "baixa · 8è Honor A",
-     "p_1r": 0.0028,
-     "p_2n": 0.3867,
+     "p_1r": 0.0049,
+     "p_2n": 0.4955,
      "p_penultim": 0.0003,
-     "p_ultim": 0.0,
-     "pos_mitjana": 2.67
+     "p_ultim": 0.0001,
+     "pos_mitjana": 2.56
     },
     {
      "seed": 4,
@@ -5574,11 +6612,11 @@
      "lletra_2526": "A",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.3962,
-     "p_2n": 0.2893,
-     "p_penultim": 0.0008,
-     "p_ultim": 0.0001,
-     "pos_mitjana": 2.1
+     "p_1r": 0.4033,
+     "p_2n": 0.276,
+     "p_penultim": 0.003,
+     "p_ultim": 0.0008,
+     "pos_mitjana": 2.13
     },
     {
      "seed": 5,
@@ -5590,10 +6628,10 @@
      "div_2526": "1a",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0004,
-     "p_penultim": 0.2276,
-     "p_ultim": 0.2466,
-     "pos_mitjana": 6.25
+     "p_2n": 0.0022,
+     "p_penultim": 0.2073,
+     "p_ultim": 0.1423,
+     "pos_mitjana": 5.83
     },
     {
      "seed": 6,
@@ -5604,11 +6642,11 @@
      "lletra_2526": "B",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.0085,
-     "p_2n": 0.0274,
-     "p_penultim": 0.1308,
-     "p_ultim": 0.0311,
-     "pos_mitjana": 5.2
+     "p_1r": 0.0394,
+     "p_2n": 0.0894,
+     "p_penultim": 0.0732,
+     "p_ultim": 0.0316,
+     "pos_mitjana": 4.38
     },
     {
      "seed": 7,
@@ -5620,10 +6658,10 @@
      "div_2526": "1a",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0013,
-     "p_penultim": 0.2018,
-     "p_ultim": 0.1839,
-     "pos_mitjana": 5.96
+     "p_2n": 0.0026,
+     "p_penultim": 0.1834,
+     "p_ultim": 0.1222,
+     "pos_mitjana": 5.66
     },
     {
      "seed": 8,
@@ -5634,11 +6672,11 @@
      "lletra_2526": "C",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.1663,
-     "p_2n": 0.2291,
-     "p_penultim": 0.0058,
-     "p_ultim": 0.0008,
-     "pos_mitjana": 2.94
+     "p_1r": 0.2715,
+     "p_2n": 0.2812,
+     "p_penultim": 0.0066,
+     "p_ultim": 0.0015,
+     "pos_mitjana": 2.51
     },
     {
      "seed": 9,
@@ -5649,11 +6687,11 @@
      "lletra_2526": "A",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.0031,
-     "p_2n": 0.0126,
-     "p_penultim": 0.2059,
-     "p_ultim": 0.0602,
-     "pos_mitjana": 5.7
+     "p_1r": 0.0023,
+     "p_2n": 0.009,
+     "p_penultim": 0.2592,
+     "p_ultim": 0.2346,
+     "pos_mitjana": 6.3
     },
     {
      "seed": 10,
@@ -5665,10 +6703,10 @@
      "div_2526": "1a",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0025,
-     "p_penultim": 0.1234,
-     "p_ultim": 0.0818,
-     "pos_mitjana": 5.23
+     "p_2n": 0.0037,
+     "p_penultim": 0.1669,
+     "p_ultim": 0.0995,
+     "pos_mitjana": 5.51
     },
     {
      "seed": 11,
@@ -5680,10 +6718,10 @@
      "div_2526": "1a",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0005,
-     "p_penultim": 0.226,
-     "p_ultim": 0.2312,
-     "pos_mitjana": 6.19
+     "p_2n": 0.0001,
+     "p_penultim": 0.2371,
+     "p_ultim": 0.4923,
+     "pos_mitjana": 7.04
     },
     {
      "seed": 12,
@@ -5694,11 +6732,11 @@
      "lletra_2526": "A",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.0824,
-     "p_2n": 0.1459,
-     "p_penultim": 0.0186,
-     "p_ultim": 0.0027,
-     "pos_mitjana": 3.59
+     "p_1r": 0.0245,
+     "p_2n": 0.0615,
+     "p_penultim": 0.0944,
+     "p_ultim": 0.0517,
+     "pos_mitjana": 4.76
     },
     {
      "seed": 13,
@@ -5709,11 +6747,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": "puja · play-off guanyat a Llinars B",
-     "p_1r": 0.0,
-     "p_2n": 0.0,
-     "p_penultim": 0.2118,
-     "p_ultim": 0.6992,
-     "pos_mitjana": 7.58
+     "p_1r": 0.0014,
+     "p_2n": 0.0052,
+     "p_penultim": 0.2787,
+     "p_ultim": 0.3235,
+     "pos_mitjana": 6.63
     },
     {
      "seed": 14,
@@ -5725,10 +6763,10 @@
      "div_2526": "2a",
      "motiu": "puja · play-off amb Lleida B, desempat per caramboles (201-186)",
      "p_1r": 0.0,
-     "p_2n": 0.0006,
-     "p_penultim": 0.221,
-     "p_ultim": 0.2564,
-     "pos_mitjana": 6.27
+     "p_2n": 0.0027,
+     "p_penultim": 0.2044,
+     "p_ultim": 0.1435,
+     "pos_mitjana": 5.81
     },
     {
      "seed": 15,
@@ -5739,7 +6777,7 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": "puja · campió 2a A",
-     "p_1r": 0.9907,
+     "p_1r": 0.9905,
      "p_2n": 0.0092,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
@@ -5754,11 +6792,11 @@
      "lletra_2526": "",
      "div_2526": "2a",
      "motiu": "puja · campió 2a B",
-     "p_1r": 0.0003,
-     "p_2n": 0.0015,
-     "p_penultim": 0.4248,
-     "p_ultim": 0.2057,
-     "pos_mitjana": 6.64
+     "p_1r": 0.0013,
+     "p_2n": 0.0046,
+     "p_penultim": 0.2777,
+     "p_ultim": 0.3543,
+     "pos_mitjana": 6.71
     }
    ],
    "grups": [
@@ -5813,11 +6851,11 @@
      "lletra_2526": "B",
      "div_2526": "1a",
      "motiu": "baixa · play-off amb Sant Adrià C, desempat per caramboles (186-201)",
-     "p_1r": 0.0391,
-     "p_2n": 0.0872,
-     "p_penultim": 0.0997,
-     "p_ultim": 0.0257,
-     "pos_mitjana": 4.51
+     "p_1r": 0.0415,
+     "p_2n": 0.1134,
+     "p_penultim": 0.0912,
+     "p_ultim": 0.0086,
+     "pos_mitjana": 4.23
     },
     {
      "seed": 2,
@@ -5828,11 +6866,11 @@
      "lletra_2526": "B",
      "div_2526": "1a",
      "motiu": "baixa · play-off perdut amb Mont-roig B",
-     "p_1r": 0.0152,
-     "p_2n": 0.057,
-     "p_penultim": 0.191,
-     "p_ultim": 0.2102,
-     "pos_mitjana": 5.65
+     "p_1r": 0.0659,
+     "p_2n": 0.1442,
+     "p_penultim": 0.0862,
+     "p_ultim": 0.0451,
+     "pos_mitjana": 4.21
     },
     {
      "seed": 3,
@@ -5843,11 +6881,11 @@
      "lletra_2526": "A",
      "div_2526": "1a",
      "motiu": "baixa · 8è 1a B",
-     "p_1r": 0.6792,
-     "p_2n": 0.1835,
-     "p_penultim": 0.0032,
-     "p_ultim": 0.0009,
-     "pos_mitjana": 1.57
+     "p_1r": 0.6101,
+     "p_2n": 0.2079,
+     "p_penultim": 0.0043,
+     "p_ultim": 0.0008,
+     "pos_mitjana": 1.72
     },
     {
      "seed": 4,
@@ -5858,11 +6896,11 @@
      "lletra_2526": "B",
      "div_2526": "1a",
      "motiu": "baixa · 8è 1a A",
-     "p_1r": 0.3019,
-     "p_2n": 0.2688,
-     "p_penultim": 0.0088,
-     "p_ultim": 0.0015,
-     "pos_mitjana": 2.5
+     "p_1r": 0.5127,
+     "p_2n": 0.2919,
+     "p_penultim": 0.0021,
+     "p_ultim": 0.0,
+     "pos_mitjana": 1.8
     },
     {
      "seed": 5,
@@ -5873,11 +6911,11 @@
      "lletra_2526": "A",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0315,
-     "p_2n": 0.0669,
-     "p_penultim": 0.1232,
-     "p_ultim": 0.0352,
-     "pos_mitjana": 4.79
+     "p_1r": 0.0129,
+     "p_2n": 0.046,
+     "p_penultim": 0.1992,
+     "p_ultim": 0.0236,
+     "pos_mitjana": 5.12
     },
     {
      "seed": 6,
@@ -5888,11 +6926,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.019,
-     "p_2n": 0.0669,
-     "p_penultim": 0.1847,
-     "p_ultim": 0.1815,
-     "pos_mitjana": 5.47
+     "p_1r": 0.0617,
+     "p_2n": 0.1388,
+     "p_penultim": 0.0925,
+     "p_ultim": 0.0464,
+     "pos_mitjana": 4.27
     },
     {
      "seed": 7,
@@ -5903,11 +6941,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0042,
-     "p_2n": 0.0106,
-     "p_penultim": 0.3537,
-     "p_ultim": 0.1704,
-     "pos_mitjana": 6.26
+     "p_1r": 0.0037,
+     "p_2n": 0.0178,
+     "p_penultim": 0.3618,
+     "p_ultim": 0.0626,
+     "pos_mitjana": 5.86
     },
     {
      "seed": 8,
@@ -5918,11 +6956,11 @@
      "lletra_2526": "",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0781,
-     "p_2n": 0.1865,
-     "p_penultim": 0.0825,
-     "p_ultim": 0.052,
-     "pos_mitjana": 4.01
+     "p_1r": 0.0212,
+     "p_2n": 0.0603,
+     "p_penultim": 0.1793,
+     "p_ultim": 0.1184,
+     "pos_mitjana": 5.31
     },
     {
      "seed": 9,
@@ -5933,11 +6971,11 @@
      "lletra_2526": "A",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.2611,
-     "p_2n": 0.2622,
-     "p_penultim": 0.0106,
-     "p_ultim": 0.0021,
-     "pos_mitjana": 2.66
+     "p_1r": 0.0512,
+     "p_2n": 0.1273,
+     "p_penultim": 0.0712,
+     "p_ultim": 0.0073,
+     "pos_mitjana": 4.03
     },
     {
      "seed": 10,
@@ -5948,11 +6986,11 @@
      "lletra_2526": "C",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.035,
-     "p_2n": 0.104,
-     "p_penultim": 0.1428,
-     "p_ultim": 0.1158,
-     "pos_mitjana": 4.9
+     "p_1r": 0.0036,
+     "p_2n": 0.0154,
+     "p_penultim": 0.2649,
+     "p_ultim": 0.3646,
+     "pos_mitjana": 6.6
     },
     {
      "seed": 11,
@@ -5963,11 +7001,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.1268,
-     "p_2n": 0.2464,
-     "p_penultim": 0.0583,
-     "p_ultim": 0.0314,
-     "pos_mitjana": 3.51
+     "p_1r": 0.1488,
+     "p_2n": 0.2462,
+     "p_penultim": 0.0406,
+     "p_ultim": 0.0168,
+     "pos_mitjana": 3.32
     },
     {
      "seed": 12,
@@ -5978,11 +7016,11 @@
      "lletra_2526": "",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0001,
-     "p_2n": 0.0011,
-     "p_penultim": 0.1981,
-     "p_ultim": 0.6917,
-     "pos_mitjana": 7.53
+     "p_1r": 0.0,
+     "p_2n": 0.0,
+     "p_penultim": 0.0953,
+     "p_ultim": 0.8764,
+     "pos_mitjana": 7.84
     },
     {
      "seed": 13,
@@ -5993,11 +7031,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": "puja · play-off guanyat a Lliçà d'Amunt A",
-     "p_1r": 0.0148,
-     "p_2n": 0.0393,
-     "p_penultim": 0.1988,
-     "p_ultim": 0.0725,
-     "pos_mitjana": 5.39
+     "p_1r": 0.016,
+     "p_2n": 0.0527,
+     "p_penultim": 0.1738,
+     "p_ultim": 0.0212,
+     "pos_mitjana": 4.98
     },
     {
      "seed": 14,
@@ -6008,11 +7046,11 @@
      "lletra_2526": "D",
      "div_2526": "3a",
      "motiu": "puja · play-off amb Canet B, desempat per caramboles (178-177)",
-     "p_1r": 0.0389,
-     "p_2n": 0.1192,
-     "p_penultim": 0.1287,
-     "p_ultim": 0.1033,
-     "pos_mitjana": 4.75
+     "p_1r": 0.0854,
+     "p_2n": 0.1726,
+     "p_penultim": 0.0683,
+     "p_ultim": 0.0346,
+     "pos_mitjana": 3.93
     },
     {
      "seed": 15,
@@ -6023,11 +7061,11 @@
      "lletra_2526": "",
      "div_2526": "3a",
      "motiu": "puja · campió 3a A",
-     "p_1r": 0.0077,
-     "p_2n": 0.0365,
-     "p_penultim": 0.2088,
-     "p_ultim": 0.3048,
-     "pos_mitjana": 6.14
+     "p_1r": 0.0033,
+     "p_2n": 0.0146,
+     "p_penultim": 0.264,
+     "p_ultim": 0.3733,
+     "pos_mitjana": 6.63
     },
     {
      "seed": 16,
@@ -6038,11 +7076,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": "puja · campió 3a B",
-     "p_1r": 0.3473,
-     "p_2n": 0.264,
-     "p_penultim": 0.0072,
-     "p_ultim": 0.0009,
-     "pos_mitjana": 2.36
+     "p_1r": 0.362,
+     "p_2n": 0.3509,
+     "p_penultim": 0.0054,
+     "p_ultim": 0.0002,
+     "pos_mitjana": 2.14
     }
    ],
    "grups": [
@@ -6097,11 +7135,11 @@
      "lletra_2526": "A",
      "div_2526": "2a",
      "motiu": "baixa · play-off perdut amb Cerdanyola B",
-     "p_1r": 0.218,
-     "p_2n": 0.36,
-     "p_penultim": 0.0077,
-     "p_ultim": 0.002,
-     "pos_mitjana": 2.52
+     "p_1r": 0.251,
+     "p_2n": 0.4267,
+     "p_penultim": 0.005,
+     "p_ultim": 0.0005,
+     "pos_mitjana": 2.29
     },
     {
      "seed": 2,
@@ -6112,11 +7150,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": "baixa · play-off amb Sants D, desempat per caramboles (177-178)",
-     "p_1r": 0.0341,
-     "p_2n": 0.0852,
-     "p_penultim": 0.041,
-     "p_ultim": 0.0079,
-     "pos_mitjana": 4.34
+     "p_1r": 0.1482,
+     "p_2n": 0.2189,
+     "p_penultim": 0.0177,
+     "p_ultim": 0.0034,
+     "pos_mitjana": 3.13
     },
     {
      "seed": 3,
@@ -6127,11 +7165,11 @@
      "lletra_2526": "",
      "div_2526": "2a",
      "motiu": "baixa · 8è 2a A",
-     "p_1r": 0.127,
-     "p_2n": 0.2248,
-     "p_penultim": 0.008,
-     "p_ultim": 0.0012,
-     "pos_mitjana": 3.19
+     "p_1r": 0.0186,
+     "p_2n": 0.0525,
+     "p_penultim": 0.1181,
+     "p_ultim": 0.0389,
+     "pos_mitjana": 4.89
     },
     {
      "seed": 4,
@@ -6142,11 +7180,11 @@
      "lletra_2526": "D",
      "div_2526": "2a",
      "motiu": "baixa · 8è 2a B",
-     "p_1r": 0.1089,
-     "p_2n": 0.249,
-     "p_penultim": 0.0193,
-     "p_ultim": 0.0063,
-     "pos_mitjana": 3.14
+     "p_1r": 0.0028,
+     "p_2n": 0.0175,
+     "p_penultim": 0.2741,
+     "p_ultim": 0.1217,
+     "pos_mitjana": 5.86
     },
     {
      "seed": 5,
@@ -6157,11 +7195,11 @@
      "lletra_2526": "C",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.6334,
-     "p_2n": 0.2306,
-     "p_penultim": 0.0006,
-     "p_ultim": 0.0001,
-     "pos_mitjana": 1.56
+     "p_1r": 0.6618,
+     "p_2n": 0.2349,
+     "p_penultim": 0.0004,
+     "p_ultim": 0.0,
+     "pos_mitjana": 1.49
     },
     {
      "seed": 6,
@@ -6172,11 +7210,11 @@
      "lletra_2526": "D",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.1952,
-     "p_2n": 0.273,
-     "p_penultim": 0.0041,
-     "p_ultim": 0.0005,
-     "pos_mitjana": 2.81
+     "p_1r": 0.3863,
+     "p_2n": 0.2894,
+     "p_penultim": 0.0029,
+     "p_ultim": 0.0003,
+     "pos_mitjana": 2.16
     },
     {
      "seed": 7,
@@ -6187,11 +7225,11 @@
      "lletra_2526": "D",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0021,
-     "p_2n": 0.0106,
-     "p_penultim": 0.2303,
-     "p_ultim": 0.0756,
-     "pos_mitjana": 5.94
+     "p_1r": 0.0014,
+     "p_2n": 0.0086,
+     "p_penultim": 0.3237,
+     "p_ultim": 0.1913,
+     "pos_mitjana": 6.32
     },
     {
      "seed": 8,
@@ -6202,11 +7240,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0151,
-     "p_2n": 0.0604,
-     "p_penultim": 0.1158,
-     "p_ultim": 0.058,
-     "pos_mitjana": 4.85
+     "p_1r": 0.0144,
+     "p_2n": 0.0631,
+     "p_penultim": 0.1226,
+     "p_ultim": 0.0373,
+     "pos_mitjana": 4.77
     },
     {
      "seed": 9,
@@ -6217,11 +7255,11 @@
      "lletra_2526": "C",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0198,
-     "p_2n": 0.0703,
-     "p_penultim": 0.097,
-     "p_ultim": 0.0531,
-     "pos_mitjana": 4.69
+     "p_1r": 0.0469,
+     "p_2n": 0.1555,
+     "p_penultim": 0.0466,
+     "p_ultim": 0.0093,
+     "pos_mitjana": 3.79
     },
     {
      "seed": 10,
@@ -6232,11 +7270,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0001,
-     "p_2n": 0.0014,
-     "p_penultim": 0.4415,
-     "p_ultim": 0.2725,
-     "pos_mitjana": 6.88
+     "p_1r": 0.0037,
+     "p_2n": 0.0163,
+     "p_penultim": 0.2564,
+     "p_ultim": 0.1303,
+     "pos_mitjana": 5.93
     },
     {
      "seed": 11,
@@ -6247,11 +7285,11 @@
      "lletra_2526": "A",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0882,
-     "p_2n": 0.1726,
-     "p_penultim": 0.0148,
-     "p_ultim": 0.0029,
-     "pos_mitjana": 3.55
+     "p_1r": 0.0627,
+     "p_2n": 0.1207,
+     "p_penultim": 0.0484,
+     "p_ultim": 0.0136,
+     "pos_mitjana": 3.99
     },
     {
      "seed": 12,
@@ -6262,11 +7300,11 @@
      "lletra_2526": "",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0003,
-     "p_2n": 0.0033,
-     "p_penultim": 0.2646,
-     "p_ultim": 0.4194,
-     "pos_mitjana": 6.87
+     "p_1r": 0.0001,
+     "p_2n": 0.0008,
+     "p_penultim": 0.1896,
+     "p_ultim": 0.6921,
+     "pos_mitjana": 7.51
     },
     {
      "seed": 13,
@@ -6277,11 +7315,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0,
-     "p_2n": 0.0001,
-     "p_penultim": 0.2599,
-     "p_ultim": 0.6394,
-     "pos_mitjana": 7.51
+     "p_1r": 0.0001,
+     "p_2n": 0.0006,
+     "p_penultim": 0.2294,
+     "p_ultim": 0.6219,
+     "pos_mitjana": 7.4
     },
     {
      "seed": 14,
@@ -6292,11 +7330,11 @@
      "lletra_2526": "C",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0008,
-     "p_2n": 0.0073,
-     "p_penultim": 0.2722,
-     "p_ultim": 0.3003,
-     "pos_mitjana": 6.5
+     "p_1r": 0.003,
+     "p_2n": 0.0194,
+     "p_penultim": 0.2643,
+     "p_ultim": 0.1121,
+     "pos_mitjana": 5.79
     },
     {
      "seed": 15,
@@ -6307,11 +7345,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": "puja · campió 4a B",
-     "p_1r": 0.5534,
-     "p_2n": 0.2324,
-     "p_penultim": 0.0004,
-     "p_ultim": 0.0,
-     "pos_mitjana": 1.79
+     "p_1r": 0.379,
+     "p_2n": 0.2929,
+     "p_penultim": 0.0034,
+     "p_ultim": 0.0003,
+     "pos_mitjana": 2.18
     },
     {
      "seed": 16,
@@ -6322,11 +7360,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": "puja · campió 4a A",
-     "p_1r": 0.0036,
-     "p_2n": 0.019,
-     "p_penultim": 0.2226,
-     "p_ultim": 0.1608,
-     "pos_mitjana": 5.87
+     "p_1r": 0.02,
+     "p_2n": 0.0819,
+     "p_penultim": 0.0974,
+     "p_ultim": 0.027,
+     "pos_mitjana": 4.51
     }
    ],
    "grups": [
@@ -6381,11 +7419,11 @@
      "lletra_2526": "C",
      "div_2526": "3a",
      "motiu": "baixa · 8è 3a A",
-     "p_1r": 0.1869,
-     "p_2n": 0.1749,
-     "p_penultim": 0.0481,
-     "p_ultim": 0.0278,
-     "pos_mitjana": 3.77
+     "p_1r": 0.1038,
+     "p_2n": 0.1469,
+     "p_penultim": 0.0566,
+     "p_ultim": 0.0221,
+     "pos_mitjana": 4.18
     },
     {
      "seed": 2,
@@ -6396,11 +7434,11 @@
      "lletra_2526": "",
      "div_2526": "3a",
      "motiu": "baixa · 8è 3a B",
-     "p_1r": 0.0138,
-     "p_2n": 0.0428,
-     "p_penultim": 0.0709,
-     "p_ultim": 0.0154,
-     "pos_mitjana": 5.86
+     "p_1r": 0.0006,
+     "p_2n": 0.0032,
+     "p_penultim": 0.1837,
+     "p_ultim": 0.0893,
+     "pos_mitjana": 7.42
     },
     {
      "seed": 3,
@@ -6411,11 +7449,11 @@
      "lletra_2526": "",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.1595,
-     "p_2n": 0.2445,
-     "p_penultim": 0.005,
-     "p_ultim": 0.0006,
-     "pos_mitjana": 3.27
+     "p_1r": 0.4001,
+     "p_2n": 0.279,
+     "p_penultim": 0.0001,
+     "p_ultim": 0.0001,
+     "pos_mitjana": 2.14
     },
     {
      "seed": 4,
@@ -6426,11 +7464,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.2481,
-     "p_2n": 0.1878,
-     "p_penultim": 0.0353,
-     "p_ultim": 0.0188,
-     "pos_mitjana": 3.38
+     "p_1r": 0.1169,
+     "p_2n": 0.1576,
+     "p_penultim": 0.0437,
+     "p_ultim": 0.0199,
+     "pos_mitjana": 4.0
     },
     {
      "seed": 5,
@@ -6441,11 +7479,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.1613,
-     "p_2n": 0.1593,
-     "p_penultim": 0.0587,
-     "p_ultim": 0.0343,
-     "pos_mitjana": 4.03
+     "p_1r": 0.3206,
+     "p_2n": 0.2454,
+     "p_penultim": 0.0125,
+     "p_ultim": 0.0039,
+     "pos_mitjana": 2.68
     },
     {
      "seed": 6,
@@ -6456,11 +7494,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.085,
-     "p_2n": 0.1701,
-     "p_penultim": 0.012,
-     "p_ultim": 0.0014,
-     "pos_mitjana": 3.99
+     "p_1r": 0.0386,
+     "p_2n": 0.0882,
+     "p_penultim": 0.0121,
+     "p_ultim": 0.0031,
+     "pos_mitjana": 4.52
     },
     {
      "seed": 7,
@@ -6471,11 +7509,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.1174,
-     "p_2n": 0.2006,
-     "p_penultim": 0.01,
-     "p_ultim": 0.001,
-     "pos_mitjana": 3.66
+     "p_1r": 0.3119,
+     "p_2n": 0.2902,
+     "p_penultim": 0.0003,
+     "p_ultim": 0.0001,
+     "pos_mitjana": 2.4
     },
     {
      "seed": 8,
@@ -6486,11 +7524,11 @@
      "lletra_2526": "D",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0107,
-     "p_2n": 0.0208,
-     "p_penultim": 0.2158,
-     "p_ultim": 0.3483,
-     "pos_mitjana": 7.21
+     "p_1r": 0.0418,
+     "p_2n": 0.08,
+     "p_penultim": 0.1051,
+     "p_ultim": 0.0599,
+     "pos_mitjana": 5.2
     },
     {
      "seed": 9,
@@ -6501,11 +7539,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0711,
-     "p_2n": 0.0972,
-     "p_penultim": 0.1074,
-     "p_ultim": 0.0792,
-     "pos_mitjana": 5.11
+     "p_1r": 0.3641,
+     "p_2n": 0.249,
+     "p_penultim": 0.009,
+     "p_ultim": 0.0026,
+     "pos_mitjana": 2.5
     },
     {
      "seed": 10,
@@ -6516,11 +7554,11 @@
      "lletra_2526": "",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0392,
-     "p_2n": 0.0901,
-     "p_penultim": 0.0326,
-     "p_ultim": 0.006,
-     "pos_mitjana": 4.94
+     "p_1r": 0.0081,
+     "p_2n": 0.0266,
+     "p_penultim": 0.0585,
+     "p_ultim": 0.0173,
+     "pos_mitjana": 5.93
     },
     {
      "seed": 11,
@@ -6531,11 +7569,11 @@
      "lletra_2526": "E",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.5748,
-     "p_2n": 0.2183,
-     "p_penultim": 0.0002,
-     "p_ultim": 0.0,
-     "pos_mitjana": 1.81
+     "p_1r": 0.2193,
+     "p_2n": 0.2545,
+     "p_penultim": 0.001,
+     "p_ultim": 0.0001,
+     "pos_mitjana": 2.77
     },
     {
      "seed": 12,
@@ -6546,11 +7584,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0206,
-     "p_2n": 0.0382,
-     "p_penultim": 0.2052,
-     "p_ultim": 0.2202,
-     "pos_mitjana": 6.56
+     "p_1r": 0.0205,
+     "p_2n": 0.0449,
+     "p_penultim": 0.1705,
+     "p_ultim": 0.1101,
+     "pos_mitjana": 6.0
     },
     {
      "seed": 13,
@@ -6561,11 +7599,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0673,
-     "p_2n": 0.0921,
-     "p_penultim": 0.1178,
-     "p_ultim": 0.0886,
-     "pos_mitjana": 5.22
+     "p_1r": 0.0138,
+     "p_2n": 0.0309,
+     "p_penultim": 0.2009,
+     "p_ultim": 0.1522,
+     "pos_mitjana": 6.4
     },
     {
      "seed": 14,
@@ -6576,11 +7614,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0067,
-     "p_2n": 0.0188,
-     "p_penultim": 0.1323,
-     "p_ultim": 0.0357,
-     "pos_mitjana": 6.62
+     "p_1r": 0.0027,
+     "p_2n": 0.0091,
+     "p_penultim": 0.1215,
+     "p_ultim": 0.0479,
+     "pos_mitjana": 6.78
     },
     {
      "seed": 15,
@@ -6591,11 +7629,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0003,
-     "p_2n": 0.0019,
-     "p_penultim": 0.377,
-     "p_ultim": 0.1681,
-     "pos_mitjana": 8.26
+     "p_1r": 0.0185,
+     "p_2n": 0.0486,
+     "p_penultim": 0.0297,
+     "p_ultim": 0.007,
+     "pos_mitjana": 5.22
     },
     {
      "seed": 16,
@@ -6606,11 +7644,11 @@
      "lletra_2526": "D",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0339,
-     "p_2n": 0.0531,
-     "p_penultim": 0.1692,
-     "p_ultim": 0.1598,
-     "pos_mitjana": 6.06
+     "p_1r": 0.0015,
+     "p_2n": 0.0047,
+     "p_penultim": 0.2225,
+     "p_ultim": 0.506,
+     "pos_mitjana": 7.93
     },
     {
      "seed": 17,
@@ -6621,11 +7659,11 @@
      "lletra_2526": "E",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.2003,
-     "p_2n": 0.1766,
-     "p_penultim": 0.0423,
-     "p_ultim": 0.0231,
-     "pos_mitjana": 3.66
+     "p_1r": 0.0169,
+     "p_2n": 0.0406,
+     "p_penultim": 0.1792,
+     "p_ultim": 0.1233,
+     "pos_mitjana": 6.12
     },
     {
      "seed": 18,
@@ -6638,9 +7676,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0001,
-     "p_penultim": 0.1844,
-     "p_ultim": 0.7229,
-     "pos_mitjana": 9.58
+     "p_penultim": 0.2542,
+     "p_ultim": 0.572,
+     "pos_mitjana": 9.3
     },
     {
      "seed": 19,
@@ -6651,11 +7689,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0032,
-     "p_2n": 0.0129,
-     "p_penultim": 0.1757,
-     "p_ultim": 0.0488,
-     "pos_mitjana": 7.01
+     "p_1r": 0.0001,
+     "p_2n": 0.0004,
+     "p_penultim": 0.3388,
+     "p_ultim": 0.2631,
+     "pos_mitjana": 8.53
     }
    ],
    "grups": [
