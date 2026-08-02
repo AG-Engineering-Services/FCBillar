@@ -148,7 +148,9 @@ de partides, amb la previsió del proper rànquing.
    partides** amb slider i finestra de 25 punts, i **histograma** de la mitjana per partida amb
    línia de mitjana i franja ±1σ (àmbit *tot* o *temporada*).
 10. **Clubs** per trams de temporades consecutives.
-11. **Partides pendents** (blau) i **taula de partides** amb les 15 que computen ressaltades en ambre.
+11. **Partides pendents** (blau) i **taula de partides** amb les que computen al rànquing vigent
+    ressaltades en ambre (etiqueta «rànquing»; 15 a tres bandes, 10 a la resta de modalitats) i
+    les jugades que hi entraran al proper rànquing en blau cel (etiqueta «proper»).
 12. Impressió: A4, s'expandeixen totes les partides i s'amaguen navegació i controls.
 
 **Com**
