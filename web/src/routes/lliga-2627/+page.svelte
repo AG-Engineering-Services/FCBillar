@@ -189,7 +189,10 @@
 			}
 		}
 	}
-	for (const v of equipsPerJugador.values()) v.sort((a, b) => b.p - a.p);
+	// per lletra d'equip, no per percentatge: així la columna es llegeix igual a
+	// totes les files i es veu d'un cop qui puja i qui baixa
+	for (const v of equipsPerJugador.values())
+		v.sort((a, b) => LLETRES.indexOf(a.lletra) - LLETRES.indexOf(b.lletra));
 	const equipsDe = (c: Club, num: number) => equipsPerJugador.get(`${c.club}|${num}`) ?? [];
 	function alineacio(c: Club, lletra: string): Jugador[] {
 		const a = alineacioEquip.get(`${c.club}|${lletra}`);
