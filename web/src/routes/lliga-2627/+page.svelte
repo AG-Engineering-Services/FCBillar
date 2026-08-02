@@ -59,7 +59,7 @@
 	const DIVS = ['Honor', '1a', '2a', '3a', '4a'];
 	const LLETRES = ['A', 'B', 'C', 'D', 'E'];
 
-	type Esquema = 'fcb' | 'opt' | 'alt';
+	type Esquema = 'fcb' | 'opt' | 'alt' | 'prob';
 	const ESQUEMES: Record<
 		Esquema,
 		{ etiqueta: string; talls: number[]; inici: Record<string, number>; rangs: Record<string, string> }
@@ -81,10 +81,18 @@
 			talls: [4, 10, 16, 22],
 			inici: { A: 1, B: 5, C: 11, D: 17, E: 23 },
 			rangs: { A: '1-4', B: '5-10', C: '11-16', D: '17-22', E: '23+' }
+		},
+		// Mateixes bandes que la norma, però els quatre que juguen no són els de
+		// més mitjana sinó els de més presència: l'alineació que de fet es veu.
+		prob: {
+			etiqueta: 'més probable',
+			talls: [3, 8, 12, 16],
+			inici: { A: 1, B: 5, C: 9, D: 13, E: 17 },
+			rangs: { A: '1-3', B: '4-8', C: '9-12', D: '13-16', E: '17+' }
 		}
 	};
 
-	let vista = $state<'club' | 'divisio' | 'grups'>('club');
+	let vista = $state<'club' | 'divisio' | 'grups'>('grups');
 	let esquema = $state<Esquema>('fcb');
 	let selDiv = $state<string | null>(null);
 	let q = $state('');
@@ -139,18 +147,47 @@
 	/** L'alineació habitual més probable: els quatre de la plantilla amb més
 	 *  presència, que no sempre són els quatre de més mitjana. Hi ha jugadors
 	 *  forts que amb prou feines juguen, i és el que decanta molts equips. */
-	function habituals(pl: { p: Jugador; titular: boolean }[]): Set<number> {
-		if (pl.length <= 4) return new Set(); // sense candidats de sobra no hi ha res a triar
-		return new Set(
-			[...pl]
+	const habituals = (c: Club, lletra: string) => new Set(alineacio(c, lletra).map((p) => p.num));
+	/** Alineació més probable de CADA equip del club, assignada de dalt a baix.
+	 *
+	 *  Un jugador no pot jugar la mateixa jornada amb dos equips: si és dels quatre
+	 *  més probables de l'A, ja no compta per al B. Per això es reparteix per ordre
+	 *  de categoria i cada equip tria entre els que queden lliures. Sense això, el
+	 *  nº 4 —que amb la norma és de la banda del B però fa la quarta taula de l'A—
+	 *  sortiria comptat dues vegades. */
+	function alineacionsClub(c: Club): Map<string, Jugador[]> {
+		const out = new Map<string, Jugador[]>();
+		const agafats = new Set<number>();
+		for (const e of c.equips) {
+			const lliures = plantilla(c.llista, e.lletra, esquema, esUltim(c, e.lletra)).filter(
+				(f) => !agafats.has(f.p.num)
+			);
+			const tria = [...lliures]
 				.sort((a, b) => b.p.taxa - a.p.taxa || b.p.mitjana - a.p.mitjana)
-				.slice(0, 4)
-				.map((x) => x.p.num)
-		);
+				.slice(0, 4);
+			for (const f of tria) agafats.add(f.p.num);
+			out.set(
+				e.lletra,
+				tria.map((f) => f.p).sort((a, b) => b.mitjana - a.mitjana)
+			);
+		}
+		return out;
 	}
+	const alineacions = $derived.by(() => {
+		const m = new Map<string, Map<string, Jugador[]>>();
+		for (const c of clubs) m.set(c.club, alineacionsClub(c));
+		return m;
+	});
+	const alineacio = (c: Club, lletra: string) => alineacions.get(c.club)?.get(lletra) ?? [];
 	const esUltim = (c: Club, lletra: string) => c.equips[c.equips.length - 1].lletra === lletra;
-	const mitjanaEquip = (llista: Jugador[], lletra: string, esq: Esquema) => {
-		const t = referents(llista, lletra, esq);
+	/** Els quatre que juguen. Amb el repartiment «més probable» són els de més
+	 *  presència de la plantilla; amb la resta, els de més mitjana de la banda. */
+	function titulars(c: Club, lletra: string): Jugador[] {
+		if (esquema !== 'prob') return referents(c.llista, lletra, esquema);
+		return alineacio(c, lletra);
+	}
+	const mitjanaEquip = (c: Club, lletra: string) => {
+		const t = titulars(c, lletra);
 		return t.length ? t.reduce((a, p) => a + p.mitjana, 0) / t.length : 0;
 	};
 
@@ -191,9 +228,9 @@
 						grup: grupPerSeed.get(e.seed) ?? 'A',
 						mogut: moguts.has(e.seed),
 						fav: fav.get(e.seed) ?? null,
-						tit: referents(club.llista, e.lletra, esquema),
+						tit: titulars(club, e.lletra),
 						plantilla: plantilla(club.llista, e.lletra, esquema, esUltim(club, e.lletra)),
-						mit: mitjanaEquip(club.llista, e.lletra, esquema)
+						mit: mitjanaEquip(club, e.lletra)
 					};
 				})
 			};
@@ -316,11 +353,11 @@
 	<div class="inline-flex items-center gap-1.5">
 		<span class="text-xs text-slate-400 dark:text-slate-500">bandes</span>
 		<div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-sm dark:bg-slate-800">
-			{#each ['fcb', 'opt', 'alt'] as k}
+			{#each ['fcb', 'opt', 'alt', 'prob'] as k}
 				<button
 					type="button"
 					onclick={() => (esquema = k as Esquema)}
-					class="rounded-md px-2.5 py-1 font-mono text-xs {esquema === k
+					class="rounded-md px-2.5 py-1 text-xs {k === 'prob' ? '' : 'font-mono'} {esquema === k
 						? 'bg-white shadow-sm dark:bg-slate-700'
 						: 'text-slate-500 dark:text-slate-400'}">{ESQUEMES[k as Esquema].etiqueta}</button
 				>
@@ -389,7 +426,7 @@
 						</header>
 						<ul class="divide-y divide-slate-100 dark:divide-slate-800">
 							{#each g.equips as x}
-								{@const hab = habituals(x.plantilla)}
+								{@const hab = habituals(x.club, x.e.lletra)}
 								<li class="px-3 py-1.5">
 									<div class="flex items-baseline gap-2">
 										<span
@@ -464,7 +501,7 @@
 				</header>
 				<ul class="divide-y divide-slate-100 dark:divide-slate-800">
 					{#each d.visibles as x}
-						{@const hab = habituals(x.plantilla)}
+						{@const hab = habituals(x.club, x.e.lletra)}
 						<li class="px-3 py-2.5">
 							<div class="flex items-baseline gap-2">
 								<span
@@ -505,6 +542,16 @@
 								banda <span class="font-mono">{ESQUEMES[esquema].rangs[x.e.lletra]}</span> de la llista
 								del club{#if x.e.motiu}&nbsp;· {x.e.motiu}{/if}
 							</p>
+							{#if esquema !== 'prob'}
+							<p class="ml-7 mt-0.5 text-[11px] leading-snug">
+								<span class="font-semibold text-slate-600 dark:text-slate-300"
+									>alineació més probable</span
+								>
+								{#each alineacio(x.club, x.e.lletra) as p, i}<span class="text-slate-500 dark:text-slate-400"
+										>{i > 0 ? ' · ' : ' '}<span class="font-mono">{i + 1}</span>&nbsp;{cognom(p.nom)}</span
+									>{/each}
+							</p>
+							{/if}
 							<ol class="ml-7 mt-1.5 space-y-0.5">
 								{#each x.plantilla as f}
 									<li class="flex items-baseline gap-2 {f.titular ? '' : 'opacity-60'}">
@@ -730,6 +777,12 @@
 			<span class="font-mono">3-5-4-4</span> —i per tant les mitjanes d'equip i la classificació
 			projectada no canvien—; el que desapareix és el jugador frontissa i, amb ell, la incertesa de
 			saber amb quin equip juga cada jornada.
+		</p>
+		<p>
+			<b>Repartiment «més probable».</b> Mateixes bandes que la norma, però els quatre que juguen no
+			són els de més mitjana de la banda sinó els de <b>més presència</b>: l'alineació que de fet es
+			veu cada jornada. És on es nota que hi ha equips que no treuen mai els seus millors promitjos.
+			Amb aquesta opció, la mitjana d'equip que es mostra és la d'aquests quatre.
 		</p>
 		<p>
 			<b>Repartiment <span class="font-mono">4-6-6-6</span>.</b> 1-4 equip A; 5-10 equip B; 11-16 el C;
