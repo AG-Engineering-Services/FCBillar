@@ -68,6 +68,7 @@
 	<div class="disposicio">
 		<!-- Columna esquerra: taula -->
 		<section class="taula">
+			<div class="blk-anim">
 			{#key d.id}
 				<Reproductor
 					bolesInicials={d.boles}
@@ -90,7 +91,9 @@
 					boles és només als <a href="/biblia?tipus=analisi">Tirs analitzats</a>.
 				</p>
 			{/if}
+			</div>
 
+			<div class="blk-text">
 			{#if data.jugador}
 				<div class="jugador">
 					{#if data.jugador.retratUrl}
@@ -122,12 +125,13 @@
 					</details>
 				</div>
 			{/if}
+			</div>
 		</section>
 
 		<!-- Columna dreta: vídeo + dades -->
 		<section class="info">
 			{#if d.video}
-				<div class="videobloc">
+				<div class="videobloc blk-video">
 					{#key d.id}
 						<VideoSincronitzat
 							bind:this={vid}
@@ -147,7 +151,7 @@
 				</div>
 			{/if}
 
-			<div class="dades targeta">
+			<div class="dades targeta blk-dades">
 				<h2>Tirada #{d.id}</h2>
 				<div class="fila">
 					<span class="clau">Família</span>
@@ -194,6 +198,12 @@
 		align-items: start;
 	}
 	.taula {
+		display: flex;
+		flex-direction: column;
+		gap: 0.9rem;
+	}
+	.blk-anim,
+	.blk-text {
 		display: flex;
 		flex-direction: column;
 		gap: 0.9rem;
@@ -316,8 +326,28 @@
 		margin-top: 0.6rem;
 	}
 	@media (max-width: 820px) {
+		/* En mòbil: animació i vídeo junts a dalt, després els diagrames, i el text
+		   a baix. Aplanem les columnes (display:contents) i reordenem per order. */
 		.disposicio {
-			grid-template-columns: 1fr;
+			display: flex;
+			flex-direction: column;
+			gap: 0.9rem;
+		}
+		.taula,
+		.info {
+			display: contents;
+		}
+		.blk-anim {
+			order: 1;
+		}
+		.blk-video {
+			order: 2;
+		}
+		.blk-dades {
+			order: 3;
+		}
+		.blk-text {
+			order: 4;
 		}
 	}
 </style>
