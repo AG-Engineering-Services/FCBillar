@@ -2,4 +2,4 @@
 	import Cataleg from '$lib/sistemes/Cataleg.svelte';
 </script>
 
-<Cataleg mode="pendents" />
+<Cataleg mode="validats" />

@@ -65,6 +65,11 @@
 			href: '/sistemes-coreans',
 			label: 'Sistemes Coreans',
 			match: (p: string) => p.startsWith('/sistemes-coreans')
+		},
+		{
+			href: '/sistemes-validats',
+			label: 'Sistemes Validats',
+			match: (p: string) => p.startsWith('/sistemes-validats')
 		}
 	];
 	const path = $derived($page.url.pathname);
