@@ -457,19 +457,37 @@
 											>{x.mit.toFixed(3)}</span
 										>
 									</div>
-									<p class="ml-7 text-[11px] leading-snug">
-										{#each x.plantilla as f, i}<span
-												class={hab.has(f.p.num)
-													? 'font-semibold text-slate-700 dark:text-slate-200'
-													: f.titular
-														? 'text-slate-500 dark:text-slate-400'
-														: 'text-slate-400 dark:text-slate-500'}
-												title={hab.has(f.p.num)
-													? `alineació habitual · ${pct(f.p.taxa)} de presència`
-													: `${pct(f.p.taxa)} de presència`}
-												>{i > 0 ? ' · ' : ''}<span class="font-mono">{f.p.num}</span>&nbsp;{cognom(f.p.nom)}</span
-											>{/each}
-									</p>
+									{#if esquema === 'prob'}
+										<p class="ml-7 text-[11px] leading-snug">
+											<span class="font-semibold text-slate-600 dark:text-slate-300"
+												>alineació {pct(pAlineacio(x.club, x.e.lletra))}</span
+											>{#each taulesEquip(x.club, x.e.lletra) as t}{@const j = x.club.llista.find(
+													(p) => p.num === t.num
+												)}<span class="text-slate-600 dark:text-slate-300"
+													>&nbsp;· <span class="font-mono">{t.taula}</span>&nbsp;{j
+														? cognom(j.nom)
+														: t.num}<span class="text-slate-400 dark:text-slate-500"
+														>&nbsp;{pct(t.p)}</span
+													></span
+												>{/each}
+										</p>
+									{:else}
+										<p class="ml-7 text-[11px] leading-snug">
+											{#each x.plantilla as f, i}<span
+													class={hab.has(f.p.num)
+														? 'font-semibold text-slate-700 dark:text-slate-200'
+														: f.titular
+															? 'text-slate-500 dark:text-slate-400'
+															: 'text-slate-400 dark:text-slate-500'}
+													title={hab.has(f.p.num)
+														? `alineació més probable · ${pct(f.p.taxa)} de presència`
+														: `${pct(f.p.taxa)} de presència`}
+													>{i > 0 ? ' · ' : ''}<span class="font-mono">{f.p.num}</span>&nbsp;{cognom(
+														f.p.nom
+													)}</span
+												>{/each}
+										</p>
+									{/if}
 								</li>
 							{/each}
 						</ul>
