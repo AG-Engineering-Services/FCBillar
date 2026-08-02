@@ -26,14 +26,40 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const N_CANALS = Number(process.argv[2] || 12);
 const N_PER_CANAL = Number(process.argv[3] || 3);
 
+// Famílies de tir (estil AM Billiard) + un parell de calaixos per als sistemes
+// de càlcul i la resta. Es fa servir com a etiqueta de cada sistema.
 const CATEGORIES = [
-	'Bricol (bandes)',
-	'Natural (sense efecte)',
-	'Rotació',
-	'Posició i patrons',
+	'Endavant',
+	'Endarrere',
+	'De costat',
+	'Tocar la bola fina',
+	'Gran rotació',
+	'Bricol',
+	'Sense efecte',
+	'Sistemes de càlcul',
 	'Tècnica bàsica',
 	'Altres'
 ];
+
+// Classificador DETERMINISTA per família a partir del títol coreà: molt més
+// fiable que l'LLM (els títols coreans contenen el tipus de tir). Prioritat:
+// tir fi > gran rotació > sense efecte > sistemes de càlcul amb nom propi >
+// bricol > endavant/endarrere/de costat > tècnica bàsica.
+function familiaPerTitol(titol) {
+	const x = titol || '';
+	if (/비껴치기|빗겨치기|빗겨|얇게/.test(x)) return 'Tocar la bola fina';
+	if (/대회전/.test(x)) return 'Gran rotació';
+	if (/무회전|노잉글리쉬|노잉글리시/i.test(x)) return 'Sense efecte';
+	if (/파이브앤하프|하프\s*시스템|five\s*and\s*half|시스템\s*15|15\s*시스템|10\s*포인트|포인트\s*시스템|베르니|일출일몰|쿠드롱/i.test(x))
+		return 'Sistemes de càlcul';
+	if (/뱅크|투뱅크|뱅크샷|bank/i.test(x)) return 'Bricol';
+	if (/앞돌/.test(x)) return 'Endavant';
+	if (/뒤돌/.test(x)) return 'Endarrere';
+	if (/옆돌/.test(x)) return 'De costat';
+	if (/넣어치기|구멍치기/.test(x)) return 'Tècnica bàsica';
+	if (/4구|사구/.test(x)) return 'Altres';
+	return null; // sense senyal clar: deixa la categoria de l'LLM
+}
 
 const CONSULTES = [
 	'쓰리쿠션 시스템', '당구 시스템 계산법', '파이브앤하프 시스템', '뱅크샷 시스템',
@@ -157,7 +183,7 @@ for (const c of canals) {
 		if (a && a.esSistema !== false) {
 			const valoracio = typeof a.valoracio === 'number' ? a.valoracio : null;
 			analitzats.push({
-				id: v.id, nom: a.nom || v.titol, categoria: a.categoria, resum: a.resum || '',
+				id: v.id, nom: a.nom || v.titol, categoria: familiaPerTitol(v.titol) || a.categoria, resum: a.resum || '',
 				canal: v.canal, canalId: v.canalId, subs: c.subs, visites: v.visites, likes: v.likes,
 				comentaris: v.comentaris, data: v.data, miniatura: v.miniatura,
 				valoracio, notaValoracio: a.nota || '', funcionaComentaris: a.funciona ?? null

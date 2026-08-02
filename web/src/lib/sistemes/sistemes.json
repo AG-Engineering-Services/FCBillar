@@ -2,7 +2,7 @@
   {
     "id": "guRv1Z5Thn0",
     "nom": "Billar a 4 boles",
-    "categoria": "Posició i patrons",
+    "categoria": "Altres",
     "resum": "Técnica de billar a quatre bandes amb èmfasi en la importància del xut inicial",
     "canal": "짠당구",
     "canalId": "UCNCKt1-Kcnj6kC1BYfIMpmA",
@@ -35,7 +35,7 @@
   {
     "id": "OiV7ekn6uNE",
     "nom": "Entrar-la a tres bandes",
-    "categoria": "Tècnica bàsica",
+    "categoria": "Altres",
     "resum": "Tècnica de billar a tres bandes amb un sistema de col·lisió",
     "canal": "짠당구",
     "canalId": "UCNCKt1-Kcnj6kC1BYfIMpmA",
@@ -68,7 +68,7 @@
   {
     "id": "TbqDRWf1cJk",
     "nom": "L’elecció de Coudron",
-    "categoria": "Rotació",
+    "categoria": "Altres",
     "resum": "Un sistema de billar que utilitza la rotació per aconseguir un 3-banc",
     "canal": "짠당구",
     "canalId": "UCNCKt1-Kcnj6kC1BYfIMpmA",
@@ -132,7 +132,7 @@
   {
     "id": "IwJtf8vCWTw",
     "nom": "Endavant amb retorn al lloc",
-    "categoria": "Posició i patrons",
+    "categoria": "Endavant",
     "resum": "Sistema de billar a tres bandes molt senzill que només requereix recordar els números 1234",
     "canal": "양빵당구",
     "canalId": "UClAm2dYo76fXo8Kbf-4Dxdw",
@@ -167,7 +167,7 @@
   {
     "id": "EG-me1-3Mb8",
     "nom": "Bricol, de costat i endarrere",
-    "categoria": "Bricol (bandes)",
+    "categoria": "Bricol",
     "resum": "Sistema de billar a tres bandes amb tècniques de banda i rotació",
     "canal": "양빵당구",
     "canalId": "UClAm2dYo76fXo8Kbf-4Dxdw",
@@ -201,7 +201,7 @@
   {
     "id": "EwK9mzJmsnw",
     "nom": "Tocar la bola fina (sèrie)",
-    "categoria": "Bricol (bandes)",
+    "categoria": "Tocar la bola fina",
     "resum": "Técnica de billar a tres bandes",
     "canal": "당구개론&패턴시스템",
     "canalId": "UChXpmop9-EI-riqkDB7oDpg",
@@ -234,7 +234,7 @@
   {
     "id": "lQtVrEaLk0M",
     "nom": "Sistema No-English Plus",
-    "categoria": "Posició i patrons",
+    "categoria": "Sense efecte",
     "resum": "Sistema de billar que només requereix recordar el número 9 per no perdre's, amb un alt índex de precisió i facilitat",
     "canal": "수호신당구레슨",
     "canalId": "UCkl4YH6GVz6QwT-XLXSMw-w",
@@ -269,7 +269,7 @@
   {
     "id": "mBrxoCjhy9k",
     "nom": "De costat: el mètode definitiu",
-    "categoria": "Bricol (bandes)",
+    "categoria": "De costat",
     "resum": "Un sistema de billar a tres bandes que explica com realitzar un tret amb efecte lateral",
     "canal": "방수좋아 당구TV",
     "canalId": "UCAjCJj92-_U29fy-uZUMDTg",
@@ -304,7 +304,7 @@
   {
     "id": "BXGv7NroC8Q",
     "nom": "Five & Half",
-    "categoria": "Posició i patrons",
+    "categoria": "Sistemes de càlcul",
     "resum": "El sistema de Five & Half explicat de manera clara i concisa",
     "canal": "야매당구쫑프로",
     "canalId": "UCeMs53wY49uQcVXMTVswo1A",
@@ -338,7 +338,7 @@
   {
     "id": "TIWr2KcX3bs",
     "nom": "Els 10 millors patrons",
-    "categoria": "Posició i patrons",
+    "categoria": "Altres",
     "resum": "Un vídeo que recopila els millors patrons de billar a tres bandes",
     "canal": "방수좋아 당구TV",
     "canalId": "UCAjCJj92-_U29fy-uZUMDTg",
@@ -372,7 +372,7 @@
   {
     "id": "1N2AbPoSVI4",
     "nom": "Sistema Half",
-    "categoria": "Posició i patrons",
+    "categoria": "Sistemes de càlcul",
     "resum": "Sistema de billar a tres bandes que utilitza la tècnica de '하프시스템' per aconseguir una major eficiència en el joc",
     "canal": "방수좋아 당구TV",
     "canalId": "UCAjCJj92-_U29fy-uZUMDTg",
@@ -406,7 +406,7 @@
   {
     "id": "iURlX9ai6g4",
     "nom": "El sistema dels 10 punts",
-    "categoria": "Posició i patrons",
+    "categoria": "Sistemes de càlcul",
     "resum": "Un sistema de billar que permet obtenir punts de manera fàcil sense necessitat de càlculs complexos",
     "canal": "수호신당구레슨",
     "canalId": "UCkl4YH6GVz6QwT-XLXSMw-w",
@@ -441,7 +441,7 @@
   {
     "id": "wNssZQqfYDo",
     "nom": "Tocar la bola fina",
-    "categoria": "Posició i patrons",
+    "categoria": "Tocar la bola fina",
     "resum": "Sistema de billar a tres bandes anomenat 비껴치기, molt útil per millorar l'eficàcia",
     "canal": "수호신당구레슨",
     "canalId": "UCkl4YH6GVz6QwT-XLXSMw-w",
@@ -476,7 +476,7 @@
   {
     "id": "6GTHDDih1sc",
     "nom": "Sistema Bernie",
-    "categoria": "Posició i patrons",
+    "categoria": "Sense efecte",
     "resum": "Sistema de billar sense rotació amb alta eficàcia",
     "canal": "초이스연구소",
     "canalId": "UCT49Rq9SRFB2rbijY2JYV9w",
@@ -510,7 +510,7 @@
   {
     "id": "2PBWQ0xkVS8",
     "nom": "Five & Half (repàs)",
-    "categoria": "Posició i patrons",
+    "categoria": "Sistemes de càlcul",
     "resum": "El sistema de billar Five & Half explicat de manera clara i concisa",
     "canal": "야매당구쫑프로",
     "canalId": "UCeMs53wY49uQcVXMTVswo1A",
@@ -544,7 +544,7 @@
   {
     "id": "x2OBi0KCWPc",
     "nom": "Short & Long (tocar la bola fina)",
-    "categoria": "Tècnica bàsica",
+    "categoria": "Tocar la bola fina",
     "resum": "Tècnica de billar per controlar la longitud del xut, amb explicació sobre com ajustar la tècnica per reduir errors",
     "canal": "당구달인TV",
     "canalId": "UCrZfld_1Yx6jrj00s5IqJBQ",
@@ -577,7 +577,7 @@
   {
     "id": "YKN6GLp9_qo",
     "nom": "Tocar la bola fina amb rebot",
-    "categoria": "Bricol (bandes)",
+    "categoria": "Tocar la bola fina",
     "resum": "Técnica de billar amb efecte de banda, molt útil en partides reals",
     "canal": "당구달인TV",
     "canalId": "UCrZfld_1Yx6jrj00s5IqJBQ",
@@ -611,7 +611,7 @@
   {
     "id": "E-wVIxYZq0Y",
     "nom": "Sistema Sol ixent–Sol ponent",
-    "categoria": "Posició i patrons",
+    "categoria": "Tocar la bola fina",
     "resum": "Un sistema de billar que no requereix càlculs complexos",
     "canal": "야매당구쫑프로",
     "canalId": "UCeMs53wY49uQcVXMTVswo1A",
@@ -645,7 +645,7 @@
   {
     "id": "skPre7KK2eY",
     "nom": "Endavant: gran rotació",
-    "categoria": "Bricol (bandes)",
+    "categoria": "Gran rotació",
     "resum": "Tècnica de billar a tres bandes amb un sistema concret per a jugar amb efecte",
     "canal": "당구달인TV",
     "canalId": "UCrZfld_1Yx6jrj00s5IqJBQ",
@@ -678,7 +678,7 @@
   {
     "id": "HSniKtkmrlE",
     "nom": "De costat: sistema dividir per 2",
-    "categoria": "Posició i patrons",
+    "categoria": "De costat",
     "resum": "Sistema de billar per predir la trajectòria de la bola amb la tècnica de '옆돌리기'",
     "canal": "필승당구레슨",
     "canalId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
@@ -713,7 +713,7 @@
   {
     "id": "rrSaAuyhFnk",
     "nom": "Tocar la bola fina per inclinació",
-    "categoria": "Bricol (bandes)",
+    "categoria": "Tocar la bola fina",
     "resum": "Sistema de billar a tres bandes amb enfocament en la tècnica de kiuling",
     "canal": "뽠주TV",
     "canalId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
@@ -747,7 +747,7 @@
   {
     "id": "kH-JyjE51Ek",
     "nom": "Sistema de 15",
-    "categoria": "Posició i patrons",
+    "categoria": "Sistemes de càlcul",
     "resum": "Un sistema de billar a tres bandes que explica com jugar amb facilitat",
     "canal": "뽠주TV",
     "canalId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
@@ -780,7 +780,7 @@
   {
     "id": "VZW5_9U0few",
     "nom": "Traçat del bricol de 3 bandes",
-    "categoria": "Bricol (bandes)",
+    "categoria": "Bricol",
     "resum": "Vídeo que mostra diverses tècniques de 3 bandes sense necessitat de càlcul",
     "canal": "필승당구레슨",
     "canalId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
@@ -815,7 +815,7 @@
   {
     "id": "IYOiEStfn2I",
     "nom": "Endavant: el millor traçat",
-    "categoria": "Posició i patrons",
+    "categoria": "Endavant",
     "resum": "Un sistema de billar que ensenya dues configuracions per a l'avançament de la pilota",
     "canal": "필승당구레슨",
     "canalId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
@@ -851,7 +851,7 @@
   {
     "id": "BLb_KYDGPyQ",
     "nom": "Two-bank (dos bancs)",
-    "categoria": "Bricol (bandes)",
+    "categoria": "Bricol",
     "resum": "Sistema de billar a tres bandes amb tècnica de dues bandes",
     "canal": "뽠주TV",
     "canalId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
@@ -885,7 +885,7 @@
   {
     "id": "uGnOvbwHWG8",
     "nom": "Five & Half (bricol)",
-    "categoria": "Bricol (bandes)",
+    "categoria": "Bricol",
     "resum": "Sistema de tirs a tres bandes anomenat Five & Half",
     "canal": "중대당구박사",
     "canalId": "UCWSi0VEeaenYgzOtg9AoqEA",
@@ -918,7 +918,7 @@
   {
     "id": "M9BM0Z0NhQc",
     "nom": "Endavant (part 1)",
-    "categoria": "Posició i patrons",
+    "categoria": "Endavant",
     "resum": "Sistema de billar a tres bandes per a principiants",
     "canal": "초이스연구소",
     "canalId": "UCT49Rq9SRFB2rbijY2JYV9w",
@@ -951,8 +951,8 @@
   },
   {
     "id": "8jXom-1dGZY",
-    "nom": "Sistema d’1 minut",
-    "categoria": "Rotació",
+    "nom": "De costat amb retorn al lloc",
+    "categoria": "De costat",
     "resum": "Sistema de billar amb rotació per tornar al punt de partida",
     "canal": "초이스연구소",
     "canalId": "UCT49Rq9SRFB2rbijY2JYV9w",
@@ -984,8 +984,8 @@
   },
   {
     "id": "X7VGNfuSkeg",
-    "nom": "Bricol per a principiants",
-    "categoria": "Bricol (bandes)",
+    "nom": "Sistema Parking (4 boles)",
+    "categoria": "Altres",
     "resum": "Sistema de billar a tres bandes per a principiants",
     "canal": "아이빌리TV",
     "canalId": "UCPteEGbatxsfN4sLcZsnJBQ",
@@ -1019,7 +1019,7 @@
   {
     "id": "5nhdd2ZEfIc",
     "nom": "Five & Half (bàsic)",
-    "categoria": "Posició i patrons",
+    "categoria": "Sistemes de càlcul",
     "resum": "Un sistema de billar a tres bandes anomenat Five & Half, amb exemples de jocs",
     "canal": "중대당구박사",
     "canalId": "UCWSi0VEeaenYgzOtg9AoqEA",
@@ -1052,7 +1052,7 @@
   {
     "id": "TknLiKQsjYQ",
     "nom": "De costat: per què s’escurça",
-    "categoria": "Tècnica bàsica",
+    "categoria": "De costat",
     "resum": "Un sistema de billar que explica la tècnica de la bola lateral",
     "canal": "중대당구박사",
     "canalId": "UCWSi0VEeaenYgzOtg9AoqEA",

@@ -21,10 +21,14 @@
 	const totsSistemes = sistemes as Sistema[];
 
 	const ORDRE = [
-		'Bricol (bandes)',
-		'Natural (sense efecte)',
-		'Rotació',
-		'Posició i patrons',
+		'Endavant',
+		'Endarrere',
+		'De costat',
+		'Tocar la bola fina',
+		'Gran rotació',
+		'Bricol',
+		'Sense efecte',
+		'Sistemes de càlcul',
 		'Tècnica bàsica',
 		'Altres'
 	];
