@@ -414,7 +414,33 @@
      "taxa": 0.286
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     4,
+     1,
+     3,
+     2
+    ],
+    "B": [
+     5,
+     7,
+     6,
+     8
+    ],
+    "C": [
+     9,
+     11,
+     12,
+     10
+    ],
+    "D": [
+     18,
+     14,
+     19,
+     17
+    ]
+   }
   },
   {
    "club": "B.C.SANT FELIU DE CODINES",
@@ -679,7 +705,21 @@
      "taxa": 0.817
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     4,
+     1,
+     3,
+     2
+    ],
+    "B": [
+     5,
+     6,
+     10,
+     7
+    ]
+   }
   },
   {
    "club": "BC OLESA",
@@ -1114,7 +1154,27 @@
      "taxa": 0.071
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     3,
+     4,
+     2,
+     1
+    ],
+    "B": [
+     8,
+     5,
+     6,
+     7
+    ],
+    "C": [
+     9,
+     12,
+     10,
+     11
+    ]
+   }
   },
   {
    "club": "C.B.2000 CERDANYOLA",
@@ -1348,7 +1408,27 @@
      "taxa": 0.325
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     2,
+     1,
+     4,
+     3
+    ],
+    "B": [
+     5,
+     7,
+     8,
+     6
+    ],
+    "C": [
+     9,
+     11,
+     15,
+     16
+    ]
+   }
   },
   {
    "club": "C.B.ALBA",
@@ -1677,7 +1757,27 @@
      "taxa": 0.43
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     2,
+     3,
+     1,
+     4
+    ],
+    "B": [
+     5,
+     6,
+     7,
+     8
+    ],
+    "C": [
+     9,
+     11,
+     16,
+     10
+    ]
+   }
   },
   {
    "club": "C.B.BARCELONA",
@@ -1878,7 +1978,27 @@
      "taxa": 0.75
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     2,
+     1,
+     4,
+     3
+    ],
+    "B": [
+     7,
+     8,
+     6,
+     5
+    ],
+    "C": [
+     13,
+     10,
+     15,
+     14
+    ]
+   }
   },
   {
    "club": "C.B.BLANES",
@@ -2037,7 +2157,21 @@
      "taxa": 0.375
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     3,
+     2,
+     1,
+     4
+    ],
+    "B": [
+     7,
+     6,
+     9,
+     5
+    ]
+   }
   },
   {
    "club": "C.B.CARDONA",
@@ -2335,7 +2469,21 @@
      "taxa": 0.071
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     3,
+     1,
+     4,
+     2
+    ],
+    "B": [
+     8,
+     7,
+     5,
+     6
+    ]
+   }
   },
   {
    "club": "C.B.LLINARS",
@@ -2697,7 +2845,39 @@
      "taxa": 0.056
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     3,
+     1,
+     4,
+     2
+    ],
+    "B": [
+     6,
+     5,
+     8,
+     7
+    ],
+    "C": [
+     10,
+     9,
+     11,
+     12
+    ],
+    "D": [
+     14,
+     15,
+     13,
+     16
+    ],
+    "E": [
+     20,
+     19,
+     17,
+     25
+    ]
+   }
   },
   {
    "club": "C.B.LLIÇÀ D'AMUNT",
@@ -2856,7 +3036,21 @@
      "taxa": 0.673
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     2,
+     1,
+     4,
+     3
+    ],
+    "B": [
+     10,
+     7,
+     6,
+     12
+    ]
+   }
   },
   {
    "club": "C.B.MANRESA",
@@ -3004,7 +3198,21 @@
      "taxa": 0.667
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "B": [
+     6,
+     11,
+     5,
+     9
+    ]
+   }
   },
   {
    "club": "C.B.MATARÓ",
@@ -3324,7 +3532,33 @@
      "taxa": 0.206
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     4,
+     2,
+     3,
+     1
+    ],
+    "B": [
+     6,
+     5,
+     7,
+     8
+    ],
+    "C": [
+     11,
+     12,
+     9,
+     10
+    ],
+    "D": [
+     13,
+     14,
+     17,
+     21
+    ]
+   }
   },
   {
    "club": "C.B.MOLLET",
@@ -3472,7 +3706,21 @@
      "taxa": 0.69
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     2,
+     4,
+     3,
+     1
+    ],
+    "B": [
+     6,
+     8,
+     5,
+     11
+    ]
+   }
   },
   {
    "club": "C.B.MONFORTE",
@@ -3922,7 +4170,39 @@
      "taxa": 0.368
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     2,
+     3,
+     4,
+     1
+    ],
+    "B": [
+     5,
+     8,
+     6,
+     7
+    ],
+    "C": [
+     12,
+     11,
+     10,
+     9
+    ],
+    "D": [
+     15,
+     14,
+     13,
+     16
+    ],
+    "E": [
+     23,
+     27,
+     17,
+     28
+    ]
+   }
   },
   {
    "club": "C.B.MONT-ROIG",
@@ -4178,7 +4458,27 @@
      "taxa": 0.111
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     4,
+     3,
+     2,
+     1
+    ],
+    "B": [
+     7,
+     6,
+     8,
+     5
+    ],
+    "C": [
+     12,
+     13,
+     11,
+     10
+    ]
+   }
   },
   {
    "club": "C.B.PRAT",
@@ -4326,7 +4626,21 @@
      "taxa": 0.286
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     1,
+     3,
+     4,
+     2
+    ],
+    "B": [
+     6,
+     5,
+     7,
+     9
+    ]
+   }
   },
   {
    "club": "C.B.PREMIÀ",
@@ -4752,7 +5066,33 @@
      "taxa": 0.357
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     4,
+     2,
+     3,
+     1
+    ],
+    "B": [
+     5,
+     8,
+     6,
+     7
+    ],
+    "C": [
+     12,
+     11,
+     10,
+     9
+    ],
+    "D": [
+     17,
+     13,
+     14,
+     15
+    ]
+   }
   },
   {
    "club": "C.B.SANT BOI",
@@ -4975,7 +5315,27 @@
      "taxa": 0.22
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "B": [
+     6,
+     8,
+     7,
+     5
+    ],
+    "C": [
+     12,
+     11,
+     13,
+     14
+    ]
+   }
   },
   {
    "club": "C.B.SANTS",
@@ -5359,7 +5719,39 @@
      "taxa": 0.319
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     2,
+     1,
+     4,
+     3
+    ],
+    "B": [
+     5,
+     7,
+     8,
+     6
+    ],
+    "C": [
+     11,
+     12,
+     10,
+     9
+    ],
+    "D": [
+     14,
+     16,
+     15,
+     13
+    ],
+    "E": [
+     19,
+     21,
+     26,
+     22
+    ]
+   }
   },
   {
    "club": "C.B.TARRAGONA",
@@ -5507,7 +5899,21 @@
      "taxa": 0.833
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     4,
+     2,
+     1,
+     3
+    ],
+    "B": [
+     9,
+     8,
+     5,
+     6
+    ]
+   }
   },
   {
    "club": "C.B.VIC",
@@ -6068,7 +6474,21 @@
      "taxa": 0.438
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "B": [
+     6,
+     5,
+     8,
+     7
+    ]
+   }
   },
   {
    "club": "S.B.ESPLUGUES L'AVENÇ",
@@ -6227,7 +6647,21 @@
      "taxa": 0.188
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     4,
+     3,
+     2,
+     1
+    ],
+    "B": [
+     6,
+     5,
+     7,
+     9
+    ]
+   }
   },
   {
    "club": "S.B.LA GRAN PENYA",
@@ -6364,7 +6798,21 @@
      "taxa": 0.05
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     2,
+     4,
+     3,
+     1
+    ],
+    "B": [
+     9,
+     8,
+     5,
+     6
+    ]
+   }
   },
   {
    "club": "S.B.P.E.CENTELLES",
@@ -6556,7 +7004,21 @@
      "taxa": 0.143
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     2,
+     3,
+     4,
+     1
+    ],
+    "B": [
+     9,
+     5,
+     8,
+     10
+    ]
+   }
   },
   {
    "club": "SB FOMENT MOLINS",
@@ -6779,7 +7241,27 @@
      "taxa": 0.071
     }
    ],
-   "multi": true
+   "multi": true,
+   "_alineacions": {
+    "A": [
+     4,
+     2,
+     1,
+     3
+    ],
+    "B": [
+     6,
+     5,
+     8,
+     7
+    ],
+    "C": [
+     10,
+     16,
+     14,
+     11
+    ]
+   }
   }
  ],
  "divisions": {
@@ -6795,8 +7277,8 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": null,
-     "p_1r": 0.9944,
-     "p_2n": 0.0056,
+     "p_1r": 0.994,
+     "p_2n": 0.0059,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
      "pos_mitjana": 1.01
@@ -6826,7 +7308,7 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.9173,
+     "p_2n": 0.9183,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
      "pos_mitjana": 2.09
@@ -6840,11 +7322,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": null,
-     "p_1r": 0.005,
-     "p_2n": 0.7028,
+     "p_1r": 0.0059,
+     "p_2n": 0.8703,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
-     "pos_mitjana": 2.34
+     "pos_mitjana": 2.14
     },
     {
      "seed": 5,
@@ -6856,10 +7338,10 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 0.0001,
-     "p_2n": 0.0507,
-     "p_penultim": 0.0008,
-     "p_ultim": 0.0,
-     "pos_mitjana": 3.74
+     "p_2n": 0.0783,
+     "p_penultim": 0.0006,
+     "p_ultim": 0.0001,
+     "pos_mitjana": 3.38
     },
     {
      "seed": 6,
@@ -6872,9 +7354,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0001,
-     "p_penultim": 0.4027,
-     "p_ultim": 0.1874,
-     "pos_mitjana": 6.52
+     "p_penultim": 0.3593,
+     "p_ultim": 0.1827,
+     "pos_mitjana": 6.4
     },
     {
      "seed": 7,
@@ -6886,10 +7368,10 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0729,
-     "p_penultim": 0.005,
+     "p_2n": 0.0769,
+     "p_penultim": 0.003,
      "p_ultim": 0.0004,
-     "pos_mitjana": 3.3
+     "pos_mitjana": 3.19
     },
     {
      "seed": 8,
@@ -6901,10 +7383,10 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0001,
-     "p_penultim": 0.128,
-     "p_ultim": 0.0491,
-     "pos_mitjana": 5.71
+     "p_2n": 0.0,
+     "p_penultim": 0.1285,
+     "p_ultim": 0.0461,
+     "pos_mitjana": 5.67
     },
     {
      "seed": 9,
@@ -6916,10 +7398,10 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0069,
-     "p_penultim": 0.067,
-     "p_ultim": 0.013,
-     "pos_mitjana": 4.65
+     "p_2n": 0.0018,
+     "p_penultim": 0.1327,
+     "p_ultim": 0.0364,
+     "pos_mitjana": 5.17
     },
     {
      "seed": 10,
@@ -6930,11 +7412,11 @@
      "lletra_2526": "B",
      "div_2526": "Honor",
      "motiu": null,
-     "p_1r": 0.0006,
-     "p_2n": 0.2408,
-     "p_penultim": 0.0001,
+     "p_1r": 0.0,
+     "p_2n": 0.0454,
+     "p_penultim": 0.0015,
      "p_ultim": 0.0,
-     "pos_mitjana": 2.99
+     "pos_mitjana": 3.64
     },
     {
      "seed": 11,
@@ -6946,10 +7428,10 @@
      "div_2526": "Honor",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0011,
-     "p_penultim": 0.1745,
-     "p_ultim": 0.0488,
-     "pos_mitjana": 5.51
+     "p_2n": 0.0014,
+     "p_penultim": 0.1555,
+     "p_ultim": 0.0483,
+     "pos_mitjana": 5.32
     },
     {
      "seed": 12,
@@ -6962,9 +7444,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0001,
-     "p_penultim": 0.1509,
-     "p_ultim": 0.0531,
-     "pos_mitjana": 5.8
+     "p_penultim": 0.147,
+     "p_ultim": 0.0532,
+     "pos_mitjana": 5.76
     },
     {
      "seed": 13,
@@ -6977,9 +7459,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0,
-     "p_penultim": 0.3764,
-     "p_ultim": 0.4238,
-     "pos_mitjana": 7.17
+     "p_penultim": 0.3831,
+     "p_ultim": 0.4162,
+     "pos_mitjana": 7.16
     },
     {
      "seed": 14,
@@ -6992,9 +7474,9 @@
      "motiu": "puja · play-off guanyat a Centelles A",
      "p_1r": 0.0,
      "p_2n": 0.0,
-     "p_penultim": 0.2014,
-     "p_ultim": 0.7116,
-     "pos_mitjana": 7.59
+     "p_penultim": 0.1999,
+     "p_ultim": 0.6885,
+     "pos_mitjana": 7.53
     },
     {
      "seed": 15,
@@ -7007,9 +7489,9 @@
      "motiu": "puja · campió 1a B",
      "p_1r": 0.0,
      "p_2n": 0.0,
-     "p_penultim": 0.3439,
-     "p_ultim": 0.4739,
-     "pos_mitjana": 7.25
+     "p_penultim": 0.3393,
+     "p_ultim": 0.4844,
+     "pos_mitjana": 7.26
     },
     {
      "seed": 16,
@@ -7021,10 +7503,10 @@
      "div_2526": "1a",
      "motiu": "puja · campió 1a A",
      "p_1r": 0.0,
-     "p_2n": 0.0018,
-     "p_penultim": 0.1494,
-     "p_ultim": 0.0387,
-     "pos_mitjana": 5.34
+     "p_2n": 0.0015,
+     "p_penultim": 0.1495,
+     "p_ultim": 0.0437,
+     "pos_mitjana": 5.31
     }
    ],
    "grups": [
@@ -7086,11 +7568,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": "baixa · play-off perdut amb Casal Cervera",
-     "p_1r": 0.2406,
-     "p_2n": 0.2707,
-     "p_penultim": 0.0074,
-     "p_ultim": 0.0022,
-     "pos_mitjana": 2.63
+     "p_1r": 0.2509,
+     "p_2n": 0.2841,
+     "p_penultim": 0.005,
+     "p_ultim": 0.0008,
+     "pos_mitjana": 2.52
     },
     {
      "seed": 2,
@@ -7101,11 +7583,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": "baixa · 8è Honor B",
-     "p_1r": 0.0031,
-     "p_2n": 0.4532,
-     "p_penultim": 0.0004,
+     "p_1r": 0.0154,
+     "p_2n": 0.4457,
+     "p_penultim": 0.0002,
      "p_ultim": 0.0001,
-     "pos_mitjana": 2.63
+     "pos_mitjana": 2.59
     },
     {
      "seed": 3,
@@ -7116,11 +7598,11 @@
      "lletra_2526": "A",
      "div_2526": "Honor",
      "motiu": "baixa · 8è Honor A",
-     "p_1r": 0.006,
-     "p_2n": 0.5239,
-     "p_penultim": 0.0003,
+     "p_1r": 0.0203,
+     "p_2n": 0.5113,
+     "p_penultim": 0.0001,
      "p_ultim": 0.0001,
-     "pos_mitjana": 2.53
+     "pos_mitjana": 2.5
     },
     {
      "seed": 4,
@@ -7131,11 +7613,11 @@
      "lletra_2526": "A",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.4086,
-     "p_2n": 0.2818,
-     "p_penultim": 0.0025,
-     "p_ultim": 0.0008,
-     "pos_mitjana": 2.1
+     "p_1r": 0.404,
+     "p_2n": 0.2923,
+     "p_penultim": 0.0022,
+     "p_ultim": 0.0001,
+     "pos_mitjana": 2.06
     },
     {
      "seed": 5,
@@ -7147,10 +7629,10 @@
      "div_2526": "1a",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0023,
-     "p_penultim": 0.2141,
-     "p_ultim": 0.1376,
-     "pos_mitjana": 5.84
+     "p_2n": 0.0027,
+     "p_penultim": 0.1705,
+     "p_ultim": 0.1101,
+     "pos_mitjana": 5.59
     },
     {
      "seed": 6,
@@ -7161,11 +7643,11 @@
      "lletra_2526": "B",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.0353,
-     "p_2n": 0.084,
-     "p_penultim": 0.0736,
-     "p_ultim": 0.0321,
-     "pos_mitjana": 4.41
+     "p_1r": 0.0159,
+     "p_2n": 0.0471,
+     "p_penultim": 0.1015,
+     "p_ultim": 0.0293,
+     "pos_mitjana": 4.81
     },
     {
      "seed": 7,
@@ -7177,10 +7659,10 @@
      "div_2526": "1a",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0029,
-     "p_penultim": 0.1921,
-     "p_ultim": 0.1098,
-     "pos_mitjana": 5.65
+     "p_2n": 0.0032,
+     "p_penultim": 0.152,
+     "p_ultim": 0.0934,
+     "pos_mitjana": 5.44
     },
     {
      "seed": 8,
@@ -7191,11 +7673,11 @@
      "lletra_2526": "C",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.2853,
-     "p_2n": 0.2832,
-     "p_penultim": 0.0054,
-     "p_ultim": 0.0015,
-     "pos_mitjana": 2.46
+     "p_1r": 0.2964,
+     "p_2n": 0.2952,
+     "p_penultim": 0.0033,
+     "p_ultim": 0.0003,
+     "pos_mitjana": 2.37
     },
     {
      "seed": 9,
@@ -7206,11 +7688,11 @@
      "lletra_2526": "A",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.0029,
-     "p_2n": 0.0099,
-     "p_penultim": 0.2522,
-     "p_ultim": 0.2102,
-     "pos_mitjana": 6.21
+     "p_1r": 0.0024,
+     "p_2n": 0.0109,
+     "p_penultim": 0.2486,
+     "p_ultim": 0.1084,
+     "pos_mitjana": 5.9
     },
     {
      "seed": 10,
@@ -7222,10 +7704,10 @@
      "div_2526": "1a",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0062,
-     "p_penultim": 0.1494,
-     "p_ultim": 0.0782,
-     "pos_mitjana": 5.34
+     "p_2n": 0.0006,
+     "p_penultim": 0.2567,
+     "p_ultim": 0.2384,
+     "pos_mitjana": 6.32
     },
     {
      "seed": 11,
@@ -7238,9 +7720,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0001,
-     "p_penultim": 0.2331,
-     "p_ultim": 0.5379,
-     "pos_mitjana": 7.17
+     "p_penultim": 0.251,
+     "p_ultim": 0.4516,
+     "pos_mitjana": 6.96
     },
     {
      "seed": 12,
@@ -7251,11 +7733,11 @@
      "lletra_2526": "A",
      "div_2526": "1a",
      "motiu": null,
-     "p_1r": 0.0251,
-     "p_2n": 0.0628,
-     "p_penultim": 0.0937,
-     "p_ultim": 0.0474,
-     "pos_mitjana": 4.74
+     "p_1r": 0.0297,
+     "p_2n": 0.066,
+     "p_penultim": 0.0709,
+     "p_ultim": 0.02,
+     "pos_mitjana": 4.46
     },
     {
      "seed": 13,
@@ -7266,11 +7748,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": "puja · play-off guanyat a Llinars B",
-     "p_1r": 0.0012,
-     "p_2n": 0.0037,
-     "p_penultim": 0.2851,
-     "p_ultim": 0.3371,
-     "pos_mitjana": 6.68
+     "p_1r": 0.0,
+     "p_2n": 0.0002,
+     "p_penultim": 0.2262,
+     "p_ultim": 0.641,
+     "pos_mitjana": 7.46
     },
     {
      "seed": 14,
@@ -7282,10 +7764,10 @@
      "div_2526": "2a",
      "motiu": "puja · play-off amb Lleida B, desempat per caramboles (201-186)",
      "p_1r": 0.0,
-     "p_2n": 0.0026,
-     "p_penultim": 0.2104,
-     "p_ultim": 0.1363,
-     "pos_mitjana": 5.83
+     "p_2n": 0.0031,
+     "p_penultim": 0.1694,
+     "p_ultim": 0.1063,
+     "pos_mitjana": 5.57
     },
     {
      "seed": 15,
@@ -7296,11 +7778,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": "puja · campió 2a A",
-     "p_1r": 0.9909,
-     "p_2n": 0.0088,
+     "p_1r": 0.9644,
+     "p_2n": 0.0333,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
-     "pos_mitjana": 1.01
+     "pos_mitjana": 1.04
     },
     {
      "seed": 16,
@@ -7311,11 +7793,11 @@
      "lletra_2526": "",
      "div_2526": "2a",
      "motiu": "puja · campió 2a B",
-     "p_1r": 0.0009,
-     "p_2n": 0.0038,
-     "p_penultim": 0.2802,
-     "p_ultim": 0.3687,
-     "pos_mitjana": 6.77
+     "p_1r": 0.0006,
+     "p_2n": 0.0042,
+     "p_penultim": 0.3422,
+     "p_ultim": 0.2001,
+     "pos_mitjana": 6.42
     }
    ],
    "grups": [
@@ -7370,11 +7852,11 @@
      "lletra_2526": "B",
      "div_2526": "1a",
      "motiu": "baixa · play-off amb Sant Adrià C, desempat per caramboles (186-201)",
-     "p_1r": 0.015,
-     "p_2n": 0.0571,
-     "p_penultim": 0.1737,
-     "p_ultim": 0.0223,
-     "pos_mitjana": 4.92
+     "p_1r": 0.008,
+     "p_2n": 0.029,
+     "p_penultim": 0.2832,
+     "p_ultim": 0.0717,
+     "pos_mitjana": 5.66
     },
     {
      "seed": 2,
@@ -7385,11 +7867,11 @@
      "lletra_2526": "B",
      "div_2526": "1a",
      "motiu": "baixa · play-off perdut amb Mont-roig B",
-     "p_1r": 0.0709,
-     "p_2n": 0.1572,
-     "p_penultim": 0.0798,
-     "p_ultim": 0.0388,
-     "pos_mitjana": 4.1
+     "p_1r": 0.0358,
+     "p_2n": 0.1084,
+     "p_penultim": 0.1252,
+     "p_ultim": 0.0864,
+     "pos_mitjana": 4.73
     },
     {
      "seed": 3,
@@ -7400,11 +7882,11 @@
      "lletra_2526": "A",
      "div_2526": "1a",
      "motiu": "baixa · 8è 1a B",
-     "p_1r": 0.6223,
-     "p_2n": 0.2046,
-     "p_penultim": 0.0037,
+     "p_1r": 0.6948,
+     "p_2n": 0.1776,
+     "p_penultim": 0.0022,
      "p_ultim": 0.0008,
-     "pos_mitjana": 1.69
+     "pos_mitjana": 1.52
     },
     {
      "seed": 4,
@@ -7415,11 +7897,11 @@
      "lletra_2526": "B",
      "div_2526": "1a",
      "motiu": "baixa · 8è 1a A",
-     "p_1r": 0.4964,
-     "p_2n": 0.313,
-     "p_penultim": 0.0021,
-     "p_ultim": 0.0001,
-     "pos_mitjana": 1.81
+     "p_1r": 0.5168,
+     "p_2n": 0.2529,
+     "p_penultim": 0.004,
+     "p_ultim": 0.0003,
+     "pos_mitjana": 1.88
     },
     {
      "seed": 5,
@@ -7430,11 +7912,11 @@
      "lletra_2526": "A",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0154,
-     "p_2n": 0.0568,
-     "p_penultim": 0.1711,
-     "p_ultim": 0.0204,
-     "pos_mitjana": 4.92
+     "p_1r": 0.0466,
+     "p_2n": 0.1033,
+     "p_penultim": 0.0951,
+     "p_ultim": 0.015,
+     "pos_mitjana": 4.32
     },
     {
      "seed": 6,
@@ -7445,11 +7927,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0493,
-     "p_2n": 0.1204,
-     "p_penultim": 0.1055,
-     "p_ultim": 0.0591,
-     "pos_mitjana": 4.49
+     "p_1r": 0.0274,
+     "p_2n": 0.0922,
+     "p_penultim": 0.144,
+     "p_ultim": 0.1041,
+     "pos_mitjana": 4.95
     },
     {
      "seed": 7,
@@ -7460,11 +7942,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0054,
-     "p_2n": 0.0214,
-     "p_penultim": 0.3226,
-     "p_ultim": 0.052,
-     "pos_mitjana": 5.69
+     "p_1r": 0.0097,
+     "p_2n": 0.033,
+     "p_penultim": 0.2686,
+     "p_ultim": 0.059,
+     "pos_mitjana": 5.55
     },
     {
      "seed": 8,
@@ -7475,11 +7957,11 @@
      "lletra_2526": "",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0184,
-     "p_2n": 0.0551,
-     "p_penultim": 0.1845,
-     "p_ultim": 0.1348,
-     "pos_mitjana": 5.42
+     "p_1r": 0.0226,
+     "p_2n": 0.0819,
+     "p_penultim": 0.1611,
+     "p_ultim": 0.1165,
+     "pos_mitjana": 5.11
     },
     {
      "seed": 9,
@@ -7490,11 +7972,11 @@
      "lletra_2526": "A",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0598,
-     "p_2n": 0.1473,
-     "p_penultim": 0.058,
-     "p_ultim": 0.0049,
-     "pos_mitjana": 3.81
+     "p_1r": 0.1394,
+     "p_2n": 0.2251,
+     "p_penultim": 0.0308,
+     "p_ultim": 0.0027,
+     "pos_mitjana": 3.23
     },
     {
      "seed": 10,
@@ -7505,11 +7987,11 @@
      "lletra_2526": "C",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0046,
-     "p_2n": 0.0181,
-     "p_penultim": 0.2641,
-     "p_ultim": 0.3202,
-     "pos_mitjana": 6.44
+     "p_1r": 0.0069,
+     "p_2n": 0.0316,
+     "p_penultim": 0.2271,
+     "p_ultim": 0.2822,
+     "pos_mitjana": 6.15
     },
     {
      "seed": 11,
@@ -7520,11 +8002,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.1417,
-     "p_2n": 0.2486,
-     "p_penultim": 0.0399,
-     "p_ultim": 0.0182,
-     "pos_mitjana": 3.32
+     "p_1r": 0.1023,
+     "p_2n": 0.2399,
+     "p_penultim": 0.0531,
+     "p_ultim": 0.0265,
+     "pos_mitjana": 3.56
     },
     {
      "seed": 12,
@@ -7535,11 +8017,11 @@
      "lletra_2526": "",
      "div_2526": "2a",
      "motiu": null,
-     "p_1r": 0.0,
-     "p_2n": 0.0,
-     "p_penultim": 0.0887,
-     "p_ultim": 0.8802,
-     "pos_mitjana": 7.84
+     "p_1r": 0.0001,
+     "p_2n": 0.0003,
+     "p_penultim": 0.1303,
+     "p_ultim": 0.8143,
+     "pos_mitjana": 7.73
     },
     {
      "seed": 13,
@@ -7550,11 +8032,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": "puja · play-off guanyat a Lliçà d'Amunt A",
-     "p_1r": 0.015,
-     "p_2n": 0.0529,
-     "p_penultim": 0.18,
-     "p_ultim": 0.02,
-     "pos_mitjana": 4.97
+     "p_1r": 0.0184,
+     "p_2n": 0.0576,
+     "p_penultim": 0.1754,
+     "p_ultim": 0.0362,
+     "pos_mitjana": 5.04
     },
     {
      "seed": 14,
@@ -7565,11 +8047,11 @@
      "lletra_2526": "D",
      "div_2526": "3a",
      "motiu": "puja · play-off amb Canet B, desempat per caramboles (178-177)",
-     "p_1r": 0.0901,
-     "p_2n": 0.1839,
-     "p_penultim": 0.0657,
-     "p_ultim": 0.0289,
-     "pos_mitjana": 3.84
+     "p_1r": 0.106,
+     "p_2n": 0.2495,
+     "p_penultim": 0.051,
+     "p_ultim": 0.0235,
+     "pos_mitjana": 3.5
     },
     {
      "seed": 15,
@@ -7580,11 +8062,11 @@
      "lletra_2526": "",
      "div_2526": "3a",
      "motiu": "puja · campió 3a A",
-     "p_1r": 0.0026,
-     "p_2n": 0.0121,
-     "p_penultim": 0.2569,
-     "p_ultim": 0.3992,
-     "pos_mitjana": 6.71
+     "p_1r": 0.0041,
+     "p_2n": 0.0189,
+     "p_penultim": 0.2364,
+     "p_ultim": 0.3601,
+     "pos_mitjana": 6.49
     },
     {
      "seed": 16,
@@ -7595,11 +8077,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": "puja · campió 3a B",
-     "p_1r": 0.393,
-     "p_2n": 0.3515,
-     "p_penultim": 0.0038,
-     "p_ultim": 0.0001,
-     "pos_mitjana": 2.04
+     "p_1r": 0.2611,
+     "p_2n": 0.2989,
+     "p_penultim": 0.0126,
+     "p_ultim": 0.0008,
+     "pos_mitjana": 2.58
     }
    ],
    "grups": [
@@ -7654,11 +8136,11 @@
      "lletra_2526": "A",
      "div_2526": "2a",
      "motiu": "baixa · play-off perdut amb Cerdanyola B",
-     "p_1r": 0.263,
-     "p_2n": 0.4119,
-     "p_penultim": 0.0055,
-     "p_ultim": 0.0007,
-     "pos_mitjana": 2.29
+     "p_1r": 0.26,
+     "p_2n": 0.4689,
+     "p_penultim": 0.0025,
+     "p_ultim": 0.0003,
+     "pos_mitjana": 2.14
     },
     {
      "seed": 2,
@@ -7669,11 +8151,11 @@
      "lletra_2526": "B",
      "div_2526": "2a",
      "motiu": "baixa · play-off amb Sants D, desempat per caramboles (177-178)",
-     "p_1r": 0.1432,
-     "p_2n": 0.2082,
-     "p_penultim": 0.0173,
-     "p_ultim": 0.004,
-     "pos_mitjana": 3.22
+     "p_1r": 0.1106,
+     "p_2n": 0.1847,
+     "p_penultim": 0.0167,
+     "p_ultim": 0.0027,
+     "pos_mitjana": 3.39
     },
     {
      "seed": 3,
@@ -7684,11 +8166,11 @@
      "lletra_2526": "",
      "div_2526": "2a",
      "motiu": "baixa · 8è 2a A",
-     "p_1r": 0.0415,
-     "p_2n": 0.0921,
-     "p_penultim": 0.0664,
-     "p_ultim": 0.0189,
-     "pos_mitjana": 4.36
+     "p_1r": 0.043,
+     "p_2n": 0.0953,
+     "p_penultim": 0.0462,
+     "p_ultim": 0.008,
+     "pos_mitjana": 4.19
     },
     {
      "seed": 4,
@@ -7699,11 +8181,11 @@
      "lletra_2526": "D",
      "div_2526": "2a",
      "motiu": "baixa · 8è 2a B",
-     "p_1r": 0.0034,
-     "p_2n": 0.0218,
-     "p_penultim": 0.2563,
-     "p_ultim": 0.1201,
-     "pos_mitjana": 5.78
+     "p_1r": 0.0044,
+     "p_2n": 0.0278,
+     "p_penultim": 0.174,
+     "p_ultim": 0.0891,
+     "pos_mitjana": 5.33
     },
     {
      "seed": 5,
@@ -7714,11 +8196,11 @@
      "lletra_2526": "C",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.6452,
-     "p_2n": 0.2467,
-     "p_penultim": 0.0008,
+     "p_1r": 0.6705,
+     "p_2n": 0.2482,
+     "p_penultim": 0.0001,
      "p_ultim": 0.0001,
-     "pos_mitjana": 1.51
+     "pos_mitjana": 1.43
     },
     {
      "seed": 6,
@@ -7729,11 +8211,11 @@
      "lletra_2526": "D",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.3611,
-     "p_2n": 0.2839,
-     "p_penultim": 0.0034,
-     "p_ultim": 0.0003,
-     "pos_mitjana": 2.26
+     "p_1r": 0.3766,
+     "p_2n": 0.291,
+     "p_penultim": 0.0019,
+     "p_ultim": 0.0002,
+     "pos_mitjana": 2.18
     },
     {
      "seed": 7,
@@ -7744,11 +8226,11 @@
      "lletra_2526": "D",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.001,
-     "p_2n": 0.0066,
-     "p_penultim": 0.3518,
-     "p_ultim": 0.2188,
-     "pos_mitjana": 6.5
+     "p_1r": 0.0022,
+     "p_2n": 0.0078,
+     "p_penultim": 0.2959,
+     "p_ultim": 0.1362,
+     "pos_mitjana": 6.21
     },
     {
      "seed": 8,
@@ -7759,11 +8241,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0134,
-     "p_2n": 0.0617,
-     "p_penultim": 0.127,
-     "p_ultim": 0.0415,
-     "pos_mitjana": 4.81
+     "p_1r": 0.0017,
+     "p_2n": 0.0151,
+     "p_penultim": 0.234,
+     "p_ultim": 0.1469,
+     "pos_mitjana": 5.81
     },
     {
      "seed": 9,
@@ -7774,11 +8256,11 @@
      "lletra_2526": "C",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0513,
-     "p_2n": 0.1597,
-     "p_penultim": 0.044,
-     "p_ultim": 0.0107,
-     "pos_mitjana": 3.75
+     "p_1r": 0.0551,
+     "p_2n": 0.1852,
+     "p_penultim": 0.0253,
+     "p_ultim": 0.0075,
+     "pos_mitjana": 3.4
     },
     {
      "seed": 10,
@@ -7789,11 +8271,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0032,
-     "p_2n": 0.0129,
-     "p_penultim": 0.2731,
-     "p_ultim": 0.1268,
-     "pos_mitjana": 6.03
+     "p_1r": 0.0009,
+     "p_2n": 0.0034,
+     "p_penultim": 0.3668,
+     "p_ultim": 0.2094,
+     "pos_mitjana": 6.56
     },
     {
      "seed": 11,
@@ -7804,11 +8286,11 @@
      "lletra_2526": "A",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0635,
-     "p_2n": 0.1199,
-     "p_penultim": 0.0451,
-     "p_ultim": 0.0109,
-     "pos_mitjana": 4.01
+     "p_1r": 0.065,
+     "p_2n": 0.128,
+     "p_penultim": 0.0318,
+     "p_ultim": 0.0059,
+     "pos_mitjana": 3.88
     },
     {
      "seed": 12,
@@ -7820,10 +8302,10 @@
      "div_2526": "3a",
      "motiu": null,
      "p_1r": 0.0001,
-     "p_2n": 0.0008,
-     "p_penultim": 0.1993,
-     "p_ultim": 0.6677,
-     "pos_mitjana": 7.46
+     "p_2n": 0.0014,
+     "p_penultim": 0.2233,
+     "p_ultim": 0.5696,
+     "pos_mitjana": 7.22
     },
     {
      "seed": 13,
@@ -7834,11 +8316,11 @@
      "lletra_2526": "B",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0001,
-     "p_2n": 0.0004,
-     "p_penultim": 0.2393,
-     "p_ultim": 0.6197,
-     "pos_mitjana": 7.42
+     "p_1r": 0.0,
+     "p_2n": 0.0003,
+     "p_penultim": 0.2388,
+     "p_ultim": 0.6373,
+     "pos_mitjana": 7.48
     },
     {
      "seed": 14,
@@ -7849,11 +8331,11 @@
      "lletra_2526": "C",
      "div_2526": "3a",
      "motiu": null,
-     "p_1r": 0.0032,
-     "p_2n": 0.0201,
-     "p_penultim": 0.2607,
-     "p_ultim": 0.1251,
-     "pos_mitjana": 5.82
+     "p_1r": 0.0036,
+     "p_2n": 0.0281,
+     "p_penultim": 0.1731,
+     "p_ultim": 0.0964,
+     "pos_mitjana": 5.36
     },
     {
      "seed": 15,
@@ -7864,11 +8346,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": "puja · campió 4a B",
-     "p_1r": 0.3863,
-     "p_2n": 0.2759,
-     "p_penultim": 0.0037,
-     "p_ultim": 0.0006,
-     "pos_mitjana": 2.2
+     "p_1r": 0.4016,
+     "p_2n": 0.2895,
+     "p_penultim": 0.0019,
+     "p_ultim": 0.0003,
+     "pos_mitjana": 2.12
     },
     {
      "seed": 16,
@@ -7879,11 +8361,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": "puja · campió 4a A",
-     "p_1r": 0.0205,
-     "p_2n": 0.0773,
-     "p_penultim": 0.1064,
-     "p_ultim": 0.034,
-     "pos_mitjana": 4.58
+     "p_1r": 0.0046,
+     "p_2n": 0.0255,
+     "p_penultim": 0.1678,
+     "p_ultim": 0.0902,
+     "pos_mitjana": 5.31
     }
    ],
    "grups": [
@@ -7938,11 +8420,11 @@
      "lletra_2526": "C",
      "div_2526": "3a",
      "motiu": "baixa · 8è 3a A",
-     "p_1r": 0.1066,
-     "p_2n": 0.1478,
-     "p_penultim": 0.0522,
-     "p_ultim": 0.0217,
-     "pos_mitjana": 4.13
+     "p_1r": 0.1754,
+     "p_2n": 0.1797,
+     "p_penultim": 0.0383,
+     "p_ultim": 0.0177,
+     "pos_mitjana": 3.69
     },
     {
      "seed": 2,
@@ -7953,11 +8435,11 @@
      "lletra_2526": "",
      "div_2526": "3a",
      "motiu": "baixa · 8è 3a B",
-     "p_1r": 0.0011,
-     "p_2n": 0.0064,
-     "p_penultim": 0.1532,
-     "p_ultim": 0.0609,
-     "pos_mitjana": 7.09
+     "p_1r": 0.0019,
+     "p_2n": 0.0091,
+     "p_penultim": 0.14,
+     "p_ultim": 0.0556,
+     "pos_mitjana": 6.85
     },
     {
      "seed": 3,
@@ -7968,11 +8450,11 @@
      "lletra_2526": "",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.4095,
-     "p_2n": 0.2775,
-     "p_penultim": 0.0001,
-     "p_ultim": 0.0,
-     "pos_mitjana": 2.12
+     "p_1r": 0.466,
+     "p_2n": 0.2725,
+     "p_penultim": 0.0003,
+     "p_ultim": 0.0001,
+     "pos_mitjana": 1.95
     },
     {
      "seed": 4,
@@ -7983,11 +8465,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.1234,
-     "p_2n": 0.1628,
-     "p_penultim": 0.0418,
-     "p_ultim": 0.0153,
-     "pos_mitjana": 3.91
+     "p_1r": 0.2051,
+     "p_2n": 0.1877,
+     "p_penultim": 0.0312,
+     "p_ultim": 0.0134,
+     "pos_mitjana": 3.49
     },
     {
      "seed": 5,
@@ -7998,11 +8480,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.3253,
-     "p_2n": 0.2482,
-     "p_penultim": 0.0109,
-     "p_ultim": 0.0027,
-     "pos_mitjana": 2.64
+     "p_1r": 0.2587,
+     "p_2n": 0.2039,
+     "p_penultim": 0.023,
+     "p_ultim": 0.0085,
+     "pos_mitjana": 3.14
     },
     {
      "seed": 6,
@@ -8013,11 +8495,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0394,
-     "p_2n": 0.0878,
-     "p_penultim": 0.0142,
-     "p_ultim": 0.0024,
-     "pos_mitjana": 4.5
+     "p_1r": 0.0519,
+     "p_2n": 0.1136,
+     "p_penultim": 0.0119,
+     "p_ultim": 0.0022,
+     "pos_mitjana": 4.19
     },
     {
      "seed": 7,
@@ -8028,11 +8510,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.3274,
-     "p_2n": 0.3013,
-     "p_penultim": 0.0004,
+     "p_1r": 0.2354,
+     "p_2n": 0.2762,
+     "p_penultim": 0.001,
      "p_ultim": 0.0001,
-     "pos_mitjana": 2.33
+     "pos_mitjana": 2.66
     },
     {
      "seed": 8,
@@ -8043,11 +8525,11 @@
      "lletra_2526": "D",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0437,
-     "p_2n": 0.078,
-     "p_penultim": 0.107,
-     "p_ultim": 0.0544,
-     "pos_mitjana": 5.18
+     "p_1r": 0.0784,
+     "p_2n": 0.1063,
+     "p_penultim": 0.0843,
+     "p_ultim": 0.0488,
+     "pos_mitjana": 4.79
     },
     {
      "seed": 9,
@@ -8058,11 +8540,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.3542,
-     "p_2n": 0.2477,
-     "p_penultim": 0.0095,
-     "p_ultim": 0.0025,
-     "pos_mitjana": 2.54
+     "p_1r": 0.2133,
+     "p_2n": 0.1895,
+     "p_penultim": 0.0333,
+     "p_ultim": 0.0129,
+     "pos_mitjana": 3.44
     },
     {
      "seed": 10,
@@ -8073,11 +8555,11 @@
      "lletra_2526": "",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.008,
-     "p_2n": 0.025,
-     "p_penultim": 0.0625,
-     "p_ultim": 0.0173,
-     "pos_mitjana": 5.94
+     "p_1r": 0.0097,
+     "p_2n": 0.0331,
+     "p_penultim": 0.0529,
+     "p_ultim": 0.0159,
+     "pos_mitjana": 5.66
     },
     {
      "seed": 11,
@@ -8088,11 +8570,11 @@
      "lletra_2526": "E",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.1958,
-     "p_2n": 0.2457,
-     "p_penultim": 0.0009,
+     "p_1r": 0.2303,
+     "p_2n": 0.2734,
+     "p_penultim": 0.0006,
      "p_ultim": 0.0001,
-     "pos_mitjana": 2.89
+     "pos_mitjana": 2.68
     },
     {
      "seed": 12,
@@ -8103,11 +8585,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0205,
-     "p_2n": 0.0473,
-     "p_penultim": 0.1598,
-     "p_ultim": 0.1014,
-     "pos_mitjana": 5.9
+     "p_1r": 0.0146,
+     "p_2n": 0.03,
+     "p_penultim": 0.2114,
+     "p_ultim": 0.1855,
+     "pos_mitjana": 6.56
     },
     {
      "seed": 13,
@@ -8118,11 +8600,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0089,
-     "p_2n": 0.0243,
-     "p_penultim": 0.219,
-     "p_ultim": 0.1804,
-     "pos_mitjana": 6.62
+     "p_1r": 0.0181,
+     "p_2n": 0.0367,
+     "p_penultim": 0.1935,
+     "p_ultim": 0.1566,
+     "pos_mitjana": 6.34
     },
     {
      "seed": 14,
@@ -8133,11 +8615,11 @@
      "lletra_2526": "C",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0018,
-     "p_2n": 0.0089,
-     "p_penultim": 0.1386,
-     "p_ultim": 0.0538,
-     "pos_mitjana": 6.94
+     "p_1r": 0.0027,
+     "p_2n": 0.0104,
+     "p_penultim": 0.1146,
+     "p_ultim": 0.0468,
+     "pos_mitjana": 6.65
     },
     {
      "seed": 15,
@@ -8148,11 +8630,11 @@
      "lletra_2526": "B",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0169,
-     "p_2n": 0.0466,
-     "p_penultim": 0.0333,
-     "p_ultim": 0.0072,
-     "pos_mitjana": 5.29
+     "p_1r": 0.0021,
+     "p_2n": 0.0109,
+     "p_penultim": 0.1181,
+     "p_ultim": 0.0483,
+     "pos_mitjana": 6.68
     },
     {
      "seed": 16,
@@ -8163,11 +8645,11 @@
      "lletra_2526": "D",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0014,
-     "p_2n": 0.005,
-     "p_penultim": 0.2212,
-     "p_ultim": 0.4964,
-     "pos_mitjana": 7.91
+     "p_1r": 0.0024,
+     "p_2n": 0.0081,
+     "p_penultim": 0.2299,
+     "p_ultim": 0.4461,
+     "pos_mitjana": 7.74
     },
     {
      "seed": 17,
@@ -8178,11 +8660,11 @@
      "lletra_2526": "E",
      "div_2526": "4a",
      "motiu": null,
-     "p_1r": 0.0163,
-     "p_2n": 0.0389,
-     "p_penultim": 0.1787,
-     "p_ultim": 0.1252,
-     "pos_mitjana": 6.16
+     "p_1r": 0.034,
+     "p_2n": 0.0582,
+     "p_penultim": 0.155,
+     "p_ultim": 0.1105,
+     "pos_mitjana": 5.81
     },
     {
      "seed": 18,
@@ -8195,9 +8677,9 @@
      "motiu": null,
      "p_1r": 0.0,
      "p_2n": 0.0001,
-     "p_penultim": 0.2417,
-     "p_ultim": 0.6069,
-     "pos_mitjana": 9.37
+     "p_penultim": 0.2362,
+     "p_ultim": 0.5874,
+     "pos_mitjana": 9.29
     },
     {
      "seed": 19,
@@ -8209,10 +8691,10 @@
      "div_2526": "4a",
      "motiu": null,
      "p_1r": 0.0,
-     "p_2n": 0.0006,
-     "p_penultim": 0.355,
-     "p_ultim": 0.2513,
-     "pos_mitjana": 8.52
+     "p_2n": 0.0008,
+     "p_penultim": 0.3245,
+     "p_ultim": 0.2435,
+     "pos_mitjana": 8.39
     }
    ],
    "grups": [

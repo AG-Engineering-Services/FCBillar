@@ -236,6 +236,32 @@ P_TAULES = 0.05
 N_SIMS = 20000
 
 
+def alineacio_probable(club: dict, lletra: str) -> list[int]:
+    """Els quatre números de la llista que amb més probabilitat formen l'alineació
+    d'aquest equip, repartits de dalt a baix.
+
+    Un jugador no pot jugar la mateixa jornada amb dos equips del club: si és dels
+    quatre més probables de l'A, ja no compta per al B. Per això es reparteix per
+    ordre de categoria i cada equip tria d'entre els que queden lliures."""
+    memo = club.setdefault("_alineacions", {})
+    if memo:
+        return memo.get(lletra, [])
+    agafats: set[int] = set()
+    for e in club["equips"]:
+        lt = e["lletra"]
+        ultim = club["equips"][-1]["lletra"] == lt
+        banda = [x for x in club["llista"] if banda_de(x["num"], "fcb") == lt]
+        tit = referents(club["llista"], lt, "fcb")
+        nums = {x["num"] for x in banda} | {x["num"] for x in tit}
+        if ultim and nums:
+            nums |= {x["num"] for x in club["llista"] if x["num"] >= min(nums)}
+        lliures = [x for x in club["llista"] if x["num"] in nums and x["num"] not in agafats]
+        tria = sorted(lliures, key=lambda x: (-x["taxa"], -x["mitjana"]))[:4]
+        agafats |= {x["num"] for x in tria}
+        memo[lt] = [x["num"] for x in tria]
+    return memo.get(lletra, [])
+
+
 def alineacio_efectiva(pool: list[tuple[float, float]], llavor: int, n: int = 4000) -> list[float]:
     """Mitjana esperada a cada taula (1..4) d'un equip, mostrejant qui hi juga.
 
@@ -547,8 +573,9 @@ def build(db: str = DB) -> dict:
             mitjanes = []
             for sd in seeds:
                 e = per_seed[sd]
-                llista_club = per_club[e["club"]]["llista"]
-                lletres = [x["lletra"] for x in per_club[e["club"]]["equips"]]
+                c = per_club[e["club"]]
+                llista_club = c["llista"]
+                lletres = [x["lletra"] for x in c["equips"]]
                 ultim = lletres[-1] == e["lletra"]
                 banda = [x for x in llista_club if banda_de(x["num"], "fcb") == e["lletra"]]
                 tit = referents(llista_club, e["lletra"], "fcb")
@@ -557,9 +584,18 @@ def build(db: str = DB) -> dict:
                 # la cua si és l'últim equip del club
                 fi = max(nums) if nums else 0
                 extra = [x for x in llista_club if fi < x["num"] <= (fi + 99 if ultim else fi + 2)]
+                # Un jugador no juga la mateixa jornada amb dos equips: els que ja
+                # té compromesos un equip de més categoria del mateix club queden
+                # fora d'aquest pool.
+                reservats = set()
+                for lt in lletres:
+                    if lt == e["lletra"]:
+                        break
+                    reservats |= set(alineacio_probable(c, lt))
                 pool = [(x["mitjana"], x["taxa"]) for x in
                         sorted({x["num"]: x for x in banda + tit + extra}.values(),
-                               key=lambda x: x["num"])]
+                               key=lambda x: x["num"])
+                        if x["num"] not in reservats]
                 mitjanes.append(alineacio_efectiva(pool, llavor=sd * 7919 + len(pool)))
             pron = pronostic_grup(mitjanes, llavor=hash((div, g)) & 0xFFFF)
             for sd, pr in zip(seeds, pron, strict=True):
