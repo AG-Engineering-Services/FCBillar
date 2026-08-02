@@ -19,6 +19,7 @@
 		retorn: boolean;
 		pj: number;
 		taxa: number;
+		temporades: number;
 	};
 	type Equip = {
 		lletra: string;
@@ -538,7 +539,7 @@
 										>
 										<span
 											class="w-8 shrink-0 text-right font-mono text-[10px] tabular-nums text-slate-400 dark:text-slate-500"
-											title="jornades que va jugar el 2025-26">{pct(f.p.taxa)}</span
+											title="presència: jornades jugades les dues últimes temporades">{pct(f.p.taxa)}</span
 										>
 									</li>
 								{/each}
@@ -639,7 +640,9 @@
 					</span>
 					<span
 						class="w-10 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400"
-						title="presència: {fila.p.pj} partides el 2025-26"
+						title={fila.p.temporades
+							? `presència en ${fila.p.temporades == 2 ? 'les dues últimes temporades' : 'la temporada que va jugar'}`
+							: 'sense partides les dues últimes temporades: hi posem la mediana del club'}
 					>
 						{pct(fila.p.taxa)}
 						<span class="block text-[10px] text-slate-400 dark:text-slate-500">pres.</span>
@@ -678,8 +681,11 @@
 			dues a 3a— i cap divisió no queda amb equips del mateix club junts. Els moguts van marcats amb ⇄.
 		</p>
 		<p>
-			<b>Presència i alineació habitual.</b> Cada jugador porta el percentatge de jornades que va
-			jugar el 2025-26 amb el seu equip. És l'ingredient que les mitjanes no diuen: només
+			<b>Presència i alineació habitual.</b> Cada jugador porta el percentatge de jornades que ha
+			jugat les <b>dues últimes temporades</b>, sobre les de l'equip on va jugar més cada any i amb
+			la temporada 2025-26 pesant el doble que la 2024-25, perquè qui acaba d'agafar la titularitat
+			no arrossegui l'any que no jugava. Hi ha 431 jugadors amb les dues temporades i 87 amb una;
+			només un no en té cap, i hereta la mediana del seu club. És l'ingredient que les mitjanes no diuen: només
 			<b>34 dels 83 equips</b> cobreixen el 80% de les seves taules amb quatre jugadors, i n'hi ha
 			que en fan servir catorze. El punt <b>●</b> marca l'<b>alineació habitual més probable</b>: els
 			quatre de la plantilla amb més presència, que no sempre són els quatre de més mitjana. El cas
