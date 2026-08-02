@@ -21,10 +21,10 @@ const sb = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 
 ## Taula `ranking_provisional` — projecció del proper rànquing
 
-Una fila per jugador del rànquing vigent. **Només es publica** per a modalitats amb
-≥1 jugador amb partides de competicions en curs (de moment, **pilot Tres Bandes,
-`modalitat_codi = 1`**). Si la taula no té files per a una modalitat+`num_seq`, no
-hi ha res a projectar.
+Una fila per jugador del rànquing vigent, de **totes** les modalitats amb rànquing
+publicat. Es publica sempre, encara que ningú tingui partides pendents: llavors els
+camps de projecció van a `null` i la fila només serveix per saber **quines partides
+computen ara mateix** (`current_game_ids`).
 
 | Columna | Tipus | Notes |
 |---|---|---|
@@ -33,17 +33,24 @@ hi ha res a projectar.
 | `player_fcb_id` | text | ID intern del jugador (= `players.fcb_id`) |
 | `posicio_oficial` | int | Posició al rànquing oficial |
 | `mitjana_oficial` | real | Mitjana general oficial |
-| `posicio_provisional` | int | Posició projectada (definitius abans que provisionals) |
+| `posicio_provisional` | int \| null | Posició projectada (definitius abans que provisionals); **null** si a la modalitat no hi ha res a projectar |
 | `mitjana_provisional` | real \| null | Mitjana projectada; **null** si el jugador no té partides noves |
 | `partides_post` | int | Nº de partides pendents que mou aquest jugador (0 = no s'ha mogut) |
-| `proj_won` / `proj_lost` / `proj_tie` | int \| null | G/P/E de la finestra projectada de 15 (només per als qui s'han mogut; sumen 15) |
+| `proj_won` / `proj_lost` / `proj_tie` | int \| null | G/P/E de la finestra projectada (només per als qui s'han mogut) |
 | `window_game_ids` | jsonb \| null | IDs (de `games`) que entren a la finestra projectada — per ressaltar-los; les partides pendents NO hi són (venen de `pending_games`) |
+| `current_game_ids` | jsonb \| null | IDs (de `games`) que **computen a la mitjana oficial vigent**, tal com els llista la federació (`ranking_game_links`) |
 
 PK: `(modalitat_codi, num_seq, player_fcb_id)`.
 
 Moviment d'un jugador = `posicio_oficial − posicio_provisional` (positiu = puja).
 Mostra el provisional d'un jugador només si `partides_post > 0`. Els camps de
 desglossament (`proj_*`, `window_game_ids`) només estan plens per a aquests.
+`current_game_ids`, en canvi, hi és sempre: ΣC/ΣE sobre aquestes partides reprodueix
+`mitjana_oficial` exactament.
+
+La **mida de la finestra** no és la mateixa a totes les modalitats: **15** partides a
+tres bandes i **10** a lliure, banda i quadres (els no definitius en tenen menys). No
+la donis per fixa: `current_game_ids.length` és la font.
 
 ```ts
 const { data } = await sb

@@ -672,27 +672,28 @@
 		}
 		return { n: w.length, car, ent, sm, won, lost, tie };
 	}
-	// Les 15 partides del rànquing OFICIAL vigent. Font autoritativa:
-	// ranking_provisional.current_game_ids (de ranking_game_links). Fallback a la
-	// reconstrucció heurística per dates si no hi ha dades (altres modalitats, o
-	// cap moviment publicat).
-	const currentRank15 = $derived.by(() => {
+	// Les 15 partides que computen a la mitjana del rànquing OFICIAL vigent. Font
+	// autoritativa: ranking_provisional.current_game_ids (de ranking_game_links,
+	// és a dir, les que la federació mateixa llista). Fallback a la reconstrucció
+	// heurística per dates si no hi ha dades publicades.
+	const currentRank15Games = $derived.by(() => {
 		const ids = provRow?.current_game_ids ?? null;
 		if (ids && ids.length) {
 			const set = new Set(ids);
-			return summarizeGames(modGames.filter((g) => set.has(g.id)));
+			return modGames.filter((g) => set.has(g.id));
 		}
 		const latestSeq = rankHist.at(-1)?.num_seq;
-		if (latestSeq == null) return summarizeGames([]);
+		if (latestSeq == null) return [] as GameRow[];
 		const [rankYear, rankMonth] = ymFromSeq(latestSeq);
 		const cutoff = `${rankYear}-${String(rankMonth).padStart(2, '0')}-01`;
 		const ageCutoff = monthOffset(rankYear, rankMonth, -24);
-		return summarizeGames(
-			sortedModGames
-				.filter((g) => (g.data_partida ?? '') >= ageCutoff && (g.data_partida ?? '') < cutoff)
-				.slice(0, 15)
-		);
+		return sortedModGames
+			.filter((g) => (g.data_partida ?? '') >= ageCutoff && (g.data_partida ?? '') < cutoff)
+			.slice(0, 15);
 	});
+	// Marca a la llista de partides: quines computen ara mateix al rànquing.
+	const currentIds = $derived(new Set(currentRank15Games.map((g) => g.id)));
+	const currentRank15 = $derived(summarizeGames(currentRank15Games));
 	// Previsió del proper rànquing: AUTORITATIVA (taula ranking_provisional,
 	// computada al backend amb la mateixa font de pendents). La fitxa no recalcula.
 	const rank15 = $derived.by(() => {
@@ -713,6 +714,12 @@
 			ids: new Set<string>((r?.window_game_ids as string[] | null) ?? [])
 		};
 	});
+	// Partides ja jugades que encara NO computen però entraran al proper rànquing
+	// (la finestra projectada menys les que ja hi computen). Sense partides noves
+	// les dues finestres coincideixen i aquest conjunt queda buit.
+	const nextOnlyIds = $derived(
+		new Set([...rank15.ids].filter((gid) => !currentIds.has(gid)))
+	);
 
 	const VBW = 300;
 	const VBH = 84;
@@ -1101,7 +1108,10 @@
 
 		{#if currentPos != null}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Rànquing actual · 15 partides</div>
+				<!-- La finestra no és 15 a totes les modalitats (tres bandes 15, la resta
+				     10) i els no definitius en tenen menys: el nombre surt de les
+				     partides realment marcades. -->
+				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Rànquing actual{currentIds.size ? ` · ${currentIds.size} ${currentIds.size === 1 ? 'partida' : 'partides'}` : ''}</div>
 				<div class="grid grid-cols-3 gap-2">
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums">#{currentPos}</div>
@@ -1619,15 +1629,21 @@
 					</ul>
 				</div>
 			{/if}
-			{#if rank15.ids.size}
-				<p class="mb-2 flex items-center gap-1.5 px-1 text-[11px] text-slate-400 dark:text-slate-500">
-					<span class="inline-block h-3 w-3 rounded bg-amber-50 dark:bg-amber-950/40 ring-1 ring-amber-200 dark:ring-amber-900/50"></span>
-					{#if rank15.hasChanges}
-						les {rank15.ids.size} de games que entren a la previsió del proper rànquing
-					{:else}
-						les {rank15.ids.size} de games que computen al rànquing actual
+			{#if currentIds.size || nextOnlyIds.size}
+				<div class="mb-2 space-y-0.5 px-1 text-[11px] text-slate-400 dark:text-slate-500">
+					{#if currentIds.size}
+						<p class="flex items-center gap-1.5">
+							<span class="inline-block h-3 w-3 shrink-0 rounded bg-amber-50 dark:bg-amber-950/40 ring-1 ring-amber-200 dark:ring-amber-900/50"></span>
+							les {currentIds.size} {currentIds.size === 1 ? 'partida que computa' : 'partides que computen'} a la mitjana del rànquing vigent
+						</p>
 					{/if}
-				</p>
+					{#if nextOnlyIds.size}
+						<p class="flex items-center gap-1.5">
+							<span class="inline-block h-3 w-3 shrink-0 rounded bg-sky-50 dark:bg-sky-950/40 ring-1 ring-sky-200 dark:ring-sky-900/50"></span>
+							{nextOnlyIds.size} {nextOnlyIds.size === 1 ? 'partida nova que entrarà' : 'partides noves que entraran'} al proper rànquing
+						</p>
+					{/if}
+				</div>
 			{/if}
 		<div class="games-wrap overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			<table class="w-full text-sm">
@@ -1642,13 +1658,17 @@
 				<tbody>
 					{#each displayGames as g (g.id)}
 						{@const p = persp(g)}
+						{@const inCur = currentIds.has(g.id)}
+						{@const inNext = nextOnlyIds.has(g.id)}
 						<tr
 							id="game-{g.id}"
-							class="border-b border-slate-100 dark:border-slate-800 last:border-b-0 {rank15.ids.has(g.id)
+							class="border-b border-slate-100 dark:border-slate-800 last:border-b-0 {inCur
 								? 'bg-amber-50 dark:bg-amber-950/40'
-								: $page.url.searchParams.get('game') === g.id
-									? 'bg-blue-50 dark:bg-blue-950/40'
-									: ''}"
+								: inNext
+									? 'bg-sky-50 dark:bg-sky-950/40'
+									: $page.url.searchParams.get('game') === g.id
+										? 'bg-blue-50 dark:bg-blue-950/40'
+										: ''}"
 						>
 							<td class="w-8 px-2 py-2 text-center sm:px-3">
 								<span class="inline-block w-6 rounded text-center text-xs font-bold {p.tie
@@ -1667,7 +1687,7 @@
 										<div class="truncate text-sm leading-tight">{p.opp}</div>
 									{/if}
 									<div class="truncate text-[11px] text-slate-400 dark:text-slate-500">
-										{fmtDate(p.date)}{#if p.comp} · {p.comp}{/if}{#if p.mySerie} · S.M. {p.mySerie}{/if}
+										{#if inCur}<span class="mr-1 rounded bg-amber-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-900/60 dark:text-amber-300" title="Computa a la mitjana del rànquing vigent">rànquing</span>{:else if inNext}<span class="mr-1 rounded bg-sky-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-sky-700 dark:bg-sky-900/60 dark:text-sky-300" title="Entrarà al proper rànquing">proper</span>{/if}{fmtDate(p.date)}{#if p.comp} · {p.comp}{/if}{#if p.mySerie} · S.M. {p.mySerie}{/if}
 									</div>
 								</td>
 								<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{p.myCar}–{p.oppCar}</td>

@@ -209,7 +209,7 @@ def publish_rankings(
 def publish_provisional_ranking(
     db_path: Path | None = None,
     on_progress: Progress | None = None,
-    modalitats: tuple[int, ...] = (1,),
+    modalitats: tuple[int, ...] | None = None,
 ) -> dict[str, int]:
     """Computa i puja el rànquing PROVISIONAL a `fcbillar.ranking_provisional`.
 
@@ -220,13 +220,24 @@ def publish_provisional_ranking(
     els jugadors per aquesta mitjana efectiva i assigna posició projectada.
 
     Un jugador només "es mou" si té ≥1 partida pendent; altrament conserva la mitjana
-    oficial per a l'ordre. Si ningú té pendents, la modalitat queda sense files i el
-    frontend no mostra la columna provisional. Pilot: Tres Bandes (codi 1)."""
+    oficial per a l'ordre. Si ningú té pendents, les files es publiquen igualment amb
+    els camps provisionals a NULL: `current_game_ids` (les partides que la federació
+    compta ara mateix) és el que la fitxa de jugador fa servir per marcar-les.
+
+    `modalitats` per defecte = totes les que tenen rànquing publicat."""
     prog: Progress = on_progress or (lambda level, msg: None)
     db_path = db_path or get_settings().db_path
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     sb = get_client()
+    if modalitats is None:
+        modalitats = tuple(
+            r[0]
+            for r in conn.execute(
+                """SELECT DISTINCT m.codi_fcb FROM modalitats m
+                   JOIN rankings r ON r.modalitat_id = m.id ORDER BY m.codi_fcb"""
+            )
+        )
 
     def _next_month(y: int, m: int) -> tuple[int, int]:
         m += 1
@@ -319,6 +330,12 @@ def publish_provisional_ranking(
             links_by_fcb.setdefault(lr["f"], []).append(lr["gid"])
             order_by_fcb.setdefault(lr["f"], {})[lr["gid"]] = lr["rid"]
 
+        # Mida de la finestra del rànquing: NO és 15 a totes les modalitats (a
+        # tres bandes sí, però a lliure/quadres/banda la federació en compta 10).
+        # La deduïm de les pròpies dades (cap jugador en pot tenir més que la
+        # finestra), amb 15 com a xarxa si encara no hi ha links.
+        win = max((len(v) for v in links_by_fcb.values()), default=15) or 15
+
         import json as _json
 
         computed: list[dict] = []
@@ -330,11 +347,11 @@ def publish_provisional_ranking(
                 off_def = True
             pg = pend.get(fcb, [])
             n_pending = len(pg)
-            # Definitiu = 15 partides computables (24 mesos). Mai degradem un
-            # definitiu oficial (la nostra `games` pot ser incompleta); però un
-            # no-definitiu que arribi a 15 amb les pendents SÍ que es promociona.
+            # Definitiu = finestra sencera de partides computables (24 mesos). Mai
+            # degradem un definitiu oficial (la nostra `games` pot ser incompleta);
+            # però un no-definitiu que hi arribi amb les pendents SÍ que es promociona.
             computable = len(games_by.get(fcb, [])) + n_pending
-            proj_def = off_def or (n_pending > 0 and computable >= 15)
+            proj_def = off_def or (n_pending > 0 and computable >= win)
             if n_pending == 0:
                 # Sense partides noves: ressaltem els games oficials que ja computen.
                 computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
@@ -343,7 +360,7 @@ def publish_provisional_ranking(
                                  "gids": links_by_fcb.get(fcb) or None,
                                  "cur_gids": links_by_fcb.get(fcb) or None})
                 continue
-            # Finestra de 15: pendents (les més recents) + les més recents de games.
+            # Finestra (`win`): pendents (les més recents) + les més recents de games.
             # Desempat intradia per ordre de la federació (vegeu order_by_fcb):
             # mateixa data → rowid més alt primer, perquè la federació conserva la
             # partida llistada més tard. Les partides fora del darrer rànquing
@@ -355,7 +372,7 @@ def publish_provisional_ranking(
                 key=lambda x: (x[0], order.get(x[4], -1)),
                 reverse=True,
             )
-            recent_window = recent[: max(0, 15 - min(n_pending, 15))]
+            recent_window = recent[: max(0, win - min(n_pending, win))]
             car = ent = won = lost = tie = 0
 
             def _tally(c, c_opp):
@@ -369,7 +386,7 @@ def publish_provisional_ranking(
                 else:
                     tie += 1
 
-            for c, c_opp, en in pg[:15]:
+            for c, c_opp, en in pg[:win]:
                 if c is not None and en is not None:
                     car += c
                     ent += en
@@ -398,15 +415,17 @@ def publish_provisional_ranking(
         )
         active = [c for c in computed if c["n"] > 0]
         sb.table("ranking_provisional").delete().eq("modalitat_codi", mod).execute()
-        if not active:
-            prog("ok", f"ranking_provisional[{mod}]: 0 (sense partides pendents)")
-            continue
-
+        # Publiquem sempre, encara que ningú tingui partides noves: la fitxa de
+        # jugador llegeix `current_game_ids` d'aquí per marcar quines partides
+        # computen a la mitjana del rànquing vigent. Sense projecció, els camps
+        # provisionals van a NULL (així cap consumidor no confon una "projecció"
+        # buida amb l'oficial; el contracte ja diu que només valen si
+        # partides_post > 0).
         rows = [
             {
                 "modalitat_codi": mod, "num_seq": rk["num_seq"], "player_fcb_id": c["fcb"],
                 "posicio_oficial": c["pos"], "mitjana_oficial": c["mj"],
-                "posicio_provisional": i,
+                "posicio_provisional": i if active else None,
                 "mitjana_provisional": round(c["proj"], 4) if c["proj"] is not None else None,
                 "partides_post": c["n"],
                 "proj_won": c["won"], "proj_lost": c["lost"], "proj_tie": c["tie"],
