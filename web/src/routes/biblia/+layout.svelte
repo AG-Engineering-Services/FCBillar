@@ -7,6 +7,7 @@
 	<nav class="biblia-nav">
 		<a href="/biblia">🎱 Tirades</a>
 		<a href="/biblia/quiz">🎯 Test</a>
+		<a href="/sistemes-coreans">🇰🇷 Sistemes coreans</a>
 		<span class="nota">reproducció en català · dades de billiard-bible.com</span>
 	</nav>
 	{@render children()}
