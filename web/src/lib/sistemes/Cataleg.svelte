@@ -27,6 +27,8 @@
 		'Tocar la bola fina',
 		'Gran rotació',
 		'Bricol',
+		'Doble banda',
+		'Travessa',
 		'Sense efecte',
 		'Sistemes de càlcul',
 		'Tècnica bàsica',
