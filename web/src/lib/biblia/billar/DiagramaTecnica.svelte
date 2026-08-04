@@ -97,7 +97,7 @@
 	// dreta (la jugadora cobreix el costat dret de l'objectiu).
 	const cueCx = $derived(75 + signe * desplacament);
 	const fraccio = $derived(FRACCIONS[absG] ?? `${absG}/8`);
-	const costat = $derived(gruix < 0 ? 'esquerra' : gruix > 0 ? 'dreta' : 'centrada');
+	const costat = $derived(gruix < 0 ? "per l'esquerra" : gruix > 0 ? 'per la dreta' : '');
 	const descripcio = $derived(absG === 0 ? 'bola plena' : absG === 8 ? 'molt fina' : `${fraccio} de bola`);
 </script>
 
@@ -156,7 +156,7 @@
 			<circle cx={cueCx} cy="45" r={R_GR} class="bola-jug" />
 		</svg>
 		<div class="titol">Quantitat de bola</div>
-		<div class="valor">{descripcio}{signe !== 0 ? ` · ${costat}` : ''}</div>
+		<div class="valor">{descripcio}{signe !== 0 && costat ? ` ${costat}` : ''}</div>
 	</div>
 
 	<div class="bloc">

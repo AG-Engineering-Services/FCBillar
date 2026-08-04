@@ -19,7 +19,7 @@
 	const signe = $derived(gruix > 0 ? 1 : gruix < 0 ? -1 : 0);
 	const cueCx = $derived(75 + signe * (absG / 8) * 2 * R);
 	const fraccio = $derived(FRACCIONS[absG] ?? `${absG}/8`);
-	const costat = $derived(gruix < 0 ? 'esquerra' : gruix > 0 ? 'dreta' : 'centrada');
+	const costat = $derived(gruix < 0 ? "per l'esquerra" : gruix > 0 ? 'per la dreta' : '');
 	const descripcio = $derived(absG === 0 ? 'bola plena' : absG === 8 ? 'molt fina' : `${fraccio} de bola`);
 </script>
 
@@ -29,7 +29,7 @@
 		<circle cx={cueCx} cy="45" r={R} class="jug" />
 	</svg>
 	{#if titol}<div class="titol">{titol}</div>{/if}
-	<div class="valor">{descripcio}{signe !== 0 ? ` · ${costat}` : ''}</div>
+	<div class="valor">{descripcio}{signe !== 0 && costat ? ` ${costat}` : ''}</div>
 </div>
 
 <style>

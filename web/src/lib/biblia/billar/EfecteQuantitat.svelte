@@ -51,7 +51,7 @@
 		7: '1/8',
 		8: 'vora'
 	};
-	const costat = $derived(signe > 0 ? ' dreta' : signe < 0 ? ' esquerra' : '');
+	const costat = $derived(signe > 0 ? " bola per la dreta" : signe < 0 ? " bola per l'esquerra" : '');
 	const etiqueta = $derived((FRACCIONS[absG] ?? '') + (absG > 0 && absG < 8 ? costat : ''));
 </script>
 
