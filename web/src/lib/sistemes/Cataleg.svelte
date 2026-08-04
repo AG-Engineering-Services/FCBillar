@@ -2,6 +2,7 @@
 	import sistemes from '$lib/sistemes/sistemes.json';
 	import { supabase } from '$lib/supabase';
 	import { onMount } from 'svelte';
+	import Explora from '$lib/sistemes/Explora.svelte';
 
 	// mode 'pendents' = encara no validats (per curar) · 'validats' = marcats com que funcionen
 	let { mode }: { mode: 'pendents' | 'validats' } = $props();
@@ -106,6 +107,10 @@
 		{/if}
 	</p>
 </div>
+
+{#if mode === 'pendents' && esAdmin}
+	<Explora />
+{/if}
 
 <!-- Filtres per categoria -->
 {#if categories.length > 1}

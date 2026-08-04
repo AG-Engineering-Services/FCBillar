@@ -35,6 +35,9 @@
 		diagrama?: Diagrama;
 		transcripcio?: string;
 		font?: string;
+		plataforma?: string;
+		url?: string;
+		explorat?: boolean;
 	}
 	const tots = sistemes as Sistema[];
 	const s = $derived(tots.find((x) => x.id === $page.params.id));
@@ -116,21 +119,28 @@
 		<!-- Vídeo -->
 		<div>
 			<div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
-				<iframe
-					class="aspect-video w-full"
-					src={`https://www.youtube.com/embed/${s.id}`}
-					title={s.nom}
-					frameborder="0"
-					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-					allowfullscreen
-				></iframe>
+				{#if s.plataforma && s.plataforma !== 'youtube'}
+					<a href={s.url} target="_blank" rel="noopener" class="block">
+						{#if s.miniatura}<img src={s.miniatura} alt={s.nom} class="aspect-video w-full object-cover" />{/if}
+						<div class="p-2 text-center text-sm text-slate-500 dark:text-slate-400">▶ Obre a {s.plataforma} ↗</div>
+					</a>
+				{:else}
+					<iframe
+						class="aspect-video w-full"
+						src={`https://www.youtube.com/embed/${s.id}`}
+						title={s.nom}
+						frameborder="0"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+						allowfullscreen
+					></iframe>
+				{/if}
 			</div>
 			<a
-				href={`https://www.youtube.com/watch?v=${s.id}`}
+				href={s.url ?? `https://www.youtube.com/watch?v=${s.id}`}
 				target="_blank"
 				rel="noopener"
 				class="mt-2 inline-block text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-				>▶ Obre a YouTube ↗</a
+				>▶ Obre {s.plataforma && s.plataforma !== 'youtube' ? `a ${s.plataforma}` : 'a YouTube'} ↗</a
 			>
 
 			{#if s.diagrama}

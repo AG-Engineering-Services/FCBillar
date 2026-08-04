@@ -10379,5 +10379,51 @@
     },
     "font": "títol",
     "descomposicio": true
+  },
+  {
+    "id": "GaWqbvQE5Xo",
+    "nom": "Sistema 5 i 1/2",
+    "categoria": "Sistemes de càlcul",
+    "resum": "Sistema de càlcul per a jugar al billar a tres bandes",
+    "canal": "뽠주TV",
+    "canalId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+    "subs": 130000,
+    "visites": 88142,
+    "likes": 901,
+    "comentaris": 8,
+    "data": "2026-05-25T00:00:00Z",
+    "miniatura": "https://i.ytimg.com/vi/GaWqbvQE5Xo/maxresdefault.jpg",
+    "valoracio": null,
+    "notaValoracio": "",
+    "funcionaComentaris": null,
+    "explicacio": {
+      "queEs": "El sistema 5 i 1/2 és una tècnica de càlcul que permet als jugadors de billar a tres bandes determinar la posició de la bola després d'un xut. Aquest sistema es basa en la quantitat de bola i l'efecte de la tacada. El sistema consisteix a calcular la posició de la bola en funció de la quantitat de bola i l'efecte aplicat",
+      "calcul": "Quantitat de bola: 5 i 1/2",
+      "correccions": [
+        "Quantitat de bola: 4-5",
+        "Efecte: 1-2",
+        "Tacada: 40-50% de la quantitat de bola"
+      ],
+      "passos": [
+        "1. Determinar la quantitat de bola",
+        "2. Aplicar l'efecte",
+        "3. Calcular la posició de la bola"
+      ],
+      "exemples": [
+        "Exemple 1: Quantitat de bola: 5, Efecte: 1, Posició de la bola: 6",
+        "Exemple 2: Quantitat de bola: 4, Efecte: 2, Posició de la bola: 5 i 1/2"
+      ],
+      "quan": "Aquest sistema és útil quan es juga al billar a tres bandes i es vol determinar la posició de la bola després d'un xut",
+      "consells": [
+        "Calcular la quantitat de bola i l'efecte amb precisió",
+        "Aplicar el sistema de manera consistent"
+      ],
+      "nivell": "avançat"
+    },
+    "font": "subtítols",
+    "explorat": true,
+    "plataforma": "youtube",
+    "url": "https://www.youtube.com/watch?v=GaWqbvQE5Xo",
+    "transcripcio": "자, 1 2 3 4 5 다섯 번째에서 마지막 코너 포인트를 쓰팁으로 치면 제자리로 옵니다. 5와 1이기 때문에 4에서 출발해서 치면 5와 1에 도착합니다. 네. 출발 자리에서 네. 쓰팁으로 쳐 주시면 돼요. 네. 자, 3에서 출발합니다. 그러면 5와 1 지점에 도착합니다. 자, 보편적으로 세리팁을 주고 치면은 40을 좀 넘기는 자리 이렇게 10을 좀 넘기게 돼 있는데 그러면 쓰팁을 다 주시고 끄트머리를 코너 바짝 넣어 주시면 되겠습니다. 네. 이렇게요. 자, 7에서 치겠습니다. 그럼 5와 1은 6이에요. 6을 향해서 오겠네요. 네. 이렇게 득점이 되죠."
   }
 ]
