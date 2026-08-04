@@ -119,6 +119,24 @@ function ambWhisper(url) {
 	} catch { return ''; }
 }
 
+// --- Traducció LITERAL dels subtítols (per trossos) ---
+function trossos(t, mida = 3500) {
+	const out = []; let i = 0;
+	while (i < t.length) { let fi = Math.min(i + mida, t.length); if (fi < t.length) { const tall = t.lastIndexOf(' ', fi); if (tall > i + 1000) fi = tall; } out.push(t.slice(i, fi)); i = fi; }
+	return out;
+}
+async function tradueixLiteral(text) {
+	const sys = `Tradueix LITERALMENT al CATALÀ aquest fragment de subtítols d'un vídeo de billar a tres bandes. Fidel i complet, sense resumir ni ometre res; sense comentaris ni encapçalaments; terminologia catalana (quantitat de bola —mai "gruix"—, efecte/tac, banda, bola 1/2/3, rombe). Retorna NOMÉS la traducció.`;
+	const res = [];
+	for (const p of trossos(text)) {
+		let out = '';
+		for (let a = 0; a < 5 && !out; a++) { try { out = await nvidia(sys, p); } catch { if (a < 4) await sleep(4000 * (a + 1)); } }
+		res.push(normalitza(out));
+		await sleep(120);
+	}
+	return res.join(' ').replace(/\s+/g, ' ').trim();
+}
+
 // --- LLM: anàlisi (nom + família + resum + explicació a fons) ---
 async function nvidia(sys, user) {
 	const r = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', { method: 'POST', headers: { Authorization: `Bearer ${NV}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: MODEL, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }], temperature: 0.3, max_tokens: 2000 }) });
@@ -183,7 +201,7 @@ for (const p of cua) {
 			data: meta.data, miniatura: meta.miniatura, valoracio: null, notaValoracio: '', funcionaComentaris: null,
 			explicacio: a.explicacio, font, explorat: true, plataforma: (p.plataforma && p.plataforma !== 'altre') ? p.plataforma : plataformaDe(p.url), url: p.url
 		};
-		if (text) entrada.transcripcio = text.slice(0, 8000);
+		if (text) { entrada.transcripcio = text.slice(0, 8000); entrada.traduccioLiteral = await tradueixLiteral(text.slice(0, 8000)); }
 		cataleg.push(entrada); tenim.add(meta.id); afegits++;
 		writeFileSync(BUNDLE, JSON.stringify(cataleg, null, 2));
 		if (p.validar) { try { await marca(meta.id); } catch {} }

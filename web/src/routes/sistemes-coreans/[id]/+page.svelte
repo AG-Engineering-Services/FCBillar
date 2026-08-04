@@ -34,6 +34,7 @@
 		explicacio?: Explicacio;
 		diagrama?: Diagrama;
 		transcripcio?: string;
+		traduccioLiteral?: string;
 		font?: string;
 		plataforma?: string;
 		url?: string;
@@ -142,6 +143,17 @@
 				class="mt-2 inline-block text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
 				>▶ Obre {s.plataforma && s.plataforma !== 'youtube' ? `a ${s.plataforma}` : 'a YouTube'} ↗</a
 			>
+
+			{#if s.traduccioLiteral}
+				<details class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/40" open>
+					<summary class="cursor-pointer text-sm font-semibold text-slate-600 dark:text-slate-300">
+						📝 Subtítols traduïts (català)
+					</summary>
+					<p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+						{s.traduccioLiteral}
+					</p>
+				</details>
+			{/if}
 
 			{#if s.diagrama}
 				<div class="mt-4">
