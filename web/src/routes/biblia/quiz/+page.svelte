@@ -216,7 +216,7 @@
 
 			<div class="panell targeta">
 				{#if data.mode === 'multiple'}
-					<p class="instruccio">Quina és la tècnica correcta (efecte + quantitat de bola)?</p>
+					<p class="instruccio">Quina és l'opció correcta (efecte + quantitat de bola)?</p>
 					<div class="opcions">
 						{#each opcions.llista as op, i (i)}
 							<button
