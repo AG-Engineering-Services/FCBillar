@@ -10430,7 +10430,7 @@
     "id": "880363054829242",
     "nom": "Tècnica de doble banda",
     "categoria": "Doble banda",
-    "resum": "Tècnica per jugar al billar de tres bandes amb doble banda",
+    "resum": "Tècnica per jugar al billar de tres bandes amb doble banda (vídeo sense narració aprofitable)",
     "canal": "Bida Ba Băng",
     "canalId": "61572605024326",
     "subs": 0,
@@ -10444,24 +10444,15 @@
     "funcionaComentaris": null,
     "explicacio": {
       "queEs": "La tècnica de doble banda és una habilitat important en el billar de tres bandes. Consisteix a colpejar la bola de manera queboti dues bandes abans de colpejar la bola objectiu. Això requereix una gran precisió i control sobre la quantitat de bola i l'efecte.",
-      "calcul": "Quantitat de bola: 1/2 - 3/4, Efecte: 1/8 - 2/8",
-      "correccions": [
-        "Posició de la bola",
-        "Angle de colpeig",
-        "Quantitat de bola",
-        "Efecte",
-        "Tac"
-      ],
+      "calcul": "",
+      "correccions": [],
       "passos": [
         "Col·loca la bola en la posició adequada",
         "Ajusta l'angle de colpeig",
         "Calcula la quantitat de bola i l'efecte",
         "Colpeja la bola amb precisió"
       ],
-      "exemples": [
-        "Bola 1 a 2/8, Quantitat de bola 1/2, Efecte 1/8",
-        "Bola 2 a 4/8, Quantitat de bola 3/4, Efecte 2/8"
-      ],
+      "exemples": [],
       "quan": "En situacions on la bola objectiu està massa lluny per colpejar-la directament",
       "consells": [
         "Practica la tècnica de doble banda per millorar la precisió",
@@ -10469,11 +10460,10 @@
       ],
       "nivell": "avançat"
     },
-    "font": "whisper",
+    "font": "títol",
     "explorat": true,
     "plataforma": "facebook",
-    "url": "https://www.facebook.com/reel/880363054829242/?fs=e#",
-    "transcripcio": "🍍 🍍 🍍 Có kí ức chưa thể với trong đằng 🍍 🍍 🍍 🍍 🍍 🍍 🍍 🍍 🍍 🍍 🍍 🍍 🍍 Cả điên màu rau trương dây là hạnh pha Tìm đau hay anh muốn đôi sang giấc Để trong tuần hạ bó đêm hoài khô của nhà Đưa đi thương gian hó phê đấu Giấc xa vào hết trung đường Tệnh mối cao thương trường Anh viên, anh viên, anh viên Êt anh viên, viên Không thể đăng kỳ đồng Tại sao sai thêm Ai cất thơ hôn ai giờ bình diễn thái lỡ thơ Ai hát trái lời, ai chẳng nhịp Thì ai dừng lại khi đăng ca Đàn sai cũng hãy thêm tất cả đặc biệt Cô ấu, cùi anh làm vô Bồi thế anh nghe đâu Thì anh dừng rồi, tâm em bắt đầu Cô hát lời, tình em một mình Thơ ngồi đặn anh ấy đây Nằm so thấy cho việc người đình làm vô vô Êt anh viên, anh viên, anh viên Hãy subscribe cho kênh Ghiền Mì Gõ Để không bỏ lỡ những video hấp dẫn Không thể đăng kỳ đồng Tại sao sai thêm Ai cất thơ hôn ai giờ bình diễn thái lỡ thơ Ai hát trái lời, ai chẳng nhịp Thì ai dừng lại khi đăng ca Đàn sai cũng hãy thêm tất cả đặc biệt Cô ấu, cùi anh làm vô Bồi thế anh nghe đâu Thì anh dừng rồi, tâm em bắt đầu Cô hát lời, tình em một mình Thơ ngồi đặn anh ấy đây Nằm so thấy cho việc người đình làm vô"
+    "url": "https://www.facebook.com/reel/880363054829242/?fs=e#"
   },
   {
     "id": "_xTZaI1OXaA",

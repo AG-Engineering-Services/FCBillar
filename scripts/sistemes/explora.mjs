@@ -8,7 +8,7 @@
  * Ús:  node explora.mjs            (processa la cua i fa push)
  *      node explora.mjs --no-push  (no desplega)
  */
-import { readFileSync, writeFileSync, existsSync, rmSync, mkdirSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, rmSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -43,6 +43,25 @@ function familiaPerTitol(t) {
 	if (/뒤돌|되돌아/.test(x)) return 'Endarrere';
 	if (/옆돌/.test(x)) return 'De costat';
 	return null;
+}
+function plataformaDe(url) {
+	if (/youtube\.com|youtu\.be/.test(url)) return 'youtube';
+	if (/instagram\.com/.test(url)) return 'instagram';
+	if (/facebook\.com|fb\.watch/.test(url)) return 'facebook';
+	if (/tiktok\.com/.test(url)) return 'tiktok';
+	if (/vimeo\.com/.test(url)) return 'vimeo';
+	return 'altre';
+}
+// El text és aprofitable? (evita que Whisper d'un clip amb música/soroll —lletres
+// inventades, emojis repetits— acabi generant una explicació falsa.)
+function textUtil(t) {
+	if (!t) return false;
+	const net = t.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}\p{P}\s\d]/gu, '');
+	if (net.length < 60) return false;
+	// diversitat de paraules: soroll repetit té molt poques paraules úniques
+	const mots = t.toLowerCase().split(/\s+/).filter((w) => w.length > 1);
+	const unics = new Set(mots).size;
+	return unics >= 20 && unics / Math.max(1, mots.length) > 0.25;
 }
 function normalitza(s) {
 	return String(s).replace(/\bdel gruix\b/gi, 'de la quantitat de bola').replace(/\bel gruix\b/gi, 'la quantitat de bola').replace(/\bgruixos\b/gi, 'quantitats de bola').replace(/\bgruix\b/gi, 'quantitat de bola');
@@ -130,6 +149,15 @@ ${reglaFons}
 }
 
 // --- Execució ---
+// Cadenat: evita que dues execucions (p.ex. tasca programada cada 10 min) se solapin.
+const LOCK = join(ARREL, '_explora.lock');
+if (existsSync(LOCK) && Date.now() - statSync(LOCK).mtimeMs < 30 * 60 * 1000) {
+	console.log('Ja hi ha una execució en marxa (lock). Surto.');
+	process.exit(0);
+}
+writeFileSync(LOCK, String(process.pid));
+process.on('exit', () => { try { rmSync(LOCK); } catch {} });
+
 const cua = await pendents();
 if (!cua.length) { console.log('Cap petició pendent.'); process.exit(0); }
 console.log(`${cua.length} peticions pendents.\n`);
@@ -146,13 +174,14 @@ for (const p of cua) {
 		let text = subtitols(p.url);
 		let font = 'subtítols';
 		if (!text) { console.log('  · sense subtítols → Whisper (àudio)…'); text = ambWhisper(p.url); font = text ? 'whisper' : 'títol'; }
+		if (!textUtil(text)) { console.log('  · text no aprofitable (sense narració) → només títol'); text = ''; font = 'títol'; }
 		const a = await analitza(meta.titol, text);
 		if (!a) { await actualitza(p.id, { estat: 'error', missatge: 'LLM sense resposta', processat: new Date().toISOString() }); console.log('  ✗ LLM'); continue; }
 		const entrada = {
 			id: meta.id, nom: a.nom, categoria: familiaPerTitol(meta.titol) || a.categoria, resum: a.resum,
 			canal: meta.canal, canalId: meta.canalId, subs: meta.subs, visites: meta.visites, likes: meta.likes, comentaris: meta.comentaris,
 			data: meta.data, miniatura: meta.miniatura, valoracio: null, notaValoracio: '', funcionaComentaris: null,
-			explicacio: a.explicacio, font, explorat: true, plataforma: p.plataforma || 'youtube', url: p.url
+			explicacio: a.explicacio, font, explorat: true, plataforma: (p.plataforma && p.plataforma !== 'altre') ? p.plataforma : plataformaDe(p.url), url: p.url
 		};
 		if (text) entrada.transcripcio = text.slice(0, 8000);
 		cataleg.push(entrada); tenim.add(meta.id); afegits++;
