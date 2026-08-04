@@ -32,7 +32,7 @@
 			return { video_id: m[1], plataforma: 'youtube' };
 		if ((m = s.match(/instagram\.com\/(?:reel|reels|p|tv)\/([\w-]+)/)))
 			return { video_id: m[1], plataforma: 'instagram' };
-		if ((m = s.match(/(?:facebook\.com\/[^/]+\/videos\/|facebook\.com\/watch\/?\?v=|fb\.watch\/)(\w+)/)))
+		if ((m = s.match(/(?:facebook\.com\/reel\/|facebook\.com\/[^/]+\/videos\/|facebook\.com\/watch\/?\?v=|fb\.watch\/)(\w+)/)))
 			return { video_id: m[1], plataforma: 'facebook' };
 		if ((m = s.match(/tiktok\.com\/@[\w.]+\/video\/(\d+)/))) return { video_id: m[1], plataforma: 'tiktok' };
 		if ((m = s.match(/vimeo\.com\/(\d+)/))) return { video_id: m[1], plataforma: 'vimeo' };
@@ -133,9 +133,15 @@
 								>{h.estat}</span
 							>
 							<span class="text-slate-400">{h.plataforma}</span>
-							<a href={h.url} target="_blank" rel="noopener" class="truncate text-slate-600 hover:underline dark:text-slate-300"
-								>{h.nom || curt(h.url)}</a
-							>
+							{#if h.estat === 'fet' && h.video_id}
+								<a href={`/sistemes-coreans/${h.video_id}`} class="truncate font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+									>{h.nom || curt(h.url)} →</a
+								>
+							{:else}
+								<a href={h.url} target="_blank" rel="noopener" class="truncate text-slate-600 hover:underline dark:text-slate-300"
+									>{h.nom || curt(h.url)}</a
+								>
+							{/if}
 							{#if h.missatge}<span class="truncate text-xs text-slate-400" title={h.missatge}>· {h.missatge}</span>{/if}
 						</li>
 					{/each}
