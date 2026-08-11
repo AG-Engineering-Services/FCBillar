@@ -341,6 +341,19 @@
 		pool: 'Pool',
 		snooker: 'Snooker'
 	};
+
+	// Competicions d'un esdeveniment. A la graella de la FCB una mateixa setmana
+	// hi cap més d'una cosa del mateix bloc —fins a quatre prèvies i finals
+	// alhora— i el parser les ajunta amb ' · '; cada tros és una competició a part
+	// i es llista en una fila pròpia sota la mateixa etiqueta. A la RFEB el ' · '
+	// vol dir una altra cosa (les ratlles d'un mateix nom, «CTO. DE ESPAÑA ·
+	// CUADRO 47/2») i no s'ha de partir.
+	const competicions = (e: CalendariEvent) =>
+		e.font === 'FCB' ? e.titol.split(' · ') : [e.titol];
+	// La graella del mes també compta per competició i no per cel·la del PDF: si
+	// no, un dia amb tres prèvies alhora hi sortiria com una sola cosa.
+	const actes = (items: CalendariEvent[]) =>
+		items.flatMap((e) => competicions(e).map((titol) => ({ tipus: e.tipus, titol })));
 	const xip = (actiu: boolean) =>
 		`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${
 			actiu
@@ -487,26 +500,27 @@
 											: 'text-slate-300 dark:text-slate-600'}">{c.dia}</span
 								>
 								{#if c.items.length}
+									{@const dia = actes(c.items)}
 									<!-- Mòbil: punts. Des de `md`, també el títol retallat. -->
 									<span class="flex flex-wrap gap-0.5 md:hidden">
-										{#each c.items.slice(0, 4) as e (e.ambit + e.tipus + e.titol)}
-											<span class="h-1.5 w-1.5 rounded-full {PUNT[e.tipus] ?? 'bg-slate-400'}"></span>
+										{#each dia.slice(0, 4) as a, i (a.titol + i)}
+											<span class="h-1.5 w-1.5 rounded-full {PUNT[a.tipus] ?? 'bg-slate-400'}"></span>
 										{/each}
 									</span>
 									<span class="hidden flex-col gap-0.5 md:flex">
-										{#each c.items.slice(0, 2) as e (e.ambit + e.tipus + e.titol)}
+										{#each dia.slice(0, 2) as a, i (a.titol + i)}
 											<span
-												class="truncate rounded px-1 text-[9px] leading-tight {e.tipus === 'equips'
+												class="truncate rounded px-1 text-[9px] leading-tight {a.tipus === 'equips'
 													? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300'
-													: e.tipus === 'individual'
+													: a.tipus === 'individual'
 														? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
 														: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}"
-												>{e.titol}</span
+												>{a.titol}</span
 											>
 										{/each}
-										{#if c.items.length > 2}
+										{#if dia.length > 2}
 											<span class="px-1 text-[9px] text-slate-400 dark:text-slate-500"
-												>+{c.items.length - 2}</span
+												>+{dia.length - 2}</span
 											>
 										{/if}
 									</span>
@@ -674,12 +688,16 @@
 				</div>
 				<div class="min-w-0 flex-1">
 					<div class="text-sm font-medium leading-snug">
-						{e.titol}
-						{#if !nomesCarambola && e.disciplina !== 'carambola'}
-							<span class="ml-1 text-[10px] uppercase text-slate-400 dark:text-slate-500"
-								>{ETIQUETA_DISC[e.disciplina] ?? e.disciplina}</span
-							>
-						{/if}
+						{#each competicions(e) as titol, i (titol + i)}
+							<div>
+								{titol}
+								{#if i === 0 && !nomesCarambola && e.disciplina !== 'carambola'}
+									<span class="ml-1 text-[10px] uppercase text-slate-400 dark:text-slate-500"
+										>{ETIQUETA_DISC[e.disciplina] ?? e.disciplina}</span
+									>
+								{/if}
+							</div>
+						{/each}
 					</div>
 					{#if e.dissabte || e.diumenge}
 						<div class="text-xs text-slate-500 dark:text-slate-400">
