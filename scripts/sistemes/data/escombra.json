@@ -1,0 +1,8333 @@
+{
+  "resum": {
+    "짠당구": {
+      "total": 961,
+      "cand": 4
+    },
+    "양빵당구": {
+      "total": 1221,
+      "cand": 118
+    },
+    "당구개론&패턴시스템": {
+      "total": 1025,
+      "cand": 52
+    },
+    "수호신당구레슨": {
+      "total": 158,
+      "cand": 37
+    },
+    "방수좋아 당구TV": {
+      "total": 650,
+      "cand": 17
+    },
+    "야매당구쫑프로": {
+      "total": 1110,
+      "cand": 54
+    },
+    "초이스연구소": {
+      "total": 1171,
+      "cand": 98
+    },
+    "당구달인TV": {
+      "total": 434,
+      "cand": 39
+    },
+    "필승당구레슨": {
+      "total": 435,
+      "cand": 33
+    },
+    "뽠주TV": {
+      "total": 2561,
+      "cand": 119
+    },
+    "중대당구박사": {
+      "total": 2020,
+      "cand": 208
+    },
+    "아이빌리TV": {
+      "total": 832,
+      "cand": 21
+    },
+    "3쿠션 연습문제": {
+      "total": 94,
+      "cand": 22
+    }
+  },
+  "candidats": [
+    {
+      "id": "-KOxPoLhw3s",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "비껴치기 \"7빼기\" 시스템",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "Qkpoul4j-dQ",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "💥더블쿠션 '7빼기' 하나면 끝! (기준부터 팁 보정까지)",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "WuiFW-c_oyA",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "뒤돌리기 '7빼기 시스템'",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "LTxJvHiUXg4",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "복합횡단 초간단 볼 시스템 #당구 #billiards #더블쿠션",
+      "score": 9,
+      "per": [
+        "볼시스템",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "RmjcOD4yPKI",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "더블쿠션 대박 볼 시스템!  당점과 두께를 아주 간단히 알 수 있는 전구간 가능 시스템입니다~!!",
+      "score": 9,
+      "per": [
+        "볼시스템",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "RJlEXV0lfyw",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "초이스 시스템 당점 두께 스트록 전부 다 설명해주는 실전 레슨 / 양빵당구 양샘 실전 레슨 10 옆돌리기 볼시스템의 중요성",
+      "score": 9,
+      "per": [
+        "볼시스템",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "8vMaPlRB448",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(40만뷰) 리버스 볼 시스템1  비기받아요~ 양빵당구 양샘레슨 28",
+      "score": 9,
+      "per": [
+        "볼시스템",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "SyCYe6nT_4Q",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(20만뷰) 뒤돌리기 볼시스템 / 양빵당구 양샘 레슨7",
+      "score": 9,
+      "per": [
+        "볼시스템",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "OxVi3lK50bI",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "3칸기울기는 센터 난구해결가능하다. 세워치기 대회전 해결 방법 당구레슨 3구레슨 4구 수호신당구레슨BILLIARDS",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "JfKKEyMw_d4",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "67편 비껴치기 적중률 99% 안정적으로 다니는 방법 공개합니다.3쿠션 3구 4구 3구레슨 쓰리쿠션레슨 billiards",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "EEFaAzQMT9E",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "65편 비껴치기 10~30포인트까지 초보도 쉽게 칠수 있는 방법 쉬운기준점 잡고 가실분 기울기패턴 수호신당구레슨 수호신비껴치기 3구레슨 billiards 3쿠션",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "rX7xZNf_1XA",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "횡단 기울기별 두께, 당점, 스트록  #당구 #lpba #pba #당구 #당구레슨 #당구시스템 #shortsvideo",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "7bFUkV02tOQ",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#178] ***비기공개*** 큰기울기의 비껴치기는 이렇게 칩니다..~~",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "fTNZ0DCnv7Q",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "더블쿠션 기울기별 거리별 두께, 당점, 스트록  #당구레슨 #lpba #pba #당구시스템 #당구 #shortsvideo",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "W_UcG7ow_zQ",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#136]횡단 총정리(두께, 당점, 스트록 by. 송프로)",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "k7kloQKD_HM",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#82] 가장 확율높은 거리별, 기울기별 더블쿠션 두께, 당점 스트록!!!",
+      "score": 9,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "9Zb25R4WIYM",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "7시스템 외우는 법! '7, 5, 3'만 기억하세요~ (당구 꿀팁)",
+      "score": 8,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "mGtsc5LErMM",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌리기, 이 '공식'으로 100% 성공하세요~✅",
+      "score": 8,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "sR_VTz9cdcI",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "좁은 구간 옆돌리기 출발점과 도착점이 같은 제자리 시스템! 당점? 두께?",
+      "score": 8,
+      "per": [
+        "당점+두께",
+        "제자리"
+      ]
+    },
+    {
+      "id": "qcpMODiOhP0",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "기울기 2칸은 중앙 40포인트다!! 속도의 변화만으로 전부해결가능 긴 옆돌리기 쉽게 치는 방법 초보당구 당구레슨 billiards 당구유튜버 수호신당구 3구 4구 3구레슨",
+      "score": 8,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "4nNeDeAG-8A",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "29편 당구공을 크게 만들어 치는 방법 공개!! 방수를 높일수 있습니다(흔히 나오는 단단장 더블 쿠션 횡단 두께고정  당점의 변화로만 가능 초보당구 3쿠션 4구 billiards",
+      "score": 8,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "gHCIYS-oh-s",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "166화. 1자로 서있는 더블쿠션 허공3단 기울기별 당점,두께, 샷 정리",
+      "score": 8,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "kZRZm7Lvvoo",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "앞돌리기 분리각 만들기(두께, 당점) #shorts #shortvideo",
+      "score": 8,
+      "per": [
+        "당점+두께",
+        "divisió"
+      ]
+    },
+    {
+      "id": "9nMZJn4svLk",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#19]기울기별 옆돌리기 최대각 만들기",
+      "score": 8,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "NEHfKaMMl2I",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[196화]🔴설마 아직도 감으로 치세요? '8' 공식으로 바운딩 확률 100% 만들기",
+      "score": 8,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "bNvQrXEzDIs",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[160화]비껴치기중에🔥가장빠르고 정확합니다.❤️기울기는 칸수다. 이 방법은🔥절대로 잊어버리지않아요.",
+      "score": 8,
+      "per": [
+        "기울기",
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "6YeeBtO6KW8",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "150 동호인 당구 실전 해설 #당구 #당구레슨 #Billiard",
+      "score": 8,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "zJ1GkXZ_s_g",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기를 이용한 1쿠션 계산법(기울기측정법+1쿠션 치는 방법) #기울기계산법 #1쿠션계산법 #1쿠션볼시스템",
+      "score": 8,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "8pk18Ky9TnE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "1팁만 주고 땅~! 치는 뒤돌리기 #당구 #뒤돌려치기 #바깥돌리기",
+      "score": 7,
+      "per": [
+        "당점+두께",
+        "divisió"
+      ]
+    },
+    {
+      "id": "gPPz_8juq2Q",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "기울기가 7칸 이상인 비껴치기 볼시스템 사용법",
+      "score": 7,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "JqBUNttWcfE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "꼭 따라해 보세요~ 3쿠션 가장 빠르게 실력향상 되는 방법!! 가장 편한 분리각(두께) 설정법 / 정확하고 완벽하게 설계하기 / 양빵당구 양샘 레슨",
+      "score": 7,
+      "per": [
+        "당점+두께",
+        "divisió"
+      ]
+    },
+    {
+      "id": "j6SlgYbQDpQ",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "320편 쿠션에 붙었을 때 제자리로 도착하는 비법 매우 좋은 패턴입니다",
+      "score": 7,
+      "per": [
+        "당점+두께",
+        "제자리"
+      ]
+    },
+    {
+      "id": "Rtbtdmb46lE",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 31화] 최종분리각을 모르면 당구의 시작은 없습니다💥💥당구의 기초이론 - 4.최종분리각 1부",
+      "score": 7,
+      "per": [
+        "당점+두께",
+        "divisió"
+      ]
+    },
+    {
+      "id": "VSrIi09c9ro",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[227화]💢아주 긴 옆돌리기❤️가장 쉽게치는 방법🔥8=기울기+두께를 전수합니다.",
+      "score": 7,
+      "per": [
+        "기울기",
+        "fórmula N=..+.."
+      ]
+    },
+    {
+      "id": "gK3l1xgmwQg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기 계산법에서 8등분한 두께를 사용하는 이유 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 7,
+      "per": [
+        "기울기",
+        "divisió"
+      ]
+    },
+    {
+      "id": "Z6sTT10Up9c",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기 계산법 (1쿠션 계산법) 개념의 출발 - 당구박사의 당구 이론 #Angle System",
+      "score": 7,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ES-_I46-bDA",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "똑같은 4칸 기울기인데 왜 안 들어갈까? 🤔 (반드시 알아야 할 서로 다른 4칸 기울기) #당구박사 #기울기계산법 #당구쇼츠",
+      "score": 7,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "NLCxweBNwOs",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 당구박사 기울기계산법의 장점 #당구박사 #당구레슨 #기울기계산법",
+      "score": 7,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "oJJyetPV38s",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기 계산법으로 옆돌리기 쉽게 치는 방법 #당구박사 #중대3구 #당구레슨",
+      "score": 7,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "aroQsYLLh80",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구교실 중급반(4월9일 오후반) 1쿠션 치는 법과 뒤돌리기 3쿠션 짧게 만드는 법 -  #당구 #당구교실 #부천시 #심곡동",
+      "score": 7,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "hU2ioUzkipM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "4구 실전 게임 자막 해설 (250점 동호인 vs 당구박사) #당구 #당구레슨 #당구박사",
+      "score": 7,
+      "per": [
+        "볼시스템",
+        "divisió"
+      ]
+    },
+    {
+      "id": "dasaOHYRi1Y",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "두께를 8등분하는 이유 #당구 #당구이론 #볼시스템",
+      "score": 7,
+      "per": [
+        "볼시스템",
+        "divisió"
+      ]
+    },
+    {
+      "id": "2cPUn3V3Hj4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 초중급반(10월30일) - 1쿠션 볼시스템으로 모으기까지   #당구 #당구교실 #부천시 #심곡동",
+      "score": 7,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ZThv4cKkpYc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 중상급반(10월16일 오후반)   #당구 #당구교실 #부천시 #심곡동",
+      "score": 7,
+      "per": [
+        "볼시스템",
+        "divisió"
+      ]
+    },
+    {
+      "id": "xvZ1nGD8rUE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "심곡3동 당구교실 후기 (두께와 분리각 이론을 이용한 공 모으기, 초급자 밀어치기, 중급자 1쿠션 치는 법) 그리고 라이브쇼핑",
+      "score": 7,
+      "per": [
+        "당점+두께",
+        "divisió"
+      ]
+    },
+    {
+      "id": "CTVBgkoGYEo",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1쿠션 볼시스템으로 치는 방법 (기울기로 생각하는 법) #당구",
+      "score": 7,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "6-Ba3THAy1M",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 필수 이론과 실습예제 내용 소개 및 당구박사앱 수록 알림",
+      "score": 7,
+      "per": [
+        "당점+두께",
+        "divisió"
+      ]
+    },
+    {
+      "id": "RVgiys-kW6w",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기로 치는 1쿠션 계산법 #당구 #3구",
+      "score": 7,
+      "per": [
+        "기울기",
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "QuyRWMyw8dI",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "두께 정해놓고, 당점 찾기",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "VeUy6PMOhtM",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "되돌아오기 바운딩 25 계산법과 치는 방법",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "shXVxQiXU3U",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "되돌아오기 바운딩 💥숫자 25만 외우세요💥 초간단 3초 계산법, 타법, 그립법, 스트록, 두께, 당점까지 되돌아오기 바운딩 잘 되는 방법 여기 다 있습니다~",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "tCbdzrH-G78",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "일출일몰 시스템 / 비껴치기는 100% 득점 / 더블 쿠션 치는 방법까지.. 양빵당구 양샘 1:1 실전 레슨",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "AXI-DKmYWQM",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "맥시멈 스핀샷 되돌아오기 접시! 전부 다 알려드립니다~ 비껴치는 형태의 맥시멈 되돌아오기 계산법, 당점 두께 설정법, 스트록, 자세 등등 / 양빵당구 양샘레슨 135",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "V3FCDLWlxmY",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "대~박! 시스템!! 만듦!! 앞돌리기 끌어치기 100% 득점 가능하게 시스템을 만들었습니다! 양빵 당구 양샘 레슨 112 앞돌리기 끌어치기 대회전",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "cjtyMFdqd3U",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(30만뷰) 짧은 뒤돌리기 간편 시스템!! 양빵당구 양샘 레슨 110",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "NUtyVY-Kh2E",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "배치별 설계방법 /초이스 시스템 두께 당점 스트록까지 전부 다 설명해주는 양빵당구 양샘 실전 레슨 11",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "WHsqrCq2lCQ",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "사우스 시스템 당점과 두께 설정법 / 양빵당구 양샘레슨32 긴 비껴치기 / 더블쿠션까지",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "xCTEFc7aEYI",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(30만뷰) 리버스 시스템2 당점과 두께를 알려주는 비기 받아요~ /  양빵당구 양샘레슨 #29",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "GVuPdlCj-A0",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "250편 맨날 제자리 실력ㅡ 패턴으로 큐질을 배워야 된다(45°기울기 옆돌리기)",
+      "score": 6,
+      "per": [
+        "기울기",
+        "제자리"
+      ]
+    },
+    {
+      "id": "bf14ueRUNQc",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "52편.앞돌리기형태 패턴 당점과 두께 Tip pattern",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "LsjMpjkwtu8",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "짧은 옆돌리기 두께와 당점찾기를 알아두면 정말 좋습니다",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "slT8BJif358",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "가장 추천할 만한 횡단샷 시스템",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "TCGc5U9U7hU",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "옆돌리기 100%득점 하는 방법 제각돌리기 레슨 옆돌려치기 레전드 레슨 3쿠션 3구 4구 당구레슨 billiards 당구유튜버",
+      "score": 6,
+      "per": [
+        "기울기",
+        "제자리"
+      ]
+    },
+    {
+      "id": "cAsYV_7Ci4s",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "74편 짧은 비껴치기 실수 없이 1점 득점 하실분!!꿀팁!!절반 두께 비밀 공개 초보당구 3쿠션 수호신당구레슨 4구 3구 레슨 billiards",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "CNMOPS0kZf8",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "이번엔 단쿠션이다! 💥걸어치기💥 맞아있게 걸어 버리는 방법",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "1iRPuaHO7WY",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "쫑프로 레슨 5  앞돌리기 두께 당점을 한번에 알려주는 시스템",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "aBjyDzouw20",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "여러분들이 알고싶은 \"스핀볼\" 두께 / 당점 / 스트록 (Re-Upload)",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "_Zy-oh9eESE",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "당신에게 깨달음을 주는 옆돌리기 절반두께 3팁 시스템 통합본",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "BzOogR30qmg",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "전설의 영상에 두께 당점 표시하기",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "IKKR5xtVS7k",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "옆돌리기 교과서 일자배치 두께 당점 스트록 다 알려줌",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "Eo6c0DR52j8",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "비껴치기 두께 당점을 이용하여 득점 확률 높이기",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "MmiAhvxVpmU",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "268. 긴각 #비껴치기 두께, 당점 한번에 구하는 방법",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "wfcKDBrDWew",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "262화. 다양한 #옆돌리기 배치!! 하지만 똑같은 두께, 당점 만능 레시피가 가능한 이유?",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "0bMlYcF9Oxw",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "[쫑프로기준]뒤돌려치기 배치별 상황별 두께 당점 레시피 + 포지션은 덤",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "D9ZU3LnoU6Q",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "쫑프로의 심플당구 6화.  쿠션에 붙은 공 좁은 옆돌리기 두께, 당점, 샷 레시피",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "zO172CtjXuI",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "쫑프로의 심플당구 1화. 기본자세, 큐걸이 꿀팁, 두께설정법, 1적구 컨트롤",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "AXPAvj2pHRE",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "121화. 2점은 먹고 들어가는 이상적인 초구 득점 방법 샷 당점 두께#초구 #뒤돌려치기 #포지션 #뒤돌려치기시스템",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "PAyYE2pcuCQ",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "특별편. 밀어치기샷 당점과 두께를 알면 답이 보인다. 꿀팁. 당구강좌. 당구강의.",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "KqEX4YeFqjA",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#199] 앞돌리기 대회전 위치별 두께 당점 스트록 설정법~!!!  #lpba #billiards #당구 #당구레슨 #pba",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "DPJ9xJGv778",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#192] 닥초쌤 연습법~ 엇각 옆돌리기 안정된 속도로 치는법~ 꼭 익혀두세요..^^",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "-LdFsddi8RI",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#189] 좁은각 뒤돌리기 잘안되시는 분들은 꼭 보세요..^^",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "PPDO8Kzg7Ng",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#188] 앞돌리기 길~게 이젠 자신있게 칠 수 있습니다..!!!",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "jeDggSt7Un8",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "쿠션에 붙은공 되돌아오기~~",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "aEwYRoJStNo",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "더블쿠션 배치별 두께 당점 스트록~!!!  #lpba #pba #당구레슨 #당구 #당구시스템 #shortsvideo",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "PN3drquyz4E",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#148] 걸어치기 당점조절로 전구간 득점하기~!!!!",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "GGEZFiUQ4EQ",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#146] 바운딩되돌리기! 위치별 당점및 스트록 방향설정법~!! 그녀의 놀라운 스트록은 서비스~!!!",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "xqKlXNV2Qhw",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#128] 밀림을 이용한 복합횡단~ 어려워 보이지만 17점도 칠수 있는 공입니다. 꼭 연습해보세요..^^",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "P_7HP5USalY",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "비껴쳐서 반대편 코너로 보내는 난구해결법~!! #lpba #당구레슨 #pba #당구시스템 #당구 #스트록 #shortsvideo",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "UWXFlQvvZJs",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#122] 고점자처럼 보내는 장단장되돌리기 - 되돌리기 심화학습2 #당구레슨 #당구시스템",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "MmzF3Lv3Igs",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#109] 끌어치는 맥시멈 리버스 두께 당점 스트록~!!",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "xhy-M77fVP8",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#101] 실수많은 길게 세워치기 송프로버전 VS 닥초쌤버전(두께 당점 스트록 꼭 확인하세요~~!!!)",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "MY8UISDYRjI",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#98] 더블쿠션 두께, 당점, 스트록 총정리!!!! 이렇게만 치세요~",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "9uFhThOYqps",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#95] 단단장 장축더블쿠션 두께, 당점, 스트록!!!!!",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "m7xizDRoQx8",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#83] 하단더블쿠션 당점만 찾으면 쉽고 정확히 득점가능합니다!!!",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "5_LkDfqmDUI",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#80] 비껴치기 핵심정리, 배치에 따른 두께, 당점, 스트록, 스피드 꼭 보세요... ^^  #당구레슨 #lpba #pba",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "ns-1FP8hVLs",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#78] 비껴치기 대회전 키스빼고 득점하는 100%실전레슨!!!! 꼭보세요~ #lpba #pba #당구레슨",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "5R8RanU4n1Y",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#77] 비껴쳐서 반대편 코너로 보내는 위치별 두께, 당점, 스트록 #당구레슨 #당구시스템 #",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "Td9AgeqIbzY",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#47] 하프라인 윗쪽의 엇각뒤돌리기",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "-5PLx0eCJBE",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#28] 좁은입사각의 앞돌리기(feat.베트남시스템)",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "skYDM9-sEjY",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#25] 꺽어치는 앞돌리기 스트록 및 기준라인(feat. 뜌즐시스템)",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "siLGFAAkT8Q",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[1분시스템] 원뱅크 걸어치기 시스템",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "xHcFW50RNp0",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#8] 옆돌리기 기준스트록 만들기&시스템",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "N4Udh-GOynk",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.203(자연스런 되돌리기)",
+      "score": 6,
+      "per": [
+        "기울기",
+        "divisió"
+      ]
+    },
+    {
+      "id": "eKYSlZoLS1I",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.153(얹혀치기)",
+      "score": 6,
+      "per": [
+        "기울기",
+        "divisió"
+      ]
+    },
+    {
+      "id": "b6yBRval4lg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "끌어치기 두께와 당점 찾는 방법 - 당구필수이론 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "bv_QQbQKaYs",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "밀어치기 계산법과 공모으기 (300점 만들기 프로젝트 4a) #당구 #당구레슨 #공모으기",
+      "score": 6,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "aOhQJoTwoXM",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "당구 되돌아오기, 쉽게 성공하는 꿀팁👍",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "NBxrWUIbQ3k",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "1뱅크 걸어치기 / 321시스템",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "pUzIuOssvrs",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "뱅크샷 장인으로 가는 지름길?",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "adVPglUEsVs",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "[최초공개] 숫자 321만 외우면 저점자도 가능!👍 제가 직접 만든 '321 시스템'의 마법 (더블쿠션, 리버스, 되돌아오기, 횡단샷까지 한방에!)",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "XDsmajMm58s",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "뒤돌리기 '속도'가 중요한 이유?",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "NfzW0e9d1Kw",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "뒤돌리기 포지션 플레이- '데려오기' 👍",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "XrjAHuYaShE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "당구 곡구 실수? 숏팔로우가 정답✅",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "P1yeXEOI07M",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌리기 완전정복! 볼시스템 핵심 4가지로 당구 수지 급상승 📈",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "gDqCy_AOXKs",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "두껍게 밀어치는 되돌아오기 #당구 #billiards #접시",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "8awu-VNzWzU",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "긴 옆돌리기 💢\"숫자 0 1 만 외우세요~\"💢 양빵양샘이 만든.. 더블쿠션도 가능한 초간단 법칙~!",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "bHA4jTkq93U",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "뒤돌리기 두께 당점 패턴 변화",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "b0JJfFg0Nuo",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "뒤돌리기 💥고수가 되는 패턴 연습법💥 / 정교함으로 두께 당점에 엄청난 자신감이 생깁니다!!",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "GF4BfWARWZk",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "💥당구 기초 통합본💥 당구 친다면 이 정도 기본은 아셔야 합니다~ 당점, 속도, 두께 통합본!",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "4cBL4OXKKT0",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "좁은각 비껴치기 완벽한 설계방법",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "hM1e-C_RdCI",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "⭐3칸 3팁⭐ 이거 하나만 딱 이해하면 참 쉬운 원뱅크 걸어치기 리버스 볼 시스템! 핵꿀팁입니다~",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "vovFsPN9QYk",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "앞돌리기 볼시스템 빠른 계산법과 노하우 배워보세요~👍 양빵당구 양샘 1:1 레슨",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "5KNlefLgM6g",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "기울기별 1적구 분리각 #옆돌리기 #키스피하기 #포지션플레이",
+      "score": 5,
+      "per": [
+        "기울기",
+        "divisió"
+      ]
+    },
+    {
+      "id": "gKqCZGpTZJs",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "기울기별 1적구의 분리각  #옆돌리기 #분리각 #키스피하기",
+      "score": 5,
+      "per": [
+        "기울기",
+        "divisió"
+      ]
+    },
+    {
+      "id": "52oolj5STbM",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "기울기에 따른 1적구의 분리각 알고 있나요? 옆돌리기 칠 때 키스피하고 포지션 플레이하기 정말 좋습니다👍  양빵당구 양샘 레슨",
+      "score": 5,
+      "per": [
+        "기울기",
+        "divisió"
+      ]
+    },
+    {
+      "id": "TWnj4UFogAA",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "1뱅크 역회전 걸어치기🤸‍♀️ 초간단 시스템 / 3칸 1기울기만 외우세요~ 양빵당구 양샘 레슨",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "NwqMNQhaqWo",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "두께를 잘 치고 싶은가요?? 부드럽게 치고 싶은가요?? 양빵당구 양샘 설계방법2 / 뒤돌리기 얇게 부드럽게 치기",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "EEK231C3Q3Y",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(30만뷰) 비껴 세워치기 초간단 계산법 / 7만 외우세요!! / 이론설명 응용 꿀팁까지 / 양빵당구 양샘 1:1 레슨 / 짱꼴라 7볼시스템",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "_Lq4muRnD3w",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "끌어치기 잘하는 방법 / 끌어치기 꿀팁 배우세요~~ 양빵당구 양샘 레슨 59",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "bOejR58NamI",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "스트록의 차이에 따른 수구와 1적구의 움직임 / 양빵당구 양샘 레슨 52",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "ztS-2uziYX8",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "수구가 1적구를 이겨내는 슥 스트록 / 관통샷 / 두께 당점보다는 스트록으로 해결해 버리자 / 양빵당구 양샘레슨 47",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "YnQGh90TcAY",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "기울기가 큰 앞돌리기 길게 정석으로 혹은 야매로.. 양빵당구 양샘 레슨 38-8 파이브앤하프시스템 앞돌리기 응용 방법",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "1azsgoyYmis",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "양빵당구 레슨65편 뒤돌려치기 (우라) 두께, 당점, 스트록을 알고 키스피하기",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "YIABi9XiDP0",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "양빵 당구 레슨27편 양샘 기초 레슨 당점 두께 속도 그립법",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "qLgSva4ibuI",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷178)\"당구맛이 새로워진다\" 각을 눕혀라~반드시~!!!",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "R6GYj5NVggw",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷145)이런 건 역회전 상단이 유리합니다",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "zoE85PdSS5I",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷128)다른 것은 다 필요없고 1/3두께와 중단3팁으로만 조절하세요",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "bknH2f3OKes",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷102)더블쿠션 \"쫑\" 속도로 해결한다",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "RJ0iol2S5Xo",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷98) 어떤 형태는 양다리를 노리는 것도 괜찮다(눈치채기 어려움)",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "0DKvieKnXpk",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "주말꿀팁84)위치가 바뀌어도 당점과 두께 같은 뒤돌려치기",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "PrSYNbr7W1U",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "43)두께와 당점고민 필요없음 ㅡ딱 하나만 외우면 된다",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "b8l9DN1rbCs",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "(주말꿀팁69)장/단쿠션 포지션을 동일하게 보고 치면 정말 쉽습니다",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "q9Ok0broDP4",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "(실전기술25)수구 위치가 어디든 같은 두께와 당점으로 옆돌리기 기술",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "xpMMSp8nTRc",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "256편 행운에 맡기는 \"감당구\"당장 탈피~ 앞돌리기형태 3쿠션도착점 이해하기",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "H0LIc70dJgU",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "254편 얼마나 좋은지 일단 해보세요 실력 업 기회가 됩니다",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "nfKXERp6tLs",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "(주말꿀팁13)고질적인 앞돌리기 쫑 이렇게 하세요 간단한 방법",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "ky7vir0fUR4",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "220편 급성장을 원하나요? 그렇다면 고점자처럼 샷을 하세요 확연하게 달라집니다",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "tcZmvNOJtlc",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "197편.간단한데 어렵게 이해/ 짧게뒤돌려치기 두께/당점 동일해서 쉽습니다",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "Cf-tFBMOQXc",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "171편.불가능해 보이는 구멍치기 팁하나 드립니다 ㅡ누가 끌어치라고 가르쳤는지No No",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "7Mph9tP7UEU",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "161편.장축횡단샷은 단순하지 않으므로 스트로크의 감수성을 키우는 것이 답입니다",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "9dz4d75h4Fw",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "139편.당구의 심장 큐질만 알아도 어려운 샷이 쉬워집니다  당구이론에 기반한 큐질",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "XM1lSgAgNXc",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "103편.키스 때문에 아예 생각하지 못하는 형태 하단당점으로 앞돌리기",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "tybBKD1NAUY",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "옆돌리기 만능 시스템 !! 옆돌리기 더블쿠션 응용 가능 billiards 3쿠션 3cushion carom billiards 당구초보 3쿠션레슨",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Cmr1WcyMfOQ",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "리버스 볼시스템 알고만 있어도 도움되는 영상 초간단 설계방법!!당점 브릿지 노하우 공개 당구초보 누구나 해결가능 3쿠션 4구 당구레슨 billiards",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "44P_F_ZIrCk",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "숫자 3개만 외우고 비껴치기(짱꼴라) 확실하게 본인공 만들기 3쿠션 3구레슨 당구레슨 수호신당구레슨 3구 4구 billiards",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "Fe1GqlCQi_o",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "45도만 알고 있으면 앞돌리기 2쿠션 정확하게 보낼수 있습니다 대박레슨!!45도레슨 billiards 당구초보레슨 3쿠션레슨 삼구레슨 수호신당구레슨 당구레슨",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "qFtCq3ToTn0",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "44편 되돌아오기 가장 쉽게 득점할수 있는 방법 3초만에 설계끝!!두께 겨냥법 3쿠션 3구 4구 billiards 수호신당구레슨",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "OnsYFx9wmmc",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "24편 당구초보도 쉽게 배울수 있는 더블쿠션&비껴치기 기울기 칸수로 공략법(일출일몰)이론배우기편",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "WoOzclT0dZw",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "6편 앞돌리기 각 안보고 두께로만 치기 적중률 올리는비법!! 앞돌리기#당구레슨전문#billiards",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "Y0bJ0RmEgU0",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "5편 뒤돌리기(꼬미)스핀샷 당점 두께만 알면 끝 #당구레슨전문#billiards",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "4rmW0PLXSmM",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "[추천 클립] 3년만에 다시보는 선지훈의 뒤돌리기 상황별 두께 당점 스트록 느낌 정리",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "GERlSymiiAY",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "비껴치기 5초만에 당점 찾아서 반두께 맞춰 버리기",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "k0FW0bKXzX4",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "대대 30점 올리고 싶나요? [기울기 + 팁수 = 도착]을 이용한 필살 해결법!",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "q2bWHYSrq5Y",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "인공지능(AI)으로 두께, 당점을 알려준다고?! 한국 당구 과학기술 어디까지 발전했나. 코엑스 당구 인공지능과 로봇 체험하고 왔습니다.",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "JZpkKhalFQo",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "뒤돌리기 확실한 두께 당점 힘배합을 한번에 찾는 방법",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "s01hZPI8-Ws",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "150화. 비껴치기 두께 통일 당점으로만 해결하기",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "wA0VT0vhvhU",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "124화. 쫑프로식 난구풀이 당신은 몇 가지 길을 보셨습니까? 두께?당점?샷? #난구풀이 #쉬운배치 #어려운배치",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "qzbPNOxoC7Q",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "큰기울기의 더블쿠션 밀림을 억제하는 당점과 스트록~  #billiards #삼구 #lpba #pba #당구레슨 #당구시스템",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "rCwesrA-zFY",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#187] *필수시청* 리버스더블 어려우셨다면 오늘 영상을 꼭 보세요..^^",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "ANczGHRv7fc",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#137] 단축출발 원뱅크(구멍) 기준잡기~ 20,30,40으로 자연스럽게 보내는 두께 당점찾기~!!",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "_smPM4DpnJ4",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "기울기가 크고 멀리있는 뒤돌리기 간단시스템!!  #lpba #pba #당구레슨 #당구시스템 #당구 #shortsvideo",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "SxBWLzL226o",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#90] 최초공개~!!!! 큰기울기의 더블쿠션 당점과 스트록의 핵심!!!!",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "NklOmhWq5lE",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#89] 비껴치기 장장단 가장쉬운 시스템 당점 및 스트록 속도 활용법",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "BATdb-nJcnI",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "뒤돌리기 위치별 당점선택!!! #shortvideo #shorts",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "49J9dyNhupQ",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#64] 멀고 큰 기울기의 뒤돌리기 팁수로 간결하게 해결하기~",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "J6kZrDijGK4",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#43] 뒤돌리기 안전구역!! 여기서는 득점과 포지션이 필수입니다.",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "Qn6CX3agsVk",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "끌어치는 옆돌리기의 기준!!!! #shorts #shortsvideo",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "E40K1LRCiQQ",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#41] 초구 완전 공략법!!(두께, 당점, 스트록, 포지션)",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "NGAlBpFP-M4",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#39] 앞돌리기 방수좋은 짧은각, 하지만 키스는????",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "Wd3CpQlhKjQ",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#36]실전 앞돌리기~ 원팁라인으로 키스제거 및 안정된 진로확보!!",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "D8ifcCz2JTI",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "코너로 보내는 더블쿠션 완전정복!!!",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "oYWOvytBKmw",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[선택과집중35탄]상단변화를 이용한 간단한 난구해결#초연소115",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "UExLuodPmsc",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "#20탄#횡단도시스템이있다#3단 시스템 전격대공개#숭그리다시한번 비법을 전수하다..ㅋㅋ#",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "7eQByWPgV_A",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "#15탄#뒤돌공략법#위치에따른스트록#두께당점#세번보세요#비법공개",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "wnrD-THgGyc",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "#5화#앞돌리기2점탄#",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "1_2sm6JlsV0",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.144(제거법)",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "6KhmprN1YKQ",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 15화] \"득점보장\" 되는 간단 명료한 리버스 설계법 💢완벽한 시스템 4탄💥",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "hn213B4lxGo",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.24(끌어 리버스)",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "t5UmQ8ZgBLc",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[90화] 횡단을 잘 칠 수 있는 속도의 비밀💢이것만 이해한다면 횡단이 쉬워집니다💢",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "zeMx9rs80WQ",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[53화] 뒤돌리기는 1점으로 끝내지 마세요💥💢당구에 자신감을 갖게 해줄거라 확신합니다👍👍",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "IyvgxG286hc",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[11화] 뒤돌리기 / 좌표별 정답영상 / 이제 그냥 외워 버리세요! 초보자 또는 뒤돌리기 기피자들 필수시청😁",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "OeGQnu7T3D8",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "※필승당구레슨※ 좁은 횡단을 전진 시키기 위한 두께, 당점, 스트록 모든것",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "kGsENSUHcuc",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "※필승당구레슨※ 두께, 당점을 다 알고있는데 왜 초구득점을 실패할까요?",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "cHjo99i2xvU",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "※필승당구레슨※ 단순 두께/당점이 아니라 몰라서 못치는 뒤돌리기&비껴치기 유형",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "m--m5I1Bncc",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "※필승당구레슨※ 저만의 횡단 기준! 당점부터 두께와 스트록의 세기까지!! 유튜브 최초공개합니다!!!",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "sAakZctnVwI",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[214화]🌈시스템 필요없어요.🔥아시나요❓️얇게 치면 내공이 어디로가는지 (옆돌리기, 더블쿠션, 짧은뒤돌려치기, 횡단샷 그리고 포지션까지 )",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ZJSzWR-0HdM",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[199화]🔥당구의 필수 시스템 ❤️'옆돌리기 볼시스템'❤️ 없는 세상은 끔찍합니다.",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "R76udxDJT3g",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[143화]🔥빨리 보세요. 💥오늘 당장 나올지도 모른다구요. 💥세워치기는 고수만 치는 게 아닙니다.",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "cibeBGTSVdE",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[136화]🔥옆돌리기 복잡하시죠?❤️머릿속 퍼즐들을 정리해드릴게요.",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "F7zVGOYHZlA",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뱅크샷 #7시3팁기울기한칸 #당구 #3쿠션 #pba #shorts",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "oUGeKPJJ8r8",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기를 두께와 회전의 조합으로 치는 1쿠션 계산법 - 당구박사 당구이론",
+      "score": 5,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ONaTjoHlP_I",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "어려운 1쿠션 (두께,회전,당점,속도 모두 사용해야하는 경우 - 300점 만들기 9강)",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "JfSE3VdnRHQ",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구의 4요소 - 두께,회전,속도,당점 (당구이론) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "CzWpSBTMo-g",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "[수정재업] 공을 모으기 위한 당점과 두께 선택하는 방법 (끌어쳐서 공 모으기 상급) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "9-_3JUSbkiU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기대회전 하수가 중수되는 질좋은 연습배치 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "e2tCaDZtXDc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "공모으기 조금씩 실수한 예 (3번의 실수) #당구박사 #당구레슨 #4구당구",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "4Lhmf4PpTzI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 오후 중급반(3월5일) 공모으기 (끌어치기)후 연속득점 연습과 3구 탄기만 2팁 절반두께연습 -  #당구 #당구교실 #부천시 #심곡동",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "rBfyuvdO6Oc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "횡단샷 칠 때 하는 대표적인 실수 - 두께실수와 당점실수의 원인 #당구박사 #당구레슨 #중대3구",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "t2J51q0_JXw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "끌어쳐서 모으기 (당점과 두께를 선택하는 방법) #당구 #당구레슨 #4구",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "4Unj8YpTzLA",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 중급반(9월25일 수요일)  당점과 두께를 이용한 4구 공 모으기와 끌어치기 #당구 #당구교실 #부천시 #심곡동",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "WhPbcm9QT2g",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "얇은 두께 하단 당점으로 치면 안되는 이유 #당구 #당구레슨 #얇은두께",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "OWFHQ3hJVwk",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "얇은 두께는 중상단 당점으로 느리게 쳐야하는 이유 #당구 #당구레슨 #얇게치는방법",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "pzgBkndgt64",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "심곡3동 당구교실 후기 (왕초보 및 중급자를 위한 1쿠션과 볼시스템, 1/2 두께의 중요성, 파이브앤하프 볼퍼스트 이용법)",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "lREqAls_W7c",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "두께 당점 스트로크를 활용한 공 모으기 #당구 #당구레슨 #Billiard",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "zMyiWh0cvWg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "초구 치는 방법 #당구 #당구레슨 #Billiard",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "hlDap2CTzAc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "두께와 회전의 조합으로 치는 볼시스템 #당구",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "zhkZwHtn2bE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 기초 예제 (300점 만들기 프로젝트 10a)",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "CGM-Limsmh4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구의 4요소와 두께 [초급당구교실]",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "0PTDWf5IvlU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "난이도 비교 (두께와 스트로크) #당구 #당구기초이론",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "3qm3N089_SE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템적 발상, 1쿠션 무회전 두께 1/2 #당구 #당구이론",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "cOJxePPINHs",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "중대 3구 뒤돌리기 키스 빼는 방법과 연습 배치 (상급자용, 뒤돌리기1-7)",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "0EagNcH7BuM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 기초 없이 150~200점 치는 분들 탄탄한 기본기 만들기 안내 (2/2)",
+      "score": 5,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ZrVMx7MFbQQ",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "초구 성공률을 높이는 방법은? 그리고 밀어치는 스트로크 연습법",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "XRn2hJoLmSk",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "초구를 앞돌리기로 쳐서 공을 모으는 두께와 당점 #당구쇼츠 #shorts",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "ydMX0CDA4Ek",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "[4구 래시피]장타가 만들어지는 초이스와 그에 따른 두께&당점 -아빌527회",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "R1wzXH64vSQ",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "우리가 자주 사용하는 중상단 당점의 치명적인 문제점! -아빌523회",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "srO27XGS-bo",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "기본 키스샷의 공략 두께와 당점  #당구쇼츠  #Shorts",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "XjWHIjlImNQ",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "[4구 꿀팁]각 시간별 2적구를 득점하기 위한 당점과 두께 -아빌492회",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "fcGiVcxfQsA",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "이 배치로 뒤돌리기 포지션을 만들기 위한 두께와 당점은? #당구쇼츠  #Shorts",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "UPPT_SLA5m8",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "두께와 당점이 나와 있는 4구만의 모아치기 기술(아빌420회)",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "HMuY7gZBLmU",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "[당구4구]끌어치기 1쿠션의 당점과 두께를 찾는 신박한 방법(아빌409회)",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "ONDOufxizRg",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "쿠션에 붙은 당구 끌어치기 1쿠션의 두께와 당점 쉽게 찾는법(아빌384회)",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "Tz8SnaLQ1VQ",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "당구 황오시의 총정리(원리, 당점, 두께, 스트로크)  -아빌308",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "5a0BIIsCpnE",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "쿠션에 붙어있는 1적구를 되돌려치기(더블레일)로 득점하기 위한 두께와 당점은?? -아빌256",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "VTQ8MyBdo-M",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "1인칭 시점으로 배우는 당구의 기초 맛세이(당점과 두께조준) -아빌227",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "ABrsuDEyV5w",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "[ENG]초보자도 당구 두께조절을 큐대와 눈썰미로 쉽고 빠르게 할 수 있는 꿀팁(1/2~3/4두께)[Billiard/thickness]-아빌139",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "rEiomiMf6Ew",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "당구에서 같은 두께와 당점으로 쳤는데 왜 때때로 진행되는 각도가 다른걸까?-아빌107",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "3hLQ-_mMEa4",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "#2. 치기 쉬운 1/2 절반 두께로 당구 각도 조절하는 법-아빌45",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "jXs7uDJldhY",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "원거리 두께 공략#01. 당점을 보면서 샷해보자!! (두께조절 딱 기다려 너)-아빌39",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "pirQbahzYew",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "당구 두께조절 및 각 두께와 당점에 따른 1쿠션 접촉점 공략. 두께별로 어디를 조준해야할까?-아빌02",
+      "score": 5,
+      "per": [
+        "당점+두께"
+      ]
+    },
+    {
+      "id": "qdiLCxi5L-0",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "\"3가지 주의 사항\"을 알아야 완벽해지는 긴 비껴치기 7볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "wsEXwllUrMA",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "\"321\"만 기억하세요! 더블쿠션이 쉬워집니다~🌟",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "_PL5s7rxhTk",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "🔥비껴치기 '321 시스템'🔥",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "dS3JFRqvFOY",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "비껴치기, 제발 '일출일몰' 쓰지 마세요❌️ (321시스템⭕️)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "hka44xPtYgE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "[NEW]비껴치기- 321시스템⭕️ 기울기 작을때 최고로 좋습니다~👍👍👍👍👍",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "gOokmsQ4y8c",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "💥리버스 볼 시스템💥 4가지 리버스 모음",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "JReWoCHhZIk",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "역회전 벽타기 / 밀어치는 되돌아오기가 무조건 되는 기울기와 정확히 득점되는 당점을 배워보세요~",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "25hvbKx5xDI",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "빗각에서 탁월한 당점과 그립법 #옆돌리기 #제자리시스템 #양빵당구",
+      "score": 4,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "u_d_HR7nepE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "더블쿠션 볼 시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "wGuHAGC4iWs",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "리버스 모음 #당구 #billiards #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "mVz5AcfRRT4",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "리버스 볼 시스템 2",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "dUDzTngdZTY",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "리버스 볼 시스템1",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "K2MOq1lC3CM",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "좁은구간 더블쿠션 초간단 볼시스템 #당구 #billiards #더불",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "626pCwNYZLU",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "좁은구간 비껴치기 볼시스템 #당구 #billiards #빗겨치기",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "01oO_YNz2CQ",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "하단 더블 볼 시스템 #당구 #billiards #더블쿠션",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "jDyYk2RXXfA",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "⭐️플러스투 제자리 시스템⭐️ '1234'만 기억하세요~ 제자리로 옵니다!!",
+      "score": 4,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "8aM-dU-nYdk",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "비껴치기 7 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "tQevM8hbqtE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "하단 더블 / 간단 볼 시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "oHvjtxBTDG4",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "숏 팔로우 스트록 / 1적구가 쿠션에 붙은 옆돌리기 공략법 / 볼시스템 사용법과 주의 사항 / 양빵당구 양샘 레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "YSAMhesc08k",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "키스피하기 공식 공개!! 뒤돌리기 앞돌리기 비껴치기 키스 아주 간단한 공식으로 피하기 / 양빵당구 양샘이 만든 긴축 키스피하기 / 숫자8 - 기울기 = 일자 두께",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ys_qf43GWgk",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "요약본으로.. 짧게 만들고 길게 만들기 한번에 이해하세요 / 간단히 3 6 기울기로 구분하기! 양빵당구 양샘 레슨 임계기울기 요약본 + 정확한 계산법까지",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "625Q7Wi9di8",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "이 영상 하나면 더블쿠션 장인~! 더블쿠션 끝판왕 통합본!!",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "-lUf21axQ3E",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "더블쿠션과 횡단샷 초간단 계산법 / 실전에서 둘중 더 좋은 선택은 뭘까요? / 양빵당구 양샘 레슨138",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Ul36oVeJoGU",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "리버스 접시 시스템 / 완전 좋아요!! 계산하기 쉽고 무조건 득점되는 리버스 되돌아오기 볼 시스템 / 양빵당구 양샘 레슨 128",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "3cLWkc9NJec",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "앞돌리기 길게 볼시스템 / 고수 머리 속의 생각을 그대로 영상에 담았습니다 / 양빵당구 양샘 설계방법1 / 앞돌리기 길게 볼 시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "4Grma2tKivk",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(50만)기가 막힙니다! 들어보세요~ / 모든 옆돌리기 계산은 2초, 득점은 완벽하게 / 양빵양샘의 주특기 옆돌리기 특별 과외 /옆돌리기 볼시스템 vs 옆돌리기 파이브앤하프 시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ufG6X7wSWJc",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "보기만 해도 당구가 늘어요! / 이런 배치는 이 시스템으로~ / 포인트만 콕콕 찝어주는 양빵당구 양샘의 배치별 Key 포인트 레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "IwxFi1zEclU",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "시스템을 사용하는데 잘 안맞는 분들은 보세요!! 양빵당구 양샘의 시스템 적용시 스트록하는 방법 / 비껴세워치기 7 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "fHRxLw85SOA",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "뒤돌리기 볼시스템이 잘 안맞으시면 꼭 보세요!! 2가지 이유 때문입니다 / 양빵당구 양샘레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "lZidX4TLm48",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "뒤돌리기 볼 시스템 실전레슨 / 양빵당구 양샘레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ks2I3n0Zprc",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(30만뷰)  긴 비껴치기 7 볼 시스템 / 7만 외우면 끝!! / 양빵당구 양샘레슨 86 짱꼴라 7볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "RqxneuXVco4",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "너무 좋은 리버스 볼 시스템 빠른 계산법 / 양빵당구 양샘 실전 레슨 9",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "6ZBuSrCv9n8",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "긴 더블, 긴 횡단 시스템 아시나요? / 양빵당구 양샘레슨 60",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "wGO0y0-HkYg",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(30만뷰) 비껴치기 볼시스템 간단하고 정확한 시스템입니다 / 양빵당구 3쿠션 양샘레슨#19",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "tVWJFTVo9_Q",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(30만뷰) 앞돌리기 볼시스템 길게 짧게 / 양빵당구 양샘레슨#9",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "C4HiLkDVcxE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(30만뷰) 옆돌리기 볼시스템 / 양빵당구 양샘레슨 8",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "MMdGA2jy_Mc",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "양빵당구 레슨18편 제각돌리기 볼시스템 응용편 합동레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "QZaU5UmjRYQ",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷150) 비껴치기, 힘 안 써도 됩니다",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Cs3qrmxpezA",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷111)이런 건 스트로크 방법만 알면 더 배울 것이 없음",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Hv8EXyu0kPM",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "주말꿀팁115)보통은 2쿠션에 풀려버리는 형태 3쿠션에 도달하는 샷방법",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "KZiN68sVW4U",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "실전기술96)샷과 팁이 딱 맞아 떨어지는 기울기 구멍치기 ~나쁜 습관만 버리면",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "LswJTEXHYQY",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷36)좌우 스핀을 버려야 단순해진다 기울기2칸부터 감 찾기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "I0WezV8-4xY",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "주말꿀팁92)길게 도착해야 하는데  짧게 도착 간단 방법으로 해결",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "nXTJulls4To",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "(실전기술42)엇각기울기 옆돌리기 완전대박 완전해결 이걸로 하세요",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "6Vj5NXoa3l0",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "(실전기술24)시스템 백날 배워도 왜 제자리 실력? 실전팁을 모르기 때문",
+      "score": 4,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "bh9_ylt7ZOU",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "273편 끝내주는 옆돌리기 패턴 감당구 이제 그만!!!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "wtEWtpjV7A4",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "(주말꿀팁17)가장 어렵고 헷갈리는 옆돌리기 기울기 없는 형태 아주 간단 해결",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "bav-nnMdNqA",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "178편.1팁으로 짧은 뒤돌려치기 잡으세요(래슨경험 제일 나음)",
+      "score": 4,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "8gjmpCvFbLg",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "167편.기울기형 앞돌리기패턴 말이 필요없음 무조건 배우세요",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "1XRU8DLuhCw",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "134편.세상에 둘도 없는 기울기 시스템으로 당구의 50%정복 그 비법을 공개합니다",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "pwaKym-UtMk",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "122편.배우지 않으면 안되는 2가지 샷 제자리실력에는 그 이유가 분명합니다 실전팁을 등한시했기 때문입니다",
+      "score": 4,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "B6vkvQwUJiQ",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "엇각 옆돌리기 엇각 옆돌려치기는 숫자 4만 기억하시고 계시면 됩니다. 엇각 시스템 볼시스템 당구시스템 billiards 3구 4구 3쿠션레슨 3 cushion billiards",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "bLV4G20BujY",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "리버스 숫자 5만 기억 하시면 됩니다 간단하게 설계!! 리버스 시스템 45도 시스템 1:1라인 billiards carom billiards 3cushion 당구레슨 3쿠션",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "4KG5HQAroLA",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "칸수만 알면 엇각 앞돌리기 쉽게 득점이  가능합니다.당구 앞돌리기 볼시스템 앞돌려치기 당구레슨 3쿠션 3구 4구 billiards carom billiards 3cushion",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "-ZAlj09jjJc",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "옆돌리기 답을 미리 알고치는 방법 이런기준점도 알고 계신가요?",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "g1x2pkZDteo",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "세워치기 숫자 1234 만 외우고 가시면 해결 가능 합니다 두께보완!!!업로드 당구레슨 3쿠션레슨 4구 3구 billiards",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "fVpgM3CLgRY",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "숫자 하나도 없는 파이브앤하프시스템 숫자없는3뱅크 허공에 떠 있어도 뒤돌려치기 옆돌려치기를 아주 쉽고 빠르게 계산하는 방법과 노하우 billiards 3쿠션 당구레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "kgejVuV2N3s",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "짧은 뒤돌려치기 99% 득점하는방법 누구나가능 계산도 간편하게 초보당구/3구레슨 4구레슨 BILLIARDS 당구레슨 당구유튜버",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "lQtVrEaLk0M",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "45도로 보내는 공은 숫자 9만 외우고 있으면 됩니다.제일 정확하고 간단한방법 적중률상승!! 노잉글리쉬 플러스시스템 당구유튜버 당구레슨 3구레슨 4구레슨 billiards",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Keg9BxR52pA",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "가장 정확한 비껴치기 칸수시스템 숫자 계산없이도 누구나 계산 가능한방법 알고만 있어도 이득 billiards 3쿠션 3구 4구 3구레슨 수호신당구레슨",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Wu3sNJPX-Gg",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "72편 더블쿠션 적중률 떨어지는분들 빨리 들어오세요!!(포지션+디펜스까지 한번에 해결방법 수호신당구레슨 볼시스템 3쿠션 3구레슨 4구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Rr6EobZ_c3o",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "70편 비껴치기(밀리는)100%득점 할수있는 간단한 시스템!!응용+더블쿠션 너무쉽고 빠르게 배울수있는방법 3구 3쿠션 당구레슨 billiards",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "oFq9GGjckDw",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "46편 대박!!레슨 길게치는 옆돌리기 2적구가 어디 있든지!!100만원짜리 레슨 3구 3쿠션 4구 3쿠션레슨 수호신당구레슨 billiards",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "hGQIsxOZE1A",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "43편)20포인트의 비밀 놀라운 반전 레슨!!평생 써먹는 공식!!레전드레슨 3쿠션 3구 billiards",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "nxeKnyr0v7E",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "42편 옆돌리기 칸수 계산으로 치는 볼시스템 이제 2점씩 치세요!!고점자되기편 3쿠션 4구 billiards 3구 포지션",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "CpPGTSNUy1Y",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "34편 앞돌리기?세워치기?4칸 기울기 패턴 시스템 칸수의 비밀!!3쿠션 레슨 3구 4구 billiards",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "0P4RN0n4PXo",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "엇각 앞돌리기 기울기 찾고 득점하세요",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "wK_T-a-l25k",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "이런 세워치기의 해결 방법은,기울기5입니다👍",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "DllzgmwgqZ4",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "기울기만 알면 끝나는 세워치기👍",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "1yVD_D8nQdw",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "초보자들 기억 안 하면 손해✋기울기0",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "cJpjFP5OIGU",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "절반 두께를 지배하면↗당구를 지배할 수 있습니다 | 연습과 완벽한 이해💥 | 절반두께 마스터 1탄",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "PoZTrWlVVZE",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "❌앞으로 비껴치기 레슨 없다❌ | 여러분 그냥 다 갈아 엎으세요😱 | 이거 완전 꿀입니다!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "1mbQb08D35U",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "비껴치기 짧게 가장 완벽한 기울기 설계방법✨ | 유튜브가 삭제한 그 영상 | 정말 비공개가 됐습니다!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "3ISFy3tBtlg",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "앞돌리기 만능 볼시스템! 이거 적응하면↗큰 일 납니다😎",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "VCX-M3UWmFE",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "볼시스템 종결영상🔥더 이상의 설명은 필요없습니다!무조건 외우게 해드립니다👊",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "le-shLl_BIs",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "더블쿠션은 볼시스템이 쉽고↗빠르고↗정확 합니다 | 방수좋아 당구레슨 65탄",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "zmZeZ2VMMb0",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "2뱅크샷 이런게 있다고? | 6볼 시스템 | 방수좋아 당구레슨 4탄",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "BQFumEBlu1c",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "[추천 클립] 5년만에 다시보는 임완섭선수의 \"옆돌리기 볼시스템\" 기초이론",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "9f0bkWxk0nM",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "쫑프로 레슨3. 옆돌리기 볼 시스템의 이해",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "-_6kylG0j80",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "이번엔 기필코 마스터 하자! 8. 앞돌리기 볼시스템 (Inside Angle Ball System)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "CwH1-YfCMGo",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "이번엔 기필코 마스터 하자! 7. 옆돌리기 볼시스템(Side Angle Ball System)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "RUyEaQbvaDI",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "쓰리쿠션 마스터 책을 베이스로 한 옆돌리기 볼시스템 영상화",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "qQG00L5sO24",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "절대 잘 밀리는 기울기에서 절대 밀리지 않게 비껴치기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "6zA4a4HcP6k",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "앞돌리기 볼시스템 안맞는 분들은 필수 시청!!",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "wmhxd2O6Eo4",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "8. 앞돌리기 볼 시스템에 대해 알아보자!!!  (쫑프로는 인터넷 수리 중)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "gr6dR_5_cQo",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "7. 옆돌리기 볼 시스템에 대해 알아보자!!!  (쫑프로는 인터넷 수리 중)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Jvv6I0WrpWk",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "[2023ver. 필수 당구 시스템 TOP10] 8강. 앞돌리기 볼시스템 (inside angle ball system)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "4-4JL8XjSrQ",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "[2023.ver  필수 당구 시스템 TOP10] 7강. 옆돌리기 볼시스템(side angle ball system)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "anohyBvBWZ4",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "옆돌리기 볼시스템 완벽 정리 (까먹으셨죠? 한번 더 클릭)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "2q3UkGEPlW8",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "선지훈시리즈 EP01 앞돌리기 볼시스템을 정확하게 사용하는 방법",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "8GCSe_ZOeiE",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "PBA선지훈 선수가 알려주는 앞돌리기 볼시스템 (수정본)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "OGGVuLoQbwk",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "쿠션에 붙은 1적구 옆돌리기 볼시스템 정석 ! 진짜 바보가 아니라면 이 배치를 누구나 해결할 수 있습니다!!",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "YTWVP3Pqwrw",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "대대핸디 올라가는 비껴치기 대회전 야매 볼 시스템 (야매인척 하는 정석 시스템)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "QRkNkfTtUBY",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "269. 기울기 칸수로 뜬공 #비껴치기 도 #코너각을 찾을 수 있을까?",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "KFQkYB_LTFM",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "[기술공유]무회전 세워치기 기울기 시스템 이거 괜찮네요",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "PSkovaKt_XU",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "[새앙쥐 특집 3탄] #옆돌리기 #볼시스템 완벽 정리",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "v_stLA6f4zM",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "235화. #상구당구 옆돌려치기의 놀라운 비밀 #볼시스템 실전에서 안되는 이유",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "kHo2FeUGraA",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "232화. 쿠션에 붙은 1적구 #옆돌리기 #볼시스템 해결해 버리기 (볼시스템의 단점 극복방법)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "hD7b0xj_JU0",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "215화. 쫑프로식 #세워치기 #볼시스템(잘 세워지십니까?)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "lE3JyrUuXNw",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "210화. 긴각 #비껴치기 (짱꼴라) 45도일땐 먹고 봅시다. 쫑프로식 볼시스템?",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "wn28bbrtH8s",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "쫑프로의 심플당구 15화. 영상 하나로 끝내는 #앞돌리기 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "dOgQ_m0eGyY",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "204화.  기울기 0에서 #더블쿠션 보내는 기술 (야매당구레슨)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Q6-ix3ESO30",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "184화. 두께 정확도와 분리각 감소의 핵심 오픈브릿지의 비밀",
+      "score": 4,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "0uE_EolvcME",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[인덕원고수뒤돌리기특강2] 엇각거리별 기울기별 공략법 및 감아치기~~ #billiards #삼구 #lpba #pba #당구레슨 #당구시스템 #3쿠션",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "VN6xm_Sfbtw",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "비껴치기 기울기 시스템 적용구간 및 방법~  #billiards #삼구 #lpba #pba #당구레슨 #당구시스템",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "SkmKw771POA",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#288]큰기울기~ 먼거리의 엇각뒤돌리기 코너공략2  #lpba #billiards #pba #당구레슨 #당구시스템",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "7wBWNC6LXCo",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#213] 좁은 옆돌리기 이보다 쉬울 순 없습니다. 꼭 배워두세요..****  #3쿠션 #billiards #lpba #pba #당구레슨 #당구시스템",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "dFYBtMmWltw",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "옆돌리기 기울기 + 회전 = 도착포인트~!!  #3쿠션 #billiards #lpba #pba #당구레슨 #당구 #당구시스템",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "dyzNg4CWW_E",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#182] 예민한 비껴치기, 세우는 형태와 맥시멈에서의 기울기 읽는법~!!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "QSKHjlbcrO4",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#176] 꼭 알아둬야할 실전 뒤돌리기 짧은 라인보내는 기준~!!!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "iz3GlRnPCMg",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "난구형태의 큰 기울기의 더블쿠션 #lpba #pba #당구레슨 #당구시스템 #당구 #shortsvideo",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "qpmZwvQuoWQ",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "비껴치기 더블쿠션 시스템!!!!!  #lpba #pba #당구레슨 #당구시스템 #130 #shortsvideo",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "qVjPpiTtJ6Y",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#154] 국민투뱅크 곱하기 시스템~! 너무 쉽지만 기울기 및 회전 보정을 알아야 완벽히 사용 가능합니다.. ^^",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "JAaYif-uy1w",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "-2만 기억하면 되는 길게 세워치기!!  #lpba #pba #당구레슨 #당구시스템 #당구 #shortsvideo",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "tzuwO9nTiR4",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "짧고 좁은각 비껴치기 시스템!!!  #lpba #pba #당구레슨 #당구시스템 #shortsvideo",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "T1sK3m8xV2I",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "겁나 쉬운 비껴치기 길게 시스템~!! #lpba #pba #당구레슨 #당구시스템 #shortsvideo",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "qeqFyBksLlk",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "비껴치기 짧게 전투시스템~!! 초간단 기울기 #lpba #pba #당구레슨 #당구시스템 #shortsvideo",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "h3nDtUAsLE8",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "-2만 알면되는 초간단 비껴치기 시스템~!!!  #lpba #pba #당구레슨 #당구시스템 #스트록 #shortsvideo",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "rOly29a47Kw",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#111] 2적구가 붙은 난구형태의 되돌리기~ 바운딩이 되지않는 큰기울기 득점방법~!!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "s66_-74j4BM",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "기울기로 한눈에 보는 비껴치기 칸수 시스템!!  #lpba #pba #당구레슨 #당구시스템 #당구 #shortsvideo",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "t6pcweAxmzc",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "세상에서 제일쉬운 뒤돌리기 시스템~!!  #lpba #pba #당구레슨 #당구 #당구시스템 #shortsvideo",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "tkEM2Iw-BOc",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#93] 복합횡단형태의 더블쿠션 초간단 계산법!!!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Da2puww1aYk",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#92] 볼시스템을 이용한 쉽고빠른 더블쿠션 공략법!!",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "hZHZGU8GzkY",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "뒤돌리기 2의 법칙!!!! #lpba #pba #당구레슨 #당구시스템",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ugaDJvnaD8A",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#72] 기울기가 작고 좁은각을 움직이는 짧은 비껴치기 시스템",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "yVDuyn3lhOM",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#70] 쉬워도 너무쉬운 비껴치기길게 시스템! 5분투자로 평생쓰십니다.!!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "A2K3DXzJvqk",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#69] 기울기로 한번에 해결하는 전투시스템!! (비껴치기짧게)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "EJhIwLfTEXc",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#66] 기울기만 보면 바로 답이 나오는 비껴치기 초간단 시스템!!!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "2TVsTH-gNeI",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#63] 세상에서 제일 쉬운 뒤돌리기 볼시스템!!! 전구간 응용가능~!",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "R4PFPRw-jk0",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#51] 짧은 뒤돌리기 기울기 2의 법칙! 일정한 패턴으로 움직입니다.. 꼭 알아두세요!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "YtaByswXabI",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[3초시스템]비껴치기 짧게 기준각 보내기!!!!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "5CVrp4VMLOg",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "기울기별 횡단#아니이걸못쳐?132탄#shorts",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "cuHukIdOL4A",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.258(역회전 감아 세워치기)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "DOqdd8gX2Jo",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 53화] 시스템 없이 긴각 옆돌리기 잘치는 4가지 방법과 느낌💥",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "HUoS0WdrAno",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.224(솟구치는 비껴치기)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "u_kkUitySOo",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.176(특수 비껴세워치기)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "NGRjsvH48cE",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.156(리버스 삼단)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "x2OBi0KCWPc",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.130(숏앤롱 비껴치기)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "glW6IjLRV74",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.129(앞돌 지그재그)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "XgmJbTmQvaY",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 25화] 제대로 된 앞돌리기 볼 시스템 사용법 공개 💢왜 이걸 몰랐을까?😥",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "KPi14P2S-6U",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 24화] 좁은 뒤돌리기💢 너무 쉽고 정확하게 칠수 있는 방법 💥저점자 분들을 위해 만들었습니다😁",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "CjAzOAPhpws",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 17화] 여러가지 세워치기 시스템중 최고라 자부 합니다 💢 6볼 시스템💥",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "NzOerrh6MZw",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.22(앞돌 앞돌려치기)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "FMYgl19vxx0",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[130화] 횡단 초간편 설계 시스템💥이것만 찾으면 횡단은 무조건 쉬워집니다💥",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "bT3BoTgxPaE",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[97화] 기울기가 큰 비껴치기는 💥무조건 이거 쓰세요, 그냥💥고수들이 계산이 빠른 이유가 있었어😂",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "docCiQFUtb0",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[78화] 더블쿠션이 쉽다고 느껴본 적 있으신가요?💥오늘부터 그렇게 되실겁니다",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "b17E32pEx80",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[57화] 더블쿠션이 잘 안되신다면 꼭 보셔야 합니다💢💥설계가 다가 아닙니다!💥💥",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "A2ulTf9Tt4c",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "배팅력이 다르면 당점도 다르다(횡단2칸기울기)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "lctxir_-gEY",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[17화] 떠있는 비껴치기 👌 비껴치기 떠 있어도 기울기와 두께만 외우시면 예상 가능합니다",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "5k4IoLOpue8",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "※.필승당구레슨※ 기울기와 무관한 비껴치기 시스템이 있습니다.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "qKVZrrPyMR4",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#기울기는두께 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "h0RmCKnyepg",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[234화]🔥계산이 없어 너무 편안한❤️15제자리시스템❤️원리만 알면 쉽습니다.",
+      "score": 4,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "u1TdnONjcek",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#볼시스템 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "W3H4CMH0bQM",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#볼시스템 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "1Vi32Z-RWEA",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[203화] 👍가장 완벽한 시스템 ❤️짧은 비껴치기 무조건 이렇게 치세요. (기울기시스템)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "bAuari_4DWQ",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#기울기시스템 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "yQSeEbZCqlI",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[201화]👍짧은 앞돌리기 쉽게 치는 방법❤️머리가 하얘지신다면 꼭 보세요.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "W107qaNbeaw",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#옆돌리기볼시스템 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "_VSPr678o58",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#볼시스템옆돌리기 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "4U8ZW2t2SUY",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#볼시스템으로 연습해요 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "X-IuxaaakgQ",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[198화]🔥제발 이것만은 알아야해요. '30보내기 역회전' ❤️25점되려면 필수.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "lHW_67SJZfw",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[188화]💢연습량 부족해도 괜찮습니다. 🔥되돌아오기 확률 90% 만드는 비법",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "mHANf5NQLV0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[187화]🔥엇각 옆돌리기 마스터 가이드: 붙은 공부터 떨어진 공까지 단 한 영상으로 끝내기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "funPTIlZGgA",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[181화]🔥계산 안 해 딱보면 딱♥️빗각옆돌리기 오늘부터 공짜❤️계산없는 기울기+1 인생 시스템입니다.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "hcY-kq3aFYc",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[180화]🔥안 보면 정말 후회할 영상! ❤️엇각 2쿠션 보내기❤️영상을 보고 나면 쉬워집니다.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "irkjVsN94ks",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#만능기울기계산법 #뽠주TV #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "tCbUqlFt6u0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #기울기계산 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "biRVkOGiTTE",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #만능기울기계산 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "KEzIPfIToC8",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[158화]❤️깜짝놀랍니다🔥원기회복🔥기울기계산법👍이것만 알면 웬만한 배치는 해결할 수 있어요",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "2GavwBL3xdk",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #앞돌리기볼시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "KWFVqiVTiDc",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #볼시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "jlpyUq05N9k",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #앞돌리기볼시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Jzf1V_JORr8",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[153화]🔥옆돌리기, 🔥앞돌리기, ❤️볼시스템 이거하나면 충분해요.",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "S1WYAEaALD4",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[151화]⚠️너무 간단합니다👍기울기만 보세요❤️작은기울기시스템으로 옆돌리기 짧게 도착도 쉬워집니다.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ziBA6jsugkw",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[146화]❤️프로선수들이 구사하는 방법🔥난구 해결 리버스엔드",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "O6_PfMfPs4Q",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[145화]🔥선수비법🔥실전비껴치기🔥가장쉽고빠른방법을 공개합니다.❤️득점확률을 올리는법까지.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "aM9sndwMyX0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[144화]🔥엇각옆돌리기 해결법, ❤️이 보다 좋은 방법은 없습니다.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "I6pJqUo3aQs",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[142화]😝이건 불법입니다.(불변의 법칙) 💢보고 이해만 해도 실력이 늘어요.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "aE0rZ-K6Pb0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[141화]❤️하프시스템❤️제대로 써봅시다. 💢2칸기울기는 코너다! ❤️기본을 연습하면 많을걸 할 수 있어요.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "9W4FoYzxUHA",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[140화]💢뱅크샷💥아직도 숫자 계산 하신다면 이제 바꾸세요. 💢칸 수만 세면 3뱅크 끝!",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "I5nQVbjffyw",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[139화]💢난구를 이렇게 쉽게? ❤️다니엘선수의 1/2 뱅크 시스템. 🚀직관적이고 너무 간단해서 좋아요.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "xDuw1kGCrwY",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[138화]❤️당구의 품격 ❤️평행이동 원뱅크, 투뱅크 2득점 하세요~",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "2kfZQgTHczI",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[135화]🔥계산 없는 대회전, ❤️일직선으로만 보내 보세요. 🌈길이 편안해 집니다.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "mGeZ4HJlFBs",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[134화]💢중간에 있는 2적구 ❤️맞히는방법, 🔥오늘 바로 2점 올릴 수 있어요.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "8pYwOi2aAsg",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[133화]🔥선수가 계산 안 하는 이유 ❤️기울기만 보고 칩니다. 더블쿠션, 옆돌리기, 횡단, 다 됩니다.",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "2HDzgF_-YiE",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[123화]🚀강추💯엇각 좁은 옆돌리기😂답이 나와있으니 믿고 치세요",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "_jz2lmgm0UM",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #3칸기울기3팁 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "V-2Yku53VBM",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #기울기시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "OfR1z_q6Dxg",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #기울기칸수계산 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "pmFo2N-tjzY",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #옆돌리기볼시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "FWfgk5hnVwk",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #기울기시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "rizaUZmFRO0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #볼시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "inQ3NOh0jC0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#7시3팁기울기한칸 #3쿠션 #당구 #예술구 #끌어치기 #밀어치기  #pba  #shorts",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "yb7-XA8zbYQ",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기계산법(1쿠션계산법)의 개념 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "CnGzR-7EyEQ",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1/2 두께의 분리각과 스트로크 - 당구이론의 출발 #당구박사 #당구이론 #분리각이론",
+      "score": 4,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "ZytrbE6oDPA",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실  LPBA 챔피언포인트 (김가영 옆돌리기) 볼시스템 #당구레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "r5PIx11bpVU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 필수 이론 1/2 두께의 분리각 (밀어치기 1-1 해설영상) - 당구박사 당구레슨",
+      "score": 4,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "ml4kf54fN_I",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구필수이론(분리각,회전과 당점,최대회전,회전의작용...) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "PjM_N_OxBLg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 계산법(볼시스템) 사용법 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "AzM7vLpi_-Q",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "쿠션에 붙은 공 옆돌리기는 볼시스템으로 치면 잘 맞아요 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "zFlwQ_j5yh8",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 볼시스템으로 연속득점 만들기 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "1jGSZxI7TGM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1쿠션 가장 쉽게 치는 이론 [공개용] #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "g8BBtMyq2m8",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구대하소설 4화 - 설 연휴가 끝나고 (세워치기, 옆돌리기 볼시스템) #당구박사 #당구소설 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "utRhIh3DgmA",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1쿠션 설계방법 (1쿠션 판단과 기울기 계산법 기초 레슨) #당구박사 #당구레슨 #1쿠션",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "5Z80oxqh0rw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기 계산법 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "gBf8gOYnxFI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "짧은 앞돌리기 볼시스템으로 치기 (김준태하이런28점 중 18점째) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ZpsjRh2QWhE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "김준태하이런28점 따라하기 옆돌리기볼시스템 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "AcNIjX7lkvY",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 오후반(중급반) 2강 볼시스템 2편 (파이브앤하프, 볼시스템, 중대3구 기본기술 중심으로 알려드립니다)  #당구박사 #당구교실",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "7iIIE0zSQEM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 옆돌리기 빗각일 때 계산하는 방법 - 두 달 만에 볼시스템을 깨우치고 둥지를 떠난 15점 동호인 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "08MAwJIBL0w",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 오후반(중급반) 1강. 볼시스템 (중급반: 1월부터 파이브앤하프, 볼시스템, 중대3구 기본기술 중심으로 알려드립니다. 시스템 배우실 분들 당구교실로 오세요",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "k5vFoMRM6_4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 놓치지 않는 계산법 (볼시스템) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "pkA48bdBfkk",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "BPS를 이용한 볼시스템 자유 연습 #당구박사 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "3oCWa3nDjF0",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "틀린곳 찾기 (중대3구 볼시스템 실전응용법) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "nkQAkIWXaGs",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "곡구를 방지하는 스트로크 아세요? #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "HymtkeAGyAU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기 계산법 실전 해설 (100점 동호인 레슨게임 5/5) #당구박사 #당구레슨 #기울기계산법",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "f_6BnZ93aJM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "주민센터당구교실 5강 - 오전반: 공 모으기 기본 원리, 공 관리, 1쿠션 기울기 계산법 #당구박사 #당구레슨 #당구교실",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "UU0UCTRjESM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "주민센터 당구교실 (오후반) 3강 - A반(1쿠션 기울기시스템 기초), B반(3쿠션 뒤돌리기 1,2패턴과 얇게치는 뒤돌리기와 옆돌리기)",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "QYpYSWW2Ce4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 오후반(중급반) 2강 볼시스템 2편 (파이브앤하프, 볼시스템, 중대3구 기본기술 중심으로 알려드립니다)  #당구박사 #당구교실",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "8xKzKaZuG5c",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "주민센터당구교실 1강 - 밀어치기 계산법, 부천시 심곡3동 당구교실 (수요일 오전반) #당구박사 #당구레슨 #당구교실",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "AbIGMO_tooo",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "주민센터당구교실 1강 - 볼시스템 기본 개념 - 매주 수요일 오후반 (부천시 심곡3동) #당구박사 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "n7yxSurDRuc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용하여 1쿠션으로 공모으는 방법의 예 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "MmPHir6rdRY",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 조금만 알면 1쿠션 잘 칠 수 있어요 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "wHIitcI5VvQ",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 오후반(중급반) 1강. 볼시스템 (중급반: 10월부터 파이브앤하프, 볼시스템, 중대3구 기본기술 중심으로 알려드립니다. 시스템 배우실 분들 당구교실로 오세요",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "q0_J6eD_T0o",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "주민센터 당구교실 여성회원의 쓰리쿠션 볼시스템 옆돌리기 마무리 (볼시스템을이용한 옆돌리기 100점 여성회원) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "mJHGGNHQaSw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 회원 4구, 3구 월례 평가전 오후반(중급반) #당구박사 #당구교실 #3쿠션",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "rcATgM3zXIY",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "심곡3동 주민센터 당구교실 중급반 옆돌리기 볼시스템 총정리 (2025.8.6) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Di2VDVVxYeE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "실전 123캐롬 당구게임 (2000점 vs 당구박사) - 파이브앤하프시스템 볼시스템 학습용 #당구박사 #당구레슨 #123캐롬",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Myi_rYdhxiE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "3쿠션 게임 (부천시 당구교실 회원과의 3쿠션 친선 게임) #당구박사 #당구교실 #3쿠션",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ZNlLdgJWmOA",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 옆돌리기 키스제거 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "uDETVVRFN_o",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 볼시스템과 - 부천시 당구교실 중급반(9월 10일) -  #당구 #당구교실 #부천시 #심곡동",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "A8k1ZJTcTsc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 볼시스템과 - 부천시 당구교실 중급반(9월 10일) -  #당구 #당구교실 #부천시 #심곡동",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "YZ2gqUo3SZs",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 볼시스템 총정리 - 부천시 심곡3동 당구교실 #주민센터당구교실 #3쿠션 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "cxa7kpb5leg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 1목적구의 수를 정확하게 읽은 방법 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "8Gs26NdvtfI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "계산법(볼시스템)을 알더라도 득점확률을 보다더 높이기 위한 방법 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "_nmeBBakKYY",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템으로 옆돌리기 칠 때 주의해야하는 경우 #볼시스템 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "YCEPQiheTtg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "150점 여성동호인이 알려주는 옆돌리기 볼시스템 계산법 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "riqxHhNFFPI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "키스 나는 옆돌리기 배치 볼시스템을 응용하여 득점하는 방법 (주민센터 당구교실 여성동호인도 잘 친다) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "SIXmIPFRZJU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 볼시스템 주민센터 당구교실 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "nU3IcGlasxo",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 볼시스템과 LPBA 챔피언포인트 - 부천시 당구교실 중급반(9월 3일) -  #당구 #당구교실 #부천시 #심곡동",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ilILdSZ0zM0",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템으로 키스제거하는 옆돌리기 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "QHdt_StYcBM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "세워치기 볼시스템의 예  #당구박사 #당구레슨 #당구쇼츠",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "-qu987im9IQ",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "[요약수정] 1쿠션 쉬운 계산법 총정리 (도형과 대칭의 원리, 1/2 두께의 분리각을 이용한 계산법) #당구박사 #당구레슨 #1쿠션계산법",
+      "score": 4,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "XgpYWo1yHOc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 대회전 계산법(볼시스템) 반복학습 #당구박사 #중대3구 #당구레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "axZ_Ffa3j_Y",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "짧은 옆돌리기 볼시스템으로 쉽게 치는 방법 #당구3쿠션짧은영상 #당구박사 #중대3쿠션",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "3Gy0SkFdUTU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "단축 옆돌리기 계산법 #당구박사 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "WAgMBAridWw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템으로 옆돌리기 연속득점 (옆돌리기는 볼시스템) #당구박사 #당구레슨 #중대3구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "AV5vmb_V_CI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "파이브앤하프시스템과 볼시스템의 컴비네이션 플레이 #당구박사 #당구레슨 #중대3구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "uxqfUwX9ueM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "[댓글당구] 옆돌리기 대회전 볼시스템 간단 계산법 #당구박사 #당구레슨 #멤버십",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "xSwSDUqbPRg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "선택실수: 횡단샷보다 옆돌리기 볼시스템으로 쳐야하는 경우 #당구박사 #당구레슨 #중대3구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "LZ70BqRWSMM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 볼시스템으로 득점하는 방법의 예 #당구 #당구레슨 #Billiard",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "eBzeb8rpgFk",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 볼시스템 총정리 - 부천시 당구교실 중급반(8월 6일) 오후 -  #당구 #당구교실 #부천시 #심곡동",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Oit5g7hh45w",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 대회전 볼시스템 간단 계산법 #당구박사 #중대3구 #당구레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "lPUmHZyMPrg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "확률 낮은 뱅크샷 치지 말고 옆돌리기 대회전 볼시스템으로 치세요 #당구박사 #중대3구 #당구레슨",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "y-I9crixkYw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "[공개용 해례본] 옆돌리기 당구박사 기울기계산법의 장점 #당구 #당구레슨 #Billiard",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "7iVgJ9GWavU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기를 계산하는 방법 #당구박사 #당구레슨 #계산법",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "r_yyHsWxnGU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 옆돌리기 스핀볼이 되는 예 #당구박사 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "avwxzl7pd0Y",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "결국 기울기 계산법을 이용한 공 모으기 #당구박사 #당구레슨 #당구4구",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "FQsuVKt77lM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기 계산법을 이용한 1쿠션 짧은 해설 #당구박사 #당구레슨 #1쿠션",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "TKmd99jJ62k",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기 계산법으로 1쿠션을 득점하되 다음 배치를 위하여 응용하는 방법 #당구박사 #당구레슨",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "WMF3tQtnI_0",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기를 이용한 1쿠션 계산법 좋은 예 #당구박사 #당구레슨 #기울기계산법",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "lggsUXbh39Y",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1분 완성 (1쿠션 기울기로 계산하여 쉽게 득점하고 공모으기 까지 가능한 방법) #당구박사 #당구레슨 #4구당구",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "H8Xz_F-h4i4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "어려운 1쿠션 실수하는 이유와 개선방법 #당구박사 #당구레슨 #1쿠션계산법",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "5RAsEP42TbY",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "미러법과 1/2두께의 분리각이론을 이용하여 1쿠션 치는 방법의 장점 #당구박사 #당구레슨 #1쿠션계산법",
+      "score": 4,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "eKhxT6KwMZg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "입사각 반사각의 기울기를 이용한 1쿠션 계산법과 공모으기 #당구박사 #당구레슨 #1쿠션계산법",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "5gcbYze5Rp0",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 옆돌리기와 연속득점 #당구박사 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "poIMqB7DsN0",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 앞돌리기와 연속득점 #4구당구 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "brXyIeXYjrA",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 앞돌리기 4쿠션 계산법과 득점 #4구당구 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "STERekxuh_g",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "앞돌리기 4쿠션 볼시스템을 이용한 계산과 득점(중대 4구 250점 동호인 에피소드) #당구클리닉 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "dJrHx1UQwIE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 1쿠션 대충 공 모으기 #4구당구 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "PanHmPicugE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기 볼시스템으로 계산해서 치는 예 #당구박사 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "BLKclL92CQs",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 알면 1쿠션으로 다시 모을 수 있어요 #4구당구 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "dLG_zIW69mA",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "옆돌리기로 공 모으기 #당구 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "5KqFYe4VN5Y",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 볼시스템과 키스제거 연습. 부천시 당구교실 중상급반(11월27일 오후반)  #당구교실 #부천시 #심곡동",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "vdxuXyn5-dg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템으로 1쿠션 치는 방법 (여성당구교실) 응용편 #당구 #당구레슨 #당구교실",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "zLQxDt6ojYQ",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 1쿠션 레슨 전편 (여성당구교실, 1쿠션 이론편 45분) 가로보기 #당구 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "hRCn7KAYBzM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 1쿠션 레슨 전편 (이론편, 여성당구교실) 세로보기 #당구 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "q3QT9tG3rHk",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 중상급반(11월6일 오후반). 볼시스템.  #당구교실 #부천시 #심곡동",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "K916KhrLJP4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 중상급반(11월6일 오후반). 볼시스템.  #당구교실 #부천시 #심곡동",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Bekp5KbE5YI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템의 용도와 발상 #부천시 #당구교실 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Mo-TvqfjPPY",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 기초부터 응용까지 (300점 만들기 프로젝트 볼시스템 총정리) #당구 #4구 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "W5fR3JbddrU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "쿠션에 붙은 공 옆돌리기 3쿠션 계산법(볼시스템) #당구 #당구레슨 #3구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "pUy__ytIHOI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "앞돌리기 볼시스템으로 설계하는 예 #당구 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Cj30C-AoU0M",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "앞돌리기 볼시스템으로 설계하는 방법 #당구 #당구레슨 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Zy9NlPGhlos",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1쿠션 계산법 (기울기로 계산해서 치기) #당구 #당구레슨 #1쿠션",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "y46ECoUikEk",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1쿠션 기울기 계산법 (300점 만들기 프로젝트 16강) #당구 #당구레슨 #Billiard",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "vthMfGn-YXc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 중대 3구와 4구 한게임 그리고 당구 Q&A #당구 #중대 #3구 #4구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "HkKEjvfdTsc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "부천시 당구교실 라이브방송 테스트 (볼시스템 질문과 답)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "_hLr0QPtzbM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 2쿠션 옆돌리기 #당구 #당구레슨 #Billiard",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "UEGZlakJV9k",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템으로 득점도하고 공도 모으고 #당구 #당구레슨 #Billiard",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "eYmkq1hp9ao",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "득점을 이어가다보면 모을 수 있는 공을 만나게 된다 #당구 #당구레슨 #Billiard #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "zpgOXwwG2h4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 Q&A (150점 동호인 vs 당구박사 게임후 질문과 답변)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "eefRp8PWI1Y",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "앞돌리기로 공 모으기 (볼시스템 이용하는 방법) #당구 #당구레슨 #Billiard",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "qch0ONdYICE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 중대용 볼시스템 연습",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "b-La45c3ftI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 중대용 볼시스템 연습",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ZfrH0R0EhjM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 자유연습 추천 방법 #당구 #4구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Vgxo0Tz4uq4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 자유연습 (당구 4구 300점 만들기 프로젝트 10e)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "xtPK6UxSxuE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템으로 공 모으는 예 #당구 #4구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Z7Ob17DdsrU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 응용한 1쿠션 득점과 공모으기 (300점 만들기 프로젝트 10d)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "tWfGuwJ5xZE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 기초 예제 (득점확률 생각하기) - 300점 만들기 프로젝트 10b",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "yt4JkTjXb08",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템의 개념 예제 #당구 #4구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "TnsIPo-V_xQ",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 교실 1쿠션 계산법 (볼시스템의 발상과 응용법 전체)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "YeZomlsqPFw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 기초 (300점 만들기 프로젝트 10강)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "zC_WDSVKWeg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템으로 2쿠션 치는 예 #당구 #4구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "sUEZUbdcFNI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템 숫자 읽는 법 #당구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "esZkOnwUDgU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1쿠션 기울기로 계산하는 방법 (당구박사 오리지널) #당구 #4구",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "r78E-X47i1M",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "2쿠션 계산해서 치는 방법 (볼시스템) #당구 #4구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "vXYLVIHTmTc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "300점 만들기 프로젝트 10강 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "0XQCYoHN8jU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당점과 큐기울기의 중요성 (더블쿠션의 예) #당구 #중대3구",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "0Nh9yHaSDF4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기(4칸)와 무회전 두께(1/2)의 관계와 중요성 #당구 #당구기초이론",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "PBsy7RZkC7c",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "기울기를 이용한 1쿠션 계산법 #당구 #3구",
+      "score": 4,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ITjo_tp5YoM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 옆돌리기 설계 추천 #당구  #중대3구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Yyy3R2uRFBE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "볼시스템을 이용한 단축 옆돌리기 실전예제  #당구 #3구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "sA9VsDXAv28",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "키스 제거 짧은 옆돌리기 (볼시스템) #당구 #중대3구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "DWhkZJl8yDc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "중대 3구 볼시스템을 이용한 앞돌리기 #당구 #3구",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "sMubvS8fp5g",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "세워치기 볼시스템으로 키스 제거하고 치는 해법 #당구 #중대3구 #볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "Sr7lj0PC0q4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "Q&A: 3구 옆돌리기 시스템 (볼시스템) 사용법 즉문즉설",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "ByQvB4_XngE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 4구 300만들기 프로젝트 라이브레슨 4회 (2/2) 볼시스템과 공 모으기",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "EtxU7D_bgog",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "250점 당구 동호인 300점 만들기 위한 분석과 조언 (당구 4구 실전 해설)",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "PnhkoxdxTm8",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제 제14집] 9화 12문제 / 옆돌리기 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "z5KJdvUs9jc",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제 제14집] 8화 6문제 / 옆돌리기 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "p1SxY24LSH0",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제 제14집] 7화 6문제 / 옆돌리기 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "MnjfYVk6CCk",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제 제14집] 6화 12문제 / 옆돌리기 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "I5maJOZd6gs",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제 제14집] 5화 6문제 / 옆돌리기 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "6RKHL1Y1ZIg",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제 제14집] 4화 6문제 / 옆돌리기 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "IFgysGAtm3c",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제 제14집] 3화 12문제 / 옆돌리기 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "8dhcTVa_3k0",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제 제14집] 2화 6문제 / 옆돌리기 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "QxwZ-b7ewN4",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제 제14집] 1화 6문제 / 옆돌리기 볼시스템",
+      "score": 4,
+      "per": [
+        "볼시스템"
+      ]
+    },
+    {
+      "id": "jF7LXGp-CYU",
+      "canal": "짠당구",
+      "chId": "UCNCKt1-Kcnj6kC1BYfIMpmA",
+      "titol": "4구당구 잘 치는법, 기울기에 따른 원쿠션 치는 법 #shorts #당구",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "qb2CvSCr_4o",
+      "canal": "짠당구",
+      "chId": "UCNCKt1-Kcnj6kC1BYfIMpmA",
+      "titol": "알아두면 유용한 제자리 뱅크샷 #shorts  #당구 #3쿠션",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "FQVzZQ9h7tg",
+      "canal": "짠당구",
+      "chId": "UCNCKt1-Kcnj6kC1BYfIMpmA",
+      "titol": "이거 알면 좁은 각 옆돌리기는 끝 #shorts #당구 #3쿠션",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "jyFfyDyGY2w",
+      "canal": "짠당구",
+      "chId": "UCNCKt1-Kcnj6kC1BYfIMpmA",
+      "titol": "좁은각 3뱅크 치는 법 (7.5 제자리 시스템) #shorts #당구 #3쿠션",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "qZctUoc3sAA",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌 대회전 키스? \"꽝\" 때려야 빠집니다! (반발력 이용)✅",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "SIZ0YTr1UsE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "신기한 옆돌리기 제자리 시스템 #당구 #billiards #옆돌려치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "slR3ltPp-Eg",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌리기 너무 쉬운 제자리 시스템 통합본 / 0~8 만 외우면 됩니다! 이 영상을 보면 옆돌리기가 너무 쉬워집니다👍",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "mJFA0Ut4iKg",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌리기 극세사 15 제자리 시스템 보정방법 #당구 #billiards #양빵당구",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "ahTVTR0Nxi4",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌리기 극세사 15 제자리 시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "JXklOJdGPEE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "길게 만들려면.. 회전을 줘? 빼?? #임계기울기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "dzUXUj6spLE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "💥💥옆돌리기 대박 좋은 시스템💥💥 43210 만 외우면 됩니다❗ 이건 꼭 보세요❗❗ 양빵당구 양샘 레슨 / 옆돌리기 극세사 15 제자리 시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "usXj-IT7jmI",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "💥3 6 기울기만 외우자!!💥 길게 뽑아내기, 짧게 만들기 엄청 쉬워집니다! 뒤돌 옆돌 앞돌 비껴 더블 뱅크샷 등등.. 모두 적용되는 당구 이론입니다.",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "3z9h8ot_Yz0",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "두께와 분리각 - 옆돌리기 키스피하기 #당구 #billiards #양빵당구",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "LfnHFXiAvWw",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "💥튀줄시스템 통합편💥 기본적인 시스템부터 신기한 제자리 시스템까지.. 몰아보기로 세워치기(3뱅크, 2뱅크, 긴 비껴치기, 앞돌리기) 완전정복하세요~",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "D6Ad3zOms6M",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "튀줄 제자리 시스템 #튜줄시스템 #튜즐시스템 #Tuzul",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "NxM5m2SiqpQ",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(100만뷰) 💥123456만 알면💥 3초만에 계산이 끝나는 신기한 튀줄 제자리 시스템 / 긴 비껴치기, 앞돌리기, 뱅크샷 적용",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "_uMbrySAPcE",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌리기 키스💥? 초간단 3가지 패턴만 알면 👍👍👍",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "zo8NBZkuO6g",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "신기하게 제자리로..  #플러스투 #제자리 #시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "hgjr6R2CnTU",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "앞돌리기 2쿠션 정확히 보내기 #45도 #제자리시스템 #양빵당구",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "O_Wfc3PAzcM",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "앞돌리기 너무 쉬운 45도 시스템 / 2쿠션에 정확히 보내는 시스템 패턴 법칙 / 양빵당구 양샘 레슨 2쿠션 45도 10 제자리 시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "pzRmQ1O0x88",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌리기 45도 시스템! 숫자 10만 외워서 2쿠션에 정확히 보내는 초간단 시스템 패턴 법칙⭐ 양빵당구 양샘 레슨 / 옆돌리기 2쿠션 45도 10시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "-CZ7u27B0D4",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "플러스투 형태 임계기울기 #3칸 #임계기울기 #플러스투",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "eGVvdxmTik8",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "길게 치는 대회전 회전 구분 #6칸 #임계기울기 #대회전",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "JYNjRDNmrwk",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "3칸 기울기만 기억하세요! 회전을 줘? 빼?? 헷갈리는 플러스투 초간단 파악법⚡ 양빵당구 양샘 레슨 임계기울기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "woyLXsLMwrY",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "6칸 기울기만 외우면 해결되는 최대한 길게 뽑아내는 옆돌리기 뒤돌리기 대회전~~ 양빵당구 양샘 레슨",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "xgIGWrxecVs",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "구멍치기 제자리시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "SSaGtgW325U",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "무조건 맞아 있습니다! 구멍치기 제자리시스템 / 양빵당구 양샘레슨 140 출발지점으로 들어오는 1뱅크 구멍 제자리 시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "xBJbJzhcOoU",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "앞돌리기 세워치기 제자리 시스템 #Shorts",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "IwJtf8vCWTw",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "(250만뷰) 앞돌리기 너무 쉬운 시스템 / 1234만 외우면 됩니다! 꼭 보세요!! 양빵 당구 양샘 레슨 117 전구간 앞돌리기 세워치기 제자리 시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "sPq3Ad7O4uc",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌리기 제자리 시스템 / 양빵당구 #Shorts",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "3yUv4_81H0k",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "옆돌리기 제자리 시스템! 50가지 예제로 완전정복!! 기초부터 응용까지 몰아보기!!  양빵당구 양샘레슨 116",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "IJ_WpFWol50",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "양빵당구 이상대프로 레슨 #15 기울기 칸수별 옆돌리기 키스 피하기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "5jGNriM32hI",
+      "canal": "양빵당구",
+      "chId": "UClAm2dYo76fXo8Kbf-4Dxdw",
+      "titol": "양빵당구 레슨100편 기울기별 어려운 옆돌리기 길게치는 방법",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "88vCgyHcFbw",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷157)고수는 기준으로 칩니다(명백합니다)시스템은 참고용",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "LboKzm2zrVw",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "132) 기울기와 높이에 따라 서로 다른 큐질로~",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "O5IdE8TmncY",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷91)기울기하면 ○○○ 높이가 다르면 ㅇㅇㅇ  같은 큐질이 안됩니다!!",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "6DzM3iBj1so",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "129)대체로 안된다고 생각하는 기울기~횡단/더블쿠션",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "nVlYqB2JEno",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷88)기울기만 보면 횡단,더블쿠션은 어렵지만 이것만 배우면 쉽게 된다",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "5o1AFleH-r4",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "실전기술111)기울 큰 빗간만 길게 나오는게 아님/이건 배워두면 좋음",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "M5xR2HUy8Y8",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "기술샷44)나쁜 큐질 딱 이것 하나만 배우면 바로 멋진 샷~",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "4eeL6tyUirU",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "주말꿀팁101)이것만 하루에 30분 5일만 연습하면 큐질이 확 달라진다",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "XCs8ldStVGo",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "실전기술65)단축걸어치기 딱 반만 보세요 아주 좋아요",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "AThiSW91I1s",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "319편 기가막힌 방법 옆돌리기 5초면 쉽게 치는 방법",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "oo_lA7AAgQA",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "(주말꿀팁46)대체로 잘 모르는 45°걸어치기 원리 매우 유용한 팁",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "xBXQAUALsuE",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "294편 \"이 기울기만 기억하자\" 무조건 1쿠션은 코너로 보내자",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "o3-kyVFu-Cg",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "175편.아주 간단한 기울기 1/2앞돌리기치는법 기억하기 좋고 쉽다",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "fDWLXm9ooeE",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "걸어치기를 잘하려면 45기준을 사용 out Umbrella Shot ㅡ오늘의 실전팁 끌어서 대회전 키스방지법",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "fRK8THbyMGE",
+      "canal": "당구개론&패턴시스템",
+      "chId": "UChXpmop9-EI-riqkDB7oDpg",
+      "titol": "3뱅크샷 형태별 초이스 2편ㅡ단출발 형태2개",
+      "score": 3,
+      "per": [
+        "fórmula N=..+.."
+      ]
+    },
+    {
+      "id": "3y6XCpKAq5s",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "숫자 7까지만 외우시면 더블쿠션 정복할수 있습니다. 3쿠션 3구레슨 4구 당구레슨 BILLIARDS 수호신당구레슨 당구유튜버",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "njIo6-kpDCc",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "짧은 앞돌리기 잘치셔야 고수가 됩니다.(기준점잡고 적중률 올리는 방법)3쿠션 앞돌려치기 3구 4구 billiards 당구유튜버 수호신당구",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "WSuu-dKkiyI",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "숫자 1/2/3/4 만 외우면 더블쿠션 끝내기 밀리는 더블쿠션까지 마스터하기편당구레슨 수호신당구 3쿠션레슨 3구레슨 4구 billiards 당구초보",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "mGe62FJtzY4",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "66편 밀리는 뒤돌리기 간편하게치기+기울기없는 3단 쉽게 공략하기(이천당구연맹 회장 이민규회장님 원포인트레슨",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "xk78SxrDvFA",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "16편 ※30포인트의 비밀※ ☆ (15플러스+맥시멈플러스+제자리)모르고있으면 나만손해  초보자도 쉽게배우자! 3쿠션 4구 billiards",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "TeWIer4OFg0",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "9편 숫자계산 필요없는 플러스투 시스템(고수들은 이미 알고있다)당구레슨 3쿠션 4구 초보당구 billiards",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "iwH5ANkwh4A",
+      "canal": "수호신당구레슨",
+      "chId": "UCkl4YH6GVz6QwT-XLXSMw-w",
+      "titol": "4편 (비껴치기+더블쿠션)기울기 이해하기 이거하나만 알면 당구비 아낍니다 초보당구 고수로 가는길#당구레슨전문#billiards",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "RMfOdGTUa9g",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "엎드리면? 득점이 됩니다💥 | 긴 비껴치기 제자리 돌아오기↗️ | 방수좋아 당구레슨 20탄",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "7wAdeUQ4hzg",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "초보는 모르는 분리각 실수😱",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "M9R8mN6Q8t0",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "리버스 역대급 공략법✨ | 구간별 위치와 기울기만 파악하면 끝! | 연장선까지 알두면 ㄱ이득🖐",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "shpXRS2lWeM",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "세워치기가 좋아지는 영상👍 | 긴 비껴치기 | 기울기를 판단해서 도착을 예측하세요",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ZyLcSTQRzxs",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "[1234기울기] 앞돌리기,세워치기는↗태초에 이렇게 시작됐다!",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "nQieSPSBjWk",
+      "canal": "방수좋아 당구TV",
+      "chId": "UCAjCJj92-_U29fy-uZUMDTg",
+      "titol": "비껴치기 실력이 올라가는 영상💪 | 기울기,칸수 설계방법 | 방수좋아 당구레슨 35탄",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "_7yTaqns5UI",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "럭키 7 제자리 시스템을 알려드리겠습니다!",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "g6Rd72dsRRA",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "[특수 스킬] 기울기가 없을 때 💥횡단💥 뒤로갔다가 앞으로 가기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "F8JE2l59o8g",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "극악무도한 기울기에서 더블쿠션 또는 횡단 절대 안밀리게 구사하기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "1YlixVkIAUI",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "[루리키우기 2탄]무회전 타법과 분리각 이해하기",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "Du7q8VUD9Rw",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "47화. 쫑프로 자체제작 시스템! 1적구가 쿠션에 붙어있을 때 수구가 제자리로 돌아오는 옆돌리기 시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "Ynq2KFIIOnI",
+      "canal": "야매당구쫑프로",
+      "chId": "UCeMs53wY49uQcVXMTVswo1A",
+      "titol": "46화. 수구가 제자리로 돌아오는 옆돌리기 비법",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "PIxGSwZFE2A",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "깊은 엇각 뒤돌리기 업샷을 활용한 쉽게 분리각 만드는 방법~ #3쿠션 #billiards #lpba #pba #당구시스템 #당구레슨",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "EbKhuS-C_jA",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[스트록] 앞임팩으로 분리각 줄이기~  #billiards #삼구 #lpba #pba #당구레슨 #당구시스템",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "Mw-WsY3w3IU",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "좁은각 제자리 시스템~ 뱅크샷 좁은옆돌~  #lpba #billiards #pba #당구레슨 #당구시스템 #3쿠션 #shorts",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "quySGsrzhVI",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "제자리로 돌아오는 지그재그 시스템8 #당구 #3쿠션 #3cushionbilliards #pba #billiard #lpba #당구레슨",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "ENEm-48tMyU",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#174] 기울기만 보면 3쿠션을 바로찾는 쉽고 간단한 옆돌리기 기준~",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "rrEQJNO0mXU",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "세워치기 제자리 시스템  #lpba #pba #당구레슨 #당구 #당구시스템 #shortsvideo",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "lqLkNh37ZyU",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#117]보충수업2-송프로의 분리각을 줄이는 스트록레슨~",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "P1MrvT8nG6w",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#116] 보충수업 - 송프로의 스트록 라이브레슨1 ~ 분리각을 키우는 스트록와 줄이는 스트록",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "YTzCD9xROq8",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법 100회 특집] 세워치기 제자리 시스템!!! - 하이런(동호인)님이 직접만든 초간단 세워치기시스템",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "IZmtmOIybHI",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "짧은 뒤돌리기 실전 설계법  #당구레슨 #lpba #pba #당구시스템 #shortsvideo",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "9E3RRhRpsQ8",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#73] 길게 세우는 비껴치기는 기울기2만 기억하시면 됩니다!!!",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "u2wzMgilH_A",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "옆돌리기 기울기별 최대각 만들기 #shorts #shortsvideo",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "8jXom-1dGZY",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[1분시스템]옆돌리기 제자리 시스템#1 #shorts #shortsvideo",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "ToSoI_8RLJ8",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법몰아보기] 옆돌리기 1편",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "eL6w71LGJVw",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "[정당법#13] 직후방제자리시스템 120%활용법",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "beTIYH3d6GE",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "제자리 시스템 보정 및 전구간 사용법",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "W1knav9XycU",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "극악기울기의 끌어치기 확실히 마스터합니다..^^",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "_9GNpivRLVk",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "초간단 제자리 플러스시스템!!!",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "duQMlOJ_1RQ",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "기울기별횡단#박프로노래방공약#초이스연구소63탄",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "-Urgn11GM6g",
+      "canal": "초이스연구소",
+      "chId": "UCT49Rq9SRFB2rbijY2JYV9w",
+      "titol": "#34탄#신년기념옆돌기준점 대방출#거리별,기울기별해법공개#",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "RbRCWZc_jQQ",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.244(때려치는 세워치기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Lj6Bzfc-po4",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.238(일자 기울기 비껴치기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "DOhdJdM0Fcs",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.216(밀려지게 치는 비껴치기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "l140h6YpTcI",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.210(커브 뒤돌리기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "u1zzLzB17-c",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.180(엇각 원뱅크 넣어치기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "oTt7eRGm8BY",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.178(스핀볼 앞돌리기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "0knDu6yF9Ys",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.159(역회전 걸어치기 완결편)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Ak7hangaBcA",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.158(역회전 걸어치기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "eUyAtdj8cA0",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.155(일자 기울기 더블쿠션)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "S7sTJEecpFA",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.151(일자 기울기 비껴치기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "eWkSLuLg4EE",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.143(종단 제자리시스템)",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "GzgiBRweOjc",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.136(안쪽 더블쿠션)",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "I2Vgy2pa980",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.124(앞돌 감아치기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "gnSMOUws-ng",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.123(일자찌르기 옆돌리기)",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "T7hMziGEg70",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 42화] 저점자 분들이 \"반드시\" 알아야 할 💢\"뒤돌리기 대회전\" 의 키스해결 \"기울기 대입 설계법\"💥 3점 수지UP 가능💥",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "gOOqgblptFI",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 32화] 저점자 분들이 빠르게 💢중점자가 될수 있는 지름길💥당구의 기초이론 -4. 최종분리각 2부",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "HyOMx_CCsdk",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 30화] 타법을 알아야 빠르게 고점자 됩니다 💥💥당구의 기초이론 - 3. 분리각과 타법",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "tFwzoa_s8lI",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 29화] 저점자, 중점자용 당구의 원리ㅣ당구의 기초이론 - 2. 테이블 각도이론(각도에 따른 회전작용)",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "ByyRMvDtjkU",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "[달달레슨 7화] 좁은 엇각 옆돌리기 💢 100%성공률을 위한 제자리 시스템 👍",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "6eVGqhzTWYw",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.65(상단더블횡단)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "HOGIEzdoX4Q",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.55(쇼트 뒤돌리기)",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "KQ7SrAHWxto",
+      "canal": "당구달인TV",
+      "chId": "UCrZfld_1Yx6jrj00s5IqJBQ",
+      "titol": "생.수.난 No.54(뒤돌 대회전)",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "2nP2cz5vQTA",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "초간단 옆돌계산#옆돌리기#필승당구",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "ADULBwEoidI",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[124화] 뒤돌리기가 무조건 쉬워질💥초간단 기울기설계법💥",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "bGvrmJZTWOw",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[123화] 앞돌리기💥나누기2 시스템💥이 탄생했습니다.곱하기 시스템NO! 가장 빨리 도착을 알 수 있습니다!",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "EqlgfCr3M_8",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[114화] 비껴치기를 💥가장 쉽고 완벽하게 구사💥할 수 있는 방법!",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "1Fq-kEwNr0I",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[109화] 비껴치기 기울기 설계는 이제 그만!💥이 방법이 실제 설계법과 가장 유사💥합니다",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "l6PAv6Sr2WQ",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[99화] 어려운 더블쿠션은 단쿠션에 답이 있습니다💥기울기가 커도💥누구든 성공가능!",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "YdBJMxnEVrI",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "뒤돌과 옆돌을 쉽게 만들어 줄 💥나누기 '2' 시스템💥 통합본",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "HSniKtkmrlE",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[95화] 이 방법으로 옆돌리기가 쉬워졌어요💥이렇게 쉬운데 아직도 모르신다고요?",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "dYi_1eKFSTQ",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "기울기=회전량?",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "DF5aByT55xM",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[86화] 이건 앞돌리기 설계법의 혁명입니다💥💥앞돌리기 1초만에 회전량 설정💥💥",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "mfnDnjL2B3s",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "비껴치기는 그냥 이것만 보시면 될 듯...💥(기울기설계 모음)💥세워치기는 덤",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "iHXJqqHe5bs",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[59화]앞돌리기,세워치기 설계법 끝판왕💥💥",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "bV3P3anTXLw",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[54화] 짧은 짱꼴라는 이 방법이 최고👍더하기만 할 줄 알면 입문자도 칠 수 있습니다💢💥",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "8KFRPe0EA00",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[52화] 짱꼴라를 젤 쉽게 만들어 줄 쉽고 정확한 방법💥💥더이상 짱꼴라를 어려워하지 않게 만들어 드리겠습니다😜😜",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "eKqwvIYXlrI",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[36화] 좁은 옆돌리기 기울기 설계법  💢(4빼기 기울기)💢지금까지 이런 설계는 없었다. 이것은 옆돌리기인가?세워치기인가?",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "XvKqBHLz_Tc",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "[35화] 세워치기와 앞돌리기는 4빼기 기울기로 해결하세요!💢쉽고 정확한 기울기 설계법 💥",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "WuVzfxg_M1k",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "기울기4칸 횡단",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "-zEBBYda4Ac",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "※필승당구레슨※ 절반두께 45도 분리각을 외워라!",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "u0J_kgD8Uus",
+      "canal": "필승당구레슨",
+      "chId": "UCQ-oxvCBBz_RFcMDJX0M6Uw",
+      "titol": "※필승당구레슨※ 기울기가 클 때 확률 높은 횡단 구사하기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Fex7YatswBY",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#2칸기울기무회전코너 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ccju86nhi74",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#제자리로오는시스템 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "AfVJDHD-MJ0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#제자리시스템 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "K1Zwn8v6Bqg",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#기울기비껴치기 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "qIEi805TX5s",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#기울기를잘알아야해요 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "cDvW17Gurbo",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#수직하강기울기 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "sr-Co63sgV4",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#센터는쎄칸기울기 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "-t2QLd6dMWY",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#기울기X2 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Pcqwf8evlQI",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#기울기+2 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "nWTEQcw3XG0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#당구는기울기 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "zBhnDtbD8WQ",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#기울기보정법 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "5e6_8Jdvuf0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#7.5제자리시스템 #당구 #뽠주TV #shorts #3쿠션 #pba",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "zJ6x_JBZBOo",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[191화]🔥남들 다 어렵게 칠 때, 뽠주는 ♥️'이판사판 공사판' 하나로 30점 찍었습니다.",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "y2BXnbZIdpc",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#기울기=회전 #뽠주TV #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "kOIYdxb41d4",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#빗각기울기+1 #뽠주TV #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "69b9TMq7JWk",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#옆돌은 기울기로 해결해요 #뽠주TV #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Up__H-DfVA0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#제자리 시스템 #뽠주TV #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "11N_iZwgqLA",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#긴 옆돌리기는 기울기로 #뽠주TV #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "RpQ3NJZnC4o",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#적용범위가 아주 넓은 제자리시스템 #뽠주TV #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "Wk1hmZZEx-M",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#비껴치기는기울기만보세요 #뽠주TV #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "xTbIg8YVPA4",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#제자리시스템 #뽠주TV #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "sYxPN2CYLf8",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "_Na44lEzauQ",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #앞돌리기제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "Ph_mQlCkZ2Y",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "v04wvr8nC6c",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[161화]❤️100%실전용❤️제자리시스템. 이걸 몰라서 계속 헤맸어요.🌈앞돌리기는 이제 정착하세요.",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "qkucmxZ6mgg",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #기울기는칸수 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "1MlkaohLmWY",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #-2팁제자리 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "rTs8InBLFnY",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #기울기택일 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "vohanqguLsI",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[159화]❤️정답은 원리입니다.🔥더블쿠션은 2칸, 3칸기울기를 가장 많이 사용합니다.",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "gstdNl8TMS4",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #기울기+회전 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "8EndUDe7M8Y",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[155화]🔥3,4,5만 만들면 세워치기, 대회전, 💢길게💢짧게 다 보낼 수있습니다.",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ZhXKhpRcFDY",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #비껴치기기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "OiDKjXf5cqE",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #3칸기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "rrSaAuyhFnk",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #비껴치기는기울기로 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "rVckdKPCKvg",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #5기울기는 코너 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "YWRrGsYkfrQ",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #기울기비껴치기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "UmKYWsuHuqk",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[149화]💢당구 잘 치는 사람은 기울기로 칩니다💥겁나서 못치던 💥긴 비껴치기의 비밀을 알면 선수만큼 칠 수 있습니다.",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "xCmqAczxZ8Y",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[148화]💥아직도 모르시나요? 💥비껴치기의 비밀은 2라는거 아시나요? 💢2만 기억하면 비껴치기는 쉽습니다.",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "vjOVf76npCY",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #세칸기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "ZYcZMwLMQXQ",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "qE8XSukjHYk",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #엇각2칸기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "OAsXFVJAHRg",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "MLY6LIBX-nI",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #1팁제자리 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "K1_2yd3G4uw",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #옆돌리기기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "sYWkc6upUlQ",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #걸어치기 기울기의 반 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "Ici5sldQuoM",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #걸어치기기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "_VwXc8OiAt0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #3칸기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "-CG-g61f_1w",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #앞돌리기 기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "OBy4j-TREN4",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #쎈터는쎄칸기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "okwUqXG-eek",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #센터는쎄칸기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "R3mdEnYmx9I",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #세칸기울기는센터다 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "oMFpVVPKAFU",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[105화]❤️걸어치기🔥단번에해결하는💯치트키. 이걸보시면 생각이 달라지실거예요.",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "EXXlzLOIRIk",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "[103화]뱅크샷, 대회전, 세워치기🔥센터로 보내기가 어렵죠? 👍❤️이제 오히려 기준이 될 만큼 쉽습니다.",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "jzn1nay412o",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "xIz-EOINkBs",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "7I_qGYn0EwM",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "bk19SDgTa7E",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #7.5제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "-IsPDo7Cyhs",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #3칸기울기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "TDeInxME3uE",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #제자리시스템 #옆돌리기 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "K7UT7qhYKgU",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #7.5제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "b5Zj50QAGcw",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #7.5제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "PguCk2R7r40",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "u9n5q1LMq88",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#뽠주TV #7.5제자리시스템 #shorts #3쿠션 #pba #당구 #예술구 #끌어치기 #밀어치기",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "tWQN3C0DmcA",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "뽠주TV #4칸기울기 #3쿠션 #pba #당구 #4구 #예술구 #끌어치기 #밀어치기 #shorts",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "19o1ze-dqpg",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#두칸기울기는벽타기 #3쿠션 #pba #당구 #4구 #예술구 #끌어치기 #밀어치기 #shorts #carom_billiards",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "eUgoa0BaTh0",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#7시3팁제자리 #3쿠션 #당구 #예술구 #끌어치기 #밀어치기  #pba  #shorts",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "zIi_U3W9O7I",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#분리각만생각해 #3쿠션 #당구 #예술구 #시스템 #끌어치기 #밀어치기 #맛세이 #pba  #shorts",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "rtP9Vsf1XMc",
+      "canal": "뽠주TV",
+      "chId": "UC6QmdmVb4T8rKj-SS1Lq3Yw",
+      "titol": "#더블쿠션나누기4하세요 #장장장장 #Shorts #pba",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "XipuKZJeHpo",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구이론 이거 모르면 영원한 하수  #당구박사 #당구레슨 #당구쇼츠",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "h9KthIEJfYw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 이론의 시작 - 1/2 분리각 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "B9pgc72cAsA",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "밀어치기 1-2 해설동영상 - 당구필수이론 1/2 두께의 분리각과 두께 겨냥법",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "BHzlmoMvZK4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "이것을 모르면 평생 하수 - 당구필수이론 분리각의 성질 - 당구박사 당구레슨",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "53k6j2v50Dk",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "득점 확률 2배 높이는 1/2 두께 판단법 (세게 vs 살살) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "DPRCpPmqJww",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1/2 두께인데 왜 안 맞을까요? (절반의 함정) - 당구레슨현장 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "xg7yYe_YB-c",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1쿠션 기울기로 치는 방법 [당구레슨현장] #당구박사 #당구레슨 #당구쇼츠",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "SB7s2lXTFmA",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1쿠션은 기울기로 생각하면 쉬워요 - 자세한 것은 관련동영상 시청하세요 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "17LAqP4oA0E",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "모두가 착각하는 두께의 함정 (당구필수 분리각이론) #당구박사 #당구이론 #당구쇼츠",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "1O2QDYTvYwM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1/2 두께의 분리각(당구필수이론) - 150점 동호인 당구클리닉 -  #당구박사 #당구레슨 #당구필수이론",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "ODqU1FBYgoE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구필수이론 1/2 두께 분리각의 진실 #당구박사 #당구레슨 #당구쇼츠",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "fG_dP6CZjks",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1/2 두께의 분리각 (당구필수이론, 150점 동호인 당구클리닉) #당구박사 #당구레슨 #당구쇼츠",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "3hpUXtq_ous",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구필수이론 - 하수는 몰라요. 1/2 두께의 분리각 #당구박사 #당구레슨 #당구이론",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "GLQw9M1u5Sk",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "중대3구 기울기를 이용하여 옆돌리기 치는 방법 #당구박사 #중대3구 #당구레슨",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "w4oNrZLKUAw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1/2 두께의 분리각 이론을 응용하여 공모으는 설계방법 #당구박사 #당구레슨 #당구이론",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "Ty3PY02m4i0",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1/2두께 1목적구의 분리각을 이용하여 공모으는 방법 (공모으기 기초 4번) #당구박사 #당구레슨 #4구공모으기",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "iI0uNYdmEGw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "큐볼과 1목적구의 기울기가 엇각일때와 빗각일때의 난이도 차이 #당구박사 #당구레슨 #당구이론",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "tqXkQfou_xM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구이론 기본중의 기본은 1/2 두께의 분리각 #당구박사 #당구레슨 #당구이론",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "9D3DePW-3tI",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "100점 동호인을 위한 당구클리닉 1쿠션 레슨 (1/3) 1쿠션의 기본은 1/2두께의 분리각 #당구박사 #당구레슨 #1쿠션",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "JjW54_UkDWU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "4구 250점 에피소드 (당구 필수이론 1/2 두께의 분리각) #당구레슨 #당구이론",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "_spDJWvWQHQ",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "포켓볼에서조차 중요한 1/2두께의 분리각 #당구 #당구레슨 #포켓볼",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "Ac14WG6W7ao",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "두께 변화로 공을 모으는 예 (당구필수이론, 두께와 분리각, 앞돌리기) #당구 #당구레슨 #당구이론",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "L19sDKgpYjY",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구필수이론(두께와 분리각의 진실) 이것도 모르고 치면 평생 하수를 면하기 어려워요 #당구 #당구레슨 #당구필수이론",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "kOyNNAE24OE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "다음 배치 생각하기 (절반 두께의 분리각 기준으로) #당구 #당구레슨 #공모으기",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "crck46wMi48",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "끌어쳐서 모으기 (기준은 1/2 두께의 분리각) #당구 #당구레슨 #공모으기",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "tfLOjxhmLSU",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "300점 만들기 프로젝트 (150점을 위한 레슨 첫시간) #당구 #4구",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "DIGFpAFhIIw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "300점 만들기 프로젝트 (200점 실수 배치 레슨 1~7) 그리고 당구박사 레슨 게임 #당구 #4구",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "UGcUjiPWFnk",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "공모으기 당점과 분리각 응용 #당구 #당구레슨 #Billiard",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "UQav7d28Mtg",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 공 모으기 기초 (300점 만들기 프로젝트 12d)",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "YLxfcAji5PY",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 교실 후기 (절반 두께와 분리각→ 무회전 밀어치기 끌어치기→ 5앤하프 입문) → 앞돌리기 3쿠션 기본 #당구레슨 #당구 #3구 3500kbps",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "WX-P6XX6F6U",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "죽여치기 기초 (당점과 분리각) #당구 #4구",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "9vBKMpa01j4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "1/2 두께의 분리각을 이용하여 파울을 피하는 방법 #당구",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "bynGn6SggQM",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구필수이론(두께와 분리각)을 4구에서 응용하는 예",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "GYy5PeBr9Is",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당점과 분리각의 관계를 4구 3구에서 응용하는 예",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "unSuBiTDhOc",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당점과 분리각의 관계 #당구이론 #당구기초",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "bMyII5qVx24",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "큐스피드와 분리각의 관계 #당구 #당구기초",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "8hfWJ7ujv9A",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당점 큐스피드와 분리각의 관계 (당구필수이론)",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "c9LF8VQ62og",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 필수 이론 (두께와 분리각의 관계)",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "gORegGtAJT4",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구필수이론 (절반두께와 분리각) #당구 #필수이론",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "8ReaLJXdmXE",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 중대 3구 기초 이론과 기본기 (절반 두께의 중요성과 스트로크 만들기)",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "KSPU6Ts92Lw",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "앞돌리기 필수 연습과 당구 필수 이론 분리각에 대한 레슨",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "ZWtZoBuHg-s",
+      "canal": "중대당구박사",
+      "chId": "UCWSi0VEeaenYgzOtg9AoqEA",
+      "titol": "당구 4구 레슨 게임 (100점 동호인 vs 당구박사 400점)",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "z95LGFbwA_k",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "당린이 두께조절의 첫 걸음, 분리각과 조준점 뽀개기! -아빌50D",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "BhdUifExpgo",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "당구의 두께별 각도와 쉽게 두께조절하는 방법 -아빌313",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "sYpWNF5Jyio",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "당구 4구에서 분리각(입사각, 반사각)으로 원뱅크 공략할 때 쉽게 계산하는 방법-아빌117",
+      "score": 3,
+      "per": [
+        "divisió"
+      ]
+    },
+    {
+      "id": "ThW44mxZAj8",
+      "canal": "아이빌리TV",
+      "chId": "UCPteEGbatxsfN4sLcZsnJBQ",
+      "titol": "당구 제각돌리기(옆돌리기)칠 때 2~3쿠션 구간의 기울기를 이용해보자!!-아빌108",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "eHJw7QQCzqY",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제7집 (7화) / 5문제 / 3210 옆돌리기 (심화)",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "lal_9if8OZU",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제7집 (6화) / 5문제 / 3210 옆돌리기 (심화)",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "FGpOoLI7l6Q",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제7집 (5화) / 5문제 / 3210 옆돌리기 (심화)",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "RuaiiiW5llE",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제7집 (3화) / 10문제 / 3210 옆돌리기 (심화)",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "rUJz7M0ekDc",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제7집 (2화) / 5문제 / 3210 옆돌리기 (심화)",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "pkvnhsLEaUc",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제7집 (1화) / 5문제 / 3210 옆돌리기 (심화)",
+      "score": 3,
+      "per": [
+        "제자리"
+      ]
+    },
+    {
+      "id": "S176EfWXOSQ",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제2집 (7화) / 10문제 / 3칸 기울기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "y5z-sPGlCi4",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제2집 (6화) / 5문제 / 3칸 기울기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "H_IXwmr8YYM",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제2집 (5화) / 5문제 / 3칸 기울기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "xJ9uIJqn4P0",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제2집 (4화) / 김영원 샷 분석",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "i_cHkFiKLUY",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제2집 (3화) / 10문제 / 3칸 기울기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "x79bleaDXyg",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제2집 (2화) / 5문제 / 3칸 기울기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    },
+    {
+      "id": "WVyOy36xRs8",
+      "canal": "3쿠션 연습문제",
+      "chId": "UC1iX9tUVHaZCgXPBEWcgpig",
+      "titol": "[3쿠션 연습문제] 제2집 (1화) / 5문제 / 3칸 기울기",
+      "score": 3,
+      "per": [
+        "기울기"
+      ]
+    }
+  ]
+}
