@@ -1,0 +1,6 @@
+# Informes generats: els refà `build_report.py` a partir dels CSV i JSON que sí
+# que hi ha al repo, i pesen més de 3 MB per tirada.
+*.docx
+*.pdf
+*.xlsx
+informe.html

@@ -1,0 +1,292 @@
+{
+ "C.B.BANYOLES": {
+  "adreca_fcb": "c/abeurador, 10 - 17820 Banyoles",
+  "municipi": "Banyoles",
+  "estat": "NO-HIT"
+ },
+ "C.B.MONFORTE": {
+  "adreca_fcb": "C/ Sant Antoni María Claret, 373 - 08027 BARCELONA",
+  "municipi": "Barcelona",
+  "query": "Carrer de Sant Antoni Maria Claret 373, 08027 Barcelona",
+  "lat": 41.421269,
+  "lon": 2.1876695,
+  "osm": "373, Carrer de Sant Antoni Maria Claret, la Sagrera, Sant Andreu, Barcelona, Barcelonès, Barcelona, Catalunya, 08027, España",
+  "osm_type": "house",
+  "estat": "OK"
+ },
+ "S.B.F.MOLINS": {
+  "adreca_fcb": "PASSEIG DEL TERRAPLÉ, 49 - MOLINS DE REI",
+  "municipi": "Molins de Rei",
+  "query": "Passeig del Terraplè 49, 08750 Molins de Rei, Barcelona",
+  "lat": 41.4120456,
+  "lon": 2.0152787,
+  "osm": "Passeig del Terraplè, Centre Vila, Molins de Rei, Baix Llobregat, Barcelona, Catalunya, 08750, España",
+  "osm_type": "pedestrian",
+  "estat": "OK"
+ },
+ "C.B.SANT ADRIÀ": {
+  "adreca_fcb": "C/Dr. Barraquer, 6 - Sant Adrià de Besòs",
+  "municipi": "Sant Adrià",
+  "query": "Carrer del Doctor Barraquer 6, 08930 Sant Adrià de Besòs, Barcelona",
+  "lat": 41.4300112,
+  "lon": 2.2172269,
+  "osm": "Club Billar Sant Adrià, 6, Carrer del Doctor Barraquer, Sant Adrià Nord, Sant Adrià de Besòs, Barcelonès, Barcelona, Catalunya, 08930, España",
+  "osm_type": "sports_centre",
+  "estat": "OK"
+ },
+ "B.C.GRANOLLERS": {
+  "adreca_fcb": "Carrer Girona 222, pab. bàsquet - Granollers",
+  "municipi": "Granollers",
+  "query": "Carrer de Girona 222, 08402 Granollers, Barcelona",
+  "lat": 41.6088794,
+  "lon": 2.290621,
+  "osm": "Carrer de Girona, Centre, Granollers, Vallès Oriental, Barcelona, Catalunya, 08402, España",
+  "osm_type": "tertiary",
+  "estat": "OK"
+ },
+ "C.B.LLINARS": {
+  "adreca_fcb": "c/ Ravalet, 17 - 08450 LLINARS DEL VALLÉS",
+  "municipi": "Llinars",
+  "query": "Carrer Ravalet 17, 08450 Llinars del Vallès, Barcelona",
+  "lat": 41.6401153,
+  "lon": 2.4063496,
+  "osm": "Carrer del Ravalet, Llinars del Vallès, Vallès Oriental, Barcelona, Catalunya, 08459, España",
+  "osm_type": "residential",
+  "estat": "OK"
+ },
+ "C.B.MATARÓ": {
+  "adreca_fcb": "PASSEIG CARLES PADRÓS, 12 (PAVELLÓ MUNICIPAL JOSEP MORA) - 08304 MATARÓ",
+  "municipi": "Mataró",
+  "query": "Passeig de Carles Padrós 12, 08304 Mataró, Barcelona",
+  "lat": 41.5464815,
+  "lon": 2.4422399,
+  "osm": "Passeig de Carles Padrós, els Molins, Mataró, Maresme, Barcelona, Catalunya, 08301, España",
+  "osm_type": "residential",
+  "estat": "OK"
+ },
+ "C.B.SANT BOI": {
+  "adreca_fcb": "Jaume I, nº 52 - SANT BOI DE LLOBREGAT",
+  "municipi": "Sant Boi",
+  "query": "Carrer de Jaume I 52, 08830 Sant Boi de Llobregat, Barcelona",
+  "lat": 41.3374597,
+  "lon": 2.0427197,
+  "osm": "Carrer de Jaume Balmes, Vinyets i Molí Vell, Sant Boi de Llobregat, Baix Llobregat, Barcelona, Catalunya, 08830, España",
+  "osm_type": "residential",
+  "estat": "OK"
+ },
+ "C.B.LLIÇÀ D'AMUNT": {
+  "adreca_fcb": "Folch i Torres,117 - 08186 Lliçà d'Amunt",
+  "municipi": "Lliçà d'Amunt",
+  "estat": "NO-HIT"
+ },
+ "C.B.MOLLET": {
+  "adreca_fcb": "Rda.Can Fábregas, 1. Sotano. - 08100 MOLLET DEL VALLÈS",
+  "municipi": "Mollet",
+  "query": "Ronda de Can Fàbregas 1, 08100 Mollet del Vallès, Barcelona",
+  "lat": 41.5359685,
+  "lon": 2.2191838,
+  "osm": "Ronda de Can Fàbregas, la Riera Seca, Mollet del Vallès, Vallès Oriental, Barcelona, Catalunya, 08100, España",
+  "osm_type": "residential",
+  "estat": "OK"
+ },
+ "C.B.2000 CERDANYOLA": {
+  "adreca_fcb": "Avinguda Guiera, 6 - Cerdanyola del Vallès",
+  "municipi": "Cerdanyola",
+  "query": "Avinguda Guiera 6, 08290 Cerdanyola del Vallès, Barcelona",
+  "lat": 41.4830183,
+  "lon": 2.1427308,
+  "osm": "Avinguda de Guiera, Guiera, Cerdanyola del Vallès, Vallès Occidental, Barcelona, Catalunya, 08290, España",
+  "osm_type": "secondary",
+  "estat": "OK"
+ },
+ "C.B.BLANES": {
+  "adreca_fcb": "Plaça d'Espanya, 5 (baixos Casino de Blanes) - Blanes",
+  "municipi": "Blanes",
+  "query": "Plaça d'Espanya 5, 17300 Blanes, Girona",
+  "lat": 41.6743889,
+  "lon": 2.7925433,
+  "osm": "Plaça d'Espanya, sa Maçaneda, Blanes, la Selva, Girona, Catalunya, 17300, España",
+  "osm_type": "square",
+  "estat": "OK"
+ },
+ "C.B.SANTS": {
+  "adreca_fcb": "Rector Triadó, 53, Interior Baixos - 08014 Barcelona",
+  "municipi": "Barcelona",
+  "query": "Carrer del Rector Triadó 53, 08014 Barcelona",
+  "lat": 41.377645,
+  "lon": 2.1418588,
+  "osm": "Poliesportiu Municipal l'Espanya Industrial, 53, Carrer del Rector Triadó, Hostafrancs, Sants-Montjuïc, Barcelona, Barcelonès, Barcelona, Catalunya, 08014, España",
+  "osm_type": "sports_centre",
+  "estat": "OK"
+ },
+ "C.B.CANET DE MAR": {
+  "adreca_fcb": "Rial de Can Godany s/n (mateix Camp Municipal de Futbol) - CANET DE MAR",
+  "municipi": "Canet de Mar",
+  "estat": "NO-HIT"
+ },
+ "C.B.BARCELONA": {
+  "adreca_fcb": "Gran Vía de les Corts Catalanes, 595-599, soterrani - Barcelona",
+  "municipi": "Barcelona",
+  "query": "Gran Via de les Corts Catalanes 595, 08007 Barcelona",
+  "lat": 41.3883171,
+  "lon": 2.1659902,
+  "osm": "Teatre Coliseum, 595, Gran Via de les Corts Catalanes (lateral muntanya), la Dreta de l'Eixample, l'Eixample, Barcelona, Barcelonès, Barcelona, Catalunya, 08007, España",
+  "osm_type": "theatre",
+  "estat": "OK"
+ },
+ "C.B.MONT-ROIG": {
+  "adreca_fcb": "C/ VINYOLS, 17 baixos - Mont-roig del camp",
+  "municipi": "Mont-roig",
+  "query": "Carrer de Vinyols 17, 43300 Mont-roig del Camp, Tarragona",
+  "lat": 41.0873067,
+  "lon": 0.961368,
+  "osm": "Carrer de Vinyols, Mont-roig del Camp, Baix Camp, Tarragona, Catalunya, 43300, España",
+  "osm_type": "residential",
+  "estat": "OK"
+ },
+ "S.B.P.E.CENTELLES": {
+  "adreca_fcb": "C/ SANT JOAN 14 - CENTELLES",
+  "municipi": "Centelles",
+  "query": "Carrer de Sant Joan 14, 08540 Centelles, Barcelona",
+  "lat": 41.7954808,
+  "lon": 2.2191965,
+  "osm": "Carrer de Sant Joan, Centelles, Osona, Barcelona, Catalunya, 08540, España",
+  "osm_type": "residential",
+  "estat": "OK"
+ },
+ "C.B.ALBA": {
+  "adreca_fcb": "SANT PAU, 13 - BADALONA",
+  "municipi": "Badalona",
+  "query": "Carrer de Sant Pau 13, 08911 Badalona, Barcelona",
+  "lat": 41.4521635,
+  "lon": 2.2500623,
+  "osm": "Carrer de Sant Pau, Centre, Districte 1, Badalona, Barcelonès, Barcelona, Catalunya, 08911, España",
+  "osm_type": "living_street",
+  "estat": "OK"
+ },
+ "C.B.LLEIDA": {
+  "adreca_fcb": "AVD. NAVARRA S/N (CAMP D'ESPORTS) - LLEIDA",
+  "municipi": "Lleida",
+  "query": "Avinguda de Navarra, 25006 Lleida",
+  "lat": 41.6212957,
+  "lon": 0.6155697,
+  "osm": "Avinguda de Navarra, Camp d'Esports, Lleida, Segrià, Lleida, Catalunya, 25006, España",
+  "osm_type": "living_street",
+  "estat": "OK"
+ },
+ "C.B.TARRAGONA": {
+  "adreca_fcb": "Plaça Imperial Tarraco,1 Estació Autobusos Sotano - Tarragona",
+  "municipi": "Tarragona",
+  "query": "Plaça Imperial Tarraco 1, 43005 Tarragona",
+  "lat": 41.1193211,
+  "lon": 1.2463466,
+  "osm": "Oficina Jove del Tarragonès, 1, Plaça Imperial Tarraco, Nou Eixample Sud, Tarragona, Tarragonès, Tarragona, Catalunya, 43005, España",
+  "osm_type": "social_facility",
+  "estat": "OK"
+ },
+ "C.B.PRAT": {
+  "adreca_fcb": "CALLE LO GAITER DEL LLOBREGAT 24 - EL PRAT DE LLOBREGAT",
+  "municipi": "Prat",
+  "estat": "NO-HIT"
+ },
+ "C.B.PREMIÀ": {
+  "adreca_fcb": "C/. SANT ANTONI, Nº 60 - 2ON. - PREMIA DE MAR",
+  "municipi": "Premià",
+  "query": "Carrer de Sant Antoni 60, 08330 Premià de Mar, Barcelona",
+  "lat": 41.4897874,
+  "lon": 2.3579717,
+  "osm": "Carrer de Sant Antoni, Premià de Mar, Maresme, Barcelona, Catalunya, 08330, España",
+  "osm_type": "living_street",
+  "estat": "OK"
+ },
+ "S.B.CORAL COLÓN": {
+  "adreca_fcb": "Avinguda Onze de Setembre, 125 - Sabadell",
+  "municipi": "Sabadell",
+  "query": "Avinguda Onze de Setembre 125, 08208 Sabadell, Barcelona",
+  "lat": 41.5534208,
+  "lon": 2.1044223,
+  "osm": "Avinguda de l'Onze de Setembre, el Centre, la Creu Alta, Sabadell, Vallès Occidental, Barcelona, Catalunya, 08201, España",
+  "osm_type": "tertiary",
+  "estat": "OK"
+ },
+ "C.B.SANT FELIU": {
+  "adreca_fcb": "Centre Cívic - Sant Feliu de Codines CP 08182",
+  "municipi": "Sant Feliu de Codines",
+  "query": "Sant Feliu de Codines, 08182, Barcelona",
+  "lat": 41.6885036,
+  "lon": 2.1646769,
+  "osm": "Sant Feliu de Codines, Vallès Oriental, Barcelona, Catalunya, 08182, España",
+  "osm_type": "administrative",
+  "estat": "OK"
+ },
+ "S.B. GEiEG": {
+  "adreca_fcb": "GEIEG Palau - c/Església de Sant Miquel, 18 - 17003 Girona",
+  "municipi": "Girona",
+  "query": "Carrer Església de Sant Miquel 18, 17003 Girona",
+  "lat": 42.1728464,
+  "lon": 2.9910876,
+  "osm": "Carrer de l'Església, Sant Miquel de Fluvià, Alt Empordà, Girona, Catalunya, 17475, España",
+  "osm_type": "residential",
+  "estat": "OK"
+ },
+ "C.B.MANRESA": {
+  "adreca_fcb": "PASSATGE DIPOSITS VELLS,4-BAIXOS - MANRESA",
+  "municipi": "Manresa",
+  "query": "Passatge Dipòsits Vells 4, 08241 Manresa, Barcelona",
+  "lat": 41.7326416,
+  "lon": 1.8303536,
+  "osm": "Passatge dels Dipòsits Vells, Carretera de Santpedor, Manresa, Bages, Barcelona, Catalunya, 08240, España",
+  "osm_type": "living_street",
+  "estat": "OK"
+ },
+ "C.B.VIC": {
+  "adreca_fcb": "CARRER ARQUEBISBE ALEMANY, 24 Baixos - VIC",
+  "municipi": "Vic",
+  "query": "Carrer Arquebisbe Alemany 24, 08500 Vic, Barcelona",
+  "lat": 41.9319543,
+  "lon": 2.2516403,
+  "osm": "Carrer de l'Arquebisbe Alemany, Sentfores, Vic, Osona, Barcelona, Catalunya, 08500, España",
+  "osm_type": "living_street",
+  "estat": "OK"
+ },
+ "C.B.OLESA": {
+  "adreca_fcb": "Plaça Països Catalans, 2 - Olesa de Montserrat",
+  "municipi": "Olesa",
+  "query": "Plaça Països Catalans 2, 08640 Olesa de Montserrat, Barcelona",
+  "lat": 41.5396836,
+  "lon": 1.8979692,
+  "osm": "Plaça dels Països Catalans, Cal Vicentó, les Roviroles, Olesa de Montserrat, Baix Llobregat, Barcelona, Catalunya, 08640, España",
+  "osm_type": "pedestrian",
+  "estat": "OK"
+ },
+ "C.B. BORGES": {
+  "adreca_fcb": "Carrer Catalunya s/n Pavelló Esportiu Francesc Macià - Les Borges Blanques",
+  "municipi": "Borges Blanques",
+  "query": "Carrer Catalunya, 25400 Les Borges Blanques, Lleida",
+  "lat": 41.5188127,
+  "lon": 0.8693986,
+  "osm": "Carrer de Catalunya, les Borges Blanques, Garrigues, Lleida, Catalunya, 25400, España",
+  "osm_type": "residential",
+  "estat": "OK"
+ },
+ "B.LA UNIÓ CORAL": {
+  "adreca_fcb": "PASSEIG BERTRAND Nº 13 - SANT FELIU DE LLOBREGAT 08980",
+  "municipi": "Sant Feliu de Llobregat",
+  "query": "Passeig Bertrand 13, 08980 Sant Feliu de Llobregat, Barcelona",
+  "lat": 41.3818806,
+  "lon": 2.0478331,
+  "osm": "Passeig de Bertrand, Can Nadal, Sant Feliu de Llobregat, Baix Llobregat, Barcelona, Catalunya, 08980, España",
+  "osm_type": "residential",
+  "estat": "OK"
+ },
+ "S.B.LA GRAN PENYA": {
+  "adreca_fcb": "Rambla Principal, 52 - Vilanova i la Geltrú",
+  "municipi": "Vilanova",
+  "query": "Rambla Principal 52, 08800 Vilanova i la Geltrú, Barcelona",
+  "lat": 41.2237774,
+  "lon": 1.7248374,
+  "osm": "52, Rambla Principal, Centrevila, Vilanova i la Geltrú, Garraf, Barcelona, Catalunya, 08800, España",
+  "osm_type": "house",
+  "estat": "OK"
+ }
+}
