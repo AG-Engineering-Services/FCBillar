@@ -147,7 +147,7 @@ MOTIU = {
 # Canvis de club coneguts per a la 2026-27 (nom exacte a `players` → club destí a la BD).
 TRASPASSOS = [
     ("CORPAS NATOLI, FERNANDO", "C.B.LLINARS"),
-    ("RODRÍGUEZ NAVARRA, FERRÁN", "S.B. GEiEG"),
+    ("RODRÍGUEZ NAVARRA, FERRÁN", "C.B.BANYOLES"),
     ("CHUECOS ENRIQUEZ, LUIS", "C.B.MONFORTE"),
     ("CARDONA GALLEGO, JULIÁN ALBERTO", "C.B.MONFORTE"),
     ("MAS CANADELL, JOSEP Mª", "B.C.GRANOLLERS"),
@@ -161,6 +161,7 @@ TRASPASSOS = [
     ("SÁNCHEZ MARTÍNEZ, PASCUAL", "C.B.SANTS"),
     ("MERCADER BOSCH, JOSEP", "C.B.BANYOLES"),
     ("ROCHA VERA, JEFERSON", "C.B.MONFORTE"),
+    ("MARTÍN LIMA, MELCHOR", "S.B.LA GRAN PENYA"),
 ]
 
 
