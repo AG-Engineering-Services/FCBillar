@@ -1,9 +1,10 @@
 -- FCBillar cloud schema — calendari esportiu federatiu (pestanya «Calendari»).
 --
--- Origen: el PDF que publica la RFEB per temporada (`cal_rfeb_2627.pdf`), parsejat
--- per `fcbillar.calendari_fed` i pujat per `publish_calendari`. La FCB publica el
--- seu més tard cada any: quan ho faci, entrarà amb `font = 'FCB'` sense canviar
--- res d'aquestes taules.
+-- Origen: dos PDF per temporada, tots dos parsejats per `fcbillar.calendari_fed` i
+-- pujats per `publish_calendari`. El de la RFEB (`cal_rfeb_2627.pdf`) hi entra amb
+-- `font = 'RFEB'` i el de la FCB, que la federació catalana publica més tard, amb
+-- `font = 'FCB'`; d'aquest últim només se n'agafa la meitat catalana (`ambit =
+-- 'catala'`), perquè la resta és una còpia del calendari estatal.
 --
 -- Una fila per cel·la de la graella del PDF: setmana × (disciplina, àmbit, tipus).
 -- El PDF només concreta el CAP DE SETMANA, no el dia i hora exactes; `data_inici`

@@ -4025,11 +4025,12 @@ def publish_live_opens(
 def publish_calendari(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
-    """Puja el calendari esportiu federatiu (PDF de la RFEB) per a la pestanya web.
+    """Puja el calendari esportiu federatiu (PDF de la RFEB i de la FCB) per a la web.
 
-    Reemplaça per (font, temporada): la RFEB va publicant revisions on treu i mou
-    competicions, i un upsert sol deixaria les baixes penjades. La columna `raw`
-    (línies crues del PDF) es queda al PC: només serveix per auditar el parser.
+    Reemplaça per (font, temporada): les federacions van publicant revisions on
+    treuen i mouen competicions, i un upsert sol deixaria les baixes penjades. La
+    columna `raw` (línies crues del PDF) es queda al PC: només serveix per auditar
+    el parser.
     """
     prog: Progress = on_progress or (lambda level, msg: None)
     db_path = db_path or get_settings().db_path

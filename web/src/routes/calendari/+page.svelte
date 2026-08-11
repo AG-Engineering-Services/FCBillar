@@ -1,10 +1,11 @@
 <script lang="ts">
-	// Calendari esportiu federatiu, setmana a setmana. Font actual: el PDF de la
-	// RFEB (la FCB encara no ha publicat el seu de 26/27; quan ho faci hi entrarà
-	// com a font 'FCB' i sortirà a la mateixa llista).
+	// Calendari esportiu federatiu, setmana a setmana. Dues fonts a la mateixa
+	// llista: el PDF de la RFEB (estatal i internacional) i el de la FCB, del qual
+	// surten les competicions catalanes —lligues, campionats de Catalunya i opens—,
+	// que no són enlloc més.
 	//
-	// El PDF NO concreta dia ni hora: per a cada setmana diu què es juga aquell cap
-	// de setmana. Per això la unitat de la pàgina és la setmana, no el dia.
+	// Els PDF NO concreten dia ni hora: per a cada setmana diuen què es juga aquell
+	// cap de setmana. Per això la unitat de la pàgina és la setmana, no el dia.
 	import { onMount } from 'svelte';
 	import {
 		supabase,
@@ -34,6 +35,7 @@
 	];
 	const OPCIONS_AMBIT: [string, string][] = [
 		['tot', 'Tots'],
+		['catala', 'Català'],
 		['nacional', 'Estatal'],
 		['internacional', 'Internacional']
 	];
@@ -112,23 +114,37 @@
 	const recent = (a: CalendariRevisio, b: CalendariRevisio) =>
 		(b.ingested_at ?? '').localeCompare(a.ingested_at ?? '');
 
-	// Revisió que ha generat els esdeveniments que es mostren. Es demana
-	// `n_events > 0` perquè de la FCB en registrem la versió i la URL del PDF sense
-	// parsejar-lo: si no, la capçalera atribuiria els esdeveniments a la font
-	// equivocada.
-	const revisioVigent = $derived(
-		revisions.filter((r) => r.temporada === temporada && r.n_events > 0).sort(recent)[0] ?? null
-	);
-	// Calendari oficial de la FCB: pot existir com a PDF sense estar integrat.
-	const revisioFCB = $derived(
-		revisions.filter((r) => r.temporada === temporada && r.font === 'FCB').sort(recent)[0] ?? null
+	// Revisió vigent de CADA font: la llista barreja el calendari de la RFEB i el de
+	// la FCB, i totes dues es revisen pel seu compte. Es demana `n_events > 0`
+	// perquè de la FCB també se'n registra la versió que hi ha penjada al seu web
+	// encara que no s'hagi ingestat: si no, la capçalera atribuiria els
+	// esdeveniments a una revisió que no els ha generat.
+	const vigents = $derived.by(() => {
+		const per = new Map<string, CalendariRevisio>();
+		for (const r of revisions
+			.filter((r) => r.temporada === temporada && r.n_events > 0)
+			.sort(recent)) {
+			if (!per.has(r.font)) per.set(r.font, r);
+		}
+		return [...per.values()];
+	});
+	// Revisió del PDF de la FCB detectada al seu web però encara no integrada.
+	const fcbPendent = $derived(
+		revisions
+			.filter((r) => r.temporada === temporada && r.font === 'FCB' && !r.n_events)
+			.sort(recent)
+			.find((r) => !vigents.some((v) => v.font === 'FCB' && v.sha256 === r.sha256)) ?? null
 	);
 
 	// Els canvis es carreguen a part perquè depenen de la temporada triada: canviar
-	// de xip de temporada ha de portar els canvis d'aquella revisió.
+	// de xip de temporada ha de portar els canvis d'aquelles revisions. Els d'una
+	// primera ingesta no compten: quan una font encara no té revisió anterior, tot
+	// hi surt com a alta i «canvis» no vol dir res.
 	$effect(() => {
-		const r = revisioVigent;
-		if (!r) {
+		const rs = vigents.filter(
+			(r) => revisions.filter((x) => x.font === r.font && x.temporada === r.temporada && x.n_events).length > 1
+		);
+		if (!rs.length) {
 			canvis = [];
 			return;
 		}
@@ -136,9 +152,8 @@
 		supabase
 			.from('calendari_canvis')
 			.select('*')
-			.eq('font', r.font)
-			.eq('temporada', r.temporada)
-			.eq('sha256', r.sha256)
+			.eq('temporada', rs[0].temporada)
+			.in('sha256', rs.map((r) => r.sha256))
 			.order('ord')
 			.range(0, 999)
 			.then(({ data }) => {
@@ -316,6 +331,7 @@
 	};
 	const ETIQUETA_TIPUS: Record<string, string> = { equips: 'Equips', individual: 'Individual' };
 	const ETIQUETA_AMBIT: Record<string, string> = {
+		catala: 'Català',
 		nacional: 'Estatal',
 		internacional: 'Internacional',
 		mixt: 'Estatal/Int.'
@@ -336,12 +352,12 @@
 <h1 class="mb-1 text-lg font-bold">Calendari</h1>
 <p class="mb-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
 	Què es juga cada setmana, per equips i individual.
-	{#if revisioVigent}
-		Font: calendari <b>{revisioVigent.font}</b>{#if revisioVigent.versio}&nbsp;{revisioVigent.versio}{/if}{#if revisioVigent.data_versio}, actualitzat per la federació el {fmtCurt(
-				revisioVigent.data_versio
-			)}{/if}{#if revisioVigent.last_checked_at} · comprovat el {fmtCurt(
-				revisioVigent.last_checked_at.slice(0, 10)
-			)}{/if}.
+	{#if vigents.length}
+		Fonts:
+		{#each vigents as r, i (r.font + r.sha256)}{#if i}&nbsp;· {/if}calendari
+			<b>{r.font}</b>{#if r.versio}&nbsp;{r.versio}{/if}{#if r.data_versio}, del {fmtCurt(
+					r.data_versio
+				)}{/if}{/each}.
 	{/if}
 </p>
 
@@ -584,7 +600,7 @@
 				<ul
 					class="mt-1.5 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
 				>
-					{#each canvis as c (c.ord)}
+					{#each canvis as c (c.font + c.sha256 + c.ord)}
 						<li
 							class="border-b border-slate-100 px-3 py-2 text-xs last:border-0 dark:border-slate-800"
 						>
@@ -623,22 +639,17 @@
 	{/if}
 
 	<p class="px-1 py-4 text-center text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-		El calendari federatiu concreta el cap de setmana, no el dia ni l'hora, i pot canviar: el PDF
-		d'origen es torna a comprovar cada dia.
-		{#if revisioFCB}
-			La Federació Catalana té publicat el seu calendari
-			{revisioFCB.versio ?? ''} en
-			<a href={revisioFCB.url ?? '#'} target="_blank" rel="noopener" class="underline">PDF</a>;
-			encara no està integrat en aquesta llista.
-		{:else}
-			La Federació Catalana encara no ha publicat el seu calendari d'aquesta temporada; quan ho
-			faci s'hi afegirà.
+		El calendari federatiu concreta el cap de setmana, no el dia ni l'hora, i pot canviar: els PDF
+		d'origen es tornen a comprovar cada dia. Les competicions catalanes surten del calendari de la
+		FCB i les estatals i internacionals, del de la RFEB.
+		{#if fcbPendent}
+			La Federació Catalana ha penjat al seu web una revisió més nova ({fcbPendent.versio ?? 's/n'})
+			que encara no s'ha integrat:
+			<a href={fcbPendent.url ?? '#'} target="_blank" rel="noopener" class="underline">PDF</a>.
 		{/if}
-		{#if revisioVigent?.url}
-			<a href={revisioVigent.url} target="_blank" rel="noopener" class="underline"
-				>PDF de la {revisioVigent.font}</a
-			>.
-		{/if}
+		{#each vigents.filter((r) => r.url) as r (r.font + r.sha256)}
+			<a href={r.url} target="_blank" rel="noopener" class="underline">PDF de la {r.font}</a>.
+		{/each}
 	</p>
 {/if}
 

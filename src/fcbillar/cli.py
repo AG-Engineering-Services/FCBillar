@@ -1526,16 +1526,23 @@ def ingest_calendari_cmd(
     url: str = typer.Option(None, "--url", help="URL del PDF (per defecte, la RFEB de la temporada en curs)."),
     fitxer: str = typer.Option(None, "--fitxer", help="Llegeix un PDF local en lloc de baixar-lo."),
     font: str = typer.Option("RFEB", "--font", help="Federació que publica el calendari: RFEB | FCB."),
+    versio: str = typer.Option(None, "--versio", help="Revisió del PDF de la FCB ('V-1'): no la diu enlloc."),
     force: bool = typer.Option(False, "--force", help="Reparseja encara que el PDF no hagi canviat."),
 ) -> None:
     """Ingesta el calendari esportiu federatiu (PDF) i n'apunta els canvis.
 
-    Pensat per executar-se periòdicament: la RFEB va publicant revisions del
-    mateix fitxer. Si no ha canviat res, no fa feina; si ha canviat, llista què
+    Pensat per executar-se periòdicament: les federacions van publicant revisions
+    del mateix fitxer. Si no ha canviat res, no fa feina; si ha canviat, llista què
     s'ha mogut respecte de la revisió anterior.
 
     Sense `--url` ni `--fitxer` prova la temporada en curs I la següent: la RFEB
     publica la del curs vinent al juliol, molt abans que se n'acabi l'actual.
+
+    El de la FCB va a part, perquè la graella és una altra i perquè encara no en
+    tenim URL estable. Amb el PDF a mà:
+
+        fcbillar ingest-calendari --font FCB --versio V-1 \\
+            --fitxer "CALENDARI FCB 2026-27 V-1.pdf" --url <on és publicat>
     """
     from pathlib import Path
 
@@ -1544,7 +1551,9 @@ def ingest_calendari_cmd(
     from fcbillar.calendari_fed import ingest_calendari, rfeb_url, temporada_actual
 
     if fitxer:
-        feines: list[tuple[str | None, bytes | None]] = [(None, Path(fitxer).read_bytes())]
+        # `--url` continua servint amb `--fitxer`: no s'hi baixa res, però queda
+        # desat d'on surt el PDF i la web hi pot enllaçar.
+        feines: list[tuple[str | None, bytes | None]] = [(url, Path(fitxer).read_bytes())]
     elif url:
         feines = [(url, None)]
     else:
@@ -1555,7 +1564,12 @@ def ingest_calendari_cmd(
     for u, dades in feines:
         try:
             res = ingest_calendari(
-                get_settings().db_path, url=u, font=font, force=force, pdf_bytes=dades
+                get_settings().db_path,
+                url=u,
+                font=font,
+                force=force,
+                pdf_bytes=dades,
+                versio=versio,
             )
         except httpx.HTTPStatusError as exc:
             if exc.response.status_code == 404 and len(feines) > 1:
@@ -1593,10 +1607,10 @@ def ingest_calendari_cmd(
             console.print(taula)
             if len(canvis) > 50:
                 console.print(f"[dim]…i {len(canvis) - 50} canvis més.[/]")
-    # Font FCB: només detecció. La graella de la FCB és diferent de la de la RFEB i
-    # de la temporada vinent encara no n'hi ha res publicat (/media/2026-2027 → 404);
-    # el que fem és apuntar quina versió hi ha i la seva URL, perquè la web pugui
-    # enllaçar el PDF oficial i avisar el dia que el pengin. Mai fatal.
+    # Font FCB: aquí, només detecció. Serveix per saber quan la federació catalana
+    # penja una revisió nova al seu web i deixar-ne apuntada la URL; ingestar-la és
+    # un pas a part (`--font FCB --fitxer`), perquè fins ara el PDF ha arribat abans
+    # per altres vies que no pas al /media/ de fcbillar.cat. Mai fatal.
     if not fitxer and not url:
         try:
             from fcbillar.calendari_fed import registra_fcb

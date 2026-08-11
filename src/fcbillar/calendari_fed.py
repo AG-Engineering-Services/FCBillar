@@ -278,8 +278,17 @@ def _dates(files: list[tuple[str, int]], any_inici: int) -> list[dt.date]:
     return candidats[0]
 
 
-def parse_calendari(pdf_bytes: bytes, font: str = FONT_RFEB) -> Calendari:
-    """Llegeix el PDF del calendari federatiu i en treu els esdeveniments."""
+def parse_calendari(
+    pdf_bytes: bytes, font: str = FONT_RFEB, versio: str | None = None
+) -> Calendari:
+    """Llegeix el PDF del calendari federatiu i en treu els esdeveniments.
+
+    Cada federació té la seva graella: `parse_calendari_fcb` per a la catalana i
+    la resta d'aquesta funció per a l'estatal.
+    """
+    if font == FONT_FCB:
+        return parse_calendari_fcb(pdf_bytes, versio=versio)
+
     import pdfplumber
 
     sha = hashlib.sha256(pdf_bytes).hexdigest()
@@ -469,22 +478,9 @@ def fetch_pdf(url: str, etag: str | None = None) -> tuple[bytes | None, str | No
 # PDF vigent surt al **layout de totes les pàgines** de fcbillar.cat, així que es
 # descobreix llegint qualsevol pàgina.
 #
-# `/media/2026-2027` encara respon 404: la FCB no ha publicat res de la temporada
-# vinent. El codi de sota ho detecta i ho deixa apuntat sense fallar, de manera que
-# el dia que el pengin la web ho pot dir i enllaçar-hi.
-#
-# GEOMETRIA DEL PDF DE LA FCB (mesurada sobre la 25/26 V-9, per si s'ha de
-# parsejar el dia que publiquin la 26/27):
-#   - A4 horitzontal, 4 pàgines, graella uniforme.
-#   - Línies verticals a x = 51,2 · 89,4 i després cada 55,1pt fins a 750,5:
-#     columna DATA + 12 columnes de contingut.
-#   - Una fila per DIA (no per setmana com la RFEB): «13-sep. SAB», «14-sep. DOM»,
-#     alçada ~8,9pt. Molt més fi que el calendari estatal.
-#   - Blocs de columnes segons la capçalera: lligues catalanes (Honor/1ª/2ª/3ª | 4a),
-#     campionats de Catalunya (prèvies | qualificació i finals), opens catalans,
-#     lliga nacional, campionats d'Espanya, d'Europa, del Món i pool.
-#   - Complica el parseig: cel·les fusionades horitzontalment i text ajustat que
-#     s'entrellaça en llegir-lo per coordenada x; cal agrupar per `top` abans.
+# Mentre la FCB no el penja al seu web, el calendari pot arribar per una altra via
+# (un PDF compartit); per això `ingest_calendari` accepta `pdf_bytes` i `url`
+# solts. El descobriment de sota segueix servint per saber quan el publiquen.
 
 _RE_MEDIA_CAL = re.compile(
     r"/media/(\d{4}-\d{4})/CALENDARIS/([^\"'>]+?\.pdf)", re.IGNORECASE
@@ -539,11 +535,9 @@ def descobreix_fcb(html: str | None = None) -> list[CalendariFCB]:
 def registra_fcb(db_path, html: str | None = None) -> dict:
     """Apunta a `calendari_versions` quins calendaris de la FCB hi ha publicats.
 
-    NO en parseja els esdeveniments: la graella de la FCB és diferent de la de la
-    RFEB i el fitxer de la temporada vinent encara no existeix. El que sí que fa,
-    i és el que interessa ara, és deixar constància de la versió vigent i la seva
-    URL, de manera que la web pugui enllaçar el PDF oficial i avisar el dia que la
-    federació publiqui la temporada nova.
+    NO en parseja els esdeveniments —d'això se n'encarrega `ingest_calendari` amb
+    `font='FCB'`—: aquí només es deixa constància de quina revisió hi ha penjada i
+    on, que és el que permet adonar-se que la federació n'ha tret una de nova.
     """
     from fcbillar.db.migrations import ensure_schema
 
@@ -582,6 +576,371 @@ def registra_fcb(db_path, html: str | None = None) -> dict:
         )
         nous += 1
     return {"trobats": len(trobats), "nous": nous, "calendaris": trobats}
+
+
+# --- Font FCB: parser de la graella -----------------------------------------
+#
+# La graella catalana no s'assembla gens a la de la RFEB i té parser propi.
+#
+# ## Com és el PDF
+#
+# A4 horitzontal, quatre pàgines. Les DUES PRIMERES són el calendari; les altres
+# dues són els annexos de distàncies i reglament (no tenen files de dia i el
+# parser les descarta sol). La graella és:
+#
+#   - Una fila per DIA de competició —«29-ago. SAB», «30-ago. DOM»— de 8,9pt, i
+#     no una per setmana com la RFEB. Dins d'una fila hi caben dues línies de text.
+#   - Columna DATA + 11 columnes de contingut de 55,1pt, partides en dos blocs per
+#     la capçalera: «CALENDARI F.C.B.» (les 6 primeres) i «CALENDARI
+#     R.F.E.B.-C.E.B.-U.M.B.» (les 5 últimes).
+#
+# ## Què se n'ingesta i què no
+#
+# NOMÉS la meitat catalana. La dreta ja entra —i millor— per la font RFEB:
+# ingestar-la també duplicaria cada competició estatal a la pestanya, i amb el
+# text retallat d'una còpia de segona mà. En queden fora els campionats catalans
+# de pool i snooker, que la FCB escriu a la columna de pool de la meitat estatal.
+#
+# ## Carrils, no categories
+#
+# Les columnes de la meitat catalana funcionen com a CARRILS: quan una setmana hi
+# ha més actes que columnes, la FCB els escriu a la del costat si és buida (el
+# 19-9 hi ha una pre-prèvia a la columna de finals). Per això els carrils agrupen
+# columnes i el que diu de què va un acte és el seu TEXT, no la columna on ha
+# acabat.
+#
+# ## Sense seu
+#
+# A diferència de la RFEB, aquí no se'n separa la localitat: a la columna d'opens
+# el que sembla una seu sol ser part del nom del torneig («Pre-prèvies III Open
+# Costa» + «Daurada», «…XIII Open Les» + «Santes de Mataró»). Partir-ho trencaria
+# més noms dels que endreçaria, i el text sencer ja es llegeix bé.
+
+AMBIT_CATALA = "catala"
+
+_MESOS_FCB = {
+    "ene": 1, "feb": 2, "mar": 3, "abr": 4, "may": 5, "jun": 6,
+    "jul": 7, "ago": 8, "sep": 9, "oct": 10, "nov": 11, "dic": 12,
+}
+_DIES_FCB = {"LUN": 0, "MAR": 1, "MIE": 2, "JUE": 3, "VIE": 4, "SAB": 5, "DOM": 6}
+
+
+@dataclass(frozen=True)
+class CarrilFCB:
+    """Un bloc de columnes de la meitat catalana de la graella."""
+
+    columnes: tuple[int, ...]  # índexs de columna de contingut, base 0
+    etiqueta: str  # títol quan la setmana es reparteix per dies
+    grup: str
+    tipus: str
+
+
+CARRILS_FCB: tuple[CarrilFCB, ...] = (
+    CarrilFCB((0,), "Lligues catalanes", "Lligues catalanes i Copa Catalana", "equips"),
+    CarrilFCB((1, 2, 3, 4), "Campionats de Catalunya", "Campionats de Catalunya", "individual"),
+    CarrilFCB((5,), "Opens catalans", "Opens catalans", "individual"),
+)
+# Columnes que cobreixen els carrils: ha de quadrar amb l'amplada que la capçalera
+# «CALENDARI F.C.B.» diu que ocupa, o el mapatge s'ha desplaçat.
+_N_COL_FCB = sum(len(c.columnes) for c in CARRILS_FCB)
+
+_RE_FILA_FCB = re.compile(r"^(\d{1,2})-(\w{3})\.?\s*(\w{3})$")
+_RE_TEMPORADA_FCB = re.compile(r"TEMPORADA\s+(\d{4})\s*/\s*(\d{2,4})")
+_RE_CAPCALERA_FCB = re.compile(r"CALENDARI\s+F\.?C\.?B\.?", re.IGNORECASE)
+_RE_DATA_META = re.compile(r"D:(\d{4})(\d{2})(\d{2})")
+
+# Un acte propi es reconeix perquè es diu a si mateix què és. Serveix per destriar
+# les dues línies d'una cel·la que continua al diumenge («Final Quadre 47/2» +
+# «3ª Div.») del cas on dissabte i diumenge es juguen coses diferents
+# («2ª jornada LL3B» dissabte, «1a jornada 4M» diumenge).
+_RE_ACTE_FCB = re.compile(
+    r"jornada|prèvi|previ|final|open|copa|campionat|cto\b|torneig|fase|"
+    r"qualificaci|promoci|play\s*-?\s*off|biathló|reunió",
+    re.IGNORECASE,
+)
+_FESTIUS_FCB = ("NADAL", "SETMANA SANTA", "CAP D'ANY")
+
+_TOL_LINIA_FCB = 1.5  # pt; dos caràcters són de la mateixa línia de text
+_ESPAI_FCB = 0.4  # pt; separació entre caràcters que ja no és dins d'una paraula
+_GAP_CELLA_FCB = 5.0  # pt; separació entre paraules que ja és un canvi de cel·la
+# Marge per damunt de la data amb què encara es considera de la mateixa fila (el
+# text de la cel·la puja fins a 2,5pt per sobre del rètol del dia) i alçada útil
+# de la fila (la segona ratlla baixa fins a 4,9pt per sota). Entremig hi ha prou
+# folgança: les files fan 8,9pt.
+_PUJADA_FILA_FCB = 2.7
+_ALCADA_FILA_FCB = 6.0
+
+
+def _linies_fcb(page) -> list[tuple[float, list[tuple[float, float, str]]]]:
+    """Línies de text de la pàgina, cadascuna partida en cel·les: (top, blocs).
+
+    Es reconstrueix a partir dels CARÀCTERS i no de `extract_words()`: dins d'una
+    fila de 8,9pt hi caben dues ratlles separades per 3,3pt, i l'agrupació per
+    defecte de pdfplumber, que tolera 3pt de desnivell, les barreja i deixa les
+    paraules de les dues esmicolades lletra a lletra.
+    """
+    linies: list[tuple[float, list]] = []
+    for c in sorted(page.chars, key=lambda c: (c["top"], c["x0"])):
+        if c["text"].isspace():
+            continue  # el farciment de justificació; els espais es dedueixen dels buits
+        if linies and c["top"] - linies[-1][0] <= _TOL_LINIA_FCB:
+            linies[-1][1].append(c)
+        else:
+            linies.append((c["top"], [c]))
+
+    out: list[tuple[float, list[tuple[float, float, str]]]] = []
+    for top, chars in linies:
+        chars.sort(key=lambda c: c["x0"])
+        blocs: list[list] = [[chars[0]]]
+        for a, b in pairwise(chars):
+            blocs.append([b]) if b["x0"] - a["x1"] > _GAP_CELLA_FCB else blocs[-1].append(b)
+        out.append(
+            (top, [(bl[0]["x0"], bl[-1]["x1"], _text_fcb(bl)) for bl in blocs])
+        )
+    return out
+
+
+def _text_fcb(chars: list) -> str:
+    """Text d'un bloc: els espais surten dels buits entre caràcters."""
+    parts = [chars[0]["text"]]
+    for a, b in pairwise(chars):
+        if b["x0"] - a["x1"] > _ESPAI_FCB:
+            parts.append(" ")
+        parts.append(b["text"])
+    return "".join(parts).strip()
+
+
+def _columnes_fcb(pdf) -> list[float]:
+    """Línies verticals de la graella, comunes a les pàgines de calendari."""
+    xs: set[float] = set()
+    for page in pdf.pages:
+        for e in page.edges:
+            if e["orientation"] == "v" and (e["y1"] - e["y0"]) >= 15:
+                xs.add(round(e["x0"], 1))
+    out: list[float] = []
+    for x in sorted(xs):
+        if not out or x - out[-1] > 2.5:
+            out.append(x)
+    return out
+
+
+def _talla_meitat_fcb(page, xs: list[float]) -> int:
+    """Quantes columnes de contingut ocupa el bloc «CALENDARI F.C.B.».
+
+    Es dedueix del centre de la capçalera del bloc en comptes de fixar-lo: si la
+    FCB hi afegeix o en treu una columna, això ho detecta en lloc d'assignar
+    silenciosament els actes catalans al carril equivocat.
+    """
+    for _, blocs in _linies_fcb(page):
+        # La capçalera del bloc de la dreta també comença per «CALENDARI»: el
+        # rètol de cada meitat és un bloc de text sencer i prou.
+        for x0, x1, text in blocs:
+            if not _RE_CAPCALERA_FCB.match(text):
+                continue
+            centre = (x0 + x1) / 2
+            n = min(range(2, len(xs)), key=lambda k: abs((xs[1] + xs[k]) / 2 - centre))
+            if abs((xs[1] + xs[n]) / 2 - centre) > 8.0:
+                break
+            return n - 1
+    raise ValueError(
+        "No s'ha pogut situar la capçalera «CALENDARI F.C.B.»: el PDF de la "
+        "federació catalana ha canviat de format."
+    )
+
+
+def _sense_accents(text: str) -> str:
+    """En majúscules i sense accents: el PDF escriu tant «SAB» com «SÁB»."""
+    import unicodedata
+
+    despullat = unicodedata.normalize("NFKD", text)
+    return "".join(c for c in despullat if not unicodedata.combining(c)).upper()
+
+
+def _data_fcb(dia: int, mes: str, any_inici: int) -> dt.date:
+    """Data real d'una fila. El PDF escriu el mes en castellà i no l'any: la
+    temporada va d'agost a juliol, i això el determina sense ambigüitat."""
+    m = _MESOS_FCB.get(mes.lower())
+    if m is None:
+        raise ValueError(f"Mes desconegut a la graella de la FCB: {mes!r}")
+    return dt.date(any_inici if m >= 8 else any_inici + 1, m, dia)
+
+
+def _cella_fcb(linies: list[tuple[dt.date, str]]) -> tuple[str, str | None, str | None]:
+    """Text d'una cel·la: (tot junt, dissabte, diumenge).
+
+    Les dues línies d'una cel·la solen ser un sol nom que no cabia en una ratlla;
+    només quan la del diumenge s'anomena a si mateixa un acte és que la setmana es
+    reparteix de debò entre els dos dies.
+    """
+    ds = [t for d, t in linies if d.weekday() == 5]
+    dg = [t for d, t in linies if d.weekday() != 5]
+    tot = " ".join(t for _, t in linies)
+    if ds and dg and _RE_ACTE_FCB.search(" ".join(dg)):
+        return tot, " ".join(ds), " ".join(dg)
+    return tot, None, None
+
+
+def parse_calendari_fcb(pdf_bytes: bytes, versio: str | None = None) -> Calendari:
+    """Llegeix la meitat catalana del calendari de la FCB."""
+    import pdfplumber
+
+    sha = hashlib.sha256(pdf_bytes).hexdigest()
+    # cel·les[(setmana, carril)][columna] = línies (data, text), en ordre de lectura
+    celles: dict[tuple[dt.date, int], dict[int, list[tuple[dt.date, str]]]] = {}
+    festius: list[tuple[dt.date, dt.date, str]] = []
+
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        capcalera = pdf.pages[0].extract_text() or ""
+        m = _RE_TEMPORADA_FCB.search(capcalera)
+        if not m:
+            raise ValueError("No s'ha trobat «TEMPORADA aaaa/aa» al calendari de la FCB.")
+        any_inici = int(m.group(1))
+        fi = m.group(2)
+        temporada = f"{any_inici}/{fi if len(fi) == 4 else str(any_inici + 1)[:2] + fi}"
+        data_versio = None
+        if md := _RE_DATA_META.match(str(pdf.metadata.get("CreationDate") or "")):
+            data_versio = dt.date(int(md.group(1)), int(md.group(2)), int(md.group(3)))
+
+        xs = _columnes_fcb(pdf)
+        n_cat = _talla_meitat_fcb(pdf.pages[0], xs)
+        if n_cat != _N_COL_FCB:
+            raise ValueError(
+                f"El bloc «CALENDARI F.C.B.» ocupa {n_cat} columnes i els carrils "
+                f"en cobreixen {_N_COL_FCB}: cal revisar CARRILS_FCB."
+            )
+        de_carril = {c: i for i, car in enumerate(CARRILS_FCB) for c in car.columnes}
+
+        for page in pdf.pages:
+            linies = _linies_fcb(page)
+            # Files de dia, del rètol de la columna DATA. Les pàgines d'annexos no
+            # en tenen cap i queden fora soles.
+            files: list[tuple[float, dt.date]] = []
+            for top, blocs in linies:
+                # El rètol («24-jul.» i «SÁB») va prou separat per caure en dos blocs.
+                rotul = " ".join(b[2] for b in blocs if b[1] <= xs[1] + 1)
+                if not (mf := _RE_FILA_FCB.match(rotul)):
+                    continue
+                data = _data_fcb(int(mf.group(1)), mf.group(2), any_inici)
+                esperat = _DIES_FCB.get(_sense_accents(mf.group(3)))
+                if esperat is None:
+                    raise ValueError(f"Dia de la setmana desconegut: {mf.group(3)!r}")
+                if data.weekday() != esperat:
+                    raise ValueError(
+                        f"La fila «{rotul}» cau en dia {data.weekday()} i el PDF "
+                        f"diu {mf.group(3)}: l'any de la temporada no quadra."
+                    )
+                files.append((top, data))
+            if not files:
+                continue
+
+            for top, blocs in linies:
+                # Fila a què pertany la línia: l'última que comença per damunt seu,
+                # amb el marge que el text de la cel·la puja sobre el rètol del dia.
+                j = max((k for k, (t, _) in enumerate(files) if t <= top + _PUJADA_FILA_FCB), default=None)
+                fora = j is None or top - files[j][0] > _ALCADA_FILA_FCB
+                for x0, x1, text in blocs:
+                    if x1 <= xs[1] + 1:
+                        continue  # la columna DATA
+                    if len(text) < 2:
+                        # Caràcter solt en una cel·la que no en té cap més: el full
+                        # d'Excel d'origen n'arrossega algun (una «a» perduda a la
+                        # columna de prèvies el 6-9) i no vol dir res.
+                        continue
+                    if fora:
+                        # Cap fila de dia: és el rètol d'un període sense competició,
+                        # que ocupa les setmanes que la graella es salta.
+                        anterior = files[j][1] if j is not None else None
+                        seguent = next((d for t, d in files if t > top), None)
+                        if anterior and seguent:
+                            festius.append(
+                                (anterior + dt.timedelta(days=1), seguent - dt.timedelta(days=1), text)
+                            )
+                        continue
+                    # Columna amb què la cel·la solapa més: les fusionades («REUNIÓ
+                    # DELEGATS ESPORTIUS», «SETMANA CATALANA») en travessen unes quantes.
+                    col = max(
+                        range(len(xs) - 2),
+                        key=lambda k: min(x1, xs[k + 2]) - max(x0, xs[k + 1]),
+                    )
+                    if col not in de_carril:
+                        continue  # meitat estatal: ja entra per la font RFEB
+                    data = files[j][1]
+                    setmana = data - dt.timedelta(days=data.weekday())
+                    cel = celles.setdefault((setmana, de_carril[col]), {})
+                    cel.setdefault(col, []).append((data, text))
+
+    out: list[Esdeveniment] = []
+    for (setmana, icar), per_columna in sorted(celles.items()):
+        carril = CARRILS_FCB[icar]
+        totes = [ln for c in sorted(per_columna) for ln in per_columna[c]]
+        parts, ds_parts, dg_parts = [], [], []
+        for c in sorted(per_columna):
+            tot, ds, dg = _cella_fcb(per_columna[c])
+            parts.append(tot)
+            if ds or dg:
+                ds_parts += [ds] if ds else []
+                dg_parts += [dg] if dg else []
+            elif per_columna[c][0][0].weekday() == 5:
+                ds_parts.append(tot)
+            else:
+                dg_parts.append(tot)
+        titol = " · ".join(parts)
+        reparteix = any(_cella_fcb(v)[1] for v in per_columna.values())
+        es_festiu = titol.upper().startswith(_FESTIUS_FCB)
+        out.append(
+            Esdeveniment(
+                font=FONT_FCB,
+                temporada=temporada,
+                setmana=setmana,
+                data_inici=min(d for d, _ in totes),
+                data_fi=max(d for d, _ in totes),
+                disciplina="carambola",
+                ambit="tot" if es_festiu else AMBIT_CATALA,
+                grup="" if es_festiu else carril.grup,
+                tipus=None if es_festiu else carril.tipus,
+                titol=carril.etiqueta if reparteix else titol,
+                seu=None,
+                dissabte=" · ".join(ds_parts) if reparteix else None,
+                diumenge=" · ".join(dg_parts) if reparteix else None,
+                col_span=len(per_columna),
+                raw="\n".join(f"{d.isoformat()} {t}" for d, t in totes),
+            )
+        )
+
+    # Nadal i companyia: no cauen en cap fila perquè la graella salta les setmanes
+    # que no es juga. Van amb `ambit = 'tot'`, com els de la RFEB, i la web no els
+    # llista: ja ho diu prou no havent-hi res aquelles setmanes.
+    for inici, fi_f, text in festius:
+        setmana = inici - dt.timedelta(days=inici.weekday())
+        out.append(
+            Esdeveniment(
+                font=FONT_FCB,
+                temporada=temporada,
+                setmana=setmana,
+                data_inici=inici,
+                data_fi=fi_f,
+                disciplina="carambola",
+                ambit="tot",
+                grup="",
+                tipus=None,
+                titol=text,
+                seu=None,
+                dissabte=None,
+                diumenge=None,
+                col_span=len(CARRILS_FCB),
+                raw=f"{inici.isoformat()}/{fi_f.isoformat()} {text}",
+            )
+        )
+
+    out.sort(key=lambda e: (e.setmana, e.grup))
+    return Calendari(
+        font=FONT_FCB,
+        temporada=temporada,
+        versio=versio,
+        data_versio=data_versio,
+        sha256=sha,
+        esdeveniments=out,
+    )
 
 
 # --- Comparació entre revisions --------------------------------------------
@@ -699,6 +1058,7 @@ def ingest_calendari(
     font: str = FONT_RFEB,
     force: bool = False,
     pdf_bytes: bytes | None = None,
+    versio: str | None = None,
 ) -> dict:
     """Baixa (o rep) el PDF del calendari federatiu, el parseja i el desa.
 
@@ -728,7 +1088,7 @@ def ingest_calendari(
     else:
         etag = last_mod = None
 
-    cal = parse_calendari(pdf_bytes, font=font)
+    cal = parse_calendari(pdf_bytes, font=font, versio=versio)
     ja_hi_es = conn.execute(
         "SELECT id FROM calendari_versions WHERE font = ? AND temporada = ? AND sha256 = ?",
         (font, cal.temporada, cal.sha256),

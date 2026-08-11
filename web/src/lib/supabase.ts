@@ -337,17 +337,18 @@ export interface OpenClassification {
 	serie_max: number | null;
 }
 
-// Calendari esportiu federatiu (taules fcbillar.calendari_*). Origen: el PDF que
-// publica la RFEB per temporada, parsejat per `fcbillar.calendari_fed`. El PDF
-// només concreta el CAP DE SETMANA: `setmana` és el dilluns i data_inici/data_fi
-// el rang de dies que la cel·la ocupa a la graella.
+// Calendari esportiu federatiu (taules fcbillar.calendari_*). Dues fonts, totes
+// dues parsejades per `fcbillar.calendari_fed`: el PDF de la RFEB (competicions
+// estatals i internacionals) i el de la FCB, del qual només se n'agafa la meitat
+// catalana perquè la resta és una còpia del de la RFEB. Cap dels dos no concreta
+// el dia: `setmana` és el dilluns i data_inici/data_fi el rang que la cel·la ocupa.
 export interface CalendariEvent {
 	font: string; // 'RFEB' | 'FCB'
 	temporada: string; // '2026/2027'
 	setmana: string; // ISO, dilluns
 	disciplina: string; // carambola | pool | snooker
-	ambit: string; // nacional | internacional | mixt | tot
-	grup: string; // 'Tres bandes' | 'Jocs de sèrie…' | ''
+	ambit: string; // catala | nacional | internacional | mixt | tot
+	grup: string; // 'Tres bandes' | 'Campionats de Catalunya' | …
 	tipus: string; // equips | individual | ''
 	data_inici: string;
 	data_fi: string;

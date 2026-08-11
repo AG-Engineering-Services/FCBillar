@@ -1,9 +1,10 @@
-"""Tests del parser del calendari esportiu federatiu (PDF de la RFEB).
+"""Tests dels parsers del calendari esportiu federatiu (PDF de la RFEB i de la FCB).
 
-El fixture és el PDF real de la temporada 2026/2027 (V.1, 28/07/2026). Els casos
-comproven les tres coses que poden trencar-se en silenci quan la federació torna a
-publicar el fitxer: la graella de columnes, la derivació de dates (el PDF no
-escriu l'any) i la distinció entre nom de competició i seu.
+Els fixtures són els PDF reals de la temporada 2026/2027 (RFEB V.1 del 28/07/2026;
+FCB V-1 del 07/08/2026). Els casos comproven les coses que poden trencar-se en
+silenci quan una federació torna a publicar el fitxer: la graella de columnes, la
+derivació de dates (cap dels dos PDF no escriu l'any) i, a la RFEB, la distinció
+entre nom de competició i seu.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from pathlib import Path
 import pytest
 
 from fcbillar.calendari_fed import (
+    CARRILS_FCB,
     COLUMNES,
     Esdeveniment,
     _es_seu,
@@ -21,16 +23,23 @@ from fcbillar.calendari_fed import (
     diff,
     ingest_calendari,
     parse_calendari,
+    parse_calendari_fcb,
     rfeb_url,
     temporada_actual,
 )
 
 FIXTURE = Path(__file__).parent / "fixtures" / "cal_rfeb_2627.pdf"
+FIXTURE_FCB = Path(__file__).parent / "fixtures" / "cal_fcb_2627_v1.pdf"
 
 
 @pytest.fixture(scope="module")
 def cal():
     return parse_calendari(FIXTURE.read_bytes())
+
+
+@pytest.fixture(scope="module")
+def cal_fcb():
+    return parse_calendari_fcb(FIXTURE_FCB.read_bytes(), versio="V-1")
 
 
 def test_capcalera(cal):
@@ -230,6 +239,147 @@ def test_rfeb_url(any_inici, url):
 )
 def test_temporada_actual(avui, esperat):
     assert temporada_actual(avui) == esperat
+
+
+# --- Calendari de la FCB ----------------------------------------------------
+
+
+def test_fcb_capcalera(cal_fcb):
+    """La temporada s'escriu «2026/27» i s'ha de normalitzar a la mateixa forma
+    que la RFEB, o la web no ajuntaria les dues fonts en una sola temporada."""
+    assert cal_fcb.font == "FCB"
+    assert cal_fcb.temporada == "2026/2027"
+    assert cal_fcb.versio == "V-1"
+    # El PDF no diu la revisió enlloc: la data surt de quan es va generar.
+    assert cal_fcb.data_versio == dt.date(2026, 8, 7)
+
+
+def test_fcb_nomes_la_meitat_catalana(cal_fcb):
+    """De la meitat estatal del PDF no se n'ingesta res: ja entra per la RFEB."""
+    carrils = {c.grup for c in CARRILS_FCB}
+    for e in cal_fcb.esdeveniments:
+        assert e.disciplina == "carambola"
+        if e.ambit == "tot":  # Nadal, Setmana Santa
+            continue
+        assert e.ambit == "catala"
+        assert e.grup in carrils
+
+
+def test_fcb_tots_els_carrils_representats(cal_fcb):
+    vistos = {e.grup for e in cal_fcb.esdeveniments}
+    for c in CARRILS_FCB:
+        assert c.grup in vistos, f"cap esdeveniment al carril {c.grup}"
+
+
+def test_fcb_dates_dins_la_setmana(cal_fcb):
+    """Cada acte cau dins la seva setmana. Els festius no: cobreixen justament les
+    setmanes que la graella se salta, i per això en poden ocupar més d'una."""
+    for e in cal_fcb.esdeveniments:
+        assert e.setmana.weekday() == 0
+        assert e.setmana <= e.data_inici <= e.data_fi
+        if e.ambit != "tot":
+            assert e.data_fi <= e.setmana + dt.timedelta(days=6)
+
+
+def test_fcb_clau_unica(cal_fcb):
+    """La clau natural és la clau primària de `calendari_events`: si dos carrils
+    xoquessin, la ingesta en perdria un sense dir res."""
+    claus = [e.clau() for e in cal_fcb.esdeveniments]
+    assert len(claus) == len(set(claus))
+
+
+def test_fcb_lliga_completa(cal_fcb):
+    """Les 14 jornades de la Lliga 3 Bandes i les 14 de la de 4 Modalitats hi han
+    de ser totes: si el parser perdés una fila, es notaria aquí i enlloc més."""
+    text = " ".join(
+        " ".join(p for p in (e.titol, e.dissabte, e.diumenge) if p)
+        for e in cal_fcb.esdeveniments
+        if e.tipus == "equips"
+    )
+    for n in range(1, 15):
+        assert f"{n}ª jornada LL3B" in text, f"falta la jornada {n} de la LL3B"
+    assert "FINALS LLIGA 3 BANDES" in text
+    assert "FINAL COPA" in text
+
+
+def test_fcb_cella_que_continua_al_diumenge(cal_fcb):
+    """«Final Quadre 47/2» (ds) + «3ª Div.» (dg) és un sol acte partit en dues
+    ratlles, no dues coses diferents."""
+    e = next(
+        x
+        for x in cal_fcb.esdeveniments
+        if x.setmana == dt.date(2026, 11, 30) and x.grup == "Campionats de Catalunya"
+    )
+    assert e.titol == "Final Quadre 47/2 3ª Div."
+    assert e.dissabte is None and e.diumenge is None
+
+
+def test_fcb_setmana_repartida_per_dies(cal_fcb):
+    """Quan cada dia es juga una cosa, el títol passa a ser el del carril i el
+    detall va al dia que toca."""
+    e = next(
+        x
+        for x in cal_fcb.esdeveniments
+        if x.setmana == dt.date(2026, 10, 5) and x.tipus == "equips"
+    )
+    assert e.titol == "Lligues catalanes"
+    assert e.dissabte == "2ª jornada LL3B"
+    assert e.diumenge == "1a jornada 4M"
+
+
+def test_fcb_columnes_del_mateix_carril_es_juxtaposen(cal_fcb):
+    """Les prèvies simultànies ocupen columnes diferents del mateix carril i han
+    de sortir totes en un sol esdeveniment de la setmana."""
+    e = next(
+        x
+        for x in cal_fcb.esdeveniments
+        if x.setmana == dt.date(2026, 9, 14) and x.grup == "Campionats de Catalunya"
+    )
+    assert e.titol == (
+        "Pre-Prèvia 3 Bandes 1ª Divisió · Prèvia 3 Bandes Div. Honor "
+        "· Pre-Prèvia 3 Bandes 2ª Divisió"
+    )
+    assert e.col_span == 3
+
+
+def test_fcb_festius(cal_fcb):
+    """Nadal no cau en cap fila de dia —la graella se salta aquelles setmanes— i
+    igualment ha de quedar registrat, amb `ambit = 'tot'` perquè la web no el
+    llisti com si fos una competició."""
+    festius = [e for e in cal_fcb.esdeveniments if e.ambit == "tot"]
+    assert {e.titol for e in festius} == {"NADAL 2026", "SETMANA SANTA"}
+    nadal = next(e for e in festius if e.titol == "NADAL 2026")
+    assert nadal.data_inici == dt.date(2026, 12, 21)
+    assert nadal.data_fi == dt.date(2027, 1, 1)
+    assert all(e.tipus is None for e in festius)
+
+
+def test_fcb_ingest_idempotent(tmp_path):
+    db = tmp_path / "test.db"
+    r1 = ingest_calendari(db, pdf_bytes=FIXTURE_FCB.read_bytes(), font="FCB", versio="V-1")
+    assert r1["estat"] == "actualitzat"
+    assert r1["n_events"] > 50
+    assert ingest_calendari(db, pdf_bytes=FIXTURE_FCB.read_bytes(), font="FCB")["estat"] == (
+        "sense-canvis"
+    )
+
+
+def test_fcb_i_rfeb_conviuen(tmp_path):
+    """Les dues fonts comparteixen taula i temporada: cap de les dues no ha de
+    trepitjar l'altra ni sortir al diff de l'altra."""
+    db = tmp_path / "test.db"
+    ingest_calendari(db, pdf_bytes=FIXTURE.read_bytes())
+    r = ingest_calendari(db, pdf_bytes=FIXTURE_FCB.read_bytes(), font="FCB", versio="V-1")
+    assert all(c.tipus_canvi == "alta" for c in r["canvis"])
+
+    import sqlite3
+
+    conn = sqlite3.connect(str(db))
+    per_font = dict(
+        conn.execute("SELECT font, count(*) FROM calendari_events GROUP BY font").fetchall()
+    )
+    assert per_font["FCB"] == r["n_events"]
+    assert per_font["RFEB"] > 0
 
 
 def test_descobreix_fcb_del_layout():
