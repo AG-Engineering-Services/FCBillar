@@ -418,15 +418,17 @@
 		{#if setmanaActual}
 			{@render blocs(setmanaActual.items)}
 		{:else}
-			<p class="text-sm text-slate-400 dark:text-slate-500">Cap competició al calendari.</p>
-			{#if propera}
-				<h2
-					class="mb-2 mt-3 border-t border-slate-100 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400"
-				>
-					Següent · {fmtRang(propera.inici, propera.fi)}
-				</h2>
-				{@render blocs(propera.items)}
-			{/if}
+			<p class="text-sm text-slate-400 dark:text-slate-500">Cap competició aquesta setmana.</p>
+		{/if}
+		<!-- El que ve, hi hagi o no hi hagi res aquesta setmana: la caixa serveix per
+		     no haver de baixar per la llista per saber quan es torna a jugar. -->
+		{#if propera}
+			<h2
+				class="mb-2 mt-3 border-t border-slate-100 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400"
+			>
+				Següent · {fmtRang(propera.inici, propera.fi)}
+			</h2>
+			{@render blocs(propera.items)}
 		{/if}
 	</section>
 
