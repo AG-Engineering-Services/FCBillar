@@ -4,7 +4,7 @@ Aquesta és la meitat d'"escriptura" del model desktop→núvol: el desktop és
 l'únic que baixa dades (scraping) i les desa a SQLite; aquí les puja a Supabase,
 des d'on el frontend desplegat a Vercel les llegeix (només lectura, RLS).
 
-Auth: SUPABASE_URL i SUPABASE_SERVICE_ROLE_KEY (la service_role salta RLS i pot
+Auth: NEON_DATA_API_URL i NEON_SERVICE_ROLE_TOKEN (la service_role salta RLS i pot
 escriure; mai s'ha de publicar). Es llegeixen de l'entorn o del fitxer .env.
 
 FASE 1: només la llesca de rànquings (modalitats, clubs, jugadors, rankings,
@@ -74,29 +74,38 @@ def _env(name: str) -> str | None:
 
 
 def get_client():
-    """Client Supabase amb la service_role, fixat al schema `fcbillar`."""
+    """Client del Data API de Neon amb la service_role, fixat al schema `fcbillar`.
+
+    El Data API de Neon és PostgREST, igual que el de Supabase, així que el
+    client de supabase-py hi val sense canvis: només canvia la URL base i que
+    la clau és un JWT amb el claim `role: service_role`, signat amb la clau
+    privada del JWKS que publica la web. Aquest rol té BYPASSRLS, com el de
+    Supabase, i per tant pot escriure a totes les taules.
+    """
     from supabase import create_client
 
-    url = _env("SUPABASE_URL")
-    key = _env("SUPABASE_SERVICE_ROLE_KEY")
+    url = _env("NEON_DATA_API_URL")
+    key = _env("NEON_SERVICE_ROLE_TOKEN")
     if not url:
-        raise RuntimeError("Falta SUPABASE_URL (entorn o .env).")
+        raise RuntimeError("Falta NEON_DATA_API_URL (entorn o .env).")
     if not key:
-        raise RuntimeError("Falta SUPABASE_SERVICE_ROLE_KEY (entorn o .env).")
+        raise RuntimeError("Falta NEON_SERVICE_ROLE_TOKEN (entorn o .env).")
     return create_client(url, key).schema(SCHEMA)
 
 
 def get_public_client():
-    """Client Supabase amb service_role, schema `public` (app germana Estadístiques).
+    """Client del Data API de c3b, schema `public` (app germana Estadístiques).
 
-    Comparteix el mateix projecte Supabase; la service_role salta RLS i pot
-    escriure a `public.partides` (marca `computa`)."""
+    Fins a la migració a Neon compartia projecte amb `fcbillar` i n'hi havia
+    prou amb canviar d'schema. Ara c3b viu en un projecte Neon separat, així
+    que cal una connexió pròpia: d'aquí que la URL sigui una altra variable.
+    """
     from supabase import create_client
 
-    url = _env("SUPABASE_URL")
-    key = _env("SUPABASE_SERVICE_ROLE_KEY")
+    url = _env("NEON_C3B_DATA_API_URL")
+    key = _env("NEON_SERVICE_ROLE_TOKEN")
     if not url or not key:
-        raise RuntimeError("Falta SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (entorn o .env).")
+        raise RuntimeError("Falta NEON_C3B_DATA_API_URL / NEON_SERVICE_ROLE_TOKEN (entorn o .env).")
     return create_client(url, key).schema("public")
 
 

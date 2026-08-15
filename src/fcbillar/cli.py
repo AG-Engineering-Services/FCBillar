@@ -629,7 +629,7 @@ def state_report_cmd(
     """Escriu l'estat de l'última reingesta a `fcbillar.cloud_status` (per al banner del PWA).
 
     Amb `--close-requests` també marca a 'done'/'error' les peticions del botó que
-    havien quedat en estat 'running'. Cal SUPABASE_URL i SUPABASE_SERVICE_ROLE_KEY.
+    havien quedat en estat 'running'. Cal NEON_DATA_API_URL i NEON_SERVICE_ROLE_TOKEN.
     """
     from datetime import datetime, timezone
 
@@ -979,7 +979,7 @@ def clean_torneig_noms_cmd(
 def publish_cloud_cmd() -> None:
     """Publica la BD local a Supabase (schema fcbillar) per al frontend de Vercel.
 
-    FASE 1: rànquings. Cal SUPABASE_URL i SUPABASE_SERVICE_ROLE_KEY (al .env o a
+    FASE 1: rànquings. Cal NEON_DATA_API_URL i NEON_SERVICE_ROLE_TOKEN (al .env o a
     l'entorn). Idempotent: es pot reexecutar després de cada actualització.
     """
     from fcbillar.cloud_sync import (
@@ -1151,7 +1151,7 @@ def publish_live_opens_cmd() -> None:
     de cada Open en curs perquè l'app web en mostri el seguiment en temps real.
     Totes les modalitats; s'exclouen els femenins i els ja tancats. Idempotent —
     pensat per executar-se sovint des d'un job programat (p.ex. GitHub Action).
-    Cal SUPABASE_URL i SUPABASE_SERVICE_ROLE_KEY (al .env o a l'entorn).
+    Cal NEON_DATA_API_URL i NEON_SERVICE_ROLE_TOKEN (al .env o a l'entorn).
     """
     from fcbillar.cloud_sync import publish_live_opens
 
@@ -1196,7 +1196,7 @@ def project_open_ranking_cmd(
     com un open 'En directe' amb el badge 'projecció · no oficial'. Quan la federació
     publiqui els grups reals, la propera `publish-live-opens` el substitueix pel
     seguiment real (mateix nom) i esborra la projecció.
-    Cal SUPABASE_URL i SUPABASE_SERVICE_ROLE_KEY (al .env o a l'entorn).
+    Cal NEON_DATA_API_URL i NEON_SERVICE_ROLE_TOKEN (al .env o a l'entorn).
     """
     import zlib
     from datetime import datetime, timezone

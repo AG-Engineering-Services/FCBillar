@@ -18,7 +18,7 @@ The history is intentional — every snapshot kept lets us replay an
 Open's progression later. To prune, run a periodic cleanup on rows
 older than 7 days.
 
-Auth: requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars,
+Auth: requires NEON_DATA_API_URL and NEON_SERVICE_ROLE_TOKEN env vars,
 same as `supabase_sync`.
 """
 
@@ -83,12 +83,12 @@ def opens_ranking_by_name(sb_fcbillar, *, genere: str = "general") -> dict[str, 
 
 
 def _client() -> Client:
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    url = os.environ.get("NEON_DATA_API_URL")
+    key = os.environ.get("NEON_SERVICE_ROLE_TOKEN")
     if not url:
-        raise RuntimeError("SUPABASE_URL env var is required")
+        raise RuntimeError("NEON_DATA_API_URL env var is required")
     if not key:
-        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY env var is required")
+        raise RuntimeError("NEON_SERVICE_ROLE_TOKEN env var is required")
     return create_client(url, key)
 
 

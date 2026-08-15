@@ -31,17 +31,20 @@ SCHEMA = "fcb_opens"
 
 
 def get_client() -> Client:
-    """Return a Supabase client authenticated with the service-role key.
+    """Return a client for Neon's Data API, authenticated as service_role.
 
-    The service-role bypasses RLS so the sync can write to every table.
-    Read access from the PWA still respects the RLS policies.
+    Neon's Data API is PostgREST, the same as Supabase's, so the supabase-py
+    client works against it unchanged: only the base URL differs, and the key
+    is a JWT carrying the `role: service_role` claim, signed with the private
+    key behind the JWKS the web app publishes. That role has BYPASSRLS, so the
+    sync can still write to every table while the PWA's reads stay under RLS.
     """
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    url = os.environ.get("NEON_DATA_API_URL")
+    key = os.environ.get("NEON_SERVICE_ROLE_TOKEN")
     if not url:
-        raise RuntimeError("SUPABASE_URL env var is required")
+        raise RuntimeError("NEON_DATA_API_URL env var is required")
     if not key:
-        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY env var is required")
+        raise RuntimeError("NEON_SERVICE_ROLE_TOKEN env var is required")
     return create_client(url, key)
 
 

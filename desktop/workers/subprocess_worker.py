@@ -18,7 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # no el .env) necessiten per publicar al núvol. Les carreguem del .env a l'entorn
 # del subprocés perquè els botons de publicació funcionin com ho fa weekly_reingest.ps1.
 _ENV_KEYS = (
-    "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY",
+    "NEON_DATA_API_URL", "NEON_C3B_DATA_API_URL", "NEON_SERVICE_ROLE_TOKEN",
     "R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET",
 )
 

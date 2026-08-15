@@ -567,7 +567,7 @@ def cmd_scrape_lliga(args: argparse.Namespace) -> int:
 def cmd_supabase_sync(args: argparse.Namespace) -> int:
     """Push the local SQLite snapshot to Supabase (`fcb_opens` schema).
 
-    Reads SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY from the environment.
+    Reads NEON_DATA_API_URL and NEON_SERVICE_ROLE_TOKEN from the environment.
     The service-role key bypasses RLS; never commit it.
     """
     from .supabase_sync import sync_all as supabase_sync_all  # lazy: needs `supabase`
@@ -611,7 +611,7 @@ def cmd_supabase_sync(args: argparse.Namespace) -> int:
 def cmd_snapshot_live_opens(args: argparse.Namespace) -> int:
     """Capture the live state of every ongoing Open and push to Supabase.
 
-    Reads SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY from the env. Bypasses
+    Reads NEON_DATA_API_URL and NEON_SERVICE_ROLE_TOKEN from the env. Bypasses
     the local SQLite — snapshots go straight to `fcb_opens.open_live_snapshots`.
     Use `--force` to bypass the FCB HTTP cache for the freshest data.
     """

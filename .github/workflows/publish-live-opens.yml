@@ -6,8 +6,8 @@ name: Publish live opens
 # Supabase amb la service_role.
 #
 # REQUISIT: secrets al repo (Settings → Secrets and variables → Actions):
-#   - SUPABASE_URL
-#   - SUPABASE_SERVICE_ROLE_KEY
+#   - NEON_DATA_API_URL
+#   - NEON_SERVICE_ROLE_TOKEN
 #
 # CADÈNCIA: cada execució fa un BUCLE INTERN que refresca cada ~2 min; el bucle
 # és llarg (~5 h) a posta: si GitHub deixa caure trets, l'últim que SÍ va arrencar
@@ -63,8 +63,9 @@ jobs:
 
       - name: Publish live opens (bucle intern ~2 min durant ~5 h)
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEON_DATA_API_URL: ${{ secrets.NEON_DATA_API_URL }}
+          NEON_C3B_DATA_API_URL: ${{ secrets.NEON_C3B_DATA_API_URL }}
+          NEON_SERVICE_ROLE_TOKEN: ${{ secrets.NEON_SERVICE_ROLE_TOKEN }}
         run: |
           END=$(( SECONDS + 18000 ))   # ~5 h: el bucle no acaba abans del següent tret (GitHub estrangula els crons; cancel-in-progress reinicia)
           i=0

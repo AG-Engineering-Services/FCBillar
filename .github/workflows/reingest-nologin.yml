@@ -30,7 +30,7 @@ name: Reingesta no-logada (núvol)
 #
 # REQUISITS:
 #   - Secrets (Settings → Secrets and variables → Actions):
-#       SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+#       NEON_DATA_API_URL, NEON_SERVICE_ROLE_TOKEN
 #     (GITHUB_TOKEN ja el proporciona Actions; amb permissions: contents: write
 #      pot escriure els assets del release.)
 #   - SEED inicial des del PC (una vegada):
@@ -70,8 +70,9 @@ jobs:
       contents: write          # per pujar/baixar assets del release fcb-state
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEON_DATA_API_URL: ${{ secrets.NEON_DATA_API_URL }}
+      NEON_C3B_DATA_API_URL: ${{ secrets.NEON_C3B_DATA_API_URL }}
+      NEON_SERVICE_ROLE_TOKEN: ${{ secrets.NEON_SERVICE_ROLE_TOKEN }}
       STATE_TAG: fcb-state
       COPA_EDICIO: ${{ github.event.inputs.copa_edicio || '7' }}
       FORCE: ${{ github.event.inputs.force || 'false' }}
@@ -96,10 +97,10 @@ jobs:
           H=$((10#$(date -u +%H)))
           if [ "$EVENT" = "schedule" ] && [ "$H" -ge 7 ] && [ "$H" -le 20 ]; then
             LIVE=$(curl -s \
-              -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-              -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "apikey: $NEON_SERVICE_ROLE_TOKEN" \
+              -H "Authorization: Bearer $NEON_SERVICE_ROLE_TOKEN" \
               -H "Accept-Profile: fcbillar" \
-              "$SUPABASE_URL/rest/v1/open_live?select=fcb_division_id&fcb_division_id=gt.0&limit=1")
+              "$NEON_DATA_API_URL/rest/v1/open_live?select=fcb_division_id&fcb_division_id=gt.0&limit=1")
             if [ "$LIVE" = "[]" ] || [ -z "$LIVE" ]; then
               echo "Tret horari de cap de setmana sense opens en directe → ometo."
               echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
