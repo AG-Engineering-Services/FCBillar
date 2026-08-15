@@ -8,11 +8,11 @@
 	// cap de setmana. Per això la unitat de la pàgina és la setmana, no el dia.
 	import { onMount } from 'svelte';
 	import {
-		supabase,
+		db,
 		type CalendariCanvi,
 		type CalendariEvent,
 		type CalendariRevisio
-	} from '$lib/supabase';
+	} from '$lib/db';
 
 	let events = $state<CalendariEvent[]>([]);
 	let revisions = $state<CalendariRevisio[]>([]);
@@ -80,8 +80,8 @@
 		try {
 			const [ev, rev] = await Promise.all([
 				// .range() explícit: PostgREST talla a 1000 files en silenci.
-				supabase.from('calendari_events').select('*').order('setmana').range(0, 4999),
-				supabase.from('calendari_revisions').select('*')
+				db.from('calendari_events').select('*').order('setmana').range(0, 4999),
+				db.from('calendari_revisions').select('*')
 			]);
 			if (ev.error) throw ev.error;
 			if (rev.error) throw rev.error;
@@ -149,7 +149,7 @@
 			return;
 		}
 		let viu = true;
-		supabase
+		db
 			.from('calendari_canvis')
 			.select('*')
 			.eq('temporada', rs[0].temporada)

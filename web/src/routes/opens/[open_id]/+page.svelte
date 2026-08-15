@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { supabase, type Open, type OpenClassification } from '$lib/supabase';
+	import { db, type Open, type OpenClassification } from '$lib/db';
 
 	const openId = $derived(Number($page.params.open_id));
 	let open = $state<Open | null>(null);
@@ -25,8 +25,8 @@
 		expanded = null;
 		try {
 			const [{ data: o }, { data: cl, error: e }, op] = await Promise.all([
-				supabase.from('opens').select('*').eq('open_id', id).maybeSingle(),
-				supabase.from('open_classifications').select('*').eq('open_id', id).order('posicio'),
+				db.from('opens').select('*').eq('open_id', id).maybeSingle(),
+				db.from('open_classifications').select('*').eq('open_id', id).order('posicio'),
 				loadAllGames(id)
 			]);
 			if (e) throw e;
@@ -44,7 +44,7 @@
 		const pageSize = 1000;
 		const result: any[] = [];
 		for (let from = 0; ; from += pageSize) {
-			const { data, error: gamesError } = await supabase
+			const { data, error: gamesError } = await db
 				.from('open_partides')
 				.select('*')
 				.eq('open_id', id)

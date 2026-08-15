@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase, tipusOf, isDecided, type Open, type OpenLiveRow } from '$lib/supabase';
+	import { db, tipusOf, isDecided, type Open, type OpenLiveRow } from '$lib/db';
 
 	let opens = $state<Open[]>([]);
 	let liveOpens = $state<OpenLiveRow[]>([]);
@@ -57,7 +57,7 @@
 		uploadMsg = '';
 		try {
 			const pdf_base64 = await fileToBase64(file);
-			const { error: e } = await supabase.from('open_projection_requests').insert({
+			const { error: e } = await db.from('open_projection_requests').insert({
 				requested_email: ADMIN_EMAIL,
 				source: 'opens/upload',
 				season: adminSeason.trim() || null,
@@ -93,7 +93,7 @@
 	let rank3bLabel = $state('');
 
 	async function loadRank3b() {
-		const { data: snaps } = await supabase
+		const { data: snaps } = await db
 			.from('rankings')
 			.select('num_seq, any_pub, mes_pub')
 			.eq('modalitat_codi', 1)
@@ -108,7 +108,7 @@
 		// Paginat: el rànquing de 3 bandes pot passar del límit de 1000 files.
 		const m = new Map<string, Rank3B>();
 		for (let from = 0; ; from += 1000) {
-			const { data } = await supabase
+			const { data } = await db
 				.from('ranking_full')
 				.select('player_fcb_id, posicio, mitjana_general')
 				.eq('modalitat_codi', 1)
@@ -265,7 +265,7 @@
 	}
 
 	// Tipus de torneig: prioritza el camp publicat; fallback a la regla compartida
-	// (tipusOf de $lib/supabase, mirall de fcbillar.torneig_naming).
+	// (tipusOf de $lib/db, mirall de fcbillar.torneig_naming).
 	const clean = (nom: string) => nom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim();
 
 	// Resum d'una línia d'un Open en directe: fase activa (o l'última amb dades)
@@ -297,20 +297,20 @@
 
 	onMount(async () => {
 		// Opens en directe (no bloqueja la resta si falla).
-		supabase
+		db
 			.from('open_live')
 			.select('*')
 			.order('fcb_division_id')
 			.then(({ data }) => (liveOpens = (data ?? []) as OpenLiveRow[]));
 		loadRank3b();     // columna de nivell 3B: tampoc bloqueja
 		try {
-			const { data, error: e } = await supabase.from('opens').select('*').order('nom');
+			const { data, error: e } = await db.from('opens').select('*').order('nom');
 			if (e) throw e;
 			opens = (data ?? []) as Open[];
 			// open_ranking pot superar el límit de 1000 files: paginem.
 			const all: any[] = [];
 			for (let from = 0; ; from += 1000) {
-				const { data: rk } = await supabase
+				const { data: rk } = await db
 					.from('open_ranking')
 					.select('*')
 					.order('ronda', { ascending: false })

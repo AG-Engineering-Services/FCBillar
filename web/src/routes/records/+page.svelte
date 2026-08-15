@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabase';
+	import { db } from '$lib/db';
 
 	type GameDetail = {
 		kind?: 'game';
@@ -27,7 +27,7 @@
 	let selMod = $state('');
 
 	onMount(async () => {
-		const { data } = await supabase
+		const { data } = await db
 			.from('records')
 			.select('categoria, ordre, player_fcb_id, jugador, valor, detall')
 			.order('categoria')

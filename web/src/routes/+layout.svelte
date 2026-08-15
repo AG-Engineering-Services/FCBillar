@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { afterNavigate } from '$app/navigation';
-	import { supabase } from '$lib/supabase';
+	import { db } from '$lib/db';
 	import { theme, toggleTheme } from '$lib/theme';
 	let { children } = $props();
 
@@ -18,7 +18,7 @@
 	let sessionExpired = $state(false);
 	onMount(async () => {
 		const since = new Date(Date.now() - 90 * 60 * 1000).toISOString();
-		const { count } = await supabase
+		const { count } = await db
 			.from('open_live')
 			.select('fcb_division_id', { count: 'exact', head: true })
 			.gte('captured_at', since);
@@ -27,7 +27,7 @@
 		const isAdmin =
 			typeof localStorage !== 'undefined' && localStorage.getItem('fcb_admin') === '1';
 		if (isAdmin) {
-			const { data } = await supabase
+			const { data } = await db
 				.from('cloud_status')
 				.select('session_ok')
 				.eq('id', 1)

@@ -1,15 +1,30 @@
-// Client Supabase fixat al schema `fcbillar` (només lectura via anon + RLS).
-// Les variables s'inlinen en build (Vite) → al .env.local en dev i a les env
-// vars de Vercel en producció.
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
+// Client del Data API de Neon, fixat al schema `fcbillar` (només lectura via
+// RLS). Les variables s'inlinen en build (Vite) → al .env.local en dev i a les
+// env vars de Vercel en producció.
+//
+// El Data API de Neon exigeix un JWT a cada petició: no té equivalent de l'anon
+// key de Supabase. `PUBLIC_NEON_ANON_TOKEN` fa el mateix paper —és una credencial
+// pública que viatja al navegador— amb el claim `role: anon`, i qui la tingui
+// només pot llegir el que les polítiques RLS li permetin. Es verifica contra el
+// JWKS de static/.well-known/, i es revoca canviant-hi la clau.
+//
+// Sota el capó és el mateix postgrest-js que hi havia amb supabase-js, així que
+// la sintaxi de les consultes no canvia.
+import { NeonPostgrestClient } from '@neondatabase/postgrest-js';
+import { PUBLIC_NEON_ANON_TOKEN, PUBLIC_NEON_DATA_API_URL } from '$env/static/public';
 
-if (!PUBLIC_SUPABASE_URL) throw new Error('Falta PUBLIC_SUPABASE_URL');
-if (!PUBLIC_SUPABASE_ANON_KEY) throw new Error('Falta PUBLIC_SUPABASE_ANON_KEY');
+if (!PUBLIC_NEON_DATA_API_URL) throw new Error('Falta PUBLIC_NEON_DATA_API_URL');
+if (!PUBLIC_NEON_ANON_TOKEN) throw new Error('Falta PUBLIC_NEON_ANON_TOKEN');
 
-export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-	db: { schema: 'fcbillar' },
-	auth: { persistSession: false }
+export const db = new NeonPostgrestClient({
+	dataApiUrl: PUBLIC_NEON_DATA_API_URL,
+	options: {
+		db: { schema: 'fcbillar' },
+		global: {
+			fetch,
+			headers: { Authorization: `Bearer ${PUBLIC_NEON_ANON_TOKEN}` }
+		}
+	}
 });
 
 // Estat de l'última reingesta al núvol (taula fcbillar.cloud_status, una sola fila).

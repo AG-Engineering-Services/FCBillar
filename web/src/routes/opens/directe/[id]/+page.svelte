@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import type { OpenLiveRow } from '$lib/supabase';
+	import type { OpenLiveRow } from '$lib/db';
 	// Cache per divisió: en tornar enrere des d'una fitxa de jugador, la pàgina
 	// es repinta a l'instant (contingut complet) i la restauració d'scroll de
 	// SvelteKit recupera el punt on era l'usuari sense esperar la xarxa.
@@ -10,7 +10,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import { supabase, isWalkover, isDecided, type OpenLivePhase, type OpenLiveGroup, type OpenLiveMatch, type OpenLiveScore, type OpenLiveClassRow } from '$lib/supabase';
+	import { db, isWalkover, isDecided, type OpenLivePhase, type OpenLiveGroup, type OpenLiveMatch, type OpenLiveScore, type OpenLiveClassRow } from '$lib/db';
 
 	const id0 = Number($page.params.id);
 	let row = $state<OpenLiveRow | null>(rowCache.get(id0) ?? null);
@@ -61,7 +61,7 @@
 	const seqKey = (div: number) => `fcb_open_prize_seq_${div}`;
 	
 	async function loadRankSeqs() {
-		const { data } = await supabase
+		const { data } = await db
 			.from('rankings')
 			.select('num_seq, any_pub, mes_pub')
 			.eq('modalitat_codi', 1)
@@ -86,7 +86,7 @@
 	}
 	
 	async function loadRankEntries(seq: number) {
-		const { data } = await supabase
+		const { data } = await db
 			.from('ranking_entries')
 			.select('player_fcb_id, posicio')
 			.eq('modalitat_codi', 1)
@@ -220,7 +220,7 @@
 	// Marcadors en viu (OCR): taula minúscula, és el que canvia més sovint → es
 	// refresca tot sol cada 30 s (independent del payload pesat de la federació).
 	function loadScores() {
-		supabase
+		db
 			.from('open_live_scores')
 			.select('*')
 			.eq('fcb_division_id', divisionId)
@@ -228,7 +228,7 @@
 	}
 
 	async function load() {
-		const { data, error: e } = await supabase
+		const { data, error: e } = await db
 			.from('open_live')
 			.select('*')
 			.eq('fcb_division_id', divisionId)

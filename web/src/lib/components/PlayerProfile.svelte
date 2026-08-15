@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import {
-		supabase,
+		db,
 		type GameRow,
 		type PendingGameRow,
 		type ProvisionalRow
-	} from '$lib/supabase';
+	} from '$lib/db';
 	import { follows, toggleFollow } from '$lib/follows';
 	import RadarChart from '$lib/components/RadarChart.svelte';
 	import { theme } from '$lib/theme';
@@ -43,7 +43,7 @@
 		}
 		reingestState = 'sending';
 		reingestMsg = '';
-		const { error: e } = await supabase
+		const { error: e } = await db
 			.from('reingest_requests')
 			.insert({ requested_email: ADMIN_EMAIL, source: `fitxa/${fcbId}` });
 		if (e) {
@@ -210,7 +210,7 @@
 		loading = true;
 		error = null;
 		try {
-			const { data: p } = await supabase
+			const { data: p } = await db
 				.from('players')
 				.select('nom, club_fcb_id')
 				.eq('fcb_id', id)
@@ -218,7 +218,7 @@
 			nom = p?.nom ?? id;
 			clubId = p?.club_fcb_id ?? null;
 			if (p?.club_fcb_id) {
-				const { data: c } = await supabase
+				const { data: c } = await db
 					.from('clubs')
 					.select('nom')
 					.eq('fcb_id', p.club_fcb_id)
@@ -228,7 +228,7 @@
 				club = null;
 			}
 
-			const { data: g, error: e } = await supabase
+			const { data: g, error: e } = await db
 				.from('games')
 				.select('*')
 				.or(`player1_fcb_id.eq.${id},player2_fcb_id.eq.${id}`)
@@ -240,7 +240,7 @@
 			// Partides pendents de TOTES les competicions en curs (copa, opens…) que
 			// encara no compten al rànquing. La dedup contra `games` ja la fa el
 			// publisher server-side; aquí només llegim.
-			const { data: pg } = await supabase
+			const { data: pg } = await db
 				.from('pending_games')
 				.select(
 					'modalitat_codi, competicio, font, opponent_nom, caramboles, caramboles_opp, entrades, serie'
@@ -249,7 +249,7 @@
 			pendingRows = (pg ?? []) as PendingGameRow[];
 
 			// Projecció del proper rànquing (autoritativa, computada al backend).
-			const { data: pr } = await supabase
+			const { data: pr } = await db
 				.from('ranking_provisional')
 				.select(
 					'player_fcb_id, modalitat_codi, posicio_oficial, mitjana_oficial, posicio_provisional, mitjana_provisional, partides_post, proj_won, proj_lost, proj_tie, window_game_ids, current_game_ids'
@@ -257,14 +257,14 @@
 				.eq('player_fcb_id', id);
 			provByMod = new Map((pr ?? []).map((r: any) => [r.modalitat_codi, r as ProvisionalRow]));
 
-			const { data: pc } = await supabase
+			const { data: pc } = await db
 				.from('player_clubs')
 				.select('temporada, club')
 				.eq('player_fcb_id', id)
 				.order('temporada', { ascending: false });
 			clubHist = pc ?? [];
 
-			const { data: podiums } = await supabase
+			const { data: podiums } = await db
 				.from('open_classifications')
 				.select('open_id, posicio, club')
 				.eq('player_fcb_id', id)
@@ -272,7 +272,7 @@
 				.lte('posicio', 3);
 			const openIds = [...new Set((podiums ?? []).map((x) => x.open_id))];
 			const { data: podiumOpens } = openIds.length
-				? await supabase.from('opens').select('open_id, nom, temporada').in('open_id', openIds)
+				? await db.from('opens').select('open_id, nom, temporada').in('open_id', openIds)
 				: { data: [] };
 			const openById = new Map((podiumOpens ?? []).map((x) => [x.open_id, x]));
 			palmares = (podiums ?? [])
@@ -340,14 +340,14 @@
 				})
 				.filter((p): p is NonNullable<typeof p> => p != null);
 
-			const { data: or } = await supabase
+			const { data: or } = await db
 				.from('open_ranking')
 				.select('ronda, posicio, punts, detall')
 				.eq('player_fcb_id', id)
 				.eq('genere', 'general');
 			openRank = or ?? [];
 
-			const { data: orf } = await supabase
+			const { data: orf } = await db
 				.from('open_ranking')
 				.select('ronda, posicio, punts, detall')
 				.eq('player_fcb_id', id)
@@ -355,7 +355,7 @@
 			openRankFem = orf ?? [];
 
 			const present = [...new Set(games.map((x) => x.modalitat_codi).filter((v) => v != null))];
-			const { data: md } = await supabase
+			const { data: md } = await db
 				.from('modalitats')
 				.select('codi_fcb, nom')
 				.in('codi_fcb', present.length ? present : [1]);
@@ -526,7 +526,7 @@
 		else rankHist = [];
 	});
 	async function loadRankHist(id: string, mod: number) {
-		const { data } = await supabase
+		const { data } = await db
 			.from('ranking_entries')
 			.select('num_seq, posicio, mitjana_general')
 			.eq('player_fcb_id', id)
@@ -551,7 +551,7 @@
 		else clubRank = null;
 	});
 	async function loadClubRank(cid: string, mod: number, seq: number) {
-		const { data: members } = await supabase
+		const { data: members } = await db
 			.from('players')
 			.select('fcb_id')
 			.eq('club_fcb_id', cid);
@@ -560,7 +560,7 @@
 			clubRank = null;
 			return;
 		}
-		const { data: ent } = await supabase
+		const { data: ent } = await db
 			.from('ranking_entries')
 			.select('player_fcb_id, mitjana_general')
 			.eq('modalitat_codi', mod)
@@ -589,7 +589,7 @@
 		}
 	});
 	async function loadRatingBuckets(id: string, mod: number) {
-		const { data } = await supabase
+		const { data } = await db
 			.from('player_rating_buckets')
 			.select('bucket_order, label, wins, losses, draws')
 			.eq('player_fcb_id', id)
@@ -601,7 +601,7 @@
 			losses: r.losses ?? 0,
 			draws: r.draws ?? 0
 		}));
-		const { data: idx } = await supabase
+		const { data: idx } = await db
 			.from('player_rating_index')
 			.select('weighted_index, crossover')
 			.eq('player_fcb_id', id)

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import sistemes from '$lib/sistemes/sistemes.json';
 	import { page } from '$app/stores';
-	import { supabase } from '$lib/supabase';
+	import { db } from '$lib/db';
 	import { onMount } from 'svelte';
 	import DiagramaSistema from '$lib/sistemes/DiagramaSistema.svelte';
 
@@ -50,7 +50,7 @@
 		esAdmin = typeof localStorage !== 'undefined' && localStorage.getItem('fcb_admin') === '1';
 		if (!s) return;
 		try {
-			const { data } = await supabase
+			const { data } = await db
 				.from('sistema_marca')
 				.select('funciona')
 				.eq('video_id', s.id)
@@ -66,7 +66,7 @@
 		const nou = mark === valor ? null : valor;
 		mark = nou;
 		try {
-			await supabase
+			await db
 				.from('sistema_marca')
 				.upsert({ video_id: s.id, funciona: nou, updated_at: new Date().toISOString() });
 		} catch {

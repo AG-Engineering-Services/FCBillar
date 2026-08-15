@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase, type Modalitat } from '$lib/supabase';
+	import { db, type Modalitat } from '$lib/db';
 	import {
 		buildClubIndexes,
 		rankClubs,
@@ -35,9 +35,9 @@
 		try {
 			const [{ data: mods, error: em }, { data: rks, error: er }, { data: cls, error: ec }] =
 				await Promise.all([
-					supabase.from('modalitats').select('codi_fcb, nom').order('codi_fcb'),
-					supabase.from('rankings').select('modalitat_codi, num_seq'),
-					supabase.from('clubs').select('fcb_id, nom')
+					db.from('modalitats').select('codi_fcb, nom').order('codi_fcb'),
+					db.from('rankings').select('modalitat_codi, num_seq'),
+					db.from('clubs').select('fcb_id, nom')
 				]);
 			if (em) throw em;
 			if (er) throw er;
@@ -61,7 +61,7 @@
 	async function fetchMod(codi: number): Promise<RankEntry[]> {
 		const seq = latestSeq.get(codi);
 		if (seq == null) return [];
-		const { data, error: e } = await supabase
+		const { data, error: e } = await db
 			.from('ranking_full')
 			.select('posicio, player_fcb_id, jugador, club, mitjana_general')
 			.eq('modalitat_codi', codi)

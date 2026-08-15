@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabase';
+	import { db } from '$lib/db';
 	import sistemes from '$lib/sistemes/sistemes.json';
 	import { onMount } from 'svelte';
 
@@ -41,7 +41,7 @@
 
 	async function carregaHistorial() {
 		try {
-			const { data } = await supabase
+			const { data } = await db
 				.from('sistema_peticio')
 				.select('*')
 				.order('creat', { ascending: false })
@@ -68,7 +68,7 @@
 		enviant = true;
 		msg = '';
 		try {
-			const { error } = await supabase
+			const { error } = await db
 				.from('sistema_peticio')
 				.insert({ url: u, video_id, plataforma, validar, estat: 'pendent' });
 			if (error) throw error;
