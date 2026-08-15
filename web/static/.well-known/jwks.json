@@ -1,0 +1,12 @@
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "n": "s5vTTaos4-6iN7xyhw8BWAZPN4iQEP8WRW2iN5rL7Nqyj6gRZNVLwwhBSksvAWTQ-R4Q6i8pdA9vqEw03qyRoGa943Hb0CKovCNMeg2dvnmWjCb-8jfSyi7nf6UYkQVsuEksaaNMZxybvQtdmmAGPY1pddpwBiaTdHWiEjobg0UMf4f8UePL-X5gFzGFMO3mPo52Wuz_XfAVEluJW3Ey_1KruAlrCYQ5aI0VLxnRsxsEWThHDM5hmdQLZHeprwM2cpozOzJOyisz6GOB2VaDRszvbBwn3kv8mcVve6wKW2cEecKWEgyQJmRlpe0tDjF3PEvMsRE4RlADFkkNCaQCOQ",
+      "e": "AQAB",
+      "kid": "fcbillar-anon-1",
+      "use": "sig",
+      "alg": "RS256"
+    }
+  ]
+}
