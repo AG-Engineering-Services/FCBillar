@@ -10,7 +10,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0"
+    "@neondatabase/postgrest-js": "^0.2.0-beta"
   },
   "devDependencies": {
     "@sveltejs/adapter-vercel": "^5.4.0",

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import sistemes from '$lib/sistemes/sistemes.json';
-	import { supabase } from '$lib/supabase';
+	import { db } from '$lib/db';
 	import { onMount } from 'svelte';
 	import Explora from '$lib/sistemes/Explora.svelte';
 
@@ -69,7 +69,7 @@
 	onMount(async () => {
 		esAdmin = typeof localStorage !== 'undefined' && localStorage.getItem('fcb_admin') === '1';
 		try {
-			const { data } = await supabase.from('sistema_marca').select('video_id, funciona');
+			const { data } = await db.from('sistema_marca').select('video_id, funciona');
 			if (data) marks = Object.fromEntries(data.map((r) => [r.video_id, r.funciona]));
 		} catch {
 			// la taula pot no existir encara; els marks queden buits
@@ -81,7 +81,7 @@
 		const nou = marks[id] === valor ? null : valor; // tornar a clicar treu la marca
 		marks = { ...marks, [id]: nou };
 		try {
-			await supabase
+			await db
 				.from('sistema_marca')
 				.upsert({ video_id: id, funciona: nou, updated_at: new Date().toISOString() });
 		} catch {

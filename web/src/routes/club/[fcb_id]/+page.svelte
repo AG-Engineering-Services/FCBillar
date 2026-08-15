@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { supabase } from '$lib/supabase';
+	import { db } from '$lib/db';
 	import { clubFollows, toggleClubFollow } from '$lib/follows';
 
 	const fcbId = $derived($page.params.fcb_id);
@@ -17,9 +17,9 @@
 	async function load(id: string) {
 		loading = true;
 		const [{ data: c }, { data: pl }, { data: maxR }] = await Promise.all([
-			supabase.from('clubs').select('nom').eq('fcb_id', id).maybeSingle(),
-			supabase.from('players').select('fcb_id, nom').eq('club_fcb_id', id),
-			supabase
+			db.from('clubs').select('nom').eq('fcb_id', id).maybeSingle(),
+			db.from('players').select('fcb_id, nom').eq('club_fcb_id', id),
+			db
 				.from('rankings')
 				.select('num_seq')
 				.eq('modalitat_codi', 1)
@@ -31,7 +31,7 @@
 		const latest = maxR?.[0]?.num_seq;
 		const rankMap = new Map<string, { posicio: number; mitjana: number }>();
 		if (latest != null && ids.length) {
-			const { data: re } = await supabase
+			const { data: re } = await db
 				.from('ranking_entries')
 				.select('player_fcb_id, posicio, mitjana_general')
 				.eq('modalitat_codi', 1)

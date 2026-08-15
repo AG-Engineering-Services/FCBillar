@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase, type LligaGroup, type StandingRow, type PlayerRankRow } from '$lib/supabase';
+	import { db, type LligaGroup, type StandingRow, type PlayerRankRow } from '$lib/db';
 
 	let groups = $state<LligaGroup[]>([]);
 	let standings = $state<StandingRow[]>([]);
@@ -25,10 +25,10 @@
 				{ data: pr, error: ep },
 				{ data: enc }
 			] = await Promise.all([
-				supabase.from('lliga_groups').select('*'),
-				supabase.from('lliga_standings').select('*').order('posicio'),
-				supabase.from('lliga_player_rankings').select('*').order('posicio'),
-				supabase.from('lliga_encontres').select('*')
+				db.from('lliga_groups').select('*'),
+				db.from('lliga_standings').select('*').order('posicio'),
+				db.from('lliga_player_rankings').select('*').order('posicio'),
+				db.from('lliga_encontres').select('*')
 			]);
 			if (eg) throw eg;
 			if (es) throw es;
@@ -37,7 +37,7 @@
 			standings = (s ?? []) as StandingRow[];
 			pranks = (pr ?? []) as PlayerRankRow[];
 			encontres = enc ?? [];
-			const { data: hs } = await supabase.from('lliga_history').select('temporada');
+			const { data: hs } = await db.from('lliga_history').select('temporada');
 			histSeasons = [...new Set((hs ?? []).map((r) => r.temporada as string))].sort().reverse();
 		} catch (e) {
 			error = (e as Error).message;
@@ -111,7 +111,7 @@
 		if (season !== currentSeason) loadHistory(season);
 	});
 	async function loadHistory(s: string) {
-		const { data } = await supabase
+		const { data } = await db
 			.from('lliga_history')
 			.select('lliga, divisio, posicio, equip, pm, pp')
 			.eq('temporada', s)
@@ -166,7 +166,7 @@
 		s.add(encId);
 		expandedEnc = s;
 		if (!partidesCache[encId]) {
-			const { data } = await supabase
+			const { data } = await db
 				.from('lliga_partides')
 				.select('*')
 				.eq('encontre_id', encId)

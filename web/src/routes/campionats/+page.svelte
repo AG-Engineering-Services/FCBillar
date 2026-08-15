@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase, tipusOf, type Open } from '$lib/supabase';
+	import { db, tipusOf, type Open } from '$lib/db';
 
 	let opens = $state<Open[]>([]);
 	let q = $state('');
@@ -11,7 +11,7 @@
 		return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 	}
 	// Tipus de torneig: prioritza el camp publicat; fallback a la regla compartida
-	// (tipusOf de $lib/supabase, mirall de fcbillar.torneig_naming).
+	// (tipusOf de $lib/db, mirall de fcbillar.torneig_naming).
 	const clean = (nom: string) => nom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim();
 
 	// La modalitat no és una columna: es dedueix del nom (prefix abans del " - " o
@@ -36,7 +36,7 @@
 
 	onMount(async () => {
 		try {
-			const { data, error: e } = await supabase.from('opens').select('*').order('nom');
+			const { data, error: e } = await db.from('opens').select('*').order('nom');
 			if (e) throw e;
 			opens = (data ?? []) as Open[];
 		} catch (e) {

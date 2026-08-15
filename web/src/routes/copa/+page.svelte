@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import {
-		supabase,
+		db,
 		type CopaGroup,
 		type CopaStanding,
 		type PlayerRankRow
-	} from '$lib/supabase';
+	} from '$lib/db';
 
 	let groups = $state<CopaGroup[]>([]);
 	let standings = $state<CopaStanding[]>([]);
@@ -29,10 +29,10 @@
 				{ data: pr, error: ep },
 				{ data: enc }
 			] = await Promise.all([
-				supabase.from('copa_groups').select('*'),
-				supabase.from('copa_standings').select('*').order('posicio'),
-				supabase.from('copa_player_rankings').select('*').order('posicio'),
-				supabase.from('copa_encontres').select('*')
+				db.from('copa_groups').select('*'),
+				db.from('copa_standings').select('*').order('posicio'),
+				db.from('copa_player_rankings').select('*').order('posicio'),
+				db.from('copa_encontres').select('*')
 			]);
 			if (eg) throw eg;
 			if (es) throw es;
@@ -110,7 +110,7 @@
 		s.add(encId);
 		expandedEnc = s;
 		if (!partidesCache[encId]) {
-			const { data } = await supabase
+			const { data } = await db
 				.from('copa_partides')
 				.select('*')
 				.eq('encontre_id', encId)

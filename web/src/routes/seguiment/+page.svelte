@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabase';
+	import { db } from '$lib/db';
 	import { follows, toggleFollow, clubFollows, toggleClubFollow } from '$lib/follows';
 	import { theme } from '$lib/theme';
 
@@ -43,9 +43,9 @@
 
 	onMount(async () => {
 		const [{ data: pl }, { data: cl }, { data: maxR }] = await Promise.all([
-			supabase.from('players').select('fcb_id, nom, club_fcb_id'),
-			supabase.from('clubs').select('fcb_id, nom').order('nom'),
-			supabase.from('rankings').select('num_seq').eq('modalitat_codi', 1).order('num_seq', { ascending: false }).limit(1)
+			db.from('players').select('fcb_id, nom, club_fcb_id'),
+			db.from('clubs').select('fcb_id, nom').order('nom'),
+			db.from('rankings').select('num_seq').eq('modalitat_codi', 1).order('num_seq', { ascending: false }).limit(1)
 		]);
 		allPlayers = pl ?? [];
 		allClubs = cl ?? [];
@@ -53,7 +53,7 @@
 		const latest = maxR?.[0]?.num_seq;
 		latestRankSeq = latest ?? null;
 		if (latest != null) {
-			const { data: re } = await supabase
+			const { data: re } = await db
 				.from('ranking_entries')
 				.select('player_fcb_id, posicio, mitjana_general')
 				.eq('modalitat_codi', 1)
@@ -159,7 +159,7 @@
 	async function loadGamesForSide(side: 'player1_fcb_id' | 'player2_fcb_id', ids: string[], columns: string) {
 		const result: any[] = [];
 		for (let from = 0; ; from += 1000) {
-			const { data, error } = await supabase
+			const { data, error } = await db
 				.from('games')
 				.select(columns)
 				.eq('modalitat_codi', 1)
@@ -174,7 +174,7 @@
 	async function loadCopaForSide(side: 'jugador_local' | 'jugador_visitant', names: string[], columns: string) {
 		const result: any[] = [];
 		for (let from = 0; ; from += 1000) {
-			const { data, error } = await supabase.from('copa_partides').select(columns).in(side, names).range(from, from + 999);
+			const { data, error } = await db.from('copa_partides').select(columns).in(side, names).range(from, from + 999);
 			if (error) throw error;
 			result.push(...(data ?? []));
 			if (!data || data.length < 1000) return result;
@@ -200,9 +200,9 @@
 			return;
 		}
 		const [{ data: pl }, { data: cl }, { data: re }] = await Promise.all([
-			supabase.from('players').select('fcb_id, nom, club_fcb_id').in('fcb_id', ids),
-			supabase.from('clubs').select('fcb_id, nom'),
-			supabase
+			db.from('players').select('fcb_id, nom, club_fcb_id').in('fcb_id', ids),
+			db.from('clubs').select('fcb_id, nom'),
+			db
 				.from('ranking_entries')
 				.select('player_fcb_id, num_seq, posicio, mitjana_general')
 				.eq('modalitat_codi', 1)

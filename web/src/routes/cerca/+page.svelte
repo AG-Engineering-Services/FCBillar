@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabase';
+	import { db } from '$lib/db';
 
 	interface P {
 		fcb_id: string;
@@ -20,8 +20,8 @@
 	onMount(async () => {
 		try {
 			const [{ data: pl, error: ep }, { data: cl, error: ec }] = await Promise.all([
-				supabase.from('players').select('fcb_id, nom, club_fcb_id'),
-				supabase.from('clubs').select('fcb_id, nom')
+				db.from('players').select('fcb_id, nom, club_fcb_id'),
+				db.from('clubs').select('fcb_id, nom')
 			]);
 			if (ep) throw ep;
 			if (ec) throw ec;

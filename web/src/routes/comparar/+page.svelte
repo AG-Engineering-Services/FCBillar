@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase, type GameRow } from '$lib/supabase';
+	import { db, type GameRow } from '$lib/db';
 	import { theme } from '$lib/theme';
 
 	// Graella del gràfic SVG reactiva al tema (clar/fosc).
@@ -40,7 +40,7 @@
 	}
 
 	onMount(async () => {
-		const { data } = await supabase.from('players').select('fcb_id, nom');
+		const { data } = await db.from('players').select('fcb_id, nom');
 		allPlayers = (data ?? []).filter((p) => !p.fcb_id.startsWith('name:'));
 	});
 
@@ -59,13 +59,13 @@
 		q = '';
 		const color = COLORS[sel.length];
 		const [{ data: g }, { data: re }] = await Promise.all([
-			supabase
+			db
 				.from('games')
 				.select('*')
 				.or(`player1_fcb_id.eq.${p.fcb_id},player2_fcb_id.eq.${p.fcb_id}`)
 				.order('data_partida', { ascending: false })
 				.limit(1000),
-			supabase
+			db
 				.from('ranking_entries')
 				.select('num_seq, posicio, mitjana_general, modalitat_codi')
 				.eq('player_fcb_id', p.fcb_id)

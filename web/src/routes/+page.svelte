@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import {
-		supabase,
+		db,
 		type Modalitat,
 		type Snapshot,
 		type RankingRow,
 		type ProvisionalRow
-	} from '$lib/supabase';
+	} from '$lib/db';
 	import { clubMatches, playerMatches } from '$lib/search';
 
 	type SearchScope = 'tot' | 'jugador' | 'club';
@@ -107,7 +107,7 @@
 
 	onMount(async () => {
 		try {
-			const { data, error: e } = await supabase
+			const { data, error: e } = await db
 				.from('modalitats')
 				.select('codi_fcb, nom')
 				.order('codi_fcb');
@@ -125,12 +125,12 @@
 	async function loadSnapshots() {
 		if (selMod == null) return;
 		const [snapsRes, provRes] = await Promise.all([
-			supabase
+			db
 				.from('rankings')
 				.select('num_seq, any_pub, mes_pub')
 				.eq('modalitat_codi', selMod)
 				.order('num_seq', { ascending: false }),
-			supabase
+			db
 				.from('ranking_provisional')
 				.select(
 					'player_fcb_id, posicio_oficial, mitjana_oficial, posicio_provisional, mitjana_provisional, partides_post'
@@ -162,7 +162,7 @@
 		// posició/mitjana provisional sobreposada i reordenats per la provisional.
 		if (selSeq === 'prov') {
 			const latest = snapshots[0]?.num_seq ?? -1;
-			const { data, error: e } = await supabase
+			const { data, error: e } = await db
 				.from('ranking_full')
 				.select('posicio, player_fcb_id, jugador, club, mitjana_general, partides')
 				.eq('modalitat_codi', selMod)
@@ -189,7 +189,7 @@
 		}
 
 		// Vista d'un rànquing OFICIAL.
-		const { data, error: e } = await supabase
+		const { data, error: e } = await db
 			.from('ranking_full')
 			.select('posicio, player_fcb_id, jugador, club, mitjana_general, partides')
 			.eq('modalitat_codi', selMod)
