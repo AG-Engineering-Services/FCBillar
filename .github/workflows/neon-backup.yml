@@ -1,0 +1,77 @@
+name: Neon Backup
+
+# El pla Free de Neon no té snapshots programats, així que aquesta còpia és
+# l'única xarxa de seguretat de les 289.633 files de fcbillar i fcb_opens.
+# Fa un pg_dump complet: es pot restaurar tal qual i no es deixa cap taula,
+# cap funció ni cap política.
+
+on:
+  schedule:
+    - cron: '0 4 * * 0'  # cada diumenge a les 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout backups branch
+        uses: actions/checkout@v4
+        with:
+          ref: backups
+          fetch-depth: 1
+        continue-on-error: true
+
+      - name: Init backups branch if missing
+        run: |
+          if [ ! -d .git ]; then
+            git init
+            git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+            git checkout --orphan backups
+            git rm -rf . 2>/dev/null || true
+            echo "# Neon backups" > README.md
+            git add README.md
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "init backups branch"
+            git push -u origin backups
+          fi
+
+      - name: Install postgresql-client 17
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+            https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+
+      - name: Dump database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          DATE=$(date -u +%Y-%m-%d)
+          mkdir -p "backups/$DATE"
+          pg_dump --no-owner --no-privileges "$DATABASE_URL" \
+            | gzip > "backups/$DATE/fcbillar.sql.gz"
+          ls -la "backups/$DATE"
+          # Un bolcat d'aquesta base ronda els centenars de KB comprimits: si
+          # baixa d'aquí, alguna cosa ha fallat i val més aturar-se que desar-ho.
+          test "$(stat -c%s "backups/$DATE/fcbillar.sql.gz")" -gt 50000
+
+      - name: Commit and push backup
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backups/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "backup: $(date -u +%Y-%m-%d)"
+          git push origin HEAD:backups
