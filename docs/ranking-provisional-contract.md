@@ -8,7 +8,7 @@ clau pública `anon`); l'escriptura la fa el desktop via `fcbillar publish-cloud
 
 | | |
 |---|---|
-| Project URL | `https://unocmdvjuncqnzscrypg.supabase.co` |
+| Project URL | `https://ep-silent-resonance-b10v6qta.apirest.c-5.eu-central-1.aws.neon.tech/neondb` (Neon, des del 16/08/2026) |
 | Schema | `fcbillar` |
 | Clau (anon, pública) | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVub2NtZHZqdW5jcW56c2NyeXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1Mjc4NjIsImV4cCI6MjA3NjEwMzg2Mn0.nhPnwBRKkxL9re3Ik99frloldzf8MNtYszsQo2OkyiE` |
 
