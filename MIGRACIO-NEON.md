@@ -102,3 +102,20 @@ Si es torna a moure aquest projecte, cal actualitzar-lo també.
 Neon Free no té *snapshots* programats. El workflow `neon-backup.yml` fa un
 `pg_dump` complet setmanal a la branca `backups`. Necessita el secret
 `DATABASE_URL`.
+
+## Vinculació amb Supabase: cap
+
+Des del 16/08/2026 aquest projecte **no té cap dependència del nostre Supabase**.
+S'han retirat els secrets de GitHub (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`),
+les variables de Vercel (`PUBLIC_SUPABASE_*`) i el token de gestió que quedava al
+`.env` — cap d'ells s'usava.
+
+**L'única cosa que segueix parlant amb un Supabase és la biblioteca de billar**, i
+no és nostra: `szaxmylzfarikbqdufcm` és el projecte de **billiard-bible.com**, un
+servei extern del qual `web/src/lib/biblia/` consumeix l'API pública en només
+lectura, amb la clau anònima que ells mateixos publiquen. No hi tenim accés
+d'administració i no es pot migrar; només es podria deixar de fer servir si algun
+dia es retira aquella funcionalitat del web.
+
+La resta de mencions a «Supabase» que queden al codi són **noms i text**:
+`cmd_supabase_sync`, docstrings, l'etiqueta d'un checkbox i noms de fitxers SQL.
