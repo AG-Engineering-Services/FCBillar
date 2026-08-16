@@ -199,6 +199,53 @@ def aplica_traspassos(conn, pool: dict, rk: dict) -> None:
         pool[desti][pid] = agg
 
 
+# Clubs a menys de 40 km de Barcelona en línia recta, mesurats des de plaça
+# Catalunya amb les coordenades del directori de clubs de la FCB
+# (docs/ajuts-desplacaments/geocodes.json; els que el geocodificador no va
+# resoldre, pel centre del municipi). El tall cau en un buit ample: l'últim que
+# hi entra és Llinars a 34,4 km i el primer que en queda fora, Canet a 41,1.
+PROP_BCN = frozenset({
+    "B. EL MASNOU", "B.C.GRANOLLERS", "B.C.SANT FELIU DE CODINES", "B.LA UNIÓ CORAL", "BC OLESA",
+    "C.B.2000 CERDANYOLA", "C.B.ALBA", "C.B.BARCELONA", "C.B.LLINARS", "C.B.LLIÇÀ D'AMUNT",
+    "C.B.MATARÓ", "C.B.MOLLET", "C.B.MONFORTE", "C.B.PRAT", "C.B.PREMIÀ", "C.B.SANT ADRIÀ",
+    "C.B.SANT BOI", "C.B.SANTS", "S.B.CORAL COLÓN", "S.B.ESPLUGUES L'AVENÇ", "SB FOMENT MOLINS",
+})
+
+
+# Acords interns de club per al 2026-27. Les bandes diuen qui POT jugar a cada
+# equip; qui hi juga de fet el tria el club, i això el rànquing no ho endevina.
+#
+# C.B. Banyoles: l'Albert Gómez juga amb l'A i el Ferran Rodríguez amb el B,
+# encara que la llista els posi a l'inrevés —el Ferran és el nº4 i l'Albert el
+# nº5, tots dos de la banda del B (4-8), o sigui que qualsevol dels dos pot fer
+# la quarta taula de l'A. Es permuten només les jornades en què l'A juga a casa
+# i alhora el B es desplaça a prop de Barcelona.
+ACORDS: dict[str, dict] = {
+    "C.B.BANYOLES": dict(
+        fixats={"GÓMEZ AMETLLER, ALBERT": "A", "RODRÍGUEZ NAVARRA, FERRÁN": "B"},
+        permuta=dict(local="A", visita="B"),
+        nota="L'Albert Gómez juga amb l'A i el Ferran Rodríguez amb el B. Es permuten "
+             "les jornades en què l'A juga a casa i el B es desplaça a menys de 40 km "
+             "de Barcelona.",
+    ),
+}
+
+
+def fixats_de(club: str, llista: list[dict]) -> dict[int, str]:
+    """Els números de la llista compromesos amb un equip concret per acord de club."""
+    ac = ACORDS.get(club)
+    if not ac:
+        return {}
+    per_nom = {p["nom"]: p["num"] for p in llista}
+    out = {}
+    for nom, lletra in ac["fixats"].items():
+        if nom not in per_nom:
+            print(f"AVÍS: acord de {club} amb un jugador que no hi és -> {nom}", file=sys.stderr)
+            continue
+        out[per_nom[nom]] = lletra
+    return out
+
+
 # Repartiments de la llista única en bandes. Els clubs inscriuen tots els jugadors
 # en una sola llista i la federació els ordena per rànquing; la banda diu a quin
 # equip pot jugar cadascú, i sempre pot fer de suplent dels equips que té per sobre.
@@ -420,11 +467,16 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
     cal = {k: calendari(len(ids)) for k, ids in per_grup.items()}
     n_jor = max(len(v) for v in cal.values())
     juga: list[set[int]] = [set() for _ in equips]
+    # amb qui i on juga cada equip a cada jornada: (rival, és local?)
+    enfront: list[dict[int, tuple[int, bool]]] = [{} for _ in equips]
     for k, ids in per_grup.items():
         for j, jornada in enumerate(cal[k]):
             for il, iv in jornada:
-                juga[ids[il]].add(j)
-                juga[ids[iv]].add(j)
+                loc, vis = ids[il], ids[iv]
+                juga[loc].add(j)
+                juga[vis].add(j)
+                enfront[loc][j] = (vis, True)
+                enfront[vis][j] = (loc, False)
 
     # --- clubs: equips per ordre de categoria i jugadors amb la seva banda --
     clubs: dict[str, dict] = {}
@@ -453,6 +505,30 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
         c["jug"] = [(p["num"], p["mitjana"], min(1.0, p["taxa"] * f),
                      LLETRA_ORD[banda_de(p["num"], "fcb")])
                     for p in per_club[nom]["llista"]]
+
+    # --- acords de club: qui va compromès amb quin equip, i en quines jornades
+    # els dos implicats es permuten. Es mira sobre el calendari, que ja diu on
+    # juga cada equip cada jornada.
+    acords: dict[str, dict] = {}
+    for nom, c in clubs.items():
+        c["fix"] = None
+        ac = ACORDS.get(nom)
+        if not ac:
+            continue
+        fixats = {n: LLETRA_ORD[lt]
+                  for n, lt in fixats_de(nom, per_club[nom]["llista"]).items()}
+        idx = {equips[i]["lletra"]: i for i, _ in c["equips"]}
+        la, lv = ac["permuta"]["local"], ac["permuta"]["visita"]
+        if not fixats or la not in idx or lv not in idx:
+            continue
+        permuta = {j for j in range(n_jor)
+                   if (casa := enfront[idx[la]].get(j)) and casa[1]
+                   and (fora := enfront[idx[lv]].get(j)) and not fora[1]
+                   and equips[fora[0]]["club"] in PROP_BCN}
+        canvi = {LLETRA_ORD[la]: LLETRA_ORD[lv], LLETRA_ORD[lv]: LLETRA_ORD[la]}
+        c["fix"] = (fixats, {n: canvi.get(o, o) for n, o in fixats.items()}, permuta)
+        acords[nom] = dict(jornades_permuta=sorted(j + 1 for j in permuta),
+                           jornades=len(juga[idx[la]]))
     llista_clubs = list(clubs.values())
 
     n_eq = len(equips)
@@ -496,6 +572,18 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
                 #    pujar-ne si en queden prou per als de sota; sense aquest
                 #    límit, l'A i el B buiden la banda de l'últim equip.
                 disp = {pj[0] for pj in c["jug"] if aleatori() < pj[2]}
+                # 1b) Acords del club, que manen per sobre de la mitjana: qui hi
+                #     va compromès juga amb el seu equip i no compta per als
+                #     altres. Si un dels implicats no és disponible l'acord no es
+                #     pot complir i la jornada es reparteix com sempre.
+                fix: dict[int, int] = {}
+                if c["fix"]:
+                    base, permutat, jornades = c["fix"]
+                    ordres = {o for _, o in juguen}
+                    fix = {n: o for n, o in (permutat if j in jornades else base).items()
+                           if o in ordres}
+                    if not all(n in disp for n in fix):
+                        fix = {}
                 usats: set[int] = set()
                 repartiment: list[tuple[int, tuple]] = []
                 for n_fets, (idx_eq, ordre_eq) in enumerate(juguen):
@@ -504,7 +592,10 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
                     for pj in c["jug"]:
                         if pj[0] in usats or pj[0] not in disp:
                             continue
-                        if pj[3] == ordre_eq:
+                        compromes = fix.get(pj[0])
+                        if compromes is not None and compromes != ordre_eq:
+                            continue  # el club el té promès a un altre equip
+                        if compromes == ordre_eq or pj[3] == ordre_eq:
                             propis.append(pj)
                         elif pj[3] > ordre_eq:
                             sota.append(pj)
@@ -642,7 +733,7 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
             pos_mitjana=round(suma_pos[i] / n_sims, 2),
         )
         for i, e in enumerate(equips)
-    }
+    }, acords
 
 
 def forma_grups(ordre: list[tuple[str, str]]) -> tuple[list[int], list[int], list[dict]]:
@@ -836,9 +927,16 @@ def build(db: str = DB) -> dict:
                        lletra_2526=("" if antiga == "UNICO" else antiga),
                        div_2526=prev_div.get((club, antiga)), motiu=MOTIU.get((club, antiga)))
                   for _, lt, dv, antiga in teams]
-        out["clubs"].append(dict(
-            club=club, nom=nom_club(club), equips=equips, llista=llista, multi=multi,
-        ))
+        # Acord de club: la llista continua ordenada pel rànquing, però hi ha
+        # jugadors compromesos amb un equip concret al marge de la mitjana.
+        fixats = fixats_de(club, llista)
+        for p in llista:
+            if p["num"] in fixats:
+                p["fixat"] = fixats[p["num"]]
+        fitxa = dict(club=club, nom=nom_club(club), equips=equips, llista=llista, multi=multi)
+        if fixats:
+            fitxa["acord"] = dict(nota=ACORDS[club]["nota"], **ACORDS[club]["permuta"])
+        out["clubs"].append(fitxa)
 
     # La vista per divisió només guarda la referència a l'equip; els quatre titulars
     # i la mitjana d'equip es deriven de la llista del club amb el repartiment actiu.
@@ -863,10 +961,13 @@ def build(db: str = DB) -> dict:
 
     # El pronòstic es fa amb TOTA la lliga alhora, no grup per grup: cal, perquè
     # un jugador no pot jugar la mateixa jornada amb dos equips del seu club.
-    pron = simula_lliga(per_club, out["divisions"], N_SIMS)
+    pron, acords = simula_lliga(per_club, out["divisions"], N_SIMS)
     for div, dades in out["divisions"].items():
         for e in dades["equips"]:
             e.update(pron[(div, e["seed"])])
+    for c in out["clubs"]:
+        if c["club"] in acords and "acord" in c:
+            c["acord"].update(acords[c["club"]])
     return out
 
 
@@ -887,6 +988,13 @@ if __name__ == "__main__":
             eq = " · ".join(f"{e['lletra']} a {e['divisio']}" for e in c["equips"])
             lletres = [e["lletra"] for e in c["equips"]]
             print(f"\n{'=' * 72}\n{c['club']}   [{eq}]")
+            if c.get("acord"):
+                jor = c["acord"].get("jornades_permuta") or []
+                print(f"  acord: {c['acord']['nota']}"
+                      + (f" Jornades: {', '.join(map(str, jor))}." if jor else ""))
+            # amb el 3-5-4-4 la quarta taula de l'A surt de la banda del B: és el
+            # nº4, o qui el club hi tingui compromès
+            swing = next((p["num"] for p in c["llista"] if p.get("fixat") == lletres[0]), 4)
             vist = None
             for p in c["llista"]:
                 b = banda_de(p["num"], esq)
@@ -897,6 +1005,8 @@ if __name__ == "__main__":
                     print(f"  -- banda {b}: {rol} --")
                 mk = (f"  <- {p['de_club']}" if p["de_club"]
                       else "  (reincorporacio)" if p["retorn"] else "")
-                sw = ("  (nº4: limitat amb el B)"
-                      if esq == "fcb" and p["num"] == 4 and c["multi"] else "")
-                print(f"    {p['num']:3d}. {p['nom']:34s} {p['mitjana']:.4f}{sw}{mk}")
+                sw = (f"  (nº{swing}: limitat amb el B)"
+                      if esq == "fcb" and p["num"] == swing and c["multi"] else "")
+                fx = ("  [fixat a l'A]" if p.get("fixat") == "A"
+                      else f"  [fixat al {p['fixat']}]" if p.get("fixat") else "")
+                print(f"    {p['num']:3d}. {p['nom']:34s} {p['mitjana']:.4f}{sw}{fx}{mk}")

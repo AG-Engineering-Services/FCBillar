@@ -1520,7 +1520,8 @@
      "retorn": false,
      "pj": 13,
      "temporades": 2,
-     "taxa": 0.897
+     "taxa": 0.897,
+     "fixat": "B"
     },
     {
      "num": 5,
@@ -1531,7 +1532,8 @@
      "retorn": false,
      "pj": 13,
      "temporades": 2,
-     "taxa": 0.929
+     "taxa": 0.929,
+     "fixat": "A"
     },
     {
      "num": 6,
@@ -1688,7 +1690,19 @@
      "taxa": 0.43
     }
    ],
-   "multi": true
+   "multi": true,
+   "acord": {
+    "nota": "L'Albert Gómez juga amb l'A i el Ferran Rodríguez amb el B. Es permuten les jornades en què l'A juga a casa i el B es desplaça a menys de 40 km de Barcelona.",
+    "local": "A",
+    "visita": "B",
+    "jornades_permuta": [
+     1,
+     3,
+     11,
+     13
+    ],
+    "jornades": 14
+   }
   },
   {
    "club": "C.B.BARCELONA",
@@ -8184,9 +8198,9 @@
       1,
       2,
       3,
-      4
+      5
      ],
-     "p_alineacio": 0.902,
+     "p_alineacio": 0.687,
      "taules": [
       {
        "num": 1,
@@ -8204,9 +8218,9 @@
        "p": 0.978
       },
       {
-       "num": 4,
+       "num": 5,
        "taula": 4,
-       "p": 0.902
+       "p": 0.687
       }
      ],
      "presencia": [
@@ -8223,23 +8237,27 @@
        "p": 0.978
       },
       {
-       "num": 4,
-       "p": 0.922
+       "num": 5,
+       "p": 0.703
       },
       {
-       "num": 5,
-       "p": 0.094
+       "num": 4,
+       "p": 0.294
       },
       {
        "num": 6,
-       "p": 0.005
+       "p": 0.024
       },
       {
        "num": 7,
-       "p": 0.0
+       "p": 0.002
       },
       {
        "num": 8,
+       "p": 0.0
+      },
+      {
+       "num": 9,
        "p": 0.0
       },
       {
@@ -8249,17 +8267,13 @@
       {
        "num": 11,
        "p": 0.0
-      },
-      {
-       "num": 9,
-       "p": 0.0
       }
      ],
-     "p_1r": 0.1722,
-     "p_2n": 0.7011,
-     "p_penultim": 0.0,
+     "p_1r": 0.1126,
+     "p_2n": 0.687,
+     "p_penultim": 0.0002,
      "p_ultim": 0.0,
-     "pos_mitjana": 1.96
+     "pos_mitjana": 2.11
     },
     {
      "seed": 3,
@@ -8317,11 +8331,11 @@
        "p": 1.0
       }
      ],
-     "p_1r": 0.0103,
-     "p_2n": 0.1233,
-     "p_penultim": 0.0017,
+     "p_1r": 0.0138,
+     "p_2n": 0.1846,
+     "p_penultim": 0.0018,
      "p_ultim": 0.0002,
-     "pos_mitjana": 3.07
+     "pos_mitjana": 2.99
     },
     {
      "seed": 4,
@@ -8450,8 +8464,8 @@
       }
      ],
      "p_1r": 0.0,
-     "p_2n": 0.0048,
-     "p_penultim": 0.0758,
+     "p_2n": 0.0097,
+     "p_penultim": 0.0765,
      "p_ultim": 0.03,
      "pos_mitjana": 4.75
     },
@@ -8574,10 +8588,10 @@
       }
      ],
      "p_1r": 0.0,
-     "p_2n": 0.0005,
-     "p_penultim": 0.1912,
-     "p_ultim": 0.1151,
-     "pos_mitjana": 5.72
+     "p_2n": 0.0013,
+     "p_penultim": 0.1903,
+     "p_ultim": 0.1111,
+     "pos_mitjana": 5.71
     },
     {
      "seed": 8,
@@ -8856,10 +8870,10 @@
       }
      ],
      "p_1r": 0.0,
-     "p_2n": 0.0003,
-     "p_penultim": 0.2622,
-     "p_ultim": 0.2282,
-     "pos_mitjana": 6.32
+     "p_2n": 0.0005,
+     "p_penultim": 0.2663,
+     "p_ultim": 0.2304,
+     "pos_mitjana": 6.34
     },
     {
      "seed": 11,
@@ -8918,9 +8932,9 @@
       }
      ],
      "p_1r": 0.0,
-     "p_2n": 0.0005,
-     "p_penultim": 0.2205,
-     "p_ultim": 0.1528,
+     "p_2n": 0.0012,
+     "p_penultim": 0.2177,
+     "p_ultim": 0.1566,
      "pos_mitjana": 5.96
     },
     {
@@ -9204,10 +9218,10 @@
       }
      ],
      "p_1r": 0.0,
-     "p_2n": 0.0,
-     "p_penultim": 0.2486,
-     "p_ultim": 0.4737,
-     "pos_mitjana": 7.02
+     "p_2n": 0.0001,
+     "p_penultim": 0.2472,
+     "p_ultim": 0.4717,
+     "pos_mitjana": 7.01
     },
     {
      "seed": 15,
@@ -9289,11 +9303,11 @@
        "p": 0.0
       }
      ],
-     "p_1r": 0.8175,
-     "p_2n": 0.1695,
+     "p_1r": 0.8736,
+     "p_2n": 0.1156,
      "p_penultim": 0.0,
      "p_ultim": 0.0,
-     "pos_mitjana": 1.2
+     "pos_mitjana": 1.14
     },
     {
      "seed": 16,
@@ -9563,11 +9577,11 @@
        "p": 0.002
       }
      ],
-     "p_1r": 0.0245,
-     "p_2n": 0.0737,
-     "p_penultim": 0.1544,
-     "p_ultim": 0.1359,
-     "pos_mitjana": 5.17
+     "p_1r": 0.021,
+     "p_2n": 0.0594,
+     "p_penultim": 0.1557,
+     "p_ultim": 0.1333,
+     "pos_mitjana": 5.21
     },
     {
      "seed": 3,
@@ -9641,11 +9655,11 @@
        "p": 0.001
       }
      ],
-     "p_1r": 0.5886,
-     "p_2n": 0.2348,
+     "p_1r": 0.5046,
+     "p_2n": 0.292,
      "p_penultim": 0.0041,
-     "p_ultim": 0.0017,
-     "pos_mitjana": 1.72
+     "p_ultim": 0.0019,
+     "pos_mitjana": 1.85
     },
     {
      "seed": 4,
@@ -9875,11 +9889,11 @@
        "p": 0.0
       }
      ],
-     "p_1r": 0.0108,
-     "p_2n": 0.0445,
-     "p_penultim": 0.2013,
-     "p_ultim": 0.215,
-     "pos_mitjana": 5.76
+     "p_1r": 0.0089,
+     "p_2n": 0.0376,
+     "p_penultim": 0.2049,
+     "p_ultim": 0.2101,
+     "pos_mitjana": 5.78
     },
     {
      "seed": 7,
@@ -10023,11 +10037,11 @@
        "p": 0.052
       }
      ],
-     "p_1r": 0.0569,
-     "p_2n": 0.1293,
-     "p_penultim": 0.0987,
-     "p_ultim": 0.0666,
-     "pos_mitjana": 4.33
+     "p_1r": 0.0484,
+     "p_2n": 0.1136,
+     "p_penultim": 0.0977,
+     "p_ultim": 0.0653,
+     "pos_mitjana": 4.38
     },
     {
      "seed": 9,
@@ -10199,11 +10213,11 @@
        "p": 0.001
       }
      ],
-     "p_1r": 0.0102,
-     "p_2n": 0.0351,
-     "p_penultim": 0.2058,
-     "p_ultim": 0.2564,
-     "pos_mitjana": 5.95
+     "p_1r": 0.006,
+     "p_2n": 0.0302,
+     "p_penultim": 0.2099,
+     "p_ultim": 0.2622,
+     "pos_mitjana": 6.02
     },
     {
      "seed": 11,
@@ -10215,17 +10229,17 @@
      "div_2526": "2a",
      "motiu": null,
      "alineacio": [
-      5,
+      4,
       6,
       7,
       8
      ],
-     "p_alineacio": 0.566,
+     "p_alineacio": 0.404,
      "taules": [
       {
-       "num": 5,
+       "num": 4,
        "taula": 1,
-       "p": 0.861
+       "p": 0.629
       },
       {
        "num": 6,
@@ -10246,23 +10260,27 @@
      "presencia": [
       {
        "num": 7,
-       "p": 0.929
+       "p": 0.928
       },
       {
        "num": 6,
-       "p": 0.924
-      },
-      {
-       "num": 5,
-       "p": 0.861
+       "p": 0.905
       },
       {
        "num": 8,
        "p": 0.76
       },
       {
+       "num": 4,
+       "p": 0.629
+      },
+      {
        "num": 9,
-       "p": 0.298
+       "p": 0.297
+      },
+      {
+       "num": 5,
+       "p": 0.251
       },
       {
        "num": 10,
@@ -10303,17 +10321,13 @@
       {
        "num": 19,
        "p": 0.0
-      },
-      {
-       "num": 4,
-       "p": 0.0
       }
      ],
-     "p_1r": 0.2524,
-     "p_2n": 0.3395,
-     "p_penultim": 0.0218,
-     "p_ultim": 0.0088,
-     "pos_mitjana": 2.63
+     "p_1r": 0.3643,
+     "p_2n": 0.3472,
+     "p_penultim": 0.01,
+     "p_ultim": 0.0037,
+     "pos_mitjana": 2.18
     },
     {
      "seed": 12,
@@ -10551,11 +10565,11 @@
        "p": 1.0
       }
      ],
-     "p_1r": 0.0437,
-     "p_2n": 0.1057,
-     "p_penultim": 0.1146,
-     "p_ultim": 0.0887,
-     "pos_mitjana": 4.63
+     "p_1r": 0.037,
+     "p_2n": 0.0908,
+     "p_penultim": 0.1151,
+     "p_ultim": 0.0866,
+     "pos_mitjana": 4.67
     },
     {
      "seed": 15,
@@ -10629,11 +10643,11 @@
        "p": 0.007
       }
      ],
-     "p_1r": 0.0129,
-     "p_2n": 0.0374,
-     "p_penultim": 0.1993,
-     "p_ultim": 0.2269,
-     "pos_mitjana": 5.82
+     "p_1r": 0.0098,
+     "p_2n": 0.0292,
+     "p_penultim": 0.2026,
+     "p_ultim": 0.2369,
+     "pos_mitjana": 5.9
     },
     {
      "seed": 16,

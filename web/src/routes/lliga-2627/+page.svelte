@@ -20,6 +20,17 @@
 		pj: number;
 		taxa: number;
 		temporades: number;
+		/** Equip amb què el club l'ha compromès, al marge del que digui la banda. */
+		fixat?: string;
+	};
+	/** Acord intern d'un club sobre qui juga a quin equip, amb les jornades en què
+	 *  els dos jugadors implicats es permuten. */
+	type Acord = {
+		nota: string;
+		local: string;
+		visita: string;
+		jornades_permuta: number[];
+		jornades: number;
 	};
 	type Equip = {
 		lletra: string;
@@ -30,7 +41,14 @@
 		div_2526: string;
 		motiu: string | null;
 	};
-	type Club = { club: string; nom: string; multi: boolean; equips: Equip[]; llista: Jugador[] };
+	type Club = {
+		club: string;
+		nom: string;
+		multi: boolean;
+		equips: Equip[];
+		llista: Jugador[];
+		acord?: Acord;
+	};
 	type EquipDiv = {
 		seed: number;
 		alineacio: number[];
@@ -109,10 +127,27 @@
 		for (let i = 0; i < t.length; i++) if (num <= t[i]) return LLETRES[i];
 		return 'E';
 	}
+	/** Els acords de club manen per sobre de la banda: qui hi va compromès juga amb
+	 *  el seu equip encara que la llista el posi a un altre, i no compta per als
+	 *  altres equips. Al Banyoles són el nº4 i el nº5, tots dos de la banda del B:
+	 *  qualsevol dels dos pot fer la quarta taula de l'A i el club tria qui. */
+	function ambAcord(llista: Jugador[], lletra: string, quatre: Jugador[]): Jugador[] {
+		const fixats = llista.filter((p) => p.fixat);
+		if (!fixats.length) return quatre;
+		const fora = new Set(fixats.filter((p) => p.fixat !== lletra).map((p) => p.num));
+		const dins = quatre.filter((p) => !fora.has(p.num));
+		for (const p of fixats)
+			if (p.fixat === lletra && !dins.some((x) => x.num === p.num)) dins.push(p);
+		return dins.sort((a, b) => a.num - b.num);
+	}
 	/** Els quatre que formen l'alineació d'un equip en jornada regular. */
 	function referents(llista: Jugador[], lletra: string, esq: Esquema): Jugador[] {
 		const s = ESQUEMES[esq].inici[lletra];
-		return llista.filter((p) => p.num >= s && p.num <= s + 3);
+		return ambAcord(
+			llista,
+			lletra,
+			llista.filter((p) => p.num >= s && p.num <= s + 3)
+		);
 	}
 	/** Tota la banda d'un equip: titulars i suplents. */
 	function bandaDe(llista: Jugador[], lletra: string, esq: Esquema): Jugador[] {
@@ -325,7 +360,12 @@
 	}
 	const puja = (m: string | null) => !!m && m.startsWith('puja');
 	const baixa = (m: string | null) => !!m && m.startsWith('baixa');
-	const esSwing = (p: Jugador, c: Club) => esquema === 'fcb' && p.num === 4 && c.multi;
+	// El jugador frontissa del 3-5-4-4 és el nº4, que fa la quarta taula de l'A. Als
+	// clubs amb acord, però, qui puja a l'A el tria el club, i va marcat com a fixat.
+	const esSwing = (p: Jugador, c: Club) =>
+		esquema === 'fcb' && p.num === 4 && c.multi && !c.acord;
+	const etiquetaFixat = (p: Jugador) =>
+		p.fixat ? `⚑ fixat ${p.fixat === 'A' ? "a l'A" : `al ${p.fixat}`}` : '';
 	const FAV: Record<string, { text: string; classe: string }> = {
 		p_1r: { text: '1r', classe: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' },
 		p_2n: { text: '2n', classe: 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300' },
@@ -586,6 +626,11 @@
 								banda <span class="font-mono">{ESQUEMES[esquema].rangs[x.e.lletra]}</span> de la llista
 								del club{#if x.e.motiu}&nbsp;· {x.e.motiu}{/if}
 							</p>
+							{#if x.club.acord && [x.club.acord.local, x.club.acord.visita].includes(x.e.lletra)}
+								<p class="ml-7 text-[11px] leading-snug text-amber-600 dark:text-amber-400">
+									⚑ {x.club.acord.nota}
+								</p>
+							{/if}
 							{#if esquema !== 'prob'}
 							<p class="ml-7 mt-0.5 text-[11px] leading-snug">
 								<span class="font-semibold text-slate-600 dark:text-slate-300"
@@ -630,6 +675,9 @@
 												>{:else if esSwing(f.p, x.club)}<span
 													class="ml-1 text-[10px] text-amber-600 dark:text-amber-400"
 													>{f.titular ? 'nº4' : "nº4 · juga amb l'A"}</span
+												>{/if}{#if f.p.fixat}<span
+													class="ml-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
+													>{etiquetaFixat(f.p)}</span
 												>{/if}
 										</span>
 										<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400"
@@ -680,6 +728,16 @@
 						</span>
 					{/each}
 				</div>
+				{#if c.acord}
+					<p class="mt-1.5 text-[11px] leading-snug text-amber-700 dark:text-amber-400">
+						<span class="font-semibold">⚑ Acord de club.</span>
+						{c.acord.nota}
+						<span class="text-slate-500 dark:text-slate-400"
+							>Al calendari del simulador la permuta cau en {c.acord.jornades_permuta.length} de les
+							{c.acord.jornades} jornades.</span
+						>
+					</p>
+				{/if}
 			</header>
 
 			{#each bandes(c) as fila}
@@ -727,6 +785,11 @@
 						{:else if esSwing(fila.p, c)}
 							<span class="block text-[10px] text-amber-600 dark:text-amber-400"
 								>nº 4: mínim 6 jornades amb el B per jugar-hi les decisives</span
+							>
+						{/if}
+						{#if fila.p.fixat}
+							<span class="block text-[10px] font-semibold text-amber-600 dark:text-amber-400"
+								>{etiquetaFixat(fila.p)} per acord de club</span
 							>
 						{/if}
 						{#if equipsDe(c, fila.p.num).length}
@@ -831,6 +894,20 @@
 			jugadors propis, o sigui que el quart de cada encontre surt de les suplències; i el nº 4, als
 			clubs amb més d'un equip, només pot jugar les dues últimes jornades regulars i les finals o
 			promocions amb el B si abans hi ha fet un mínim de 6 jornades (Assemblea 03/06/23).
+		</p>
+		<p>
+			<b>Acords de club.</b> La llista va ordenada pel rànquing i la banda diu qui <i>pot</i> jugar
+			a cada equip, però qui hi juga de fet el tria el club. Els compromisos que coneixem van marcats
+			amb <b>⚑</b> i manen per sobre de la mitjana, tant a les plantilles com al pronòstic. De moment
+			n'hi ha un: al <b>C.B. Banyoles</b>, l'<b>Albert Gómez</b> (nº 5) juga amb l'A i el
+			<b>Ferran Rodríguez</b> (nº 4) amb el B. Tots dos són de la banda 4-8, o sigui que qualsevol
+			dels dos pot fer la quarta taula de l'A i el club tria qui; aquí la fa l'Albert i no el nº 4.
+			Es permuten les jornades en què l'A juga a casa i alhora el B es desplaça a menys de 40 km de
+			Barcelona —dels set desplaçaments del B n'hi entren cinc: Sants, Sant Boi, Molins de Rei,
+			Premià i Llinars, i en queden fora Tarragona i Cardona. Al calendari de doble volta del
+			simulador la coincidència cau en 4 de les 14 jornades, però el calendari oficial del 2026-27
+			encara no existeix i el nombre exacte pot ballar. Si un dels dos no està disponible, la
+			jornada es reparteix com sempre.
 		</p>
 		<p>
 			<b>Repartiment <span class="font-mono">4-4-4-4-4</span>.</b> 1-4 equip A; 5-8 el B; 9-12 el C;
