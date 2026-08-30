@@ -158,11 +158,15 @@ TRASPASSOS = [
     ("GARRIGA COMAS, JORDI", "C.B.MATARÓ"),
     ("SÁNCHEZ GALLEGO, JOEL", "C.B.MATARÓ"),
     ("MULA CALLEJÓN, FRANCISCO", "C.B.SANTS"),
-    ("SÁNCHEZ MARTÍNEZ, PASCUAL", "C.B.SANTS"),
     ("MERCADER BOSCH, JOSEP", "C.B.BANYOLES"),
     ("ROCHA VERA, JEFERSON", "C.B.MONFORTE"),
     ("MARTÍN LIMA, MELCHOR", "S.B.LA GRAN PENYA"),
+    ("LÓPEZ BALBOA, ALEJANDRO", "SB FOMENT MOLINS"),
 ]
+
+# El PASCUAL SÁNCHEZ MARTÍNEZ no hi és a posta. A la BD federativa hi consta amb
+# llicència del C.B.SANTS, però al Sants no hi jugarà; mentre no se sàpiga on va,
+# el deixem al Sant Boi, que és on va jugar el 2025-26.
 
 
 def aplica_traspassos(conn, pool: dict, rk: dict) -> None:
