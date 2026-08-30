@@ -777,87 +777,89 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
     }, acords
 
 
+class RepartimentImpossible(ValueError):
+    """No hi ha manera de repartir la divisió sense ajuntar equips d'un club."""
+
+
 def forma_grups(
     ordre: list[tuple[str, str]], n_grups: int = 2
-) -> tuple[list[list[int]], list[dict]]:
-    """Reparteix una divisió en grups pel serpentí sobre l'ordre de sembra, i hi
-    fa les permutes necessàries perquè dos equips d'un mateix club no coincideixin.
+) -> tuple[list[list[int]], list[int]]:
+    """Reparteix una divisió en grups respectant l'ordre de sembra i sense
+    ajuntar mai dos equips d'un mateix club.
 
-    Amb dos grups el serpentí és l'A-B-B-A de sempre: 1-4-5-8-9-12-13-16 al grup A
-    i 2-3-6-7-10-11-14-15 al B. Amb quatre —la 4a divisió— és el mateix estirat:
-    1-8-9-16… al A, 2-7-10-15… al B, i així.
+    El punt de partida és el serpentí: amb dos grups, 1-4-5-8-9-12-13-16 al A i
+    2-3-6-7-10-11-14-15 al B; amb quatre —la 4a divisió— el mateix estirat. Però
+    el serpentí sol no garanteix la regla de club, i reparar-lo amb intercanvis
+    d'un en un no és fiable: hi ha repartiments vàlids als quals no s'hi arriba
+    amb cap intercanvi simple, i una versió anterior es rendia i publicava un
+    repartiment dolent —Sant Feliu A i B junts a la 4a del 2026-27.
 
-    Es mou sempre el SEGON equip del club dins del grup, no el primer, i
-    s'intercanvia amb l'equip que ocupa el mateix slot a un altre grup on el club
-    no hi sigui. Així l'equip millor classificat es queda on el posa la sembra i
-    el moviment és el mínim possible: els slots homòlegs són sempre posicions
-    consecutives de l'ordre oficial.
+    Per això l'assignació es fa de debò: es recorren els equips en ordre de
+    sembra i cadascun va al grup que li tocaria, o al més proper que l'admeti,
+    amb marxa enrere quan un camí no porta enlloc. Amb divisions d'aquesta mida
+    és immediat, i té la propietat que importa: **si hi ha una manera de
+    repartir-los, la troba**. Si no n'hi ha —un club amb més equips que grups té
+    la divisió— aixeca `RepartimentImpossible` en comptes de publicar un
+    repartiment invàlid.
 
-    Retorna les posicions (0-based) de cada grup i les permutes fetes."""
+    Retorna les posicions (0-based) de cada grup i els seeds (1-based) que han
+    acabat en un grup diferent del que els donava el serpentí.
+    """
     n = len(ordre)
-    grups: list[list[int]] = [[] for _ in range(n_grups)]
+    # El grup que el serpentí voldria per a cada posició, i quants equips hi
+    # caben a cada grup.
+    desitjat = []
     for p in range(n):
         volta, dins = divmod(p, n_grups)
-        grups[dins if volta % 2 == 0 else n_grups - 1 - dins].append(p)
+        desitjat.append(dins if volta % 2 == 0 else n_grups - 1 - dins)
+    capacitat = collections.Counter(desitjat)
 
-    def clubs_de(g: int) -> collections.Counter:
-        return collections.Counter(ordre[i][0] for i in grups[g])
+    quants = collections.Counter(club for club, _ in ordre)
+    massa = {c: k for c, k in quants.items() if k > n_grups}
+    if massa:
+        detall = ", ".join(f"{c} ({k} equips)" for c, k in sorted(massa.items()))
+        raise RepartimentImpossible(
+            f"{detall} i només {n_grups} grups: no hi ha cap repartiment que no "
+            f"ajunti dos equips del mateix club."
+        )
 
-    def segon_repetit() -> tuple[int, int, int] | None:
-        """El primer cas de dos equips del mateix club en un grup: en retorna el segon."""
-        for g, lst in enumerate(grups):
-            vistos: set[str] = set()
-            for slot, i in enumerate(lst):
-                club = ordre[i][0]
-                if club in vistos:
-                    return g, slot, i
-                vistos.add(club)
-        return None
+    assignat = [-1] * n
+    ocupats = [0] * n_grups
+    clubs: list[set[str]] = [set() for _ in range(n_grups)]
 
-    permutes: list[dict] = []
-    for _ in range(200):
-        objectiu = segon_repetit()
-        if objectiu is None:
-            break
-        g, slot, i = objectiu
-        club = ordre[i][0]
-        compte_g = clubs_de(g)
-
-        # L'intercanvi ha de ser bo EN ELS DOS SENTITS. Mirar només si el club
-        # que entra cap al grup destí no n'hi ha prou: si el que en surt xoca
-        # amb el grup d'origen, la permuta següent el torna a lloc i les dues es
-        # desfan l'una a l'altra. És el que passava a la 4a amb el Sant Feliu i
-        # el Mataró.
-        millor = None
-        for h in range(n_grups):
-            if h == g:
+    def prova(p: int) -> bool:
+        if p == n:
+            return True
+        club = ordre[p][0]
+        # Primer el grup que li toca pel serpentí, després els del costat: així
+        # el repartiment s'assembla tant com pot al de la sembra.
+        for g in sorted(
+            range(n_grups),
+            key=lambda g: (g != desitjat[p], abs(g - desitjat[p]), g),
+        ):
+            if ocupats[g] >= capacitat[g] or club in clubs[g]:
                 continue
-            compte_h = clubs_de(h)
-            # Es prova primer el slot homòleg —el moviment mínim— i després els
-            # de més a prop, perquè l'equip es quedi tan amunt com es pugui.
-            for s2 in sorted(range(len(grups[h])), key=lambda s: (abs(s - slot), s)):
-                j = grups[h][s2]
-                club_j = ordre[j][0]
-                if club_j == club:
-                    continue  # canviar-lo per un altre equip del mateix club no arregla res
-                cap_a_h = compte_h[club] - (1 if club_j == club else 0) == 0
-                cap_a_g = compte_g[club_j] - (1 if club == club_j else 0) == 0
-                if cap_a_h and cap_a_g:
-                    millor = (h, s2, j)
-                    break
-            if millor is not None:
-                break
+            assignat[p] = g
+            ocupats[g] += 1
+            clubs[g].add(club)
+            if prova(p + 1):
+                return True
+            assignat[p] = -1
+            ocupats[g] -= 1
+            clubs[g].discard(club)
+        return False
 
-        if millor is None:
-            # No hi ha cap intercanvi que arregli aquest xoc sense fer-ne un
-            # altre. Passa si un club té més equips que grups té la divisió, i
-            # llavors no és un error de repartiment: és impossible.
-            break
+    if not prova(0):
+        raise RepartimentImpossible(
+            f"No he trobat cap manera de repartir {n} equips en {n_grups} grups "
+            f"sense ajuntar-ne dos d'un mateix club."
+        )
 
-        h, s2, j = millor
-        grups[g][slot], grups[h][s2] = grups[h][s2], grups[g][slot]
-        permutes.append(dict(slot=slot + 1, seed_a=i + 1, seed_b=j + 1))
-    return grups, permutes
+    grups: list[list[int]] = [[] for _ in range(n_grups)]
+    for p, g in enumerate(assignat):
+        grups[g].append(p)
+    moguts = sorted(p + 1 for p in range(n) if assignat[p] != desitjat[p])
+    return grups, moguts
 
 
 def banda_de(num: int, esquema: str = "fcb") -> str:
@@ -1049,15 +1051,13 @@ def build(db: str = DB, comp: dict[str, list[tuple[str, str]]] | None = None) ->
                 lletra_2526=e["lletra_2526"], div_2526=e["div_2526"], motiu=e["motiu"],
                 nou=e.get("nou", False),
             ))
-        grups_idx, permutes = forma_grups(comp[div], GRUPS[div])
-        moguts = {p["seed_a"] for p in permutes} | {p["seed_b"] for p in permutes}
+        grups_idx, moguts = forma_grups(comp[div], GRUPS[div])
         grups = [
             dict(lletra=chr(ord("A") + g), seeds=[i + 1 for i in lst])
             for g, lst in enumerate(grups_idx)
         ]
         out["divisions"][div] = dict(
-            distancia=DIST[div], equips=equips, grups=grups, permutes=permutes,
-            moguts=sorted(moguts),
+            distancia=DIST[div], equips=equips, grups=grups, moguts=moguts,
         )
 
     # El pronòstic es fa amb TOTA la lliga alhora, no grup per grup: cal, perquè

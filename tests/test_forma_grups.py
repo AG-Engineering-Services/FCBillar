@@ -111,13 +111,26 @@ def test_cas_dificil_amb_molts_equips_del_mateix_club() -> None:
     assert clubs_repetits(ordre, grups) == []
 
 
-def test_quan_es_impossible_no_peta() -> None:
+def test_quan_es_impossible_es_planta() -> None:
     """Cinc equips d'un club i només dos grups: no hi ha repartiment vàlid.
 
-    El generador ho ha de deixar com pugui i tornar, no quedar-se en un bucle.
+    Publicar-ne un de dolent en silenci seria pitjor que no publicar-ne cap: la
+    pàgina ensenyaria grups que la federació no pot sortejar i ningú no ho
+    sabria. Ha de petar amb un missatge que digui quin club el provoca.
     """
     ordre = [("A", str(i)) for i in range(5)] + [("B", "1"), ("C", "1"), ("D", "1")]
-    grups, permutes = P.forma_grups(ordre, 2)
-    repartits = [i for lst in grups for i in lst]
-    assert sorted(repartits) == list(range(len(ordre)))
-    assert len(permutes) < 200
+    with pytest.raises(P.RepartimentImpossible, match="A"):
+        P.forma_grups(ordre, 2)
+
+
+def test_troba_el_repartiment_encara_que_calgui_marxa_enrere() -> None:
+    """Un cas que cap intercanvi simple no resol, però que sí que té solució.
+
+    Amb quatre grups i quatre clubs de quatre equips cadascun només hi ha una
+    manera de repartir-los: un equip de cada club a cada grup. Una reparació
+    per intercanvis es quedava encallada; l'assignació sencera hi arriba.
+    """
+    ordre = [(club, str(i)) for club in "ABCD" for i in range(4)]
+    grups, _ = P.forma_grups(ordre, 4)
+    assert clubs_repetits(ordre, grups) == []
+    assert sorted(len(g) for g in grups) == [4, 4, 4, 4]

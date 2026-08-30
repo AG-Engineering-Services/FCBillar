@@ -76,7 +76,6 @@
 		distancia: number;
 		equips: EquipDiv[];
 		grups: { lletra: string; seeds: number[] }[];
-		permutes: { slot: number; seed_a: number; seed_b: number }[];
 		moguts: number[];
 	};
 
@@ -283,7 +282,10 @@
 			return {
 				nom: d,
 				distancia: D.distancia,
-				permutes: D.permutes,
+				moguts: D.moguts,
+				// Les lletres surten de les dades: les quatre primeres divisions en
+				// tenen dos, i la 4a en té quatre.
+				lletresGrup: D.grups.map((g) => g.lletra),
 				equips: D.equips.map((e) => {
 					const club = clubPerClau.get(e.club)!;
 					return {
@@ -323,8 +325,8 @@
 			.map((d) => ({
 				nom: d.nom,
 				distancia: d.distancia,
-				permutes: d.permutes,
-				grups: (['A', 'B'] as const).map((g) => {
+				moguts: d.moguts,
+				grups: d.lletresGrup.map((g) => {
 					const eq = d.equips.filter((x) => x.grup === g);
 					return {
 						g,
@@ -475,12 +477,13 @@
 					{etiquetaDiv(d.nom)}
 				</h2>
 				<span class="text-[11px] text-slate-500 dark:text-slate-400">
-					serpentí 1-4-5-8… · {d.permutes.length === 0
-						? 'cap permuta'
-						: d.permutes.length === 1
-							? '1 permuta'
-							: `${d.permutes.length} permutes`} · desequilibri {Math.abs(
-						d.grups[0].mitjana - d.grups[1].mitjana
+					serpentí 1-4-5-8… · {d.moguts.length === 0
+						? 'cap equip mogut'
+						: d.moguts.length === 1
+							? '1 equip mogut'
+							: `${d.moguts.length} equips moguts`} · desequilibri {(
+						Math.max(...d.grups.map((g) => g.mitjana)) -
+						Math.min(...d.grups.map((g) => g.mitjana))
 					).toFixed(3)}
 				</span>
 			</header>
@@ -516,8 +519,8 @@
 													>▼</span
 												>{/if}{#if x.mogut}<span
 													class="ml-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
-													title="permutat amb l'equip del mateix slot de l'altre grup per no coincidir amb un altre equip del seu club"
-													>⇄ permutat</span
+													title="mogut a un altre grup del que li donava el serpentí, per no coincidir amb un altre equip del seu club"
+													>⇄ mogut</span
 												>{/if}
 										</span>
 										<span class="shrink-0 font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400"
@@ -561,11 +564,11 @@
 					</div>
 				{/each}
 			</div>
-			{#if d.permutes.length}
+			{#if d.moguts.length}
 				<p class="mt-1.5 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
-					<span class="font-semibold text-amber-600 dark:text-amber-400">⇄ permutes</span>
-					{#each d.permutes as p, i}{i > 0 ? ' · ' : ' '}slot {p.slot}: caps de sèrie
-						<span class="font-mono">{p.seed_a}</span> i <span class="font-mono">{p.seed_b}</span>{/each}
+					<span class="font-semibold">⇄ moguts del serpentí</span>
+					perquè dos equips d'un mateix club no coincideixin de grup: caps de sèrie
+					{#each d.moguts as m, i}{i > 0 ? ', ' : ' '}<span class="font-mono">{m}</span>{/each}
 				</p>
 			{/if}
 		</section>
@@ -846,16 +849,16 @@
 			dins del bloc és inferència nostra.
 		</p>
 		<p>
-			<b>Grups.</b> Serpentí <span class="font-mono">A-B-B-A</span> sobre l'ordre de sembra:
-			1-4-5-8-9-12-13-16 al grup A i 2-3-6-7-10-11-14-15 al B. A 4a divisió, amb 19 equips, s'estira
-			igual (el 17 a l'A; el 18 i el 19 al B). Després s'hi fan les <b>permutes</b> necessàries perquè
-			dos equips d'un mateix club no coincideixin de grup: es mou sempre el <b>segon</b> equip del club
-			dins del grup, mai el primer, i s'intercanvia amb l'equip que ocupa el mateix slot a l'altre
-			grup. Si el Monforte A és el 3r del grup i el Monforte B el 8è, es permuta el Monforte B amb el
-			8è de l'altre grup. Així el millor classificat es queda on el posa la sembra i el moviment és
-			mínim, perquè els slots homòlegs són sempre posicions consecutives de l'ordre oficial (l'A2 és el
-			4 i el B2 el 3; l'A3 és el 5 i el B3 el 6…). En surten sis —dues a Honor, una a 1a, una a 2a i
-			dues a 3a— i cap divisió no queda amb equips del mateix club junts. Els moguts van marcats amb ⇄.
+			<b>Grups.</b> Serpentí sobre l'ordre de sembra: amb dos grups,
+			<span class="font-mono">A-B-B-A</span> —1-4-5-8-9-12-13-16 al A i 2-3-6-7-10-11-14-15 al B—; a
+			4a divisió, que en té quatre, el mateix estirat. El serpentí sol, però, no garanteix que dos
+			equips d'un mateix club no coincideixin de grup, i reparar-lo amb intercanvis d'un en un no és
+			fiable: hi ha repartiments vàlids als quals no s'hi arriba amb cap intercanvi simple. Per això
+			l'assignació es fa sencera: cada equip va al grup que li tocaria pel serpentí, o al més proper
+			que l'admeti, amb marxa enrere quan un camí no porta enlloc. Si hi ha una manera de repartir-los
+			sense ajuntar dos equips d'un club, la troba; si no n'hi ha —un club amb més equips que grups té
+			la divisió— el generador s'atura en comptes de publicar un repartiment dolent. Els equips que
+			acaben en un grup diferent del que els donava el serpentí van marcats amb ⇄.
 		</p>
 		<p>
 			<b>Presència i alineació habitual.</b> Cada jugador porta el percentatge de jornades que ha
