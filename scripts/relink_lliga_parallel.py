@@ -1,7 +1,13 @@
-"""Re-enllaça els games de lliga al seu encontre (per etiquetar 3 bandes vs 4
-modalitats), en PARAL·LEL. Enrich-only: NO crea games ni toca la modalitat;
-només assigna encontre_lliga_id (+ equips) a la partida que ja existeix de
-partideshome, casant per signatura.
+"""Re-enllaça els games de lliga al seu encontre, en PARAL·LEL.
+
+Serveix per etiquetar 3 bandes contra 4 modalitats. Enrich-only: NO crea games
+ni toca la modalitat; només assigna `encontre_lliga_id` (i els equips) a la
+partida que ja existeix del rànquing, casant per signatura.
+
+ATENCIÓ: el detall d'encontre de lliga retorna HTTP 500 des del canvi de web
+d'agost de 2026 (vegeu `docs/canvi-web-fcb-2026.md`), o sigui que ara mateix
+aquest script no té d'on llegir. Es manté a punt per al dia que la federació ho
+arregli; llavors caldrà comprovar que el parser encerta les columnes.
 """
 
 from __future__ import annotations
@@ -11,7 +17,7 @@ import sqlite3
 import sys
 from datetime import date
 
-from playwright.async_api import async_playwright
+import httpx
 
 from fcbillar.config import get_settings
 from fcbillar.db.migrations import ensure_schema
@@ -19,7 +25,7 @@ from fcbillar.db.repository import Repository
 from fcbillar.pipeline import _build_game_from_lliga_row, _lliga_partides_url
 from fcbillar.scraper.parsers import parse_lliga_partides
 
-N_TABS = 6
+N_CONCURRENTS = 6
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -38,8 +44,7 @@ def load_encontres(s):
     return [dict(r) for r in rows]
 
 
-async def worker(tab, context, queue, repo, base, state, emit):
-    page = await context.new_page()
+async def worker(tab, client, queue, repo, base, state, emit):
     while not state["dead"]:
         try:
             e = queue.get_nowait()
@@ -50,8 +55,9 @@ async def worker(tab, context, queue, repo, base, state, emit):
             base, e["lliga_id"], e["divisio_id"], e["grup_id"], e["jornada_id"], e["encontre_id_extern"]
         )
         try:
-            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-            html = await page.content()
+            resposta = await client.get(url)
+            resposta.raise_for_status()
+            html = resposta.text
             rows = parse_lliga_partides(html)
             d = date.fromisoformat(e["data"]) if e["data"] else None
             matched = 0
@@ -83,8 +89,7 @@ async def worker(tab, context, queue, repo, base, state, emit):
             emit(f"[{state['i']}/{state['total']}] T{tab} enc{e['encontre_id_extern']} → (error)")
             if state["consec"] >= 25:
                 state["dead"] = True
-                emit("⚠️  Massa errors seguits — sessió morta? Re-logina i torna a llançar.")
-    await page.close()
+                emit("⚠️  Massa errors seguits — el portal no respon; atura i torna-hi.")
 
 
 async def main():
@@ -98,7 +103,7 @@ async def main():
         logf.write(msg + "\n")
         logf.flush()
 
-    emit(f"=== RELINK LLIGA ({N_TABS} pestanyes) · encontres: {total} ===")
+    emit(f"=== RELINK LLIGA ({N_CONCURRENTS} peticions concurrents) · encontres: {total} ===")
     queue: asyncio.Queue = asyncio.Queue()
     for e in encs:
         queue.put_nowait(e)
@@ -107,15 +112,17 @@ async def main():
     repo = Repository(conn)
     state = {"i": 0, "ok": 0, "err": 0, "consec": 0, "total": total, "dead": False}
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(
-            storage_state=str(s.storage_state_path), user_agent=UA, locale="ca-ES"
-        )
+    async with httpx.AsyncClient(
+        headers={"User-Agent": UA, "Accept-Language": "ca-ES,ca;q=0.9"},
+        follow_redirects=True,
+        timeout=30.0,
+    ) as client:
         await asyncio.gather(
-            *[worker(t + 1, context, queue, repo, s.base_url, state, emit) for t in range(N_TABS)]
+            *[
+                worker(t + 1, client, queue, repo, s.base_url, state, emit)
+                for t in range(N_CONCURRENTS)
+            ]
         )
-        await browser.close()
 
     emit(f"=== FET ({state['ok']} ok / {state['err']} err de {total}) ===")
     logf.close()
@@ -124,5 +131,5 @@ async def main():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        N_TABS = int(sys.argv[1])
+        N_CONCURRENTS = int(sys.argv[1])
     asyncio.run(main())

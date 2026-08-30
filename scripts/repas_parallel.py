@@ -1,11 +1,18 @@
-"""Repàs PARAL·LEL: N pestanyes concurrents a la MATEIXA sessió (async).
+"""Repàs PARAL·LEL de les partides d'un rànquing: N peticions concurrents.
 
-Les pestanyes comparteixen una sola sessió (com un usuari amb pestanyes), cosa
-que la FCB tolera (a diferència de navegadors separats). Fetch en paral·lel
-(coll d'ampolla = xarxa); ingest a la BD inline amb un sol conn (l'event loop
-és d'un sol fil → escriptures serialitzades, sense locks).
+Fins a l'agost de 2026 això eren N pestanyes de Chromium compartint una sessió,
+perquè les partides exigien login i la federació tolerava les pestanyes però no
+els navegadors separats. Amb el web nou són peticions HTTP normals: més ràpid,
+sense navegador i sense sessió que es pugui morir a mitges.
+
+Fetch en paral·lel (el coll d'ampolla és la xarxa); ingest a la BD inline amb
+una sola connexió — l'event loop és d'un sol fil, o sigui que les escriptures
+queden serialitzades i no calen locks.
 
 Resumible (done-set + empty-skip), verbós i amb el mateix log estable.
+
+És l'eina per posar-se al dia quan la federació toca un rànquing ja publicat,
+cosa que fa sovint: durant l'agost de 2026 va afegir 104 jugadors al 124.
 """
 
 from __future__ import annotations
@@ -14,7 +21,7 @@ import asyncio
 import sqlite3
 import sys
 
-from playwright.async_api import async_playwright
+import httpx
 
 from fcbillar.config import get_settings
 from fcbillar.db.migrations import ensure_schema
@@ -22,7 +29,7 @@ from fcbillar.db.repository import Repository
 from fcbillar.pipeline import RankingGameLink, _build_game_from_raw_row, _partides_url
 from fcbillar.scraper.parsers import parse_partides_jugador
 
-N_TABS = 3
+N_CONCURRENTS = 3
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -59,8 +66,7 @@ def load_pending(s):
     ]
 
 
-async def worker(tab, context, queue, repo, base, state, emit, emptyf):
-    page = await context.new_page()
+async def worker(tab, client, queue, repo, base, state, emit, emptyf):
     while not state["dead"]:
         try:
             num, mod, fcb, nom, modnom, fmt, rid, pid = queue.get_nowait()
@@ -70,9 +76,9 @@ async def worker(tab, context, queue, repo, base, state, emit, emptyf):
         et = f"[{state['i']}/{state['total']}] T{tab} {modnom:<11} R{num:<3} {nom[:24]:<24}"
         url = _partides_url(base, num, mod, fcb, fmt)
         try:
-            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-            html = await page.content()
-            parsed = parse_partides_jugador(html)  # peta si és pàgina de login
+            resposta = await client.get(url)
+            resposta.raise_for_status()
+            parsed = parse_partides_jugador(resposta.text)
             owner = repo.get_player_nom_by_fcb_id(fcb)
             tot = new = 0
             for row in parsed.rows:
@@ -103,8 +109,7 @@ async def worker(tab, context, queue, repo, base, state, emit, emptyf):
             emit(f"{et} → (buit)")
             if state["consec"] >= 25:
                 state["dead"] = True
-                emit("⚠️  Massa errors seguits — sessió morta? Re-logina i torna a llançar.")
-    await page.close()
+                emit("⚠️  Massa errors seguits — el portal no respon; atura i torna-hi.")
 
 
 async def main():
@@ -119,7 +124,7 @@ async def main():
         logf.write(msg + "\n")
         logf.flush()
 
-    emit(f"=== PARAL·LEL ({N_TABS} pestanyes) · combos pendents: {total} ===")
+    emit(f"=== PARAL·LEL ({N_CONCURRENTS} peticions concurrents) · combos pendents: {total} ===")
     queue: asyncio.Queue = asyncio.Queue()
     for c in pending:
         queue.put_nowait(c)
@@ -128,15 +133,17 @@ async def main():
     repo = Repository(conn)
     state = {"i": 0, "ok": 0, "err": 0, "consec": 0, "total": total, "dead": False}
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(
-            storage_state=str(s.storage_state_path), user_agent=UA, locale="ca-ES"
-        )
+    async with httpx.AsyncClient(
+        headers={"User-Agent": UA, "Accept-Language": "ca-ES,ca;q=0.9"},
+        follow_redirects=True,
+        timeout=30.0,
+    ) as client:
         await asyncio.gather(
-            *[worker(t + 1, context, queue, repo, s.base_url, state, emit, emptyf) for t in range(N_TABS)]
+            *[
+                worker(t + 1, client, queue, repo, s.base_url, state, emit, emptyf)
+                for t in range(N_CONCURRENTS)
+            ]
         )
-        await browser.close()
 
     emit(f"=== FET ({state['ok']} ok / {state['err']} err de {total}) ===")
     logf.close()
@@ -146,5 +153,5 @@ async def main():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        N_TABS = int(sys.argv[1])
+        N_CONCURRENTS = int(sys.argv[1])
     asyncio.run(main())

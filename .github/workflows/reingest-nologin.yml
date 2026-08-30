@@ -9,10 +9,9 @@ name: Reingesta no-logada (núvol)
 # Per què cal persistir la BD encara que sigui "no-logat":
 #   - publish-cloud publica des de data/fcbillar.db (cal el players master per
 #     enllaçar partides, i els rànquings que el PC hi ha deixat).
-#   - el ScraperClient de fcbillar llança Chromium i EXIGEIX que existeixi
-#     session/storage_state.json. PERÒ les pàgines de lliga/copa/opens són
-#     públiques → n'hi ha prou amb una sessió BUIDA (verificat), que generem al
-#     vol. Així NO exposem cap credencial de login al release públic.
+#   - Des del canvi de web de la federació (agost de 2026) el ScraperClient és
+#     httpx pelat: ni Chromium, ni sessió, ni credencials. Tot el que ingerim és
+#     públic. Aquest job ja no és "el no-logat": és l'únic que hi ha.
 #
 # DIVISIÓ D'AMOS (evita clobbering PC↔núvol):
 #   - PC (weekly_reingest.ps1, LOGAT):  rànquings + games  → puja la BD al release
@@ -115,29 +114,17 @@ jobs:
         with:
           enable-cache: true
 
-      # Chromium per al ScraperClient (lliga/copa/individuals de fcbillar). Clau
-      # de cau lligada a uv.lock, que fixa la versió de playwright (i del Chromium).
-      - name: Cache Playwright browsers
-        if: steps.gate.outputs.skip != 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+      # Ni Chromium ni navegador: des del canvi de web de la federació
+      # (agost de 2026) la ingesta són peticions HTTP i prou.
 
-      - name: Install Chromium
-        if: steps.gate.outputs.skip != 'true'
-        run: uv run --no-dev playwright install --with-deps chromium
-
-      # Baixa l'estat (les 2 BD) del release i genera una sessió BUIDA. Si el
-      # release/asset no existeix, falla expressament: cal fer el SEED abans (la
-      # BD amb el players master + rànquings del PC és imprescindible).
-      - name: Baixa l'estat del release (BD) + sessió buida
+      # Baixa l'estat (les 2 BD) del release. Si el release/asset no existeix,
+      # falla expressament: cal fer el SEED abans (la BD amb el players master
+      # + ranquings del PC és imprescindible).
+      - name: Baixa l'estat del release (BD)
         if: steps.gate.outputs.skip != 'true'
         run: |
           gh release download "$STATE_TAG" --dir data \
             --pattern 'fcbillar.db' --pattern 'fcb_opens.db' --clobber
-          mkdir -p session
-          printf '%s' '{"cookies":[],"origins":[]}' > session/storage_state.json
           ls -lh data/fcbillar.db data/fcb_opens.db
 
       - name: Reingesta no-logada (passos aïllats, continua si un falla)

@@ -98,7 +98,7 @@ def main() -> None:
 
     def _wait_for_session(cl):
         """Atura i espera fins que la sessió torni (re-login manual o xarxa)."""
-        emit("⚠️  SESSIÓ CAIGUDA — pausant. Si cal, re-logina:  uv run fcbillar login")
+        emit("⚠️  El portal no serveix partides — pausant. Reprova-ho més tard.")
         waited = 0
         while True:
             time.sleep(30)
