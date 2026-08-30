@@ -3,11 +3,11 @@ import { browser } from '$app/environment';
 
 export type Theme = 'light' | 'dark';
 
-// Color de la barra del navegador (PWA) per a cada mode — ha de coincidir
-// amb el fons del <body> (slate-50 clar / slate-950 fosc).
+// Color de la barra del navegador (PWA) per a cada mode. Ha de coincidir amb
+// el fons del <body>: les superfícies de betum del sistema.
 const THEME_COLOR: Record<Theme, string> = {
-	light: '#f8fafc',
-	dark: '#020617'
+	light: '#F4F6F3',
+	dark: '#161917'
 };
 
 function systemPrefersDark(): boolean {
@@ -32,9 +32,15 @@ function initial(): Theme {
 // blanc; aquí el repliquem perquè l'estat del store quadri amb el DOM.
 export const theme = writable<Theme>(initial());
 
-/** Aplica el tema al DOM (classe `dark` a <html>) i el persisteix. */
+/** Aplica el tema al DOM i el persisteix.
+ *
+ * Dues marques, que no diuen el mateix: `data-theme` és l'elecció explícita de
+ * l'usuari i és la que fan servir els tokens per manar per damunt del sistema;
+ * la classe `dark` porta l'estat ja resolt i és la que llegeix Tailwind.
+ */
 export function applyTheme(t: Theme) {
 	if (!browser) return;
+	document.documentElement.setAttribute('data-theme', t);
 	document.documentElement.classList.toggle('dark', t === 'dark');
 	const meta = document.querySelector('meta[name="theme-color"]');
 	if (meta) meta.setAttribute('content', THEME_COLOR[t]);

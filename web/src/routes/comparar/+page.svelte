@@ -210,7 +210,7 @@
 {#if sel.length}
 	<div class="mb-3 flex flex-wrap gap-1.5">
 		{#each sel as s (s.fcb_id)}
-			<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-white" style:background-color={s.color}>
+			<span class="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs font-medium text-white" style:background-color={s.color}>
 				{s.nom}
 				<button onclick={() => remove(s.fcb_id)} aria-label="treure">✕</button>
 			</span>
@@ -219,17 +219,17 @@
 {/if}
 
 {#if sel.length < 2}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Afegeix com a mínim 2 jugadors per comparar.</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Afegeix com a mínim 2 jugadors per comparar.</p>
 {:else}
 	<!-- Mitjana de joc per modalitat (cadascuna per separat) -->
 	{#if modMitjanes.length}
 		<div class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+			<div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				Mitjana de joc per modalitat
 			</div>
 			{#each modMitjanes as row}
 				<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-					<span class="w-24 shrink-0 text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">{MODNOM[row.mod] ?? row.mod}</span>
+					<span class="w-24 shrink-0 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{MODNOM[row.mod] ?? row.mod}</span>
 					{#each row.vals as v, i}
 						<span class="flex-1 text-center font-mono text-sm font-bold tabular-nums" style:color={sel[i].color}>{v != null ? v.toFixed(3) : '—'}</span>
 					{/each}
@@ -244,8 +244,8 @@
 			{#each modalitats as m}
 				<button
 					onclick={() => (selMod = m)}
-					class="rounded-full px-2.5 py-1 text-xs font-medium {selMod === m
-						? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+					class="rounded-sm px-2.5 py-1 text-xs font-medium {selMod === m
+						? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 						: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{MODNOM[m] ?? m}</button>
 			{/each}
 		</div>
@@ -255,7 +255,7 @@
 	<div class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 		{#each [['Posició rànquing', curPos.map((p) => (p != null ? '#' + p : '—'))], ['Mitjana rànquing', curMit.map((m) => (m != null ? m.toFixed(3) : '—'))], ['Partides', kpis.map((k) => k.n)], ['Sèrie màx', kpis.map((k) => k.sm)], ['% victòries', kpis.map((k) => k.pct + '%')]] as [label, vals]}
 			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-				<span class="w-24 shrink-0 text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</span>
+				<span class="w-24 shrink-0 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
 				{#each vals as v, i}
 					<span class="flex-1 text-center font-mono text-sm font-bold tabular-nums" style:color={sel[i].color}>{v}</span>
 				{/each}
@@ -266,7 +266,7 @@
 	<!-- Cara a cara directe -->
 	{#if h2h.length}
 		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Cara a cara directe</div>
+			<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Cara a cara directe</div>
 			{#each h2h as m}
 				<div class="flex items-center justify-between gap-2 py-1 text-sm">
 					<span class="min-w-0 flex-1 truncate text-right">{m.a}</span>
@@ -281,8 +281,8 @@
 	{#if hasChart}
 		<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 			<div class="mb-1 flex items-end justify-between">
-				<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Evolució mitjana rànquing · {MODNOM[selMod] ?? selMod}</span>
-				<span class="text-[9px] tabular-nums text-slate-400 dark:text-slate-500">{mitRange[1].toFixed(2)} ↕ {mitRange[0].toFixed(2)}</span>
+				<span class="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Evolució mitjana rànquing · {MODNOM[selMod] ?? selMod}</span>
+				<span class="text-[9px] tabular-nums text-slate-500 dark:text-slate-400">{mitRange[1].toFixed(2)} ↕ {mitRange[0].toFixed(2)}</span>
 			</div>
 			<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" class="h-28 w-full">
 				{#each [0, 0.25, 0.5, 0.75, 1] as f}

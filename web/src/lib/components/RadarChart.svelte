@@ -147,7 +147,7 @@
 				<span class="flex items-center gap-1">
 					<span class="inline-block h-3 w-3 rounded-sm" style="background:{LOSS}"></span> % derrotes
 				</span>
-				<span class="text-slate-400 dark:text-slate-500">escala 0–100%</span>
+				<span class="text-slate-500 dark:text-slate-400">escala 0–100%</span>
 			{:else}
 				<span class="flex items-center gap-1">
 					<span class="inline-block h-3 w-3 rounded-sm" style="background:{WIN}"></span> Victòries
@@ -155,7 +155,7 @@
 				<span class="flex items-center gap-1">
 					<span class="inline-block h-3 w-3 rounded-sm" style="background:{LOSS}"></span> Derrotes
 				</span>
-				<span class="text-slate-400 dark:text-slate-500">escala 0–{scaleMax}</span>
+				<span class="text-slate-500 dark:text-slate-400">escala 0–{scaleMax}</span>
 			{/if}
 		</div>
 	</div>

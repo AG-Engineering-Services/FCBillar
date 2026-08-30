@@ -187,38 +187,38 @@
 	{/if}
 	{#if season !== currentSeason}
 		{#if histGroups.length === 0}
-			<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense classificacions d'aquesta temporada.</p>
+			<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Sense classificacions d'aquesta temporada.</p>
 		{/if}
 		{#each histGroups as grp}
 			<section class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 				<header class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400">{grp.lliga} · {grp.divisio}</header>
-				<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+				<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					<span class="w-5 text-center">#</span><span class="flex-1">Equip</span><span class="w-8 text-right">PM</span><span class="w-8 text-right">PP</span>
 				</div>
 				<ul>
 					{#each grp.rows as r (r.equip)}
 						<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
+							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</span>
 							<span class="min-w-0 flex-1 truncate text-sm">{r.equip}</span>
 							<span class="w-8 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.pm}</span>
-							<span class="w-8 shrink-0 text-right font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500">{r.pp}</span>
+							<span class="w-8 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.pp}</span>
 						</li>
 					{/each}
 				</ul>
 			</section>
 		{/each}
 	{:else if loading}
-		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 	{:else if divisions.length === 0}
-		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense classificacions.</p>
+		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Sense classificacions.</p>
 	{:else}
 		<!-- Divisions: xips -->
 	<div class="-mx-3 mb-2 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
 		{#each divisions as d}
 			<button
 				onclick={() => (selDiv = d.id)}
-				class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium {d.id === selDiv
-					? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+				class="shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium {d.id === selDiv
+					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}">{d.nom}</button>
 		{/each}
 	</div>
@@ -260,7 +260,7 @@
 			<header class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				Categoria sencera · {divPlayers.length} jugadors
 			</header>
-			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				<span class="w-6 text-center">#</span>
 				<span class="flex-1">Jugador</span>
 				<span class="w-6 text-center">PJ</span>
@@ -270,10 +270,10 @@
 			<ul>
 				{#each divPlayers as r, i (r.player_fcb_id)}
 					<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-						<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {i === 0 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{i + 1}</span>
+						<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {i === 0 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{i + 1}</span>
 						<div class="min-w-0 flex-1">
 							<a href="/jugador/{r.player_fcb_id}" class="block truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
-							{#if r.club}<div class="truncate text-[11px] text-slate-400 dark:text-slate-500">{r.club}</div>{/if}
+							{#if r.club}<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">{r.club}</div>{/if}
 						</div>
 						<span class="w-6 shrink-0 text-center text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.partides}</span>
 						<span class="w-11 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
@@ -290,12 +290,12 @@
 				class="flex w-full items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
 			>
 				<span class="flex-1">{g.grup_nom ?? 'Grup'}</span>
-				<span class="font-normal normal-case text-slate-400 dark:text-slate-500">{count(g.grup_id)} {mode}</span>
-				<span class="text-slate-400 dark:text-slate-500 transition-transform {collapsed.has(g.grup_id) ? '' : 'rotate-90'}">›</span>
+				<span class="font-normal normal-case text-slate-500 dark:text-slate-400">{count(g.grup_id)} {mode}</span>
+				<span class="text-slate-500 dark:text-slate-400 transition-transform {collapsed.has(g.grup_id) ? '' : 'rotate-90'}">›</span>
 			</button>
 			{#if !collapsed.has(g.grup_id)}
 				{#if mode === 'equips'}
-					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
 						<span class="w-5 text-center">#</span>
 						<span class="flex-1">Equip</span>
 						<span class="w-7 text-center">PJ</span>
@@ -304,10 +304,10 @@
 					<ul>
 						{#each teamRows(g.grup_id) as r (r.equip)}
 							<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
+								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</span>
 								<div class="min-w-0 flex-1">
 									<div class="truncate text-sm font-medium leading-tight">{r.equip}</div>
-									<div class="text-[11px] tabular-nums text-slate-400 dark:text-slate-500">{r.g}-{r.e}-{r.p}{#if r.penalitzacio}<span class="ml-1 font-medium text-red-500 dark:text-red-400" title="Sanció federativa: −{r.penalitzacio} {r.penalitzacio === 1 ? 'punt' : 'punts'}">· −{r.penalitzacio} sanció</span>{/if}</div>
+									<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.g}-{r.e}-{r.p}{#if r.penalitzacio}<span class="ml-1 font-medium text-red-500 dark:text-red-400" title="Sanció federativa: −{r.penalitzacio} {r.penalitzacio === 1 ? 'punt' : 'punts'}">· −{r.penalitzacio} sanció</span>{/if}</div>
 								</div>
 								<span class="w-7 shrink-0 text-center text-sm tabular-nums text-slate-500 dark:text-slate-400">{r.pj}</span>
 								<span class="w-9 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
@@ -315,7 +315,7 @@
 						{/each}
 					</ul>
 				{:else}
-					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
 						<span class="w-5 text-center">#</span>
 						<span class="flex-1">Jugador</span>
 						<span class="w-6 text-center">PJ</span> <span class="w-11 text-right">Mitj.</span>
@@ -324,10 +324,10 @@
 					<ul>
 						{#each playerRows(g.grup_id) as r (r.player_fcb_id)}
 							<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
+								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</span>
 								<div class="min-w-0 flex-1">
 									<a href="/jugador/{r.player_fcb_id}" class="block truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
-									{#if r.club}<div class="truncate text-[11px] text-slate-400 dark:text-slate-500">{r.club}</div>{/if}
+									{#if r.club}<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">{r.club}</div>{/if}
 								</div>
 								<span class="w-6 shrink-0 text-center text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.partides}</span> <span class="w-11 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.mitjana != null ? r.mitjana.toFixed(3) : '—'}</span>
 								<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
@@ -359,7 +359,7 @@
 													<span class="flex-1 truncate text-left">{p.jugador_local}</span>
 													<span class="shrink-0 font-mono tabular-nums">{p.caramboles_local}–{p.caramboles_visitant}</span>
 													<span class="flex-1 truncate text-right">{p.jugador_visitant}</span>
-													<span class="w-12 shrink-0 text-right text-slate-400 dark:text-slate-500">{p.entrades} ent</span>
+													<span class="w-12 shrink-0 text-right text-slate-500 dark:text-slate-400">{p.entrades} ent</span>
 												</div>
 											{/each}
 										</div>

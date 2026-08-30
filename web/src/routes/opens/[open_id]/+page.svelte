@@ -90,13 +90,13 @@
 		{open ? open.nom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim() : '…'}
 	</h1>
 	{#if partides.length}
-		<p class="mb-3 text-[11px] text-slate-400 dark:text-slate-500">Toca un jugador per veure el desglòs de partides.</p>
+		<p class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">Toca un jugador per veure el desglòs de partides.</p>
 	{/if}
 
 	{#if loading}
-		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 	{:else if rows.length === 0}
-		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense classificació disponible.</p>
+		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Sense classificació disponible.</p>
 	{:else}
 		{#if rows.length > 10}
 			<input
@@ -107,7 +107,7 @@
 			/>
 		{/if}
 		<div class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				<span class="w-5 text-center">#</span>
 				<span class="flex-1">Jugador</span>
 				<span class="w-7 text-center">PJ</span>
@@ -118,10 +118,10 @@
 				{#each filteredRows as r (r.player_fcb_id)}
 					<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
 						<button onclick={() => toggle(r.jugador ?? '')} class="flex w-full items-center gap-2 px-3 py-2 text-left active:bg-slate-50 dark:active:bg-slate-800/50">
-							<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
+							<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</span>
 							<div class="min-w-0 flex-1">
 								<div class="truncate text-sm font-medium leading-tight">{r.jugador}</div>
-								{#if r.club}<div class="truncate text-[11px] text-slate-400 dark:text-slate-500">{r.club}</div>{/if}
+								{#if r.club}<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">{r.club}</div>{/if}
 							</div>
 							<span class="w-7 shrink-0 text-center text-sm tabular-nums text-slate-500 dark:text-slate-400">{r.partides}</span>
 							<span class="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.mitjana_general != null ? r.mitjana_general.toFixed(3) : '—'}</span>
@@ -133,10 +133,10 @@
 									<div class="flex items-center gap-2 py-0.5 text-[11px]">
 										<span class="flex-1 truncate">vs {g.opp}</span>
 										<span class="font-mono tabular-nums {g.my > g.oppc ? 'font-bold text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}">{g.my}–{g.oppc}</span>
-										<span class="w-12 text-right text-slate-400 dark:text-slate-500">{g.ent} ent</span>
+										<span class="w-12 text-right text-slate-500 dark:text-slate-400">{g.ent} ent</span>
 									</div>
 								{:else}
-									<p class="py-1 text-[11px] text-slate-400 dark:text-slate-500">No hi ha partides desglossades disponibles per aquest jugador.</p>
+									<p class="py-1 text-[11px] text-slate-500 dark:text-slate-400">No hi ha partides desglossades disponibles per aquest jugador.</p>
 								{/each}
 								{#if r.player_fcb_id}
 									<a href="/jugador/{r.player_fcb_id}" class="mt-1 inline-block text-[11px] text-slate-500 dark:text-slate-400 underline">Fitxa completa →</a>

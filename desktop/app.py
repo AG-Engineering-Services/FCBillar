@@ -6,15 +6,13 @@ Executar amb:
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication
 
 from desktop.controllers import MainController
 from desktop.models import DataSource
+from desktop.styles import full_estils
 from desktop.views import MainWindow
-
-STYLES_PATH = Path(__file__).resolve().parent / "styles" / "theme.qss"
 
 
 def main() -> int:
@@ -22,8 +20,9 @@ def main() -> int:
     app = QApplication(sys.argv)
     app.setApplicationName("FCBillar Dashboard")
     app.setOrganizationName("FCBillar")
-    # QSS aplicat a nivell de QApplication (iron law #3).
-    app.setStyleSheet(STYLES_PATH.read_text(encoding="utf-8"))
+    # QSS aplicat a nivell de QApplication (iron law #3). El full surt dels
+    # tokens d'AGenginyeria; vegeu desktop/styles/__init__.py.
+    app.setStyleSheet(full_estils())
 
     data_source = DataSource()
     controller = MainController(data_source)

@@ -70,14 +70,14 @@
 <h1 class="mb-3 text-lg font-bold">Rècords</h1>
 
 {#if loading}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else}
 	<div class="-mx-3 mb-3 flex gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
 		{#each mods as m}
 			<button
 				onclick={() => (selMod = m)}
-				class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium {selMod === m
-					? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+				class="shrink-0 rounded-sm px-3 py-1.5 text-sm font-medium {selMod === m
+					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{m}</button>
 		{/each}
 	</div>
@@ -92,14 +92,14 @@
 					{#each recs.filter((r) => r.categoria === cat) as r (r.ordre)}
 						{@const d = detail(r.detall)}
 						<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums {r.ordre === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.ordre}</span>
+							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums {r.ordre === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.ordre}</span>
 							{#if r.player_fcb_id}
 								<a href={playerHref(r.player_fcb_id, d)} class="min-w-0 flex-1 active:underline">
 									<div class="truncate text-sm font-medium leading-tight">{r.jugador}</div>
 									{#if d?.kind === 'ranking'}
-										<div class="truncate text-[10px] text-slate-400 dark:text-slate-500">{fmtRanking(d)}</div>
+										<div class="truncate text-[10px] text-slate-500 dark:text-slate-400">{fmtRanking(d)}</div>
 									{:else if d}
-										<div class="truncate text-[10px] text-slate-400 dark:text-slate-500">{fmtDate(d.data)} · vs {d.rival} · {d.caramboles}–{d.caramboles_rival} / {d.entrades} ent.</div>
+										<div class="truncate text-[10px] text-slate-500 dark:text-slate-400">{fmtDate(d.data)} · vs {d.rival} · {d.caramboles}–{d.caramboles_rival} / {d.entrades} ent.</div>
 									{/if}
 								</a>
 							{:else}

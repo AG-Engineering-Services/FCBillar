@@ -24,15 +24,15 @@ from desktop.views.reingesta_view import ReingestaView
 from desktop.views.virtual_clubs_view import VirtualClubsView
 
 SIDEBAR_ITEMS = [
-    ("Inici", "🏠"),
-    ("Rànquings", "🏆"),
-    ("Jugadors", "👤"),
-    ("Partides", "🎱"),
-    ("Resultats", "📊"),
-    ("Clubs", "🏛"),
-    ("Focus club", "⭐"),
-    ("Clubs virtuals", "🧩"),
-    ("Reingesta", "🔄"),
+    "Inici",
+    "Rànquings",
+    "Jugadors",
+    "Partides",
+    "Resultats",
+    "Clubs",
+    "Focus club",
+    "Clubs virtuals",
+    "Reingesta",
 ]
 
 
@@ -60,8 +60,8 @@ class MainWindow(QMainWindow):
         self._sidebar.setObjectName("sidebar")
         self._sidebar.setFixedWidth(210)
         self._sidebar.setSpacing(2)
-        for label, icon in SIDEBAR_ITEMS:
-            item = QListWidgetItem(f"  {icon}   {label}")
+        for label in SIDEBAR_ITEMS:
+            item = QListWidgetItem(label)
             self._sidebar.addItem(item)
         self._sidebar.currentRowChanged.connect(self._on_nav_changed)
         root.addWidget(self._sidebar)

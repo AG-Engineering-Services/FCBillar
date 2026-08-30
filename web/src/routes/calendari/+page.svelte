@@ -355,9 +355,9 @@
 	const actes = (items: CalendariEvent[]) =>
 		items.flatMap((e) => competicions(e).map((titol) => ({ tipus: e.tipus, titol })));
 	const xip = (actiu: boolean) =>
-		`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${
+		`rounded-sm px-2.5 py-1 text-xs font-semibold ring-1 ${
 			actiu
-				? 'bg-slate-900 text-white ring-slate-900 dark:bg-slate-100 dark:text-slate-900 dark:ring-slate-100'
+				? 'bg-sky-600 text-white ring-slate-900 dark:bg-slate-100 dark:text-slate-900 dark:ring-slate-100'
 				: 'bg-white text-slate-600 ring-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
 		}`;
 </script>
@@ -381,9 +381,9 @@
 		{error}
 	</div>
 {:else if loading}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if !events.length}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
 		Encara no hi ha cap calendari ingestat.
 	</p>
 {:else}
@@ -418,7 +418,7 @@
 		{#if setmanaActual}
 			{@render blocs(setmanaActual.items)}
 		{:else}
-			<p class="text-sm text-slate-400 dark:text-slate-500">Cap competició aquesta setmana.</p>
+			<p class="text-sm text-slate-500 dark:text-slate-400">Cap competició aquesta setmana.</p>
 		{/if}
 		<!-- El que ve, hi hagi o no hi hagi res aquesta setmana: la caixa serveix per
 		     no haver de baixar per la llista per saber quan es torna a jugar. -->
@@ -443,7 +443,7 @@
 				type="button"
 				onclick={() => (vista = v as 'llista' | 'mes')}
 				class="rounded-md px-3 py-1 text-xs font-semibold {vista === v
-					? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'text-slate-500 dark:text-slate-400'}">{lbl}</button
 			>
 		{/each}
@@ -451,7 +451,7 @@
 
 	{#if vista === 'mes'}
 		{#if !mesos.length}
-			<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+			<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
 				Cap competició en aquesta temporada.
 			</p>
 		{:else}
@@ -478,7 +478,7 @@
 
 				<div class="grid grid-cols-7 gap-px text-center">
 					{#each DIES_CURT as dia (dia)}
-						<div class="pb-1 text-[10px] uppercase text-slate-400 dark:text-slate-500">{dia}</div>
+						<div class="pb-1 text-[10px] uppercase text-slate-500 dark:text-slate-400">{dia}</div>
 					{/each}
 				</div>
 				<div class="grid grid-cols-7 gap-px overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800">
@@ -521,7 +521,7 @@
 											>
 										{/each}
 										{#if dia.length > 2}
-											<span class="px-1 text-[9px] text-slate-400 dark:text-slate-500"
+											<span class="px-1 text-[9px] text-slate-500 dark:text-slate-400"
 												>+{dia.length - 2}</span
 											>
 										{/if}
@@ -544,12 +544,12 @@
 						{@render blocs(itemsDiaSel)}
 					</div>
 				{:else if totalMes}
-					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-400 dark:border-slate-800 dark:text-slate-500">
+					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-500 dark:text-slate-400 dark:border-slate-800 dark:text-slate-500">
 						{totalMes}
 						{totalMes === 1 ? 'dia' : 'dies'} amb competició. Toca un dia per veure'n el detall.
 					</p>
 				{:else}
-					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-400 dark:border-slate-800 dark:text-slate-500">
+					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-500 dark:text-slate-400 dark:border-slate-800 dark:text-slate-500">
 						Cap competició aquest mes amb aquests filtres.
 					</p>
 				{/if}
@@ -557,7 +557,7 @@
 		{/if}
 	{:else}
 	{#if !llista.length}
-		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
 			Cap competició amb aquests filtres.
 		</p>
 	{/if}
@@ -582,7 +582,7 @@
 						>aquesta setmana</span
 					>
 				{:else if s.setmana < avui}
-					<span class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500"
+					<span class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400"
 						>jugat</span
 					>
 				{/if}
@@ -621,7 +621,7 @@
 							class="border-b border-slate-100 px-3 py-2 text-xs last:border-0 dark:border-slate-800"
 						>
 							<div class="flex items-center gap-2">
-								<span class="font-mono text-[11px] text-slate-400 dark:text-slate-500"
+								<span class="font-mono text-[11px] text-slate-500 dark:text-slate-400"
 									>{fmtCurt(c.setmana)}</span
 								>
 								<span
@@ -633,7 +633,7 @@
 											: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'}"
 									>{c.tipus_canvi === 'modificacio' ? 'canvi' : c.tipus_canvi}</span
 								>
-								<span class="text-slate-400 dark:text-slate-500"
+								<span class="text-slate-500 dark:text-slate-400"
 									>{[ETIQUETA_DISC[c.disciplina] ?? c.disciplina, ETIQUETA_TIPUS[c.tipus ?? '']]
 										.filter(Boolean)
 										.join(' · ')}</span
@@ -641,7 +641,7 @@
 							</div>
 							<div class="mt-0.5 leading-snug">
 								{#if c.tipus_canvi === 'modificacio'}
-									<span class="text-slate-400 line-through dark:text-slate-500">{c.abans}</span>
+									<span class="text-slate-500 dark:text-slate-400 line-through dark:text-slate-500">{c.abans}</span>
 									<span class="mx-1">→</span><span>{c.despres}</span>
 								{:else}
 									{c.despres ?? c.abans}
@@ -654,7 +654,7 @@
 		</section>
 	{/if}
 
-	<p class="px-1 py-4 text-center text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+	<p class="px-1 py-4 text-center text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
 		El calendari federatiu concreta el cap de setmana, no el dia ni l'hora, i pot canviar: els PDF
 		d'origen es tornen a comprovar cada dia. Les competicions catalanes surten del calendari de la
 		FCB i les estatals i internacionals, del de la RFEB.
@@ -683,7 +683,7 @@
 					{/if}
 					{#if e.ambit !== 'tot'}
 						<span
-							class="text-center text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500"
+							class="text-center text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400"
 							>{ETIQUETA_AMBIT[e.ambit] ?? e.ambit}</span
 						>
 					{/if}
@@ -694,7 +694,7 @@
 							<div>
 								{titol}
 								{#if i === 0 && !nomesCarambola && e.disciplina !== 'carambola'}
-									<span class="ml-1 text-[10px] uppercase text-slate-400 dark:text-slate-500"
+									<span class="ml-1 text-[10px] uppercase text-slate-500 dark:text-slate-400"
 										>{ETIQUETA_DISC[e.disciplina] ?? e.disciplina}</span
 									>
 								{/if}
@@ -709,7 +709,7 @@
 						</div>
 					{/if}
 					{#if e.seu}
-						<div class="text-xs text-slate-400 dark:text-slate-500">{e.seu}</div>
+						<div class="text-xs text-slate-500 dark:text-slate-400">{e.seu}</div>
 					{/if}
 				</div>
 			</li>

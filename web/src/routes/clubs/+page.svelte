@@ -137,15 +137,15 @@
 	<div class="flex flex-wrap gap-1.5">
 		<button
 			onclick={() => pickMod('global')}
-			class="rounded-full px-3 py-1 text-sm font-medium {selMod === 'global'
-				? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+			class="rounded-sm px-3 py-1 text-sm font-medium {selMod === 'global'
+				? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 				: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}">Global</button
 		>
 		{#each modalitats as m}
 			<button
 				onclick={() => pickMod(m.codi_fcb)}
-				class="rounded-full px-3 py-1 text-sm font-medium {selMod === m.codi_fcb
-					? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+				class="rounded-sm px-3 py-1 text-sm font-medium {selMod === m.codi_fcb
+					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}">{m.nom}</button
 			>
 		{/each}
@@ -170,16 +170,16 @@
 {#if error}
 	<p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">{error}</p>
 {:else if loading}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if !clubs.length}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense dades per a aquesta modalitat.</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Sense dades per a aquesta modalitat.</p>
 {:else}
-	<div class="mb-1 px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+	<div class="mb-1 px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 		{modLabel} · {clubs.length} clubs · {fieldSize} jugadors al camp
 	</div>
 	<div class="mb-4 rounded-xl bg-white p-2 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
 		<ClubScatter {clubs} selected={selectedClub} onselect={(c) => (selectedClub = c)} />
-		<p class="px-1 pb-1 text-center text-[11px] text-slate-400 dark:text-slate-500">
+		<p class="px-1 pb-1 text-center text-[11px] text-slate-500 dark:text-slate-400">
 			Cada bombolla és un club (mida = jugadors rankejats). Toca'n una per veure'n la plantilla.
 		</p>
 	</div>
@@ -194,7 +194,7 @@
 						? 'bg-emerald-50/60 dark:bg-emerald-950/20'
 						: ''}"
 				>
-					<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-400 dark:text-slate-500">{i + 1}</span>
+					<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-500 dark:text-slate-400">{i + 1}</span>
 					<div class="min-w-0 flex-1">
 						<div class="truncate text-sm font-semibold leading-tight">{short(c.club)}</div>
 						<div class="mt-1 flex items-center gap-2">
@@ -216,14 +216,14 @@
 					</div>
 					<div class="shrink-0 text-right">
 						<div class="font-mono text-base font-bold tabular-nums leading-none">{c.cqi.toFixed(1)}</div>
-						<div class="text-[9px] uppercase tracking-wide text-slate-400 dark:text-slate-500">CQI · {c.n}j</div>
+						<div class="text-[9px] uppercase tracking-wide text-slate-500 dark:text-slate-400">CQI · {c.n}j</div>
 					</div>
 				</button>
 
 				{#if selectedClub === c.club}
 					<div class="border-t border-slate-100 bg-slate-50/60 px-3 py-2 dark:border-slate-800 dark:bg-slate-950/30">
 						<div class="mb-1.5 flex items-center justify-between">
-							<span class="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Plantilla · per nivell</span>
+							<span class="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Plantilla · per nivell</span>
 							{#if clubFcb.get(c.club)}
 								<a href="/club/{clubFcb.get(c.club)}" class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Fitxa del club ↗</a>
 							{/if}
@@ -231,17 +231,17 @@
 						<ul class="space-y-0.5">
 							{#each c.players.slice(0, 12) as p, pi (p.fcb_id)}
 								<li class="flex items-center gap-2 text-sm">
-									<span class="w-4 shrink-0 text-center text-[10px] tabular-nums text-slate-400 dark:text-slate-500">{pi + 1}</span>
+									<span class="w-4 shrink-0 text-center text-[10px] tabular-nums text-slate-500 dark:text-slate-400">{pi + 1}</span>
 									{#if pi < K}<span class="shrink-0 rounded bg-emerald-100 px-1 text-[9px] font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">TOP{K}</span>{/if}
 									<a href="/jugador/{p.fcb_id}" class="min-w-0 flex-1 truncate active:underline">{p.nom}</a>
 									{#if selMod !== 'global' && p.mitjana != null}
-										<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500">{p.mitjana.toFixed(3)}</span>
+										<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{p.mitjana.toFixed(3)}</span>
 									{/if}
 									<span class="w-8 shrink-0 text-right font-mono text-xs font-semibold tabular-nums">{p.nivell.toFixed(0)}</span>
 								</li>
 							{/each}
 							{#if c.players.length > 12}
-								<li class="pl-6 pt-0.5 text-[11px] text-slate-400 dark:text-slate-500">+{c.players.length - 12} més</li>
+								<li class="pl-6 pt-0.5 text-[11px] text-slate-500 dark:text-slate-400">+{c.players.length - 12} més</li>
 							{/if}
 						</ul>
 					</div>
@@ -250,7 +250,7 @@
 		{/each}
 	</ul>
 
-	<p class="mt-3 px-1 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+	<p class="mt-3 px-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
 		<strong>Nivell</strong> = percentil de la posició al rànquing (100 = primer). <strong>Potència</strong>
 		= mitjana dels {K} millors nivells. <strong>Profunditat</strong> = jugadors per damunt de la mediana
 		del camp (la barra n'és la massa relativa). <strong>CQI</strong> = {Math.round(w * 100)}%·Potència +

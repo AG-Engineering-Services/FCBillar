@@ -1,3 +1,13 @@
+/* Fulla base del web. El sistema visual és el d'AGenginyeria: els tokens surten
+   de `lib/styles/ag-tokens.css` (còpia dels estàndards, la refresca
+   `scripts/sync_tokens_ag.py`) i les rampes de Tailwind hi estan mapejades a
+   `tailwind.config.js`.
+
+   Aquí només hi ha tres coses: el registre tipogràfic, la densitat de taula i
+   els components petits que el sistema defineix i Tailwind no. */
+
+@import './lib/styles/ag-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,15 +15,102 @@
 @layer base {
 	html {
 		-webkit-text-size-adjust: 100%;
+		text-size-adjust: 100%;
 		text-rendering: optimizeLegibility;
+		/* Verdana és ampla: 15px, no 16. */
+		font-size: var(--ag-size-base);
 	}
+
 	body {
-		/* respect iOS safe areas (notch) for a true mobile feel */
+		/* Respecta les zones segures d'iOS (el notch). */
 		padding-bottom: env(safe-area-inset-bottom);
+		line-height: var(--ag-lh);
 	}
-	/* Estil Geist: xifres tabulars perquè les columnes de números (mitjanes,
-	   punts, posicions) quedin alineades verticalment a totes les taules. */
-	table {
-		font-variant-numeric: tabular-nums;
+
+	/* Un preu o una mitjana que ballen entre files són un error, no una
+	   preferència. */
+	table,
+	.tabular {
+		font-variant-numeric: tabular-nums lining-nums;
+	}
+
+	/* Densitat alta: els nostres usuaris comparen files, no contemplen targetes.
+	   La cel·la va a 4px 12px; una pantalla mig buida no es llegeix com a
+	   rigorosa, es llegeix com a inacabada. */
+	table :where(th, td):not([class*='p-']):not([class*='px-']):not([class*='py-']) {
+		padding: var(--ag-space-1) var(--ag-space-3);
+	}
+
+	/* Els encapçalaments de columna són registre tècnic, no text corrent. */
+	table :where(thead th):not([class*='font-']) {
+		font-family: var(--ag-font-data);
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ag-ink-muted);
+	}
+
+	/* El focus es veu sempre, i amb l'accent d'acció. */
+	:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+		outline: 2px solid var(--ag-focus);
+		outline-offset: 2px;
+		border-radius: var(--ag-radius);
+	}
+
+	/* Cap degradat, enlloc. Si algun component n'arrossega un, que no es pinti. */
+	:where(body, header, nav, aside, main, section, footer) {
+		background-image: none;
+	}
+}
+
+@layer components {
+	/* Identificadors, codis i etiquetes d'aparell van en monoespaiada: és el que
+	   fa que una pantalla sembli un document tècnic i no una plantilla. */
+	.ag-et {
+		font-family: var(--ag-font-data);
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ag-ink-muted);
+	}
+
+	/* Xifra: monoespaiada, alineada a la dreta i amb les columnes quadrades. */
+	.ag-num {
+		font-family: var(--ag-font-data);
+		font-variant-numeric: tabular-nums lining-nums;
+		text-align: right;
+	}
+
+	/* Píndola d'estat: el color va al FONS i el text en tinta normal. És el que
+	   evita el problema de contrast del color sobre fons tenyit. Sempre amb
+	   etiqueta; el color no pot ser l'únic portador de la informació. */
+	.ag-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--ag-space-1);
+		padding: 1px var(--ag-space-2);
+		border-radius: var(--ag-radius);
+		font-size: 0.78rem;
+		color: var(--ag-ink);
+	}
+	.ag-pill.bo {
+		background: var(--ag-bo-bg);
+	}
+	.ag-pill.avis {
+		background: var(--ag-avis-bg);
+	}
+	.ag-pill.greu {
+		background: var(--ag-greu-bg);
+	}
+	.ag-pill.critic {
+		background: var(--ag-critic-bg);
+	}
+
+	/* Filet de marca: el vermell de la federació com a identitat, mai com a
+	   acció. Va a la capçalera i prou. */
+	.ag-marca {
+		border-top: 2px solid theme('colors.fcb');
 	}
 }

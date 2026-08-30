@@ -132,7 +132,7 @@
 							<span class="rounded px-1.5 py-0.5 text-xs font-medium {BADGE[h.estat] ?? BADGE.pendent}"
 								>{h.estat}</span
 							>
-							<span class="text-slate-400">{h.plataforma}</span>
+							<span class="text-slate-500 dark:text-slate-400">{h.plataforma}</span>
 							{#if h.estat === 'fet' && h.video_id}
 								<a href={`/sistemes-coreans/${h.video_id}`} class="truncate font-medium text-indigo-600 hover:underline dark:text-indigo-400"
 									>{h.nom || curt(h.url)} →</a
@@ -142,7 +142,7 @@
 									>{h.nom || curt(h.url)}</a
 								>
 							{/if}
-							{#if h.missatge}<span class="truncate text-xs text-slate-400" title={h.missatge}>· {h.missatge}</span>{/if}
+							{#if h.missatge}<span class="truncate text-xs text-slate-500 dark:text-slate-400" title={h.missatge}>· {h.missatge}</span>{/if}
 						</li>
 					{/each}
 				</ul>

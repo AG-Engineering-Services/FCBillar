@@ -64,27 +64,23 @@
 	const embed = $derived(path.startsWith('/fitxa'));
 </script>
 
-<div class="mx-auto flex min-h-full max-w-screen-sm flex-col md:max-w-3xl lg:max-w-5xl">
-	<!-- Marca d'aigua d'autoria: emblema "AG" + nom Albert Gómez, fixat al centre de la
-	     finestra i sense capturar clics (pointer-events-none). Va a z-0: per sota de la
-	     capçalera sticky (z-10) i per sobre del contingut, però amb opacitat molt baixa,
-	     així es percep com una marca de fons a totes les pàgines —inclosa la vista
-	     aïllada /fitxa— sense destorbar la lectura. -->
+<div class="mx-auto flex min-h-full max-w-screen-sm flex-col md:max-w-3xl lg:max-w-6xl">
+	<!-- Marca d'autoria. Surt a qualsevol captura de pantalla, que és per al que
+	     serveix, però a la cantonada: al mig de la pàgina es barallava amb les
+	     xifres, i aquí les files es llegeixen abans que la marca. No captura
+	     clics i queda per sota de la capçalera enganxada. -->
 	<div
-		class="pointer-events-none fixed inset-0 z-0 flex select-none flex-col items-center justify-center gap-3 opacity-[0.05] dark:opacity-[0.09]"
+		class="pointer-events-none fixed bottom-3 right-3 z-0 flex select-none items-center gap-2 opacity-[0.16] dark:opacity-[0.2]"
 		aria-hidden="true"
 	>
-		<img src="/logo-ag.png" alt="" class="w-48 max-w-[55vw] grayscale md:w-64 lg:w-72" />
-		<span
-			class="text-2xl font-semibold uppercase tracking-[0.35em] text-slate-900 dark:text-slate-100 md:text-3xl lg:text-4xl"
-			>Albert&nbsp;Gómez</span
-		>
+		<img src="/logo-ag.png" alt="" class="h-6 w-auto grayscale" />
+		<span class="ag-et text-slate-900 dark:text-slate-100">Albert Gómez</span>
 	</div>
 	{#if !embed}
 	<header
-		class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90"
+		class="ag-marca sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95"
 	>
-		<div class="flex items-center gap-2 px-4 pt-3 md:px-6 md:pt-4">
+		<div class="flex items-center gap-2 px-4 pt-2 md:px-6 md:pt-3">
 			<svg viewBox="0 0 40 40" class="h-7 w-7 shrink-0 md:h-9 md:w-9" aria-hidden="true">
 				<rect width="40" height="40" rx="10" fill="#0b3d2e" />
 				<circle cx="20" cy="13.5" r="7" fill="#e0322a" />
@@ -94,11 +90,14 @@
 				<circle cx="11.2" cy="22" r="1.8" fill="#fff" opacity="0.7" />
 				<circle cx="24.2" cy="22" r="1.8" fill="#fff" opacity="0.5" />
 			</svg>
-			<span class="text-base font-bold tracking-tight md:text-xl">FCBillar</span>
+			<span class="text-base font-bold tracking-tight md:text-lg">FCBillar</span>
+			<span class="ag-et hidden sm:inline" title="Font de les dades"
+				>Federació Catalana de Billar</span
+			>
 			<button
 				type="button"
 				onclick={toggleTheme}
-				class="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+				class="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-sm text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
 				aria-label={$theme === 'dark' ? 'Mode clar' : 'Mode fosc'}
 				title={$theme === 'dark' ? 'Mode clar' : 'Mode fosc'}
 			>
@@ -116,13 +115,13 @@
 				{/if}
 			</button>
 		</div>
-		<nav class="flex flex-wrap gap-x-1 gap-y-0 px-3 pt-2 md:px-5">
+		<nav class="flex flex-wrap gap-x-0 gap-y-0 px-3 pt-1 md:px-5">
 			{#each tabs as t}
 				<a
 					href={t.href}
-					class="-mb-px rounded-t-lg px-3 py-2 text-sm font-medium md:px-4 md:text-base {t.match(path)
-						? 'border-b-2 border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100'
-						: 'text-slate-400 dark:text-slate-500'}"
+					class="ag-et -mb-px px-2.5 py-1.5 md:px-3 {t.match(path)
+						? 'border-b-2 border-sky-600 text-sky-700 dark:border-sky-400 dark:text-sky-300'
+						: 'border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'}"
 					>{t.label}{#if t.href === '/opens' && liveCount > 0}<span
 							class="relative ml-1 inline-flex h-2 w-2 align-middle"
 							title="Opens en directe ara"
@@ -137,11 +136,11 @@
 		{@render children()}
 	</main>
 	<footer
-		class="flex flex-col items-center gap-2 px-4 py-6 text-center text-[11px] text-slate-400 dark:text-slate-500"
+		class="flex flex-col items-center gap-2 px-4 py-6 text-center text-[11px] text-slate-500 dark:text-slate-400"
 	>
 		<div class="flex items-center gap-2">
-			<img src="/logo-ag.png" alt="Albert Gómez" class="h-7 w-auto opacity-80" />
-			<span class="text-xs font-semibold tracking-wide text-slate-500 dark:text-slate-400">Albert Gómez</span>
+			<img src="/logo-ag.png" alt="Albert Gómez" class="h-5 w-auto opacity-70" />
+			<span class="ag-et text-slate-500 dark:text-slate-400">Albert Gómez</span>
 		</div>
 		<p>© Albert Gómez. No se'n permet la distribució no autoritzada.</p>
 		<p class="text-slate-300 dark:text-slate-600">Dades de la Federació Catalana de Billar · ús personal</p>

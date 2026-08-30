@@ -387,7 +387,7 @@
 	{@const bCls = decided ? (w === 'b' ? 'font-semibold text-emerald-600 dark:text-emerald-400' : w === 'a' ? 'text-red-600 dark:text-red-400' : '') : ''}
 	<li class="border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
 		<div class="flex items-center justify-between gap-2 text-sm">
-			{#if m.player_a}{@render player(m.player_a, 'min-w-0 flex-1 truncate ' + aCls)}{:else}<span class="min-w-0 flex-1 truncate text-slate-400 dark:text-slate-500">—</span>{/if}
+			{#if m.player_a}{@render player(m.player_a, 'min-w-0 flex-1 truncate ' + aCls)}{:else}<span class="min-w-0 flex-1 truncate text-slate-500 dark:text-slate-400">—</span>{/if}
 			{#if wo}
 				<span class="shrink-0 font-mono text-[10px] font-semibold uppercase text-slate-500 dark:text-slate-400">w.o.</span>
 			{:else if m.is_played}
@@ -395,22 +395,22 @@
 			{:else}
 				<span class="shrink-0 font-mono text-xs text-slate-300 dark:text-slate-600">vs</span>
 			{/if}
-			{#if m.player_b}{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right ' + bCls)}{:else}<span class="min-w-0 flex-1 truncate text-right text-slate-400 dark:text-slate-500">—</span>{/if}
+			{#if m.player_b}{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right ' + bCls)}{:else}<span class="min-w-0 flex-1 truncate text-right text-slate-500 dark:text-slate-400">—</span>{/if}
 		</div>
 		{#if wo}
-			<div class="mt-0.5 text-center text-[10px] text-slate-400 dark:text-slate-500">no presentat · passa de ronda sense jugar</div>
+			<div class="mt-0.5 text-center text-[10px] text-slate-500 dark:text-slate-400">no presentat · passa de ronda sense jugar</div>
 		{:else if m.is_played}
-			<div class="mt-0.5 text-center text-[10px] text-slate-400 dark:text-slate-500">{m.entrades} ent.</div>
+			<div class="mt-0.5 text-center text-[10px] text-slate-500 dark:text-slate-400">{m.entrades} ent.</div>
 		{:else}
 			<div class="mt-0.5 text-center text-[10px] {calc ? 'text-sky-600 dark:text-sky-400' : 'text-amber-600 dark:text-amber-400'}">{calc ? 'calculat' : 'pendent'}</div>
 		{/if}
 	</li>
 {/snippet}
 
-<a href="/opens" class="mb-3 inline-block text-sm text-slate-400 dark:text-slate-500 active:underline">‹ Opens</a>
+<a href="/opens" class="mb-3 inline-block text-sm text-slate-500 dark:text-slate-400 active:underline">‹ Opens</a>
 
 {#if loading}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if error}
 	<div class="rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-sm text-amber-800 dark:text-amber-300">{error}</div>
 {:else if row && payload}
@@ -426,7 +426,7 @@
 				<span class="shrink-0 rounded bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">En directe</span>
 			{/if}
 		</div>
-		<p class="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+		<p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
 			{#if projected}Sorteig <strong>projectat</strong> · encara no oficial{:else}Actualitzat {agoText(row.captured_at)} · es refresca sol{/if}
 		</p>
 	</div>
@@ -470,7 +470,7 @@
 						? 'border-emerald-300 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
 						: st === 'active'
 							? 'border-amber-300 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300'
-							: 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500'}"
+							: 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400'}"
 			>
 				{p.label}
 				{p.projected ? '· proj' : st === 'done' ? '✓' : st === 'active' ? '●' : '○'}
@@ -528,7 +528,7 @@
 							{@const grp = phase.groups.find((gg) => gg.label === q.group_label)}
 							{@const sure = q.position_in_group > 1 || (!!grp && groupClosed(grp))}
 							<li class="flex items-center gap-2 text-sm {q.position_in_group > 1 ? '-mx-1 rounded bg-amber-50/70 dark:bg-amber-950/40 px-1' : ''}">
-								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{i + 1}</span>
+								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{i + 1}</span>
 								<span class="w-6 shrink-0 rounded bg-white/70 dark:bg-slate-900/70 text-center font-mono text-[10px] text-slate-500 dark:text-slate-400">{q.group_label.replace('Grup ', '')}</span>
 								<span class="flex min-w-0 flex-1 items-center gap-1">
 									{@render player(q.player_name, 'truncate ' + (sure ? 'font-bold' : ''))}
@@ -543,7 +543,7 @@
 							</li>
 						{/each}
 					</ol>
-					<p class="mt-1.5 text-[10px] text-slate-400 dark:text-slate-500">Tots els 1rs de grup + els millors 2ns que calguin per omplir la següent ronda. ✓ = plaça assegurada.</p>
+					<p class="mt-1.5 text-[10px] text-slate-500 dark:text-slate-400">Tots els 1rs de grup + els millors 2ns que calguin per omplir la següent ronda. ✓ = plaça assegurada.</p>
 				</div>
 			{/if}
 			{@const liveNow = liveScores.map((sc) => ({ sc, grp: sc.group_label || '—' }))}
@@ -563,7 +563,7 @@
 								{@render playerShort(sc.player_a ?? '—', 'min-w-0 flex-1 truncate font-bold ' + (aW ? 'text-emerald-600 dark:text-emerald-400' : bW ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'))}
 								{#if warm}<span class="shrink-0 rounded bg-amber-100 px-1.5 text-[9px] font-semibold uppercase text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">escalfament</span>{:else}<span class="shrink-0 font-mono font-bold text-slate-700 dark:text-slate-200">{sc.car_a}–{sc.car_b}</span>{/if}
 								{@render playerShort(sc.player_b ?? '—', 'min-w-0 flex-1 truncate text-right font-bold ' + (bW ? 'text-emerald-600 dark:text-emerald-400' : aW ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'))}
-								{#if sc.entrades}<span class="shrink-0 font-mono text-[10px] text-slate-400 dark:text-slate-500">{sc.entrades}e</span>{/if}
+								{#if sc.entrades}<span class="shrink-0 font-mono text-[10px] text-slate-500 dark:text-slate-400">{sc.entrades}e</span>{/if}
 								<a href="https://www.youtube.com/watch?v={sc.video_id}" target="_blank" rel="noopener" title="Veure a YouTube" class="shrink-0 text-red-600 hover:opacity-80 dark:text-red-400"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.11-2.12C21.5 3.55 12 3.55 12 3.55s-9.5 0-11.39.53A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.11 2.12C4.5 20.45 12 20.45 12 20.45s9.5 0 11.39-.53A3 3 0 0 0 23.5 17.8 31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.55 15.57V8.43L15.82 12z"/></svg></a>
 							</li>
 						{/each}
@@ -585,27 +585,27 @@
 								{#if g.schedule.date}<span class="font-semibold">{fmtGroupDay(g.schedule.date)}</span>{/if}
 								{#if g.schedule.billar}<span class="rounded bg-slate-100 dark:bg-slate-800 px-1 font-medium">Billar {g.schedule.billar}</span>{/if}
 								{#each g.schedule.matches as m}
-									<span class="tabular-nums"><span class="text-slate-400 dark:text-slate-500">{matchTypeLabel(m.type)}</span> {m.time}</span>
+									<span class="tabular-nums"><span class="text-slate-500 dark:text-slate-400">{matchTypeLabel(m.type)}</span> {m.time}</span>
 								{/each}
 							</div>
-						{:else if g.venue}<div class="px-3 pt-1 text-[10px] text-slate-400 dark:text-slate-500">{g.venue}</div>{/if}
+						{:else if g.venue}<div class="px-3 pt-1 text-[10px] text-slate-500 dark:text-slate-400">{g.venue}</div>{/if}
 						{#if g.standings.length}
 							<ol class="px-2 py-1">
 								{#each g.standings as s, idx}
 									{@const pos = provPos(phase, g.label, s.player_name)}
 									<li class="flex items-center gap-2 rounded px-1 py-1 {pos === 1 ? 'bg-emerald-50 dark:bg-emerald-950/40' : pos >= 2 ? 'bg-amber-50/60 dark:bg-amber-950/40' : ''}">
-										<span class="w-4 text-center text-xs font-mono {pos === 1 ? 'text-emerald-600 dark:text-emerald-400' : pos >= 2 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{pos === 1 ? '▸' : idx + 1}</span>
+										<span class="w-4 text-center text-xs font-mono {pos === 1 ? 'text-emerald-600 dark:text-emerald-400' : pos >= 2 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}">{pos === 1 ? '▸' : idx + 1}</span>
 										<span class="flex min-w-0 flex-1 items-center gap-1">
 											{@render player(s.player_name, 'truncate text-sm' + (s.incoming ? ' text-sky-700 dark:text-sky-300' : ''))}
 											{#if s.incoming}<span class="shrink-0 rounded bg-sky-100 dark:bg-sky-900/40 px-1 text-[9px] font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300" title="{s.seed_rank ? s.seed_rank + 'è ' : ''}classificat de la ronda anterior{s.from_group ? ' (de ' + s.from_group.replace('Grup ', '') + ')' : ''} — la FCB encara no l'ha col·locat oficialment">▸ {s.seed_rank ? s.seed_rank + 'è cl.' : 'class.'}</span>{/if}
 										</span>
-										<span class="shrink-0 font-mono text-[11px] text-slate-400 dark:text-slate-500">{s.mitjana.toFixed(3)}</span>
+										<span class="shrink-0 font-mono text-[11px] text-slate-500 dark:text-slate-400">{s.mitjana.toFixed(3)}</span>
 										<span class="w-5 shrink-0 text-right font-mono text-sm font-semibold">{s.punts}</span>
 									</li>
 								{/each}
 							</ol>
 						{:else}
-							<p class="px-3 py-2 text-xs text-slate-400 dark:text-slate-500">Sense classificació encara.</p>
+							<p class="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">Sense classificació encara.</p>
 						{/if}
 						{#if liveForGroup(g.label).length}
 								<div class="border-t border-red-100 dark:border-red-900/50 px-3 py-2">
@@ -626,7 +626,7 @@
 													<span class="shrink-0 font-mono font-bold text-slate-700 dark:text-slate-200">{sc.car_a}–{sc.car_b}</span>
 													{@render playerShort(sc.player_b ?? '—', 'min-w-0 flex-1 truncate text-right font-bold ' + (bW ? 'text-emerald-600 dark:text-emerald-400' : aW ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'))}
 												</div>
-												<div class="mt-0.5 flex items-center justify-center gap-2 text-[10px] text-slate-400 dark:text-slate-500">
+												<div class="mt-0.5 flex items-center justify-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
 													{#if sc.entrades}<span>{sc.entrades} ent.</span>{/if}
 													<a href="https://www.youtube.com/watch?v={sc.video_id}" target="_blank" rel="noopener" title="Veure a YouTube" class="inline-flex items-center gap-0.5 font-semibold text-red-600 hover:underline active:underline dark:text-red-400">
 														<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.11-2.12C21.5 3.55 12 3.55 12 3.55s-9.5 0-11.39.53A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.11 2.12C4.5 20.45 12 20.45 12 20.45s9.5 0 11.39-.53A3 3 0 0 0 23.5 17.8 31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.55 15.57V8.43L15.82 12z"/></svg>
@@ -640,7 +640,7 @@
 							{/if}
 							{#if played.length}
 							<div class="border-t border-slate-100 dark:border-slate-800 px-3 py-2">
-								<div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+								<div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 									Partides disputades
 								</div>
 								<ul class="space-y-1.5">
@@ -653,7 +653,7 @@
 												<span class="shrink-0 font-mono font-bold text-slate-700 dark:text-slate-200">{m.caramboles_a}–{m.caramboles_b}</span>
 												{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right font-bold ' + (bWin ? 'text-emerald-600 dark:text-emerald-400' : aWin ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'))}
 											</div>
-											{#if m.entrades}<div class="text-center text-[10px] text-slate-400 dark:text-slate-500">{m.entrades} ent.</div>{/if}
+											{#if m.entrades}<div class="text-center text-[10px] text-slate-500 dark:text-slate-400">{m.entrades} ent.</div>{/if}
 										</li>
 									{/each}
 								</ul>
@@ -683,7 +683,7 @@
 					<ol class="space-y-0.5">
 						{#each seeds as s, i}
 							<li class="flex items-center gap-2 text-sm">
-								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{i + 1}</span>
+								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{i + 1}</span>
 								<span class="flex min-w-0 flex-1 items-center gap-1">
 									{@render player(s.name, 'truncate')}
 									{#if s.source === 'reservat'}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Cap de sèrie reservat (no juga la prèvia)">res</span>{/if}
@@ -694,12 +694,12 @@
 							</li>
 						{/each}
 					</ol>
-					<p class="mt-1.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">Ordre per la mitjana d'<strong>aquesta</strong> ronda (sèrie major com a desempat). Fixa l'aparellament 1-N de <strong>{next?.label?.toLowerCase() ?? 'la ronda següent'}</strong>.</p>
+					<p class="mt-1.5 text-[10px] leading-tight text-slate-500 dark:text-slate-400">Ordre per la mitjana d'<strong>aquesta</strong> ronda (sèrie major com a desempat). Fixa l'aparellament 1-N de <strong>{next?.label?.toLowerCase() ?? 'la ronda següent'}</strong>.</p>
 				</div>
 			{/if}
 
 			{#if official.length === 0 && calc.length === 0}
-				<p class="py-4 text-center text-sm text-slate-400 dark:text-slate-500">Encara no hi ha emparellaments d'aquesta ronda.</p>
+				<p class="py-4 text-center text-sm text-slate-500 dark:text-slate-400">Encara no hi ha emparellaments d'aquesta ronda.</p>
 			{:else}
 				{#if calc.length}
 					<p class="mb-1.5 text-[10px] text-sky-600 dark:text-sky-400">{official.length ? 'Oficials + calculats (mentre la federació no publiqui la resta).' : 'Emparellaments calculats: la federació encara no els ha publicat.'}</p>
@@ -718,7 +718,7 @@
 	<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 		<div class="mb-2">
 			<h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Classificació provisional</h2>
-			<p class="mt-0.5 text-[10px] leading-tight text-slate-400 dark:text-slate-500">A dalt, els jugadors encara EN JOC: primer els caps de sèrie (reservats) pel rànquing d'opens, després els classificats de la prèvia per ordre de classificació. A sota, els ja eliminats per la ronda on cauen. Tot és provisional (*) fins a la classificació definitiva.</p>
+			<p class="mt-0.5 text-[10px] leading-tight text-slate-500 dark:text-slate-400">A dalt, els jugadors encara EN JOC: primer els caps de sèrie (reservats) pel rànquing d'opens, després els classificats de la prèvia per ordre de classificació. A sota, els ja eliminats per la ronda on cauen. Tot és provisional (*) fins a la classificació definitiva.</p>
 		</div>
 		{#if is3b && rankSeqs.length}
 			<div class="mb-2 flex flex-wrap items-center gap-2 text-[11px]">
@@ -733,7 +733,7 @@
 						<option value={s.num_seq}>{seqLabel(s)}{i === 0 ? ' · darrer' : ''}</option>
 					{/each}
 				</select>
-				<span class="text-slate-400 dark:text-slate-500">premis per banda recalculats al navegador segons el rànquing de la convocatòria</span>
+				<span class="text-slate-500 dark:text-slate-400">premis per banda recalculats al navegador segons el rànquing de la convocatòria</span>
 			</div>
 		{/if}
 		<div class="space-y-3">
@@ -744,17 +744,17 @@
 				<div>
 					<div class="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider {alive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}">
 						<span>{alive ? 'Encara en competició' : tier.round}</span>
-						<span class="font-mono font-normal text-slate-400 dark:text-slate-500">llocs {lo === hi ? lo : `${lo}–${hi}`}</span>
+						<span class="font-mono font-normal text-slate-500 dark:text-slate-400">llocs {lo === hi ? lo : `${lo}–${hi}`}</span>
 						{#if alive}<span class="rounded bg-amber-100 dark:bg-amber-900/40 px-1 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">provisional</span>{/if}
 					</div>
 					<ol class="space-y-0.5">
 						{#each tier.rows as r (r.player_name)}
 							{@const ec = effClass(r)}
 							<li class="flex items-center gap-2 text-sm">
-								<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-400 dark:text-slate-500">{r.position}{#if r.is_provisional_position}<span class="text-amber-500" title="Posició provisional">*</span>{/if}</span>
+								<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{r.position}{#if r.is_provisional_position}<span class="text-amber-500" title="Posició provisional">*</span>{/if}</span>
 								<span class="flex min-w-0 flex-1 items-baseline gap-1 truncate">
 									{@render player(r.player_name, (!alive && r.position <= 8 ? 'font-semibold ' : '') + 'truncate')}
-									{#if ec.rank3b}<span class="shrink-0 font-mono text-[10px] text-slate-400 dark:text-slate-500" title="Posició al rànquing de 3 bandes">({ec.rank3b})</span>{/if}
+									{#if ec.rank3b}<span class="shrink-0 font-mono text-[10px] text-slate-500 dark:text-slate-400" title="Posició al rànquing de 3 bandes">({ec.rank3b})</span>{/if}
 								</span>
 								{#if ec.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial (opens 3 bandes): millor classificat de la seva banda del rànquing">{ec.prize}</span>{/if}
 								{#if !alive && r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
@@ -765,7 +765,7 @@
 									: "Mitjana de l'open"}
 							>{r.mitjana ? r.mitjana.toFixed(3) : '—'}</span>
 							{#if r.partides}
-								<span class="hidden w-7 shrink-0 text-right font-mono text-[10px] text-slate-400 dark:text-slate-500 sm:inline" title="Partides jugades a l'open">{r.partides}pj</span>
+								<span class="hidden w-7 shrink-0 text-right font-mono text-[10px] text-slate-500 dark:text-slate-400 sm:inline" title="Partides jugades a l'open">{r.partides}pj</span>
 							{/if}
 								<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title={alive ? 'Punts pendents: encara en competició' : 'Punts de rànquing segons el lloc (reglament dels opens)'}>{alive ? '—' : r.open_points}</span>
 							</li>
@@ -774,6 +774,6 @@
 				</div>
 			{/each}
 		</div>
-		<p class="mt-2 text-[10px] leading-tight text-slate-400 dark:text-slate-500"><span class="text-amber-500">*</span> provisional · (n) = rànquing 3B · <span class="text-violet-600 dark:text-violet-300">premi</span> per posició (1-8) o per banda de rànquing. Punts segons el reglament. La mitjana és la de <strong>tot l'open</strong> (totes les partides jugades) i <em>pj</em> les partides.</p>
+		<p class="mt-2 text-[10px] leading-tight text-slate-500 dark:text-slate-400"><span class="text-amber-500">*</span> provisional · (n) = rànquing 3B · <span class="text-violet-600 dark:text-violet-300">premi</span> per posició (1-8) o per banda de rànquing. Punts segons el reglament. La mitjana és la de <strong>tot l'open</strong> (totes les partides jugades) i <em>pj</em> les partides.</p>
 	</div>
 {/snippet}

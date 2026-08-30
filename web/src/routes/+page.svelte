@@ -230,9 +230,9 @@
 	{#each modalitats as m}
 		<button
 			onclick={() => pickMod(m.codi_fcb)}
-			class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors {m.codi_fcb ===
+			class="shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium transition-colors {m.codi_fcb ===
 			selMod
-				? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+				? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 				: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 		>
 			{m.nom}
@@ -260,7 +260,7 @@
 				<p class="text-[10px] uppercase tracking-wide text-amber-600 dark:text-amber-400">estimació · pot tenir errors</p>
 			{:else}
 				<p class="truncate text-sm font-semibold">{currentLabel}</p>
-				<p class="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+				<p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					{isLatestOfficial ? 'Oficial vigent' : `${snapshots.length - officialIndex} de ${snapshots.length} · oficial`}
 				</p>
 			{/if}
@@ -286,13 +286,13 @@
 <!-- Àmbit de la cerca: evita que cognoms com «Manresa» o «Olesa» es barregin amb clubs -->
 {#if search.trim()}
 	<div class="-mt-1 mb-3 flex items-center gap-1.5 px-0.5 text-xs">
-		<span class="text-slate-400 dark:text-slate-500">Cerca a:</span>
+		<span class="text-slate-500 dark:text-slate-400">Cerca a:</span>
 		{#each SCOPES as s (s.val)}
 			<button
 				type="button"
 				onclick={() => (scope = s.val)}
-				class="rounded-full px-2.5 py-1 font-medium transition-colors {scope === s.val
-					? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+				class="rounded-sm px-2.5 py-1 font-medium transition-colors {scope === s.val
+					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 			>
 				{s.label}
@@ -319,30 +319,30 @@
 
 <!-- Ordena per posició oficial o per promig (no sempre coincideixen) -->
 <div class="mb-2 flex items-center gap-1.5 px-0.5 text-xs">
-	<span class="text-slate-400 dark:text-slate-500">Ordena per:</span>
+	<span class="text-slate-500 dark:text-slate-400">Ordena per:</span>
 	<button
 		type="button"
 		onclick={() => (sortBy = 'posicio')}
-		class="rounded-full px-2.5 py-1 font-medium transition-colors {sortBy === 'posicio'
-			? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+		class="rounded-sm px-2.5 py-1 font-medium transition-colors {sortBy === 'posicio'
+			? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 			: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 	>Posició</button>
 	<button
 		type="button"
 		onclick={() => (sortBy = 'mitjana')}
-		class="rounded-full px-2.5 py-1 font-medium transition-colors {sortBy === 'mitjana'
-			? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+		class="rounded-sm px-2.5 py-1 font-medium transition-colors {sortBy === 'mitjana'
+			? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 			: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 	>Promig</button>
 	{#if sortBy === 'mitjana'}
-		<span class="text-slate-400 dark:text-slate-500">· el número segueix sent la posició oficial</span>
+		<span class="text-slate-500 dark:text-slate-400">· el número segueix sent la posició oficial</span>
 	{/if}
 </div>
 
 {#if loading}
-	<p class="px-1 py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+	<p class="px-1 py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if filtered.length === 0}
-	<p class="px-1 py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense resultats.</p>
+	<p class="px-1 py-6 text-center text-sm text-slate-500 dark:text-slate-400">Sense resultats.</p>
 {:else}
 	<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800 lg:columns-2 lg:gap-x-6">
 		{#each filtered as r (r.player_fcb_id + '-' + r.posicio)}
@@ -350,16 +350,16 @@
 			<li class="break-inside-avoid border-b border-slate-100 dark:border-slate-800 last:border-0">
 				<a
 					href="/jugador/{r.player_fcb_id}"
-					class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50 dark:active:bg-slate-800/50"
+					class="flex items-center gap-3 px-3 py-1.5 active:bg-slate-50 dark:active:bg-slate-800/50"
 				>
 					<span
 						class="w-7 shrink-0 text-center text-sm font-semibold tabular-nums {isProvView
 							? 'text-amber-600 dark:text-amber-400'
-							: 'text-slate-400 dark:text-slate-500'}"
+							: 'text-slate-500 dark:text-slate-400'}"
 					>{r.posicio ?? '—'}</span>
 					<div class="min-w-0 flex-1">
 						<div class="truncate text-sm font-medium leading-tight">{r.jugador}</div>
-						{#if r.club}<div class="truncate text-xs text-slate-400 dark:text-slate-500">{r.club}</div>{/if}
+						{#if r.club}<div class="truncate text-xs text-slate-500 dark:text-slate-400">{r.club}</div>{/if}
 						{#if isProvView && (r.partidesNoves ?? 0) > 0}
 							<div class="text-[10px] font-medium text-amber-600 dark:text-amber-400">
 								+{r.partidesNoves} {r.partidesNoves === 1 ? 'partida nova' : 'partides noves'}
@@ -380,14 +380,14 @@
 									? 'text-emerald-600 dark:text-emerald-400'
 									: mDown
 										? 'text-red-500 dark:text-red-400'
-										: 'text-slate-400 dark:text-slate-500'}"
+										: 'text-slate-500 dark:text-slate-400'}"
 								>{mUp ? `+${dm.toFixed(3)}` : mDown ? dm.toFixed(3) : '='}</span>
 							<span
 								class="block text-[10px] font-bold tabular-nums {dp > 0
 									? 'text-emerald-600 dark:text-emerald-400'
 									: dp < 0
 										? 'text-red-500 dark:text-red-400'
-										: 'text-slate-400 dark:text-slate-500'}"
+										: 'text-slate-500 dark:text-slate-400'}"
 								>{dp > 0 ? `▲${dp}` : dp < 0 ? `▼${-dp}` : '–'}</span>
 						</span>
 					{:else if pv && pv.partides_post > 0}
@@ -408,7 +408,7 @@
 									? 'text-emerald-600 dark:text-emerald-400'
 									: dp < 0
 										? 'text-red-500 dark:text-red-400'
-										: 'text-slate-400 dark:text-slate-500'}"
+										: 'text-slate-500 dark:text-slate-400'}"
 								>{dp > 0 ? `▲${dp}` : dp < 0 ? `▼${-dp}` : '–'}</span>
 						</span>
 					{:else if provActive}
@@ -419,5 +419,5 @@
 			</li>
 		{/each}
 	</ul>
-	<p class="px-1 py-3 text-center text-[11px] text-slate-400 dark:text-slate-500">{filtered.length} jugadors</p>
+	<p class="px-1 py-3 text-center text-[11px] text-slate-500 dark:text-slate-400">{filtered.length} jugadors</p>
 {/if}

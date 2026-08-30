@@ -1,0 +1,400 @@
+/* GENERAT — no editis aquest fitxer.
+
+   Còpia de ag-standards/skills/ag-disseny/tokens.css, que és la font de
+   veritat. Es refresca amb:
+
+       uv run python scripts/sync_tokens_ag.py --escriu
+
+   Hi és perquè Vercel només veu aquest repositori. Si vols canviar un color,
+   canvia'l als estàndards, passa-hi l'auditoria de contrast i torna a
+   sincronitzar. */
+
+/* Tokens visuals d'AGenginyeria — línia SaaS.
+   Els valors de gràfic estan validats amb dataviz/scripts/validate_palette.js
+   en els dos modes. No els canviïs sense tornar a executar-lo. */
+
+:root {
+  /* --- Neutres: betum. Cap gris pur, tots amb biaix verd-terros --- */
+  --ag-bitum-950: #101211;
+  --ag-bitum-900: #161917;
+  --ag-bitum-800: #212523;
+  --ag-bitum-700: #333833;
+  --ag-bitum-600: #4E544F;
+  --ag-bitum-500: #6E756F;
+  --ag-bitum-400: #939A94;
+  --ag-bitum-300: #B8BEB9;
+  --ag-bitum-200: #D6DAD6;
+  --ag-bitum-100: #E8EBE8;
+  --ag-bitum-050: #F4F6F3;
+
+  /* --- Families d'accent. Vegeu [data-familia] mes avall --- */
+  /* Ferms i emissions: verd de sostenibilitat */
+  --ag-verd-800: #0A3F26;
+  --ag-verd-700: #0E5533;
+  --ag-verd-600: #157A4A;   /* 5,36:1 sobre blanc */
+  --ag-verd-500: #1F9A5F;
+  --ag-verd-200: #A6DCBE;
+  --ag-verd-100: #DCEFE4;
+  /* Contractacio, normativa, gestio: blau */
+  --ag-blau-800: #0D2E48;
+  --ag-blau-700: #123F61;
+  --ag-blau-600: #1A5C8A;   /* 7,14:1 sobre blanc */
+  --ag-blau-500: #2E7BB0;
+  --ag-blau-200: #AFCDE2;
+  --ag-blau-100: #DEEAF2;
+
+  /* --- Superficies i tinta --- */
+  --ag-surface: #FFFFFF;
+  --ag-ground: var(--ag-bitum-050);
+  --ag-raised: var(--ag-bitum-100);
+  --ag-rule: var(--ag-bitum-200);
+  --ag-rule-strong: var(--ag-bitum-300);
+  --ag-ink: var(--ag-bitum-900);
+  --ag-ink-soft: var(--ag-bitum-600);
+  --ag-ink-muted: #6A716B;   /* 4,61:1 sobre pagina; bitum-500 no hi arribava */
+
+  /* Accent per defecte = familia de gestio. Es reassigna per [data-familia]. */
+  --ag-accent: var(--ag-blau-600);
+  --ag-accent-hover: var(--ag-blau-700);
+  --ag-accent-soft: var(--ag-blau-100);
+  --ag-accent-ink: #FFFFFF;
+  --ag-focus: var(--ag-blau-500);
+
+  /* --- Estat. SEMPRE amb icona i etiqueta, mai nomes color --- */
+  --ag-bo: #157A4A;          --ag-bo-bg: #DCEFE4;       --ag-bo-text: #157A4A;
+  --ag-avis: #C08018;        --ag-avis-bg: #F7EDD9;     --ag-avis-text: #A16900;
+  --ag-greu: #B0432A;        --ag-greu-bg: #F7E4DE;     --ag-greu-text: #B0432A;
+  --ag-critic: #A81E12;      --ag-critic-bg: #F8DEDB;   --ag-critic-text: #A81E12;
+
+  /* --- Grafics: independents de la familia --- */
+  /* Els colors de serie identifiquen dades, no marca: aixi els grafics de
+     productes diferents es poden comparar. Ordre fix, mai en cicle. */
+  --ag-cat-1: #0F7A5A;
+  --ag-cat-2: #B0432A;
+  --ag-cat-3: #2A6FB0;
+  --ag-cat-4: #C08018;
+  --ag-cat-5: #7A4FA8;
+
+  --ag-seq-1: #DDEFE8;
+  --ag-seq-2: #A8D6C5;
+  --ag-seq-3: #4EAE8E;
+  --ag-seq-4: #0F7A5A;
+  --ag-seq-5: #0B5B43;
+  --ag-seq-6: #08402F;
+
+  --ag-div-neg-2: #B0432A;
+  --ag-div-neg-1: #DFA08E;
+  --ag-div-mid:   #939A94;
+  --ag-div-pos-1: #8FB4D8;
+  --ag-div-pos-2: #2A6FB0;
+
+  /* --- Tipografia --- */
+  /* Verdana: la mes llegible en pantalla i amb xifres amples i clares.
+     Es ampla, per aixo la base va a 15px i no a 16. Tahoma es la seva
+     versio estreta; DejaVu Sans cobreix Linux amb proporcions properes. */
+  --ag-font: Verdana, Tahoma, "DejaVu Sans", Geneva, sans-serif;
+  --ag-font-data: Consolas, "Cascadia Mono", "DejaVu Sans Mono", monospace;
+  --ag-size-base: 15px;
+  --ag-lh: 1.5;
+
+  /* --- Estructura: convencions de planol --- */
+  --ag-radius: 2px;
+  --ag-hairline: 1px;
+  --ag-space-1: 4px;
+  --ag-space-2: 8px;
+  --ag-space-3: 12px;
+  --ag-space-4: 16px;
+  --ag-space-6: 24px;
+  --ag-space-8: 32px;
+}
+
+/* --- Famílies de producte --- */
+[data-familia="ferms"] {
+  --ag-accent: var(--ag-verd-600);
+  --ag-accent-hover: var(--ag-verd-700);
+  --ag-accent-soft: var(--ag-verd-100);
+  --ag-accent-ink: #FFFFFF;
+  --ag-focus: var(--ag-verd-500);
+}
+[data-familia="gestio"] {
+  --ag-accent: var(--ag-blau-600);
+  --ag-accent-hover: var(--ag-blau-700);
+  --ag-accent-soft: var(--ag-blau-100);
+  --ag-accent-ink: #FFFFFF;
+  --ag-focus: var(--ag-blau-500);
+}
+
+/* Mode fosc: passos propis, no una inversio del clar.
+   Nomes es redefineixen tokens; cap component s'estila aqui dins. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ag-surface: #1C201E;
+    --ag-ground: var(--ag-bitum-900);
+    --ag-raised: var(--ag-bitum-800);
+    --ag-rule: var(--ag-bitum-700);
+    --ag-rule-strong: var(--ag-bitum-600);
+    --ag-ink: #E7EAE7;
+    --ag-ink-soft: var(--ag-bitum-400);
+    --ag-ink-muted: #828A84;   /* 4,64:1 sobre targeta fosca */
+
+    --ag-verd-600: #2FA96C;
+    --ag-verd-700: #1F8A55;
+    --ag-verd-500: #4FC088;
+    --ag-verd-100: #12261B;
+    --ag-blau-600: #4A90C4;
+    --ag-blau-700: #2E7BB0;
+    --ag-blau-500: #6BA9D6;
+    --ag-blau-100: #172935;
+
+    --ag-accent: var(--ag-blau-600);
+    --ag-accent-hover: var(--ag-blau-500);
+    --ag-accent-soft: var(--ag-blau-100);
+    --ag-accent-ink: #0B1512;
+    --ag-focus: var(--ag-blau-500);
+
+    --ag-bo: #249272;        --ag-bo-bg: #12251F;      --ag-bo-text: #2D9878;
+    --ag-avis: #B8811F;      --ag-avis-bg: #2A2113;    --ag-avis-text: #B8811F;
+    --ag-greu: #CB5C3E;      --ag-greu-bg: #2B1A15;    --ag-greu-text: #D86749;
+    --ag-critic: #D64534;    --ag-critic-bg: #2E1614;  --ag-critic-text: #E95745;
+
+    --ag-cat-1: #249272;
+    --ag-cat-2: #CB5C3E;
+    --ag-cat-3: #4380C4;
+    --ag-cat-4: #B8811F;
+    --ag-cat-5: #8F68BE;
+
+    --ag-seq-1: #12251F;
+    --ag-seq-2: #14503D;
+    --ag-seq-3: #0F7A5A;
+    --ag-seq-4: #249272;
+    --ag-seq-5: #4EAE8E;
+    --ag-seq-6: #A8D6C5;
+
+    --ag-div-neg-2: #CB5C3E;
+    --ag-div-neg-1: #8A4433;
+    --ag-div-mid:   #6E756F;
+    --ag-div-pos-1: #35597F;
+    --ag-div-pos-2: #4380C4;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ag-surface: #1C201E;
+  --ag-ground: var(--ag-bitum-900);
+  --ag-raised: var(--ag-bitum-800);
+  --ag-rule: var(--ag-bitum-700);
+  --ag-rule-strong: var(--ag-bitum-600);
+  --ag-ink: #E7EAE7;
+  --ag-ink-soft: var(--ag-bitum-400);
+  --ag-ink-muted: #828A84;
+
+  --ag-verd-600: #2FA96C;
+  --ag-verd-700: #1F8A55;
+  --ag-verd-500: #4FC088;
+  --ag-verd-100: #12261B;
+  --ag-blau-600: #4A90C4;
+  --ag-blau-700: #2E7BB0;
+  --ag-blau-500: #6BA9D6;
+  --ag-blau-100: #172935;
+
+  --ag-accent: var(--ag-blau-600);
+  --ag-accent-hover: var(--ag-blau-500);
+  --ag-accent-soft: var(--ag-blau-100);
+  --ag-accent-ink: #0B1512;
+  --ag-focus: var(--ag-blau-500);
+
+  --ag-bo: #249272;    --ag-bo-bg: #12251F;    --ag-bo-text: #2D9878;
+  --ag-avis: #B8811F;    --ag-avis-bg: #2A2113;  --ag-avis-text: #B8811F;
+  --ag-greu: #CB5C3E;    --ag-greu-bg: #2B1A15;  --ag-greu-text: #D86749;
+  --ag-critic: #D64534;  --ag-critic-bg: #2E1614;  --ag-critic-text: #E95745;
+
+  --ag-cat-1: #249272;
+  --ag-cat-2: #CB5C3E;
+  --ag-cat-3: #4380C4;
+  --ag-cat-4: #B8811F;
+  --ag-cat-5: #8F68BE;
+
+  --ag-seq-1: #12251F;
+  --ag-seq-2: #14503D;
+  --ag-seq-3: #0F7A5A;
+  --ag-seq-4: #249272;
+  --ag-seq-5: #4EAE8E;
+  --ag-seq-6: #A8D6C5;
+
+  --ag-div-neg-2: #CB5C3E;
+  --ag-div-neg-1: #8A4433;
+  --ag-div-mid:   #6E756F;
+  --ag-div-pos-1: #35597F;
+  --ag-div-pos-2: #4380C4;
+}
+
+/* Base minima. Tot el que segueix usa nomes tokens. */
+body {
+  background: var(--ag-ground);
+  color: var(--ag-ink);
+  font-family: var(--ag-font);
+  font-size: var(--ag-size-base);
+  line-height: var(--ag-lh);
+}
+
+/* Xifres en columna: sempre tabulars i lining */
+.ag-num, td.ag-num, .ag-data {
+  font-family: var(--ag-font-data);
+  font-variant-numeric: tabular-nums lining-nums;
+  text-align: right;
+}
+
+/* Pindola d'estat: el color va al FONS i a la icona; el text, en tinta normal.
+   Es el que evita el problema de contrast de color-sobre-fons-tenyit. */
+.ag-pill {
+  display: inline-flex; gap: .3em; align-items: center;
+  padding: .1em .45em; border-radius: var(--ag-radius);
+  font-family: var(--ag-font-data); font-size: .8em;
+  color: var(--ag-ink);
+}
+.ag-pill .ag-pill-marca { color: inherit; }
+.ag-pill.bo     { background: var(--ag-bo-bg); }
+.ag-pill.avis   { background: var(--ag-avis-bg); }
+.ag-pill.greu   { background: var(--ag-greu-bg); }
+.ag-pill.critic { background: var(--ag-critic-bg); }
+
+/* Quan l'estat ha de ser TEXT i no pindola, aquests si que passen AA */
+.ag-estat-bo     { color: var(--ag-bo-text); }
+.ag-estat-avis   { color: var(--ag-avis-text); }
+.ag-estat-greu   { color: var(--ag-greu-text); }
+.ag-estat-critic { color: var(--ag-critic-text); }
+
+/* ==========================================================================
+   LA SIGNATURA (R4): el xip de procedencia i la traca que obre.
+   Dos nivells del mateix component. El xip diu d'on surt la xifra i sempre es
+   visible; la traca ensenya la cadena sencera i es a un clic. El marcatge el
+   genera traca.py, i serveix igual per a la web i per al PDF de l'informe.
+   ========================================================================== */
+
+/* Nivell 1: el xip. Al costat de cada xifra derivada, mai amagat en un tooltip */
+.ag-cita {
+  font-family: var(--ag-font-data);
+  font-size: 0.74em;
+  letter-spacing: .01em;
+  color: var(--ag-ink-muted);
+  background: none;
+  border: var(--ag-hairline) solid var(--ag-rule);
+  border-radius: var(--ag-radius);
+  padding: 0 .3em;
+  white-space: nowrap;
+}
+/* Que el xip obri la traca ho diu la vora, no el color d'accent: dins l'area de
+   dibuix d'un grafic l'accent ja vol dir una altra cosa. */
+.ag-cita[data-obre], .ag-cita[popovertarget] { cursor: pointer; }
+.ag-cita[data-obre]:hover, .ag-cita[popovertarget]:hover {
+  color: var(--ag-ink);
+  border-color: var(--ag-rule-strong);
+  background: var(--ag-raised);
+}
+
+/* Etiqueta de plaquet: versaleta monoespaiada. El registre del planol */
+.ag-et {
+  font-family: var(--ag-font-data);
+  font-size: .69em;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--ag-ink-muted);
+}
+
+/* Nivell 2: la traca. Contingut nu -- qui el mostra decideix si va dins un
+   modal (aplicacio) o dins una pagina (informe impres). */
+.ag-traca {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-3);
+  background: var(--ag-surface);
+  color: var(--ag-ink);
+}
+.ag-traca-cap { display: flex; flex-direction: column; gap: 2px; }
+.ag-traca-cap h2 { font-size: 1.07em; font-weight: 700; margin: 0; }
+
+/* El resultat, encapcalat per l'accent de la familia: es l'unica xifra de tota
+   la cadena que l'usuari havia demanat */
+.ag-traca-resultat {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--ag-space-3);
+  padding: var(--ag-space-2) var(--ag-space-3);
+  background: var(--ag-accent-soft);
+  border: var(--ag-hairline) solid var(--ag-accent);
+  border-radius: var(--ag-radius);
+}
+.ag-traca-resultat .ag-num { font-size: 1.33em; }
+.ag-traca-unitat { font-size: .7em; color: var(--ag-ink-soft); }
+
+.ag-traca-cadena { display: flex; flex-direction: column; gap: var(--ag-space-2); }
+
+/* Una baula: un pas del calcul, amb el seu valor i d'on surt */
+.ag-baula {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: var(--ag-space-2) var(--ag-space-3);
+  background: var(--ag-surface);
+  border: var(--ag-hairline) solid var(--ag-rule);
+  border-radius: var(--ag-radius);
+}
+.ag-baula-cap {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--ag-space-3);
+}
+.ag-baula-nota { font-size: .78em; color: var(--ag-ink-muted); }
+.ag-baula-cites { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+/* L'aritmetica del pas, escrita tal com es fa i no descrita */
+.ag-baula-formula {
+  font-family: var(--ag-font-data);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-size: .78em;
+  padding: var(--ag-space-1) var(--ag-space-2);
+  margin-top: 3px;
+  background: var(--ag-ground);
+  border: var(--ag-hairline) solid var(--ag-raised);
+  border-radius: var(--ag-radius);
+}
+.ag-baula-fletxa {
+  display: flex; justify-content: center;
+  color: var(--ag-rule-strong);
+}
+
+.ag-traca-total {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--ag-space-3);
+  padding-top: var(--ag-space-2);
+  border-top: var(--ag-hairline) solid var(--ag-rule);
+}
+.ag-traca-total .ag-num { text-align: left; }
+.ag-traca-peu { font-size: .78em; color: var(--ag-ink-muted); }
+
+/* La xifra amb el seu xip, dins una cel·la de taula */
+.ag-xifra-traca {
+  display: inline-flex; flex-direction: column; align-items: flex-end; gap: 2px;
+}
+
+/* La traca flotant: el xip l'obre amb popover, sense cap JavaScript.
+   Vel de betum, filet fort, cap ombra. */
+.ag-traca-flotant {
+  width: min(720px, calc(100vw - 2 * var(--ag-space-4)));
+  max-height: 85vh;
+  overflow-y: auto;
+  margin: auto;
+  padding: var(--ag-space-4);
+  background: var(--ag-surface);
+  color: var(--ag-ink);
+  border: var(--ag-hairline) solid var(--ag-rule-strong);
+  border-radius: var(--ag-radius);
+}
+.ag-traca-flotant::backdrop { background: rgba(22, 25, 23, .55); }
+
+/* A paper la traca s'imprimeix desplegada i cap xip no obre res */
+@media print {
+  .ag-traca { break-inside: avoid; }
+  .ag-cita[data-obre], .ag-cita[popovertarget] { cursor: default; background: none; }
+  .ag-traca-flotant { display: none; }
+}
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--ag-focus);
+  outline-offset: 1px;
+}

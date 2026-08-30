@@ -116,15 +116,15 @@
 {#if categories.length > 1}
 	<div class="mb-4 flex flex-wrap items-center gap-2">
 		<button
-			class="rounded-full px-3 py-1 text-sm {categoriaActiva === null
-				? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+			class="rounded-sm px-3 py-1 text-sm {categoriaActiva === null
+				? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 				: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}"
 			onclick={() => (categoriaActiva = null)}>Totes</button
 		>
 		{#each categories as cat (cat)}
 			<button
-				class="rounded-full px-3 py-1 text-sm {categoriaActiva === cat
-					? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+				class="rounded-sm px-3 py-1 text-sm {categoriaActiva === cat
+					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}"
 				onclick={() => (categoriaActiva = cat)}>{cat}</button
 			>

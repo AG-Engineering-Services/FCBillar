@@ -95,19 +95,19 @@
 	<header class="mb-4">
 		<div class="mb-1 flex flex-wrap items-center gap-2">
 			<span
-				class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+				class="rounded-sm bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
 				>{s.categoria}</span
 			>
 			{#if s.explicacio}
 				<span
-					class="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+					class="rounded-sm bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
 					>Nivell {s.explicacio.nivell}</span
 				>
 			{/if}
 			{#if mark === true}
-				<span class="rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs font-semibold text-white">✓ funciona</span>
+				<span class="rounded-sm bg-emerald-500 px-2.5 py-0.5 text-xs font-semibold text-white">✓ funciona</span>
 			{:else if mark === false}
-				<span class="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-semibold text-white">✗ no funciona</span>
+				<span class="rounded-sm bg-red-500 px-2.5 py-0.5 text-xs font-semibold text-white">✗ no funciona</span>
 			{/if}
 		</div>
 		<h1 class="text-xl font-bold md:text-2xl">{s.nom}</h1>
@@ -236,7 +236,7 @@
 							<div class="space-y-2">
 								{#each s.explicacio.exemples as ex, i}
 									<div class="rounded-md bg-slate-50 p-2 text-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
-										{#if s.explicacio.exemples.length > 1}<span class="mr-1 font-semibold text-slate-400">{i + 1}.</span>{/if}<span class="whitespace-pre-line">{ex}</span>
+										{#if s.explicacio.exemples.length > 1}<span class="mr-1 font-semibold text-slate-500 dark:text-slate-400">{i + 1}.</span>{/if}<span class="whitespace-pre-line">{ex}</span>
 									</div>
 								{/each}
 							</div>
@@ -266,14 +266,14 @@
 					{/if}
 
 					{#if s.font}
-						<p class="text-xs italic text-slate-400 dark:text-slate-500">
+						<p class="text-xs italic text-slate-500 dark:text-slate-400">
 							{FONT[s.font] ?? ''} Repassa el vídeo per als detalls.
 						</p>
 					{/if}
 				</section>
 			{:else}
 				<p class="text-slate-600 dark:text-slate-300">{s.resum}</p>
-				<p class="mt-3 text-sm italic text-slate-400 dark:text-slate-500">
+				<p class="mt-3 text-sm italic text-slate-500 dark:text-slate-400">
 					Encara no hi ha explicació de text detallada per a aquest sistema.
 				</p>
 			{/if}

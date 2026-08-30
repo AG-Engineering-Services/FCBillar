@@ -362,7 +362,7 @@
 							{/if}
 						</div>
 					</div>
-					<div class="mt-1 text-[11px] text-slate-400 dark:text-slate-500">{liveSummary(r)}</div>
+					<div class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{liveSummary(r)}</div>
 				</a>
 			{/each}
 		</div>
@@ -400,10 +400,10 @@
 {#if error}
 	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
 {:else if loading}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if cat === 'ranking'}
 	{#if rondes.length === 0}
-		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Sense rànquing d'opens.</p>
+		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Sense rànquing d'opens.</p>
 	{:else}
 		{#if isCalc}
 				<div class="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
@@ -432,7 +432,7 @@
 			<button onclick={() => stepRonda(1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="següent">›</button>
 		</div>
 		<div class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				<span class="w-6 text-center">#</span>
 				<span class="flex-1">Jugador</span>
 				<span class="w-7 text-center">Op.</span>
@@ -443,10 +443,10 @@
 				{#each rondaRows.filter((r) => !q.trim() || norm(r.jugador ?? '').includes(norm(q.trim()))) as r (r.player_fcb_id)}
 					<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
 						<div class="flex items-center gap-2 px-3 py-2">
-							<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}">{r.posicio}</span>
+							<span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</span>
 							<div class="min-w-0 flex-1">
 								<a href="/jugador/{r.player_fcb_id}" class="block truncate text-sm font-medium leading-tight active:underline">{r.jugador}</a>
-								{#if r.club}<div class="truncate text-[11px] text-slate-400 dark:text-slate-500">{r.club}</div>{/if}
+								{#if r.club}<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">{r.club}</div>{/if}
 							</div>
 							<span class="w-7 shrink-0 text-center text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.opens_jugats}</span>
 							<div
@@ -455,7 +455,7 @@
 							>
 								<div class="font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">{mitjanaOf(r.player_fcb_id)}</div>
 								{#if posicio3bOf(r.player_fcb_id)}
-									<div class="font-mono text-[10px] tabular-nums text-slate-400 dark:text-slate-500">{posicio3bOf(r.player_fcb_id)}</div>
+									<div class="font-mono text-[10px] tabular-nums text-slate-500 dark:text-slate-400">{posicio3bOf(r.player_fcb_id)}</div>
 								{/if}
 							</div>
 							<button
@@ -463,7 +463,7 @@
 								class="flex w-12 shrink-0 items-center justify-end gap-0.5 font-mono text-sm font-bold tabular-nums"
 							>
 								{r.punts}
-								<span class="text-[9px] text-slate-400 dark:text-slate-500">{expandedPlayer === r.player_fcb_id ? '▴' : '▾'}</span>
+								<span class="text-[9px] text-slate-500 dark:text-slate-400">{expandedPlayer === r.player_fcb_id ? '▴' : '▾'}</span>
 							</button>
 						</div>
 						{#if expandedPlayer === r.player_fcb_id && r.detall?.length}
@@ -490,22 +490,22 @@
 				{/each}
 			</ul>
 		</div>
-		<p class="px-1 py-2 text-center text-[10px] text-slate-400 dark:text-slate-500">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII). <strong>3B</strong> = mitjana general i posició al rànquing vigent de 3 bandes{rank3bLabel ? ` (${rank3bLabel})` : ''}.{isCalc ? ' Ronda CALCULADA: els 4 darrers opens acabats + l’open en curs amb punts provisionals en directe.' : rondaProvisional ? ' Ronda PROVISIONAL: punts de la classificació final del darrer open, pendent que la federació actualitzi el rànquing oficial.' : ''}</p>
+		<p class="px-1 py-2 text-center text-[10px] text-slate-500 dark:text-slate-400">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII). <strong>3B</strong> = mitjana general i posició al rànquing vigent de 3 bandes{rank3bLabel ? ` (${rank3bLabel})` : ''}.{isCalc ? ' Ronda CALCULADA: els 4 darrers opens acabats + l’open en curs amb punts provisionals en directe.' : rondaProvisional ? ' Ronda PROVISIONAL: punts de la classificació final del darrer open, pendent que la federació actualitzi el rànquing oficial.' : ''}</p>
 	{/if}
 {:else if filtered.length === 0}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap open.</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Cap open.</p>
 {:else}
 	<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 		{#each filtered as o (o.open_id)}
 			<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
-				<a href="/opens/{o.open_id}" class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50 dark:active:bg-slate-800/50">
+				<a href="/opens/{o.open_id}" class="flex items-center gap-3 px-3 py-1.5 active:bg-slate-50 dark:active:bg-slate-800/50">
 					<div class="min-w-0 flex-1 truncate text-sm font-medium leading-tight">{clean(o.nom)}</div>
 					<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
 				</a>
 			</li>
 		{/each}
 	</ul>
-	<p class="px-1 py-3 text-center text-[11px] text-slate-400 dark:text-slate-500">
+	<p class="px-1 py-3 text-center text-[11px] text-slate-500 dark:text-slate-400">
 		{filtered.length} opens
 	</p>
 {/if}
@@ -514,7 +514,7 @@
 <section class="mt-8 border-t border-slate-100 dark:border-slate-800 pt-3">
 	<button
 		onclick={() => (showAdmin = !showAdmin)}
-		class="text-[11px] text-slate-400 dark:text-slate-500 active:underline"
+		class="text-[11px] text-slate-500 dark:text-slate-400 active:underline"
 	>
 		{showAdmin ? '▾' : '▸'} Admin · generar open des del rànquing inicial
 	</button>

@@ -85,9 +85,9 @@
 {#if error}
 	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
 {:else if loading}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if total === 0}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap campionat.</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Cap campionat.</p>
 {:else}
 	{#each groups as g (g.temporada)}
 		<section class="mb-4">
@@ -97,7 +97,7 @@
 			<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 				{#each g.items as o (o.open_id)}
 					<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
-						<a href="/opens/{o.open_id}" class="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50 dark:active:bg-slate-800/50">
+						<a href="/opens/{o.open_id}" class="flex items-center gap-3 px-3 py-1.5 active:bg-slate-50 dark:active:bg-slate-800/50">
 							<div class="min-w-0 flex-1 truncate text-sm font-medium leading-tight">{clean(o.nom)}</div>
 							<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
 						</a>
@@ -106,5 +106,5 @@
 			</ul>
 		</section>
 	{/each}
-	<p class="px-1 py-3 text-center text-[11px] text-slate-400 dark:text-slate-500">{total} campionats</p>
+	<p class="px-1 py-3 text-center text-[11px] text-slate-500 dark:text-slate-400">{total} campionats</p>
 {/if}

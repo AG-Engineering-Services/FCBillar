@@ -417,7 +417,7 @@
 		{/each}
 	</div>
 	<div class="inline-flex items-center gap-1.5">
-		<span class="text-xs text-slate-400 dark:text-slate-500">bandes</span>
+		<span class="text-xs text-slate-500 dark:text-slate-400">bandes</span>
 		<div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-sm dark:bg-slate-800">
 			{#each ['fcb', 'opt', 'alt', 'prob'] as k}
 				<button
@@ -437,16 +437,16 @@
 	<button
 		type="button"
 		onclick={() => (selDiv = null)}
-		class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium {selDiv === null
-			? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+		class="shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium {selDiv === null
+			? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 			: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}">Totes</button
 	>
 	{#each DIVS as d}
 		<button
 			type="button"
 			onclick={() => (selDiv = d)}
-			class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium {selDiv === d
-				? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+			class="shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium {selDiv === d
+				? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 				: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}">{d}</button
 		>
 	{/each}
@@ -460,7 +460,7 @@
 
 {#if vista === 'grups'}
 	{#if grupsFiltrats.length === 0}
-		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap grup coincideix.</p>
+		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Cap grup coincideix.</p>
 	{/if}
 	{#each grupsFiltrats as d}
 		<section class="mb-4">
@@ -468,7 +468,7 @@
 				<h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					{etiquetaDiv(d.nom)}
 				</h2>
-				<span class="text-[11px] text-slate-400 dark:text-slate-500">
+				<span class="text-[11px] text-slate-500 dark:text-slate-400">
 					serpentí 1-4-5-8… · {d.permutes.length === 0
 						? 'cap permuta'
 						: d.permutes.length === 1
@@ -487,7 +487,7 @@
 							class="flex items-baseline gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50"
 						>
 							<span class="text-sm font-bold">Grup {g.g}</span>
-							<span class="text-[11px] text-slate-400 dark:text-slate-500">{g.equips.length} equips</span>
+							<span class="text-[11px] text-slate-500 dark:text-slate-400">{g.equips.length} equips</span>
 							<span class="ml-auto font-mono text-sm font-bold tabular-nums">{g.mitjana.toFixed(3)}</span>
 						</header>
 						<ul class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -496,7 +496,7 @@
 								<li class="px-3 py-1.5">
 									<div class="flex items-baseline gap-2">
 										<span
-											class="w-5 shrink-0 text-right font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500"
+											class="w-5 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400"
 											>{x.pos}</span
 										>
 										<span class="min-w-0 flex-1 truncate text-sm font-medium">
@@ -527,7 +527,7 @@
 												)}<span class="text-slate-600 dark:text-slate-300"
 													>&nbsp;· <span class="font-mono">{t.taula}</span>&nbsp;{j
 														? cognom(j.nom)
-														: t.num}<span class="text-slate-400 dark:text-slate-500"
+														: t.num}<span class="text-slate-500 dark:text-slate-400"
 														>&nbsp;{pct(t.p)}</span
 													></span
 												>{/each}
@@ -539,7 +539,7 @@
 														? 'font-semibold text-slate-700 dark:text-slate-200'
 														: f.titular
 															? 'text-slate-500 dark:text-slate-400'
-															: 'text-slate-400 dark:text-slate-500'}
+															: 'text-slate-500 dark:text-slate-400'}
 													title={hab.has(f.p.num)
 														? `alineació més probable · ${pct(f.p.taxa)} de presència`
 														: `${pct(f.p.taxa)} de presència`}
@@ -556,7 +556,7 @@
 				{/each}
 			</div>
 			{#if d.permutes.length}
-				<p class="mt-1.5 text-[11px] leading-snug text-slate-400 dark:text-slate-500">
+				<p class="mt-1.5 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
 					<span class="font-semibold text-amber-600 dark:text-amber-400">⇄ permutes</span>
 					{#each d.permutes as p, i}{i > 0 ? ' · ' : ' '}slot {p.slot}: caps de sèrie
 						<span class="font-mono">{p.seed_a}</span> i <span class="font-mono">{p.seed_b}</span>{/each}
@@ -566,7 +566,7 @@
 	{/each}
 {:else if vista === 'divisio'}
 	{#if totalEquips === 0}
-		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap equip coincideix.</p>
+		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Cap equip coincideix.</p>
 	{/if}
 	{#each divisionsFiltrades as d}
 		{#if d.visibles.length}
@@ -579,17 +579,17 @@
 					<span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
 						>{etiquetaDiv(d.nom)}</span
 					>
-					<span class="text-[11px] text-slate-400 dark:text-slate-500"
+					<span class="text-[11px] text-slate-500 dark:text-slate-400"
 						>{d.total} equips · partides a {d.distancia} caramboles</span
 					>
 				</header>
 				<ul class="divide-y divide-slate-100 dark:divide-slate-800">
 					{#each d.visibles as x}
 						{@const hab = habituals(x.club, x.e.lletra)}
-						<li class="px-3 py-2.5">
+						<li class="px-3 py-1.5">
 							<div class="flex items-baseline gap-2">
 								<span
-									class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-400 dark:text-slate-500"
+									class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-500 dark:text-slate-400"
 									>{x.pos}</span
 								>
 								<span class="min-w-0 flex-1 truncate text-sm font-semibold"
@@ -622,7 +622,7 @@
 									>{x.mit.toFixed(3)}</span
 								>
 							</div>
-							<p class="ml-7 text-[11px] text-slate-400 dark:text-slate-500">
+							<p class="ml-7 text-[11px] text-slate-500 dark:text-slate-400">
 								banda <span class="font-mono">{ESQUEMES[esquema].rangs[x.e.lletra]}</span> de la llista
 								del club{#if x.e.motiu}&nbsp;· {x.e.motiu}{/if}
 							</p>
@@ -635,14 +635,14 @@
 							<p class="ml-7 mt-0.5 text-[11px] leading-snug">
 								<span class="font-semibold text-slate-600 dark:text-slate-300"
 									>alineació més probable</span
-								><span class="text-slate-400 dark:text-slate-500"
+								><span class="text-slate-500 dark:text-slate-400"
 									>&nbsp;({pct(pAlineacio(x.club, x.e.lletra))} de les jornades)</span
 								>
 								{#each taulesEquip(x.club, x.e.lletra) as t}{@const j = x.club.llista.find(
 										(p) => p.num === t.num
 									)}<span class="text-slate-500 dark:text-slate-400"
 										>{t.taula > 1 ? ' · ' : ' '}<span class="font-mono">{t.taula}</span
-										>&nbsp;{j ? cognom(j.nom) : t.num}<span class="text-slate-400 dark:text-slate-500"
+										>&nbsp;{j ? cognom(j.nom) : t.num}<span class="text-slate-500 dark:text-slate-400"
 											>&nbsp;{pct(t.p)}</span
 										></span
 									>{/each}
@@ -658,14 +658,14 @@
 											title={hab.has(f.p.num) ? "de l'alineació habitual més probable" : ''}>●</span
 										>
 										<span
-											class="w-4 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-400 dark:text-slate-500"
+											class="w-4 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400"
 											>{f.p.num}</span
 										>
 										<span class="min-w-0 flex-1 truncate text-xs">
 											<span class={f.titular ? 'font-medium' : ''}>{cognom(f.p.nom)}</span><span
 												class="text-slate-500 dark:text-slate-400">, {nomPropi(f.p.nom)}</span
 											>
-											{#if !f.titular}<span class="ml-1 text-[10px] text-slate-400 dark:text-slate-500"
+											{#if !f.titular}<span class="ml-1 text-[10px] text-slate-500 dark:text-slate-400"
 													>suplent</span
 												>{/if}
 											{#if f.p.de_club}<span
@@ -684,7 +684,7 @@
 											>{f.p.mitjana.toFixed(3)}</span
 										>
 										<span
-											class="w-8 shrink-0 text-right font-mono text-[10px] tabular-nums text-slate-400 dark:text-slate-500"
+											class="w-8 shrink-0 text-right font-mono text-[10px] tabular-nums text-slate-500 dark:text-slate-400"
 											title="presència: jornades jugades les dues últimes temporades">{pct(f.p.taxa)}</span
 										>
 									</li>
@@ -698,7 +698,7 @@
 	{/each}
 {:else}
 	{#if clubsFiltrats.length === 0}
-		<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap club coincideix.</p>
+		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Cap club coincideix.</p>
 	{/if}
 	{#each clubsFiltrats as c}
 		<section
@@ -745,7 +745,7 @@
 					<div class="flex items-baseline gap-2 border-t border-slate-100 px-3 py-1.5 dark:border-slate-800">
 						<span
 							class="rounded px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums {fila.cap.titular
-								? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+								? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 								: 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}"
 							>{ESQUEMES[esquema].rangs[fila.cap.b]}</span
 						>
@@ -754,20 +754,20 @@
 								>{c.equips.length === 1 && fila.cap.b === 'A' ? 'Equip únic' : `Equip ${fila.cap.b}`}</span
 							>
 							{#if fila.cap.reserva_de.length}
-								<span class="text-[11px] text-slate-400 dark:text-slate-500"
+								<span class="text-[11px] text-slate-500 dark:text-slate-400"
 									>i suplents de {llistaLletres(fila.cap.reserva_de)}</span
 								>
 							{/if}
 						{:else}
 							<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Suplents</span>
-							<span class="text-[11px] text-slate-400 dark:text-slate-500"
+							<span class="text-[11px] text-slate-500 dark:text-slate-400"
 								>de {llistaLletres(fila.cap.reserva_de)}</span
 							>
 						{/if}
 					</div>
 				{/if}
 				<div class="flex items-baseline gap-2 px-3 py-1">
-					<span class="w-6 shrink-0 text-right font-mono text-xs tabular-nums text-slate-400 dark:text-slate-500"
+					<span class="w-6 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400"
 						>{fila.p.num}</span
 					>
 					<span class="min-w-0 flex-1">
@@ -805,7 +805,7 @@
 					</span>
 					<span class="shrink-0 text-right font-mono text-xs tabular-nums">
 						{fila.p.mitjana.toFixed(3)}
-						<span class="block text-[10px] text-slate-400 dark:text-slate-500"
+						<span class="block text-[10px] text-slate-500 dark:text-slate-400"
 							>{fila.p.pos ? `#${fila.p.pos}` : 's/r'}</span
 						>
 					</span>
@@ -816,7 +816,7 @@
 							: 'sense partides les dues últimes temporades: hi posem la mediana del club'}
 					>
 						{pct(fila.p.taxa)}
-						<span class="block text-[10px] text-slate-400 dark:text-slate-500">pres.</span>
+						<span class="block text-[10px] text-slate-500 dark:text-slate-400">pres.</span>
 					</span>
 				</div>
 			{/each}

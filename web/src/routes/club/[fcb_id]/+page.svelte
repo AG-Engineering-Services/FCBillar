@@ -65,30 +65,30 @@
 <div class="mb-3 flex items-start justify-between gap-3">
 	<div class="min-w-0">
 		<h1 class="text-lg font-bold leading-tight">{clubNom}</h1>
-		<p class="text-sm text-slate-400 dark:text-slate-500">{players.length} jugadors · {ranked.length} al rànquing</p>
+		<p class="text-sm text-slate-500 dark:text-slate-400">{players.length} jugadors · {ranked.length} al rànquing</p>
 	</div>
 	<button
 		onclick={() => toggleClubFollow(fcbId)}
-		class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium {$clubFollows.includes(fcbId)
+		class="shrink-0 rounded-sm px-3 py-1.5 text-sm font-medium {$clubFollows.includes(fcbId)
 			? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 ring-1 ring-amber-300 dark:ring-amber-900/50'
-			: 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'}"
+			: 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'}"
 	>
 		{$clubFollows.includes(fcbId) ? '★ Seguint' : '☆ Seguir club'}
 	</button>
 </div>
 
 {#if loading}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Carregant…</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if players.length === 0}
-	<p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">Cap jugador en aquest club.</p>
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Cap jugador en aquest club.</p>
 {:else}
-	<div class="mb-1 px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+	<div class="mb-1 px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 		Al rànquing (3 bandes) · per mitjana
 	</div>
 	<ul class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 		{#each ranked as p, i (p.fcb_id)}
 			<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-				<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-400 dark:text-slate-500"
+				<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-500 dark:text-slate-400"
 					>{i + 1}</span>
 				<a
 					href="/jugador/{p.fcb_id}"
@@ -96,13 +96,13 @@
 					>{p.nom}</a>
 				<div class="shrink-0 text-right">
 					<div class="font-mono text-sm font-bold tabular-nums">{p.rank?.mitjana?.toFixed(3)}</div>
-					<div class="text-[10px] text-slate-400 dark:text-slate-500">#{p.rank?.posicio}</div>
+					<div class="text-[10px] text-slate-500 dark:text-slate-400">#{p.rank?.posicio}</div>
 				</div>
 			</li>
 		{/each}
 	</ul>
 	{#if unranked.length}
-		<div class="mb-1 px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+		<div class="mb-1 px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 			Altres jugadors ({unranked.length})
 		</div>
 		<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
