@@ -1,4 +1,13 @@
-"""Tests del parser contra fixtures HTML reals capturades de fcbillar.cat."""
+"""Tests dels parsers contra pàgines reals del web nou de la FCB.
+
+Les fixtures de `fixtures/nou/` són captures del 2026-08-30, una per cada mena
+de pàgina que sabem llegir (`scripts/captura_fixtures_web_nou.py`). Les del
+directori de sobre són del web antic, que ja no existeix.
+
+Els valors que s'hi comproven són dades reals de la temporada 2025-26: si la
+federació torna a canviar el marcatge, aquests tests cauen abans que no ho faci
+una ingesta a mitja nit.
+"""
 
 from __future__ import annotations
 
@@ -8,337 +17,310 @@ from pathlib import Path
 import pytest
 
 from fcbillar.scraper.parsers import (
-    HistorialEntry,
     parse_clubs_listing,
     parse_home_current_rankings,
+    parse_individuals_divisions,
+    parse_individuals_fases,
+    parse_individuals_grups_membership,
+    parse_individuals_partides,
+    parse_individuals_torneigs_list,
     parse_lliga_classificacio,
     parse_lliga_divisions,
     parse_lliga_encontres,
     parse_lliga_grups,
+    parse_lliga_inscripcions,
     parse_lliga_jornades,
     parse_lliga_partides,
     parse_partides_jugador,
     parse_ranking,
     parse_ranking_historial,
+    parse_rankings_index,
 )
 
-FIXTURES = Path(__file__).parent / "fixtures"
+NOU = Path(__file__).parent / "fixtures" / "nou"
+
+
+def fixture(nom: str) -> str:
+    return (NOU / f"{nom}.html").read_text(encoding="utf-8")
+
+
+# ---------------- rànquings ----------------
 
 
 @pytest.fixture
-def ranking_lliure_121_html() -> str:
-    return (FIXTURES / "ranking_lliure_121.html").read_text(encoding="utf-8")
+def ranking_vigent() -> str:
+    return fixture("rankings_dades_vigent_124_1")
 
 
 @pytest.fixture
-def ranking_tres_bandes_121_html() -> str:
-    return (FIXTURES / "ranking_tres_bandes_121.html").read_text(encoding="utf-8")
+def ranking_historic() -> str:
+    return fixture("rankings_dades_historic_123_6")
 
 
 @pytest.fixture
-def historial_html() -> str:
-    return (FIXTURES / "ranking_historial.html").read_text(encoding="utf-8")
+def index_rankings() -> str:
+    return fixture("rankings_llistat")
 
 
-# ---------------- parse_ranking ----------------
+def test_parse_ranking_llegeix_tota_la_taula(ranking_vigent: str) -> None:
+    res = parse_ranking(ranking_vigent, 124, 1)
+    assert len(res.entries) == 715
+    assert len(res.players) == 715  # un jugador no pot sortir dues vegades
+    assert res.num_seq == 124
+    assert res.modalitat_codi_fcb == 1
 
 
-def test_parse_ranking_lliure_121_basic_shape(ranking_lliure_121_html: str) -> None:
-    result = parse_ranking(ranking_lliure_121_html, num_seq=121, modalitat_codi_fcb=2)
-    assert result.num_seq == 121
-    assert result.modalitat_codi_fcb == 2
-    # A la fixture hi ha 166 jugadors (vist a inspecció manual).
-    assert len(result.entries) == 166
-    # Tots els jugadors són únics en aquesta llista.
-    assert len(result.players) == 166
+def test_parse_ranking_primera_fila(ranking_vigent: str) -> None:
+    res = parse_ranking(ranking_vigent, 124, 1)
+    top = res.entries[0]
+    assert top.posicio == 1
+    assert top.player_fcb_id == "843"
+    assert res.players[0].nom == "MAS CANADELL, JOSEP Mª"
+    assert top.mitjana_general == pytest.approx(1.63665)
+    assert top.extras == {
+        "mitjana_contraris": pytest.approx(0.71222),
+        "rang": pytest.approx(1000.0),
+        "caramboles": 527,
+        "entrades": 322,
+        "punts": 28,
+        "punts_totals": 30,
+        "definitiva": True,
+    }
 
 
-def test_parse_ranking_first_row_is_vilalta(ranking_lliure_121_html: str) -> None:
-    result = parse_ranking(ranking_lliure_121_html, num_seq=121, modalitat_codi_fcb=2)
-    first = result.entries[0]
-    assert first.posicio == 1
-    assert first.player_fcb_id == "566"
-    assert first.mitjana_general == pytest.approx(21.91071)
-    assert first.partides is None  # no es publica al rànquing
-    assert first.extras["mitjana_contraris"] == pytest.approx(11.38221)
-    assert first.extras["caramboles"] == 2454
-    assert first.extras["entrades"] == 112
-    assert first.extras["punts"] == 16
-    assert first.extras["punts_totals"] == 20
-    assert first.extras["definitiva"] is True
-
-    first_player = next(p for p in result.players if p.fcb_id == "566")
-    assert first_player.nom == "VILALTA PARÉ, VALENTÍ"
-
-
-def test_parse_ranking_non_definitiva_row(ranking_lliure_121_html: str) -> None:
-    """Posició 64 ja és la primera amb Def=No."""
-    result = parse_ranking(ranking_lliure_121_html, num_seq=121, modalitat_codi_fcb=2)
-    row_64 = result.entries[63]
-    assert row_64.posicio == 64
-    assert row_64.extras["definitiva"] is False
-
-
-def test_parse_ranking_player_ids_all_extracted(ranking_lliure_121_html: str) -> None:
-    """Tots els entries han de tenir un player_fcb_id (no None)."""
-    result = parse_ranking(ranking_lliure_121_html, num_seq=121, modalitat_codi_fcb=2)
-    for entry in result.entries:
-        assert entry.player_fcb_id
-        assert entry.player_fcb_id.isdigit()
-
-
-def test_parse_ranking_tres_bandes_121_has_more_players(
-    ranking_tres_bandes_121_html: str,
+def test_parse_ranking_vigent_te_mes_decimals(
+    ranking_vigent: str, ranking_historic: str
 ) -> None:
-    """Tres bandes (155KB) té molts més jugadors que lliure (53KB)."""
-    result = parse_ranking(ranking_tres_bandes_121_html, num_seq=121, modalitat_codi_fcb=1)
-    assert len(result.entries) > 200
+    """El rànquing vigent publica cinc decimals i l'històric només tres."""
+    vigent = parse_ranking(ranking_vigent, 124, 1).entries[0].mitjana_general
+    historic = parse_ranking(ranking_historic, 123, 6).entries[0].mitjana_general
+    assert vigent == pytest.approx(1.63665)
+    assert historic == pytest.approx(8.562)
 
 
-# ---------------- parse_ranking_historial ----------------
+def test_parse_ranking_tots_els_jugadors_tenen_id(ranking_vigent: str) -> None:
+    res = parse_ranking(ranking_vigent, 124, 1)
+    assert all(e.player_fcb_id.isdigit() for e in res.entries)
 
 
-def test_parse_historial_count(historial_html: str) -> None:
-    entries = parse_ranking_historial(historial_html)
-    # A la fixture vam veure 15 entrades (del 98 al 112).
-    assert len(entries) == 15
+def test_parse_ranking_sense_taula_es_queixa() -> None:
+    with pytest.raises(ValueError):
+        parse_ranking("<html><body>res</body></html>", 124, 1)
 
 
-def test_parse_historial_first_entry_is_112(historial_html: str) -> None:
-    entries = parse_ranking_historial(historial_html)
-    e = entries[0]
-    assert isinstance(e, HistorialEntry)
-    assert e.data == date(2025, 7, 1)
-    # Totes 5 modalitats han d'aparèixer.
-    assert set(e.rankings.keys()) == {1, 2, 3, 4, 6}
-    # Format: aquests rànquings antics usen "data".
-    fmt, num_seq = e.rankings[1]
-    assert fmt == "data"
-    assert num_seq == 112
+def test_index_separa_vigent_i_historial(index_rankings: str) -> None:
+    idx = parse_rankings_index(index_rankings)
+    assert idx.data_vigent == date(2026, 7, 27)
+    assert [(c.modalitat_codi_fcb, c.num_seq) for c in idx.vigents] == [
+        (1, 124), (2, 124), (3, 124), (4, 124), (6, 124)
+    ]
+    assert all(c.format_url == "llistat" for c in idx.vigents)
+    assert len(idx.historial) == 15
 
 
-def test_parse_historial_last_entry_is_98(historial_html: str) -> None:
-    entries = parse_ranking_historial(historial_html)
-    e = entries[-1]
-    assert e.data == date(2024, 4, 2)
-    fmt, num_seq = e.rankings[1]
-    assert num_seq == 98
+def test_historial_va_del_mes_nou_al_mes_antic(index_rankings: str) -> None:
+    historial = parse_ranking_historial(index_rankings)
+    assert historial[0].data == date(2026, 7, 1)
+    assert historial[0].rankings[1] == ("historial", 123)
+    dates = [h.data for h in historial]
+    assert dates == sorted(dates, reverse=True)
 
 
-# ---------------- parse_partides_jugador ----------------
+def test_home_current_rankings_es_la_mateixa_pagina(index_rankings: str) -> None:
+    """La portada del jugador i l'índex de rànquings ara són la mateixa cosa."""
+    home = parse_home_current_rankings(index_rankings)
+    assert home.data_ranking == date(2026, 7, 27)
+    assert len(home.rankings) == 5
 
 
-@pytest.fixture
-def partides_lliure_p566_html() -> str:
-    return (FIXTURES / "partideshome_lliure_121_p566.html").read_text(encoding="utf-8")
-
-
-@pytest.fixture
-def partides_tresbandes_p769_html() -> str:
-    return (FIXTURES / "partideshome_tresbandes_121_p769.html").read_text(encoding="utf-8")
-
-
-def test_parse_partides_lliure_p566_categories(partides_lliure_p566_html: str) -> None:
-    """Vilalta (lliure 121) té una partida de LLIGA i 9 d'INDIVIDUAL."""
-    result = parse_partides_jugador(partides_lliure_p566_html)
-    by_comp: dict[str, int] = {}
-    for r in result.rows:
-        by_comp[r.competicio] = by_comp.get(r.competicio, 0) + 1
-    assert by_comp.get("LLIGA") == 1
-    assert by_comp.get("INDIVIDUAL") == 9
-
-
-def test_parse_partides_lliga_first_row(partides_lliure_p566_html: str) -> None:
-    result = parse_partides_jugador(partides_lliure_p566_html)
-    lliga = [r for r in result.rows if r.competicio == "LLIGA"]
-    assert len(lliga) == 1
-    row = lliga[0]
-    assert row.data_partida == date(2026, 2, 1)
-    assert row.local_nom == "PALLISA GONZÁLEZ, JOSEP"
-    assert row.local_punts == 0
-    assert row.local_caramboles == 53
-    assert row.visitant_nom == "VILALTA PARÉ, VALENTÍ"
-    assert row.visitant_punts == 2
-    assert row.visitant_caramboles == 200
-    assert row.entrades == 9
-
-
-def test_parse_partides_noms_unics(partides_lliure_p566_html: str) -> None:
-    """Tots els noms han de quedar al set de noms únics."""
-    result = parse_partides_jugador(partides_lliure_p566_html)
-    assert "VILALTA PARÉ, VALENTÍ" in result.noms
-    assert "PALLISA GONZÁLEZ, JOSEP" in result.noms
-
-
-def test_parse_partides_tres_bandes_p769_lliga(
-    partides_tresbandes_p769_html: str,
-) -> None:
-    """Jiménez Galera té només partides de LLIGA en aquest rànquing."""
-    result = parse_partides_jugador(partides_tresbandes_p769_html)
-    assert all(r.competicio == "LLIGA" for r in result.rows)
-    assert len(result.rows) == 15
-
-
-# ---------------- parse_home_current_rankings ----------------
+# ---------------- partides d'un jugador ----------------
 
 
 @pytest.fixture
-def home_authed_html() -> str:
-    return (FIXTURES / "jugador_home_authed.html").read_text(encoding="utf-8")
+def partides_843() -> str:
+    return fixture("rankings_partides_vigent_124_1_843")
 
 
-def test_parse_home_current_rankings(home_authed_html: str) -> None:
-    result = parse_home_current_rankings(home_authed_html)
-    assert result.data_ranking == date(2026, 5, 4)
-    # Han de sortir les 5 modalitats actives.
-    modalitats = {r.modalitat_codi_fcb for r in result.rankings}
-    assert modalitats == {1, 2, 3, 4, 6}
-    # Totes apunten al num_seq 121 amb format datahome.
-    assert all(r.num_seq == 121 for r in result.rankings)
-    assert all(r.format_url == "datahome" for r in result.rankings)
+def test_partides_reparteix_per_competicio(partides_843: str) -> None:
+    res = parse_partides_jugador(partides_843)
+    per_competicio = {c: sum(1 for r in res.rows if r.competicio == c) for c in
+                      {r.competicio for r in res.rows}}
+    assert per_competicio == {"LLIGA": 1, "INDIVIDUAL": 14}
+    assert len(res.rows) == 15
 
 
-# ---------------- parsers de lliga catalana ----------------
+def test_partides_primera_fila_de_lliga(partides_843: str) -> None:
+    res = parse_partides_jugador(partides_843)
+    lliga = next(r for r in res.rows if r.competicio == "LLIGA")
+    assert lliga.data_partida == date(2026, 3, 15)
+    assert lliga.local_nom == "MAS CANADELL, JOSEP Mª"
+    assert (lliga.local_punts, lliga.local_caramboles) == (2, 35)
+    assert lliga.visitant_nom == "PASTOR BALAGUÉ, JORDI"
+    assert (lliga.visitant_punts, lliga.visitant_caramboles) == (0, 12)
+    assert lliga.entrades == 16
 
 
-@pytest.fixture
-def lliga_grups_html() -> str:
-    return (FIXTURES / "lliga_3bandes_honor.html").read_text(encoding="utf-8")
+def test_partides_recull_els_noms(partides_843: str) -> None:
+    res = parse_partides_jugador(partides_843)
+    assert "MAS CANADELL, JOSEP Mª" in res.noms
+    assert len(res.noms) == 15
 
 
-@pytest.fixture
-def lliga_jornades_html() -> str:
-    return (FIXTURES / "lliga_3b_honor_grupA_jornades.html").read_text(encoding="utf-8")
+# ---------------- lliga ----------------
 
 
-@pytest.fixture
-def lliga_encontres_html() -> str:
-    return (FIXTURES / "lliga_3b_jornada01_encontres.html").read_text(encoding="utf-8")
+def test_lliga_divisions() -> None:
+    divisions = parse_lliga_divisions(fixture("lligues_divisions_36"))
+    assert len(divisions) == 5
+    assert all(d.lliga_id == 36 for d in divisions)
+    assert {d.divisio_id for d in divisions} == {148, 149, 150, 151, 152}
+    honor = next(d for d in divisions if d.divisio_id == 148)
+    assert honor.nom == "HONOR"
 
 
-@pytest.fixture
-def lliga_partides_html() -> str:
-    return (FIXTURES / "lliga_3b_encontre_partides.html").read_text(encoding="utf-8")
+def test_lliga_grups_amb_club_organitzador() -> None:
+    grups = parse_lliga_grups(fixture("lligues_grups_36_148"))
+    assert len(grups) == 4
+    grup_a = next(g for g in grups if g.nom == "GRUP A")
+    assert (grup_a.lliga_id, grup_a.divisio_id, grup_a.grup_id) == (36, 148, 316)
+    final = next(g for g in grups if g.nom == "FINAL HONOR")
+    assert final.club_responsable == "C.B.MATARÓ"
 
 
-def test_parse_lliga_grups_honor(lliga_grups_html: str) -> None:
-    """HONOR de la lliga tres bandes té 3 grups: FINAL HONOR, GRUP A, GRUP B."""
-    grups = parse_lliga_grups(lliga_grups_html)
-    assert len(grups) == 3
-    noms = {g.nom for g in grups}
-    assert noms == {"FINAL HONOR", "GRUP A", "GRUP B"}
-    # Tots tenen lliga_id=36 i divisio_id=148.
-    assert all(g.lliga_id == 36 and g.divisio_id == 148 for g in grups)
-    # Responsable conegut.
-    final_honor = next(g for g in grups if g.nom == "FINAL HONOR")
-    assert final_honor.club_responsable == "C.B.MATARÓ"
-    assert final_honor.grup_id == 333
-
-
-def test_parse_lliga_jornades_grup_a(lliga_jornades_html: str) -> None:
-    """GRUP A HONOR té 14 jornades amb dates."""
-    jornades = parse_lliga_jornades(lliga_jornades_html)
+def test_lliga_jornades_amb_data() -> None:
+    jornades = parse_lliga_jornades(fixture("lligues_jornades_36_148_316"))
     assert len(jornades) == 14
-    # Tots tenen lliga 36, divisió 148, grup 316.
-    assert all(
-        j.lliga_id == 36 and j.divisio_id == 148 and j.grup_id == 316 for j in jornades
-    )
-    # Jornada 01: 2025-09-27.
-    j01 = next(j for j in jornades if j.nom == "Jornada 01")
-    assert j01.data == date(2025, 9, 27)
-    assert j01.jornada_id == 2593
+    primera = jornades[0]
+    assert primera.nom == "Jornada 01"
+    assert primera.jornada_id == 2593
+    assert primera.data == date(2025, 9, 27)
+    assert (primera.lliga_id, primera.divisio_id, primera.grup_id) == (36, 148, 316)
 
 
-def test_parse_lliga_encontres_jornada_01(lliga_encontres_html: str) -> None:
-    """Jornada 01 GRUP A HONOR té 4 encontres."""
-    encontres = parse_lliga_encontres(lliga_encontres_html)
+def test_lliga_encontres_parteix_els_equips() -> None:
+    encontres = parse_lliga_encontres(fixture("lligues_encontres_36_148_316_2593"))
     assert len(encontres) == 4
-    # Primer encontre: C.B. SANTS "A" vs SB FOMENT MOLINS "A" (5-3, 3-0).
-    first = encontres[0]
-    assert first.equip_local == 'C.B. SANTS "A"'
-    assert first.equip_visitant == 'SB FOMENT MOLINS "A"'
-    assert first.p_parcials_local == 5
-    assert first.p_match_local == 3
-    assert first.p_parcials_visitant == 3
-    assert first.p_match_visitant == 0
-    assert first.encontre_id == 10939
+    primer = encontres[0]
+    assert primer.encontre_id == 10939
+    assert primer.equip_local == 'C.B. SANTS "A"'
+    assert primer.equip_visitant == 'SB FOMENT MOLINS "A"'
+    assert (primer.p_parcials_local, primer.p_parcials_visitant) == (5, 3)
+    assert (primer.p_match_local, primer.p_match_visitant) == (3, 0)
 
 
-@pytest.fixture
-def lliga_divisions_html() -> str:
-    return (FIXTURES / "lliga_div_36_tres_bandes.html").read_text(encoding="utf-8")
+def test_lliga_classificacio() -> None:
+    files = parse_lliga_classificacio(fixture("lligues_classificacio_36_148_316"))
+    assert len(files) == 8
+    primer = files[0]
+    assert (primer.posicio, primer.equip) == (1, 'C.B. MATARÓ "A"')
+    assert (primer.pm, primer.pp, primer.j) == (36, 89, 14)
+    assert [f.posicio for f in files] == list(range(1, 9))
 
 
-@pytest.fixture
-def clubs_listing_html() -> str:
-    return (FIXTURES / "clubs_listing.html").read_text(encoding="utf-8")
+def test_lliga_inscripcions_dona_el_club_de_cada_equip() -> None:
+    equips = parse_lliga_inscripcions(fixture("lligues_inscripcions_39"))
+    assert len(equips) == 29
+    granollers = equips[0]
+    assert granollers.club == "B.C.GRANOLLERS"
+    assert granollers.equip == "B.C. GRANOLLERS"
 
 
-def test_parse_clubs_listing_extracts_all(clubs_listing_html: str) -> None:
-    clubs = parse_clubs_listing(clubs_listing_html)
-    # A la fixture (inspeccionada manualment) hi ha ~38 clubs.
-    assert len(clubs) >= 35
-    noms = {c.nom for c in clubs}
-    # Algun nom conegut hi ha de ser.
-    assert "C.B.SANTS" in noms
-    assert "C.B.MATARÓ" in noms
-    assert "S.B.F.MOLINS" in noms
-    # Camps de contacte parsejats.
-    mataro = next(c for c in clubs if c.nom == "C.B.MATARÓ")
-    assert mataro.telefon is not None and "937964557" in mataro.telefon
-    assert mataro.email == "cbillarmataro@gmail.com"
+def test_lliga_partides_llegeix_la_taula_de_partides() -> None:
+    """El detall d'encontre de lliga retorna HTTP 500 des del canvi de web.
+
+    Com que la taula de partides és la mateixa a tot el portal, el parser es
+    prova contra la d'un grup d'individuals, que sí que funciona. El dia que la
+    federació arregli el 500 caldrà confirmar-ho amb una pàgina de debò.
+    """
+    partides = parse_lliga_partides(
+        fixture("individuals_partides_grup_211_447_799_5100")
+    )
+    # Sis files: cinc partides i el buit que deixa un grup incomplet. A la lliga
+    # no hi ha buits —els dos equips presenten jugadors—, o sigui que aquest
+    # parser no els filtra; el d'individuals sí.
+    assert len(partides) == 6
+    primera = partides[1]
+    assert primera.local_nom == "MAS CANADELL, JOSEP Mª"
+    assert primera.local_caramboles == 30
+    assert primera.local_serie_major == 6
+    assert primera.entrades == 22
+    assert primera.arbitre == "MIGUEL"
 
 
-def test_parse_lliga_divisions(lliga_divisions_html: str) -> None:
-    """La LLIGA TRES BANDES (36) té 5 divisions: HONOR + 1a a 4a."""
-    divs = parse_lliga_divisions(lliga_divisions_html)
-    assert len(divs) == 5
-    noms = {d.nom for d in divs}
-    assert noms == {"HONOR", "1A DIVISIÓ", "2A DIVISIÓ", "3A DIVISIÓ", "4A DIVISIÓ"}
-    assert all(d.lliga_id == 36 for d in divs)
-    # Validació puntual: HONOR té divisio_id=148.
-    honor = next(d for d in divs if d.nom == "HONOR")
-    assert honor.divisio_id == 148
+# ---------------- individuals ----------------
 
 
-def test_parse_lliga_partides_encontre(lliga_partides_html: str) -> None:
-    """Un encontre típic té 4 partides individuals amb camps rics."""
-    partides = parse_lliga_partides(lliga_partides_html)
-    assert len(partides) == 4
-    p1 = partides[0]
-    assert p1.local_nom == "VARELA LOSADA, FRANCESC"
-    assert p1.local_caramboles == 40
-    assert p1.local_serie_major == 6
-    assert p1.local_punts == 2
-    assert p1.visitant_nom == "PERALES SANZ, JOAN"
-    assert p1.visitant_caramboles == 24
-    assert p1.visitant_serie_major == 3
-    assert p1.visitant_punts == 0
-    assert p1.entrades == 40
-    assert p1.arbitre == "BOTERO"
-    assert p1.assistencia == "Partit disputat"
-    assert p1.modalitat == "Tres bandes"
+def test_individuals_llistat_de_torneigs() -> None:
+    torneigs = parse_individuals_torneigs_list(fixture("individuals_llistat"))
+    assert {t.torneig_id_extern for t in torneigs} == {216, 217}
+    assert torneigs[0].nom == "OPEN LLIURE PUNT D'ATAC"
 
 
-@pytest.fixture
-def lliga_classif_html() -> str:
-    return (FIXTURES / "lliga_3b_honor_grupA_classif.html").read_text(encoding="utf-8")
+def test_individuals_divisions() -> None:
+    divisions = parse_individuals_divisions(fixture("individuals_divisions_211"))
+    assert len(divisions) == 1
+    assert (divisions[0].torneig_id, divisions[0].divisio_id_extern) == (211, 447)
+    assert divisions[0].nom == "ÚNICA"
+    # La classificació final va desaparèixer: ja no hi ha cap enllaç que hi porti.
+    assert divisions[0].classif_href is None
 
 
-def test_parse_lliga_classificacio(lliga_classif_html: str) -> None:
-    """Classificació oficial d'un grup: 8 equips amb posició, PM, PP, J."""
-    rows = parse_lliga_classificacio(lliga_classif_html)
-    assert len(rows) == 8
-    first = rows[0]
-    assert first.posicio == 1
-    assert first.equip == 'C.B. MATARÓ "A"'
-    assert first.pm == 36
-    assert first.pp == 89
-    assert first.j == 14
-    last = rows[-1]
-    assert last.posicio == 8
-    assert last.equip == 'C.B. SANTS "A"'
-    assert last.pm == 6
-    assert last.pp == 32
-    # Posicions consecutives 1..8, sense capçalera ni llegenda colades.
-    assert [r.posicio for r in rows] == list(range(1, 9))
+def test_individuals_fases_separa_grups_i_eliminatories() -> None:
+    fases = parse_individuals_fases(fixture("individuals_fases_211_447"))
+    grups = [f for f in fases if f.tipus == "grups"]
+    ko = [f for f in fases if f.tipus == "ko"]
+    assert [f.nom for f in grups] == ["PRE-PRE-PREVIA", "PRE-PREVIA", "PREVIA"]
+    assert [f.nom for f in ko] == [
+        "SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "FINAL"
+    ]
+    assert all(f.torneig_id == 211 for f in fases)
+
+
+def test_individuals_membres_de_grup() -> None:
+    membres = parse_individuals_grups_membership(
+        fixture("individuals_grups_211_447_799")
+    )
+    assert len(membres) == 3
+    assert membres[0].jugador_nom == "CALLS SARROCA, JOSEP"
+    assert all(m.grup_nom == "Grup A" for m in membres)
+
+
+def test_individuals_partides_de_grup_descarta_els_buits() -> None:
+    """Una fila amb el mateix jugador als dos costats i tot a zero no és partida."""
+    partides = parse_individuals_partides(
+        fixture("individuals_partides_grup_211_447_799_5100")
+    )
+    assert len(partides) == 3  # de sis files, una és un buit i dues no s'han jugat
+    assert all(p.local_nom != p.visitant_nom for p in partides)
+
+
+def test_individuals_partides_deliminatoria() -> None:
+    partides = parse_individuals_partides(
+        fixture("individuals_partides_eliminatories_211_447_1185")
+    )
+    assert len(partides) == 1
+    final = partides[0]
+    assert final.local_nom == "HERNÁNDEZ PARRA, ANTONI"
+    assert final.visitant_nom == "GARRIGA COMAS, JORDI"
+    assert (final.visitant_serie_major, final.visitant_caramboles) == (9, 40)
+    assert final.entrades == 25
+    assert final.estat == "Finalitzada"
+
+
+# ---------------- clubs ----------------
+
+
+def test_clubs_amb_dades_de_contacte() -> None:
+    """El llistat va passar al WordPress i hi va guanyar telèfon, correu i adreça."""
+    clubs = parse_clubs_listing(fixture("wp_clubs"))
+    assert len(clubs) == 38
+    granollers = clubs[0]
+    assert granollers.nom == "B.C.GRANOLLERS"
+    assert granollers.telefon == "636022079"
+    assert granollers.email == "billargranollers@hotmail.com"
+    assert "Granollers" in granollers.direccio
+
+
+def test_clubs_sense_taula_es_queixa() -> None:
+    with pytest.raises(ValueError):
+        parse_clubs_listing("<html><body>res</body></html>")

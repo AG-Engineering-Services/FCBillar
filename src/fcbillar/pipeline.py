@@ -55,7 +55,8 @@ from fcbillar.scraper.parsers import (
     parse_ranking,
     parse_ranking_historial,
 )
-from fcbillar.scraper.url_builder import all_ranking_url_candidates
+from fcbillar.scraper import urls as U
+from fcbillar.scraper.taules import taula_amb
 from fcbillar.torneig_naming import clean_torneig_nom
 
 log = logging.getLogger(__name__)
@@ -82,18 +83,22 @@ def fetch_ranking_html(
     *,
     preferred_format: str | None = None,
 ) -> FetchResult | None:
-    """Prova els formats d'URL i retorna el primer que retorni rànquing parsejable.
+    """Descarrega un rànquing, provant primer la vigència que se'ns diu.
 
-    Amb `preferred_format` (p.ex. 'data' o 'datahome'), prova aquest primer
-    i l'altre com a fallback. Sense, l'ordre per defecte de
-    `all_ranking_url_candidates` és 'datahome' primer (rànquing actual).
+    Des del canvi de web d'agost de 2026 `llistat` i `historial` ja no són dos
+    formats de la mateixa pàgina sinó dos endpoints amb significat diferent:
+    el vigent i els quinze anteriors. Qui crida ho sap gairebé sempre —l'índex
+    de rànquings ho diu—, però mantenim l'altre com a alternativa per als dies
+    en què un rànquing passa de vigent a històric.
     """
     settings = client.settings
-    candidates = all_ranking_url_candidates(settings.base_url, num_seq, modalitat_codi_fcb)
-    if preferred_format is not None:
-        candidates = sorted(
-            candidates, key=lambda c: 0 if c[0] == preferred_format else 1
-        )
+    ordre = ("llistat", "historial")
+    if preferred_format in ordre:
+        ordre = (preferred_format, *(f for f in ordre if f != preferred_format))
+    candidates = [
+        (f, U.ranking_dades(num_seq, modalitat_codi_fcb, f, base=settings.base_url))
+        for f in ordre
+    ]
     for fmt, url in candidates:
         try:
             html = client.fetch_html(url)
@@ -107,20 +112,18 @@ def fetch_ranking_html(
 
 
 def _looks_like_valid_ranking(html: str) -> bool:
-    """Heurística estricta: rànquing vàlid té la secció principal + una taula.
+    """Un rànquing de debò té la taula amb les seves columnes.
 
-    El portal sovint serveix una pàgina d'error 'silenciosa' (200 OK, HTML
-    petit) quan demanes un num_seq amb el format equivocat (p.ex. 'datahome'
-    per a un rànquing antic). Aquesta heurística evita acceptar-la.
+    El portal serveix pàgines d'error silencioses —200 OK amb poc contingut, o
+    un JSON buit— quan demanes un rànquing per l'endpoint que no toca. Mirar
+    que hi hagi la taula i les seves capçaleres ho descarta sense haver de
+    parsejar-ho tot.
     """
     if not html or len(html) < 500:
         return False
-    if "formloguinacion" in html:
+    if "formLogin" in html:
         return False
-    # La secció + taula són el marcador estructural del rànquing.
-    if "three fourths padded" not in html or "<table" not in html:
-        return False
-    return True
+    return taula_amb(html, "Jugador", "MJ", "Rang") is not None
 
 
 def ingest_ranking(
@@ -192,13 +195,9 @@ class IngestPartidesResult:
     games_new: int = 0  # partides que NO existien abans (descàrrega real)
 
 
-# Mapeig de format del rànquing → segment de la URL de partides per jugador.
-# Mateix patró que rànquings: 'datahome' (actual) usa 'partideshome', 'data'
-# (històric) usa 'partides'.
-_PARTIDES_SEGMENT_BY_FORMAT = {
-    "datahome": "partideshome",
-    "data": "partides",
-}
+# La vigència del rànquing mana també a les partides: el vigent es demana per
+# `llistat-partides` i els històrics per `historial-partides`.
+_VIGENCIES = ("llistat", "historial")
 
 
 def _partides_url(
@@ -206,12 +205,11 @@ def _partides_url(
     num_seq: int,
     modalitat: int,
     player_fcb_id: str,
-    format_url: str = "datahome",
+    format_url: str = "llistat",
 ) -> str:
-    segment = _PARTIDES_SEGMENT_BY_FORMAT.get(format_url, "partideshome")
-    return (
-        f"{base_url.rstrip('/')}/ca/jugador/ranking/{segment}/"
-        f"{num_seq}/{modalitat}/{player_fcb_id}"
+    vigencia = format_url if format_url in _VIGENCIES else "llistat"
+    return U.ranking_partides(
+        num_seq, modalitat, player_fcb_id, vigencia, base=base_url
     )
 
 
@@ -427,20 +425,20 @@ class SyncResult:
 
 
 def discover_current_rankings(client: ScraperClient) -> HomeRankingsResult:
-    """Descobreix els rànquings actuals consultant /jugador/home."""
-    url = f"{client.settings.base_url.rstrip('/')}/jugador/home"
+    """Els rànquings vigents, des de l'índex públic de rànquings."""
+    url = U.rankings_llistat(base=client.settings.base_url)
     html = client.fetch_html(url, use_cache=False)
     return parse_home_current_rankings(html)
 
 
 def discover_historical_rankings(client: ScraperClient) -> list[HistorialEntry]:
-    """Descobreix els rànquings històrics consultant /ca/jugador/ranking/historial.
+    """Els rànquings anteriors, des del mateix índex que els vigents.
 
-    El portal mostra els ~15 més recents. Per a un backfill realment complet
-    caldria iterar per num_seq més enrere consultant URLs directament, però per
-    ara l'historial és la font primària.
+    El portal en publica els quinze més recents i prou. Per anar més enrere cal
+    demanar `num_seq` a pèl, però la nostra base de dades ja els té: el web és
+    la font del que és nou, no de l'arxiu.
     """
-    url = f"{client.settings.base_url.rstrip('/')}/ca/jugador/ranking/historial"
+    url = U.rankings_llistat(base=client.settings.base_url)
     html = client.fetch_html(url, use_cache=False)
     return parse_ranking_historial(html)
 
@@ -795,10 +793,7 @@ class IngestLligaEncontreResult:
 def _lliga_partides_url(
     base_url: str, lliga: int, divisio: int, grup: int, jornada: int, encontre: int
 ) -> str:
-    return (
-        f"{base_url.rstrip('/')}/ca/lligues/partides/"
-        f"{lliga}/{divisio}/{grup}/{jornada}/{encontre}"
-    )
+    return U.lligues_partides(lliga, divisio, grup, jornada, encontre, base=base_url)
 
 
 def ingest_lliga_encontre(
@@ -1110,10 +1105,7 @@ class IngestLligaJornadaResult:
 def _lliga_encontres_url(
     base_url: str, lliga: int, divisio: int, grup: int, jornada: int
 ) -> str:
-    return (
-        f"{base_url.rstrip('/')}/ca/lligues/encontres/"
-        f"{lliga}/{divisio}/{grup}/{jornada}"
-    )
+    return U.lligues_encontres(lliga, divisio, grup, jornada, base=base_url)
 
 
 def ingest_lliga_jornada(
@@ -1184,7 +1176,12 @@ class ImportClubsResult:
 
 
 def _clubs_listing_url(base_url: str) -> str:
-    return f"{base_url.rstrip('/')}/ca/clubs/5/Federacio"
+    """El llistat oficial ja no és a la intranet: ara és una pàgina del web.
+
+    `base_url` és el de la competició i aquí no serveix; el deixem al paràmetre
+    perquè qui crida no s'hagi d'assabentar del canvi.
+    """
+    return U.web_clubs()
 
 
 def import_clubs_oficials(
@@ -1218,11 +1215,11 @@ class LligaTree:
 
 
 def _lliga_divisions_url(base_url: str, lliga_id: int) -> str:
-    return f"{base_url.rstrip('/')}/ca/lligues/divisions/{lliga_id}"
+    return U.lligues_divisions(lliga_id, base=base_url)
 
 
 def _lliga_grups_url(base_url: str, lliga_id: int, divisio_id: int) -> str:
-    return f"{base_url.rstrip('/')}/ca/lligues/grups/{lliga_id}/{divisio_id}"
+    return U.lligues_grups(lliga_id, divisio_id, base=base_url)
 
 
 def discover_lliga(
@@ -1273,7 +1270,7 @@ class IngestLligaGrupResult:
 def _lliga_jornades_url(
     base_url: str, lliga: int, divisio: int, grup: int
 ) -> str:
-    return f"{base_url.rstrip('/')}/ca/lligues/jornades/{lliga}/{divisio}/{grup}"
+    return U.lligues_jornades(lliga, divisio, grup, base=base_url)
 
 
 def ingest_lliga_grup(
@@ -1482,9 +1479,14 @@ class IngestIndividualsResult:
 
 
 def _individuals_llistat_url(base_url: str, temporada: str | None) -> str:
+    """Llistat de torneigs. Nomes la temporada en curs: l'historial per
+    temporades va desapareixer amb el web nou i no te substitut."""
     if temporada is None or temporada == "current":
-        return f"{base_url.rstrip('/')}/ca/individuals/llistat"
-    return f"{base_url.rstrip('/')}/ca/historial/llistatIndividual/{temporada}"
+        return U.individuals_llistat(base=base_url)
+    raise ValueError(
+        f"El web nou no publica el llistat d'individuals de la temporada "
+        f"{temporada}: nomes hi ha el de la temporada en curs."
+    )
 
 
 def ingest_individuals_temporada(
@@ -1534,7 +1536,7 @@ def ingest_individuals_temporada(
     failed = 0
     total_part = 0
     for torneig in torneigs:
-        torneig_url = f"{base}/ca/individuals/divisions/{torneig.torneig_id_extern}"
+        torneig_url = U.individuals_divisions(torneig.torneig_id_extern, base=base)
         try:
             torneig_html = client.fetch_html(torneig_url, use_cache=use_cache)
         except Exception as e:
@@ -1624,22 +1626,21 @@ def _current_temporada_label(today: date | None = None) -> str:
 
 
 def discover_individual_seasons(client: ScraperClient) -> list[str]:
-    """Etiquetes de temporada amb individuals a /ca/historial (p.ex. '2024-2025').
+    """Temporades passades amb individuals publicats. Ara mateix, cap.
 
-    L'índex de l'historial enllaça cada temporada passada via
-    `/ca/historial/llistatIndividual/{temporada}`. Retorna les etiquetes en
-    l'ordre del portal (més recent primer), sense duplicats.
+    L'índex `/ca/historial` va desapareixer amb el web d'agost de 2026 i no
+    te substitut: el portal nomes publica la temporada en curs. Els torneigs
+    antics segueixen sent accessibles pel seu id —els tenim tots a la base de
+    dades—, pero ja no hi ha cap pagina que els llisti per temporada.
+
+    Es manté la funció perquè qui la crida no hagi de canviar: retorna una
+    llista buida i ho diu al log.
     """
-    base = client.settings.base_url.rstrip("/")
-    html = client.fetch_html(f"{base}/ca/historial", use_cache=False)
-    seasons: list[str] = []
-    seen: set[str] = set()
-    for m in re.finditer(r"/?ca/historial/llistatIndividual/([\w\-]+)", html):
-        season = m.group(1)
-        if season not in seen:
-            seen.add(season)
-            seasons.append(season)
-    return seasons
+    log.warning(
+        "El web ja no publica l'historial d'individuals per temporada; "
+        "els torneigs antics nomes son accessibles pel seu id."
+    )
+    return []
 
 
 def ingest_individuals_all_temporades(
@@ -1703,7 +1704,8 @@ class IngestCopaResult:
 
 
 def _copa_base(base_url: str) -> str:
-    return base_url.rstrip("/") + "/ca/copa"
+    """La copa ja no penja de `/ca/copa`: les rutes noves les construeix `urls`."""
+    return base_url.rstrip("/")
 
 
 def ingest_copa_edicio(
@@ -1730,7 +1732,7 @@ def ingest_copa_edicio(
 
     n_jor = n_grups = n_enc = n_part = 0
 
-    html = client.fetch_html(f"{base}/faseGrups/{edicio_id}", use_cache=use_cache)
+    html = client.fetch_html(U.copa_fase_grups(edicio_id, base=base), use_cache=use_cache)
     jornades = parse_copa_jornades(html)
     if jornada is not None:
         jornades = [j for j in jornades if j.jornada == jornada]
@@ -1740,12 +1742,12 @@ def ingest_copa_edicio(
         n_jor += 1
 
         ghtml = client.fetch_html(
-            f"{base}/grups/{edicio_id}/{jor.jornada}", use_cache=use_cache
+            U.copa_grups(edicio_id, jor.jornada, base=base), use_cache=use_cache
         )
         for g in parse_copa_grups(ghtml):
             n_grups += 1
             ehtml = client.fetch_html(
-                f"{base}/encontresGrup/{edicio_id}/{jor.jornada}/{g.grup_id}",
+                U.copa_encontres_grup(edicio_id, jor.jornada, g.grup_id, base=base),
                 use_cache=use_cache,
             )
             data = parse_copa_encontresgrup(ehtml)
@@ -1768,8 +1770,10 @@ def ingest_copa_edicio(
                 )
                 n_enc += 1
                 phtml = client.fetch_html(
-                    f"{base}/partidesGrup/{edicio_id}/{jor.jornada}/{g.grup_id}/"
-                    f"{enc.enc_id_extern}/{enc.team_a_extern}/{enc.team_b_extern}",
+                    U.copa_partides_grup(
+                        edicio_id, jor.jornada, g.grup_id, enc.enc_id_extern,
+                        enc.team_a_extern, enc.team_b_extern, base=base,
+                    ),
                     use_cache=use_cache,
                 )
                 partides = parse_copa_partides(phtml)

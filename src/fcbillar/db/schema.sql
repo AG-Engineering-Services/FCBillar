@@ -90,7 +90,11 @@ CREATE TABLE IF NOT EXISTS rankings (
     num_seq         INTEGER NOT NULL,
     modalitat_id    INTEGER NOT NULL REFERENCES modalitats(id),
     url             TEXT NOT NULL,
-    format_url      TEXT NOT NULL CHECK (format_url IN ('data', 'datahome')),
+    -- Quin endpoint va servir el rànquing. 'data'/'datahome' són del web
+    -- antic (fins a l'agost de 2026); 'historial'/'llistat' són del nou.
+    -- Els vells es conserven: diuen d'on va sortir cada fila i encara hi són.
+    format_url      TEXT NOT NULL
+        CHECK (format_url IN ('data', 'datahome', 'historial', 'llistat')),
     any_pub         INTEGER,
     mes_pub         INTEGER,
     data_pub        TEXT,  -- data ISO exacta de publicació (de l'historial); font de any_pub/mes_pub

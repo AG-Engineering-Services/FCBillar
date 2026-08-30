@@ -65,11 +65,11 @@ def settings(tmp_path: Path) -> StubSettings:
 
 # Mappings d'URL → fixture utilitzats en tots els tests.
 URL_FIXTURES = {
-    "https://www.fcbillar.cat/jugador/home": "jugador_home_authed.html",
-    "https://www.fcbillar.cat/ca/jugador/ranking/datahome/121/1#red": "ranking_tres_bandes_121.html",
-    "https://www.fcbillar.cat/ca/jugador/ranking/datahome/121/2#red": "ranking_lliure_121.html",
-    "https://www.fcbillar.cat/ca/jugador/ranking/partideshome/121/2/566": "partideshome_lliure_121_p566.html",
-    "https://www.fcbillar.cat/ca/jugador/ranking/partideshome/121/1/769": "partideshome_tresbandes_121_p769.html",
+    "https://www.fcbillar.cat/frontend/rankings/llistat": "nou/rankings_llistat.html",
+    "https://www.fcbillar.cat/frontend/rankings/llistat-dades?idranking=124&idmodalitat=1": "nou/rankings_dades_vigent_124_1.html",
+    "https://www.fcbillar.cat/frontend/rankings/llistat-dades?idranking=124&idmodalitat=6": "nou/rankings_dades_historic_123_6.html",
+    "https://www.fcbillar.cat/frontend/rankings/llistat-partides?idranking=124&idmodalitat=1&idjugador=843": "nou/rankings_partides_vigent_124_1_843.html",
+    "https://www.fcbillar.cat/frontend/rankings/historial-partides?idranking=123&idmodalitat=1&idjugador=843": "nou/rankings_partides_historic_123_1_843.html",
 }
 
 
@@ -78,28 +78,28 @@ URL_FIXTURES = {
 
 def test_ingest_ranking_inserts_players_and_entries(settings: StubSettings) -> None:
     client = StubScraperClient(settings, URL_FIXTURES)
-    result = ingest_ranking(client, num_seq=121, modalitat_codi_fcb=2, settings=settings)
+    result = ingest_ranking(client, num_seq=124, modalitat_codi_fcb=1, settings=settings)
 
     assert result is not None
-    assert result.players_upserted == 166
-    assert result.entries_upserted == 166
-    assert result.fetch.fmt == "datahome"
+    assert result.players_upserted == 715
+    assert result.entries_upserted == 715
+    assert result.fetch.fmt == "llistat"
 
     counts = Repository(ensure_schema(settings.db_path)).counts()
     assert counts["rankings"] == 1
-    assert counts["players"] == 166
-    assert counts["ranking_entries"] == 166
+    assert counts["players"] == 715
+    assert counts["ranking_entries"] == 715
 
 
 def test_ingest_ranking_is_idempotent(settings: StubSettings) -> None:
     """Tornar a fer ingest del mateix rànquing no crea duplicats."""
     client = StubScraperClient(settings, URL_FIXTURES)
-    ingest_ranking(client, 121, 2, settings=settings)
-    ingest_ranking(client, 121, 2, settings=settings)
+    ingest_ranking(client, 124, 1, settings=settings)
+    ingest_ranking(client, 124, 1, settings=settings)
     counts = Repository(ensure_schema(settings.db_path)).counts()
     assert counts["rankings"] == 1
-    assert counts["players"] == 166
-    assert counts["ranking_entries"] == 166
+    assert counts["players"] == 715
+    assert counts["ranking_entries"] == 715
 
 
 # ---------------- ingest_partides ----------------
@@ -112,33 +112,33 @@ def test_ingest_partides_requires_ranking_in_db(settings: StubSettings) -> None:
     repo = Repository(conn)
     from fcbillar.models import Player
 
-    repo.upsert_player(Player(fcb_id="566", nom="VILALTA"))
+    repo.upsert_player(Player(fcb_id="843", nom="MAS CANADELL, JOSEP Mª"))
     client = StubScraperClient(settings, URL_FIXTURES)
-    with pytest.raises(ValueError, match="Rànquing 121/2 no està a la BD"):
-        ingest_partides(client, 121, 2, "566", settings=settings)
+    with pytest.raises(ValueError, match="Rànquing 124/1 no està a la BD"):
+        ingest_partides(client, 124, 1, "843", settings=settings)
 
 
 def test_ingest_partides_requires_player_in_db(settings: StubSettings) -> None:
     """Si el player referenciat no està a la BD, missatge clar."""
     client = StubScraperClient(settings, URL_FIXTURES)
-    ingest_ranking(client, 121, 2, settings=settings)
+    ingest_ranking(client, 124, 1, settings=settings)
     with pytest.raises(ValueError, match="Player 99999 no està a la BD"):
-        ingest_partides(client, 121, 2, "99999", settings=settings)
+        ingest_partides(client, 124, 1, "99999", settings=settings)
 
 
 def test_ingest_partides_persists_games_and_links(settings: StubSettings) -> None:
-    """Ingest end-to-end: 10 partides de Vilalta amb les 2 competicions (LLIGA/INDIVIDUAL)."""
+    """Ingest de punta a punta: les partides de Mas Canadell al rànquing vigent."""
     client = StubScraperClient(settings, URL_FIXTURES)
-    ingest_ranking(client, 121, 2, settings=settings)
+    ingest_ranking(client, 124, 1, settings=settings)
 
-    res = ingest_partides(client, 121, 2, "566", settings=settings)
-    assert res.games_upserted == 10
+    res = ingest_partides(client, 124, 1, "843", settings=settings)
+    assert res.games_upserted == 15
     assert res.games_skipped_missing_opponent == 0
-    assert res.links_created == 10
+    assert res.links_created == 15
 
     counts = Repository(ensure_schema(settings.db_path)).counts()
-    assert counts["games"] == 10
-    assert counts["ranking_game_links"] == 10
+    assert counts["games"] == 15
+    assert counts["ranking_game_links"] == 15
     assert counts["competicions"] == 2  # LLIGA + INDIVIDUAL
 
 
@@ -152,18 +152,18 @@ def test_sync_ingests_what_stub_can_serve(settings: StubSettings) -> None:
     `sync_current_rankings` només marca com a `ingested` les que han anat bé.
     """
     fixtures = {
-        "https://www.fcbillar.cat/jugador/home": "jugador_home_authed.html",
-        "https://www.fcbillar.cat/ca/jugador/ranking/datahome/121/1#red": (
-            "ranking_tres_bandes_121.html"
+        "https://www.fcbillar.cat/frontend/rankings/llistat": "nou/rankings_llistat.html",
+        "https://www.fcbillar.cat/frontend/rankings/llistat-dades?idranking=124&idmodalitat=1": (
+            "nou/rankings_dades_vigent_124_1.html"
         ),
-        "https://www.fcbillar.cat/ca/jugador/ranking/datahome/121/2#red": (
-            "ranking_lliure_121.html"
+        "https://www.fcbillar.cat/frontend/rankings/llistat-dades?idranking=124&idmodalitat=6": (
+            "nou/rankings_dades_historic_123_6.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
     result = sync_current_rankings(client, settings=settings)
 
-    assert set(result.ingested) == {(121, 1), (121, 2)}
+    assert set(result.ingested) == {(124, 1), (124, 6)}
     assert result.skipped_existing == []
 
     counts = Repository(ensure_schema(settings.db_path)).counts()
@@ -172,19 +172,19 @@ def test_sync_ingests_what_stub_can_serve(settings: StubSettings) -> None:
 
 def test_sync_skips_when_db_at_or_above_current(settings: StubSettings) -> None:
     """Si la BD ja té el num_seq actual, sync no ingereix res."""
-    # Pre-popular la BD amb el rànquing 121 per a totes les modalitats.
+    # Pre-popular la BD amb el rànquing 124 per a totes les modalitats.
     conn = ensure_schema(settings.db_path)
     repo = Repository(conn)
     from fcbillar.models import Ranking
 
     for mod in (1, 2, 3, 4, 6):
         repo.upsert_ranking(
-            Ranking(num_seq=121, modalitat_codi_fcb=mod, url="x", format_url="datahome")
+            Ranking(num_seq=124, modalitat_codi_fcb=mod, url="x", format_url="llistat")
         )
 
     client = StubScraperClient(
         settings,
-        {"https://www.fcbillar.cat/jugador/home": "jugador_home_authed.html"},
+        {"https://www.fcbillar.cat/frontend/rankings/llistat": "nou/rankings_llistat.html"},
     )
     result = sync_current_rankings(client, settings=settings)
     assert result.ingested == []
@@ -198,16 +198,16 @@ def test_backfill_top_n_processes_only_top(settings: StubSettings) -> None:
     """backfill amb --top 1 processa només el jugador rànquing 1."""
     client = StubScraperClient(settings, URL_FIXTURES)
     result = backfill_modalitat(
-        client, modalitat_codi_fcb=2, top_n=1, settings=settings
+        client, modalitat_codi_fcb=1, top_n=1, settings=settings
     )
     assert result.players_processed == 1
-    # El jugador top 1 de lliure 121 és Vilalta (566); ha de tenir 10 partides.
-    assert result.total_games_upserted == 10
+    # El número 1 de tres bandes és Mas Canadell (843), amb 15 partides.
+    assert result.total_games_upserted == 15
 
 
 def test_backfill_unknown_modalitat_raises(settings: StubSettings) -> None:
     client = StubScraperClient(
-        settings, {"https://www.fcbillar.cat/jugador/home": "jugador_home_authed.html"}
+        settings, {"https://www.fcbillar.cat/frontend/rankings/llistat": "nou/rankings_llistat.html"}
     )
     with pytest.raises(ValueError, match="Modalitat 99"):
         backfill_modalitat(client, 99, settings=settings)
@@ -217,16 +217,16 @@ def test_backfill_only_followed_skips_non_followed(settings: StubSettings) -> No
     """only_followed=True processa només jugadors amb seguiment=1."""
     client = StubScraperClient(settings, URL_FIXTURES)
     # Ingest del rànquing primer per poder marcar el follow.
-    ingest_ranking(client, 121, 2, settings=settings)
+    ingest_ranking(client, 124, 1, settings=settings)
     repo = Repository(ensure_schema(settings.db_path))
-    repo.set_seguiment("566", True)
+    repo.set_seguiment("843", True)
 
-    # Re-runeixo backfill amb only_followed. Només ha de processar Vilalta.
+    # Torno a fer backfill amb only_followed: només ha de processar Mas Canadell.
     result = backfill_modalitat(
-        client, modalitat_codi_fcb=2, only_followed=True, settings=settings
+        client, modalitat_codi_fcb=1, only_followed=True, settings=settings
     )
     assert result.players_processed == 1
-    assert result.total_games_upserted == 10
+    assert result.total_games_upserted == 15
 
 
 # ---------------- backfill_historical ----------------
@@ -235,7 +235,7 @@ def test_backfill_only_followed_skips_non_followed(settings: StubSettings) -> No
 def test_backfill_ranking_with_no_partides(settings: StubSettings) -> None:
     """backfill_ranking amb top_n=0 ingest només el rànquing, no les partides."""
     client = StubScraperClient(settings, URL_FIXTURES)
-    res = backfill_ranking(client, 121, 2, top_n=0, settings=settings)
+    res = backfill_ranking(client, 124, 1, top_n=0, settings=settings)
     assert res.ranking_ingested is True
     assert res.players_processed == 0
     assert res.total_games_upserted == 0
@@ -251,17 +251,17 @@ def test_backfill_historical_processes_what_stub_can_serve(
     """Donat l'historial real (15 dates × 5 modalitats) i fixtures per a un sol
     (num_seq, modalitat), només aquest es processa OK; la resta queden a failed."""
     fixtures = {
-        "https://www.fcbillar.cat/ca/jugador/ranking/historial": "ranking_historial.html",
-        # Reutilitzem la fixture del 121 com a fake del 112 (mateixa estructura).
-        # fetch_ranking_html prova primer 'datahome', després 'data'.
-        "https://www.fcbillar.cat/ca/jugador/ranking/data/112/2#red": "ranking_lliure_121.html",
+        "https://www.fcbillar.cat/frontend/rankings/llistat": "nou/rankings_llistat.html",
+        "https://www.fcbillar.cat/frontend/rankings/historial-dades?idranking=123&idmodalitat=6": (
+            "nou/rankings_dades_historic_123_6.html"
+        ),
     }
     client = StubScraperClient(settings, fixtures)
     res = backfill_historical(
-        client, modalitat_codi_fcb=2, top_n=0, settings=settings
+        client, modalitat_codi_fcb=6, top_n=0, settings=settings
     )
-    # 1 OK (el 112/2 amb fixture) + 14 fallats (la resta sense fixture).
-    assert res.rankings_processed == [(112, 2)]
+    # 1 OK (el 123/6, que és el que tenim capturat) + 14 sense fixture.
+    assert res.rankings_processed == [(123, 6)]
     assert len(res.rankings_failed) == 14
     assert res.total_players_processed == 0  # top_n=0 evita partides
     assert res.total_games_upserted == 0
@@ -270,7 +270,7 @@ def test_backfill_historical_processes_what_stub_can_serve(
 def test_backfill_historical_filters_by_modalitat(settings: StubSettings) -> None:
     """Amb modalitat_codi_fcb=None, processa totes les modalitats (15×5=75 entries)."""
     fixtures = {
-        "https://www.fcbillar.cat/ca/jugador/ranking/historial": "ranking_historial.html",
+        "https://www.fcbillar.cat/frontend/rankings/llistat": "nou/rankings_llistat.html",
     }
     client = StubScraperClient(settings, fixtures)
     # Sense fixture per a cap rànquing → tots fallen.
@@ -309,8 +309,8 @@ def test_ingest_lliga_encontre_creates_full_context(settings: StubSettings) -> N
     i 4 games amb context complet. Salta partides on els jugadors no són a la BD."""
     fixtures = {
         # URL de partides del primer encontre de la jornada 01 GRUP A HONOR.
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -378,8 +378,8 @@ def test_ingest_lliga_encontre_creates_full_context(settings: StubSettings) -> N
 def test_ingest_lliga_encontre_skips_unknown_players(settings: StubSettings) -> None:
     """Sense pre-popular jugadors, totes les 4 partides es salten."""
     fixtures = {
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -405,8 +405,8 @@ def test_ingest_lliga_encontre_enriches_existing_game(settings: StubSettings) ->
     """Si una partida ja venia de partideshome (sense club/àrbitre), ingest_lliga
     la complementa amb els camps de lliga via COALESCE."""
     fixtures = {
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -625,8 +625,8 @@ def test_ingest_lliga_reuses_existing_club_via_normalization(
     from fcbillar.models import Club
 
     fixtures = {
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -664,8 +664,8 @@ def test_ingest_lliga_encontre_create_missing_persists_all(
 ) -> None:
     """Amb create_missing_players=True, totes les partides es desen amb placeholders."""
     fixtures = {
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -691,8 +691,8 @@ def test_placeholder_fusion_after_ranking_ingest(settings: StubSettings) -> None
     els placeholders es fusionen automàticament i els games NO es perden."""
     # Pas 1: ingest lliga amb placeholders
     lliga_fixtures = {
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, lliga_fixtures)
@@ -741,22 +741,22 @@ def test_ingest_lliga_jornada_processes_all_encontres(settings: StubSettings) ->
     però permet validar el flow end-to-end: 4 encontres × 4 partides = 16 vistes).
     """
     fixtures = {
-        "https://www.fcbillar.cat/ca/lligues/encontres/36/148/316/2593": (
-            "lliga_3b_jornada01_encontres.html"
+        "https://www.fcbillar.cat/frontend/lligues/encontres/36/148/316/2593": (
+            "nou/lligues_encontres_36_148_316_2593.html"
         ),
         # Mateixa fixture per als 4 encontres → 16 vistes amb molts noms iguals
         # (els 8 jugadors de la fixture).
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10941": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10941": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10943": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10943": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10945": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10945": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -795,24 +795,24 @@ def test_ingest_lliga_grup_iterates_jornades(settings: StubSettings) -> None:
     encontres, però el comptador failed ho reflectirà sense petar).
     """
     fixtures = {
-        "https://www.fcbillar.cat/ca/lligues/jornades/36/148/316": (
-            "lliga_3b_honor_grupA_jornades.html"
+        "https://www.fcbillar.cat/frontend/lligues/jornades/36/148/316": (
+            "nou/lligues_jornades_36_148_316.html"
         ),
         # Només jornada 01 té fixture; els altres jornada_id fallaran amb KeyError.
-        "https://www.fcbillar.cat/ca/lligues/encontres/36/148/316/2593": (
-            "lliga_3b_jornada01_encontres.html"
+        "https://www.fcbillar.cat/frontend/lligues/encontres/36/148/316/2593": (
+            "nou/lligues_encontres_36_148_316_2593.html"
         ),
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10939": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10941": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10941": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10943": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10943": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
-        "https://www.fcbillar.cat/ca/lligues/partides/36/148/316/2593/10945": (
-            "lliga_3b_encontre_partides.html"
+        "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10945": (
+            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)

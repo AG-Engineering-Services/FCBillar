@@ -40,7 +40,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 12
+SCHEMA_VERSION = 13
 
 
 def _read_schema_sql() -> str:
@@ -104,6 +104,46 @@ def _migrate_to_v10(conn: sqlite3.Connection) -> None:
         log.info("→v10: afegida columna rankings.data_pub")
 
 
+
+def _migrate_to_v13(conn: sqlite3.Connection) -> None:
+    """El CHECK de `rankings.format_url` ha d'admetre les vigències noves.
+
+    Amb el web d'agost de 2026 els rànquings ja no venen de `data`/`datahome`
+    sinó de `historial`/`llistat`. Els valors antics es conserven: diuen per on
+    va entrar cada fila que ja tenim, i esborrar-los seria perdre informació.
+
+    SQLite no sap alterar un CHECK, així que cal refer la taula. Es fa amb el
+    nom de columnes explícit per no dependre de l'ordre.
+    """
+    cols = [row[1] for row in conn.execute("PRAGMA table_info(rankings)").fetchall()]
+    if not cols:
+        return  # BD nova: la crearà schema.sql amb el CHECK ja bo
+    llista = ", ".join(cols)
+    conn.executescript(
+        f"""
+        PRAGMA foreign_keys = OFF;
+        ALTER TABLE rankings RENAME TO rankings_v12;
+        CREATE TABLE rankings (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            num_seq         INTEGER NOT NULL,
+            modalitat_id    INTEGER NOT NULL REFERENCES modalitats(id),
+            url             TEXT NOT NULL,
+            format_url      TEXT NOT NULL
+                CHECK (format_url IN ('data', 'datahome', 'historial', 'llistat')),
+            any_pub         INTEGER,
+            mes_pub         INTEGER,
+            scraped_at      TEXT NOT NULL DEFAULT (datetime('now')),
+            data_pub        TEXT,
+            UNIQUE (num_seq, modalitat_id)
+        );
+        INSERT INTO rankings ({llista}) SELECT {llista} FROM rankings_v12;
+        DROP TABLE rankings_v12;
+        PRAGMA foreign_keys = ON;
+        """
+    )
+    log.info("→v13: rankings.format_url admet 'historial' i 'llistat'")
+
+
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
     conn = connect(db_path)
     version = current_version(conn)
@@ -124,6 +164,9 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v10: rankings.data_pub (data exacta de publicació de l'historial).
     if 1 <= version < 10:
         _migrate_to_v10(conn)
+    # → v13: el web nou serveix els rànquings per 'historial'/'llistat'.
+    if 1 <= version < 13:
+        _migrate_to_v13(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).
