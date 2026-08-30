@@ -225,6 +225,25 @@ Aquesta és la part que estalvia setmanes de feina. Comprovacions fetes:
 | `idranking=124` | 2026-07-27 = l'últim rànquing que tenim |
 | Columnes del rànquing | Idèntiques |
 | Competició de cada partida | Continua explícita (Lliga / Individual / Copa) |
+| **Reingesta del 124/1 amb el codi nou** | **0 jugadors amb estadístiques diferents** |
+
+L'última fila és la comprovació que importa, i es va fer el 2026-08-30: es va
+reingerir el rànquing vigent sencer des del web nou a una base de dades buida i
+es va comparar jugador a jugador amb el que teníem des del 30 de juliol. Dels
+611 que surten a totes dues lectures, **cap no té cap diferència** ni al nom, ni
+a la mitjana, ni a cap dels extres —mitjana dels contraris, rang, caramboles,
+entrades, punts, definitiva.
+
+### 4.1 Però el rànquing vigent no està congelat
+
+La mateixa comparació va destapar una cosa que no sabíem: entre el 30 de juliol
+i el 30 d'agost la federació ha **afegit 104 jugadors** al rànquing 124 i n'ha
+tret 2, cosa que ha mogut 505 posicions. És la renovació de llicències de la
+temporada nova entrant a poc a poc.
+
+Conseqüència pràctica: **el rànquing vigent s'ha de tornar a ingerir mentre ho
+sigui**, no només el dia que apareix. Ara mateix la nostra còpia del 124 de tres
+bandes va 102 jugadors curta.
 
 **És el mateix sistema darrere, amb una capa web nova al davant.** No hi ha cap
 motiu per reingerir res «per si de cas»: la deduplicació per `id_natural` fa que
@@ -331,7 +350,7 @@ les tres columnes mortes.
    referència de «l'últim estat bo».
 3. Anotar el 500 de `lligues/partides` i preparar l'avís a la federació.
 
-### Fase 1 — Tornar a ingerir el que és públic i estable *(el gruix)*
+### Fase 1 — Tornar a ingerir el que és públic i estable *(fet, tret del punt 8)*
 4. `config.py`: `intranet_url` + `web_url`, sense `www`.
 5. `http.py` compartit amb `httpx` (caché, ritme, reintents) i **retirada de
    Playwright, `auth.py` i `url_builder.py`**.
@@ -341,7 +360,9 @@ les tres columnes mortes.
    rànquing 124, que ja tenim ingerit: **la reingesta ha de sortir idèntica**.
    És la prova de regressió que ens regala la deduplicació per `id_natural`.
 8. Portar la ingesta sencera a GitHub Actions: ja no hi ha res que necessiti el
-   PC de casa.
+   PC de casa. **Pendent.**
+8b. Tornar a ingerir el rànquing vigent cada setmana mentre ho sigui, no només
+   el dia que apareix (§4.1). **Pendent.**
 
 ### Fase 2 — Fonts noves i fonts perdudes
 9. Llistat de clubs des del WordPress, amb els camps de contacte nous.
