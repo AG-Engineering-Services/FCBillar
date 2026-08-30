@@ -371,10 +371,41 @@ les tres columnes mortes.
 ## 8. Pendents de verificar
 
 - El detall d'encontre de lliga (500) — pot ser que només afecti temporades
-  tancades.
+  tancades. El panell de jugador logat en dona una part (§9), però només per
+  a un jugador.
 - Les subrutes de copa amb una edició en joc (l'edició 7 es comporta bé, però
   està tancada).
-- Si el panell de jugador logat conté res que no sigui públic i que ens
-  interessi (no s'ha comprovat: caldria entrar-hi).
 - Si la federació manté una còpia dels PDF de `/media/**` en algun lloc, o si
   s'han perdut definitivament.
+
+---
+
+## 9. Què hi ha al panell de jugador logat
+
+Explorat el 2026-08-30 amb `scripts/explora_jugador.py`, que obre un navegador,
+espera que resolguis el captcha i recorre el panell. **Les pàgines que en surten
+no es commiten**: porten el número de llicència federativa i l'historial de
+partides de qui hi entra, i el repositori és públic.
+
+| Secció | Què hi ha | Ens serveix? |
+|---|---|---|
+| `/jugador/rankings/**` | Les mateixes pàgines que la part pública, columna per columna | No: ja les tenim |
+| `/jugador/perfil` | **Número de llicència federativa**, tipus i validesa | Sí — és el codi federatiu real que el README dona per no disponible |
+| `/jugador/lligues/partides` | «Les meves últimes partides de lliga» | Sí — vegeu sota |
+| `/jugador/copa/partides` | Igual, per a la copa | Sí |
+| `/jugador/individuals/partides-fasegrups` · `-eliminatories` | Igual, per als individuals | Sí |
+| `/jugador/dashboard` | Resum en targetes, sense taules | No |
+
+Les quatre pàgines de partides tenen **més camps que res del que és públic**:
+
+```
+Data | Local SM/Caramboles/Punts | Visitant SM/Caramboles/Punts |
+Entrades | Àrbitre | Assistència | Modalitat | Observacions
+```
+
+La taula pública de partides d'un rànquing només dona data, punts, caramboles i
+entrades. Aquí hi ha a més **sèrie major, àrbitre, assistència i modalitat** —
+exactament els camps que ens dona el detall d'encontre de lliga que ara retorna
+500. **És una solució de recanvi parcial per al 500**, però només per a un
+jugador: són «les meves» partides, i només les últimes (26 de lliga, 12 de copa,
+28 de fase de grups). No escala al club sencer ni substitueix l'endpoint trencat.
