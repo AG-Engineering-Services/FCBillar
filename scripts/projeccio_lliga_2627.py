@@ -19,8 +19,6 @@ import math
 import sqlite3
 import sys
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-
 DB = "data/fcbillar.db"
 RANK_ID = 832  # rànquing tres bandes num_seq 124 (2026-07-27)
 DIVORD = {"Honor": 0, "1a": 1, "2a": 2, "3a": 3, "4a": 4}
@@ -802,6 +800,9 @@ def forma_grups(
         volta, dins = divmod(p, n_grups)
         grups[dins if volta % 2 == 0 else n_grups - 1 - dins].append(p)
 
+    def clubs_de(g: int) -> collections.Counter:
+        return collections.Counter(ordre[i][0] for i in grups[g])
+
     def segon_repetit() -> tuple[int, int, int] | None:
         """El primer cas de dos equips del mateix club en un grup: en retorna el segon."""
         for g, lst in enumerate(grups):
@@ -814,32 +815,47 @@ def forma_grups(
         return None
 
     permutes: list[dict] = []
-    estats: set[tuple[int, ...]] = set()
-    for _ in range(40):
+    for _ in range(200):
         objectiu = segon_repetit()
         if objectiu is None:
             break
-        estat = tuple(i for lst in grups for i in lst)
-        if estat in estats:
-            break  # ja hi hem passat: no convergeix, ho deixem com està
-        estats.add(estat)
         g, slot, i = objectiu
         club = ordre[i][0]
-        # El primer grup que tingui aquell slot i no tingui ja aquest club.
-        desti = next(
-            (
-                h
-                for h in range(n_grups)
-                if h != g
-                and slot < len(grups[h])
-                and club not in {ordre[k][0] for k in grups[h]}
-            ),
-            None,
-        )
-        if desti is None:
-            break  # l'últim grup pot tenir un slot menys, o no hi ha on anar
-        j = grups[desti][slot]
-        grups[g][slot], grups[desti][slot] = grups[desti][slot], grups[g][slot]
+        compte_g = clubs_de(g)
+
+        # L'intercanvi ha de ser bo EN ELS DOS SENTITS. Mirar només si el club
+        # que entra cap al grup destí no n'hi ha prou: si el que en surt xoca
+        # amb el grup d'origen, la permuta següent el torna a lloc i les dues es
+        # desfan l'una a l'altra. És el que passava a la 4a amb el Sant Feliu i
+        # el Mataró.
+        millor = None
+        for h in range(n_grups):
+            if h == g:
+                continue
+            compte_h = clubs_de(h)
+            # Es prova primer el slot homòleg —el moviment mínim— i després els
+            # de més a prop, perquè l'equip es quedi tan amunt com es pugui.
+            for s2 in sorted(range(len(grups[h])), key=lambda s: (abs(s - slot), s)):
+                j = grups[h][s2]
+                club_j = ordre[j][0]
+                if club_j == club:
+                    continue  # canviar-lo per un altre equip del mateix club no arregla res
+                cap_a_h = compte_h[club] - (1 if club_j == club else 0) == 0
+                cap_a_g = compte_g[club_j] - (1 if club == club_j else 0) == 0
+                if cap_a_h and cap_a_g:
+                    millor = (h, s2, j)
+                    break
+            if millor is not None:
+                break
+
+        if millor is None:
+            # No hi ha cap intercanvi que arregli aquest xoc sense fer-ne un
+            # altre. Passa si un club té més equips que grups té la divisió, i
+            # llavors no és un error de repartiment: és impossible.
+            break
+
+        h, s2, j = millor
+        grups[g][slot], grups[h][s2] = grups[h][s2], grups[g][slot]
         permutes.append(dict(slot=slot + 1, seed_a=i + 1, seed_b=j + 1))
     return grups, permutes
 
@@ -1057,6 +1073,11 @@ def build(db: str = DB, comp: dict[str, list[tuple[str, str]]] | None = None) ->
 
 
 if __name__ == "__main__":
+    # La consola de Windows no escriu accents sense això. Va aquí i no a dalt de
+    # tot perquè importar aquest fitxer —ho fan els tests— no ha de tocar el
+    # stdout de ningú.
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", help="desa el resultat en JSON")
     ap.add_argument(
