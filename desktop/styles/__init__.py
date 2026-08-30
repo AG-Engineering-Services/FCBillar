@@ -2,23 +2,19 @@
 
 El tema d'abans era el de fàbrica de qualsevol aplicació fosca: fons `#1f2329`,
 accent `#2d6cdf`, Segoe UI i cantonades de 6 px. Ara la base la genera
-`qss(FOSC)` dels estàndards —betum, Verdana, filets d'1 px, radi de 2 px, cap
+`qss(FOSC)` dels tokens —betum, Verdana, filets d'1 px, radi de 2 px, cap
 degradat i cap ombra— i aquí només hi ha el que és d'aquesta aplicació: els noms
 d'objecte que fa servir la interfície.
 
-Els tokens són la font de veritat i s'importen; no se'n copia cap valor.
+Els tokens venen de `ag_tokens.py`, que és una còpia dels estàndards feta per
+`scripts/sync_tokens_ag.py`. Es copien i no s'importen de fora perquè
+l'aplicació ha d'arrencar amb aquest repositori sol; els valors no es toquen mai
+a mà.
 """
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-_ESTANDARDS = Path(__file__).resolve().parents[3] / "ag-standards" / "skills" / "ag-disseny"
-if str(_ESTANDARDS) not in sys.path:
-    sys.path.insert(0, str(_ESTANDARDS))
-
-from tokens import FOSC, per_familia, qss  # noqa: E402
+from desktop.styles.ag_tokens import FOSC, per_familia, qss
 
 # Família de producte: `gestio`. El vermell de l'escut de la federació és marca
 # d'identitat i no es fa servir mai com a color d'acció; a l'escriptori ni tan

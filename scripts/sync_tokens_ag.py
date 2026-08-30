@@ -1,15 +1,17 @@
-"""Porta els tokens visuals d'AGenginyeria al web.
+"""Porta els tokens visuals d'AGenginyeria a dins d'aquest repositori.
 
-Els tokens viuen a `ag-standards/skills/ag-disseny/tokens.css` i són la font de
-veritat. El web es desplega a Vercel des d'aquest repositori i prou, o sigui que
-el fitxer hi ha de ser físicament; això no és excusa per copiar-ne els valors a
-mà, que és exactament el que la norma prohibeix.
+Els tokens viuen a `ag-standards/skills/ag-disseny/` i són la font de veritat.
+Aquí n'hi ha d'haver una còpia perquè les dues aplicacions han de funcionar amb
+aquest repositori sol: Vercel només veu això quan desplega el web, i qualsevol
+que es cloni el projecte ha de poder obrir l'escriptori sense tenir els
+estàndards al costat. Això no és excusa per copiar-ne els valors a mà, que és
+el que la norma prohibeix; els copia aquest script.
 
-    uv run python scripts/sync_tokens_ag.py            # comprova que no ha derivat
-    uv run python scripts/sync_tokens_ag.py --escriu   # el torna a copiar
+    uv run python scripts/sync_tokens_ag.py            # comprova que no han derivat
+    uv run python scripts/sync_tokens_ag.py --escriu   # els torna a copiar
 
-Surt amb codi 1 si la còpia del web no coincideix amb l'original, perquè un
-canvi als estàndards no es quedi sense arribar aquí.
+Surt amb codi 1 si alguna còpia no coincideix amb l'original, perquè un canvi
+als estàndards no es quedi sense arribar aquí.
 """
 
 from __future__ import annotations
@@ -17,54 +19,103 @@ from __future__ import annotations
 import argparse
 import io
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 ARREL = Path(__file__).resolve().parents[1]
-ORIGEN = ARREL.parent / "ag-standards" / "skills" / "ag-disseny" / "tokens.css"
-DESTI = ARREL / "web" / "src" / "lib" / "styles" / "ag-tokens.css"
+ESTANDARDS = ARREL.parent / "ag-standards" / "skills" / "ag-disseny"
 
-CAPCALERA = """/* GENERAT — no editis aquest fitxer.
+_AVIS = """GENERAT — no editis aquest fitxer.
 
-   Còpia de ag-standards/skills/ag-disseny/tokens.css, que és la font de
-   veritat. Es refresca amb:
+Còpia de ag-standards/skills/ag-disseny/{nom}, que és la font de veritat.
+Es refresca amb:
 
-       uv run python scripts/sync_tokens_ag.py --escriu
+    uv run python scripts/sync_tokens_ag.py --escriu
 
-   Hi és perquè Vercel només veu aquest repositori. Si vols canviar un color,
-   canvia'l als estàndards, passa-hi l'auditoria de contrast i torna a
-   sincronitzar. */
+Hi és perquè {motiu}. Si vols canviar un color, canvia'l als estàndards,
+passa-hi l'auditoria de contrast i torna a sincronitzar."""
 
-"""
+
+@dataclass(frozen=True)
+class Copia:
+    nom: str
+    desti: Path
+    motiu: str
+    #: Com es marca l'avís al fitxer de destí. En un fitxer Python ha de ser un
+    #: COMENTARI: una docstring al davant deixaria el `from __future__` de
+    #: l'original fora del principi del fitxer i no compilaria.
+    comentari: str = ""
+    obre: str = ""
+    tanca: str = ""
+
+    @property
+    def origen(self) -> Path:
+        return ESTANDARDS / self.nom
+
+    def contingut(self) -> str:
+        avis = _AVIS.format(nom=self.nom, motiu=self.motiu)
+        if self.comentari:
+            linies = [f"{self.comentari} {ln}".rstrip() for ln in avis.splitlines()]
+            capcalera = "\n".join(linies) + "\n\n"
+        else:
+            capcalera = f"{self.obre}\n{avis}\n{self.tanca}\n\n"
+        return capcalera + self.origen.read_text(encoding="utf-8")
+
+
+COPIES = (
+    Copia(
+        nom="tokens.css",
+        desti=ARREL / "web" / "src" / "lib" / "styles" / "ag-tokens.css",
+        motiu="Vercel només veu aquest repositori quan desplega el web",
+        obre="/*",
+        tanca="*/",
+    ),
+    Copia(
+        nom="tokens.py",
+        desti=ARREL / "desktop" / "styles" / "ag_tokens.py",
+        motiu="l'escriptori ha d'arrencar amb aquest repositori sol, sense\n"
+        "tenir els estàndards al costat",
+        comentari="#",
+    ),
+)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--escriu", action="store_true", help="Actualitza la còpia del web")
+    ap.add_argument("--escriu", action="store_true", help="Actualitza les còpies")
     args = ap.parse_args()
 
-    if not ORIGEN.exists():
-        print(f"No hi ha els estàndards a {ORIGEN}")
+    if not ESTANDARDS.is_dir():
+        print(f"No hi ha els estàndards a {ESTANDARDS}.")
+        print("Sense ells no es poden refrescar les còpies, però les que hi ha")
+        print("al repositori segueixen servint: les aplicacions no en depenen.")
         return 1
 
-    volgut = CAPCALERA + ORIGEN.read_text(encoding="utf-8")
-    actual = DESTI.read_text(encoding="utf-8") if DESTI.exists() else None
+    problemes = 0
+    for c in COPIES:
+        volgut = c.contingut()
+        actual = c.desti.read_text(encoding="utf-8") if c.desti.exists() else None
+        relatiu = c.desti.relative_to(ARREL)
 
-    if actual == volgut:
-        print(f"Al dia: {DESTI.relative_to(ARREL)}")
-        return 0
+        if actual == volgut:
+            print(f"  al dia   {relatiu}")
+            continue
 
-    if not args.escriu:
-        estat = "no hi és" if actual is None else "ha derivat de l'original"
-        print(f"La còpia {estat}: {DESTI.relative_to(ARREL)}")
-        print("Passa-hi --escriu per posar-la al dia.")
-        return 1
+        if not args.escriu:
+            estat = "no hi és" if actual is None else "ha derivat"
+            print(f"  {estat:8s} {relatiu}")
+            problemes += 1
+            continue
 
-    DESTI.parent.mkdir(parents=True, exist_ok=True)
-    DESTI.write_text(volgut, encoding="utf-8")
-    print(f"Copiat {ORIGEN.name} → {DESTI.relative_to(ARREL)}")
-    return 0
+        c.desti.parent.mkdir(parents=True, exist_ok=True)
+        c.desti.write_text(volgut, encoding="utf-8")
+        print(f"  copiat   {c.nom} → {relatiu}")
+
+    if problemes:
+        print("\nPassa-hi --escriu per posar-les al dia.")
+    return 1 if problemes else 0
 
 
 if __name__ == "__main__":
