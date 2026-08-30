@@ -1,8 +1,12 @@
 <script lang="ts">
-	// Projecció de la Lliga de Tres Bandes 2026-27. A diferència de la resta de
-	// seccions, NO llegeix de Supabase: és una foto derivada de les classificacions
-	// oficials 2025-26 + els play-offs de promoció del 4-5 de juliol de 2026, que es
-	// regenera amb `python scripts/projeccio_lliga_2627.py --json web/src/lib/data/lliga2627.json`.
+	// Lliga de Tres Bandes 2026-27. A diferència de la resta de seccions, NO llegeix
+	// de la base de dades del núvol: és una foto que es regenera amb
+	// `python scripts/projeccio_lliga_2627.py --json web/src/lib/data/lliga2627.json`.
+	//
+	// La composició de divisions i grups surt dels EQUIPS INSCRITS que publica la
+	// federació; l'ordre de sembra, de les classificacions 2025-26 i dels play-offs
+	// de promoció. Torna a executar el generador quan la federació mogui la
+	// inscripció: es baixa la llista en viu cada vegada.
 	//
 	// El JSON només porta la POSICIÓ de cada jugador a la llista única del club; la
 	// banda (a quin equip pot jugar) es deriva aquí segons el repartiment triat,
@@ -397,9 +401,11 @@
 
 <h1 class="mb-1 text-lg font-bold tracking-tight md:text-xl">Lliga de Tres Bandes 2026-27</h1>
 <p class="mb-3 text-sm leading-snug text-slate-500 dark:text-slate-400">
-	Projecció a partir de les classificacions oficials del 2025-26 i dels play-offs de promoció del 4 i
-	5 de juliol de 2026. Cada club inscriu una sola llista de jugadors, ordenada per rànquing, i les
-	bandes diuen a quin equip pot jugar cadascú.
+	Divisions i grups amb els <strong>equips inscrits de debò</strong> a la federació. L'ordre de
+	sembra surt de les classificacions oficials del 2025-26 i dels play-offs de promoció del 4 i 5 de
+	juliol; els equips que no hi eren entren per baix, ordenats per l'últim equip del seu club. El que
+	sí que és projecció són les alineacions: cada club inscriu una sola llista de jugadors, ordenada
+	per rànquing, i les bandes diuen a quin equip pot jugar cadascú.
 </p>
 
 <!-- vista i repartiment: dos controls independents, perquè el repartiment val

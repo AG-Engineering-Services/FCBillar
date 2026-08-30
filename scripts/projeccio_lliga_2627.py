@@ -87,6 +87,43 @@ COMP: dict[str, list[tuple[str, str]]] = {
     ],
 }
 
+#: Quants grups té cada divisió. Les quatre de dalt van a setze equips en dos
+#: grups; la 4a s'endú la resta en quatre. Ho va anunciar la federació i quadra
+#: amb els 93 inscrits.
+GRUPS = {"Honor": 2, "1a": 2, "2a": 2, "3a": 2, "4a": 4}
+
+#: Marca interna per als equips que no existien el 2025-26. La composició els
+#: dona la lletra buida i el repartiment de lletres necessita distingir-los.
+_NOU = "·NOU"
+
+
+def comp_des_dels_inscrits(lliga: int = 38) -> dict[str, list[tuple[str, str]]]:
+    """La composició REAL, a partir dels equips apuntats a la lliga.
+
+    `COMP` és la projecció que es va fer al juliol, abans de saber qui
+    s'inscriuria: surt de les classificacions oficials i dels play-offs. Ara la
+    federació publica els equips inscrits, o sigui que la composició ja no cal
+    endevinar-la. `inscripcions_lliga_2627.py` fa la feina de confrontar-les i
+    de col·locar els equips nous; aquí només se'n tradueixen els noms.
+
+    Torna la mateixa forma que `COMP` —divisió → [(clau de club, lletra del
+    2025-26)]— amb la lletra buida quan l'equip no existia la temporada passada.
+    """
+    import inscripcions_lliga_2627 as INS
+
+    # Els noms oficials van canviar quan la federació va passar el cens al
+    # WordPress; `INS.clau_club` ja sap les equivalències, i aquí es fa servir
+    # per tornar del nom oficial a la clau que fa servir aquest script.
+    coneguts = {INS.clau_club(c): c for div in COMP for c, _ in COMP[div]}
+
+    equips = INS.ordena(INS.carrega_projeccio(), INS.baixa_inscrits(lliga))[0]
+    comp: dict[str, list[tuple[str, str]]] = {d: [] for d in DIVORD}
+    for e in sorted(equips, key=lambda x: (DIVORD[x.divisio], x.seed)):
+        clau = coneguts.get(INS.clau_club(e.club), e.club)
+        comp[e.divisio].append((clau, e.lletra_2526))
+    return comp
+
+
 # Noms de club per a la interfície (a la BD hi són en majúscules i sense espais)
 NOMS = {
     "B. EL MASNOU": "B. El Masnou", "B.C.GRANOLLERS": "B.C. Granollers",
@@ -98,6 +135,8 @@ NOMS = {
     "C.B.BLANES": "C.B. Blanes", "C.B.CARDONA": "C.B. Cardona", "C.B.LLEIDA": "C.B. Lleida",
     "C.B.LLINARS": "C.B. Llinars", "C.B.LLIÇÀ D'AMUNT": "C.B. Lliçà d'Amunt",
     "C.B.MANRESA": "C.B. Manresa", "C.B.MATARÓ": "C.B. Mataró", "C.B.MOLLET": "C.B. Mollet",
+    # Clubs que entren a la lliga de tres bandes el 2026-27.
+    "C.B.MATADEPERA": "C.B. Matadepera", "C.B.PUNT D'ATAC": "C.B. Punt d'Atac",
     "C.B.MONFORTE": "C.B. Monforte", "C.B.MONT-ROIG": "C.B. Mont-roig", "C.B.PRAT": "C.B. Prat",
     "C.B.PREMIÀ": "C.B. Premià", "C.B.SANT ADRIÀ": "C.B. Sant Adrià",
     "C.B.SANT BOI": "C.B. Sant Boi", "C.B.SANTS": "C.B. Sants",
@@ -740,33 +779,37 @@ def simula_lliga(per_club: dict, divisions: dict, n_sims: int, llavor: int = 202
     }, acords
 
 
-def forma_grups(ordre: list[tuple[str, str]]) -> tuple[list[int], list[int], list[dict]]:
-    """Reparteix una divisió en dos grups pel serpentí A-B-B-A sobre l'ordre de
-    sembra —1-4-5-8-9-12-13-16 al grup A i 2-3-6-7-10-11-14-15 al B, estirat igual
-    a 4a amb 19 equips— i hi fa les permutes necessàries perquè dos equips d'un
-    mateix club no coincideixin de grup.
+def forma_grups(
+    ordre: list[tuple[str, str]], n_grups: int = 2
+) -> tuple[list[list[int]], list[dict]]:
+    """Reparteix una divisió en grups pel serpentí sobre l'ordre de sembra, i hi
+    fa les permutes necessàries perquè dos equips d'un mateix club no coincideixin.
 
-    Es mou sempre el SEGON equip del club dins del grup, no el primer, i s'intercanvia
-    amb l'equip que ocupa el mateix slot a l'altre grup. Exemple: si el Monforte A és
-    el 3r del grup i el Monforte B el 8è, es permuta el Monforte B amb el 8è de l'altre
-    grup. Així l'equip millor classificat es queda on el posa la sembra i el moviment
-    és el mínim possible: els slots homòlegs són sempre posicions consecutives de
-    l'ordre oficial (l'A2 és el 4 i el B2 el 3; l'A3 és el 5 i el B3 el 6…).
+    Amb dos grups el serpentí és l'A-B-B-A de sempre: 1-4-5-8-9-12-13-16 al grup A
+    i 2-3-6-7-10-11-14-15 al B. Amb quatre —la 4a divisió— és el mateix estirat:
+    1-8-9-16… al A, 2-7-10-15… al B, i així.
+
+    Es mou sempre el SEGON equip del club dins del grup, no el primer, i
+    s'intercanvia amb l'equip que ocupa el mateix slot a un altre grup on el club
+    no hi sigui. Així l'equip millor classificat es queda on el posa la sembra i
+    el moviment és el mínim possible: els slots homòlegs són sempre posicions
+    consecutives de l'ordre oficial.
 
     Retorna les posicions (0-based) de cada grup i les permutes fetes."""
     n = len(ordre)
-    serp = ["A" if (p - 1) % 4 in (0, 3) else "B" for p in range(1, n + 1)]
-    A = [i for i in range(n) if serp[i] == "A"]
-    B = [i for i in range(n) if serp[i] == "B"]
+    grups: list[list[int]] = [[] for _ in range(n_grups)]
+    for p in range(n):
+        volta, dins = divmod(p, n_grups)
+        grups[dins if volta % 2 == 0 else n_grups - 1 - dins].append(p)
 
-    def segon_repetit() -> tuple[str, int, int] | None:
+    def segon_repetit() -> tuple[int, int, int] | None:
         """El primer cas de dos equips del mateix club en un grup: en retorna el segon."""
-        for lst, nom in ((A, "A"), (B, "B")):
+        for g, lst in enumerate(grups):
             vistos: set[str] = set()
             for slot, i in enumerate(lst):
                 club = ordre[i][0]
                 if club in vistos:
-                    return nom, slot, i
+                    return g, slot, i
                 vistos.add(club)
         return None
 
@@ -776,17 +819,29 @@ def forma_grups(ordre: list[tuple[str, str]]) -> tuple[list[int], list[int], lis
         objectiu = segon_repetit()
         if objectiu is None:
             break
-        estat = tuple(A + B)
+        estat = tuple(i for lst in grups for i in lst)
         if estat in estats:
             break  # ja hi hem passat: no convergeix, ho deixem com està
         estats.add(estat)
-        _nom, slot, i = objectiu
-        if slot >= len(A) or slot >= len(B):
-            break  # a 4a el grup B té un slot més: aquell no té homòleg
-        j = B[slot] if A[slot] == i else A[slot]
-        A[slot], B[slot] = B[slot], A[slot]
+        g, slot, i = objectiu
+        club = ordre[i][0]
+        # El primer grup que tingui aquell slot i no tingui ja aquest club.
+        desti = next(
+            (
+                h
+                for h in range(n_grups)
+                if h != g
+                and slot < len(grups[h])
+                and club not in {ordre[k][0] for k in grups[h]}
+            ),
+            None,
+        )
+        if desti is None:
+            break  # l'últim grup pot tenir un slot menys, o no hi ha on anar
+        j = grups[desti][slot]
+        grups[g][slot], grups[desti][slot] = grups[desti][slot], grups[g][slot]
         permutes.append(dict(slot=slot + 1, seed_a=i + 1, seed_b=j + 1))
-    return A, B, permutes
+    return grups, permutes
 
 
 def banda_de(num: int, esquema: str = "fcb") -> str:
@@ -803,7 +858,8 @@ def referents(llista: list[dict], lletra: str, esquema: str = "fcb") -> list[dic
     return [p for p in llista if inici <= p["num"] <= inici + 3]
 
 
-def build(db: str = DB) -> dict:
+def build(db: str = DB, comp: dict[str, list[tuple[str, str]]] | None = None) -> dict:
+    comp = comp if comp is not None else COMP
     conn = sqlite3.connect(db)
     rk = {
         r[0]: (r[1], r[2])
@@ -877,8 +933,15 @@ def build(db: str = DB) -> dict:
     # 2025-26 (les que van guanyar la plaça) i serveixen només per lligar-hi el motiu
     # de l'ascens o descens.
     club_teams = collections.defaultdict(list)
-    for div, teams in COMP.items():
+    nous = 0
+    for div, teams in comp.items():
         for club, lletra in teams:
+            if not lletra:
+                # Equip que no existia el 2025-26. Se li posa una marca pròpia
+                # perquè el lligam per lletra amb la fitxa del club segueixi
+                # funcionant; a la sortida hi anirà com a lletra buida.
+                nous += 1
+                lletra = f"{_NOU}{nous}"
             club_teams[club].append((DIVORD[div], lletra, div))
     for club, v in club_teams.items():
         v.sort()
@@ -928,8 +991,13 @@ def build(db: str = DB) -> dict:
             taxa=(taxa_de(p) if taxa_de(p) is not None else per_defecte),
         ) for i, p in enumerate(ranked, 1)]
         equips = [dict(lletra=lt, unic=(not multi), divisio=dv, distancia=DIST[dv],
-                       lletra_2526=("" if antiga == "UNICO" else antiga),
-                       div_2526=prev_div.get((club, antiga)), motiu=MOTIU.get((club, antiga)))
+                       lletra_2526=("" if antiga == "UNICO" or antiga.startswith(_NOU)
+                                    else antiga),
+                       nou=antiga.startswith(_NOU),
+                       div_2526=(None if antiga.startswith(_NOU)
+                                 else prev_div.get((club, antiga))),
+                       motiu=("equip nou" if antiga.startswith(_NOU)
+                              else MOTIU.get((club, antiga))))
                   for _, lt, dv, antiga in teams]
         # Acord de club: la llista continua ordenada pel rànquing, però hi ha
         # jugadors compromesos amb un equip concret al marge de la mitjana.
@@ -945,19 +1013,32 @@ def build(db: str = DB) -> dict:
     # La vista per divisió només guarda la referència a l'equip; els quatre titulars
     # i la mitjana d'equip es deriven de la llista del club amb el repartiment actiu.
     per_club = {c["club"]: c for c in out["clubs"]}
+    pendents = collections.defaultdict(list)
+    for div in ["Honor", "1a", "2a", "3a", "4a"]:
+        for club, lletra in comp[div]:
+            pendents[club].append(lletra)
+    consumits: dict[str, int] = collections.defaultdict(int)
+
     for div in ["Honor", "1a", "2a", "3a", "4a"]:
         equips = []
-        for seed, (club, lletra) in enumerate(COMP[div], 1):
+        for seed, (club, _lletra) in enumerate(comp[div], 1):
             c = per_club[club]
-            antiga = "" if lletra == "UNICO" else lletra
-            e = next(x for x in c["equips"] if x["lletra_2526"] == antiga)
+            # Els equips d'un club es consumeixen en l'ordre de la composició,
+            # que és el de sembra: així dos equips nous del mateix club —que no
+            # tenen lletra antiga per distingir-se— no es trepitgen.
+            e = c["equips"][consumits[club]]
+            consumits[club] += 1
             equips.append(dict(
                 seed=seed, club=club, nom=nom_club(club), lletra=e["lletra"], unic=e["unic"],
                 lletra_2526=e["lletra_2526"], div_2526=e["div_2526"], motiu=e["motiu"],
+                nou=e.get("nou", False),
             ))
-        A, B, permutes = forma_grups(COMP[div])
+        grups_idx, permutes = forma_grups(comp[div], GRUPS[div])
         moguts = {p["seed_a"] for p in permutes} | {p["seed_b"] for p in permutes}
-        grups = [dict(lletra=g, seeds=[i + 1 for i in lst]) for g, lst in (("A", A), ("B", B))]
+        grups = [
+            dict(lletra=chr(ord("A") + g), seeds=[i + 1 for i in lst])
+            for g, lst in enumerate(grups_idx)
+        ]
         out["divisions"][div] = dict(
             distancia=DIST[div], equips=equips, grups=grups, permutes=permutes,
             moguts=sorted(moguts),
@@ -978,10 +1059,23 @@ def build(db: str = DB) -> dict:
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", help="desa el resultat en JSON")
+    ap.add_argument(
+        "--projectada",
+        action="store_true",
+        help="Fa servir la composicio projectada al juliol en comptes dels equips "
+        "inscrits de debo. Serveix per comparar-les, i per treballar sense xarxa.",
+    )
     ap.add_argument("--esquema", choices=sorted(ESQUEMES), default="fcb",
                     help="repartiment en bandes per a la sortida de text")
     args = ap.parse_args()
-    data = build()
+    if args.projectada:
+        comp = COMP
+        print("Composicio: la projectada al juliol.")
+    else:
+        comp = comp_des_dels_inscrits()
+        total = sum(len(v) for v in comp.values())
+        print(f"Composicio: els {total} equips inscrits a la lliga.")
+    data = build(comp=comp)
     if args.json:
         with open(args.json, "w", encoding="utf-8") as fh:
             json.dump(data, fh, ensure_ascii=False, indent=1)

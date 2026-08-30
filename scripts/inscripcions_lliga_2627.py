@@ -34,13 +34,12 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
-import httpx  # noqa: E402
+import httpx
 
-from fcbillar.scraper import parsers as P  # noqa: E402
-from fcbillar.scraper import urls as U  # noqa: E402
-from fcbillar.scraper.taules import taula_amb  # noqa: E402
+from fcbillar.scraper import parsers as P
+from fcbillar.scraper import urls as U
+from fcbillar.scraper.taules import taula_amb
 
 LLIGA_3B = 38  # Lliga Catalana Tres Bandes 2026-27 (la 39 és la de 4 Modalitats)
 PROJECCIO = Path(__file__).with_name("projeccio_lliga_2627.py")
@@ -89,6 +88,10 @@ class Equip:
     grup: str  # "A", "B", ...
     seed: int  # posició a l'ordre general de sembra
     origen: str  # "projectat" | "nou" | "club nou"
+    #: Lletra que tenia l'equip la temporada passada, quan n'hereta la plaça.
+    #: Buida si és un equip nou. `projeccio_lliga_2627.py` la fa servir per
+    #: lligar-hi el motiu de l'ascens o el descens.
+    lletra_2526: str = ""
 
 
 def carrega_projeccio(path: Path = PROJECCIO) -> list[tuple[str, str, str]]:
@@ -180,24 +183,26 @@ def ordena(
             else:
                 darrere.setdefault(posicions[-1], []).append(e)
 
-    ordre: list[tuple[P.LligaEquipInscrit, str]] = []
+    # Cada entrada porta l'equip inscrit, d'on surt, i la lletra que tenia la
+    # plaça que hereta (buida si és un equip nou).
+    ordre: list[tuple[P.LligaEquipInscrit, str, str]] = []
     no_inscrits: list[tuple[str, str, str]] = []
     for i, (div, club, llet) in enumerate(projectats):
         e = assignat.get(i)
         if e is None:
             no_inscrits.append((div, club, llet))
         else:
-            ordre.append((e, "projectat"))
+            ordre.append((e, "projectat", llet))
         if intercalat:
-            ordre.extend((x, "nou") for x in darrere.get(i, []))
+            ordre.extend((x, "nou", "") for x in darrere.get(i, []))
 
     if not intercalat:
         # Els equips nous entren per baix, tots a la 4a, i entre ells s'ordenen
         # per la classificació de l'últim equip del seu club la temporada
         # passada. Un equip nou no pot fer baixar de divisió un que ja hi era.
         for pos in sorted(darrere):
-            ordre.extend((x, "nou") for x in darrere[pos])
-    ordre.extend((e, "club nou") for e in clubs_nous)
+            ordre.extend((x, "nou", "") for x in darrere[pos])
+    ordre.extend((e, "club nou", "") for e in clubs_nous)
 
     # Les places que deixen lliures els equips que no s'han inscrit les ocupa el
     # següent de l'ordre: cada divisió es tanca a 16 comptant els que hi són.
@@ -210,7 +215,7 @@ def ordena(
         talla = MIDA_DIVISIO if div != "4a" else len(ordre) - i
         bloc = ordre[i : i + talla]
         n = GRUPS[div]
-        for j, (e, origen) in enumerate(bloc):
+        for j, (e, origen, llet) in enumerate(bloc):
             volta, dins = divmod(j, n)
             grup = chr(ord("A") + (dins if volta % 2 == 0 else n - 1 - dins))
             resultat.append(
@@ -221,6 +226,7 @@ def ordena(
                     grup=grup,
                     seed=j + 1,
                     origen=origen,
+                    lletra_2526=llet,
                 )
             )
         i += talla
@@ -228,6 +234,10 @@ def ordena(
 
 
 def main() -> int:
+    # Va aqui i no a dalt de tot: importar aquest fitxer -ho fa
+    # projeccio_lliga_2627.py- no ha de tocar el stdout de ningu.
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--lliga", type=int, default=LLIGA_3B)
     ap.add_argument(
