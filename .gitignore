@@ -24,6 +24,11 @@ data/cache/
 data/exports/
 data/*.db
 data/*.db.bak*
+data/*.db.pre-*
+
+# Panell de jugador logat: porta el numero de llicencia federativa i
+# l'historial de partides de qui hi entra. El repositori es public.
+tests/fixtures/nou/jugador/
 
 # Logs
 logs/

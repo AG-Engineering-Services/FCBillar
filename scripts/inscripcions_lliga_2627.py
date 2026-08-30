@@ -40,6 +40,7 @@ import httpx  # noqa: E402
 
 from fcbillar.scraper import parsers as P  # noqa: E402
 from fcbillar.scraper import urls as U  # noqa: E402
+from fcbillar.scraper.taules import taula_amb  # noqa: E402
 
 LLIGA_3B = 38  # Lliga Catalana Tres Bandes 2026-27 (la 39 és la de 4 Modalitats)
 PROJECCIO = Path(__file__).with_name("projeccio_lliga_2627.py")
@@ -110,10 +111,34 @@ def carrega_projeccio(path: Path = PROJECCIO) -> list[tuple[str, str, str]]:
 
 
 def baixa_inscrits(lliga: int = LLIGA_3B) -> list[P.LligaEquipInscrit]:
+    """Els equips inscrits a una lliga, o un error clar si no els podem llegir.
+
+    Una llista buida no és una resposta acceptable: el parser en retorna una
+    tant si la lliga no té ningú inscrit com si el que ha arribat és una pàgina
+    d'error, un formulari de login o un marcatge que ha canviat. Publicar una
+    composició buida amb pinta de bona seria pitjor que no publicar-ne cap, així
+    que aquí ens plantem.
+    """
+    url = U.lligues_inscripcions(lliga)
     with httpx.Client(
         headers={"User-Agent": "FCBillar/2.0"}, follow_redirects=True, timeout=60.0
     ) as c:
-        return P.parse_lliga_inscripcions(c.get(U.lligues_inscripcions(lliga)).text)
+        r = c.get(url)
+    r.raise_for_status()
+
+    if taula_amb(r.text, "Club", "Equip") is None:
+        raise SystemExit(
+            f"No hi ha taula d'inscripcions a {url} — o la federació ha tornat a "
+            f"canviar el web, o la lliga {lliga} no és la que esperem. "
+            f"No genero cap composició."
+        )
+    equips = P.parse_lliga_inscripcions(r.text)
+    if not equips:
+        raise SystemExit(
+            f"Cap equip inscrit a {url}: o la lliga {lliga} no existeix, o encara "
+            f"no s'hi ha apuntat ningú. En tots dos casos no hi ha res a repartir."
+        )
+    return equips
 
 
 def ordena(
