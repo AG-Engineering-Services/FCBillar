@@ -1,13 +1,15 @@
-/* GENERAT — no editis aquest fitxer.
+/*
+GENERAT — no editis aquest fitxer.
 
-   Còpia de ag-standards/skills/ag-disseny/tokens.css, que és la font de
-   veritat. Es refresca amb:
+Còpia de ag-standards/skills/ag-disseny/tokens.css, que és la font de veritat.
+Es refresca amb:
 
-       uv run python scripts/sync_tokens_ag.py --escriu
+    uv run python scripts/sync_tokens_ag.py --escriu
 
-   Hi és perquè Vercel només veu aquest repositori. Si vols canviar un color,
-   canvia'l als estàndards, passa-hi l'auditoria de contrast i torna a
-   sincronitzar. */
+Hi és perquè Vercel només veu aquest repositori quan desplega el web. Si vols
+canviar un color, canvia'l als estàndards, passa-hi l'auditoria de contrast i
+torna a sincronitzar.
+*/
 
 /* Tokens visuals d'AGenginyeria — línia SaaS.
    Els valors de gràfic estan validats amb dataviz/scripts/validate_palette.js

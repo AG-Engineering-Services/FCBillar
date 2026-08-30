@@ -5,8 +5,8 @@
 #
 #     uv run python scripts/sync_tokens_ag.py --escriu
 #
-# Hi és perquè l'escriptori ha d'arrencar amb aquest repositori sol, sense
-# tenir els estàndards al costat. Si vols canviar un color, canvia'l als estàndards,
+# Hi és perquè l'escriptori ha d'arrencar amb aquest repositori sol, sense tenir
+# els estàndards al costat. Si vols canviar un color, canvia'l als estàndards,
 # passa-hi l'auditoria de contrast i torna a sincronitzar.
 
 # -*- coding: utf-8 -*-

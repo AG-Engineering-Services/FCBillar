@@ -19,10 +19,9 @@ from __future__ import annotations
 import argparse
 import io
 import sys
+import textwrap
 from dataclasses import dataclass
 from pathlib import Path
-
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 ARREL = Path(__file__).resolve().parents[1]
 ESTANDARDS = ARREL.parent / "ag-standards" / "skills" / "ag-disseny"
@@ -34,8 +33,11 @@ Es refresca amb:
 
     uv run python scripts/sync_tokens_ag.py --escriu
 
-Hi és perquè {motiu}. Si vols canviar un color, canvia'l als estàndards,
-passa-hi l'auditoria de contrast i torna a sincronitzar."""
+{tancament}"""
+
+#: El text generat va a fitxers que es commiten: que no hi surtin línies
+#: llarguíssimes segons què digui el motiu de cada còpia.
+_AMPLADA = 78
 
 
 @dataclass(frozen=True)
@@ -55,7 +57,12 @@ class Copia:
         return ESTANDARDS / self.nom
 
     def contingut(self) -> str:
-        avis = _AVIS.format(nom=self.nom, motiu=self.motiu)
+        tancament = textwrap.fill(
+            f"Hi és perquè {self.motiu}. Si vols canviar un color, canvia'l als "
+            f"estàndards, passa-hi l'auditoria de contrast i torna a sincronitzar.",
+            width=_AMPLADA,
+        )
+        avis = _AVIS.format(nom=self.nom, tancament=tancament)
         if self.comentari:
             linies = [f"{self.comentari} {ln}".rstrip() for ln in avis.splitlines()]
             capcalera = "\n".join(linies) + "\n\n"
@@ -75,14 +82,19 @@ COPIES = (
     Copia(
         nom="tokens.py",
         desti=ARREL / "desktop" / "styles" / "ag_tokens.py",
-        motiu="l'escriptori ha d'arrencar amb aquest repositori sol, sense\n"
-        "tenir els estàndards al costat",
+        motiu="l'escriptori ha d'arrencar amb aquest repositori sol, sense tenir "
+        "els estàndards al costat",
         comentari="#",
     ),
 )
 
 
 def main() -> int:
+    # La consola de Windows no escriu accents sense això. Va aquí i no a dalt de
+    # tot perquè importar aquest fitxer —ho fa `tests/test_tokens_sync.py`— no ha
+    # de tocar el stdout de ningú.
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--escriu", action="store_true", help="Actualitza les còpies")
     args = ap.parse_args()
