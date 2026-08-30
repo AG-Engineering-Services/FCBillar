@@ -15,7 +15,6 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.table import Table
 
-from fcbillar.auth import interactive_login
 from fcbillar.config import get_settings
 from fcbillar.db.migrations import ensure_schema
 from fcbillar.db.repository import Repository
@@ -65,13 +64,6 @@ def _setup_logging(verbose: bool = False) -> None:
 @app.callback()
 def main(verbose: bool = typer.Option(False, "--verbose", "-v", help="Logs detallats")) -> None:
     _setup_logging(verbose)
-
-
-@app.command()
-def login() -> None:
-    """Obre un navegador visible per fer login manual (resol captcha) i desa la sessió."""
-    ok = interactive_login()
-    raise typer.Exit(code=0 if ok else 1)
 
 
 @app.command()
@@ -541,20 +533,18 @@ app.add_typer(clubs_app, name="clubs")
 # --------------------------------------------------------------------------- #
 
 state_app = typer.Typer(
-    help="Sincronitza l'estat canònic (BD + sessió) amb Cloudflare R2.",
+    help="Sincronitza les bases de dades canòniques amb Cloudflare R2.",
     no_args_is_help=True,
 )
 
 
-def _state_names(db: bool, opens_db: bool, session: bool, default) -> tuple[str, ...]:
-    """Tradueix els flags --db/--opens-db/--session a noms lògics (o el per defecte)."""
+def _state_names(db: bool, opens_db: bool, default) -> tuple[str, ...]:
+    """Tradueix els flags --db/--opens-db a noms lògics (o el per defecte)."""
     picked = []
     if db:
         picked.append("db")
     if opens_db:
         picked.append("opens-db")
-    if session:
-        picked.append("session")
     return tuple(picked) if picked else default
 
 
@@ -562,12 +552,11 @@ def _state_names(db: bool, opens_db: bool, session: bool, default) -> tuple[str,
 def state_pull_cmd(
     db: bool = typer.Option(False, "--db", help="Només la BD principal"),
     opens_db: bool = typer.Option(False, "--opens-db", help="Només la BD d'opens"),
-    session: bool = typer.Option(False, "--session", help="Només la sessió de login"),
 ) -> None:
     """Baixa de R2 a local (escriptura atòmica). Sense flags: baixa-ho tot."""
     from fcbillar import state_sync
 
-    names = _state_names(db, opens_db, session, state_sync.ALL)
+    names = _state_names(db, opens_db, state_sync.ALL)
     try:
         res = state_sync.pull(names)
     except RuntimeError as exc:
@@ -582,16 +571,15 @@ def state_pull_cmd(
 def state_push_cmd(
     db: bool = typer.Option(False, "--db", help="Només la BD principal"),
     opens_db: bool = typer.Option(False, "--opens-db", help="Només la BD d'opens"),
-    session: bool = typer.Option(False, "--session", help="Només la sessió de login"),
     check_generation: bool = typer.Option(
         False, "--check-generation", help="Nega si el núvol ha avançat (guardó de divergència)"
     ),
     force: bool = typer.Option(False, "--force", help="Ignora el guardó de generació"),
 ) -> None:
-    """Puja de local a R2. Sense flags: puja BD principal + BD d'opens (no la sessió)."""
+    """Puja de local a R2. Sense flags: puja les dues BD."""
     from fcbillar import state_sync
 
-    names = _state_names(db, opens_db, session, ("db", "opens-db"))
+    names = _state_names(db, opens_db, ("db", "opens-db"))
     try:
         res = state_sync.push(names, check_generation=check_generation, force=force)
     except RuntimeError as exc:
@@ -618,7 +606,6 @@ def state_status_cmd() -> None:
 
 @state_app.command("report")
 def state_report_cmd(
-    session_ok: bool = typer.Option(True, "--session-ok/--no-session-ok"),
     n_ok: int = typer.Option(0, "--n-ok", help="Passos correctes"),
     n_fail: int = typer.Option(0, "--n-fail", help="Passos fallats"),
     last_error: str = typer.Option("", "--last-error", help="Resum de l'últim error"),
@@ -637,10 +624,12 @@ def state_report_cmd(
 
     now = datetime.now(timezone.utc).isoformat()
     sb = get_client()
+    # `session_ok` es queda a la taula perque el PWA la llegeix, pero ja no pot
+    # ser fals: des del web nou no hi ha cap sessio que pugui caducar.
     sb.table("cloud_status").upsert(
         {
             "id": 1,
-            "session_ok": session_ok,
+            "session_ok": True,
             "last_run": now,
             "last_error": last_error or None,
             "n_ok": n_ok,
@@ -649,9 +638,7 @@ def state_report_cmd(
         },
         on_conflict="id",
     ).execute()
-    console.print(
-        f"[green]OK cloud_status: session_ok={session_ok} n_ok={n_ok} n_fail={n_fail}[/]"
-    )
+    console.print(f"[green]OK cloud_status: n_ok={n_ok} n_fail={n_fail}[/]")
 
     if close_requests:
         status = "error" if n_fail > 0 else "done"
@@ -662,47 +649,6 @@ def state_report_cmd(
 
 
 app.add_typer(state_app, name="state")
-
-
-@app.command("session-check")
-def session_check_cmd() -> None:
-    """Comprova si la sessió de login encara és vàlida (per al job del núvol).
-
-    Codis de sortida: 0 = autenticat · 2 = no hi ha fitxer de sessió ·
-    3 = la sessió ha caducat (la federació torna a servir el formulari de login).
-    Qualsevol altre error (xarxa, timeout) surt amb 1 i NO s'ha d'interpretar com
-    a sessió caducada.
-    """
-    from fcbillar.auth import LOGIN_FORM_SELECTOR
-    from fcbillar.scraper.client import ScraperClient
-
-    settings = get_settings()
-    if not settings.storage_state_path.exists():
-        console.print("[red]No hi ha sessió desada.[/]")
-        raise typer.Exit(code=2)
-
-    # IMPORTANT: comprovem /jugador/home, NO /ca/jugador. La landing /ca/jugador
-    # renderitza el formulari de login (#formloguinacion) al DOM SEMPRE —fins i tot
-    # autenticat—, cosa que donava falsos "sessió caducada". A /jugador/home el form
-    # només hi és si NO estàs autenticat (si la sessió ha caducat, la federació hi
-    # redirigeix a la landing de login). Sessió vàlida = sense formulari I encara a
-    # /jugador/home.
-    url = f"{settings.base_url.rstrip('/')}/jugador/home"
-    try:
-        with ScraperClient(settings) as client:
-            client.page.goto(url, wait_until="domcontentloaded")
-            client.page.wait_for_timeout(1500)  # deixa que un eventual redirect s'assenti
-            form_present = client.page.query_selector(LOGIN_FORM_SELECTOR) is not None
-            on_home = "/jugador/home" in client.page.url
-    except Exception as exc:  # noqa: BLE001 — error transitori, no és sessió caducada
-        console.print(f"[yellow]No s'ha pogut comprovar la sessió (transitori): {exc}[/]")
-        raise typer.Exit(code=1) from exc
-
-    if form_present or not on_home:
-        console.print("[red]Sessió caducada: cal `fcbillar login` al PC i `state push --session`.[/]")
-        raise typer.Exit(code=3)
-    console.print("[green]OK sessió vàlida.[/]")
-
 
 
 @clubs_app.command("list")

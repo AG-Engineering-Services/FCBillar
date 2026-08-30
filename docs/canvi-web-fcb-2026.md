@@ -193,12 +193,12 @@ existeix; el calendari 2026-27 v-2 és a la categoria `calendari` del WPFD.
 
 | Mòdul | Estat | Feina |
 |---|---|---|
-| [config.py](../src/fcbillar/config.py) | 🔴 Trencat | `base_url` mort. Calen dues bases: intranet i web |
-| [auth.py](../src/fcbillar/auth.py) | ⚫ Obsolet | Ja no cal login per a res que ingerim |
-| [scraper/client.py](../src/fcbillar/scraper/client.py) | 🟠 Sobredimensionat | Playwright + sessió → n'hi ha prou amb `httpx` |
-| [scraper/url_builder.py](../src/fcbillar/scraper/url_builder.py) | ⚫ Obsolet | Els dos formats ja no existeixen |
-| [scraper/parsers.py](../src/fcbillar/scraper/parsers.py) (1.285 l.) | 🔴 Trencat | Cap selector és vàlid. Reescriure sobre taules |
-| [pipeline.py](../src/fcbillar/pipeline.py) (1.798 l.) | 🟠 URLs | 11 URLs escrites a dins; la lògica es manté |
+| [config.py](../src/fcbillar/config.py) | ✅ **Fet** | `base_url` apunta a la intranet; fora `session_dir` i `headless` |
+| ~~`auth.py`~~ | ⚫ **Esborrat** | Ja no cal login per a res que ingerim |
+| [scraper/client.py](../src/fcbillar/scraper/client.py) | ✅ **Fet** | Playwright + sessió → `httpx` amb caché, ritme i reintents |
+| ~~`scraper/url_builder.py`~~ | ⚫ **Esborrat** | Els dos formats ja no existeixen |
+| [scraper/parsers.py](../src/fcbillar/scraper/parsers.py) | ✅ **Fet** | Reescrit sobre `taules.py`, el lector genèric |
+| [pipeline.py](../src/fcbillar/pipeline.py) | ✅ **Fet** | Ara construeix les URLs amb `scraper/urls` |
 | [db/](../src/fcbillar/db/) | 🟢 Intacte | Ids estables → cap migració obligada |
 | [cloud_sync.py](../src/fcbillar/cloud_sync.py) | 🟠 1 URL | La de classificació de lliga |
 | [calendari_fed.py](../src/fcbillar/calendari_fed.py) | 🟠 Descoberta | Regex `/media/` → WPFD |
@@ -256,8 +256,11 @@ puntuals i estan a la fase 3 del pla.
 
 El canvi permet esborrar més codi del que obliga a escriure:
 
-**Fora**
-- Playwright, `storage_state.json`, el captcha i el login interactiu.
+**Fora** (fet)
+- Playwright, `storage_state.json`, el captcha i el login interactiu. Amb ells
+  se'n van `auth.py`, les comandes `fcbillar login` i `fcbillar session-check`,
+  el blob de sessió que viatjava a R2 (`state push --session`) i el banner de
+  «sessió caducada» del PWA, que ja no es pot encendre.
 - `url_builder.py` i la lògica de fallback entre `data` i `datahome`.
 - La separació entre «ingesta logada local» i «ingesta no-logada al núvol» de
   [weekly_reingest.ps1](../scripts/weekly_reingest.ps1): **tot pot anar a

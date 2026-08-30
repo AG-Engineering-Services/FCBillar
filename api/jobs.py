@@ -15,11 +15,14 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 # Tasques permeses: clau → (etiqueta, args, requereix_login).
-# Només lectura/ingest; res destructiu ni interactiu (el login amb captcha
-# s'ha de fer des del terminal: `uv run fcbillar login`).
+# Només lectura/ingest; res destructiu ni interactiu.
+#
+# `requereix_login` es queda a False a totes: amb el web nou (agost de 2026)
+# rànquings i partides són públics i no hi ha cap sessió federativa. El camp es
+# manté perquè la interfície el llegeix.
 TASKS: dict[str, tuple[str, list[str], bool]] = {
-    "sync": ("Sincronitza rànquings nous", ["sync"], True),
-    "backfill-3b": ("Backfill 3 bandes (top 20)", ["backfill", "1", "--top", "20"], True),
+    "sync": ("Sincronitza rànquings nous", ["sync"], False),
+    "backfill-3b": ("Backfill 3 bandes (top 20)", ["backfill", "1", "--top", "20"], False),
     "import-clubs": ("Importa clubs oficials", ["import-clubs"], False),
     "individuals": ("Ingest torneigs individuals (temporada actual)", ["ingest-individuals"], False),
     "lliga-noms": ("Actualitza noms de lliga", ["discover-lliga-noms"], False),
@@ -130,13 +133,10 @@ def task_list() -> list[dict]:
 
 
 def session_info() -> dict:
-    """Estat de la sessió desada (per avisar si cal re-login)."""
-    state = PROJECT_ROOT / "session" / "storage_state.json"
-    if not state.exists():
-        return {"exists": False, "mtime": None}
-    from datetime import datetime
+    """Estat de la sessió federativa. Ja no n'hi ha cap.
 
-    return {
-        "exists": True,
-        "mtime": datetime.fromtimestamp(state.stat().st_mtime).isoformat(timespec="seconds"),
-    }
+    Amb el web nou tot el que ingerim és públic: no hi ha login, ni captcha, ni
+    sessió que caduqui. Es manté la funció —i la forma de la resposta— perquè
+    la interfície la consulta; `needed` li diu que no cal ensenyar cap avís.
+    """
+    return {"needed": False, "exists": True, "mtime": None}

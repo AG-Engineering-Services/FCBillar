@@ -4,31 +4,33 @@ La reingesta setmanal de FCBillar ja **no depèn del PC**. Corre a GitHub Action
 ([.github/workflows/reingest.yml](../.github/workflows/reingest.yml)), baixa l'estat
 canònic de Cloudflare R2, incorpora les novetats de la federació i publica a Supabase.
 
-L'únic que segueix lligat al PC és el **login amb captcha** (la sessió, però, dura
-setmanes), i les **edicions curades** opcionals de la BD.
+Des del canvi de web de la federació (agost de 2026) **ja no hi ha res lligat al
+PC**: el login amb captcha, que era l'última cosa que hi quedava, ha deixat de
+caldre perquè rànquings i partides són públics. Vegeu
+[`canvi-web-fcb-2026.md`](canvi-web-fcb-2026.md). L'únic ús que li queda al PC
+són les **edicions curades** opcionals de la base de dades.
 
 ## Arquitectura
 
 ```
-   PC (ocasional)                 Cloudflare R2 (canònic)            GitHub Actions
+   PC (opcional)                  Cloudflare R2 (canònic)            GitHub Actions
  ┌────────────────┐   push       ┌──────────────────────┐   pull   ┌────────────────┐
- │ fcbillar login │ ───────────▶ │ storage_state.json   │ ───────▶ │ reingest.yml   │
- │ (resol captcha)│              │ fcbillar.db (169MB)  │          │  7 passos      │
- │ edicions BD    │ ◀─────────── │ fcb_opens.db         │ ◀─────── │  publish-cloud │
+ │ edicions BD    │ ───────────▶ │ fcbillar.db (169MB)  │ ───────▶ │ reingesta      │
+ │                │ ◀─────────── │ fcb_opens.db         │ ◀─────── │ publish-cloud  │
  └────────────────┘   pull       │ generation           │   push   └───────┬────────┘
                                   └──────────────────────┘                  │ publish
                                                                             ▼
-                                                                     Supabase → Vercel (web)
+                                                                       Neon → Vercel (web)
 ```
 
-- **R2** guarda la còpia **canònica** de les dues BD + la sessió de login. S'hi tria
-  R2 (i no Supabase Storage) perquè no cobra egress i aguanta fitxers grans.
+- **R2** guarda la còpia **canònica** de les dues bases de dades. S'hi tria R2
+  perquè no cobra egress i aguanta fitxers grans.
 - El **botó "↻ Reingesta"** del PWA encua una fila a `fcbillar.reingest_requests`;
   [reingest-dispatch.yml](../.github/workflows/reingest-dispatch.yml) la veu (cada 15
   min) i dispara `reingest.yml`. Substitueix el watcher local.
-- Si la **sessió caduca**, el job ho detecta (`fcbillar session-check`), omet els
-  passos amb login i posa `fcbillar.cloud_status.session_ok=false`; el PWA mostra un
-  banner a l'admin demanant re-login.
+- Ja no hi ha cap pas que depengui d'una sessió, així que `cloud_status.session_ok`
+  és sempre cert i el banner de «sessió caducada» del PWA no s'encén mai. La
+  columna es manté perquè el web la llegeix.
 
 ## Posada en marxa (un sol cop)
 
@@ -52,14 +54,13 @@ Aplica [supabase/migrations/0013_fcbillar_cloud_status.sql](../supabase/migratio
 
 ### 5. Sembra l'estat canònic a R2 (des del PC)
 ```powershell
-uv run fcbillar login              # resol el captcha → session/storage_state.json
-uv run fcbillar state push --all   # puja BD + opens BD + sessió a R2
-uv run fcbillar state status       # comprova generació i mides
+uv run fcbillar state push       # puja les dues BD a R2
+uv run fcbillar state status     # comprova generació i mides
 ```
 
 ### 6. Primera prova al núvol
 Llança `reingest.yml` a mà (Actions → Reingesta (núvol) → Run workflow) amb
-`force=true`. Verifica: baixa ~182MB, `session-check` OK, els 7 passos, publicació,
+`force=true`. Verifica: baixa ~182MB, els passos d'ingesta, publicació,
 repuja l'estat i `cloud_status` actualitzat. Comprova que el PWA mostra dades fresques.
 
 ### 7. Cutover
@@ -76,7 +77,7 @@ local manual; en acabar puja l'estat a R2 per mantenir el núvol canònic.)
 |----------|-------|
 | Reingesta setmanal | Automàtica (cron dilluns 02:00 UTC). Res a fer. |
 | Vull refrescar ara | Botó "↻ Reingesta" al PWA, o Run workflow manual. |
-| Banner "sessió caducada" | Al PC: `uv run fcbillar login` + `uv run fcbillar state push --session`. |
+| Banner "sessió caducada" | No hi hauria de sortir mai: ja no hi ha sessió. Si surt, és una fila antiga a `cloud_status`. |
 | Edició curada de la BD | `state pull` → editar al desktop → `state push --check-generation`. |
 
 ## Detalls
@@ -85,6 +86,8 @@ local manual; en acabar puja l'estat a R2 per mantenir el núvol canònic.)
   `data/.state_gen`; `state push --check-generation` es nega si el núvol ha avançat
   (cal `pull` primer o `--force`). El job del núvol queda serialitzat per la
   `concurrency: { group: reingest, cancel-in-progress: false }`.
-- **Codis de `session-check`:** 0 = vàlida · 2 = sense sessió · 3 = caducada ·
+- **`session-check` ja no existeix**: era la comanda que comprovava si la sessió
+  federativa seguia viva. Codis que retornava, per si els trobeu a scripts antics:
+  0 = vàlida · 2 = sense sessió · 3 = caducada ·
   1 = error transitori (no marca la sessió com a caducada).
 - **Aturada d'estiu:** el job s'omet de l'1 al 24 d'agost (UTC) tret de `force=true`.

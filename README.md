@@ -1,38 +1,46 @@
 # FCBillar
 
-Scraper i base de dades local per fer seguiment dels jugadors del club i d'altres jugadors d'interès en els campionats de caràmbola de la **Federació Catalana de Billar** (https://www.fcbillar.cat/).
+Scraper i base de dades local per fer seguiment dels jugadors del club i d'altres
+jugadors d'interès en els campionats de caràmbola de la **Federació Catalana de
+Billar** (https://fcbillar.cat).
+
+> L'agost de 2026 la federació va partir el seu web en tres i va fer pública la
+> zona de competició. Què va canviar i què va implicar:
+> [`docs/canvi-web-fcb-2026.md`](docs/canvi-web-fcb-2026.md).
 
 ## Què fa
 
-- Es connecta a la intranet de jugador amb les teves credencials federatives.
+- Llegeix la zona de competició de `intranet.fcbillar.cat`, que és pública: no
+  cal login, ni captcha, ni navegador.
 - Descobreix els rànquings mensuals per modalitat (lliure, banda, tres bandes, quadre, etc.).
 - Descarrega les partides que conformen cada rànquing per a cada jugador i les dedupliquica (les partides apareixen a tots dos jugadors i en més d'un rànquing per la finestra lliscant de 10-15 partides).
-- Backfill històric: recorre tot l'`/jugador/ranking/historial` (els ~15 rànquings més recents) per modalitat.
-- **Lliga catalana**: ingest des de les pàgines públiques de lliga (no requereix sessió) per obtenir el **club + equip** de cada jugador per partida, més camps rics no presents a la intranet (sèrie major, àrbitre, assistència).
+- Backfill històric: recorre l'índex de rànquings (el vigent més els 15 anteriors
+  que publica el portal) per modalitat.
+- **Lliga catalana**: ingest des de les pàgines de lliga per obtenir el **club +
+  equip** de cada jugador per partida, més camps que el rànquing no dona (sèrie
+  major, àrbitre, assistència). El detall d'encontre retorna HTTP 500 des del
+  canvi de web; vegeu el document.
 - Persisteix-ho tot en una BD SQLite local per consulta amb SQL/Pandas/notebooks.
-- Gestiona els dos formats d'URL de rànquings (`data` històric, `datahome` actual).
+- Distingeix el rànquing **vigent** de l'**històric**, que al portal són dos
+  endpoints diferents.
 
 ## Requisits
 
 - Python 3.12+
 - uv (gestor de paquets/projecte)
-- Credencials d'accés a la intranet de jugador de fcbillar.cat
+- Res més: des del canvi de web d'agost de 2026 tot el que s'ingereix és
+  públic (vegeu `docs/canvi-web-fcb-2026.md`)
 
 ## Instal·lació
 
 ```powershell
 uv sync
-uv run playwright install chromium
 Copy-Item .env.example .env
-# edita .env i posa FCB_USER / FCB_PASS
 ```
 
 ## Ús bàsic
 
 ```powershell
-# Verifica que el login funciona i desa la sessió (resol captcha manualment)
-uv run fcbillar login
-
 # Crea/actualitza l'esquema de la BD (seedeja modalitats)
 uv run fcbillar init-db
 
@@ -85,33 +93,32 @@ uv run fcbillar status
 ## Pipeline típic per a una temporada nova
 
 ```powershell
-# 1. Login si no tens sessió desada
-uv run fcbillar login
-
-# 2. Pre-popular clubs amb noms canònics + aliases per a casos coneguts
+# 1. Pre-popular clubs amb noms canònics + aliases per a casos coneguts
 uv run fcbillar import-clubs
 uv run fcbillar clubs alias "SANT ADRIÀ" "C.B.SANT ADRIÀ"
 uv run fcbillar clubs alias "SB FOMENT MOLINS" "S.B.F.MOLINS"
 
-# 3. Ingest dels rànquings actuals de totes les modalitats (alimenta la BD de jugadors)
+# 2. Ingest dels rànquings actuals de totes les modalitats (alimenta la BD de jugadors)
 uv run fcbillar sync
 
-# 4. Ingest dels rànquings històrics (15 més recents al portal)
+# 3. Ingest dels rànquings històrics (els 15 que publica el portal)
 uv run fcbillar backfill 0 --historical
 
-# 5. Descobrir IDs de jornades / grups que ens interessen
-uv run fcbillar discover-lliga 36 --depth 3
+# 4. Descobrir IDs de jornades / grups que ens interessen
+uv run fcbillar discover-lliga 38 --depth 3
 
-# 6. Backfill complet d'un grup de lliga
-uv run fcbillar ingest-lliga-grup 36 148 316 --modalitat 1
+# 5. Backfill complet d'un grup de lliga
+uv run fcbillar ingest-lliga-grup 38 148 316 --modalitat 1
 ```
 
 ## Identificadors
 
-El portal exposa només un **ID intern numèric** per jugador (`fcb_id`, ex. "566"),
-no el codi federatiu real. És aquest id el que apareix a les URLs `partideshome/.../.../{id}`.
-Si en algun moment volem el codi federatiu real, s'haurà d'extreure del perfil
-individual i afegir com a columna addicional.
+El portal exposa només un **ID intern numèric** per jugador (`fcb_id`, ex. "843"),
+no el codi federatiu real. És el que va al paràmetre `idjugador` de les URLs de
+partides, i **no ha canviat** amb el web nou.
+
+El codi federatiu real (el número de llicència) sí que surt al panell de jugador
+logat, però només el teu: no serveix per poblar la resta de la base de dades.
 
 Per a **clubs** el portal no exposa cap id intern. Fem servir el nom del club
 com a `fcb_id`. La resolució a 3 nivells (`Repository.resolve_club_id_by_nom`)
@@ -141,13 +148,12 @@ servir backfill sense `--top` per ingerir tots els jugadors del rànquing.
 ```text
 src/fcbillar/
 ├── config.py         # Settings (Pydantic)
-├── auth.py           # Login intranet (polling estable del form)
 ├── scraper/
-│   ├── client.py     # Playwright + caché + rate limit, networkidle no-fatal
-│   ├── url_builder.py # URLs de rànquing (formats 'data' / 'datahome')
-│   └── parsers.py    # parse_ranking, parse_partides_jugador, parse_home,
-│                     # parse_historial, parse_lliga_* (divisions/grups/
-│                     # jornades/encontres/partides), parse_clubs_listing
+│   ├── client.py     # httpx + caché a disc + límit de ritme + reintents
+│   ├── urls.py       # Les URLs del portal, en un sol lloc
+│   ├── taules.py     # Lector genèric de les taules Bootstrap del web
+│   └── parsers.py    # Què vol dir cada columna: rànquing, partides,
+│                     # lliga, individuals, copa, clubs
 ├── db/
 │   ├── schema.sql    # Schema v3
 │   ├── migrations.py # SCHEMA_VERSION + _migrate_v1_to_v2
@@ -157,7 +163,7 @@ src/fcbillar/
 ├── pipeline.py       # ingest_ranking, ingest_partides, sync, backfill (+ historical),
 │                     # ingest_lliga_encontre/jornada/grup, discover_lliga,
 │                     # import_clubs_oficials
-└── cli.py            # CLI Typer (14 comandes)
+└── cli.py            # CLI Typer
 ```
 
 ## Esquema de la BD (v3)

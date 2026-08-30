@@ -1,15 +1,16 @@
-"""Round-trip de l'estat canònic (BD + sessió) amb Cloudflare R2.
+"""Round-trip de l'estat canònic amb Cloudflare R2.
 
-El núvol (GitHub Actions) passa a ser la còpia CANÒNICA de tres blobs:
+El núvol (GitHub Actions) passa a ser la còpia CANÒNICA de dues bases de dades:
 
-  - data/fcbillar.db            BD principal (rànquings, partides, clubs…)
-  - data/fcb_opens.db           BD d'opens (mòdul fcb_opens)
-  - session/storage_state.json  sessió de login (la produeix el PC amb captcha;
-                                el núvol només la CONSUMEIX, no la pot renovar)
+  - data/fcbillar.db   BD principal (rànquings, partides, clubs…)
+  - data/fcb_opens.db  BD d'opens (mòdul fcb_opens)
 
-El job de reingesta fa `pull` al començar i `push` al final. El PC fa `push`
-de la sessió després de cada re-login (`fcbillar login`), i pot fer `pull`/`push`
-de les BD per a edicions curades. Es trien R2 i no Supabase Storage perquè R2 no
+Fins a l'agost de 2026 també hi viatjava `session/storage_state.json`: el núvol
+no podia resoldre el captcha, així que la sessió la produïa el PC i la pujava
+aquí. Amb el web nou no cal cap sessió, i el blob ha desaparegut.
+
+El job de reingesta fa `pull` al començar i `push` al final; el PC pot fer
+`pull`/`push` per a edicions curades. Es trien R2 i no Supabase Storage perquè R2 no
 cobra egress, aguanta fitxers grans (la BD ~169MB) i el PC també hi pot escriure.
 
 Guardó de divergència PC↔núvol: un comptador `generation` (objecte tip a R2). El
@@ -37,11 +38,10 @@ log = logging.getLogger(__name__)
 # Claus dels objectes a R2 i comptador de generació.
 KEY_DB = "fcbillar.db"
 KEY_OPENS_DB = "fcb_opens.db"
-KEY_SESSION = "storage_state.json"
 KEY_GENERATION = "generation"
 
 # Noms lògics que accepten les comandes `state pull/push`.
-ALL = ("db", "opens-db", "session")
+ALL = ("db", "opens-db")
 
 _GEN_FILE = PROJECT_ROOT / "data" / ".state_gen"
 
@@ -50,8 +50,6 @@ def _local_path(which: str) -> Path:
     """Ruta local resolta per a cada blob (respecta FCB_* i FCB_OPENS_DB)."""
     if which == "db":
         return get_settings().db_path
-    if which == "session":
-        return get_settings().storage_state_path
     if which == "opens-db":
         from fcb_opens.paths import resolve_db_path
 
@@ -60,7 +58,7 @@ def _local_path(which: str) -> Path:
 
 
 def _remote_key(which: str) -> str:
-    return {"db": KEY_DB, "opens-db": KEY_OPENS_DB, "session": KEY_SESSION}[which]
+    return {"db": KEY_DB, "opens-db": KEY_OPENS_DB}[which]
 
 
 def _r2(name: str) -> str:
