@@ -76,6 +76,14 @@
 	}
 	const avui = dillunsAvui();
 
+	/** El dilluns de la setmana d'una data ISO, per comparar-lo amb `avui`. */
+	function dilluns(iso: string): string {
+		const d = new Date(iso + 'T00:00:00');
+		d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+		const p = (n: number) => String(n).padStart(2, '0');
+		return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+	}
+
 	// Els encontres del nostre club a la lliga, que `fcbillar
 	// ingest-calendari-lliga` treu dels PDF de grup de la federació. Van a part
 	// (font FCB-LLIGA) perquè són l'única cosa del calendari que concreta el
@@ -431,9 +439,17 @@
 	     perquè és el que es mira primer: la resta del calendari diu què es juga
 	     aquella setmana, i això diu contra qui juguem nosaltres. -->
 	<section class="mb-4 border border-slate-200 dark:border-slate-700">
-		<h2 class="ag-et border-b border-slate-200 px-3 py-1.5 dark:border-slate-700">
-			Els nostres equips, jornada a jornada
+		<h2
+			class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-3 py-1.5 dark:border-slate-700"
+		>
+			<span class="ag-et">Els nostres equips, jornada a jornada</span>
+			<span class="provisional" title="Els PDF de la federació porten errors">Provisional</span>
 		</h2>
+		<p class="border-b border-slate-200 px-3 py-1.5 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+			Els calendaris que publica la federació porten errors —el de 2a divisió grup A duia la data de
+			la primera jornada a totes—, o sigui que les dates poden canviar. Els emparellaments són els
+			del PDF; les dates, les de les jornades comunes a la lliga.
+		</p>
 		<div class="overflow-x-auto">
 			<table class="w-full text-sm">
 				<thead>
@@ -447,7 +463,10 @@
 				</thead>
 				<tbody>
 					{#each jornades.files as f (f.jornada)}
-						<tr class="border-t border-slate-100 dark:border-slate-800">
+						<tr
+							class="border-t border-slate-100 dark:border-slate-800"
+							class:jornada-ara={dilluns(f.data) === avui}
+						>
 							<td class="ag-num pr-3">J{f.jornada}</td>
 							<td class="whitespace-nowrap">{fmtCurt(f.data)}</td>
 							{#each jornades.equips as l (l)}
@@ -817,3 +836,40 @@
 		{/each}
 	</ul>
 {/snippet}
+
+<style>
+	/* El calendari de la lliga encara porta errors de la federació, i l'avís ha
+	   de cridar l'atenció. Un pols suau, no un parpelleig dur: allò distreu de
+	   llegir la taula i, si dura, molesta de debò. */
+	.provisional {
+		border: 1px solid var(--ag-greu);
+		border-radius: var(--ag-radius);
+		padding: 0 var(--ag-space-2);
+		font-family: var(--ag-font-data);
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--ag-greu-text);
+		animation: pols 1.6s ease-in-out infinite;
+	}
+	@keyframes pols {
+		50% {
+			opacity: 0.35;
+		}
+	}
+
+	/* La jornada d'aquesta setmana: la fila que toca mirar en obrir la pàgina. */
+	.jornada-ara {
+		background: var(--ag-accent-soft);
+		box-shadow: inset 3px 0 0 var(--ag-accent);
+	}
+
+	/* Qui demana menys moviment no ha de perdre l'avís: es queda quiet i ple. */
+	@media (prefers-reduced-motion: reduce) {
+		.provisional {
+			animation: none;
+			background: var(--ag-greu-bg);
+		}
+	}
+</style>
