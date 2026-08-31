@@ -362,30 +362,61 @@ def files_de_calendari(
     """
     files: list[tuple] = []
     for cal in calendaris:
-        for e in cal.encontres:
-            if club not in e.local and club not in e.visitant:
-                continue
-            titol = f"J{e.jornada} · {cal.divisio} {cal.grup} · {e.local} - {e.visitant}"
+        nostre = next((e for e in cal.equips if club in e), None)
+        if nostre is None:
+            continue
+        lletra = lletra_equip(nostre)
+
+        # Les jornades que l'equip NO juga també són informació: als grups de
+        # set equips en descansa un cada jornada, i qui mira el calendari ha de
+        # saber que aquell dissabte no hi ha partit, no que ens n'hem descuidat.
+        per_jornada = {e.jornada: e for e in cal.de(nostre)}
+        for jornada in sorted(cal.dates):
+            e = per_jornada.get(jornada)
+            data = e.data if e else cal.dates[jornada]
+            cua = f"{e.local} - {e.visitant}" if e else "descansa"
+            titol = f"Equip {lletra} · J{jornada} · {cal.divisio} {cal.grup} · {cua}"
             files.append(
                 (
                     FONT,
                     temporada,
-                    _dilluns(e.data).isoformat(),
+                    _dilluns(data).isoformat(),
                     "carambola",
                     "catala",
-                    f"Lliga Tres Bandes · {cal.divisio} divisió grup {cal.grup}",
+                    # La clau primària de la taula és (font, temporada, setmana,
+                    # disciplina, àmbit, grup, tipus): està pensada per a una
+                    # fila per cel·la setmanal. Amb un sol epígraf per als
+                    # quatre equips, els quatre partits d'un dissabte xocarien.
+                    # L'equip com a grup respecta la clau i alhora és el millor
+                    # epígraf: tots comencen igual i queden junts.
+                    f"Lliga Tres Bandes · Equip {lletra}",
                     "equips",
-                    e.data.isoformat(),
-                    e.data.isoformat(),
+                    data.isoformat(),
+                    data.isoformat(),
                     titol,
-                    e.local,  # qui juga a casa és qui fa de seu
+                    e.local if e else None,  # qui juga a casa és qui fa de seu
                     None,
                     None,
                     1,
-                    f"{e.data.isoformat()} {titol}",
+                    f"{data.isoformat()} {titol}",
                 )
             )
+    # Per data i, dins del dia, per lletra d'equip: A, B, C i D. Funciona
+    # perquè el títol ara comença per la lletra; abans començava per la jornada
+    # i els ordenava per divisió, que és l'ordre estrany que es veia.
     return sorted(files, key=lambda f: (f[7], f[9]))
+
+
+_RE_LLETRA = re.compile(r'"([A-Z])"\s*$')
+
+
+def lletra_equip(nom: str) -> str:
+    """La lletra d'un equip: 'C.B. BANYOLES "C"' -> 'C'.
+
+    Els clubs amb un sol equip no en porten, i llavors és l'A.
+    """
+    m = _RE_LLETRA.search(nom.strip())
+    return m.group(1) if m else "A"
 
 
 def ingest(conn, calendaris: list[CalendariGrup], club: str, temporada: str) -> int:

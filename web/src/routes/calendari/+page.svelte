@@ -84,14 +84,16 @@
 	// El publicador només hi desa els encontres d'un club; aquí només cal per
 	// saber quin dels dos noms de l'encontre és el nostre.
 	const CLUB = 'BANYOLES';
-	//  'J1 · 1a B · C.B. MANRESA "A" - C.B. BANYOLES "A"'
-	const RE_ENCONTRE = /^J(\d+)\s*·\s*([^·]+?)\s*·\s*(.+?)\s+-\s+(.+)$/;
+	//  'Equip A · J1 · 1a B · C.B. MANRESA "A" - C.B. BANYOLES "A"'
+	//  'Equip C · J7 · 4a D · descansa'
+	const RE_ENCONTRE = /^Equip ([A-Z]) · J(\d+) · ([^·]+) · (.+)$/;
 
 	/** Els encontres del club, per jornada i per equip: la graella de sota. */
 	const jornades = $derived.by(() => {
+		type Cel·la = { rival: string; casa: boolean; descansa: boolean; divisio: string };
 		const files = new Map<
 			number,
-			{ jornada: number; data: string; per_equip: Map<string, { rival: string; casa: boolean }> }
+			{ jornada: number; data: string; per_equip: Map<string, Cel·la> }
 		>();
 		const equips = new Set<string>();
 
@@ -99,19 +101,26 @@
 			if (e.font !== FONT_LLIGA || e.temporada !== temporada) continue;
 			const m = RE_ENCONTRE.exec(e.titol);
 			if (!m) continue;
-			const [, num, , local, visitant] = m;
-			// El nostre és el que surt a totes dues bandes al llarg de la graella;
-			// aquí el reconeixem perquè el publicador només hi desa els nostres.
-			const nostre = [local, visitant].find((t) => t.includes(CLUB)) ?? local;
-			const rival = nostre === local ? visitant : local;
-			const lletra = /"([A-Z])"\s*$/.exec(nostre)?.[1] ?? '—';
+			const [, lletra, num, divisio, cua] = m;
 			equips.add(lletra);
 
 			const jornada = Number(num);
 			const fila =
 				files.get(jornada) ??
 				files.set(jornada, { jornada, data: e.data_inici, per_equip: new Map() }).get(jornada)!;
-			fila.per_equip.set(lletra, { rival, casa: nostre === local });
+
+			if (cua === 'descansa') {
+				fila.per_equip.set(lletra, { rival: '', casa: false, descansa: true, divisio });
+				continue;
+			}
+			const [local, visitant] = cua.split(' - ');
+			const nostre = [local, visitant].find((t) => t?.includes(CLUB)) ?? local;
+			fila.per_equip.set(lletra, {
+				rival: nostre === local ? visitant : local,
+				casa: nostre === local,
+				descansa: false,
+				divisio
+			});
 		}
 		return {
 			equips: [...equips].sort(),
@@ -444,15 +453,17 @@
 							{#each jornades.equips as l (l)}
 								{@const p = f.per_equip.get(l)}
 								<td>
-									{#if p}
+									{#if p && !p.descansa}
 										<span
 											class="ag-et mr-1"
-											title={p.casa ? 'a casa' : 'a fora'}
+											title="{p.casa ? 'A casa' : 'A fora'} · {p.divisio}"
 											class:text-sky-700={p.casa}
 											class:dark:text-sky-300={p.casa}>{p.casa ? 'casa' : 'fora'}</span
 										>{p.rival}
-									{:else}
-										<span class="text-slate-400 dark:text-slate-500">descansa</span>
+									{:else if p}
+										<span class="text-slate-500 dark:text-slate-400" title={p.divisio}
+											>descansa</span
+										>
 									{/if}
 								</td>
 							{/each}
