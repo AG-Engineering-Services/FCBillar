@@ -76,6 +76,49 @@
 	}
 	const avui = dillunsAvui();
 
+	// Els encontres del nostre club a la lliga, que `fcbillar
+	// ingest-calendari-lliga` treu dels PDF de grup de la federació. Van a part
+	// (font FCB-LLIGA) perquè són l'única cosa del calendari que concreta el
+	// DIA i els equips: la resta són setmanes.
+	const FONT_LLIGA = 'FCB-LLIGA';
+	// El publicador només hi desa els encontres d'un club; aquí només cal per
+	// saber quin dels dos noms de l'encontre és el nostre.
+	const CLUB = 'BANYOLES';
+	//  'J1 · 1a B · C.B. MANRESA "A" - C.B. BANYOLES "A"'
+	const RE_ENCONTRE = /^J(\d+)\s*·\s*([^·]+?)\s*·\s*(.+?)\s+-\s+(.+)$/;
+
+	/** Els encontres del club, per jornada i per equip: la graella de sota. */
+	const jornades = $derived.by(() => {
+		const files = new Map<
+			number,
+			{ jornada: number; data: string; per_equip: Map<string, { rival: string; casa: boolean }> }
+		>();
+		const equips = new Set<string>();
+
+		for (const e of events) {
+			if (e.font !== FONT_LLIGA || e.temporada !== temporada) continue;
+			const m = RE_ENCONTRE.exec(e.titol);
+			if (!m) continue;
+			const [, num, , local, visitant] = m;
+			// El nostre és el que surt a totes dues bandes al llarg de la graella;
+			// aquí el reconeixem perquè el publicador només hi desa els nostres.
+			const nostre = [local, visitant].find((t) => t.includes(CLUB)) ?? local;
+			const rival = nostre === local ? visitant : local;
+			const lletra = /"([A-Z])"\s*$/.exec(nostre)?.[1] ?? '—';
+			equips.add(lletra);
+
+			const jornada = Number(num);
+			const fila =
+				files.get(jornada) ??
+				files.set(jornada, { jornada, data: e.data_inici, per_equip: new Map() }).get(jornada)!;
+			fila.per_equip.set(lletra, { rival, casa: nostre === local });
+		}
+		return {
+			equips: [...equips].sort(),
+			files: [...files.values()].sort((a, b) => a.jornada - b.jornada)
+		};
+	});
+
 	onMount(async () => {
 		try {
 			const [ev, rev] = await Promise.all([
@@ -373,6 +416,53 @@
 				)}{/if}{/each}.
 	{/if}
 </p>
+
+{#if jornades.files.length}
+	<!-- Els nostres equips, jornada a jornada. Va abans de la graella general
+	     perquè és el que es mira primer: la resta del calendari diu què es juga
+	     aquella setmana, i això diu contra qui juguem nosaltres. -->
+	<section class="mb-4 border border-slate-200 dark:border-slate-700">
+		<h2 class="ag-et border-b border-slate-200 px-3 py-1.5 dark:border-slate-700">
+			Els nostres equips, jornada a jornada
+		</h2>
+		<div class="overflow-x-auto">
+			<table class="w-full text-sm">
+				<thead>
+					<tr>
+						<th class="text-left">Jornada</th>
+						<th class="text-left">Data</th>
+						{#each jornades.equips as l (l)}
+							<th class="text-left">Equip {l}</th>
+						{/each}
+					</tr>
+				</thead>
+				<tbody>
+					{#each jornades.files as f (f.jornada)}
+						<tr class="border-t border-slate-100 dark:border-slate-800">
+							<td class="ag-num pr-3">J{f.jornada}</td>
+							<td class="whitespace-nowrap">{fmtCurt(f.data)}</td>
+							{#each jornades.equips as l (l)}
+								{@const p = f.per_equip.get(l)}
+								<td>
+									{#if p}
+										<span
+											class="ag-et mr-1"
+											title={p.casa ? 'a casa' : 'a fora'}
+											class:text-sky-700={p.casa}
+											class:dark:text-sky-300={p.casa}>{p.casa ? 'casa' : 'fora'}</span
+										>{p.rival}
+									{:else}
+										<span class="text-slate-400 dark:text-slate-500">descansa</span>
+									{/if}
+								</td>
+							{/each}
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	</section>
+{/if}
 
 {#if error}
 	<div

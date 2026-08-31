@@ -1467,6 +1467,79 @@ def open_import_inscrits_cmd(
     )
 
 
+@app.command("ingest-calendari-lliga")
+def ingest_calendari_lliga_cmd(
+    carpeta: str = typer.Argument(..., help="Carpeta amb els PDF de calendari de grup."),
+    club: str = typer.Option("BANYOLES", "--club", help="Part del nom del club a seguir."),
+    temporada: str = typer.Option("2026/2027", "--temporada"),
+    ics_a: str = typer.Option(
+        None, "--ics", help="Desa també un .ics per importar a un calendari."
+    ),
+) -> None:
+    """Ingesta els calendaris oficials de grup: encontres del club amb data.
+
+    La federació publica un PDF per grup, i és l'única font que diu EL DIA de
+    cada jornada; el calendari esportiu general només diu la setmana. Passa-li
+    la carpeta amb els PDF dels grups on juga el club:
+
+        fcbillar ingest-calendari-lliga ~/Descarregues --ics data/billar.ics
+
+    Les dates es contrasten entre grups. Si un PDF repeteix la mateixa data a
+    mitja graella —com el de 2a divisió grup A de la 2026-27, que la federació
+    va publicar amb la data de la primera jornada a totes— se li posen les dels
+    grups que sí que la porten bé, perquè les jornades són comunes a la lliga.
+    """
+    from pathlib import Path
+
+    from fcbillar.calendari_lliga import (
+        dates_de_referencia,
+        esmena_dates,
+        ics,
+        ingest,
+        llegeix,
+    )
+
+    pdfs = sorted(Path(carpeta).glob("*.pdf"))
+    calendaris = []
+    for p in pdfs:
+        try:
+            cal = llegeix(p)
+        except Exception as e:
+            # Un PDF que no sigui d'aquests no ha d'aturar la resta.
+            console.print(f"  [dim]{p.name}: no és un calendari de grup ({e})[/]")
+            continue
+        if cal.encontres:
+            calendaris.append(cal)
+
+    if not calendaris:
+        console.print(f"[red]Cap calendari de grup a {carpeta}[/]")
+        raise typer.Exit(1)
+
+    referencia = dates_de_referencia(calendaris)
+    esmenats = []
+    for cal in calendaris:
+        nou = esmena_dates(cal, referencia)
+        canviades = sum(
+            1
+            for a, b in zip(cal.encontres, nou.encontres, strict=True)
+            if a.data != b.data
+        )
+        marca = f" [yellow]({canviades} dates esmenades)[/]" if canviades else ""
+        console.print(
+            f"  {cal.divisio} grup {cal.grup}: {len(cal.equips)} equips, "
+            f"{len(cal.encontres)} encontres{marca}"
+        )
+        esmenats.append(nou)
+
+    conn = ensure_schema(get_settings().db_path)
+    n = ingest(conn, esmenats, club, temporada)
+    console.print(f"[green]{n} encontres del {club} a calendari_events[/]")
+
+    if ics_a:
+        Path(ics_a).write_text(ics(esmenats, club), encoding="utf-8")
+        console.print(f"[green]{ics_a}[/] — importa'l al calendari que vulguis")
+
+
 @app.command("ingest-calendari")
 def ingest_calendari_cmd(
     url: str = typer.Option(None, "--url", help="URL del PDF (per defecte, la RFEB de la temporada en curs)."),

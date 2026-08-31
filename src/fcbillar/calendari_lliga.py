@@ -327,3 +327,169 @@ def esmena_dates(cal: CalendariGrup, referencia: dict[int, date]) -> CalendariGr
             replace(e, data=referencia.get(e.jornada, e.data)) for e in cal.encontres
         ),
     )
+
+
+# ======================================================================
+# Cap al calendari: files de `calendari_events` i fitxer .ics
+# ======================================================================
+
+#: Font pròpia, i no `FCB`, per dos motius. Un: `ingest_calendari` reemplaça la
+#: temporada sencera d'una font, i amb `FCB` la propera ingesta del calendari
+#: general s'enduria aquests encontres. Dos: la graella de la zona soci parteix
+#: els títols de la font `FCB` pel punt volat, i aquí el punt volat separa la
+#: jornada del grup i dels equips.
+FONT = "FCB-LLIGA"
+
+_CAMPS_EVENT = (
+    "font, temporada, setmana, disciplina, ambit, grup, tipus, data_inici, data_fi, "
+    "titol, seu, dissabte, diumenge, col_span, raw"
+)
+
+
+def _dilluns(d: date) -> date:
+    from datetime import timedelta
+
+    return d - timedelta(days=d.weekday())
+
+
+def files_de_calendari(
+    calendaris: list[CalendariGrup], club: str, temporada: str
+) -> list[tuple]:
+    """Els encontres d'un club, en la forma que demana `calendari_events`.
+
+    Només els del club: la graella és la de la zona soci, i el que hi vol veure
+    el soci és quan juga el seu equip, no les 92 files de la lliga sencera.
+    """
+    files: list[tuple] = []
+    for cal in calendaris:
+        for e in cal.encontres:
+            if club not in e.local and club not in e.visitant:
+                continue
+            titol = f"J{e.jornada} · {cal.divisio} {cal.grup} · {e.local} - {e.visitant}"
+            files.append(
+                (
+                    FONT,
+                    temporada,
+                    _dilluns(e.data).isoformat(),
+                    "carambola",
+                    "catala",
+                    f"Lliga Tres Bandes · {cal.divisio} divisió grup {cal.grup}",
+                    "equips",
+                    e.data.isoformat(),
+                    e.data.isoformat(),
+                    titol,
+                    e.local,  # qui juga a casa és qui fa de seu
+                    None,
+                    None,
+                    1,
+                    f"{e.data.isoformat()} {titol}",
+                )
+            )
+    return sorted(files, key=lambda f: (f[7], f[9]))
+
+
+def ingest(conn, calendaris: list[CalendariGrup], club: str, temporada: str) -> int:
+    """Desa els encontres del club a `calendari_events`. Reemplaça els seus.
+
+    No toca les files del calendari general —les de «1ª jornada LL3B»—, que
+    diuen que la lliga sencera juga aquell dia i segueixen servint.
+    """
+    files = files_de_calendari(calendaris, club, temporada)
+    conn.execute(
+        "DELETE FROM calendari_events WHERE font = ? AND temporada = ?", (FONT, temporada)
+    )
+    conn.executemany(
+        f"INSERT INTO calendari_events ({_CAMPS_EVENT}) "
+        f"VALUES ({','.join('?' * 15)})",
+        files,
+    )
+    conn.commit()
+    return len(files)
+
+
+def _escapa_ics(text: str) -> str:
+    """Escapa un text per a un camp .ics (RFC 5545 §3.3.11).
+
+    La barra primer: si no, escaparia les barres que acabem de posar.
+    """
+    return (
+        text.replace("\\", "\\\\")
+        .replace(";", "\\;")
+        .replace(",", "\\,")
+        .replace("\n", "\\n")
+    )
+
+
+def ics(calendaris: list[CalendariGrup], club: str, *, nom: str = "Billar") -> str:
+    """Els encontres del club en un .ics per importar a un calendari.
+
+    Són esdeveniments de DIA SENCER: la federació dona el dia de la jornada,
+    però l'hora la posa cada club amb el contrari, i no la sabem. Posar-hi una
+    hora inventada seria pitjor que no posar-n'hi cap.
+    """
+    from datetime import timedelta
+
+    linies = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//FCBillar//Calendari de lliga//CA",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        f"X-WR-CALNAME:{_escapa_ics(nom)}",
+    ]
+    for cal in calendaris:
+        for e in cal.encontres:
+            if club not in e.local and club not in e.visitant:
+                continue
+            casa = club in e.local
+            # L'identificador ha de ser estable: si es torna a importar, el
+            # calendari ha d'actualitzar l'esdeveniment, no duplicar-lo.
+            # Estable entre exportacions, i únic encara que s'exporti més d'un
+            # club: si canviés, cada importació duplicaria els esdeveniments en
+            # comptes d'actualitzar-los.
+            uid = (
+                f"lliga3b-{cal.temporada.replace('/', '')}"
+                f"-{cal.divisio}{cal.grup}-j{e.jornada}"
+                f"-{re.sub(r'[^a-z0-9]', '', club.lower())}@fcbillar"
+            )
+            linies += [
+                "BEGIN:VEVENT",
+                f"UID:{uid}",
+                f"DTSTART;VALUE=DATE:{e.data:%Y%m%d}",
+                f"DTEND;VALUE=DATE:{e.data + timedelta(days=1):%Y%m%d}",
+                f"SUMMARY:{_escapa_ics(f'{e.local} - {e.visitant}')}",
+                f"LOCATION:{_escapa_ics(e.local if not casa else club)}",
+                "DESCRIPTION:"
+                + _escapa_ics(
+                    f"Jornada {e.jornada} · {cal.divisio} divisió grup {cal.grup} · "
+                    f"{'a casa' if casa else 'a fora'}"
+                ),
+                "TRANSP:TRANSPARENT",
+                "END:VEVENT",
+            ]
+    linies.append("END:VCALENDAR")
+    # L'RFC demana CRLF i línies de com a molt 75 octets.
+    return "\r\n".join(pleg for ln in linies for pleg in _plega(ln)) + "\r\n"
+
+
+def _plega(linia: str, limit: int = 73) -> list[str]:
+    """Parteix una línia llarga com mana l'RFC 5545 §3.1.
+
+    El tall es compta en OCTETS, no en caràcters: amb accents i punts volats,
+    una línia que sembla curta pot passar-se. Les continuacions comencen amb un
+    espai, que qui la llegeix torna a treure.
+    """
+    b = linia.encode("utf-8")
+    if len(b) <= limit:
+        return [linia]
+    trossos: list[str] = []
+    while b:
+        tall = min(limit, len(b))
+        # No partir un caràcter multibyte pel mig: si el byte del tall és una
+        # continuació (10xxxxxx), enrere fins al principi del caràcter.
+        while 0 < tall < len(b) and (b[tall] & 0xC0) == 0x80:
+            tall -= 1
+        trossos.append(b[:tall].decode("utf-8"))
+        b = b[tall:]
+        limit = 72  # les continuacions perden un octet per l'espai del davant
+    return [trossos[0]] + [f" {t}" for t in trossos[1:]]
