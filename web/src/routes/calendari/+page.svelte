@@ -446,9 +446,8 @@
 			<span class="provisional" title="Els PDF de la federació porten errors">Provisional</span>
 		</h2>
 		<p class="border-b border-slate-200 px-3 py-1.5 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
-			Els calendaris que publica la federació porten errors —el de 2a divisió grup A duia la data de
-			la primera jornada a totes—, o sigui que les dates poden canviar. Els emparellaments són els
-			del PDF; les dates, les de les jornades comunes a la lliga.
+			Els calendaris que publica la federació porten errors, o sigui que les dates i els
+			enfrontaments poden canviar.
 		</p>
 		<div class="overflow-x-auto">
 			<table class="w-full text-sm">
