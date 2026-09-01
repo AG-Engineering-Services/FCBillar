@@ -76,79 +76,11 @@
 	}
 	const avui = dillunsAvui();
 
-	/** El dilluns de la setmana d'una data ISO, per comparar-lo amb `avui`. */
-	function dilluns(iso: string): string {
-		const d = new Date(iso + 'T00:00:00');
-		d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-		const p = (n: number) => String(n).padStart(2, '0');
-		return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-	}
-
-	// Els encontres del nostre club a la lliga, que `fcbillar
-	// ingest-calendari-lliga` treu dels PDF de grup de la federació. Van a part
-	// (font FCB-LLIGA) perquè són l'única cosa del calendari que concreta el
-	// DIA i els equips: la resta són setmanes.
-	const FONT_LLIGA = 'FCB-LLIGA';
-	// El publicador només hi desa els encontres d'un club; aquí només cal per
-	// saber quin dels dos noms de l'encontre és el nostre.
-	const CLUB = 'BANYOLES';
-	//  'Equip A · J1 · 1a B · C.B. MANRESA "A" - C.B. BANYOLES "A"'
-	//  'Equip C · J7 · 4a D · descansa'
-	const RE_ENCONTRE = /^Equip ([A-Z]) · J(\d+) · ([^·]+) · (.+)$/;
-
-	// Els nostres jugadors al campionat individual. La fila que els porta no és
-	// una competició més: és la llista de qui hi juga, i ha de penjar de
-	// l'epígraf de la seva fase. `seu` porta el text de la fase tal com
-	// l'escriu la federació, que és la clau amb què s'hi enganxa.
-	const FONT_INDIVIDUAL = 'FCB-INDIVIDUAL';
-	const nostresPerFase = $derived.by(() => {
-		const per = new Map<string, string[]>();
-		for (const e of events) {
-			if (e.font !== FONT_INDIVIDUAL || e.temporada !== temporada || !e.seu) continue;
-			per.set(e.seu, e.titol.split(' · ').map((x) => x.trim()));
-		}
-		return per;
-	});
-
-	/** Els encontres del club, per jornada i per equip: la graella de sota. */
-	const jornades = $derived.by(() => {
-		type Cel·la = { rival: string; casa: boolean; descansa: boolean; divisio: string };
-		const files = new Map<
-			number,
-			{ jornada: number; data: string; per_equip: Map<string, Cel·la> }
-		>();
-		const equips = new Set<string>();
-
-		for (const e of events) {
-			if (e.font !== FONT_LLIGA || e.temporada !== temporada) continue;
-			const m = RE_ENCONTRE.exec(e.titol);
-			if (!m) continue;
-			const [, lletra, num, divisio, cua] = m;
-			equips.add(lletra);
-
-			const jornada = Number(num);
-			const fila =
-				files.get(jornada) ??
-				files.set(jornada, { jornada, data: e.data_inici, per_equip: new Map() }).get(jornada)!;
-
-			if (cua === 'descansa') {
-				fila.per_equip.set(lletra, { rival: '', casa: false, descansa: true, divisio });
-				continue;
-			}
-			const [local, visitant] = cua.split(' - ');
-			const nostre = [local, visitant].find((t) => t?.includes(CLUB)) ?? local;
-			fila.per_equip.set(lletra, {
-				rival: nostre === local ? visitant : local,
-				casa: nostre === local,
-				descansa: false,
-				divisio
-			});
-		}
-		return {
-			equips: [...equips].sort(),
-			files: [...files.values()].sort((a, b) => a.jornada - b.jornada)
-		};
-	});
+	// Les files que `fcbillar ingest-calendari-lliga` i
+	// `ingest-divisions-individual` desen amb aquestes fonts son d'UN club: la
+	// graella que les ensenya viu a l'aplicacio del club, no aqui. Aquest
+	// calendari es el de la federacio i ha de valer per a tothom.
+	const FONTS_DE_CLUB = ['FCB-LLIGA', 'FCB-INDIVIDUAL'];
 
 	onMount(async () => {
 		try {
@@ -251,7 +183,7 @@
 			.filter((e) => e.temporada === temporada && !esFestiu(e))
 			// Els nostres inscrits al campionat no són una competició més: es
 			// pinten sota l'epígraf de la seva fase, i aquí hi sortirien repetits.
-			.filter((e) => e.font !== FONT_INDIVIDUAL)
+			.filter((e) => !FONTS_DE_CLUB.includes(e.font))
 			.filter((e) => (nomesCarambola ? e.disciplina === 'carambola' : true))
 			.filter((e) => tipus === 'tot' || e.tipus === tipus)
 			.filter((e) => ambit === 'tot' || e.ambit === ambit)
@@ -450,65 +382,6 @@
 				)}{/if}{/each}.
 	{/if}
 </p>
-
-{#if jornades.files.length}
-	<!-- Els nostres equips, jornada a jornada. Va abans de la graella general
-	     perquè és el que es mira primer: la resta del calendari diu què es juga
-	     aquella setmana, i això diu contra qui juguem nosaltres. -->
-	<section class="mb-4 border border-slate-200 dark:border-slate-700">
-		<h2
-			class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-3 py-1.5 dark:border-slate-700"
-		>
-			<span class="ag-et">Els nostres equips, jornada a jornada</span>
-			<span class="provisional" title="Els PDF de la federació porten errors">Provisional</span>
-		</h2>
-		<p class="border-b border-slate-200 px-3 py-1.5 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
-			Els calendaris que publica la federació porten errors, o sigui que les dates i els
-			enfrontaments poden canviar.
-		</p>
-		<div class="overflow-x-auto">
-			<table class="w-full text-sm">
-				<thead>
-					<tr>
-						<th class="text-left">Jornada</th>
-						<th class="text-left">Data</th>
-						{#each jornades.equips as l (l)}
-							<th class="text-left">Equip {l}</th>
-						{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each jornades.files as f (f.jornada)}
-						<tr
-							class="border-t border-slate-100 dark:border-slate-800"
-							class:jornada-ara={dilluns(f.data) === avui}
-						>
-							<td class="ag-num pr-3">J{f.jornada}</td>
-							<td class="whitespace-nowrap">{fmtCurt(f.data)}</td>
-							{#each jornades.equips as l (l)}
-								{@const p = f.per_equip.get(l)}
-								<td>
-									{#if p && !p.descansa}
-										<span
-											class="ag-et mr-1"
-											title="{p.casa ? 'A casa' : 'A fora'} · {p.divisio}"
-											class:text-sky-700={p.casa}
-											class:dark:text-sky-300={p.casa}>{p.casa ? 'casa' : 'fora'}</span
-										>{p.rival}
-									{:else if p}
-										<span class="text-slate-500 dark:text-slate-400" title={p.divisio}
-											>descansa</span
-										>
-									{/if}
-								</td>
-							{/each}
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	</section>
-{/if}
 
 {#if error}
 	<div
@@ -835,15 +708,6 @@
 									>
 								{/if}
 							</div>
-							{#if nostresPerFase.get(titol.trim())}
-								<ul class="mb-1 ml-3 border-l border-slate-200 pl-3 dark:border-slate-700">
-									{#each nostresPerFase.get(titol.trim()) ?? [] as jugador (jugador)}
-										<li class="text-xs font-normal text-slate-600 dark:text-slate-300">
-											{jugador}
-										</li>
-									{/each}
-								</ul>
-							{/if}
 						{/each}
 					</div>
 					{#if e.dissabte || e.diumenge}
@@ -861,40 +725,3 @@
 		{/each}
 	</ul>
 {/snippet}
-
-<style>
-	/* El calendari de la lliga encara porta errors de la federació, i l'avís ha
-	   de cridar l'atenció. Un pols suau, no un parpelleig dur: allò distreu de
-	   llegir la taula i, si dura, molesta de debò. */
-	.provisional {
-		border: 1px solid var(--ag-greu);
-		border-radius: var(--ag-radius);
-		padding: 0 var(--ag-space-2);
-		font-family: var(--ag-font-data);
-		font-size: 0.68rem;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--ag-greu-text);
-		animation: pols 1.6s ease-in-out infinite;
-	}
-	@keyframes pols {
-		50% {
-			opacity: 0.35;
-		}
-	}
-
-	/* La jornada d'aquesta setmana: la fila que toca mirar en obrir la pàgina. */
-	.jornada-ara {
-		background: var(--ag-accent-soft);
-		box-shadow: inset 3px 0 0 var(--ag-accent);
-	}
-
-	/* Qui demana menys moviment no ha de perdre l'avís: es queda quiet i ple. */
-	@media (prefers-reduced-motion: reduce) {
-		.provisional {
-			animation: none;
-			background: var(--ag-greu-bg);
-		}
-	}
-</style>
