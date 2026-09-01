@@ -96,6 +96,20 @@
 	//  'Equip C · J7 · 4a D · descansa'
 	const RE_ENCONTRE = /^Equip ([A-Z]) · J(\d+) · ([^·]+) · (.+)$/;
 
+	// Els nostres jugadors al campionat individual. La fila que els porta no és
+	// una competició més: és la llista de qui hi juga, i ha de penjar de
+	// l'epígraf de la seva fase. `seu` porta el text de la fase tal com
+	// l'escriu la federació, que és la clau amb què s'hi enganxa.
+	const FONT_INDIVIDUAL = 'FCB-INDIVIDUAL';
+	const nostresPerFase = $derived.by(() => {
+		const per = new Map<string, string[]>();
+		for (const e of events) {
+			if (e.font !== FONT_INDIVIDUAL || e.temporada !== temporada || !e.seu) continue;
+			per.set(e.seu, e.titol.split(' · ').map((x) => x.trim()));
+		}
+		return per;
+	});
+
 	/** Els encontres del club, per jornada i per equip: la graella de sota. */
 	const jornades = $derived.by(() => {
 		type Cel·la = { rival: string; casa: boolean; descansa: boolean; divisio: string };
@@ -235,6 +249,9 @@
 	const filtrats = $derived(
 		events
 			.filter((e) => e.temporada === temporada && !esFestiu(e))
+			// Els nostres inscrits al campionat no són una competició més: es
+			// pinten sota l'epígraf de la seva fase, i aquí hi sortirien repetits.
+			.filter((e) => e.font !== FONT_INDIVIDUAL)
 			.filter((e) => (nomesCarambola ? e.disciplina === 'carambola' : true))
 			.filter((e) => tipus === 'tot' || e.tipus === tipus)
 			.filter((e) => ambit === 'tot' || e.ambit === ambit)
@@ -818,6 +835,15 @@
 									>
 								{/if}
 							</div>
+							{#if nostresPerFase.get(titol.trim())}
+								<ul class="mb-1 ml-3 border-l border-slate-200 pl-3 dark:border-slate-700">
+									{#each nostresPerFase.get(titol.trim()) ?? [] as jugador (jugador)}
+										<li class="text-xs font-normal text-slate-600 dark:text-slate-300">
+											{jugador}
+										</li>
+									{/each}
+								</ul>
+							{/if}
 						{/each}
 					</div>
 					{#if e.dissabte || e.diumenge}

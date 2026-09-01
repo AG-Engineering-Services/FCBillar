@@ -24,10 +24,13 @@ reconeixement va per expressió regular tolerant i no per text exacte.
 
 ## Què hi va i què no
 
-Només les fases **classificatòries**. Les juga tothom de la divisió, o sigui
-que són una data segura per a qualsevol inscrit. La final no hi va: només hi
-arriba qui passa les prèvies, i posar-la al calendari abans de saber-ho seria
-prometre un dia que potser no arriba.
+Només la **primera fase** de cada divisió. És l'única data segura: la juga
+tothom qui s'hi ha inscrit. A partir d'aquí cal classificar-se, i qui no passi
+la pre-prèvia no jugarà la prèvia. Posar-hi les fases següents seria prometre
+uns dies que potser no arriben.
+
+Quina és la primera depèn de la divisió: a 6a és la pre-pre-prèvia, a 1a i 2a
+la pre-prèvia, i a Honor —que no en té -— la prèvia mateixa.
 """
 
 from __future__ import annotations
@@ -42,8 +45,8 @@ from fcbillar.divisions_individual import DIVISIONS, Inscrit
 #: Les fases, de la primera a l'última.
 FASES = ("Pre-pre-prèvia", "Pre-prèvia", "Prèvia", "Final")
 
-#: Les que van al calendari: les que se sap del cert que es jugaran.
-CLASSIFICATORIES = FASES[:-1]
+#: La final no és mai una data segura per a ningú abans de començar.
+FINAL = "Final"
 
 FONT = "FCB-INDIVIDUAL"
 
@@ -84,6 +87,10 @@ class Fase:
     fase: str
     data_inici: date
     data_fi: date
+    #: Tal com la federació l'escriu al calendari: «Pre-Prèvia 3 Bandes 1ª
+    #: Divisió». És la clau amb què la graella sap sota quin epígraf ha de
+    #: penjar els nostres jugadors, i per això es desa sense tocar.
+    text: str = ""
 
     @property
     def ordre(self) -> int:
@@ -119,6 +126,7 @@ def fases_del_calendari(conn, temporada: str) -> dict[str, list[Fase]]:
                     fase=fase,
                     data_inici=date.fromisoformat(data_inici),
                     data_fi=date.fromisoformat(data_fi),
+                    text=tros.strip(),
                 )
             )
 
@@ -142,17 +150,17 @@ class Cita:
 
 
 def cites(inscrits: list[Inscrit], per_divisio: dict[str, list[Fase]]) -> list[Cita]:
-    """Les fases classificatòries que jugarà cadascú.
+    """La fase per la qual cadascú comença, que és l'única data segura.
 
-    La final no hi és: només hi arriba qui passa les prèvies, i fins llavors no
-    és una data seva.
+    Les que vénen després demanen haver passat l'anterior, i encara no se sap
+    qui hi arribarà.
     """
     out: list[Cita] = []
     for i in inscrits:
-        for f in per_divisio.get(i.divisio, []):
-            if f.fase not in CLASSIFICATORIES:
-                continue
-            out.append(Cita(inscrit=i, fase=f))
+        fases = per_divisio.get(i.divisio, [])
+        primera = next((f for f in fases if f.fase != FINAL), None)
+        if primera is not None:
+            out.append(Cita(inscrit=i, fase=primera))
     return sorted(
         out,
         key=lambda c: (c.fase.data_inici, c.inscrit.ordre_divisio, c.inscrit.posicio),
@@ -162,14 +170,30 @@ def cites(inscrits: list[Inscrit], per_divisio: dict[str, list[Fase]]) -> list[C
 def files_de_calendari(cites_: list[Cita], temporada: str) -> list[tuple]:
     """Les cites en la forma que demana `calendari_events`.
 
-    El grup és el jugador: la clau primària de la taula és per setmana i grup, i
-    així dos jugadors del club poden jugar el mateix cap de setmana sense
-    trepitjar-se. De passada, la graella els agrupa per persona.
+    Una fila per FASE, no per jugador, amb els nostres a dins. Amb una fila per
+    jugador la graella els posava tots al mateix nivell que la competició i
+    quedava una llista plana on no es veia qui juga què; així pengen de
+    l'epígraf de la seva fase, que és on toca.
+
+    A més, la clau primària de la taula és per setmana i grup: amb el jugador
+    com a grup, dos que juguessin la mateixa fase no s'haurien trepitjat, però
+    tampoc no s'haurien pogut agrupar. Amb la fase com a grup surt bé de totes
+    dues maneres, perquè una divisió no té dues fases el mateix cap de setmana.
+
+    `seu` porta el text de la fase tal com l'escriu la federació: és la clau
+    amb què la graella l'enganxa sota l'epígraf que li toca.
     """
-    files: list[tuple] = []
+    per_fase: dict[tuple, list[Cita]] = {}
     for c in cites_:
-        i, f = c.inscrit, c.fase
-        titol = f"{i.jugador} · {i.divisio} · {f.fase}"
+        per_fase.setdefault((c.fase.data_inici, c.inscrit.divisio, c.fase.fase), []).append(c)
+
+    files: list[tuple] = []
+    for (_, divisio, fase), grup in sorted(per_fase.items(), key=lambda kv: kv[0]):
+        f = grup[0].fase
+        jugadors = [c.inscrit for c in sorted(grup, key=lambda c: c.inscrit.posicio)]
+        # Punt volat i no coma: els noms són «COGNOMS, NOM» i la coma ja hi és
+        # a dins, o sigui que qui ho llegeixi no sabria per on partir.
+        titol = " · ".join(j.jugador for j in jugadors)
         files.append(
             (
                 FONT,
@@ -177,24 +201,39 @@ def files_de_calendari(cites_: list[Cita], temporada: str) -> list[tuple]:
                 _dilluns(f.data_inici).isoformat(),
                 "carambola",
                 "catala",
-                f"Campionat de Catalunya 3 bandes · {i.jugador}",
+                f"Campionat de Catalunya 3 bandes · {divisio} · {fase}",
                 "individual",
                 f.data_inici.isoformat(),
                 f.data_fi.isoformat(),
                 titol,
-                None,
+                f.text or None,
                 None,
                 None,
                 1,
-                f"{f.data_inici.isoformat()} {titol}",
+                f"{f.data_inici.isoformat()} {divisio} {fase}: {titol}",
             )
         )
     return files
 
 
+class ResDesar(ValueError):
+    """S'ha demanat de desar una llista buida damunt de dades que ja hi eren."""
+
+
 def ingest(conn, cites_: list[Cita], temporada: str) -> int:
-    """Desa les cites a `calendari_events`. Reemplaça les seves."""
+    """Desa les cites a `calendari_events`. Reemplaça les seves.
+
+    El reemplaçament és destructiu —esborra i torna a escriure—, o sigui que una
+    llista buida s'enduria el que ja hi havia. Passa amb un `--club` mal escrit:
+    no casa amb ningú, no surt cap cita, i el calendari es queda sense res sense
+    que ningú se n'assabenti. Per això no es desa mai el buit.
+    """
     files = files_de_calendari(cites_, temporada)
+    if not files:
+        raise ResDesar(
+            "No hi ha res per desar. No esborro el que ja hi ha per posar-hi el buit: "
+            "si el filtre no ha trobat ningú, el problema és el filtre, no les dades."
+        )
     conn.execute(
         "DELETE FROM calendari_events WHERE font = ? AND temporada = ?", (FONT, temporada)
     )

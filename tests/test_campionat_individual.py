@@ -9,8 +9,8 @@ from pathlib import Path
 import pytest
 
 from fcbillar.campionat_individual import (
-    CLASSIFICATORIES,
     FASES,
+    FINAL,
     Fase,
     cites,
     fases_del_calendari,
@@ -131,31 +131,46 @@ def _inscrit(nom: str, divisio: str) -> Inscrit:
 
 
 FASES_2A = [
-    Fase("2ª", "Pre-prèvia", date(2026, 9, 19), date(2026, 9, 19)),
-    Fase("2ª", "Prèvia", date(2026, 10, 3), date(2026, 10, 4)),
-    Fase("2ª", "Final", date(2026, 10, 17), date(2026, 10, 18)),
+    Fase("2ª", "Pre-prèvia", date(2026, 9, 19), date(2026, 9, 19), "Pre-Prèvia 3 Bandes 2ª Divisió"),
+    Fase("2ª", "Prèvia", date(2026, 10, 3), date(2026, 10, 4), "Prèvia 3 Bandes 2ª Divisió"),
+    Fase("2ª", "Final", date(2026, 10, 17), date(2026, 10, 18), "FINAL 3Bandes 2ª Divisió"),
 ]
 
 
-def test_la_final_no_hi_va_perque_encara_s_ha_de_classificar() -> None:
-    """Posar-la seria prometre un dia que potser no arriba."""
+def test_nomes_hi_va_la_primera_fase() -> None:
+    """Per jugar la prèvia s'ha de passar la pre-prèvia: encara no és una data seva."""
     resultat = cites([_inscrit("QUALSEVOL, U", "2ª")], {"2ª": FASES_2A})
-    assert [c.fase.fase for c in resultat] == ["Pre-prèvia", "Prèvia"]
+    assert [c.fase.fase for c in resultat] == ["Pre-prèvia"]
 
 
-def test_tothom_juga_les_mateixes_classificatories_de_la_seva_divisio() -> None:
+def test_a_honor_la_primera_es_la_previa() -> None:
+    """Honor no té pre-prèvia: la seva primera fase sí que és segura."""
+    honor = [
+        Fase("Honor", "Prèvia", date(2026, 9, 19), date(2026, 9, 19)),
+        Fase("Honor", "Final", date(2026, 10, 31), date(2026, 11, 1)),
+    ]
+    resultat = cites([_inscrit("QUALSEVOL, U", "Honor")], {"Honor": honor})
+    assert [c.fase.fase for c in resultat] == ["Prèvia"]
+
+
+def test_la_final_no_hi_va_mai() -> None:
+    nomes_final = [Fase("2ª", FINAL, date(2026, 10, 17), date(2026, 10, 18))]
+    assert cites([_inscrit("QUALSEVOL, U", "2ª")], {"2ª": nomes_final}) == []
+
+
+def test_els_jugadors_van_junts_a_la_fila_de_la_seva_fase() -> None:
+    """Una fila per fase amb els nostres a dins, no una per jugador."""
     dos = cites(
-        [_inscrit("GÓMEZ AMETLLER, ALBERT", "2ª"), _inscrit("QUALSEVOL, U", "2ª")],
+        [_inscrit("GÓMEZ AMETLLER, ALBERT", "2ª"), _inscrit("ALTRE, U", "2ª")],
         {"2ª": FASES_2A},
     )
-    per_jugador = {}
-    for c in dos:
-        per_jugador.setdefault(c.inscrit.jugador, []).append(c.fase.fase)
-    assert list(per_jugador.values()) == [["Pre-prèvia", "Prèvia"]] * 2
-
-
-def test_la_final_no_es_classificatoria() -> None:
-    assert "Final" in FASES and "Final" not in CLASSIFICATORIES
+    files = files_de_calendari(dos, "2026/2027")
+    assert len(files) == 1
+    assert "GÓMEZ AMETLLER, ALBERT" in files[0][9] and "ALTRE, U" in files[0][9]
+    # El separador no pot ser la coma: ja n'hi ha a «COGNOMS, NOM».
+    assert " · " in files[0][9]
+    # I `seu` porta el text de la fase tal com l'escriu la federació.
+    assert files[0][10] == FASES_2A[0].text
 
 
 def test_una_divisio_sense_fases_no_genera_cites() -> None:
@@ -174,5 +189,6 @@ def test_les_files_del_calendari_porten_la_setmana_del_dilluns() -> None:
     assert files[0][2] == "2026-09-14"
     assert files[0][7] == "2026-09-19"
     assert files[0][6] == "individual"
-    # Un grup per jugador: la clau primària de la taula és per setmana i grup.
-    assert "QUALSEVOL, U" in files[0][5]
+    # El grup és la fase: la clau primària de la taula és per setmana i grup, i
+    # una divisió no té dues fases el mateix cap de setmana.
+    assert "2ª" in files[0][5] and "Pre-prèvia" in files[0][5]

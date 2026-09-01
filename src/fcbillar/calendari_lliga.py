@@ -419,13 +419,26 @@ def lletra_equip(nom: str) -> str:
     return m.group(1) if m else "A"
 
 
+class ResDesar(ValueError):
+    """S'ha demanat de desar una llista buida damunt de dades que ja hi eren."""
+
+
 def ingest(conn, calendaris: list[CalendariGrup], club: str, temporada: str) -> int:
     """Desa els encontres del club a `calendari_events`. Reemplaça els seus.
 
     No toca les files del calendari general —les de «1ª jornada LL3B»—, que
     diuen que la lliga sencera juga aquell dia i segueixen servint.
+
+    El reemplaçament és destructiu, o sigui que una llista buida s'enduria el
+    que ja hi havia. Passa amb un `--club` mal escrit. Per això no es desa mai
+    el buit.
     """
     files = files_de_calendari(calendaris, club, temporada)
+    if not files:
+        raise ResDesar(
+            "No hi ha res per desar. No esborro el que ja hi ha per posar-hi el buit: "
+            "si el filtre no ha trobat ningú, el problema és el filtre, no les dades."
+        )
     conn.execute(
         "DELETE FROM calendari_events WHERE font = ? AND temporada = ?", (FONT, temporada)
     )

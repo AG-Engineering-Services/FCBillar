@@ -1510,6 +1510,11 @@ def ingest_divisions_individual_cmd(
         console.print(f"  {linia}")
 
     meus = per_club(inscrits, club)
+    if not meus:
+        console.print(f"[red]Cap jugador amb «{club}» al club.[/] N'hi ha de:")
+        for c in sorted({i.club for i in inscrits}):
+            console.print(f"    {c}")
+        raise typer.Exit(1)
     console.print(f"\n  {len(meus)} jugadors del {club}:")
     for i in meus:
         console.print(f"    {i.divisio:6s} #{i.posicio:<4d} {i.jugador}")
