@@ -1643,6 +1643,28 @@ def ingest_calendari_cmd(
         feines: list[tuple[str | None, bytes | None]] = [(url, Path(fitxer).read_bytes())]
     elif url:
         feines = [(url, None)]
+    elif font.upper() == "FCB":
+        # Cada federació publica el seu calendari on vol. La RFEB té una URL
+        # previsible per temporada; la FCB el desa al gestor de fitxers del seu
+        # WordPress amb identificadors que no es poden endevinar, i s'ha de
+        # buscar. Sense aquesta branca s'hi baixava el PDF de la RFEB i es
+        # parsejava com si fos de la FCB, que són graelles diferents.
+        from fcbillar.calendari_fed import descobreix_fcb
+
+        trobats = descobreix_fcb()
+        if not trobats:
+            console.print(
+                "[red]No he trobat cap calendari de la FCB publicat.[/] "
+                "Passa-li `--fitxer` amb el PDF si el tens a mà."
+            )
+            raise typer.Exit(1)
+        for c in trobats:
+            console.print(f"  [dim]publicat:[/] {c.temporada} {c.versio or 's/v'} — {c.url}")
+        # Només la temporada més nova: les velles ja les tenim i tornar-les a
+        # ingerir només mouria dates cap enrere.
+        cal = trobats[0]
+        versio = versio or cal.versio
+        feines = [(cal.url, None)]
     else:
         any_actual = temporada_actual()
         feines = [(rfeb_url(a), None) for a in (any_actual, any_actual + 1)]
