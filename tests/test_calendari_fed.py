@@ -406,3 +406,20 @@ def test_descobreix_fcb_ignora_el_que_no_sap_col_locar():
     """Sense temporada al nom no el sabem posar a cap lloc: val més deixar-lo."""
     html = '<a href="https://fcbillar.cat/download/36/calendari/1/calendari-fcb.pdf">x</a>'
     assert descobreix_fcb(html) == []
+
+
+def test_la_versio_de_la_rfeb_tambe_va_en_minuscula():
+    """La V.1 del juliol de 2026 anava amb majúscula i la v.1.2 de l'agost no.
+
+    Sense això la revisió entrava sense versió ni data, i la capçalera del web
+    seguia atribuint les dades a la revisió anterior.
+    """
+    from fcbillar.calendari_fed import _RE_VERSIO
+
+    for text, versio in [
+        ("CALENDARIO V.1 actualizado a 28/07/2026", "V.1"),
+        ("CALENDARIO v.1.2 actualizado a 28/08/2026", "v.1.2"),
+    ]:
+        m = _RE_VERSIO.search(text)
+        assert m is not None, text
+        assert m.group(1) == versio

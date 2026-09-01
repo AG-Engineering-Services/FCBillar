@@ -187,7 +187,14 @@ def _es_seu(text: str) -> bool:
 # --- Parser -----------------------------------------------------------------
 
 _RE_TEMPORADA = re.compile(r"TEMPORADA\s+(\d{4})\s*/\s*(\d{4})")
-_RE_VERSIO = re.compile(r"CALENDARIO\s+(V\.[\d.]+)\s+actualizado\s+a\s+(\d{1,2})\s*/(\d{1,2})/(\d{4})")
+# La RFEB no escriu la versió sempre igual: la V.1 del juliol de 2026 anava amb
+# majúscula i la v.1.2 de l'agost amb minúscula. Sense IGNORECASE la revisió
+# entrava sense versió ni data, i la capçalera del web seguia atribuint les
+# dades a la revisió anterior.
+_RE_VERSIO = re.compile(
+    r"CALENDARIO\s+(V\.[\d.]+)\s+actualizado\s+a\s+(\d{1,2})\s*/(\d{1,2})/(\d{4})",
+    re.IGNORECASE,
+)
 
 _MIN_AMPLE_COLUMNA = 50.0  # pt; descarta les columnes estretes dels marges
 _TOL_FILA = 7.0  # pt; distància màxima entre el centre d'una paraula i la seva fila
@@ -1144,8 +1151,19 @@ def ingest_calendari(
         "INSERT INTO calendari_versions "
         "(font, temporada, versio, data_versio, sha256, etag, last_modified, url, "
         " n_events, n_canvis) VALUES (?,?,?,?,?,?,?,?,?,?) "
+        # En conflicte s'omple el que no sabíem i es deixa el que ja sabíem. Si
+        # només es refresqués l'etag, una revisió desada abans que el parser en
+        # sabés llegir la versió es quedaria sense versió per sempre, i la
+        # capçalera del web seguiria atribuint les dades a la revisió anterior.
+        # El COALESCE va al revés del que sembla: mana el valor NOU, i el vell
+        # només si el nou és nul.
         "ON CONFLICT(font, temporada, sha256) DO UPDATE SET "
+        "  versio = COALESCE(excluded.versio, calendari_versions.versio), "
+        "  data_versio = COALESCE(excluded.data_versio, calendari_versions.data_versio), "
         "  etag = COALESCE(excluded.etag, calendari_versions.etag), "
+        "  last_modified = COALESCE(excluded.last_modified, calendari_versions.last_modified), "
+        "  url = COALESCE(excluded.url, calendari_versions.url), "
+        "  n_events = excluded.n_events, n_canvis = excluded.n_canvis, "
         "  ingested_at = datetime('now'), last_checked_at = datetime('now')",
         (
             font,
