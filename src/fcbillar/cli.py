@@ -1496,8 +1496,19 @@ def ingest_divisions_individual_cmd(
         console.print(f"[red]No he pogut llegir cap inscrit de {pdf}[/]")
         raise typer.Exit(1)
     console.print(f"  {len(inscrits)} inscrits llegits")
-    for linia in rebutjades:
-        console.print(f"  [yellow]sense interpretar:[/] {linia}")
+
+    # El desat reemplaça la temporada sencera d'aquesta font. Si del PDF ens
+    # n'hem deixat una línia, la reemplaçaríem per una llista incompleta i
+    # ningú no se n'assabentaria: val més no tocar res. Passa quan hi ha un club
+    # que no és al cens, que és el motiu habitual.
+    if rebutjades:
+        for linia in rebutjades:
+            console.print(f"  [yellow]sense interpretar:[/] {linia}")
+        console.print(
+            f"\n[red]{len(rebutjades)} línies sense interpretar: no deso res.[/] "
+            "Segurament hi ha un club que no és al cens; afegeix-l'hi i torna-ho a provar."
+        )
+        raise typer.Exit(1)
 
     fases = fases_del_calendari(conn, temporada)
     if not fases:

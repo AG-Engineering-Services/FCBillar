@@ -482,11 +482,21 @@ def fetch_pdf(url: str, etag: str | None = None) -> tuple[bytes | None, str | No
 # (un PDF compartit); per això `ingest_calendari` accepta `pdf_bytes` i `url`
 # solts. El descobriment de sota segueix servint per saber quan el publiquen.
 
-_RE_MEDIA_CAL = re.compile(
-    r"/media/(\d{4}-\d{4})/CALENDARIS/([^\"'>]+?\.pdf)", re.IGNORECASE
+#: El web nou desa els documents amb el gestor de fitxers del WordPress:
+#:     /download/{id_categoria}/{categoria}/{id_fitxer}/{nom}.pdf
+#: El nom porta la temporada i la versió, que és tot el que en necessitem.
+_RE_DESCARREGA_CAL = re.compile(
+    r"https?://[^\"'\s<>]*/download/\d+/[^/]*calendari[^/]*/\d+/([^\"'\s<>]+\.pdf)",
+    re.IGNORECASE,
 )
+_RE_TEMPORADA_FITXER = re.compile(r"(\d{4})[-_](\d{2,4})")
 _RE_VERSIO_FITXER = re.compile(r"\bV[-_ ]?(\d+)", re.IGNORECASE)
-FCB_BASE = "https://www.fcbillar.cat"
+
+FCB_BASE = "https://fcbillar.cat"
+#: Sitemap de Yoast amb una pàgina per document publicat. Substitueix el llistat
+#: paginat del web antic: aquí hi són tots d'una tirada, i cada pàgina de
+#: document porta l'enllaç directe al PDF.
+FCB_SITEMAP_DOCS = f"{FCB_BASE}/wpfd_file-sitemap.xml"
 
 
 @dataclass
@@ -500,36 +510,57 @@ class CalendariFCB:
 
 
 def descobreix_fcb(html: str | None = None) -> list[CalendariFCB]:
-    """Troba els PDF de calendari de la FCB enllaçats al web (layout comú).
+    """Troba els PDF de calendari que la FCB té publicats.
 
-    Sense `html` es baixa la portada. Retorna la llista ordenada per temporada i
-    versió, de més nova a més antiga.
+    Amb el web nou ja no serveix mirar la portada: els documents viuen al gestor
+    de fitxers del WordPress i no s'enllacen des del layout. El camí fiable és
+    el sitemap de documents, que en llista un per pàgina, i entrar a les que
+    parlen de calendari per treure'n l'enllaç al PDF.
+
+    Amb `html` es mira un sol document ja baixat, que és el que fan els tests.
+    Retorna la llista ordenada per temporada i versió, de més nova a més antiga.
     """
-    from urllib.parse import unquote, urljoin
+    from urllib.parse import unquote
 
-    if html is None:
-        import httpx
-
-        html = httpx.get(FCB_BASE + "/", follow_redirects=True, timeout=60.0).text
+    pagines = [html] if html is not None else _pagines_de_calendari()
 
     vistos: dict[str, CalendariFCB] = {}
-    for m in _RE_MEDIA_CAL.finditer(html):
-        carpeta, fitxer = m.group(1), unquote(m.group(2))
-        url = urljoin(FCB_BASE, m.group(0))
-        mv = _RE_VERSIO_FITXER.search(fitxer)
-        a, b = carpeta.split("-")
-        vistos[url] = CalendariFCB(
-            temporada=f"{a}/{b}",
-            versio=f"V-{mv.group(1)}" if mv else None,
-            url=url,
-            nom_fitxer=fitxer,
-        )
+    for pagina in pagines:
+        for m in _RE_DESCARREGA_CAL.finditer(pagina):
+            url, fitxer = m.group(0), unquote(m.group(1))
+            mt = _RE_TEMPORADA_FITXER.search(fitxer)
+            if mt is None:
+                continue  # sense temporada al nom no el sabem col·locar
+            a, b = mt.group(1), mt.group(2)
+            if len(b) == 2:  # «2026-27» -> «2026/2027»
+                b = a[:2] + b
+            mv = _RE_VERSIO_FITXER.search(fitxer)
+            vistos[url] = CalendariFCB(
+                temporada=f"{a}/{b}",
+                versio=f"V-{mv.group(1)}" if mv else None,
+                url=url,
+                nom_fitxer=fitxer,
+            )
 
     def ordre(c: CalendariFCB) -> tuple:
         n = _RE_VERSIO_FITXER.search(c.versio or "")
         return (c.temporada, int(n.group(1)) if n else -1)
 
     return sorted(vistos.values(), key=ordre, reverse=True)
+
+
+def _pagines_de_calendari() -> list[str]:
+    """Les pàgines de document del web que parlen de calendari."""
+    import httpx
+
+    with httpx.Client(follow_redirects=True, timeout=60.0) as client:
+        sitemap = client.get(FCB_SITEMAP_DOCS).text
+        enllacos = [
+            u
+            for u in re.findall(r"<loc>([^<]+)</loc>", sitemap)
+            if "calendari" in u.lower()
+        ]
+        return [client.get(u).text for u in enllacos]
 
 
 def registra_fcb(db_path, html: str | None = None) -> dict:
