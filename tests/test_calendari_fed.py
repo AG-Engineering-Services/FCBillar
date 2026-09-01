@@ -382,18 +382,27 @@ def test_fcb_i_rfeb_conviuen(tmp_path):
     assert per_font["RFEB"] > 0
 
 
-def test_descobreix_fcb_del_layout():
-    """L'enllaç al calendari de la FCB surt al layout de qualsevol pàgina del web,
-    amb la versió dins el nom del fitxer."""
+def test_descobreix_fcb_de_la_pagina_del_document():
+    """Amb el web nou, el PDF s'enllaça des de la pàgina del document.
+
+    La temporada i la versió surten del nom del fitxer, que és l'únic lloc on
+    la federació les escriu: la ruta només porta identificadors.
+    """
     html = """
-    <a href="https://www.fcbillar.cat/media/2025-2026/CALENDARIS/CALENDARI%20FCB%202025-26%20V-9.pdf">cal</a>
-    <a href="/media/2026-2027/CALENDARIS/CALENDARI FCB 2026-27 V-2.pdf">nou</a>
-    <a href="/media/2025-2026/COMPETICIO/OPENS/altra-cosa.pdf">no és calendari</a>
+    <a href="https://fcbillar.cat/download/36/calendari/232324/calendari-fcb-2026-27-v-2.pdf">baixa</a>
+    <a href="https://fcbillar.cat/download/36/calendari/230001/calendari-fcb-2025-26-v-9.pdf">l'antic</a>
+    <a href="https://fcbillar.cat/download/6/ranquings/230343/ranquing-opens-3-bandes-25-26.pdf">no és calendari</a>
     """
     trobats = descobreix_fcb(html)
     assert [(c.temporada, c.versio) for c in trobats] == [
         ("2026/2027", "V-2"),
         ("2025/2026", "V-9"),
     ]
-    assert trobats[0].nom_fitxer == "CALENDARI FCB 2026-27 V-2.pdf"
-    assert trobats[1].url.startswith("https://www.fcbillar.cat/media/2025-2026/CALENDARIS/")
+    assert trobats[0].nom_fitxer == "calendari-fcb-2026-27-v-2.pdf"
+    assert trobats[0].url.endswith("/calendari-fcb-2026-27-v-2.pdf")
+
+
+def test_descobreix_fcb_ignora_el_que_no_sap_col_locar():
+    """Sense temporada al nom no el sabem posar a cap lloc: val més deixar-lo."""
+    html = '<a href="https://fcbillar.cat/download/36/calendari/1/calendari-fcb.pdf">x</a>'
+    assert descobreix_fcb(html) == []
