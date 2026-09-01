@@ -158,6 +158,26 @@ def test_la_final_no_hi_va_mai() -> None:
     assert cites([_inscrit("QUALSEVOL, U", "2ª")], {"2ª": nomes_final}) == []
 
 
+def test_la_fase_d_entrada_es_per_ordre_no_per_data() -> None:
+    """Si la federació escriu una data equivocada, la fase segueix sent la mateixa.
+
+    Primer s'ha de passar la pre-prèvia i després es juga la prèvia, encara que
+    el calendari les hagi posades al revés. I ja hem vist que s'hi equivoquen.
+    """
+    desordenades = [
+        Fase("2ª", "Prèvia", date(2026, 9, 5), date(2026, 9, 5), "Prèvia 3 Bandes 2ª Divisió"),
+        Fase(
+            "2ª",
+            "Pre-prèvia",
+            date(2026, 9, 19),
+            date(2026, 9, 19),
+            "Pre-Prèvia 3 Bandes 2ª Divisió",
+        ),
+    ]
+    resultat = cites([_inscrit("QUALSEVOL, U", "2ª")], {"2ª": desordenades})
+    assert [c.fase.fase for c in resultat] == ["Pre-prèvia"]
+
+
 def test_els_jugadors_van_junts_a_la_fila_de_la_seva_fase() -> None:
     """Una fila per fase amb els nostres a dins, no una per jugador."""
     dos = cites(

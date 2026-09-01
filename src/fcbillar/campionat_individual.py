@@ -157,10 +157,14 @@ def cites(inscrits: list[Inscrit], per_divisio: dict[str, list[Fase]]) -> list[C
     """
     out: list[Cita] = []
     for i in inscrits:
-        fases = per_divisio.get(i.divisio, [])
-        primera = next((f for f in fases if f.fase != FINAL), None)
-        if primera is not None:
-            out.append(Cita(inscrit=i, fase=primera))
+        classificatories = [f for f in per_divisio.get(i.divisio, []) if f.fase != FINAL]
+        if not classificatories:
+            continue
+        # Per ORDRE DE FASE, no per data. Qui hi entra ho fa per la pre-prèvia
+        # encara que el calendari la posés després de la prèvia: primer s'ha de
+        # classificar i després es juga, passi el que passi amb les dates. I ja
+        # hem vist que la federació s'hi equivoca.
+        out.append(Cita(inscrit=i, fase=min(classificatories, key=lambda f: f.ordre)))
     return sorted(
         out,
         key=lambda c: (c.fase.data_inici, c.inscrit.ordre_divisio, c.inscrit.posicio),
