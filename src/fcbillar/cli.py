@@ -1467,6 +1467,58 @@ def open_import_inscrits_cmd(
     )
 
 
+@app.command("ingest-divisions-individual")
+def ingest_divisions_individual_cmd(
+    pdf: str = typer.Argument(..., help="PDF de divisions del campionat individual."),
+    club: str = typer.Option("BANYOLES", "--club", help="Part del nom del club a seguir."),
+    temporada: str = typer.Option("2026/2027", "--temporada"),
+) -> None:
+    """Quan juga cada jugador del club el campionat individual.
+
+    Creua dues coses que fins ara no es parlaven: el PDF de divisions, que diu a
+    quina divisió juga cadascú, i el calendari esportiu ja ingerit, que diu quin
+    cap de setmana es juga cada fase de cada divisió. En surt la data de cada
+    jugador, que no diu cap dels dos documents per separat.
+
+    Al calendari només hi van les fases classificatòries, que les juga tothom de
+    la divisió. La final no: només hi arriba qui passa les prèvies, i per tant
+    només se sap la data de qui hi entra directament.
+    """
+    from fcbillar.campionat_individual import cites, fases_del_calendari, ingest
+    from fcbillar.campionat_individual import resum_per_divisio
+    from fcbillar.divisions_individual import llegeix, per_club
+
+    conn = ensure_schema(get_settings().db_path)
+    clubs = [r[0] for r in conn.execute("SELECT fcb_id FROM clubs")]
+
+    inscrits, rebutjades = llegeix(pdf, clubs)
+    if not inscrits:
+        console.print(f"[red]No he pogut llegir cap inscrit de {pdf}[/]")
+        raise typer.Exit(1)
+    console.print(f"  {len(inscrits)} inscrits llegits")
+    for linia in rebutjades:
+        console.print(f"  [yellow]sense interpretar:[/] {linia}")
+
+    fases = fases_del_calendari(conn, temporada)
+    if not fases:
+        console.print(
+            f"[red]Cap fase al calendari de la temporada {temporada}. "
+            f"Executa abans `fcbillar ingest-calendari --font FCB`.[/]"
+        )
+        raise typer.Exit(1)
+    for linia in resum_per_divisio(fases):
+        console.print(f"  {linia}")
+
+    meus = per_club(inscrits, club)
+    console.print(f"\n  {len(meus)} jugadors del {club}:")
+    for i in meus:
+        console.print(f"    {i.divisio:6s} #{i.posicio:<4d} {i.jugador}")
+
+    les_cites = cites(meus, fases)
+    n = ingest(conn, les_cites, temporada)
+    console.print(f"\n[green]{n} cites a calendari_events[/]")
+
+
 @app.command("ingest-calendari-lliga")
 def ingest_calendari_lliga_cmd(
     carpeta: str = typer.Argument(..., help="Carpeta amb els PDF de calendari de grup."),
