@@ -1021,6 +1021,11 @@ def publish_lliga(
     es desa a `penalitzacio` per marcar la sanció. Si l'scraper no està disponible
     (`use_official=False` o error de xarxa), es cau a l'ordre calculat des dels
     encontres (PM, després parcials a favor), com fa la federació.
+
+    Sense classificació oficial no es retira res de les taules en viu: aquella
+    classificació és l'únic cens dels equips d'un grup —els encontres només
+    diuen qui ha jugat—, i sense ella no es pot distingir un equip que ja no hi
+    és d'un que encara no ha jugat.
     """
     prog: Progress = on_progress or (lambda level, msg: None)
     lliga = lliga_id if lliga_id is not None else LLIGA_3B_ID
@@ -1215,20 +1220,26 @@ def publish_lliga(
     # Regla: si algun grup previst no ha donat cap fila, no es retira res. Una
     # temporada de més al costat de la bona es veu de seguida i es resol
     # publicant un altre cop; una classificació esborrada, no.
+    # Qui pot dir que la publicació és sencera és la classificació OFICIAL, i
+    # no les files que n'han sortit. Els encontres ingerits no són un cens dels
+    # equips d'un grup: només hi surt qui ja ha jugat. En un grup a mitja
+    # temporada amb la petició oficial fallida, `standing_rows` porta els equips
+    # que han jugat, sembla que el grup s'ha publicat bé, i la retirada s'enduria
+    # els que encara no hi apareixen —que són els que més necessiten no
+    # desaparèixer. Per això la condició és que hagi respost de TOTS els grups.
     previstos = {(g["divisio_id"], g["grup_id"]) for g in groups}
-    amb_files = {(r["divisio_id"], r["grup_id"]) for r in standing_rows}
-    buits = previstos - amb_files
+    sense_oficial = previstos - set(official)
     if not standing_rows:
         # Ni un grup. Això no és una temporada buida, és una publicació que no
         # ha arribat a lloc, i retirar-hi res se n'enduria la taula sencera.
         prog("warn", "cap classificació per publicar: no retiro res.")
         counts["retirades"] = counts["grups_retirats"] = 0
-    elif buits:
+    elif sense_oficial:
         prog(
             "warn",
-            f"{len(buits)} de {len(previstos)} grups sense classificació "
-            f"({sorted(buits)[:4]}…): NO retiro res, que esborraria dades bones. "
-            f"Torna-ho a provar quan la federació respongui.",
+            f"{len(sense_oficial)} de {len(previstos)} grups sense classificació "
+            f"oficial ({sorted(sense_oficial)[:4]}…): NO retiro res, que esborraria "
+            f"equips bons. Torna-ho a provar quan la federació respongui.",
         )
         counts["retirades"] = counts["grups_retirats"] = 0
     else:

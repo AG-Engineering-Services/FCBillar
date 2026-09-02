@@ -5,11 +5,20 @@ perquè les taules en viu són «la temporada en curs» i el que hi queda de mé
 surt duplicat al web.
 
 El perill és que la publicació sigui incompleta sense que peti res.
-`_fetch_official_lliga_standings` s'empassa els errors de xarxa a posta —un grup
-que falla simplement no hi surt—, i els grups que encara no han jugat cap
-encontre no tenen cap altra font. A la temporada 2026-27 això són tots. Una
-petició fallida esborraria una classificació bona i el web es quedaria sense
-res, sense cap error que ho digués.
+`_fetch_official_lliga_standings` s'empassa els errors de xarxa a posta: un grup
+que falla simplement no surt al resultat.
+
+Dues maneres de perdre-hi dades, i la segona no es veu:
+
+Un grup que encara no ha jugat cap encontre no té cap altra font que aquella
+classificació —a la 2026-27 això són tots—, o sigui que amb la petició fallida
+es queda sense cap fila i la retirada l'esborra sencer.
+
+I un grup a MITJA temporada en treu, de files, perquè els encontres ingerits
+n'hi posen: sembla publicat correctament. Però els encontres només diuen qui ha
+jugat. Els equips que encara no hi surten no hi són, i la retirada se'ls
+enduria. Per això la condició no pot ser «el grup ha donat files» sinó «la
+classificació oficial ha respost», que és l'única que fa de cens dels equips.
 """
 
 from __future__ import annotations
@@ -135,6 +144,58 @@ def test_si_no_respon_cap_grup_tampoc(entorn, monkeypatch) -> None:
 
     assert res["retirades"] == 0
     assert magatzem["lliga_standings"] == abans
+
+
+def _grup_a_mig_jugar(db) -> None:
+    """Dos dels vuit equips del grup 343 ja han jugat; els altres sis, no."""
+    import sqlite3
+
+    conn = sqlite3.connect(db)
+    for i, nom in enumerate(("C.B.MATARÓ", "C.B.LLEIDA"), start=1):
+        conn.execute("INSERT INTO clubs (id, fcb_id, nom) VALUES (?,?,?)", (i, nom, nom))
+        conn.execute("INSERT INTO equips (id, club_id, lletra) VALUES (?,?,'A')", (i, i))
+    conn.execute(
+        """
+        INSERT INTO encontres_lliga
+            (lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern, temporada_id,
+             equip_local_id, equip_visitant_id, p_match_local, p_match_visitant,
+             p_parcials_local, p_parcials_visitant)
+        VALUES (38, 159, 343, 1, 1, 1, 1, 2, 3, 0, 6, 2)
+        """
+    )
+    conn.commit()
+    conn.close()
+
+
+def test_un_grup_a_mig_jugar_amb_l_oficial_mut_no_perd_equips(entorn, monkeypatch) -> None:
+    """El cas dolent de debò, i el que no es veu.
+
+    Un grup que ja ha jugat treu files dels encontres encara que la petició
+    oficial falli, o sigui que sembla publicat. Però els encontres només diuen
+    qui HA JUGAT: els equips que encara no han sortit no hi són. Retirar a
+    partir d'això se'ls enduria, i són justament els que no es poden defensar.
+    """
+    db, magatzem = entorn
+    _grup_a_mig_jugar(db)
+    magatzem["lliga_standings"] = [
+        {"lliga_id": 38, "divisio_id": 159, "grup_id": 343, "equip": e, "posicio": i, "punts": 0}
+        for i, e in enumerate(
+            ("C.B.MATARÓ A", "C.B.LLEIDA A", "B. C. OLESA", "C.B.SANT BOI A"), start=1
+        )
+    ]
+    # La federació no respon d'aquest grup, però sí de l'altre.
+    monkeypatch.setattr(
+        cloud_sync,
+        "_fetch_official_lliga_standings",
+        lambda claus, prog, lliga=38: {(159, 344): [_classificacio(1, "ALTRE", 0)]},
+    )
+    cloud_sync.publish_lliga(db_path=db, lliga_id=38)
+
+    equips = {f["equip"] for f in magatzem["lliga_standings"]}
+    assert "B. C. OLESA" in equips and "C.B.SANT BOI A" in equips, (
+        "els equips que encara no han jugat no poden desaparèixer perquè la "
+        "classificació oficial no hagi respost"
+    )
 
 
 def test_quan_tot_respon_si_que_retira(entorn, monkeypatch) -> None:
