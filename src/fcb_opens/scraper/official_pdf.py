@@ -112,6 +112,12 @@ def _cache_path_for_pdf(url: str, cache_dir: Path) -> Path:
     return cache_dir / f"{digest}.pdf"
 
 
+#: On es recorda l'última URL que ha funcionat. Serveix per a `use_cache_only`,
+#: que promet no tocar la xarxa: sense això no hi hauria manera de saber de quin
+#: fitxer és la memòria cau, perquè el nom surt del hash de la URL.
+_FITXER_ULTIMA_URL = "ultima-url-ranquing.txt"
+
+
 def fetch_official_ranking_pdf(
     url: str | None = None,
     force: bool = False,
@@ -120,21 +126,40 @@ def fetch_official_ranking_pdf(
     cache_ttl_s: int = DEFAULT_TTL_S,
     timeout_s: float = DEFAULT_TIMEOUT_S,
     use_cache_only: bool = False,
-) -> bytes:
-    """Fetch the official Open ranking PDF using a local binary cache.
+) -> tuple[bytes, str]:
+    """El PDF del rànquing oficial i la URL d'on surt, amb memòria cau local.
 
-    Sense `url` es busca al web: vegeu `descobreix_ranquing_oficial`.
+    Es torna també la URL perquè qui el parseja l'ha de saber: `source_url` va a
+    la resposta de l'API i és el que diu d'on ha sortit el que s'ensenya.
+    Deixar-la endevinar al cridador voldria dir buscar-la dues vegades, i amb
+    `use_cache_only` ni tan sols es podria, que és el camí que promet no tocar
+    la xarxa.
+
+    Sense `url` es busca al web (`descobreix_ranquing_oficial`) i es recorda;
+    amb `use_cache_only` es fa servir la recordada, sense sortir a fora.
     """
     import httpx
 
-    url = url or descobreix_ranquing_oficial(timeout_s)
     cache_dir.mkdir(parents=True, exist_ok=True)
+    memoria = cache_dir / _FITXER_ULTIMA_URL
+    if not url:
+        if use_cache_only:
+            if not memoria.exists():
+                raise FileNotFoundError(
+                    "No sé de quin PDF és la memòria cau: no s'ha baixat mai el "
+                    "rànquing oficial i amb use_cache_only no puc sortir a buscar-lo."
+                )
+            url = memoria.read_text(encoding="utf-8").strip()
+        else:
+            url = descobreix_ranquing_oficial(timeout_s)
+            memoria.write_text(url, encoding="utf-8")
+
     cache_file = _cache_path_for_pdf(url, cache_dir)
 
     if cache_file.exists():
         age_s = time.time() - cache_file.stat().st_mtime
         if use_cache_only or (not force and age_s < cache_ttl_s):
-            return cache_file.read_bytes()
+            return cache_file.read_bytes(), url
 
     if use_cache_only:
         raise FileNotFoundError(f"Cached PDF not found for URL: {url}")
@@ -148,7 +173,8 @@ def fetch_official_ranking_pdf(
     response.raise_for_status()
     body = response.content
     cache_file.write_bytes(body)
-    return body
+    memoria.write_text(url, encoding="utf-8")
+    return body, url
 
 
 def _clean_space(value: str) -> str:

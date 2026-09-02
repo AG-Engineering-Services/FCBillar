@@ -353,17 +353,18 @@ def cmd_scrape_historical(args: argparse.Namespace) -> int:
 
 
 def cmd_diff_official(args: argparse.Namespace) -> int:
-    url = args.url
-    print(f"Loading official ranking PDF from {url} ...")
     try:
-        pdf = fetch_official_ranking_pdf(
-            url=url,
+        pdf, url = fetch_official_ranking_pdf(
+            url=args.url,
             force=args.force,
             use_cache_only=args.no_fetch,
         )
     except FileNotFoundError as e:
         print(str(e))
         return 1
+    # Es diu DESPRÉS de baixar-lo: sense --url no se sap quin és fins que la
+    # descoberta ha respost.
+    print(f"Loaded official ranking PDF from {url}")
 
     official = parse_official_ranking(pdf, source_url=url)
 

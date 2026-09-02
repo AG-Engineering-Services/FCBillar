@@ -57,7 +57,6 @@ from ..reglament.ranquing_opens import (
 )
 from ..scraper.http import fetch as _http_fetch
 from ..scraper.official_pdf import (
-    descobreix_ranquing_oficial,
     fetch_official_ranking_pdf,
     parse_official_ranking,
 )
@@ -2067,7 +2066,7 @@ def register_routes(app: FastAPI) -> None:
         is missing rather than hitting the network.
         """
         try:
-            pdf_bytes = fetch_official_ranking_pdf(
+            pdf_bytes, url_font = fetch_official_ranking_pdf(
                 url=url, force=force, use_cache_only=use_cache_only
             )
         except FileNotFoundError as exc:
@@ -2076,7 +2075,7 @@ def register_routes(app: FastAPI) -> None:
             raise HTTPException(502, detail=f"PDF fetch failed: {exc}") from exc
 
         try:
-            official = parse_official_ranking(pdf_bytes, source_url=url)
+            official = parse_official_ranking(pdf_bytes, source_url=url_font)
         except Exception as exc:
             raise HTTPException(500, detail=f"PDF parse failed: {exc}") from exc
 
@@ -2402,14 +2401,14 @@ def _apply_pdf_penalties_if_available(
          hand off to the pure `apply_official_penalties`.
     """
     try:
-        pdf_bytes = fetch_official_ranking_pdf(use_cache_only=True)
+        pdf_bytes, url_font = fetch_official_ranking_pdf(use_cache_only=True)
     except FileNotFoundError:
         return base_entries
     except Exception:
         log.exception("PDF fetch for ranking penalties failed; returning base")
         return base_entries
     try:
-        official = parse_official_ranking(pdf_bytes, source_url=descobreix_ranquing_oficial())
+        official = parse_official_ranking(pdf_bytes, source_url=url_font)
     except Exception:
         log.exception("PDF parse for ranking penalties failed; returning base")
         return base_entries
