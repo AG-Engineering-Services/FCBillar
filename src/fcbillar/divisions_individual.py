@@ -35,9 +35,7 @@ from pathlib import Path
 #: Ordre de les divisions, de més alta a més baixa.
 DIVISIONS = ("Honor", "1ª", "2ª", "3ª", "4ª", "5ª", "6ª")
 
-_RE_FILA = re.compile(
-    r"^(Honor|\d+[ªº])\s+(\d+)\s+(.+?)\s+([\d.]+)\s+(Definitiva|Provisional)$"
-)
+_RE_FILA = re.compile(r"^(Honor|\d+[ªº])\s+(\d+)\s+(.+?)\s+([\d.]+)\s+(Definitiva|Provisional)$")
 
 
 def _norm(s: str) -> str:
@@ -68,12 +66,23 @@ def llegeix(pdf_path: str | Path, clubs: list[str]) -> tuple[list[Inscrit], list
     `clubs` és el cens amb què es parteix el nom del club del nom del jugador.
     Retorna els inscrits i les línies que no s'han pogut interpretar, que no
     s'amaguen: si la federació canvia el format, val més veure-ho.
+
+    A la llista s'hi afegeixen els noms alternatius coneguts, i el club que en
+    surt es torna sempre amb el nom del cens. No és cosmètic: el PDF escriu
+    «S.B.LA UNIÓ CORAL» i el cens en diu «B.LA UNIÓ CORAL», i sense la variant el
+    tall es fa pel nom curt i la «S.» sobrant se'n va al nom del jugador. Catorze
+    jugadors del club van sortir com a «COGNOMS, NOM S.», que no casa amb ningú.
     """
     import pdfplumber
 
+    from fcbillar.clubs import ALIES, canonic
+
     # Del més llarg al més curt: «C.B.SANT ADRIÀ» abans que «C.B.SANT», per no
     # deixar-nos mitja paraula dins del nom del jugador.
-    cens = sorted(({_norm(c): c for c in clubs}).items(), key=lambda kv: -len(kv[0]))
+    cens = sorted(
+        ({_norm(c): canonic(c) for c in [*clubs, *ALIES]}).items(),
+        key=lambda kv: -len(kv[0]),
+    )
 
     inscrits: list[Inscrit] = []
     rebutjades: list[str] = []
@@ -129,3 +138,77 @@ def per_club(inscrits: list[Inscrit], club: str) -> list[Inscrit]:
         (i for i in inscrits if _norm(club) in _norm(i.club)),
         key=lambda i: (i.ordre_divisio, i.posicio),
     )
+
+
+class ResDesar(Exception):
+    """No es desa el buit sobre el que ja hi ha."""
+
+
+def desa(conn, inscrits: list[Inscrit], temporada: str) -> int:
+    """Desa els inscrits a `inscrits_individual`, reemplaçant els de la temporada.
+
+    El club es canonicalitza en desar-lo: el PDF fa servir els noms del cens
+    oficial, però prou documents de la federació no ho fan i val més que la taula
+    en tingui una sola versió.
+
+    El reemplaçament és destructiu, o sigui que una llista buida s'enduria el que
+    ja hi ha. Un PDF que ha canviat de format en dona una, i llavors el problema
+    és el PDF, no les dades: val més plantar-se que buidar la taula en silenci.
+    """
+    from fcbillar.clubs import canonic
+
+    if not inscrits:
+        raise ResDesar(
+            "Cap inscrit per desar. No esborro els que ja hi ha per posar-hi el buit: "
+            "si el PDF no ha donat ningú, el problema és el PDF."
+        )
+    conn.execute("DELETE FROM inscrits_individual WHERE temporada = ?", (temporada,))
+    conn.executemany(
+        "INSERT INTO inscrits_individual "
+        "(temporada, jugador, club, divisio, posicio, mitjana, definitiva) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [
+            (
+                temporada,
+                i.jugador,
+                canonic(i.club),
+                i.divisio,
+                i.posicio,
+                i.mitjana,
+                int(i.definitiva),
+            )
+            for i in inscrits
+        ],
+    )
+    conn.commit()
+    return len(inscrits)
+
+
+def traspassos(conn, temporada: str) -> list[tuple[str, str, str]]:
+    """Qui ha canviat de club: (jugador, club d'abans, club d'ara).
+
+    Compara el club que diu el PDF amb el que tenim fitxat a `players`. Els noms
+    es comparen amb `clubs.mateix_club`, que és el que evita que un club escrit
+    de dues maneres sembli un fitxatge: sense això, de 66 diferències només 30
+    eren traspassos de debò.
+
+    Qui no té club fitxat no hi surt: no sabem d'on ve, i dir que ve de «sense
+    club» seria inventar-s'ho.
+    """
+    from fcbillar.clubs import mateix_club
+
+    fitxat = {
+        nom: club
+        for nom, club in conn.execute(
+            "SELECT p.nom, c.nom FROM players p LEFT JOIN clubs c ON c.id = p.club_id"
+        )
+    }
+    canvis = []
+    for jugador, club in conn.execute(
+        "SELECT jugador, club FROM inscrits_individual WHERE temporada = ? ORDER BY jugador",
+        (temporada,),
+    ):
+        abans = fitxat.get(jugador)
+        if abans and not mateix_club(abans, club):
+            canvis.append((jugador, abans, club))
+    return canvis

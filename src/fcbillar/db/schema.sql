@@ -421,3 +421,27 @@ CREATE TABLE IF NOT EXISTS calendari_canvis (
 );
 CREATE INDEX IF NOT EXISTS ix_calendari_canvis_versio
     ON calendari_canvis(versio_id);
+
+-- A quina divisió juga cadascú el campionat individual, i amb quin club. Surt
+-- del PDF de divisions que publica la federació abans de començar la temporada.
+--
+-- És la font oficial de qui juga on: fins ara els traspassos s'anotaven a mà a
+-- `scripts/projeccio_lliga_2627.py`, i d'aquesta llista en surten tots els que
+-- afecten jugadors inscrits a l'individual. No tots: qui no s'hi inscriu no surt
+-- al PDF, i aquell traspàs se segueix sabent per una altra banda.
+--
+-- La clau és (temporada, jugador) perquè el PDF dona una sola divisió per
+-- jugador i temporada. El nom va tal com l'escriu la federació, «COGNOMS, NOM»,
+-- que és la manera com es lliga amb `players.nom`.
+CREATE TABLE IF NOT EXISTS inscrits_individual (
+    temporada   TEXT NOT NULL,
+    jugador     TEXT NOT NULL,
+    club        TEXT NOT NULL,              -- nom del cens, ja canonicalitzat
+    divisio     TEXT NOT NULL,              -- 'Honor', '1ª'… '6ª'
+    posicio     INTEGER NOT NULL,           -- ordre al rànquing de sortida
+    mitjana     REAL NOT NULL,
+    -- 0 = mitjana provisional: la federació encara la pot moure, i amb ella la
+    -- divisió. Val més saber-ho que ensenyar-ho tot com si fos definitiu.
+    definitiva  INTEGER NOT NULL,
+    PRIMARY KEY (temporada, jugador)
+);

@@ -1558,7 +1558,7 @@ def ingest_divisions_individual_cmd(
     """
     from fcbillar.campionat_individual import cites, fases_del_calendari, ingest
     from fcbillar.campionat_individual import resum_per_divisio
-    from fcbillar.divisions_individual import llegeix, per_club
+    from fcbillar.divisions_individual import desa, llegeix, per_club, traspassos
 
     conn = ensure_schema(get_settings().db_path)
     clubs = [r[0] for r in conn.execute("SELECT fcb_id FROM clubs")]
@@ -1581,6 +1581,16 @@ def ingest_divisions_individual_cmd(
             "Segurament hi ha un club que no és al cens; afegeix-l'hi i torna-ho a provar."
         )
         raise typer.Exit(1)
+
+    # Desar-los abans de res: el PDF diu a quina divisió i amb quin club juga
+    # cadascú, i això val molt més que les dates. És la font oficial dels
+    # traspassos i la que dona la categoria de cada jugador.
+    console.print(f"  {desa(conn, inscrits, temporada)} inscrits desats")
+    canvis = traspassos(conn, temporada)
+    if canvis:
+        console.print(f"\n[bold]Fitxatges ({len(canvis)})[/]")
+        for jugador, abans, ara in canvis:
+            console.print(f"  {jugador:34} [dim]{abans}[/] → {ara}")
 
     fases = fases_del_calendari(conn, temporada)
     if not fases:

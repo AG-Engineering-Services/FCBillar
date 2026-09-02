@@ -52,6 +52,18 @@ ja s'havien partit i registra els àlies perquè no es tornin a partir. Aquí
 només hi ha la llista i la comparació de noms per als scripts que no toquen la
 base de dades.
 
+## Els noms que no vénen del cens
+
+«S.B.LA UNIÓ CORAL» no és cap fitxa duplicada: el cens oficial en diu «B.LA
+UNIÓ CORAL» i prou. Qui hi posa el «S.B.» al davant és el PDF de divisions.
+
+Sense l'àlies fa mal en un lloc que no s'endevina: `divisions_individual`
+separa el nom del jugador del nom del club buscant el nom de club més llarg que
+casi al final de la línia, i si el més llarg que coneix és «B.LA UNIÓ CORAL» la
+«S.» sobrant se'n va a parar al nom del jugador. Sortien catorze «AGULLO
+TABOAS, JOSEP S.» que no casaven amb ningú i semblaven jugadors nous; tretze ja
+els teníem.
+
 ## El que NO s'unifica
 
 Vuit clubs de la base de dades no surten al cens oficial i es queden com estan:
@@ -72,6 +84,7 @@ import unicodedata
 #: que els accents, els punts i els espais no compten.
 ALIES: dict[str, str] = {
     "B. EL MASNOU": "BILLAR EL MASNOU",
+    "S.B.LA UNIÓ CORAL": "B.LA UNIÓ CORAL",
     "B.C.SANT FELIU DE CODINES": "C.B.SANT FELIU",
     "C.B. CANET": "C.B.CANET DE MAR",
     "CASAL DE CERVERA": "S.E.CASAL CERVERA",

@@ -18,6 +18,11 @@ import json
 import math
 import sqlite3
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from fcbillar.clubs import canonic, mateix_club
 
 DB = "data/fcbillar.db"
 RANK_ID = 832  # rànquing tres bandes num_seq 124 (2026-07-27)
@@ -146,8 +151,26 @@ NOMS = {
 }
 
 
+# Les claus d'aquests tres diccionaris estan escrites com la federació escriu els
+# clubs als seus documents; les dades, en canvi, van pels noms del cens oficial
+# des que es van unificar. Es passen pel canonicalitzador aquí perquè lliguin
+# sense haver de reescriure cap literal —«SB FOMENT MOLINS» es pot seguir
+# copiant del document tal com hi surt.
+def _per_nom_oficial(d: dict) -> dict:
+    fet = {}
+    for clau, valor in d.items():
+        nova = (canonic(clau[0]), *clau[1:]) if isinstance(clau, tuple) else canonic(clau)
+        if nova in fet:
+            raise SystemExit(f"Dues entrades per al mateix club: {clau} i {nova}")
+        fet[nova] = valor
+    return fet
+
+
 def nom_club(clau: str) -> str:
     return NOMS.get(clau, clau)
+
+
+NOMS = _per_nom_oficial(NOMS)
 
 
 # Motiu del canvi de divisió respecte del 2025-26
@@ -180,64 +203,169 @@ MOTIU = {
     ("C.B.VILANOVA", "UNICO"): "baixa · 8è 3a B",
 }
 
+MOTIU = _per_nom_oficial(MOTIU)
 
-# Canvis de club coneguts per a la 2026-27 (nom exacte a `players` → club destí a la BD).
-TRASPASSOS = [
-    ("CORPAS NATOLI, FERNANDO", "C.B.LLINARS"),
-    ("RODRÍGUEZ NAVARRA, FERRÁN", "C.B.BANYOLES"),
-    ("CHUECOS ENRIQUEZ, LUIS", "C.B.MONFORTE"),
-    ("CARDONA GALLEGO, JULIÁN ALBERTO", "C.B.MONFORTE"),
-    ("MAS CANADELL, JOSEP Mª", "B.C.GRANOLLERS"),
-    ("GUERRERO GONZÁLEZ, MIQUEL A.", "C.B.SANT ADRIÀ"),
-    ("GIL PÉREZ, ALBERT", "C.B.SANT ADRIÀ"),
-    ("PORQUERAS SABATÉ, VÍCTOR", "C.B.SANT ADRIÀ"),
+
+#: Canvis de club que el PDF de divisions NO pot dir, perquè el jugador no s'ha
+#: inscrit al campionat individual i per tant no hi surt. Aquests se saben per
+#: una altra banda i s'han de mantenir a mà.
+#:
+#: Fins a l'agost de 2026 aquesta llista els tenia tots. Quan va sortir el PDF de
+#: divisions es van poder confrontar: dels setze que hi havia, quinze els
+#: confirma la federació i el setzè és el que queda aquí. Val més tenir-ne dos i
+#: saber-ne la procedència que setze i no saber quins són bons.
+TRASPASSOS_A_MA = [
     ("GARCÍA GARCÍA, JORDI", "B.LA UNIÓ CORAL"),
-    ("GARRIGA COMAS, JORDI", "C.B.MATARÓ"),
-    ("SÁNCHEZ GALLEGO, JOEL", "C.B.MATARÓ"),
-    ("MULA CALLEJÓN, FRANCISCO", "C.B.SANTS"),
-    ("MERCADER BOSCH, JOSEP", "C.B.BANYOLES"),
-    ("ROCHA VERA, JEFERSON", "C.B.MONFORTE"),
-    ("MARTÍN LIMA, MELCHOR", "S.B.LA GRAN PENYA"),
-    ("LÓPEZ BALBOA, ALEJANDRO", "SB FOMENT MOLINS"),
 ]
 
-# El PASCUAL SÁNCHEZ MARTÍNEZ no hi és a posta. A la BD federativa hi consta amb
-# llicència del C.B.SANTS, però al Sants no hi jugarà; mentre no se sàpiga on va,
-# el deixem al Sant Boi, que és on va jugar el 2025-26.
+TEMPORADA_INSCRITS = "2026/2027"
 
 
-def aplica_traspassos(conn, pool: dict, rk: dict) -> None:
-    """Mou jugadors d'un pool de club a un altre.
+def inscrits_oficials(conn) -> list[tuple[str, str, float, int]]:
+    """Qui juga a quin club aquesta temporada, del PDF de divisions.
 
-    Qui no va jugar la lliga 2025-26 s'incorpora des del rànquing amb 0 partides.
-    Si ja tenia llicència al club de destí és una reincorporació, no un traspàs:
-    es marca com a `retorn` perquè la interfície no digui que ve d'un altre club."""
-    for nom, desti in TRASPASSOS:
+    Es retorna la llista sencera, no només els que canvien de club: el PDF és el
+    cens de qui hi ha a cada club, i comparar aquí seria comparar amb el club de
+    la llicència, que no sempre és amb qui es va jugar la lliga.
+    """
+    return list(
+        conn.execute(
+            "SELECT jugador, club, mitjana, definitiva FROM inscrits_individual "
+            "WHERE temporada = ? ORDER BY jugador",
+            (TEMPORADA_INSCRITS,),
+        )
+    )
+
+
+# El PASCUAL SÁNCHEZ MARTÍNEZ no calia posar-l'hi: a la BD federativa hi consta
+# amb llicència del C.B.SANTS i aquí el vam deixar al Sant Boi, que és on va
+# jugar el 2025-26, esperant saber-ne alguna cosa. El PDF de divisions ja ho diu:
+# hi juga amb el Sant Boi.
+
+
+def ultim_club_jugat(conn) -> dict[int, str]:
+    """Amb quin club va jugar per última vegada cada jugador.
+
+    `players.club_id` és el club de la llicència i és buit per a 877 dels 1.534
+    jugadors que tenim: la fitxa no sempre porta el club, i llavors sembla que
+    no en tinguin. Però 331 d'aquests sí que han jugat la lliga, i el club es
+    veu a les partides.
+
+    Serveix per saber d'on ve algú que torna a jugar: en José Antonio Anillo no
+    té club a la fitxa, però va jugar amb el Blanes el 2014-15 i del 2019-20 al
+    2021-22, i el PDF el torna a posar al Blanes. Sense mirar-ho semblava una
+    incorporació de nou encuny; és una tornada a casa.
+    """
+    ultim: dict[int, tuple[str, str]] = {}
+    q = """
+    select g.player1_id, el.data, cl.nom
+      from games g
+      join encontres_lliga el on el.id = g.encontre_lliga_id
+      join equips e on e.id = g.equip1_id
+      join clubs cl on cl.id = e.club_id
+     where el.data is not null
+    union all
+    select g.player2_id, el.data, cl.nom
+      from games g
+      join encontres_lliga el on el.id = g.encontre_lliga_id
+      join equips e on e.id = g.equip2_id
+      join clubs cl on cl.id = e.club_id
+     where el.data is not null"""
+    for pid, data, club in conn.execute(q):
+        vist = ultim.get(pid)
+        if vist is None or data > vist[0]:
+            ultim[pid] = (data, club)
+    return {pid: club for pid, (_data, club) in ultim.items()}
+
+
+def aplica_traspassos(conn, pool: dict, rk: dict, clubs_amb_equip: set[str]) -> None:
+    """Posa cada jugador al club amb què juga aquesta temporada.
+
+    La font és la llista d'inscrits al campionat individual, que és el cens
+    federatiu de qui hi ha a cada club; `TRASPASSOS_A_MA` hi afegeix els que no
+    s'hi han inscrit i per tant no hi surten.
+
+    Fa dues coses que no són la mateixa:
+
+    MOURE qui ja era a un pool. Aquí hi surten canvis que no es veurien comparant
+    clubs de llicència, perquè un jugador pot tenir la llicència d'un club i
+    haver jugat la lliga amb un altre.
+
+    INCORPORAR qui no és a cap pool, que són tres casos i tots tres compten:
+    qui va jugar fa dues temporades i no la passada -del rànquing no en cau ningú
+    fins que fa dos anys que no juga-; qui ja fa més de dos anys que no juga i
+    per tant ja no hi és; i els jugadors nous, que encara no han sortit mai al
+    rànquing general perquè no han començat a jugar, però que al PDF sí que hi
+    són amb la seva mitjana i sortiran al rànquing que ve.
+
+    D'aquests tres, els dos últims no tenen mitjana al rànquing. La del PDF és
+    la que la federació els assigna per repartir-los per divisions, i és
+    exactament el que fa falta aquí. Als jugadors que no tenim ni fitxats se'ls
+    dona una clau negativa, que no pot xocar amb cap `players.id`.
+
+    Només s'hi entra si el club de destí té equip a la lliga: un inscrit pot ser
+    d'un club que no hi juga, i llavors no hi ha on posar-lo.
+    """
+    oficials = inscrits_oficials(conn)
+    if not oficials:
+        print(
+            "AVÍS: cap inscrit a inscrits_individual — els traspassos surten només "
+            "de la llista a mà. Executa `fcbillar ingest-divisions-individual`.",
+            file=sys.stderr,
+        )
+    #: Clau per als que no tenim fitxats. Negativa perquè `rk` i `presencia` van
+    #: per `players.id` i han de fallar el `in` sense confondre's amb ningú.
+    seguent_clau = -1
+    ultim_club = ultim_club_jugat(conn)
+
+    a_ma = [(nom, desti, None, None) for nom, desti in TRASPASSOS_A_MA]
+    for nom, desti, mitjana_pdf, definitiva in a_ma + oficials:
+        de_la_llista_a_ma = mitjana_pdf is None
+        desti_real = next((cl for cl in clubs_amb_equip if mateix_club(cl, desti)), None)
+        if desti_real is None:
+            if de_la_llista_a_ma:
+                print(f"AVÍS: club destí sense equip a la lliga -> {nom}: {desti}",
+                      file=sys.stderr)
+            continue
         row = conn.execute(
             "select p.id, c.nom from players p left join clubs c on c.id=p.club_id where p.nom=?",
             (nom,),
         ).fetchone()
-        if row is None:
-            print(f"AVÍS: jugador no trobat -> {nom}", file=sys.stderr)
-            continue
-        pid, club_llicencia = row
-        origen = next((cl for cl, ps in pool.items() if pid in ps), None)
-        if origen == desti:
+        pid, club_llicencia = row if row else (None, None)
+        origen = next((cl for cl, ps in pool.items() if pid in ps), None) if pid else None
+        if origen is not None and mateix_club(origen, desti_real):
             continue  # ja hi és
         if origen is not None:
             agg = pool[origen].pop(pid)
             agg["de_club"] = origen
-        elif pid in rk:
+        else:
+            if pid is None:
+                if de_la_llista_a_ma:
+                    print(f"AVÍS: jugador no trobat -> {nom}", file=sys.stderr)
+                    continue
+                pid, seguent_clau = seguent_clau, seguent_clau - 1
             agg = dict(nom=nom, pj=0, car=0, ent=0, equips=collections.Counter())
-            if club_llicencia == desti:
+            if pid not in rk:
+                if mitjana_pdf is None:
+                    print(f"AVÍS: sense mitjana de referència -> {nom}", file=sys.stderr)
+                    continue
+                # La mitjana del PDF només es fa servir quan no n'hi ha al
+                # rànquing: el rànquing oficial mana sempre que hi sigui.
+                agg["mitjana_pdf"] = mitjana_pdf
+                agg["provisional"] = not definitiva
+            # D'on ve. La llicència primer, que és el que diu la federació; si la
+            # fitxa no en porta —passa sovint—, el club amb qui va jugar per
+            # última vegada. Només és un debut de debò quan no hi ha ni l'una ni
+            # l'altre.
+            venia_de = club_llicencia or ultim_club.get(pid)
+            if venia_de is None:
+                agg["debut"] = True
+            elif mateix_club(venia_de, desti_real):
                 agg["retorn"] = True
             else:
-                agg["de_club"] = club_llicencia or "sense club"
-        else:
-            print(f"AVÍS: sense mitjana de referència -> {nom}", file=sys.stderr)
-            continue
+                agg["de_club"] = venia_de
         agg["equips"] = collections.Counter()
-        pool[desti][pid] = agg
+        pool[desti_real][pid] = agg
 
 
 # Clubs a menys de 40 km de Barcelona en línia recta, mesurats des de plaça
@@ -270,6 +398,8 @@ ACORDS: dict[str, dict] = {
              "de Barcelona.",
     ),
 }
+
+ACORDS = _per_nom_oficial(ACORDS)
 
 
 def fixats_de(club: str, llista: list[dict]) -> dict[int, str]:
@@ -878,6 +1008,14 @@ def referents(llista: list[dict], lletra: str, esquema: str = "fcb") -> list[dic
 
 def build(db: str = DB, comp: dict[str, list[tuple[str, str]]] | None = None) -> dict:
     comp = comp if comp is not None else COMP
+    # Els noms dels clubs venen escrits com els escriu la federació als documents
+    # de composició; les dades van pels noms del cens oficial des que es van
+    # unificar. Es tradueixen aquí, una sola vegada, perquè tot el que ve després
+    # -pools, motius d'ascens, acords, formació de grups- lligui. Sense això, set
+    # clubs surten amb la plantilla buida: el Molins és «SB FOMENT MOLINS» al
+    # document i «S.B.F.MOLINS» a la taula.
+    comp = {div: [(canonic(club), lletra) for club, lletra in equips]
+            for div, equips in comp.items()}
     conn = sqlite3.connect(db)
     rk = {
         r[0]: (r[1], r[2])
@@ -944,7 +1082,8 @@ def build(db: str = DB, comp: dict[str, list[tuple[str, str]]] | None = None) ->
         a["ent"] += ent
         a["equips"][lletra] += n
 
-    aplica_traspassos(conn, pool, rk)
+    clubs_amb_equip = {canonic(club) for equips in comp.values() for club, _ in equips}
+    aplica_traspassos(conn, pool, rk, clubs_amb_equip)
 
     # Les lletres es tornen a repartir cada temporada per categoria: l'A és sempre
     # l'equip de més divisió, després B, C, D i E. Les de COMP són les heretades del
@@ -971,7 +1110,12 @@ def build(db: str = DB, comp: dict[str, list[tuple[str, str]]] | None = None) ->
     def nivell(pid: int, a: dict) -> tuple[float, int | None]:
         if pid in rk:
             return rk[pid][0], rk[pid][1]
-        return (a["car"] / a["ent"] if a["ent"] else 0.0), None
+        if a["ent"]:
+            return a["car"] / a["ent"], None
+        # Ni al rànquing ni cap partida nostra: és dels que s'acaben d'inscriure.
+        # La mitjana que els posa la federació al PDF de divisions és l'única que
+        # en tenim, i és amb la que els reparteix per divisions.
+        return a.get("mitjana_pdf", 0.0), None
 
     out: dict = {"rank_id": RANK_ID, "clubs": [], "divisions": {}}
     for club in sorted(club_teams):
@@ -984,6 +1128,7 @@ def build(db: str = DB, comp: dict[str, list[tuple[str, str]]] | None = None) ->
                     pid=pid, nom=a["nom"], mitjana=m, pos=pos, pj=a["pj"],
                     equip_2526=a["equips"].most_common(1)[0][0] if a["equips"] else None,
                     de_club=a.get("de_club"), retorn=bool(a.get("retorn")),
+                    debut=bool(a.get("debut")), provisional=bool(a.get("provisional")),
                 )
             )
         ranked.sort(key=lambda x: -x["mitjana"])
@@ -1005,6 +1150,7 @@ def build(db: str = DB, comp: dict[str, list[tuple[str, str]]] | None = None) ->
         llista = [dict(
             num=i, nom=p["nom"], mitjana=round(p["mitjana"], 4), pos=p["pos"],
             de_club=nom_club(p["de_club"]) if p["de_club"] else None, retorn=p["retorn"],
+            debut=p["debut"], provisional=p["provisional"],
             pj=p["pj"], temporades=len(presencia.get(p["pid"], [])),
             taxa=(taxa_de(p) if taxa_de(p) is not None else per_defecte),
         ) for i, p in enumerate(ranked, 1)]

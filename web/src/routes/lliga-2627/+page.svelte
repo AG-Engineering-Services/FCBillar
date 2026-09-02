@@ -21,6 +21,10 @@
 		pos: number | null;
 		de_club: string | null;
 		retorn: boolean;
+		/** No l'havíem vist mai jugar: s'inscriu per primera vegada. */
+		debut?: boolean;
+		/** La mitjana surt del PDF de divisions i la federació encara la pot moure. */
+		provisional?: boolean;
 		pj: number;
 		taxa: number;
 		temporades: number;
@@ -681,6 +685,8 @@
 													class="ml-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400">⇄ {f.p.de_club}</span
 												>{:else if f.p.retorn}<span
 													class="ml-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400">↩ es reincorpora</span
+												>{:else if f.p.debut}<span
+													class="ml-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400">★ debuta</span
 												>{:else if esSwing(f.p, x.club)}<span
 													class="ml-1 text-[10px] text-amber-600 dark:text-amber-400"
 													>{f.titular ? 'nº4' : "nº4 · juga amb l'A"}</span
@@ -689,8 +695,13 @@
 													>{etiquetaFixat(f.p)}</span
 												>{/if}
 										</span>
-										<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400"
-											>{f.p.mitjana.toFixed(3)}</span
+										<span
+											class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400"
+											title={f.p.provisional
+												? 'Mitjana provisional: surt del PDF de divisions i la federació encara la pot moure'
+												: undefined}>{f.p.mitjana.toFixed(3)}{#if f.p.provisional}<span
+												class="text-amber-600 dark:text-amber-400">*</span
+											>{/if}</span
 										>
 										<span
 											class="w-8 shrink-0 text-right font-mono text-[10px] tabular-nums text-slate-500 dark:text-slate-400"
@@ -791,6 +802,10 @@
 							<span class="block text-[10px] font-semibold text-sky-600 dark:text-sky-400"
 								>↩ es reincorpora: no va jugar la lliga 2025-26</span
 							>
+						{:else if fila.p.debut}
+							<span class="block text-[10px] font-semibold text-sky-600 dark:text-sky-400"
+								>★ debuta: encara no surt al rànquing general</span
+							>
 						{:else if esSwing(fila.p, c)}
 							<span class="block text-[10px] text-amber-600 dark:text-amber-400"
 								>nº 4: mínim 6 jornades amb el B per jugar-hi les decisives</span
@@ -890,9 +905,21 @@
 			fitxatges que no coneguem.
 		</p>
 		<p>
-			<b>Llistes.</b> El pool de cada club són els jugadors que van disputar la lliga 2025-26, ordenats
-			per la mitjana del rànquing de tres bandes vigent (núm. 124, 27-07-2026) — el mateix criteri que
-			aplica la federació sobre la llista única d'inscripció. Tothom pot fer de suplent dels equips
+			<b>Qui hi entra i d'on surt.</b> La llista d'inscrits al campionat individual és el cens
+			federatiu de qui hi ha a cada club, i d'aquí surten els <b>⇄ canvis de club</b>. També hi
+			entra qui no va jugar la lliga passada: del rànquing no en cau ningú fins que fa dos anys que
+			no juga, o sigui que qui torna (<b>↩</b>) hi arriba amb la seva mitjana de sempre. I els que
+			<b>★ debuten</b> encara no han sortit mai al rànquing general perquè no han començat a jugar;
+			la federació sí que els posa una mitjana al document de divisions per repartir-los per
+			categories, i és la que es fa servir aquí — marcada amb un asterisc <span
+				class="text-amber-600 dark:text-amber-400">*</span
+			> mentre sigui provisional, perquè encara la poden moure. Sortiran al rànquing que ve.
+		</p>
+		<p>
+			<b>Llistes.</b> El pool de cada club són els jugadors que van disputar la lliga 2025-26 més els
+			que la federació situa al club a la llista d'inscrits del campionat individual d'aquesta
+			temporada. Van ordenats per la mitjana del rànquing de tres bandes vigent (núm. 124,
+			27-07-2026) — el mateix criteri que aplica la federació sobre la llista única d'inscripció. Tothom pot fer de suplent dels equips
 			que té per sobre, i a l'<b>últim equip</b> del club hi consten tots els jugadors que queden,
 			encara que passin dels sis: la seva banda és oberta i qui hi hagi a sota només pot jugar amb ell
 			o fer de suplent dels de dalt.

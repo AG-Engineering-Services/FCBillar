@@ -29,6 +29,11 @@ Versions:
 - 12: calendari esportiu federatiu (calendari_events, calendari_versions,
      calendari_canvis) — el PDF de la RFEB parsejat, amb historial de revisions.
      Taules noves: les crea l'executescript.
+- 13: el CHECK de rankings.format_url admet 'historial'/'llistat', que és per
+     on entren els rànquings des del web d'agost de 2026.
+- 14: inscrits_individual — a quina divisió i amb quin club juga cadascú el
+     campionat individual, del PDF de divisions de la federació. Taula nova:
+     la crea l'executescript.
 """
 
 from __future__ import annotations
@@ -40,7 +45,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 13
+SCHEMA_VERSION = 14
 
 
 def _read_schema_sql() -> str:
