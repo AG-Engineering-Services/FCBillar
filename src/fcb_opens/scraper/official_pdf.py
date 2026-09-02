@@ -10,7 +10,55 @@ from pathlib import Path
 
 from .http import DEFAULT_CACHE_DIR, DEFAULT_TIMEOUT_S, DEFAULT_TTL_S, USER_AGENT
 
-OFFICIAL_RANKING_URL = "https://www.fcbillar.cat/media/2025-2026/COMPETICIO/OPENS/FcBillar-RanquingOpens3Bandes-25-26.pdf"
+#: Sitemap dels documents del WordPress de la federació. Amb el web nou els PDF
+#: no s'enllacen des de cap pàgina navegable, i el sitemap és l'únic índex que
+#: en queda —el mateix camí que fa servir `fcbillar.calendari_fed`.
+FCB_SITEMAP_DOCS = "https://fcbillar.cat/wpfd_file-sitemap.xml"
+
+#: Les pàgines de document que porten el rànquing d'opens de tres bandes. El
+#: femení i les altres modalitats tenen la seva i no han d'entrar aquí.
+_RE_PAGINA_RANQUING = re.compile(
+    r"https?://[^<\s]*/wpfd_file/ranquing-opens-3-bandes-[^<\s]*", re.IGNORECASE
+)
+#: L'enllaç de descàrrega dins d'aquella pàgina. L'identificador del mig canvia
+#: a cada versió que publiquen, o sigui que no es pot escriure a mà.
+_RE_DESCARREGA_RANQUING = re.compile(
+    r"https?://[^\"'\s<>]*/download/\d+/[^/]*/\d+/([^\"'\s<>]*ranquing-opens-3-bandes[^\"'\s<>]*\.pdf)",
+    re.IGNORECASE,
+)
+
+
+def descobreix_ranquing_oficial(timeout_s: float = 60.0) -> str:
+    """La URL del PDF del rànquing oficial d'opens, buscada al web.
+
+    Fins a l'agost de 2026 això era una constant que apuntava a
+    `/media/{temporada}/COMPETICIO/OPENS/...`. Aquell camí va morir amb el canvi
+    de web i la constant es va quedar apuntant al no-res: la baixada petava,
+    `publish_open_ranking` s'ho empassava —hi ha un `except` que marca la ronda
+    com a provisional— i el web va estar ensenyant el rànquing CALCULAT en
+    comptes de l'oficial sense que res ho digués. Una URL escrita a mà no se
+    n'assabenta, que és per això que ara es busca.
+
+    Es tria la de temporada més nova pel nom del fitxer, que hi porta l'any.
+    """
+    import httpx
+
+    with httpx.Client(follow_redirects=True, timeout=timeout_s) as client:
+        sitemap = client.get(FCB_SITEMAP_DOCS, headers={"User-Agent": USER_AGENT}).text
+        trobats: dict[str, str] = {}
+        for pagina in dict.fromkeys(_RE_PAGINA_RANQUING.findall(sitemap)):
+            html = client.get(pagina, headers={"User-Agent": USER_AGENT}).text
+            for m in _RE_DESCARREGA_RANQUING.finditer(html):
+                trobats[m.group(0)] = m.group(1).lower()
+    if not trobats:
+        raise LookupError(
+            f"No he trobat cap PDF de rànquing d'opens de tres bandes a {FCB_SITEMAP_DOCS}. "
+            f"O la federació l'ha tret, o ha canviat com publica els documents."
+        )
+    # El nom porta la temporada («...-25-26.pdf»), i ordenar-los per nom deixa
+    # la més nova al final.
+    return max(trobats, key=lambda u: trobats[u])
+
 
 _OPEN_LABEL_RE = re.compile(r"(\d+\s*[EeÈèºo]?\s*OPEN)", re.IGNORECASE)
 _OPEN_LEGEND_LINE_RE = re.compile(
@@ -65,7 +113,7 @@ def _cache_path_for_pdf(url: str, cache_dir: Path) -> Path:
 
 
 def fetch_official_ranking_pdf(
-    url: str = OFFICIAL_RANKING_URL,
+    url: str | None = None,
     force: bool = False,
     *,
     cache_dir: Path = DEFAULT_CACHE_DIR,
@@ -73,9 +121,13 @@ def fetch_official_ranking_pdf(
     timeout_s: float = DEFAULT_TIMEOUT_S,
     use_cache_only: bool = False,
 ) -> bytes:
-    """Fetch the official Open ranking PDF using a local binary cache."""
+    """Fetch the official Open ranking PDF using a local binary cache.
+
+    Sense `url` es busca al web: vegeu `descobreix_ranquing_oficial`.
+    """
     import httpx
 
+    url = url or descobreix_ranquing_oficial(timeout_s)
     cache_dir.mkdir(parents=True, exist_ok=True)
     cache_file = _cache_path_for_pdf(url, cache_dir)
 
@@ -177,7 +229,9 @@ def _find_open_legend(lines: list[str], labels: tuple[str, ...]) -> tuple[tuple[
     return tuple(result)
 
 
-def _detect_total_and_points(nums: list[int], opens_count: int) -> tuple[int, tuple[int | None, ...]]:
+def _detect_total_and_points(
+    nums: list[int], opens_count: int
+) -> tuple[int, tuple[int | None, ...]]:
     if not nums:
         raise ValueError("No numeric values found in row")
 
@@ -319,9 +373,7 @@ def _detect_column_bounds(
         upper_texts = [w["text"].upper() for w in words_by_x]
         if "JUGADOR" not in " ".join(upper_texts) or "TOTAL" not in upper_texts:
             continue
-        total_w = next(
-            (w for w in words_by_x if w["text"].upper() == "TOTAL"), None
-        )
+        total_w = next((w for w in words_by_x if w["text"].upper() == "TOTAL"), None)
         if total_w is None:
             continue
         # Each Open column shows up as a "NN" token followed by "OPEN".
@@ -416,7 +468,7 @@ def _parse_spatial_row(
 
 
 def _parse_table_row(row: list[str | None], opens_count: int) -> OfficialRankingEntry | None:
-    cells = [_clean_space((c or "")) for c in row]
+    cells = [_clean_space(c or "") for c in row]
     if not cells or not cells[0].isdigit():
         return None
 
@@ -507,7 +559,7 @@ def parse_official_ranking(pdf_bytes: bytes, source_url: str) -> OfficialRanking
             # Also collect text lines always, because data rows are more reliable there.
             text_lines.extend(_extract_text_lines(page))
 
-            for table in (page.extract_tables() or []):
+            for table in page.extract_tables() or []:
                 for row in table:
                     if row:
                         table_rows.append(row)

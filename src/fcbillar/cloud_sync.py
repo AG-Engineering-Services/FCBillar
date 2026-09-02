@@ -16,6 +16,7 @@ from __future__ import annotations
 import functools
 import sqlite3
 from collections.abc import Callable, Iterable
+from datetime import UTC
 from pathlib import Path
 
 from fcbillar.config import PROJECT_ROOT, get_settings
@@ -352,7 +353,7 @@ def publish_provisional_ranking(
             fcb, off_pos, off_mj = e["fcb_id"], e["posicio"], e["mitjana_general"]
             try:
                 off_def = bool((_json.loads(e["extras_json"] or "{}")).get("definitiva", True))
-            except Exception:  # noqa: BLE001
+            except Exception:
                 off_def = True
             pg = pend.get(fcb, [])
             n_pending = len(pg)
@@ -1505,7 +1506,7 @@ def _prune_orphan_opens(sb, local_ids: set[int], prog: Progress) -> int:
         sb.table("opens").delete().in_("open_id", ghosts).execute()
         prog("ok", f"opens: {len(ghosts)} retirats (ja no són a la BD local)")
         return len(ghosts)
-    except Exception as exc:  # noqa: BLE001 — la poda no ha de tombar la publicació
+    except Exception as exc:
         prog("warn", f"no s'han pogut podar els opens obsolets: {exc}")
         return 0
 
@@ -2050,12 +2051,21 @@ def publish_open_ranking(
     prov_latest = True
     try:
         import httpx
-        from fcb_opens.reglament.open_match import map_pdf_columns_to_window
-        from fcb_opens.scraper.official_pdf import OFFICIAL_RANKING_URL, parse_official_ranking
 
+        from fcb_opens.reglament.open_match import map_pdf_columns_to_window
+        from fcb_opens.scraper.official_pdf import (
+            descobreix_ranquing_oficial,
+            parse_official_ranking,
+        )
+
+        # La URL es busca al web a cada publicació. Quan era una constant, el
+        # canvi de web la va deixar morta i la baixada petava en silenci: el
+        # `except` de sota marcava la ronda com a provisional i el web ensenyava
+        # el rànquing calculat en comptes de l'oficial sense dir-ho.
+        url_oficial = descobreix_ranquing_oficial()
         off = parse_official_ranking(
-            httpx.get(OFFICIAL_RANKING_URL, timeout=30, follow_redirects=True).content,
-            source_url=OFFICIAL_RANKING_URL,
+            httpx.get(url_oficial, timeout=30, follow_redirects=True).content,
+            source_url=url_oficial,
         )
         window_names = [onom.get(oid, "") for oid in window]
         colmap = map_pdf_columns_to_window([o.full_name for o in off.opens], window_names)
@@ -2170,7 +2180,7 @@ def publish_open_ranking(
             prog("ok", "ronda provisional: l'open més recent encara no té classificació final")
         else:
             prog("ok", "ronda provisional: el rànquing oficial encara no inclou l'open més recent")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         prog("warn", f"penalitzacions: PDF no aplicat ({exc}); ronda marcada provisional")
 
     # Marca la ronda vigent com a PROVISIONAL (punts des de la classificació final,
@@ -2225,7 +2235,7 @@ def _date_dist(a: str | None, b: str | None) -> int:
         try:
             y, m, d = str(s).split("-")[:3]
             return date(int(y), int(m), int(d))
-        except Exception:  # noqa: BLE001
+        except Exception:
             return None
 
     da, db = _p(a), _p(b)
@@ -2336,7 +2346,7 @@ def publish_estadistiques_computa(
                     .execute()
                     .data
                 )
-            except Exception:  # noqa: BLE001
+            except Exception:
                 rp = None
             if rp:
                 prox = _sigs_for_gids(fcb_id, rp[0].get("window_game_ids") or [])
@@ -2350,7 +2360,7 @@ def publish_estadistiques_computa(
                         .data
                         or []
                     )
-                except Exception:  # noqa: BLE001
+                except Exception:
                     pend = []
                 for pr in pend:
                     if (
@@ -2445,14 +2455,14 @@ def publish_estadistiques_fitxa(
 
     Escriu un únic JSON per `usuari_id` (upsert idempotent). Amb `dry_run=True` només
     informa. Modalitat: 3 Bandes (codi_fcb 1)."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     prog: Progress = on_progress or (lambda level, msg: None)
     sb = get_client()  # schema fcbillar
     pub = get_public_client()  # schema public (app Estadístiques)
     conn = sqlite3.connect(str(get_settings().db_path))  # local: rival de més/menys nivell
     conn.row_factory = sqlite3.Row
-    fetched_at = datetime.now(timezone.utc).isoformat()
+    fetched_at = datetime.now(UTC).isoformat()
     MOD = 1  # 3 Bandes
 
     # Mapa num_seq → (any, mes) del rànquing 3B i fites de temporada (agost-juliol),
@@ -2926,7 +2936,7 @@ def publish_estadistiques_partides(
                     .eq("player_fcb_id", fcb_id).eq("modalitat_codi", codi_fcb)
                     .execute().data or []
                 )
-            except Exception:  # noqa: BLE001
+            except Exception:
                 pend = []
             for pr in pend:
                 if pr.get("caramboles") is None or pr.get("caramboles_opp") is None or not pr.get("entrades"):
@@ -3358,7 +3368,7 @@ def _autobuild_projection_payload(
     division_name: str,
     fetched_at: str,
     *,
-    live_phases: "list | None" = None,
+    live_phases: list | None = None,
     force: bool = True,
 ) -> dict | None:
     """Construeix la projecció d'un open des dels PDFs PÚBLICS de la federació.
@@ -3392,7 +3402,7 @@ def _autobuild_projection_payload(
     def _pdf_tempfile(doc_id: int) -> str | None:
         try:
             data, _fn = fetch_doc_pdf(doc_id, force=force)
-        except Exception:  # noqa: BLE001
+        except Exception:
             return None
         fd, path = tempfile.mkstemp(suffix=".pdf")
         with os.fdopen(fd, "wb") as fh:
@@ -3401,7 +3411,7 @@ def _autobuild_projection_payload(
 
     try:
         docs = fetch_opens_docs(force=force)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     open_docs = [
         d
@@ -3419,7 +3429,7 @@ def _autobuild_projection_payload(
         return None
     try:
         ranking = parse_ranking_inicial_pdf(rpath)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     finally:
         try:
@@ -3439,7 +3449,7 @@ def _autobuild_projection_payload(
                 from fcb_opens.scraper.horaris_pdf import parse_horaris_pdf
 
                 sched = parse_horaris_pdf(hpath)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 sched = None
             finally:
                 try:
@@ -3449,7 +3459,7 @@ def _autobuild_projection_payload(
 
     try:
         proj = build_projection_from_seeded(ranking, season=None)
-    except Exception:  # noqa: BLE001 — NotImplementedError si N fora de rang, etc.
+    except Exception:
         return None
 
     # Resol la RONDA SEGÜENT: omple els placeholders '<k>-<fase>' de cada fase de
@@ -3509,7 +3519,7 @@ def _open_schedule_by_group(
 
     try:
         docs = fetch_opens_docs(force=force)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     hor = [
         d
@@ -3520,14 +3530,14 @@ def _open_schedule_by_group(
         return None
     try:
         data, _fn = fetch_doc_pdf(hor[0].doc_id, force=force)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     fd, path = tempfile.mkstemp(suffix=".pdf")
     with os.fdopen(fd, "wb") as fh:
         fh.write(data)
     try:
         return parse_horaris_pdf(path)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     finally:
         try:
@@ -3831,7 +3841,7 @@ def _enrich_live_payload(
         chunk = variants[i : i + 80]
         try:
             res = sb.table("players").select("nom,fcb_id").in_("nom", chunk).execute()
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
         for r in res.data or []:
             by_nom.setdefault(r["nom"], []).append(r["fcb_id"])
@@ -3861,7 +3871,7 @@ def _enrich_live_payload(
         by_key: dict[str, set[str]] = {}
         try:
             allp = sb.table("players").select("nom,fcb_id").execute().data or []
-        except Exception:  # noqa: BLE001
+        except Exception:
             allp = []
         for r in allp:
             by_key.setdefault(_key(r["nom"]), set()).add(r["fcb_id"])
@@ -3922,7 +3932,7 @@ def _latest_3b_num_seq(sb) -> int | None:
             .eq("modalitat_codi", 1).order("num_seq", desc=True).limit(1).execute()
         )
         return int(r.data[0]["num_seq"]) if r.data else None
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
 
 
@@ -3944,7 +3954,7 @@ def _ranking_3b_by_fcb_id(sb, num_seq: int | None = None) -> dict[str, int]:
             if r.get("player_fcb_id") and r.get("posicio") is not None:
                 out[r["player_fcb_id"]] = int(r["posicio"])
         return out
-    except Exception:  # noqa: BLE001
+    except Exception:
         return {}
 
 
@@ -3968,7 +3978,7 @@ def _load_prize_pins() -> dict[int, int]:
     try:
         raw = json.loads(p.read_text(encoding="utf-8"))
         return {int(k): int(v) for k, v in raw.items()}
-    except Exception:  # noqa: BLE001
+    except Exception:
         return {}
 
 
@@ -4001,7 +4011,7 @@ def publish_live_opens(
     upsert per `fcb_division_id` i esborrat de les files d'Opens que ja no
     estiguin en curs. Retorna comptadors {live_opens, removed, errors}.
     """
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from fcb_opens.scraper.open_live import (
         fetch_has_final_classification,
@@ -4012,7 +4022,7 @@ def publish_live_opens(
 
     prog: Progress = on_progress or (lambda level, msg: None)
     sb = get_client()
-    fetched_at = datetime.now(timezone.utc).isoformat()
+    fetched_at = datetime.now(UTC).isoformat()
     # Ordre de sorteig dels grups encara no jugats = ordre del rànquing d'Opens
     # (`get_client()` ja està lligat a l'esquema `fcbillar`, on viu `open_ranking`).
     rank_by_name = opens_ranking_by_name(sb)
@@ -4029,7 +4039,7 @@ def publish_live_opens(
             .data
             or []
         )
-    except Exception:  # noqa: BLE001
+    except Exception:
         _live_rows = []
     proj_full = [r for r in _live_rows if (r.get("fcb_division_id") or 0) < 0]
     prev_real = {
@@ -4040,7 +4050,7 @@ def publish_live_opens(
 
     try:
         entries = fetch_individuals_llistat(force=force)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         prog("warn", f"no s'ha pogut llegir el llistat d'individuals: {exc}")
         return {"live_opens": 0, "removed": 0, "errors": 1}
 
@@ -4059,13 +4069,13 @@ def publish_live_opens(
         try:
             if fetch_has_final_classification(e.division_id, force=force):
                 continue
-        except Exception:  # noqa: BLE001 — si la sonda falla, el tractem com a en curs
+        except Exception:
             pass
         try:
             state = fetch_live_state(
                 e.division_id, force=force, rank_by_name=rank_by_name
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             prog("warn", f"#{e.division_id} {e.name}: {exc}")
             errors += 1
             continue
@@ -4153,7 +4163,7 @@ def publish_live_opens(
         removed = len(res.data or [])
         if removed:
             prog("ok", f"open_live: {removed} files retirades (ja no en curs)")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         prog("warn", f"no s'han pogut retirar files antigues: {exc}")
 
     # Retira les PROJECCIONS (id negatiu) que ja tenen l'open real en curs: quan
@@ -4179,7 +4189,7 @@ def publish_live_opens(
             sb.table("open_live").delete().in_("fcb_division_id", stale).execute()
             superseded = len(stale)
             prog("ok", f"open_live: {superseded} projeccions retirades (sorteig real ja publicat)")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         prog("warn", f"no s'han pogut retirar projeccions superades: {exc}")
 
     return {

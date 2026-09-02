@@ -21,6 +21,7 @@ from . import db
 from .diff import diff_rankings, pair_rankings
 from .lliga.persistence import save_league_snapshot
 from .lliga.scraper import incremental_refresh, scrape_competition
+
 # NOTE: snapshot_live / supabase_sync import the optional `supabase` package,
 # which isn't a dependency when fcb_opens is vendored inside FCBillar. They are
 # imported lazily inside the two commands that need them so the rest of the CLI
@@ -32,7 +33,6 @@ from .reglament.puntuacio import points_for_position
 from .reglament.ranquing_opens import compute_opens_ranking
 from .scraper import classificacio, historial, ranking
 from .scraper.official_pdf import (
-    OFFICIAL_RANKING_URL,
     fetch_official_ranking_pdf,
     parse_official_ranking,
 )
@@ -214,7 +214,7 @@ def cmd_scrape_current_opens(args: argparse.Namespace) -> int:
                 clf_id = fetch_final_classification_id(
                     entry.division_id, force=args.force
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 errors.append(f"{entry.division_id}: probe failed: {exc}")
                 continue
             if clf_id is None:
@@ -232,7 +232,7 @@ def cmd_scrape_current_opens(args: argparse.Namespace) -> int:
                     f"  [ok]   #{entry.division_id}/{clf_id} {open_data.name} "
                     f"({len(open_data.classification)} players)"
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 errors.append(f"{entry.division_id}/{clf_id}: scrape failed: {exc}")
                 continue
         conn.commit()
@@ -767,7 +767,10 @@ def build_parser() -> argparse.ArgumentParser:
         "diff-official",
         help="compare official PDF Open ranking vs computed ranking",
     )
-    p_diff.add_argument("--url", type=str, default=OFFICIAL_RANKING_URL, help="official PDF URL")
+    p_diff.add_argument(
+        "--url", type=str, default=None,
+        help="official PDF URL (per defecte, la que es trobi al web de la federació)",
+    )
     p_diff.add_argument(
         "--no-fetch",
         action="store_true",

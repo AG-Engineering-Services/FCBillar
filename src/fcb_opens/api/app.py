@@ -14,13 +14,13 @@ import asyncio
 import logging
 import sqlite3
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from dataclasses import asdict
+from datetime import UTC, datetime
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
-from dataclasses import asdict
 from .. import __version__, db
 from ..club_resolution import (
     PlayerClubSources,
@@ -30,13 +30,23 @@ from ..club_resolution import (
 )
 from ..diff import diff_rankings
 from ..generator import Tournament, generate_tournament
-from ..lliga.refresh import RefreshResult, state as refresh_state
+from ..lliga.refresh import RefreshResult
+from ..lliga.refresh import state as refresh_state
 from ..lliga.scraper import incremental_refresh
+from ..lliga.stats import (
+    division_aggregate,
+    group_aggregate,
+    partides_for_player,
+    player_ranking_for_division,
+    player_ranking_for_group,
+    slot_performance_for_player,
+    team_aggregates_for_group,
+)
 from ..models import normalize_name
 from ..paths import resolve_db_path
 from ..player_matching import Player, build_matcher, normalize_for_matching
-from ..reglament.ordenacio import InscriptionEntry, sort_inscriptions
 from ..reglament.open_match import map_pdf_columns_to_window
+from ..reglament.ordenacio import InscriptionEntry, sort_inscriptions
 from ..reglament.ranquing_opens import (
     OpensRankingEntry,
     apply_official_penalties,
@@ -47,7 +57,7 @@ from ..reglament.ranquing_opens import (
 )
 from ..scraper.http import fetch as _http_fetch
 from ..scraper.official_pdf import (
-    OFFICIAL_RANKING_URL,
+    descobreix_ranquing_oficial,
     fetch_official_ranking_pdf,
     parse_official_ranking,
 )
@@ -64,15 +74,6 @@ from ..scraper.open_live import (
 )
 from ..sync import SyncResult, run_full_sync, sync_state
 from ..validator import validate_inscriptions
-from ..lliga.stats import (
-    division_aggregate,
-    group_aggregate,
-    partides_for_player,
-    player_ranking_for_division,
-    player_ranking_for_group,
-    slot_performance_for_player,
-    team_aggregates_for_group,
-)
 from .deps import get_connection
 from .schemas import (
     AnomalyResponse,
@@ -100,11 +101,11 @@ from .schemas import (
     LeagueJornadaRow,
     LeagueJornadasResponse,
     LeaguePartidaRow,
-    LeagueTeamDetail,
     LeagueRefreshLastResult,
     LeagueRefreshStatus,
     LeagueRefreshTriggerResponse,
     LeagueSummary,
+    LeagueTeamDetail,
     LiveGroup,
     LiveIndexEntry,
     LiveMatch,
@@ -112,19 +113,16 @@ from .schemas import (
     LivePhase,
     LiveSnapshotSummary,
     LiveStanding,
-    OpenDocument,
-    RankingBandEntry,
-    RankingBandResponse,
-    ProvisionalQualifier as ProvisionalQualifierSchema,
     MonthlyRankingDetail,
     MonthlyRankingRow,
     MonthlyRankingSummary,
+    OpenBreakdown,
     OpenClassificationRow,
     OpenDetail,
-    OpenSummary,
-        OpenBreakdown,
+    OpenDocument,
     OpensRankingResponse,
     OpensRankingRow,
+    OpenSummary,
     PhaseResponse,
     PlayerClubSourcesResponse,
     PlayerLeagueGroupSummary,
@@ -132,11 +130,13 @@ from .schemas import (
     PlayerLeagueProfile,
     PlayerLeagueRankingRow,
     PlayerListEntry,
-    PlayerRankingHistoryEntry,
-    SetManualClubRequest,
-    SlotPerformanceRow,
     PlayerOpenResult,
     PlayerProfile,
+    PlayerRankingHistoryEntry,
+    RankingBandEntry,
+    RankingBandResponse,
+    SetManualClubRequest,
+    SlotPerformanceRow,
     StatsResponse,
     SyncResultResponse,
     SyncRunResponse,
@@ -147,7 +147,9 @@ from .schemas import (
     ValidatorRequest,
     ValidatorResponse,
 )
-
+from .schemas import (
+    ProvisionalQualifier as ProvisionalQualifierSchema,
+)
 
 log = logging.getLogger(__name__)
 
@@ -166,7 +168,7 @@ def _run_incremental_refresh_sync(competition_id: int) -> RefreshResult:
     rather than propagated, so the task's caller can record them as state
     instead of crashing the server.
     """
-    started_at = datetime.now(timezone.utc).isoformat()
+    started_at = datetime.now(UTC).isoformat()
     db_path = resolve_db_path()
     db.init_db(db_path)
     conn = db.connect(db_path)
@@ -175,7 +177,7 @@ def _run_incremental_refresh_sync(competition_id: int) -> RefreshResult:
         return RefreshResult(
             competition_id=competition_id,
             started_at=started_at,
-            finished_at=datetime.now(timezone.utc).isoformat(),
+            finished_at=datetime.now(UTC).isoformat(),
             success=True,
             divisions=progress.divisions,
             groups=progress.groups,
@@ -184,12 +186,12 @@ def _run_incremental_refresh_sync(competition_id: int) -> RefreshResult:
             encontres=progress.encontres,
             partides=progress.partides,
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.exception("incremental_refresh failed for competition %s", competition_id)
         return RefreshResult(
             competition_id=competition_id,
             started_at=started_at,
-            finished_at=datetime.now(timezone.utc).isoformat(),
+            finished_at=datetime.now(UTC).isoformat(),
             success=False,
             error=f"{type(exc).__name__}: {exc}",
         )
@@ -541,7 +543,7 @@ def register_routes(app: FastAPI) -> None:
 
         try:
             state = fetch_live_state(division_id, force=force)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return {"published": False, "reason": "live_unreachable", "error": str(exc)}
 
         real: dict[str, str] = {}
@@ -593,7 +595,7 @@ def register_routes(app: FastAPI) -> None:
         """
         try:
             entries = fetch_individuals_llistat(force=force)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise HTTPException(502, detail=f"FCB fetch failed: {exc}") from exc
 
         def passes(e) -> bool:
@@ -609,7 +611,7 @@ def register_routes(app: FastAPI) -> None:
                 try:
                     if fetch_has_final_classification(e.division_id, force=force):
                         return False
-                except Exception:  # noqa: BLE001
+                except Exception:
                     # A fetch failure for a single division shouldn't drop the
                     # whole endpoint — treat the entry as ongoing to be safe.
                     pass
@@ -638,7 +640,7 @@ def register_routes(app: FastAPI) -> None:
         When `persist=true`, the rendered response is also appended to
         `open_live_snapshots` so the timeline can be reconstructed later.
         """
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         # Ordre de sorteig dels grups encara no jugats = ordre del rànquing d'Opens.
         # Si el càlcul falla, deixem l'ordre de la federació (rank_by_name=None).
@@ -647,14 +649,14 @@ def register_routes(app: FastAPI) -> None:
             rank_by_name = {
                 _norm_name(e.display_name): i + 1 for i, e in enumerate(_opens_rank)
             }
-        except Exception:  # noqa: BLE001
+        except Exception:
             rank_by_name = None
 
         try:
             state = fetch_live_state(
                 division_id, force=force, rank_by_name=rank_by_name
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise HTTPException(502, detail=f"FCB fetch failed: {exc}") from exc
 
         def match_to_schema(m) -> LiveMatch:
@@ -736,7 +738,7 @@ def register_routes(app: FastAPI) -> None:
             name=state.structure.name,
             phase_id=state.structure.phase_id,
             phases=phases,
-            fetched_at=datetime.now(timezone.utc).isoformat(),
+            fetched_at=datetime.now(UTC).isoformat(),
         )
         if persist:
             db.save_live_snapshot(
@@ -780,11 +782,11 @@ def register_routes(app: FastAPI) -> None:
         the tiebreaker. The top-60 are intentionally excluded — they're
         the natural focus of the main standings view already.
         """
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         try:
             state = fetch_live_state(division_id, force=force)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise HTTPException(502, detail=f"FCB fetch failed: {exc}") from exc
 
         # Resolve which monthly ranking to use (see resolution order above).
@@ -892,7 +894,7 @@ def register_routes(app: FastAPI) -> None:
             open_name=state.structure.name,
             month_id=resolved_month_id,
             month_is_saved=month_is_saved,
-            fetched_at=datetime.now(timezone.utc).isoformat(),
+            fetched_at=datetime.now(UTC).isoformat(),
             band_61_180=band_61_180,
             band_181_plus=band_181_plus,
             unranked=unranked,
@@ -911,7 +913,7 @@ def register_routes(app: FastAPI) -> None:
         latest published ranking. The by-ranking-band view honours this
         choice (see resolution order there). `month_id=0` clears it.
         """
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         if month_id == 0:
             conn.execute(
@@ -931,7 +933,7 @@ def register_routes(app: FastAPI) -> None:
             conn,
             fcb_division_id=division_id,
             month_id=month_id,
-            updated_at=datetime.now(timezone.utc).isoformat(),
+            updated_at=datetime.now(UTC).isoformat(),
         )
         conn.commit()
         return {"ok": True, "division_id": division_id, "month_id": month_id}
@@ -948,7 +950,7 @@ def register_routes(app: FastAPI) -> None:
             pdf_bytes, filename = fetch_doc_pdf(doc_id, force=force)
         except ValueError as exc:
             raise HTTPException(404, detail=str(exc)) from exc
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise HTTPException(502, detail=f"FCB fetch failed: {exc}") from exc
         # Inline disposition so PDFs open in the browser tab by default.
         safe_name = filename.replace('"', "")
@@ -969,7 +971,7 @@ def register_routes(app: FastAPI) -> None:
         horaris, grups, setzens…) for the current season, newest first."""
         try:
             docs = fetch_opens_docs(force=force)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise HTTPException(502, detail=f"FCB fetch failed: {exc}") from exc
         return [
             OpenDocument(
@@ -991,7 +993,7 @@ def register_routes(app: FastAPI) -> None:
             html = _http_fetch(division_url(division_id), force=force)
             structure = parse_division_page(html, division_id)
             docs = fetch_opens_docs(force=force)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise HTTPException(502, detail=f"FCB fetch failed: {exc}") from exc
         matched = filter_docs_for_division(docs, division_id, structure.name)
         return [
@@ -2055,7 +2057,7 @@ def register_routes(app: FastAPI) -> None:
     def get_official_diff(
         force: bool = False,
         use_cache_only: bool = False,
-        url: str = OFFICIAL_RANKING_URL,
+        url: str | None = None,
         conn: sqlite3.Connection = Depends(get_connection),
     ):
         """Compare the computed Opens ranking against the official FCB PDF.
@@ -2070,12 +2072,12 @@ def register_routes(app: FastAPI) -> None:
             )
         except FileNotFoundError as exc:
             raise HTTPException(404, detail=str(exc)) from exc
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise HTTPException(502, detail=f"PDF fetch failed: {exc}") from exc
 
         try:
             official = parse_official_ranking(pdf_bytes, source_url=url)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise HTTPException(500, detail=f"PDF parse failed: {exc}") from exc
 
         # Window must match the PDF's column count. The diff is meaningless
@@ -2221,7 +2223,7 @@ def register_routes(app: FastAPI) -> None:
             penalty_cascade_count=report.penalty_cascade_count,
             source_mismatch_count=report.source_mismatch_count,
             position_cascade_count=report.position_cascade_count,
-            fetched_at=datetime.now(timezone.utc).isoformat(),
+            fetched_at=datetime.now(UTC).isoformat(),
             official_opens=official_opens_payload,
             computed_opens=computed_opens_payload,
             opens_set_match=_opens_match(official.opens, computed_window),
@@ -2261,7 +2263,7 @@ def register_routes(app: FastAPI) -> None:
                 400,
                 detail=f"decision must be one of {sorted(_ALLOWED_DECISIONS)}",
             )
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         conn.execute(
             """
             INSERT INTO diff_overrides
@@ -2336,7 +2338,7 @@ def register_routes(app: FastAPI) -> None:
             if sync_state.in_progress:
                 return None
             sync_state.in_progress = True
-            sync_state.started_at = datetime.now(timezone.utc).isoformat()
+            sync_state.started_at = datetime.now(UTC).isoformat()
         try:
             result = await asyncio.to_thread(run_full_sync, force=force)
             sync_state.last_result = result
@@ -2403,12 +2405,12 @@ def _apply_pdf_penalties_if_available(
         pdf_bytes = fetch_official_ranking_pdf(use_cache_only=True)
     except FileNotFoundError:
         return base_entries
-    except Exception:  # noqa: BLE001
+    except Exception:
         log.exception("PDF fetch for ranking penalties failed; returning base")
         return base_entries
     try:
-        official = parse_official_ranking(pdf_bytes, source_url=OFFICIAL_RANKING_URL)
-    except Exception:  # noqa: BLE001
+        official = parse_official_ranking(pdf_bytes, source_url=descobreix_ranquing_oficial())
+    except Exception:
         log.exception("PDF parse for ranking penalties failed; returning base")
         return base_entries
 
