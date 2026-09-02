@@ -216,6 +216,37 @@ def test_quan_tot_respon_si_que_retira(entorn, monkeypatch) -> None:
     assert equips == {"C.B.MATARÓ A", "C.B.LLEIDA A"}
 
 
+def test_els_noms_dels_grups_de_temporades_velles_no_es_retiren(entorn, monkeypatch) -> None:
+    """`lliga_groups` és el diccionari dels `grup_id`, no la temporada en curs.
+
+    `lliga_encontres` es guarda els encontres de totes les temporades. Si en
+    publicar-ne una de nova se n'anessin els noms dels grups de les anteriors,
+    aquells encontres es quedarien orfes i ningú no podria dir de quin grup
+    eren. Va passar de debò: 19 grups i 648 encontres.
+    """
+    db, magatzem = entorn
+    magatzem["lliga_groups"].append(
+        {
+            "lliga_id": 36,
+            "divisio_id": 148,
+            "grup_id": 316,
+            "divisio_nom": "HONOR",
+            "grup_nom": "GRUP A",
+        }
+    )
+    monkeypatch.setattr(
+        cloud_sync,
+        "_fetch_official_lliga_standings",
+        lambda claus, prog, lliga=38: {
+            (159, 343): [_classificacio(1, "A", 0)],
+            (159, 344): [_classificacio(1, "B", 0)],
+        },
+    )
+    cloud_sync.publish_lliga(db_path=db, lliga_id=38)
+    vells = [f for f in magatzem["lliga_groups"] if f["lliga_id"] == 36]
+    assert vells, "el nom del grup de la temporada passada s'ha de quedar"
+
+
 def test_la_temporada_anterior_es_retira_quan_la_nova_es_sencera(entorn, monkeypatch) -> None:
     db, magatzem = entorn
     magatzem["lliga_standings"].append(

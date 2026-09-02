@@ -59,9 +59,15 @@
 		}
 	});
 
+	// `lliga_groups` és el diccionari dels grup_id de TOTES les temporades: hi ha
+	// de quedar-hi, perquè `lliga_encontres` es guarda els encontres de totes i
+	// sense el nom del grup es quedarien orfes. La que sí que és només de la
+	// temporada en curs és `lliga_standings`, i per això la temporada que
+	// s'ensenya surt d'aquí i no del rellotge.
+	const lligaActual = $derived(standings.length ? standings[0].lliga_id : null);
 	const divisions = $derived.by(() => {
 		const m = new Map<number, string>();
-		for (const g of groups) if (!m.has(g.divisio_id)) m.set(g.divisio_id, g.divisio_nom ?? `Div ${g.divisio_id}`);
+		for (const g of groups.filter((g) => g.lliga_id === lligaActual)) if (!m.has(g.divisio_id)) m.set(g.divisio_id, g.divisio_nom ?? `Div ${g.divisio_id}`);
 		return [...m.entries()].map(([id, nom]) => ({ id, nom })).sort((a, b) => a.id - b.id);
 	});
 
@@ -71,7 +77,7 @@
 
 	const divGroups = $derived(
 		groups
-			.filter((g) => g.divisio_id === selDiv)
+			.filter((g) => g.lliga_id === lligaActual && g.divisio_id === selDiv)
 			.sort((a, b) => {
 				const fa = (a.grup_nom ?? '').toUpperCase().startsWith('FINAL') ? 1 : 0;
 				const fb = (b.grup_nom ?? '').toUpperCase().startsWith('FINAL') ? 1 : 0;
