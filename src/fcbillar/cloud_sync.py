@@ -2196,8 +2196,52 @@ def publish_open_ranking(
                 det[-1]["prov"] = True
 
     n = _upsert(sb, "open_ranking", all_rows, "genere,ronda,player_fcb_id", prog)
+    fora = _retira_rondes_sobrants(sb, "general", max_ronda, prog)
     conn.close()
-    return {"open_ranking": n}
+    return {"open_ranking": n, "rondes_retirades": fora}
+
+
+def _retira_rondes_sobrants(sb, genere: str, max_ronda: int, prog: Progress) -> int:
+    """Esborra les rondes publicades que ja no existeixen.
+
+    L'upsert només escriu i sobreescriu; el que sobra hi queda. I aquí sobrar és
+    greu, perquè la web ensenya la ronda de número més alt: si en queda una de
+    passada, és la que es veu, i la bona queda amagada a sota.
+
+    Va passar amb la 2025-26. Un canvi al criteri de quins torneigs són opens del
+    circuit —els femenins van sortir del rànquing general, que en té un de propi—
+    va fer baixar el nombre de rondes de 64 a 58. Les rondes 59 a 64 es van
+    quedar publicades, i la 64 era la que es veia a /opens: provisional, amb la
+    finestra repetida i uns punts que no eren els de ningú. La 58, que és
+    exactament el rànquing oficial de la federació, no la veia ningú.
+
+    No es retira res si la publicació no ha donat cap ronda: això no seria una
+    temporada buida sinó una publicació que no ha arribat a lloc.
+    """
+    if not max_ronda:
+        prog("warn", f"open_ranking[{genere}]: cap ronda publicada, no retiro res")
+        return 0
+    sobrants = {
+        r["ronda"]
+        for r in (
+            sb.table("open_ranking")
+            .select("ronda")
+            .eq("genere", genere)
+            .gt("ronda", max_ronda)
+            .execute()
+            .data
+            or []
+        )
+    }
+    for ronda in sorted(sobrants):
+        sb.table("open_ranking").delete().eq("genere", genere).eq("ronda", ronda).execute()
+    if sobrants:
+        prog(
+            "ok",
+            f"open_ranking[{genere}]: retirades les rondes {sorted(sobrants)}, "
+            f"que ja no existeixen (l'última és la {max_ronda})",
+        )
+    return len(sobrants)
 
 
 def publish_open_ranking_femeni(
@@ -2224,7 +2268,10 @@ def publish_open_ranking_femeni(
         return {"open_ranking_femeni": 0}
     sb = get_client()
     n = _upsert(sb, "open_ranking", rows, "genere,ronda,player_fcb_id", prog)
-    return {"open_ranking_femeni": n}
+    # El mateix que al general: la web ensenya la ronda de número més alt, o sigui
+    # que una ronda passada que hi quedi tapa la bona.
+    fora = _retira_rondes_sobrants(sb, "femeni", max(r["ronda"] for r in rows), prog)
+    return {"open_ranking_femeni": n, "rondes_femeni_retirades": fora}
 
 
 def _date_dist(a: str | None, b: str | None) -> int:
