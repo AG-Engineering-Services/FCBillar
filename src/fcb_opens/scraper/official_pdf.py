@@ -135,8 +135,14 @@ def fetch_official_ranking_pdf(
     `use_cache_only` ni tan sols es podria, que és el camí que promet no tocar
     la xarxa.
 
-    Sense `url` es busca al web (`descobreix_ranquing_oficial`) i es recorda;
-    amb `use_cache_only` es fa servir la recordada, sense sortir a fora.
+    Sense `url` es busca al web (`descobreix_ranquing_oficial`); amb
+    `use_cache_only` es fa servir la recordada, sense sortir a fora.
+
+    La recordada només s'escriu quan la URL ha servit de debò —quan el PDF ha
+    arribat, sigui de la xarxa o de la memòria cau. Apuntar-la en descobrir-la
+    faria que una baixada fallida se n'endugués l'última que funcionava, i amb
+    ella l'accés a la memòria cau: el nom del fitxer surt del hash de la URL, o
+    sigui que recordar-ne una de dolenta deixa el PDF bo il·localitzable.
     """
     import httpx
 
@@ -152,13 +158,13 @@ def fetch_official_ranking_pdf(
             url = memoria.read_text(encoding="utf-8").strip()
         else:
             url = descobreix_ranquing_oficial(timeout_s)
-            memoria.write_text(url, encoding="utf-8")
 
     cache_file = _cache_path_for_pdf(url, cache_dir)
 
     if cache_file.exists():
         age_s = time.time() - cache_file.stat().st_mtime
         if use_cache_only or (not force and age_s < cache_ttl_s):
+            memoria.write_text(url, encoding="utf-8")
             return cache_file.read_bytes(), url
 
     if use_cache_only:

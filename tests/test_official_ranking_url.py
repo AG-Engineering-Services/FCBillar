@@ -76,6 +76,35 @@ def test_nomes_memoria_cau_no_surt_a_buscar_la_url(cau, monkeypatch) -> None:
     assert url == "https://x.test/r-25-26.pdf"
 
 
+def test_una_baixada_fallida_no_s_endu_la_darrera_url_bona(cau, monkeypatch) -> None:
+    """La URL es recorda quan ha servit, no quan s'ha descobert.
+
+    Si la federació canvia on penja el PDF i la nova adreça no respon, apuntar-la
+    igualment deixaria il·localitzable el PDF bo que ja tenim: el nom del fitxer
+    de la memòria cau surt del hash de la URL.
+    """
+    import httpx
+
+    monkeypatch.setattr(httpx, "get", lambda *_a, **_k: _resposta(b"%PDF-BO"))
+    op.fetch_official_ranking_pdf(cache_dir=cau)
+
+    def peta(*_a, **_k):
+        raise httpx.ConnectError("la nova adreça no respon")
+
+    monkeypatch.setattr(
+        op, "descobreix_ranquing_oficial", lambda *_a, **_k: "https://x.test/nova.pdf"
+    )
+    monkeypatch.setattr(httpx, "get", peta)
+    with pytest.raises(httpx.ConnectError):
+        op.fetch_official_ranking_pdf(cache_dir=cau, force=True)
+
+    # La memòria cau segueix arribant al PDF bo.
+    monkeypatch.setattr(op, "descobreix_ranquing_oficial", peta)
+    cos, url = op.fetch_official_ranking_pdf(cache_dir=cau, use_cache_only=True)
+    assert cos == b"%PDF-BO"
+    assert url == "https://x.test/r-25-26.pdf"
+
+
 def test_sense_res_recordat_ho_diu_en_comptes_de_sortir(cau, monkeypatch) -> None:
     def esclata(*_a, **_k):
         raise AssertionError("no s'hi pot sortir, a la xarxa")
