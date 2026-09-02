@@ -140,8 +140,11 @@ CREATE TABLE IF NOT EXISTS encontres_lliga (
     --
     data                    TEXT,
     temporada_id            INTEGER REFERENCES temporades(id),
-    equip_local_id          INTEGER NOT NULL REFERENCES equips(id),
-    equip_visitant_id       INTEGER NOT NULL REFERENCES equips(id),
+    -- Opcionals: hi ha encontres del backfill històric dels quals no sabem els
+    -- equips. NULL ho diu; un 0, que és el que s'hi posava, no és cap equip i
+    -- els feia semblar partits d'un equip contra ell mateix.
+    equip_local_id          INTEGER REFERENCES equips(id),
+    equip_visitant_id       INTEGER REFERENCES equips(id),
     p_parcials_local        INTEGER,
     p_match_local           INTEGER,
     p_parcials_visitant     INTEGER,

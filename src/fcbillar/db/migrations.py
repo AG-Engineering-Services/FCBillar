@@ -34,6 +34,9 @@ Versions:
 - 14: inscrits_individual — a quina divisió i amb quin club juga cadascú el
      campionat individual, del PDF de divisions de la federació. Taula nova:
      la crea l'executescript.
+- 15: encontres_lliga.equip_local_id / equip_visitant_id admeten NULL, i els
+     2.035 que valien 0 hi passen. El 0 no era cap equip: era un «no ho sé»
+     escrit com si fos un id.
 """
 
 from __future__ import annotations
@@ -45,7 +48,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 14
+SCHEMA_VERSION = 15
 
 
 def _read_schema_sql() -> str:
@@ -149,6 +152,63 @@ def _migrate_to_v13(conn: sqlite3.Connection) -> None:
     log.info("→v13: rankings.format_url admet 'historial' i 'llistat'")
 
 
+def _migrate_to_v15(conn: sqlite3.Connection) -> None:
+    """Un encontre pot no saber quins equips el jugaven, i ho ha de poder dir.
+
+    Els dos camps eren NOT NULL, o sigui que una ingesta que no resolia l'equip
+    hi posava un 0. I 0 no és cap equip: no existeix a `equips`, trenca la clau
+    forana i, pitjor, fa que 2.035 encontres semblin partits d'un equip contra
+    ell mateix quan es compara local amb visitant. És prou convincent per
+    enganyar a qui ho miri —m'ha enganyat a mi.
+
+    Són encontres del backfill històric de 2015-2019: sense data, sense equips i
+    sense resultat, però amb 5.631 partides penjades. No es poden esborrar
+    perquè s'endurien les partides, que sí que tenen dades. El que es pot fer és
+    que el camp digui la veritat: NULL vol dir que no ho sabem.
+
+    Cap ingesta d'ara no pot tornar a escriure un 0: `upsert_equip` es planta si
+    el club no existeix.
+    """
+    cols = [row[1] for row in conn.execute("PRAGMA table_info(encontres_lliga)").fetchall()]
+    if not cols:
+        return  # BD nova: la crearà schema.sql amb els camps ja opcionals
+    llista = ", ".join(cols)
+    conn.executescript(
+        f"""
+        PRAGMA foreign_keys = OFF;
+        ALTER TABLE encontres_lliga RENAME TO encontres_lliga_v14;
+        CREATE TABLE encontres_lliga (
+            id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+            lliga_id                INTEGER NOT NULL,
+            divisio_id              INTEGER NOT NULL,
+            grup_id                 INTEGER NOT NULL,
+            jornada_id              INTEGER NOT NULL,
+            encontre_id_extern      INTEGER NOT NULL,
+            data                    TEXT,
+            temporada_id            INTEGER REFERENCES temporades(id),
+            equip_local_id          INTEGER REFERENCES equips(id),
+            equip_visitant_id       INTEGER REFERENCES equips(id),
+            p_parcials_local        INTEGER,
+            p_match_local           INTEGER,
+            p_parcials_visitant     INTEGER,
+            p_match_visitant        INTEGER,
+            UNIQUE(lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern)
+        );
+        INSERT INTO encontres_lliga ({llista})
+            SELECT {llista} FROM encontres_lliga_v14;
+        DROP TABLE encontres_lliga_v14;
+        UPDATE encontres_lliga SET equip_local_id = NULL WHERE equip_local_id = 0;
+        UPDATE encontres_lliga SET equip_visitant_id = NULL WHERE equip_visitant_id = 0;
+        PRAGMA foreign_keys = ON;
+        """
+    )
+    n = conn.execute(
+        "SELECT COUNT(*) FROM encontres_lliga "
+        "WHERE equip_local_id IS NULL OR equip_visitant_id IS NULL"
+    ).fetchone()[0]
+    log.info("→v15: encontres_lliga admet equips desconeguts; %d en tenien un 0", n)
+
+
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
     conn = connect(db_path)
     version = current_version(conn)
@@ -172,6 +232,9 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v13: el web nou serveix els rànquings per 'historial'/'llistat'.
     if 1 <= version < 13:
         _migrate_to_v13(conn)
+    # → v15: un encontre pot no saber quins equips el van jugar.
+    if 1 <= version < 15:
+        _migrate_to_v15(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).
