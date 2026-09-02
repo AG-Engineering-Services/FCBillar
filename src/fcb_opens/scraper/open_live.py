@@ -25,7 +25,13 @@ from bs4 import BeautifulSoup
 
 from .http import fetch, fetch_binary
 
-BASE = "https://www.fcbillar.cat/ca"
+# El frontal public de competicions viu a intranet.fcbillar.cat des del canvi
+# de web de l'agost de 2026, i els camins porten «frontend/» al davant. El
+# domini antic ja no te ni certificat valid: `publish-live-opens` petava amb un
+# error d'SSL i, com que peta abans de mirar res, tampoc no podia retirar els
+# opens que ja no estan en curs. Per aixo el Mataro del juliol va estar dos
+# mesos sortint com a «en directe» a /opens, tapant el ranquing oficial.
+BASE = "https://intranet.fcbillar.cat/frontend"
 LLISTAT_URL = f"{BASE}/individuals/llistat"
 # Docs listing for the "Opens" subcategory of Carambola. The trailing segment
 # is the zero-based offset (20 per page). Season id 15 = 2025-26.
@@ -257,7 +263,10 @@ def parse_individuals_llistat(html: str) -> tuple[CompetitionIndexEntry, ...]:
     out: list[CompetitionIndexEntry] = []
     seen: set[int] = set()
 
-    for link in soup.find_all("a", class_="button"):
+    # Qualsevol enllaç cap a una divisio, no nomes els que porten
+    # class="button": al web nou el nom del torneig es un enllaç dins de la
+    # taula i demanant la classe no en sortia cap.
+    for link in soup.find_all("a", href=_DIVISION_LINK_RE):
         href = link.get("href") or ""
         m = _DIVISION_LINK_RE.search(href)
         if not m:
