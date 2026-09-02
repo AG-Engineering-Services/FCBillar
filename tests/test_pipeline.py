@@ -353,26 +353,36 @@ def test_ingest_lliga_encontre_creates_full_context(settings: StubSettings) -> N
     )
 
     assert result.partides_total == 4
-    assert result.games_upserted == 4
-    assert result.games_skipped_missing_player == 0
+    # Cap game NOU: `games` s'alimenta de partideshome, que és el rànquing
+    # oficial, i la pàgina de lliga només l'enriqueix amb el context de la
+    # competició. Aquí no s'ha ingerit partideshome, o sigui que no hi ha res a
+    # enriquir i les quatre partides queden pendents.
+    assert result.games_upserted == 0
+    assert result.games_skipped_missing_player == 4
 
     counts = repo.counts()
     assert counts["clubs"] == 2  # C.B. SANTS + SB FOMENT MOLINS
     assert counts["equips"] == 2  # ambdós amb lletra A
     assert counts["encontres_lliga"] == 1
-    assert counts["games"] == 4
     assert counts["temporades"] == 1  # derivada de la data
 
-    # Verifico que tots els games tenen context omplert.
-    row = conn.execute(
-        "SELECT arbitre, equip1_id, equip2_id, encontre_lliga_id, temporada_id, serie_max1 "
-        "FROM games LIMIT 1"
+    # Però no es perden: van a `lliga_pending_partides`, que és d'on surten les
+    # partides jugades que el rànquing oficial encara no ha recollit.
+    pendents = conn.execute(
+        "SELECT player1_nom, caramboles1, entrades, encontre_lliga_id "
+        "FROM lliga_pending_partides ORDER BY player1_nom"
+    ).fetchall()
+    assert len(pendents) == 4
+    assert all(r[3] == result.encontre_lliga_id for r in pendents)
+    assert all(r[2] > 0 for r in pendents), "sense entrades no serien partides jugades"
+
+    # El context de la competició sí que s'ha desat: l'encontre, els equips i la
+    # temporada derivada de la data.
+    enc = conn.execute(
+        "SELECT equip_local_id, equip_visitant_id, temporada_id FROM encontres_lliga"
     ).fetchone()
-    assert row[0] is not None  # arbitre
-    assert row[1] is not None and row[2] is not None  # equips
-    assert row[3] == result.encontre_lliga_id
-    assert row[4] is not None  # temporada derivada de la data
-    assert row[5] is not None  # serie_max1 (camp ric de lliga)
+    assert enc[0] is not None and enc[1] is not None
+    assert enc[2] is not None
 
 
 def test_ingest_lliga_encontre_skips_unknown_players(settings: StubSettings) -> None:
@@ -662,7 +672,12 @@ def test_ingest_lliga_reuses_existing_club_via_normalization(
 def test_ingest_lliga_encontre_create_missing_persists_all(
     settings: StubSettings,
 ) -> None:
-    """Amb create_missing_players=True, totes les partides es desen amb placeholders."""
+    """Amb create_missing_players=True es crea el jugador encara que no el tinguem.
+
+    Els placeholders no són per desar el game -els games venen de partideshome-
+    sinó perquè la partida pendent i el context de la competició puguin apuntar a
+    algú. Quan el rànquing porti el jugador de debò, es fusionen.
+    """
     fixtures = {
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
             "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
@@ -678,17 +693,21 @@ def test_ingest_lliga_encontre_create_missing_persists_all(
         client, encontre, modalitat_codi_fcb=1, data=date(2025, 9, 27),
         create_missing_players=True, settings=settings,
     )
-    assert result.games_upserted == 4
-    assert result.games_skipped_missing_player == 0
+    assert result.games_upserted == 0
+    assert result.games_skipped_missing_player == 4
 
-    counts = Repository(ensure_schema(settings.db_path)).counts()
+    conn = ensure_schema(settings.db_path)
+    counts = Repository(conn).counts()
     assert counts["players"] == 8  # tots placeholders
-    assert counts["games"] == 4
+    # Les quatre partides queden pendents fins que el rànquing oficial les
+    # reculli; el que s'ha creat són els jugadors, no els games.
+    assert conn.execute("SELECT COUNT(*) FROM lliga_pending_partides").fetchone()[0] == 4
 
 
 def test_placeholder_fusion_after_ranking_ingest(settings: StubSettings) -> None:
-    """Si primer ingerim lliga amb placeholders i després el rànquing amb fcb_id real,
-    els placeholders es fusionen automàticament i els games NO es perden."""
+    """Si primer ingerim lliga amb placeholders i després el rànquing amb fcb_id
+    real, els placeholders es fusionen automàticament i el que hi apuntava NO es
+    perd: la promoció conserva l'id intern."""
     # Pas 1: ingest lliga amb placeholders
     lliga_fixtures = {
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
@@ -710,7 +729,6 @@ def test_placeholder_fusion_after_ranking_ingest(settings: StubSettings) -> None
     repo = Repository(conn)
     counts_before = repo.counts()
     assert counts_before["players"] == 8
-    assert counts_before["games"] == 4
 
     # Pas 2: upsert d'un Player real amb mateix nom → fusió
     from fcbillar.models import Player
@@ -727,8 +745,10 @@ def test_placeholder_fusion_after_ranking_ingest(settings: StubSettings) -> None
     assert repo.get_player_id_by_fcb_id("60") == real_player_id
     # Cap player nou: 8 → 8 (el placeholder s'ha promogut a real, no s'ha creat un altre)
     assert repo.counts()["players"] == 8
-    # I el game segueix sent allà.
-    assert repo.counts()["games"] == 4
+    # Conservar l'id és tota la gràcia: qualsevol fila que apunti al jugador
+    # -els games que arribin de partideshome, els enllaços del rànquing- hi
+    # segueix apuntant sense haver-la de tocar.
+    assert repo.get_player_id_by_fcb_id("60") == placeholder_player_id
 
 
 # ---------------- ingest_lliga_jornada ----------------
@@ -829,4 +849,8 @@ def test_ingest_lliga_grup_iterates_jornades(settings: StubSettings) -> None:
     assert result.jornades_processed == 1
     assert result.jornades_failed == 13
     assert result.total_encontres == 4  # només de la jornada 01
-    assert result.total_games_upserted == 16  # 4 encontres × 4 partides
+    # Cap game nou: `games` s'alimenta de partideshome i la pàgina de lliga
+    # només l'enriqueix. Aquí no s'ha ingerit, o sigui que les 16 partides
+    # queden pendents en comptes de crear-se.
+    assert result.total_games_upserted == 0
+    assert result.total_games_skipped == 16
