@@ -1202,16 +1202,46 @@ def publish_lliga(
     # duplicat a la web. Ha passat dues vegades: quan un club va canviar de nom
     # (el Coral Colón sortia dos cops a la mateixa classificació, amb els
     # mateixos punts) i quan la temporada canvia de lliga_id.
-    counts["retirades"] = _retira_sobrants(
-        sb, "lliga_standings", lliga,
-        {(r["divisio_id"], r["grup_id"], r["equip"]) for r in standing_rows},
-        ("divisio_id", "grup_id", "equip"), prog,
-    )
-    counts["grups_retirats"] = _retira_sobrants(
-        sb, "lliga_groups", lliga,
-        {(r["divisio_id"], r["grup_id"]) for r in group_rows},
-        ("divisio_id", "grup_id"), prog,
-    )
+    #
+    # Però esborrar a partir del que s'acaba de publicar només val si la
+    # publicació és SENCERA, i pot no ser-ho sense que peti res. Els grups que
+    # encara no han jugat cap encontre no tenen cap altra font que la
+    # classificació oficial, i `_fetch_official_lliga_standings` s'empassa els
+    # errors de xarxa a posta: un grup que falla simplement no hi surt. A la
+    # 2026-27 això són TOTS els grups. Amb la retirada engegada a cegues, una
+    # petició fallida esborraria una classificació bona i el web es quedaria
+    # sense res, sense que cap error ho digués.
+    #
+    # Regla: si algun grup previst no ha donat cap fila, no es retira res. Una
+    # temporada de més al costat de la bona es veu de seguida i es resol
+    # publicant un altre cop; una classificació esborrada, no.
+    previstos = {(g["divisio_id"], g["grup_id"]) for g in groups}
+    amb_files = {(r["divisio_id"], r["grup_id"]) for r in standing_rows}
+    buits = previstos - amb_files
+    if not standing_rows:
+        # Ni un grup. Això no és una temporada buida, és una publicació que no
+        # ha arribat a lloc, i retirar-hi res se n'enduria la taula sencera.
+        prog("warn", "cap classificació per publicar: no retiro res.")
+        counts["retirades"] = counts["grups_retirats"] = 0
+    elif buits:
+        prog(
+            "warn",
+            f"{len(buits)} de {len(previstos)} grups sense classificació "
+            f"({sorted(buits)[:4]}…): NO retiro res, que esborraria dades bones. "
+            f"Torna-ho a provar quan la federació respongui.",
+        )
+        counts["retirades"] = counts["grups_retirats"] = 0
+    else:
+        counts["retirades"] = _retira_sobrants(
+            sb, "lliga_standings", lliga,
+            {(r["divisio_id"], r["grup_id"], r["equip"]) for r in standing_rows},
+            ("divisio_id", "grup_id", "equip"), prog,
+        )
+        counts["grups_retirats"] = _retira_sobrants(
+            sb, "lliga_groups", lliga,
+            {(r["divisio_id"], r["grup_id"]) for r in group_rows},
+            ("divisio_id", "grup_id"), prog,
+        )
     conn.close()
     return counts
 
