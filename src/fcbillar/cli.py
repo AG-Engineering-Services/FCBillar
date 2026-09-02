@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from pathlib import Path
 
 import typer
 
@@ -15,6 +16,7 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.table import Table
 
+from fcbillar.clubs import canonic
 from fcbillar.config import get_settings
 from fcbillar.db.migrations import ensure_schema
 from fcbillar.db.repository import Repository
@@ -1819,6 +1821,130 @@ def ingest_calendari_cmd(
     if not fets:
         console.print("[yellow]Cap calendari disponible per ingestar.[/]")
         raise typer.Exit(code=1)
+
+
+@app.command("sql-categoria-federativa")
+def sql_categoria_federativa_cmd(
+    club: str = typer.Option("C.B.BANYOLES", "--club", help="Club del qual generar-ho."),
+    temporada: str = typer.Option("2026/2027", "--temporada"),
+    federacio: str = typer.Option("fcb", "--federacio", help="`federations.id` a NouProjecte."),
+    surt: str = typer.Option("", "--surt", help="Fitxer on desar-ho."),
+) -> None:
+    """El SQL que posa la categoria d'aquesta temporada als socis de NouProjecte.
+
+    La categoria surt del PDF de divisions, que és el que reparteix els jugadors
+    per divisions al campionat individual. NouProjecte ja té la columna
+    (`member_federation_licenses.category_federacio`), o sigui que no cal cap
+    migració d'esquema: és una actualització de dades.
+
+    NO s'executa res. La política de NouProjecte és que cap SQL s'aplica sense
+    que l'admin l'hagi validat, i aquesta comanda només l'escriu.
+
+    El fitxer que en surt es comprova a si mateix: si el nombre de llicències
+    que casen no és el que esperem, es planta dins de la transacció en comptes
+    d'actualitzar-ne quatre i deixar-ho a mitges. És la manera de saber que els
+    números de llicència de NouProjecte no s'escriuen igual que els nostres,
+    que és l'única cosa que pot fallar aquí i que no es veu.
+    """
+    conn = ensure_schema(get_settings().db_path)
+    files = conn.execute(
+        """
+        SELECT i.jugador, i.divisio, i.definitiva, p.fcb_id
+          FROM inscrits_individual i
+          LEFT JOIN players p ON p.nom = i.jugador
+         WHERE i.temporada = ? AND i.club = ?
+         ORDER BY i.posicio
+        """,
+        (temporada, canonic(club)),
+    ).fetchall()
+    if not files:
+        console.print(
+            f"[red]Cap inscrit del {canonic(club)} a la temporada {temporada}.[/] "
+            f"Executa abans `fcbillar ingest-divisions-individual`."
+        )
+        raise typer.Exit(1)
+
+    amb, sense = [f for f in files if f[3]], [f for f in files if not f[3]]
+    # La coma va ABANS del comentari. Si va al final de la línia queda dins del
+    # `--` i la llista de valors es converteix en un error de sintaxi.
+    valors = "\n  ".join(
+        f"('{lic}', '{div}')"
+        + ("," if i < len(amb) - 1 else "")
+        + f"  -- {jugador}"
+        + ("" if defin else "  [mitjana provisional]")
+        for i, (jugador, div, defin, lic) in enumerate(amb)
+    )
+    nota_sense = "".join(
+        f"\n--   {j} ({d})" + ("  [mitjana provisional]" if not fi else "")
+        for j, d, fi, _ in sense
+    )
+    sql = f"""-- Categoria federativa {temporada} dels socis del {canonic(club)}.
+-- Generat per `fcbillar sql-categoria-federativa`. NO s'ha executat.
+--
+-- Surt del PDF de divisions de la FCB, que és el document amb què la federació
+-- reparteix els jugadors per divisions al campionat individual.
+--
+-- No canvia cap taula ni cap columna: `member_federation_licenses.category_federacio`
+-- ja existeix. Per tant no cal `NOTIFY pgrst`.
+{"--" if not sense else f"-- SENSE LLICÈNCIA a la nostra base, i per tant fora d'aquí ({len(sense)}):{nota_sense}"}
+
+BEGIN;
+
+-- La llista va a una taula temporal, no repetida a cada sentència: així el
+-- mira-t'ho, la comprovació i l'actualització diuen exactament el mateix.
+CREATE TEMP TABLE categoria_nova (
+  license_number TEXT PRIMARY KEY,
+  categoria      TEXT NOT NULL
+) ON COMMIT DROP;
+
+INSERT INTO categoria_nova (license_number, categoria) VALUES
+  {valors}
+;
+
+-- Mira-ho abans de deixar-ho anar: qui queda tocat i què tenia.
+SELECT c.license_number, m.nom || ' ' || m.cognoms AS soci,
+       l.category_federacio AS tenia, c.categoria AS passa_a
+  FROM categoria_nova c
+  JOIN member_federation_licenses l
+    ON l.license_number = c.license_number AND l.federation_id = '{federacio}'
+  JOIN members m ON m.id = l.member_id
+ ORDER BY c.categoria, soci;
+
+-- Si els números de llicència no s'escriuen igual als dos costats, l'UPDATE no
+-- casaria res i no es veuria. Això ho fa visible abans de tocar cap fila.
+DO $$
+DECLARE n integer;
+BEGIN
+  SELECT count(*) INTO n
+    FROM categoria_nova c
+    JOIN member_federation_licenses l
+      ON l.license_number = c.license_number AND l.federation_id = '{federacio}';
+  IF n <> {len(amb)} THEN
+    RAISE EXCEPTION
+      'Esperava % llicències del {federacio} i n''he trobat %. No actualitzo res: '
+      'mira si els números de llicència s''escriuen igual als dos costats.',
+      {len(amb)}, n;
+  END IF;
+END $$;
+
+UPDATE member_federation_licenses AS l
+   SET category_federacio = c.categoria
+  FROM categoria_nova c
+ WHERE l.license_number = c.license_number
+   AND l.federation_id = '{federacio}';
+
+COMMIT;
+"""
+    if surt:
+        Path(surt).write_text(sql, encoding="utf-8")
+        console.print(f"[green]Escrit a {surt}[/] — {len(amb)} llicències.")
+    else:
+        console.print(sql)
+    if sense:
+        console.print(
+            f"[yellow]{len(sense)} inscrit(s) sense llicència a la nostra base, "
+            f"fora del SQL:[/] {', '.join(j for j, _, _, _ in sense)}"
+        )
 
 
 if __name__ == "__main__":
