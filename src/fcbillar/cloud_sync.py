@@ -910,13 +910,23 @@ def publish_rating_buckets(
 
 
 # Lliga Catalana Tres Bandes = competició/portal lliga_id 36.
-LLIGA_3B_ID = 36
+#: Id de la Lliga Catalana de Tres Bandes de la temporada en curs.
+#:
+#: La federació estrena id cada temporada i no segueix cap patró que es pugui
+#: calcular: 34 va ser la 2024-25, 36 la 2025-26 i 38 la 2026-27 (els senars del
+#: mig són les lligues de 4 Modalitats). O sigui que això s'ha de canviar a mà
+#: cada any, i mentre no es canviï la web segueix ensenyant la temporada passada
+#: com si fos la d'ara, que és exactament el que va passar el setembre de 2026.
+#:
+#: Per saber quin toca: `fcbillar discover-lliga <id>` fins que en surtin les
+#: divisions de Tres Bandes.
+LLIGA_3B_ID = 38
 
 
 def _fetch_official_lliga_standings(
-    group_keys: list[tuple[int, int]], prog: Progress
+    group_keys: list[tuple[int, int]], prog: Progress, lliga: int = LLIGA_3B_ID
 ) -> dict[tuple[int, int], list]:
-    """Scrapeja la classificació OFICIAL (live) de cada grup de la lliga 36.
+    """Scrapeja la classificació OFICIAL (live) de cada grup d'una lliga.
 
     Retorna {(divisio_id, grup_id): [LligaClassificacioRow]}. És la font de
     veritat per a posició + punts (penalitzacions i desempat ja aplicats).
@@ -928,6 +938,7 @@ def _fetch_official_lliga_standings(
         from fcbillar.config import get_settings
         from fcbillar.scraper.client import ScraperClient
         from fcbillar.scraper.parsers import parse_lliga_classificacio
+        from fcbillar.scraper.urls import lligues_classificacio
     except Exception as e:  # pragma: no cover - dependència de scraper absent
         prog("warn", f"classificació oficial: import fallit ({e}); s'usa l'ordre calculat")
         return out
@@ -937,7 +948,10 @@ def _fetch_official_lliga_standings(
     try:
         with ScraperClient(settings) as cl:
             for div, gid in group_keys:
-                url = f"{base}/ca/lligues/classificacio/{LLIGA_3B_ID}/{div}/{gid}"
+                # La munta `urls.py` i no aquí: el camí va canviar de
+                # `/ca/lligues/...` a `/frontend/lligues/...` amb el web nou, i
+                # una còpia a mà d'una URL és una còpia que no se n'assabenta.
+                url = lligues_classificacio(lliga, div, gid, base)
                 try:
                     rows = parse_lliga_classificacio(cl.fetch_html(url))
                 except Exception as e:
@@ -994,12 +1008,13 @@ def publish_lliga(
     db_path: Path | None = None,
     on_progress: Progress | None = None,
     use_official: bool = True,
+    lliga_id: int | None = None,
 ) -> dict[str, int]:
     """Calcula i puja les classificacions de la lliga 3 bandes (temporada actual).
 
     Les estadístiques de detall (PJ/G/E/P, parcials) es deriven dels encontres,
     però la POSICIÓ i els PUNTS són els de la classificació OFICIAL de la
-    federació (`/ca/lligues/classificacio/...`), que ja porta el desempat oficial
+    federació (`/frontend/lligues/classificacio/...`), que ja porta el desempat oficial
     (per parcials) i les penalitzacions federatives —que no es publiquen com a
     fet separat, només es veuen com a menys punts dels que tocarien. Quan un equip
     té menys punts oficials dels esperats per les seves victòries, la diferència
@@ -1008,6 +1023,7 @@ def publish_lliga(
     encontres (PM, després parcials a favor), com fa la federació.
     """
     prog: Progress = on_progress or (lambda level, msg: None)
+    lliga = lliga_id if lliga_id is not None else LLIGA_3B_ID
     db_path = db_path or get_settings().db_path
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
@@ -1024,7 +1040,7 @@ def publish_lliga(
         (r["divisio_id"], r["grup_id"]): r["nom"]
         for r in conn.execute(
             "SELECT divisio_id, grup_id, nom FROM lliga_noms WHERE lliga_id = ?",
-            (LLIGA_3B_ID,),
+            (lliga,),
         )
     }
     equips = {
@@ -1035,18 +1051,40 @@ def publish_lliga(
         )
     }
 
-    groups = conn.execute(
-        """
-        SELECT DISTINCT divisio_id, grup_id FROM encontres_lliga
-        WHERE lliga_id = ? AND temporada_id = ? AND grup_id <> 0
-        """,
-        (LLIGA_3B_ID, season_id),
-    ).fetchall()
+    # Els grups de la lliga, no només aquells dels quals tenim encontres. Els
+    # encontres no en són un cens fiable per dos motius, i tots dos s'han cobrat
+    # dades: una temporada que encara no ha començat no en té cap —els
+    # enfrontaments no jugats no porten enllaç a la web i per tant no tenen id,
+    # o sigui que no es poden ingerir—, i de les promocions ens en falten. Amb
+    # el criteri vell la web es quedava ensenyant la temporada passada tot el
+    # setembre, i les promocions desapareixien de la classificació.
+    #
+    # La classificació oficial, en canvi, es publica de tots els grups des del
+    # primer dia. Els grups sense encontres nostres en surten sencers, amb els
+    # equips i les posicions de la federació.
+    claus = {
+        (r["divisio_id"], r["grup_id"])
+        for r in conn.execute(
+            """
+            SELECT DISTINCT divisio_id, grup_id FROM encontres_lliga
+            WHERE lliga_id = ? AND temporada_id = ? AND grup_id <> 0
+            """,
+            (lliga, season_id),
+        )
+    } | {
+        (r["divisio_id"], r["grup_id"])
+        for r in conn.execute(
+            "SELECT DISTINCT divisio_id, grup_id FROM lliga_noms "
+            "WHERE lliga_id = ? AND grup_id <> 0",
+            (lliga,),
+        )
+    }
+    groups = [{"divisio_id": d, "grup_id": g} for d, g in sorted(claus)]
 
     official: dict[tuple[int, int], list] = {}
     if use_official:
         official = _fetch_official_lliga_standings(
-            [(g["divisio_id"], g["grup_id"]) for g in groups], prog
+            [(g["divisio_id"], g["grup_id"]) for g in groups], prog, lliga
         )
 
     group_rows: list[dict] = []
@@ -1054,7 +1092,7 @@ def publish_lliga(
     for grp in groups:
         div, gid = grp["divisio_id"], grp["grup_id"]
         group_rows.append({
-            "lliga_id": LLIGA_3B_ID, "divisio_id": div, "grup_id": gid,
+            "lliga_id": lliga, "divisio_id": div, "grup_id": gid,
             "divisio_nom": noms.get((div, 0)), "grup_nom": noms.get((div, gid)),
         })
         enc = conn.execute(
@@ -1065,7 +1103,7 @@ def publish_lliga(
             FROM encontres_lliga
             WHERE lliga_id = ? AND divisio_id = ? AND grup_id = ? AND temporada_id = ?
             """,
-            (LLIGA_3B_ID, div, gid, season_id),
+            (lliga, div, gid, season_id),
         ).fetchall()
         stats: dict[int, dict] = {}
 
@@ -1106,6 +1144,28 @@ def publish_lliga(
                 return (0, off.posicio, 0, 0)
             return (1, 0, -(3 * s["g"] + s["e"]), -s["ppf"])
 
+        # Encara no s'ha jugat res en aquest grup: els equips i l'ordre surten
+        # de la classificació oficial, i tota la resta és zero perquè zero és el
+        # que hi ha. Val més ensenyar la lliga nova buida que la vella plena.
+        if not stats and off_rows:
+            for off in off_rows:
+                cid = repo.resolve_club_id_by_nom(off.equip)
+                fila = (
+                    conn.execute(
+                        "SELECT fcb_id FROM clubs WHERE id = ?", (cid,)
+                    ).fetchone()
+                    if cid
+                    else None
+                )
+                standing_rows.append({
+                    "lliga_id": lliga, "divisio_id": div, "grup_id": gid,
+                    "posicio": off.posicio, "equip": off.equip,
+                    "club_fcb_id": fila["fcb_id"] if fila else None,
+                    "pj": 0, "g": 0, "e": 0, "p": 0,
+                    "punts": off.pm, "pf": 0, "pc": 0, "penalitzacio": None,
+                })
+            continue
+
         ranked = sorted(stats.items(), key=_rank_key)
         for pos, (eid, s) in enumerate(ranked, start=1):
             nom, fcb_id, lletra, _club_id = equips.get(eid, ("?", None, "", None))
@@ -1122,7 +1182,7 @@ def publish_lliga(
                 else None
             )
             standing_rows.append({
-                "lliga_id": LLIGA_3B_ID, "divisio_id": div, "grup_id": gid,
+                "lliga_id": lliga, "divisio_id": div, "grup_id": gid,
                 "posicio": pos, "equip": equip, "club_fcb_id": fcb_id,
                 "pj": s["pj"], "g": s["g"], "e": s["e"], "p": s["p"],
                 "punts": punts, "pf": s["pf"], "pc": s["pc"],
@@ -1136,8 +1196,54 @@ def publish_lliga(
     counts["lliga_standings"] = _upsert(
         sb, "lliga_standings", standing_rows, "lliga_id,divisio_id,grup_id,equip", prog
     )
+    # L'upsert no s'endú res: només escriu i sobreescriu. Aquestes dues taules
+    # són «la temporada en curs», o sigui que tot el que hi quedi de més ho és
+    # de sobres, i sobra en silenci —no es veu que hi sigui fins que apareix
+    # duplicat a la web. Ha passat dues vegades: quan un club va canviar de nom
+    # (el Coral Colón sortia dos cops a la mateixa classificació, amb els
+    # mateixos punts) i quan la temporada canvia de lliga_id.
+    counts["retirades"] = _retira_sobrants(
+        sb, "lliga_standings", lliga,
+        {(r["divisio_id"], r["grup_id"], r["equip"]) for r in standing_rows},
+        ("divisio_id", "grup_id", "equip"), prog,
+    )
+    counts["grups_retirats"] = _retira_sobrants(
+        sb, "lliga_groups", lliga,
+        {(r["divisio_id"], r["grup_id"]) for r in group_rows},
+        ("divisio_id", "grup_id"), prog,
+    )
     conn.close()
     return counts
+
+
+def _retira_sobrants(
+    sb, taula: str, lliga: int, vius: set, claus: tuple[str, ...], prog: Progress
+) -> int:
+    """Esborra de `taula` el que no s'acaba de publicar.
+
+    Dues coses: les files d'altres lligues —les temporades anteriors, que ja
+    tenen el seu lloc a l'històric— i les d'aquesta que ja no surten al que hem
+    publicat, que són les que han canviat de nom.
+    """
+    fora = 0
+    r = sb.table(taula).select(",".join(("lliga_id", *claus))).execute().data or []
+    for fila in r:
+        if fila["lliga_id"] != lliga:
+            q = sb.table(taula).delete().eq("lliga_id", fila["lliga_id"])
+            for c in claus:
+                q = q.eq(c, fila[c])
+            q.execute()
+            fora += 1
+            continue
+        if tuple(fila[c] for c in claus) not in vius:
+            q = sb.table(taula).delete().eq("lliga_id", lliga)
+            for c in claus:
+                q = q.eq(c, fila[c])
+            q.execute()
+            fora += 1
+    if fora:
+        prog("ok", f"{taula}: {fora} files retirades (ja no hi són)")
+    return fora
 
 
 def publish_lliga_standings_hist(

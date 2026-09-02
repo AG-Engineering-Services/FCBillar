@@ -37,8 +37,21 @@
 			standings = (s ?? []) as StandingRow[];
 			pranks = (pr ?? []) as PlayerRankRow[];
 			encontres = enc ?? [];
-			const { data: hs } = await db.from('lliga_history').select('temporada');
-			histSeasons = [...new Set((hs ?? []).map((r) => r.temporada as string))].sort().reverse();
+			// `lliga_standings_hist` i no `lliga_history`: la segona és una taula
+			// morta que no escriu ningú i es va quedar al 2024-2025, o sigui que el
+			// selector no s'actualitzava mai. La que s'omple a cada publicació és
+			// aquesta, i a més porta el nom real del grup —«Final», «Promoció»—,
+			// que l'altra no distingia.
+			const { data: hs, error: eh } = await db
+				.from('lliga_standings_hist')
+				.select('temporada');
+			// L'error s'ensenya: si es menja, el selector desapareix i ningú no
+			// sap que hi hauria d'haver històric.
+			if (eh) throw eh;
+			histSeasons = [...new Set((hs ?? []).map((r) => r.temporada as string))]
+				.filter((t) => t !== currentSeason)
+				.sort()
+				.reverse();
 		} catch (e) {
 			error = (e as Error).message;
 		} finally {
@@ -105,26 +118,40 @@
 	let season = $state(currentSeason);
 	let histSeasons = $state<string[]>([]);
 	let history = $state<
-		{ lliga: string; divisio: string; posicio: number; equip: string; pm: number; pp: number }[]
+		{
+			lliga: string;
+			divisio: string;
+			/** «A», «B», «Final», «Promoció»… Cada fase té la seva classificació. */
+			grup: string;
+			posicio: number;
+			equip: string;
+			pm: number;
+			pp: number;
+		}[]
 	>([]);
 	$effect(() => {
 		if (season !== currentSeason) loadHistory(season);
 	});
 	async function loadHistory(s: string) {
 		const { data } = await db
-			.from('lliga_history')
-			.select('lliga, divisio, posicio, equip, pm, pp')
+			.from('lliga_standings_hist')
+			.select('lliga, divisio, grup, posicio, equip, pm, pp')
 			.eq('temporada', s)
 			.order('lliga')
 			.order('divisio')
+			.order('grup')
 			.order('posicio');
 		history = (data ?? []) as typeof history;
 	}
+	// El grup forma part de la clau: una divisió té grup A, grup B, la promoció i
+	// la final, i cadascuna té la seva classificació. Ajuntar-les en una de sola
+	// barrejaria quatre taules diferents amb posicions repetides.
 	const histGroups = $derived(
-		[...new Set(history.map((r) => `${r.lliga}||${r.divisio}`))].map((k) => ({
+		[...new Set(history.map((r) => `${r.lliga}||${r.divisio}||${r.grup}`))].map((k) => ({
 			lliga: k.split('||')[0],
 			divisio: k.split('||')[1],
-			rows: history.filter((r) => `${r.lliga}||${r.divisio}` === k)
+			grup: k.split('||')[2],
+			rows: history.filter((r) => `${r.lliga}||${r.divisio}||${r.grup}` === k)
 		}))
 	);
 	let jornadaSel = $state<Record<number, number>>({});
@@ -191,12 +218,12 @@
 		{/if}
 		{#each histGroups as grp}
 			<section class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-				<header class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400">{grp.lliga} · {grp.divisio}</header>
+				<header class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400">{grp.lliga} · {grp.divisio} · {grp.grup}</header>
 				<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					<span class="w-5 text-center">#</span><span class="flex-1">Equip</span><span class="w-8 text-right">PM</span><span class="w-8 text-right">PP</span>
 				</div>
 				<ul>
-					{#each grp.rows as r (r.equip)}
+					{#each grp.rows as r (r.equip + r.grup)}
 						<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
 							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</span>
 							<span class="min-w-0 flex-1 truncate text-sm">{r.equip}</span>
