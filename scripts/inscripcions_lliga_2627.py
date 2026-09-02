@@ -52,13 +52,14 @@ GRUPS = {"Honor": 2, "1a": 2, "2a": 2, "3a": 2, "4a": 4}
 # El cens oficial de clubs va canviar de nom en unes quantes entrades quan la
 # federació va passar el llistat al WordPress. Aquestes equivalències estan
 # comprovades contra l'adreça de cada club al llistat oficial nou —en particular
-# «C.B.SANT FELIU», que és el de Sant Feliu de CODINES i no el de Llobregat.
+# «C.B.SANT FELIU», que és el de Sant Feliu de CODINES: ho diu la seva adreça i
+# ho confirma el club.
 EQUIVALENTS = {
     "BELMASNOU": "BILLARELMASNOU",
+    "BCSANTFELIUDECODINES": "CBSANTFELIU",
     "CBCANET": "CBCANETDEMAR",
     "SBFOMENTMOLINS": "SBFMOLINS",
     "CASALDECERVERA": "SECASALCERVERA",
-    "BCSANTFELIUDECODINES": "CBSANTFELIU",
     "BLAUNIOCORAL": "SBLAUNIOCORAL",
 }
 

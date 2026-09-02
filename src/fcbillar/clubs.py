@@ -13,16 +13,24 @@ vegades.
 
 ## Com s'ha comprovat que són el mateix
 
-No per semblança del nom, que és el que fa equivocar. De les nou parelles:
+No per semblança del nom, que és el que fa equivocar. Set de les nou parelles d'aquí
+sota tenen el nom nou **buit** —zero jugadors, zero equips—: són les fitxes que
+es van crear en importar el cens oficial i no s'hi ha enganxat mai res. Unir un
+registre buit amb un de ple no pot perdre res.
 
-- Set tenen el nom nou **buit** —zero jugadors, zero equips—: són les fitxes que
-  es van crear en importar el cens oficial i no s'hi ha enganxat mai res. Unir
-  un registre buit amb un de ple no pot perdre res.
-- **Coral Colón** i **Sant Feliu de Codines** tenien tots dos registres amb
-  dades i semblaven dos clubs. Mirant a quina lliga juguen es veu que no: un
-  registre porta l'equip de la lliga de Tres Bandes (36) i l'altre el de la de
-  4 Modalitats (37), i mai coincideixen a la mateixa. És el mateix club amb
-  l'equip de cada lliga sota el nom que li dona la pàgina d'aquella lliga.
+## Les dues parelles que tenen dades a totes dues bandes
+
+«CORAL COLÓN» i «S.B.CORAL COLÓN», i «B.C.SANT FELIU DE CODINES» i «C.B.SANT
+FELIU». Aquí no val l'argument del registre buit, i tampoc no en val un que vaig
+fer servir primer i és fals: que cada registre porti l'equip d'una lliga
+diferent —Tres Bandes en un, 4 Modalitats en l'altre— i que mai no coincideixin
+NO demostra que siguin el mateix club, perquè dos clubs diferents també poden
+jugar cadascun una sola de les dues lligues.
+
+El que ho sosté és una altra cosa: el cens oficial en té un de sol de cada, i
+el Sant Feliu del cens és el de Codines —hi diu l'adreça, «Centre Cívic, Sant
+Feliu de Codines»—, cosa que el soci del club confirma. El Coral Colón descansa
+en la mateixa evidència: un sol Coral Colón al cens, a Sabadell.
 
 ## El que NO s'unifica
 
