@@ -1244,19 +1244,20 @@ def publish_lliga(
         )
         counts["retirades"] = counts["grups_retirats"] = 0
     else:
+        # Tampoc no se'n retiren les temporades anteriors. Va semblar bona idea
+        # -«aquesta taula és la temporada en curs»- i va resultar que no ho és:
+        # `lliga_encontres` es guarda els encontres de totes les temporades i
+        # l'aplicació del club en penja el seguiment de la seva, o sigui que
+        # treure'n la 2025-26 va deixar el Banyoles sense classificacions ni
+        # resultats de tota la temporada passada. Cada fila porta el seu
+        # lliga_id: qui vulgui només la d'ara, que filtri, com fa /lliga.
         counts["retirades"] = _retira_sobrants(
             sb, "lliga_standings", lliga,
             {(r["divisio_id"], r["grup_id"], r["equip"]) for r in standing_rows},
-            ("divisio_id", "grup_id", "equip"), prog,
+            ("divisio_id", "grup_id", "equip"), prog, altres_lligues=False,
         )
-        # De `lliga_groups` NO se'n retiren les temporades anteriors. No és una
-        # taula de la temporada en curs sinó el diccionari que dona nom als
-        # `grup_id`, i `lliga_encontres` es guarda els encontres de totes les
-        # temporades: sense el diccionari es queden orfes i ningú no pot dir de
-        # quin grup eren. Va passar en publicar la 2026-27, que es va endur els
-        # noms dels 19 grups de la 25-26 i amb ells la lectura de 648 encontres.
-        # Cada fila va marcada amb el seu `lliga_id`, o sigui que conviure-hi no
-        # és cap ambigüitat: qui vulgui només la temporada en curs, que filtri.
+        # El mateix per als noms dels grups, que a més són el diccionari amb què
+        # es llegeixen els encontres de totes les temporades.
         counts["grups_retirats"] = _retira_sobrants(
             sb, "lliga_groups", lliga,
             {(r["divisio_id"], r["grup_id"]) for r in group_rows},

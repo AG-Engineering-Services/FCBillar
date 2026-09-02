@@ -247,7 +247,15 @@ def test_els_noms_dels_grups_de_temporades_velles_no_es_retiren(entorn, monkeypa
     assert vells, "el nom del grup de la temporada passada s'ha de quedar"
 
 
-def test_la_temporada_anterior_es_retira_quan_la_nova_es_sencera(entorn, monkeypatch) -> None:
+def test_la_temporada_anterior_es_queda(entorn, monkeypatch) -> None:
+    """Publicar una temporada no se n'endú l'anterior.
+
+    Va semblar que `lliga_standings` era «la temporada en curs» i resulta que no:
+    `lliga_encontres` es guarda els encontres de totes, i l'aplicació del club en
+    penja el seguiment. Retirar-ne la 2025-26 va deixar el Banyoles sense
+    classificacions ni resultats de tota la temporada passada. Cada fila porta el
+    seu lliga_id; qui vulgui només la d'ara, que filtri.
+    """
     db, magatzem = entorn
     magatzem["lliga_standings"].append(
         {"lliga_id": 36, "divisio_id": 148, "grup_id": 316, "equip": "VELL", "posicio": 1}
@@ -261,19 +269,6 @@ def test_la_temporada_anterior_es_retira_quan_la_nova_es_sencera(entorn, monkeyp
         },
     )
     cloud_sync.publish_lliga(db_path=db, lliga_id=38)
-    assert not [f for f in magatzem["lliga_standings"] if f["lliga_id"] == 36]
-
-
-def test_pero_no_si_la_nova_ve_coixa(entorn, monkeypatch) -> None:
-    """Mig publicada, la temporada vella es queda: val més duplicat que perdut."""
-    db, magatzem = entorn
-    magatzem["lliga_standings"].append(
-        {"lliga_id": 36, "divisio_id": 148, "grup_id": 316, "equip": "VELL", "posicio": 1}
-    )
-    monkeypatch.setattr(
-        cloud_sync,
-        "_fetch_official_lliga_standings",
-        lambda claus, prog, lliga=38: {(159, 343): [_classificacio(1, "A", 0)]},
-    )
-    cloud_sync.publish_lliga(db_path=db, lliga_id=38)
     assert [f for f in magatzem["lliga_standings"] if f["lliga_id"] == 36]
+    # I la nova hi és igualment.
+    assert [f for f in magatzem["lliga_standings"] if f["lliga_id"] == 38]

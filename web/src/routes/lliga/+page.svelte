@@ -64,7 +64,12 @@
 	// sense el nom del grup es quedarien orfes. La que sí que és només de la
 	// temporada en curs és `lliga_standings`, i per això la temporada que
 	// s'ensenya surt d'aquí i no del rellotge.
-	const lligaActual = $derived(standings.length ? standings[0].lliga_id : null);
+	// La més alta de les que hi ha: la federació estrena id cada temporada i sempre
+	// creix. `lliga_standings` en porta més d'una -l'aplicació del club penja el
+	// seguiment de les passades- i aquí només s'ensenya la d'ara.
+	const lligaActual = $derived(
+		standings.length ? Math.max(...standings.map((s) => s.lliga_id)) : null
+	);
 	const divisions = $derived.by(() => {
 		const m = new Map<number, string>();
 		for (const g of groups.filter((g) => g.lliga_id === lligaActual)) if (!m.has(g.divisio_id)) m.set(g.divisio_id, g.divisio_nom ?? `Div ${g.divisio_id}`);
