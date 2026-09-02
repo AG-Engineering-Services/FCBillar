@@ -37,18 +37,23 @@ Versions:
 - 15: encontres_lliga.equip_local_id / equip_visitant_id admeten NULL, i els
      2.035 que valien 0 hi passen. El 0 no era cap equip: era un «no ho sé»
      escrit com si fos un id.
+- 16: repara les claus foranes que apuntaven a taules esborrades. Refer una
+     taula reanomenant-la primer fa que SQLite reescrigui cap al nom temporal
+     les claus foranes que hi apunten des d'altres taules; en esborrar-lo,
+     aquelles taules queden apuntant al no-res i no s'hi pot inserir.
 """
 
 from __future__ import annotations
 
 import logging
+import re
 import sqlite3
 from importlib.resources import files
 from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 15
+SCHEMA_VERSION = 16
 
 
 def _read_schema_sql() -> str:
@@ -122,6 +127,14 @@ def _migrate_to_v13(conn: sqlite3.Connection) -> None:
 
     SQLite no sap alterar un CHECK, així que cal refer la taula. Es fa amb el
     nom de columnes explícit per no dependre de l'ordre.
+
+    L'ordre importa i abans era el contrari: es reanomenava l'original i després
+    se'n creava una de nova amb el nom bo. Reanomenar una taula fa que SQLite
+    reescrigui les claus foranes que hi apunten des d'ALTRES taules, o sigui que
+    `ranking_entries` i `ranking_game_links` van passar a apuntar a
+    `rankings_v12`, que tot seguit s'esborrava. Amb foreign_keys=ON, inserir-hi
+    peta amb «no such table». Creant primer la nova amb un nom temporal i
+    reanomenant-la al final, les referències a `rankings` no es toquen mai.
     """
     cols = [row[1] for row in conn.execute("PRAGMA table_info(rankings)").fetchall()]
     if not cols:
@@ -130,8 +143,7 @@ def _migrate_to_v13(conn: sqlite3.Connection) -> None:
     conn.executescript(
         f"""
         PRAGMA foreign_keys = OFF;
-        ALTER TABLE rankings RENAME TO rankings_v12;
-        CREATE TABLE rankings (
+        CREATE TABLE rankings_nou (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             num_seq         INTEGER NOT NULL,
             modalitat_id    INTEGER NOT NULL REFERENCES modalitats(id),
@@ -144,8 +156,9 @@ def _migrate_to_v13(conn: sqlite3.Connection) -> None:
             data_pub        TEXT,
             UNIQUE (num_seq, modalitat_id)
         );
-        INSERT INTO rankings ({llista}) SELECT {llista} FROM rankings_v12;
-        DROP TABLE rankings_v12;
+        INSERT INTO rankings_nou ({llista}) SELECT {llista} FROM rankings;
+        DROP TABLE rankings;
+        ALTER TABLE rankings_nou RENAME TO rankings;
         PRAGMA foreign_keys = ON;
         """
     )
@@ -168,6 +181,11 @@ def _migrate_to_v15(conn: sqlite3.Connection) -> None:
 
     Cap ingesta d'ara no pot tornar a escriure un 0: `upsert_equip` es planta si
     el club no existeix.
+
+    Es crea la taula nova amb un nom temporal i es reanomena al final, i no al
+    revés: reanomenar l'original faria que SQLite reescrigués les claus foranes
+    de `games` i `lliga_pending_partides` cap al nom temporal, que tot seguit
+    s'esborra. Vegeu `_migrate_to_v13`, que ho feia així i ho va trencar.
     """
     cols = [row[1] for row in conn.execute("PRAGMA table_info(encontres_lliga)").fetchall()]
     if not cols:
@@ -176,8 +194,7 @@ def _migrate_to_v15(conn: sqlite3.Connection) -> None:
     conn.executescript(
         f"""
         PRAGMA foreign_keys = OFF;
-        ALTER TABLE encontres_lliga RENAME TO encontres_lliga_v14;
-        CREATE TABLE encontres_lliga (
+        CREATE TABLE encontres_lliga_nou (
             id                      INTEGER PRIMARY KEY AUTOINCREMENT,
             lliga_id                INTEGER NOT NULL,
             divisio_id              INTEGER NOT NULL,
@@ -194,9 +211,10 @@ def _migrate_to_v15(conn: sqlite3.Connection) -> None:
             p_match_visitant        INTEGER,
             UNIQUE(lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern)
         );
-        INSERT INTO encontres_lliga ({llista})
-            SELECT {llista} FROM encontres_lliga_v14;
-        DROP TABLE encontres_lliga_v14;
+        INSERT INTO encontres_lliga_nou ({llista})
+            SELECT {llista} FROM encontres_lliga;
+        DROP TABLE encontres_lliga;
+        ALTER TABLE encontres_lliga_nou RENAME TO encontres_lliga;
         UPDATE encontres_lliga SET equip_local_id = NULL WHERE equip_local_id = 0;
         UPDATE encontres_lliga SET equip_visitant_id = NULL WHERE equip_visitant_id = 0;
         PRAGMA foreign_keys = ON;
@@ -207,6 +225,93 @@ def _migrate_to_v15(conn: sqlite3.Connection) -> None:
         "WHERE equip_local_id IS NULL OR equip_visitant_id IS NULL"
     ).fetchone()[0]
     log.info("→v15: encontres_lliga admet equips desconeguts; %d en tenien un 0", n)
+
+
+def _taules_referenciades(sql: str) -> set[str]:
+    """Els noms de taula que apareixen a les REFERENCES d'un CREATE TABLE."""
+    return {
+        (m.group(1) or m.group(2) or "")
+        for m in re.finditer(r'REFERENCES\s+(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*))', sql)
+    }
+
+
+def claus_penjades(conn: sqlite3.Connection) -> dict[str, set[str]]:
+    """{taula: {destins que no existeixen}}. Buit vol dir que tot lliga.
+
+    Amb foreign_keys=ON, una clau forana cap a una taula que no existeix no és
+    un detall cosmètic: qualsevol INSERT a la taula que la porta peta amb «no
+    such table». I no es veu fins que algú hi escriu.
+    """
+    existents = {
+        r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+    }
+    penjades: dict[str, set[str]] = {}
+    for nom, sql in conn.execute(
+        "SELECT name, sql FROM sqlite_master WHERE type = 'table' AND sql IS NOT NULL"
+    ):
+        fora = {t for t in _taules_referenciades(sql) if t and t not in existents}
+        if fora:
+            penjades[nom] = fora
+    return penjades
+
+
+def _migrate_to_v16(conn: sqlite3.Connection) -> None:
+    """Torna a lligar les claus foranes que van quedar apuntant al no-res.
+
+    Les migracions v13 i v15 refeien una taula reanomenant primer l'original.
+    SQLite, en reanomenar, reescriu les claus foranes que hi apunten des
+    d'ALTRES taules perquè segueixin el nom nou —i tot seguit aquell nom
+    s'esborrava. Van quedar així `ranking_entries` i `ranking_game_links`
+    (cap a `rankings_v12`) i `games` i `lliga_pending_partides` (cap a
+    `encontres_lliga_v14`), i inserir-hi petava.
+
+    Aquí es refà cada taula tocada amb la referència corregida, ara sí creant la
+    nova amb un nom temporal i reanomenant-la al final. Els índexs se'n van amb
+    la taula i els torna a crear `schema.sql`, que s'executa després.
+    """
+    penjades = claus_penjades(conn)
+    if not penjades:
+        return
+    existents = {
+        r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+    }
+    for taula, tots in penjades.items():
+        # Només les restes de refer una taula, que porten el sufix de la versió
+        # («rankings_v12»). Aquí encara no s'ha executat `schema.sql`, o sigui
+        # que hi ha taules que legítimament no existeixen: una base de la v1 té
+        # `games` apuntant a `torneigs_individuals`, que es crea després. Qui
+        # comprova que al final tot lliga és el guardià d'`ensure_schema`.
+        destins = {d for d in tots if re.search(r"_v\d+$", d)}
+        if not destins:
+            continue
+        sql = conn.execute(
+            "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?", (taula,)
+        ).fetchone()[0]
+        nou = sql
+        for destí in destins:
+            # «rankings_v12» → «rankings»: el nom bo és el de sempre, sense el
+            # sufix que hi va posar la migració.
+            base = re.sub(r"_v\d+$", "", destí)
+            if base not in existents:
+                raise RuntimeError(
+                    f"{taula} apunta a «{destí}», que sembla una resta de refer "
+                    f"«{base}», però «{base}» tampoc no existeix. Cal mirar-ho a mà."
+                )
+            nou = nou.replace(f'"{destí}"', f'"{base}"').replace(f" {destí}(", f" {base}(")
+        cols = ", ".join(
+            f'"{r[1]}"' for r in conn.execute(f"PRAGMA table_info({taula})")
+        )
+        conn.executescript(
+            f"""
+            PRAGMA foreign_keys = OFF;
+            {nou.replace(taula, f"{taula}_nou", 1)};
+            INSERT INTO {taula}_nou ({cols}) SELECT {cols} FROM {taula};
+            DROP TABLE {taula};
+            ALTER TABLE {taula}_nou RENAME TO {taula};
+            PRAGMA foreign_keys = ON;
+            """
+        )
+        log.info("→v16: %s tornava a apuntar a %s", taula, ", ".join(sorted(destins)))
 
 
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
@@ -235,6 +340,9 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v15: un encontre pot no saber quins equips el van jugar.
     if 1 <= version < 15:
         _migrate_to_v15(conn)
+    # → v16: repara les claus foranes que la v13 i la v15 van deixar penjades.
+    if 1 <= version < 16:
+        _migrate_to_v16(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).
@@ -242,5 +350,16 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # executescript és idempotent (CREATE TABLE IF NOT EXISTS, INSERT OR IGNORE,
     # CREATE INDEX IF NOT EXISTS) — segur per a BDs noves i ja migrades.
     conn.executescript(_read_schema_sql())
+    # El guardià: una clau forana cap a una taula que no existeix no es veu fins
+    # que algú hi escriu, i llavors peta amb «no such table» lluny d'aquí. Dues
+    # migracions ho van deixar anar sense que ningú se n'adonés durant mesos.
+    penjades = claus_penjades(conn)
+    if penjades:
+        detall = "; ".join(f"{t} → {', '.join(sorted(d))}" for t, d in sorted(penjades.items()))
+        raise RuntimeError(
+            f"Hi ha claus foranes que apunten a taules que no existeixen: {detall}. "
+            f"Amb foreign_keys=ON no s'hi podrà inserir. Refer una taula ha de crear "
+            f"primer la nova amb un nom temporal i reanomenar-la al final, no al revés."
+        )
     conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
     return conn
