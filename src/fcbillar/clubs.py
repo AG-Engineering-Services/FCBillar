@@ -13,24 +13,44 @@ vegades.
 
 ## Com s'ha comprovat que són el mateix
 
-No per semblança del nom, que és el que fa equivocar. Set de les nou parelles d'aquí
-sota tenen el nom nou **buit** —zero jugadors, zero equips—: són les fitxes que
-es van crear en importar el cens oficial i no s'hi ha enganxat mai res. Unir un
-registre buit amb un de ple no pot perdre res.
+No per semblança del nom, que és el que fa equivocar.
 
-## Les dues parelles que tenen dades a totes dues bandes
+Sis de les nou tenen el nom nou **buit** —zero jugadors, zero equips—: són les
+fitxes que es van crear en importar el cens oficial i no s'hi ha enganxat mai
+res. Unir un registre buit amb un de ple no pot perdre res.
 
-«CORAL COLÓN» i «S.B.CORAL COLÓN», i «B.C.SANT FELIU DE CODINES» i «C.B.SANT
-FELIU». Aquí no val l'argument del registre buit, i tampoc no en val un que vaig
-fer servir primer i és fals: que cada registre porti l'equip d'una lliga
-diferent —Tres Bandes en un, 4 Modalitats en l'altre— i que mai no coincideixin
-NO demostra que siguin el mateix club, perquè dos clubs diferents també poden
+La setena, «SANT ADRIÀ», ni tan sols és una fila: surt a les classificacions i
+prou. Aquí no hi ha res a fusionar, només a evitar que la pròxima ingesta la
+creï.
+
+Queden les dues que tenen dades a totes dues bandes: «CORAL COLÓN» amb
+«S.B.CORAL COLÓN», i «B.C.SANT FELIU DE CODINES» amb «C.B.SANT FELIU». Un
+argument que vaig fer servir primer i que és FALS: que cada registre porti
+l'equip d'una lliga diferent —Tres Bandes en un, 4 Modalitats en l'altre— i que
+mai no coincideixin no demostra res, perquè dos clubs diferents també poden
 jugar cadascun una sola de les dues lligues.
 
-El que ho sosté és una altra cosa: el cens oficial en té un de sol de cada, i
-el Sant Feliu del cens és el de Codines —hi diu l'adreça, «Centre Cívic, Sant
-Feliu de Codines»—, cosa que el soci del club confirma. El Coral Colón descansa
-en la mateixa evidència: un sol Coral Colón al cens, a Sabadell.
+El que sí que ho demostra són les temporades. L'A i la B de «CORAL COLÓN» juguen
+del 2020-21 al 2024-25; les de «S.B.CORAL COLÓN», només el 2025-26. Un club no
+desapareix i n'apareix un altre amb el mateix nom i les mateixes lletres la
+temporada següent: és la mateixa A partida en dos trossos. I qui hi juga ho
+acaba de confirmar —hi ha en Yuri Trullás, que és del Coral Colón de sempre.
+
+El Sant Feliu és el mateix cas i el confirma el soci del club: el «C.B.SANT
+FELIU» del cens és el de Sant Feliu de Codines.
+
+Aquesta comprovació no és de fiar-se'n i prou: `Repository.merge_clubs` es
+planta si les dues fitxes es van enfrontar mai, perquè aleshores no poden ser
+el mateix club.
+
+## Això no ho arregla sol
+
+La base de dades no llegeix aquest fitxer: la resolució de noms viu a la taula
+`club_aliases`, que `resolve_club_id_by_nom` consulta abans de crear cap club.
+`fcbillar clubs unifica` passa aquesta llista a la base —fusiona les fitxes que
+ja s'havien partit i registra els àlies perquè no es tornin a partir. Aquí
+només hi ha la llista i la comparació de noms per als scripts que no toquen la
+base de dades.
 
 ## El que NO s'unifica
 

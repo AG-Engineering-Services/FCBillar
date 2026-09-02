@@ -122,6 +122,12 @@ class Repository:
 
         Retorna comptadors de què s'ha mogut. Llença ValueError si source==target
         o si algun dels dos no existeix.
+
+        Va tot en una transacció perquè la connexió és autocommit: sense
+        embolcallar-ho, un error a mig camí -una col·lisió inesperada, un equip
+        que desapareix- deixaria el club mig fusionat, amb els equips ja moguts i
+        els jugadors encara al source. Mig fusionat és pitjor que no fusionat,
+        perquè ja no es veu que hi hagi res per fer.
         """
         if source_fcb_id == target_fcb_id:
             raise ValueError("source i target no poden ser el mateix club")
@@ -132,6 +138,28 @@ class Repository:
         if target_id is None:
             raise ValueError(f"Club target {target_fcb_id} no registrat")
 
+        # Abans de tocar res: si les dues fitxes es van enfrontar mai, no són el
+        # mateix club. Redirigir aquell encontre el convertiria en un equip
+        # jugant contra ell mateix -un resultat inventat que després ningú no
+        # sabria d'on surt-, i a més voldria dir que la premissa de la fusió és
+        # falsa. Val més plantar-se i que algú ho miri.
+        cara_a_cara = self.conn.execute(
+            """
+            SELECT COUNT(*) FROM encontres_lliga el
+            JOIN equips a ON a.id = el.equip_local_id
+            JOIN equips b ON b.id = el.equip_visitant_id
+            WHERE (a.club_id = ? AND b.club_id = ?)
+               OR (a.club_id = ? AND b.club_id = ?)
+            """,
+            (source_id, target_id, target_id, source_id),
+        ).fetchone()[0]
+        if cara_a_cara:
+            raise ValueError(
+                f"'{source_fcb_id}' i '{target_fcb_id}' tenen {cara_a_cara} "
+                f"encontre(s) l'un contra l'altre: no poden ser el mateix club. "
+                f"No els fusiono."
+            )
+
         # Si ja hi ha equips iguals (mateixa lletra) a target, els del source
         # caldria reassignar-los; podríen colidir amb UNIQUE(club_id, lletra).
         # Solució: per cada (target_id, lletra) ja existent, els games i
@@ -141,62 +169,68 @@ class Repository:
             "SELECT id, lletra FROM equips WHERE club_id = ?", (source_id,)
         ).fetchall()
         equips_moved = 0
-        for src_eq_id, lletra in source_equips:
-            existing_target_eq = self.conn.execute(
-                "SELECT id FROM equips WHERE club_id = ? AND lletra = ?",
-                (target_id, lletra),
-            ).fetchone()
-            if existing_target_eq is not None:
-                # Reassignar games i encontres a l'equip target existent + esborrar el source.equip
-                tgt_eq_id = existing_target_eq[0]
-                self.conn.execute(
-                    "UPDATE games SET equip1_id = ? WHERE equip1_id = ?",
-                    (tgt_eq_id, src_eq_id),
-                )
-                self.conn.execute(
-                    "UPDATE games SET equip2_id = ? WHERE equip2_id = ?",
-                    (tgt_eq_id, src_eq_id),
-                )
-                self.conn.execute(
-                    "UPDATE encontres_lliga SET equip_local_id = ? WHERE equip_local_id = ?",
-                    (tgt_eq_id, src_eq_id),
-                )
-                self.conn.execute(
-                    "UPDATE encontres_lliga SET equip_visitant_id = ? WHERE equip_visitant_id = ?",
-                    (tgt_eq_id, src_eq_id),
-                )
-                self.conn.execute("DELETE FROM equips WHERE id = ?", (src_eq_id,))
-            else:
-                # Reassignar simple: el source.equip passa a pertànyer al target.club
-                self.conn.execute(
-                    "UPDATE equips SET club_id = ? WHERE id = ?",
-                    (target_id, src_eq_id),
-                )
-            equips_moved += 1
+        self.conn.execute("BEGIN IMMEDIATE")
+        try:
+            for src_eq_id, lletra in source_equips:
+                existing_target_eq = self.conn.execute(
+                    "SELECT id FROM equips WHERE club_id = ? AND lletra = ?",
+                    (target_id, lletra),
+                ).fetchone()
+                if existing_target_eq is not None:
+                    # Reassignar games i encontres a l'equip target existent + esborrar el source.equip
+                    tgt_eq_id = existing_target_eq[0]
+                    self.conn.execute(
+                        "UPDATE games SET equip1_id = ? WHERE equip1_id = ?",
+                        (tgt_eq_id, src_eq_id),
+                    )
+                    self.conn.execute(
+                        "UPDATE games SET equip2_id = ? WHERE equip2_id = ?",
+                        (tgt_eq_id, src_eq_id),
+                    )
+                    self.conn.execute(
+                        "UPDATE encontres_lliga SET equip_local_id = ? WHERE equip_local_id = ?",
+                        (tgt_eq_id, src_eq_id),
+                    )
+                    self.conn.execute(
+                        "UPDATE encontres_lliga SET equip_visitant_id = ? WHERE equip_visitant_id = ?",
+                        (tgt_eq_id, src_eq_id),
+                    )
+                    self.conn.execute("DELETE FROM equips WHERE id = ?", (src_eq_id,))
+                else:
+                    # Reassignar simple: el source.equip passa a pertànyer al target.club
+                    self.conn.execute(
+                        "UPDATE equips SET club_id = ? WHERE id = ?",
+                        (target_id, src_eq_id),
+                    )
+                equips_moved += 1
 
-        # Players: reassignar de source → target
-        cur = self.conn.execute(
-            "UPDATE players SET club_id = ? WHERE club_id = ?",
-            (target_id, source_id),
-        )
-        players_moved = cur.rowcount
+            # Players: reassignar de source → target
+            cur = self.conn.execute(
+                "UPDATE players SET club_id = ? WHERE club_id = ?",
+                (target_id, source_id),
+            )
+            players_moved = cur.rowcount
 
-        # Aliases: reassignar de source → target
-        cur = self.conn.execute(
-            "UPDATE club_aliases SET club_id = ? WHERE club_id = ?",
-            (target_id, source_id),
-        )
-        aliases_moved = cur.rowcount
+            # Aliases: reassignar de source → target
+            cur = self.conn.execute(
+                "UPDATE club_aliases SET club_id = ? WHERE club_id = ?",
+                (target_id, source_id),
+            )
+            aliases_moved = cur.rowcount
 
-        # Crear alias per preservar el nom del source.
-        # INSERT OR IGNORE perquè potser ja existeix com a alias.
-        self.conn.execute(
-            "INSERT OR IGNORE INTO club_aliases (alias_nom, club_id) VALUES (?, ?)",
-            (source_fcb_id, target_id),
-        )
+            # Crear alias per preservar el nom del source.
+            # INSERT OR IGNORE perquè potser ja existeix com a alias.
+            self.conn.execute(
+                "INSERT OR IGNORE INTO club_aliases (alias_nom, club_id) VALUES (?, ?)",
+                (source_fcb_id, target_id),
+            )
 
-        # Esborrar el club source.
-        self.conn.execute("DELETE FROM clubs WHERE id = ?", (source_id,))
+            # Esborrar el club source.
+            self.conn.execute("DELETE FROM clubs WHERE id = ?", (source_id,))
+        except Exception:
+            self.conn.execute("ROLLBACK")
+            raise
+        self.conn.execute("COMMIT")
 
         return {
             "equips_moved": equips_moved,

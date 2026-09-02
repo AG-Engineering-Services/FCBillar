@@ -715,6 +715,78 @@ def clubs_merge_cmd(
     )
 
 
+@clubs_app.command("unifica")
+def clubs_unifica_cmd(
+    aplica: bool = typer.Option(
+        False, "--aplica", help="Fes-ho de debò. Sense això només ho ensenya."
+    ),
+) -> None:
+    """Aplica totes les equivalències de `clubs.ALIES` d'una tirada.
+
+    `merge` fusiona una parella; això passa la llista sencera dels noms que la
+    federació escriu de dues maneres. Per a cada parella fa una cosa o l'altra:
+    si el nom vell té fitxa pròpia, la fusiona amb l'oficial; si no en té -perquè
+    de moment només surt a les classificacions-, en registra l'àlies perquè la
+    pròxima ingesta no la creï.
+
+    Per defecte només ensenya què faria. Cal `--aplica` per tocar res.
+    """
+    from fcbillar.clubs import ALIES, normalitza
+
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    repo = Repository(conn)
+
+    noms = {normalitza(nom): nom for (nom,) in conn.execute("SELECT nom FROM clubs")}
+    table = Table(title="Unificació de clubs" + ("" if aplica else " (assaig en sec)"))
+    table.add_column("Nom vell", style="cyan")
+    table.add_column("Oficial", style="green")
+    table.add_column("Què hi fa")
+    fusions = alies = 0
+
+    for vell, oficial in sorted(ALIES.items()):
+        real_oficial = noms.get(normalitza(oficial))
+        if real_oficial is None:
+            console.print(
+                f"[red]«{oficial}» no és a la taula clubs: no hi puc fusionar "
+                f"«{vell}». Repassa clubs.ALIES o fes `fcbillar import-clubs`.[/]"
+            )
+            raise typer.Exit(1)
+        real_vell = noms.get(normalitza(vell))
+
+        if real_vell is None:
+            if aplica:
+                repo.add_club_alias(vell, real_oficial)
+                conn.commit()
+            alies += 1
+            table.add_row(vell, real_oficial, "només àlies (no té fitxa)")
+            continue
+
+        cid = repo.get_club_id_by_fcb_id(real_vell)
+        n_jug = conn.execute(
+            "SELECT COUNT(*) FROM players WHERE club_id = ?", (cid,)
+        ).fetchone()[0]
+        n_eq = conn.execute(
+            "SELECT COUNT(*) FROM equips WHERE club_id = ?", (cid,)
+        ).fetchone()[0]
+        if aplica:
+            try:
+                repo.merge_clubs(real_vell, real_oficial)
+            except ValueError as e:
+                console.print(f"[red]{e}[/]")
+                raise typer.Exit(1) from e
+        fusions += 1
+        table.add_row(vell, real_oficial, f"fusiona {n_jug} jugadors, {n_eq} equips")
+
+    console.print(table)
+    console.print(
+        f"[green]OK {fusions} fusions i {alies} àlies.[/]"
+        if aplica
+        else f"[yellow]{fusions} fusions i {alies} àlies pendents. "
+        f"Torna-hi amb --aplica per fer-ho.[/]"
+    )
+
+
 @app.command("import-temporada")
 def import_temporada_cmd(
     no_clubs: bool = typer.Option(False, "--no-clubs", help="No fer import-clubs"),
