@@ -161,6 +161,12 @@ export interface PlayerRankRow {
   player_fcb_id: string;
   jugador: string | null;
   club: string | null;
+  /**
+   * El mateix identificador que porta la classificació, que és el que hi lliga.
+   * `club` és el NOM i no serveix per creuar-les: no sempre coincideixen, i a
+   * més el nom pot canviar quan s'unifiquen dues fitxes del mateix club.
+   */
+  club_fcb_id?: string | null;
   partides: number | null;
   punts: number | null;
   mitjana: number | null;
