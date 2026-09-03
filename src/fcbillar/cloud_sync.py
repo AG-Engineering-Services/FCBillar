@@ -4248,6 +4248,50 @@ def publish_live_opens(
     }
 
 
+def _publica_reemplaçant(
+    sb,
+    taula: str,
+    files: list[dict],
+    clau: tuple[str, ...],
+    ambit: tuple[str, ...],
+    prog: Progress,
+) -> int:
+    """Puja `files` i després treu el que ja no hi és, dins del que s'ha publicat.
+
+    Primer escriure i després retirar, i no al revés. Esborrar abans deixa una
+    finestra en què la taula és buida, i si la pujada falla -xarxa, una fila
+    dolenta, la taula que encara no existeix- s'hi queda: el calendari
+    desapareix del web i el que ho diu és un avís que ningú no mira.
+
+    Fent-ho en aquest ordre, una fallada deixa les dades velles al seu lloc.
+    Poden quedar-hi files de més fins a la propera publicació, i això es veu i
+    es resol tornant a publicar; una taula buida, no.
+
+    `clau` identifica una fila i `ambit` el que es reemplaça: d'una font i una
+    temporada, per exemple, se'n treuen les files que ja no surten al PDF, però
+    no es toca res de les altres.
+    """
+    n = _upsert(sb, taula, files, ",".join(clau), prog)
+    vius = {tuple(str(f[c]) for c in clau) for f in files}
+    ambits = {tuple(f[c] for c in ambit) for f in files}
+    fora = 0
+    for valors in ambits:
+        q = sb.table(taula).select(",".join(dict.fromkeys(clau + ambit)))
+        for camp, valor in zip(ambit, valors, strict=True):
+            q = q.eq(camp, valor)
+        for fila in q.execute().data or []:
+            if tuple(str(fila[c]) for c in clau) in vius:
+                continue
+            d = sb.table(taula).delete()
+            for camp in clau:
+                d = d.eq(camp, fila[camp])
+            d.execute()
+            fora += 1
+    if fora:
+        prog("ok", f"{taula}: {fora} files retirades (ja no hi són)")
+    return n
+
+
 def publish_calendari(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
@@ -4304,10 +4348,6 @@ def publish_calendari(
             "FROM calendari_canvis c JOIN calendari_versions v ON v.id = c.versio_id"
         )
     ]
-    combinacions = sorted(
-        {(r["font"], r["temporada"]) for r in events}
-        | {(r["font"], r["temporada"]) for r in revisions}
-    )
     # El calendari sencer de cada grup: qui hi ha a cada grup i totes les
     # jornades. És el que permet ensenyar la temporada que comença amb la mateixa
     # forma que una de jugada, mentre la federació no publiqui la competició.
@@ -4332,18 +4372,19 @@ def publish_calendari(
                 r[camp] = r[camp].replace(" ", "T") + "Z"
 
     sb = get_client()
-    for font, temporada in combinacions:
-        for taula in ("calendari_events", "calendari_canvis", "calendari_revisions"):
-            sb.table(taula).delete().eq("font", font).eq("temporada", temporada).execute()
-    n_ev = _upsert(
-        sb,
-        "calendari_events",
-        events,
-        "font,temporada,setmana,disciplina,ambit,grup,tipus",
-        prog,
+    n_ev = _publica_reemplaçant(
+        sb, "calendari_events", events,
+        ("font", "temporada", "setmana", "disciplina", "ambit", "grup", "tipus"),
+        ("font", "temporada"), prog,
     )
-    n_rev = _upsert(sb, "calendari_revisions", revisions, "font,temporada,sha256", prog)
-    n_can = _upsert(sb, "calendari_canvis", canvis, "font,temporada,sha256,ord", prog)
+    n_rev = _publica_reemplaçant(
+        sb, "calendari_revisions", revisions,
+        ("font", "temporada", "sha256"), ("font", "temporada"), prog,
+    )
+    n_can = _publica_reemplaçant(
+        sb, "calendari_canvis", canvis,
+        ("font", "temporada", "sha256", "ord"), ("font", "temporada"), prog,
+    )
 
     # El calendari sencer de cada grup, que és el que permet ensenyar la
     # temporada que comença amb la mateixa forma que una de jugada: qui hi ha a
@@ -4352,23 +4393,13 @@ def publish_calendari(
     n_cal = 0
     if grups_cal:
         try:
-            # Reemplaça per grup: els PDF arriben d'un en un i la federació en va
-            # publicant revisions que canvien enfrontaments -a la 4a B ja n'ha
-            # canviat tres-, o sigui que un upsert sol deixaria els vells.
-            for temp, div, grup in {
-                (g["temporada"], g["divisio"], g["grup"]) for g in grups_cal
-            }:
-                (
-                    sb.table("lliga_calendari")
-                    .delete()
-                    .eq("temporada", temp)
-                    .eq("divisio", div)
-                    .eq("grup", grup)
-                    .execute()
-                )
-            n_cal = _upsert(
+            # Es reemplaça grup a grup: els PDF arriben d'un en un i la federació
+            # en va publicant revisions que canvien enfrontaments -a la 4a B ja
+            # n'ha canviat tres-, o sigui que un upsert sol deixaria els vells.
+            n_cal = _publica_reemplaçant(
                 sb, "lliga_calendari", grups_cal,
-                "temporada,divisio,grup,jornada,local,visitant", prog,
+                ("temporada", "divisio", "grup", "jornada", "local", "visitant"),
+                ("temporada", "divisio", "grup"), prog,
             )
         except Exception as exc:  # noqa: BLE001
             # La taula la crea l'administrador: amb PostgREST no es pot fer cap
