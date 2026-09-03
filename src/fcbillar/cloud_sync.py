@@ -4384,31 +4384,29 @@ def publish_calendari(
     combinacions = {(r["font"], r["temporada"]) for r in events} | {
         (r["font"], r["temporada"]) for r in revisions
     }
-    if not combinacions:
-        # Cap font ni temporada: això no és un calendari buit, és una lectura que
-        # no ha donat res. Buidar-ho tot a partir d'aquí se n'enduria el
-        # calendari sencer del web.
-        prog("warn", "calendari: cap acte ni revisió a la BD local; no toco res")
-        return {
-            "calendari_events": 0,
-            "calendari_revisions": 0,
-            "calendari_canvis": 0,
-            "lliga_calendari": 0,
-        }
     sb = get_client()
-    n_ev = _publica_reemplaçant(
-        sb, "calendari_events", events,
-        ("font", "temporada", "setmana", "disciplina", "ambit", "grup", "tipus"),
-        ("font", "temporada"), prog, combinacions,
-    )
-    n_rev = _publica_reemplaçant(
-        sb, "calendari_revisions", revisions,
-        ("font", "temporada", "sha256"), ("font", "temporada"), prog, combinacions,
-    )
-    n_can = _publica_reemplaçant(
-        sb, "calendari_canvis", canvis,
-        ("font", "temporada", "sha256", "ord"), ("font", "temporada"), prog, combinacions,
-    )
+    n_ev = n_rev = n_can = 0
+    if combinacions:
+        n_ev = _publica_reemplaçant(
+            sb, "calendari_events", events,
+            ("font", "temporada", "setmana", "disciplina", "ambit", "grup", "tipus"),
+            ("font", "temporada"), prog, combinacions,
+        )
+        n_rev = _publica_reemplaçant(
+            sb, "calendari_revisions", revisions,
+            ("font", "temporada", "sha256"), ("font", "temporada"), prog, combinacions,
+        )
+        n_can = _publica_reemplaçant(
+            sb, "calendari_canvis", canvis,
+            ("font", "temporada", "sha256", "ord"), ("font", "temporada"), prog, combinacions,
+        )
+    else:
+        # Cap font ni temporada: això no és un calendari buit, és una lectura que
+        # no ha donat res, i buidar-ho a partir d'aquí se n'enduria el calendari
+        # sencer del web. Només es deixen estar aquestes tres taules: el
+        # calendari de grups ve dels PDF de la lliga, té font pròpia, i que la
+        # federativa falli no és cap motiu per no publicar-lo.
+        prog("warn", "calendari federatiu: cap acte ni revisió a la BD local; no el toco")
 
     # El calendari sencer de cada grup, que és el que permet ensenyar la
     # temporada que comença amb la mateixa forma que una de jugada: qui hi ha a
