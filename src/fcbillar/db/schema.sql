@@ -448,3 +448,29 @@ CREATE TABLE IF NOT EXISTS inscrits_individual (
     definitiva  INTEGER NOT NULL,
     PRIMARY KEY (temporada, jugador)
 );
+
+-- El calendari sencer d'un grup de lliga, tal com el publica la federació en PDF.
+--
+-- No és la competició: és el que se'n sap ABANS que la competició existeixi. La
+-- federació no publica els encontres al seu web fins que es juguen —un partit no
+-- disputat no porta ni enllaç ni identificador—, o sigui que del setembre fins a
+-- la primera jornada no hi ha res a `encontres_lliga`. El PDF, en canvi, ja diu
+-- qui juga contra qui i quin dia.
+--
+-- Per això va a part i no a `encontres_lliga`: allò porta identificadors de la
+-- federació i resultats, i això són noms d'equip i dates que encara poden
+-- canviar. Quan la competició es publiqui, mana la competició.
+--
+-- La clau inclou els dos equips perquè una jornada té diversos encontres.
+CREATE TABLE IF NOT EXISTS lliga_calendari (
+    temporada  TEXT NOT NULL,              -- '2026/2027'
+    divisio    TEXT NOT NULL,              -- '1a', '2a', '4a'
+    grup       TEXT NOT NULL,              -- 'A', 'B', 'D'
+    jornada    INTEGER NOT NULL,
+    data       TEXT NOT NULL,              -- ISO
+    local      TEXT NOT NULL,
+    visitant   TEXT NOT NULL,
+    PRIMARY KEY (temporada, divisio, grup, jornada, local, visitant)
+);
+CREATE INDEX IF NOT EXISTS ix_lliga_calendari_grup
+    ON lliga_calendari(temporada, divisio, grup, jornada);

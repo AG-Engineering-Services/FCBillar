@@ -41,6 +41,9 @@ Versions:
      taula reanomenant-la primer fa que SQLite reescrigui cap al nom temporal
      les claus foranes que hi apunten des d'altres taules; en esborrar-lo,
      aquelles taules queden apuntant al no-res i no s'hi pot inserir.
+- 17: lliga_calendari — el calendari sencer de cada grup, del PDF de la
+     federació. És el que se'n sap abans que la competició existeixi. Taula
+     nova: la crea l'executescript.
 """
 
 from __future__ import annotations
@@ -53,7 +56,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 16
+SCHEMA_VERSION = 17
 
 
 def _read_schema_sql() -> str:

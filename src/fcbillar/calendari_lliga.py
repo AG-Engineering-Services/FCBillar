@@ -323,9 +323,7 @@ def esmena_dates(cal: CalendariGrup, referencia: dict[int, date]) -> CalendariGr
     """
     return replace(
         cal,
-        encontres=tuple(
-            replace(e, data=referencia.get(e.jornada, e.data)) for e in cal.encontres
-        ),
+        encontres=tuple(replace(e, data=referencia.get(e.jornada, e.data)) for e in cal.encontres),
     )
 
 
@@ -352,9 +350,7 @@ def _dilluns(d: date) -> date:
     return d - timedelta(days=d.weekday())
 
 
-def files_de_calendari(
-    calendaris: list[CalendariGrup], club: str, temporada: str
-) -> list[tuple]:
+def files_de_calendari(calendaris: list[CalendariGrup], club: str, temporada: str) -> list[tuple]:
     """Els encontres d'un club, en la forma que demana `calendari_events`.
 
     Només els del club: la graella és la de la zona soci, i el que hi vol veure
@@ -439,12 +435,9 @@ def ingest(conn, calendaris: list[CalendariGrup], club: str, temporada: str) -> 
             "No hi ha res per desar. No esborro el que ja hi ha per posar-hi el buit: "
             "si el filtre no ha trobat ningú, el problema és el filtre, no les dades."
         )
-    conn.execute(
-        "DELETE FROM calendari_events WHERE font = ? AND temporada = ?", (FONT, temporada)
-    )
+    conn.execute("DELETE FROM calendari_events WHERE font = ? AND temporada = ?", (FONT, temporada))
     conn.executemany(
-        f"INSERT INTO calendari_events ({_CAMPS_EVENT}) "
-        f"VALUES ({','.join('?' * 15)})",
+        f"INSERT INTO calendari_events ({_CAMPS_EVENT}) VALUES ({','.join('?' * 15)})",
         files,
     )
     conn.commit()
@@ -456,12 +449,7 @@ def _escapa_ics(text: str) -> str:
 
     La barra primer: si no, escaparia les barres que acabem de posar.
     """
-    return (
-        text.replace("\\", "\\\\")
-        .replace(";", "\\;")
-        .replace(",", "\\,")
-        .replace("\n", "\\n")
-    )
+    return text.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
 
 
 def ics(calendaris: list[CalendariGrup], club: str, *, nom: str = "Billar") -> str:
@@ -537,3 +525,51 @@ def _plega(linia: str, limit: int = 73) -> list[str]:
         b = b[tall:]
         limit = 72  # les continuacions perden un octet per l'espai del davant
     return [trossos[0]] + [f" {t}" for t in trossos[1:]]
+
+
+def desa_grups(conn, calendaris: list[CalendariGrup], temporada: str) -> int:
+    """Desa el calendari SENCER de cada grup a `lliga_calendari`.
+
+    `ingest` desa només els encontres del club, que és el que vol veure el soci
+    al seu calendari. Això desa la resta: tots els equips del grup i tots els
+    seus encontres.
+
+    Serveix per ensenyar la temporada que comença amb la mateixa forma que una
+    de jugada —la composició del grup i la graella de jornades— quan la
+    federació encara no ha publicat la competició. Sense això, del setembre fins
+    a la primera jornada no hi ha res a ensenyar: els encontres no disputats no
+    porten identificador al seu web i no es poden ingerir.
+
+    Es reemplaça grup a grup i no la temporada sencera: els PDF arriben d'un en
+    un i tornar a ingerir-ne un no pot esborrar els altres.
+    """
+    if not calendaris:
+        raise ResDesar(
+            "Cap calendari de grup per desar. No esborro el que ja hi ha per posar-hi el buit."
+        )
+    n = 0
+    for cal in calendaris:
+        conn.execute(
+            "DELETE FROM lliga_calendari WHERE temporada = ? AND divisio = ? AND grup = ?",
+            (temporada, cal.divisio, cal.grup),
+        )
+        conn.executemany(
+            "INSERT OR REPLACE INTO lliga_calendari "
+            "(temporada, divisio, grup, jornada, data, local, visitant) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [
+                (
+                    temporada,
+                    cal.divisio,
+                    cal.grup,
+                    e.jornada,
+                    e.data.isoformat(),
+                    e.local,
+                    e.visitant,
+                )
+                for e in cal.encontres
+            ],
+        )
+        n += len(cal.encontres)
+    conn.commit()
+    return n

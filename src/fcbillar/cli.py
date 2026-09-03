@@ -1645,6 +1645,7 @@ def ingest_calendari_lliga_cmd(
 
     from fcbillar.calendari_lliga import (
         dates_de_referencia,
+        desa_grups,
         esmena_dates,
         ics,
         ingest,
@@ -1686,6 +1687,11 @@ def ingest_calendari_lliga_cmd(
     conn = ensure_schema(get_settings().db_path)
     n = ingest(conn, esmenats, club, temporada)
     console.print(f"[green]{n} encontres del {club} a calendari_events[/]")
+    # I el grup sencer, que és el que permet ensenyar la temporada que comença
+    # amb la mateixa forma que una de jugada: qui hi ha a cada grup i la graella
+    # de totes les jornades, no només les nostres.
+    ng = desa_grups(conn, esmenats, temporada)
+    console.print(f"[green]{ng} encontres de tots els grups a lliga_calendari[/]")
 
     if ics_a:
         Path(ics_a).write_text(ics(esmenats, club), encoding="utf-8")

@@ -4308,6 +4308,20 @@ def publish_calendari(
         {(r["font"], r["temporada"]) for r in events}
         | {(r["font"], r["temporada"]) for r in revisions}
     )
+    # El calendari sencer de cada grup: qui hi ha a cada grup i totes les
+    # jornades. És el que permet ensenyar la temporada que comença amb la mateixa
+    # forma que una de jugada, mentre la federació no publiqui la competició.
+    grups_cal = (
+        [
+            dict(r)
+            for r in conn.execute(
+                "SELECT temporada, divisio, grup, jornada, data, local, visitant "
+                "FROM lliga_calendari ORDER BY temporada, divisio, grup, jornada"
+            )
+        ]
+        if "lliga_calendari" in taules
+        else []
+    )
     conn.close()
 
     # Les dates ISO de SQLite ('2026-09-07') ja són vàlides per a `date` a Postgres;
@@ -4330,4 +4344,44 @@ def publish_calendari(
     )
     n_rev = _upsert(sb, "calendari_revisions", revisions, "font,temporada,sha256", prog)
     n_can = _upsert(sb, "calendari_canvis", canvis, "font,temporada,sha256,ord", prog)
-    return {"calendari_events": n_ev, "calendari_revisions": n_rev, "calendari_canvis": n_can}
+
+    # El calendari sencer de cada grup, que és el que permet ensenyar la
+    # temporada que comença amb la mateixa forma que una de jugada: qui hi ha a
+    # cada grup i totes les jornades. Mentre la federació no publiqui la
+    # competició, és l'única cosa que se'n sap.
+    n_cal = 0
+    if grups_cal:
+        try:
+            # Reemplaça per grup: els PDF arriben d'un en un i la federació en va
+            # publicant revisions que canvien enfrontaments -a la 4a B ja n'ha
+            # canviat tres-, o sigui que un upsert sol deixaria els vells.
+            for temp, div, grup in {
+                (g["temporada"], g["divisio"], g["grup"]) for g in grups_cal
+            }:
+                (
+                    sb.table("lliga_calendari")
+                    .delete()
+                    .eq("temporada", temp)
+                    .eq("divisio", div)
+                    .eq("grup", grup)
+                    .execute()
+                )
+            n_cal = _upsert(
+                sb, "lliga_calendari", grups_cal,
+                "temporada,divisio,grup,jornada,local,visitant", prog,
+            )
+        except Exception as exc:  # noqa: BLE001
+            # La taula la crea l'administrador: amb PostgREST no es pot fer cap
+            # DDL. Que falti no ha d'aturar la resta del calendari, que és el que
+            # la web ensenya cada dia.
+            prog(
+                "warn",
+                f"lliga_calendari no s'ha pogut publicar ({exc}). Si encara no "
+                f"existeix, el SQL per crear-la és a docs/sql/lliga_calendari.sql.",
+            )
+    return {
+        "calendari_events": n_ev,
+        "calendari_revisions": n_rev,
+        "calendari_canvis": n_can,
+        "lliga_calendari": n_cal,
+    }
