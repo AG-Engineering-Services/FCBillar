@@ -4255,6 +4255,7 @@ def _publica_reemplaçant(
     clau: tuple[str, ...],
     ambit: tuple[str, ...],
     prog: Progress,
+    ambits: set[tuple] | None = None,
 ) -> int:
     """Puja `files` i després treu el que ja no hi és, dins del que s'ha publicat.
 
@@ -4270,12 +4271,19 @@ def _publica_reemplaçant(
     `clau` identifica una fila i `ambit` el que es reemplaça: d'una font i una
     temporada, per exemple, se'n treuen les files que ja no surten al PDF, però
     no es toca res de les altres.
+
+    Els àmbits es passen des de fora i no es dedueixen de `files`, perquè un
+    àmbit pot quedar-se legítimament sense cap fila —una revisió del PDF que no
+    canvia res deixa `calendari_canvis` buit per a aquella font i temporada— i
+    deduint-los d'allà aquell àmbit no hi sortiria i les files velles no
+    marxarien mai. Amb la llista explícita, un àmbit buit es buida de debò.
     """
     n = _upsert(sb, taula, files, ",".join(clau), prog)
     vius = {tuple(str(f[c]) for c in clau) for f in files}
-    ambits = {tuple(f[c] for c in ambit) for f in files}
     fora = 0
-    for valors in ambits:
+    for valors in ambits if ambits is not None else {
+        tuple(f[c] for c in ambit) for f in files
+    }:
         q = sb.table(taula).select(",".join(dict.fromkeys(clau + ambit)))
         for camp, valor in zip(ambit, valors, strict=True):
             q = q.eq(camp, valor)
@@ -4371,19 +4379,35 @@ def publish_calendari(
             if r.get(camp):
                 r[camp] = r[camp].replace(" ", "T") + "Z"
 
+    # Les fonts i temporades que es publiquen. Van explícites perquè una d'elles
+    # pot quedar-se sense canvis -o sense actes- i s'ha de buidar igualment.
+    combinacions = {(r["font"], r["temporada"]) for r in events} | {
+        (r["font"], r["temporada"]) for r in revisions
+    }
+    if not combinacions:
+        # Cap font ni temporada: això no és un calendari buit, és una lectura que
+        # no ha donat res. Buidar-ho tot a partir d'aquí se n'enduria el
+        # calendari sencer del web.
+        prog("warn", "calendari: cap acte ni revisió a la BD local; no toco res")
+        return {
+            "calendari_events": 0,
+            "calendari_revisions": 0,
+            "calendari_canvis": 0,
+            "lliga_calendari": 0,
+        }
     sb = get_client()
     n_ev = _publica_reemplaçant(
         sb, "calendari_events", events,
         ("font", "temporada", "setmana", "disciplina", "ambit", "grup", "tipus"),
-        ("font", "temporada"), prog,
+        ("font", "temporada"), prog, combinacions,
     )
     n_rev = _publica_reemplaçant(
         sb, "calendari_revisions", revisions,
-        ("font", "temporada", "sha256"), ("font", "temporada"), prog,
+        ("font", "temporada", "sha256"), ("font", "temporada"), prog, combinacions,
     )
     n_can = _publica_reemplaçant(
         sb, "calendari_canvis", canvis,
-        ("font", "temporada", "sha256", "ord"), ("font", "temporada"), prog,
+        ("font", "temporada", "sha256", "ord"), ("font", "temporada"), prog, combinacions,
     )
 
     # El calendari sencer de cada grup, que és el que permet ensenyar la

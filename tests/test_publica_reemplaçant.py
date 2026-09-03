@@ -121,6 +121,39 @@ def test_no_toca_el_que_es_fora_de_l_ambit() -> None:
     assert "que marxa" not in titols
 
 
+def test_un_ambit_que_es_queda_sense_files_es_buida() -> None:
+    """Una revisió del PDF que no canvia res deixa `calendari_canvis` buit.
+
+    Els àmbits no es poden deduir de les files que es pugen: si un es queda sense
+    cap, no hi sortiria i les seves files velles no marxarien mai. Per això la
+    llista d'àmbits va explícita.
+    """
+    magatzem = {"cal": [_fila("2026-09-07", "d'una revisió anterior")]}
+    sb = ClientFals(magatzem)
+    _publica_reemplaçant(sb, "cal", [], CLAU, AMBIT, _prog, {("FCB", "2026/2027")})
+    assert magatzem["cal"] == []
+
+
+def test_un_ambit_buit_no_toca_els_altres() -> None:
+    magatzem = {
+        "cal": [
+            _fila("2026-09-07", "de la RFEB", font="RFEB"),
+            _fila("2026-09-07", "que marxa"),
+        ]
+    }
+    sb = ClientFals(magatzem)
+    _publica_reemplaçant(sb, "cal", [], CLAU, AMBIT, _prog, {("FCB", "2026/2027")})
+    assert [f["titol"] for f in magatzem["cal"]] == ["de la RFEB"]
+
+
+def test_sense_ambits_explicits_es_dedueixen_de_les_files() -> None:
+    """El comportament de sempre, per a qui no en passa."""
+    magatzem = {"cal": [_fila("2026-09-14", "que marxa")]}
+    sb = ClientFals(magatzem)
+    _publica_reemplaçant(sb, "cal", [_fila("2026-09-07", "ara")], CLAU, AMBIT, _prog)
+    assert [f["titol"] for f in magatzem["cal"]] == ["ara"]
+
+
 def test_publicar_el_mateix_dues_vegades_no_duplica() -> None:
     magatzem: dict[str, list[dict]] = {"cal": []}
     sb = ClientFals(magatzem)
