@@ -474,3 +474,23 @@ CREATE TABLE IF NOT EXISTS lliga_calendari (
 );
 CREATE INDEX IF NOT EXISTS ix_lliga_calendari_grup
     ON lliga_calendari(temporada, divisio, grup, jornada);
+
+-- De qui està fet cada club, estimat. Vegeu `fcbillar.plantilles`.
+--
+-- La federació no publica plantilles: publica llicències, i aquella llista
+-- inclou gent que fa anys que no juga. Aquí hi entra qui ha jugat la lliga
+-- aquesta temporada o l'anterior, o qui consta al llistat de divisions del
+-- campionat individual d'aquesta. És una estimació i a la interfície va marcada
+-- com a tal.
+CREATE TABLE IF NOT EXISTS club_plantilles (
+    temporada     TEXT NOT NULL,
+    club          TEXT NOT NULL,              -- nom del cens, canonicalitzat
+    player_fcb_id TEXT NOT NULL,
+    jugador       TEXT NOT NULL,
+    mitjana       REAL,                       -- la millor que en tenim
+    mitjana_font  TEXT,                       -- 'rànquing' | 'divisions'
+    motiu         TEXT NOT NULL,              -- per què se l'hi espera
+    PRIMARY KEY (temporada, club, player_fcb_id)
+);
+CREATE INDEX IF NOT EXISTS ix_club_plantilles_club
+    ON club_plantilles(temporada, club);

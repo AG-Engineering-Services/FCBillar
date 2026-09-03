@@ -1532,12 +1532,20 @@ def _rank_players(acc: dict) -> list[tuple]:
 
 
 def publish_lliga_player_rankings(
-    db_path: Path | None = None, on_progress: Progress | None = None
+    db_path: Path | None = None,
+    on_progress: Progress | None = None,
+    lliga_id: int | None = None,
 ) -> dict[str, int]:
-    """Rànquing individual de jugadors per grup de la lliga 3 bandes (punts + mitjana)."""
+    """Rànquing individual de jugadors per grup de la lliga 3 bandes (punts + mitjana).
+
+    `lliga_id` serveix per tornar a publicar una temporada passada, que és el que
+    cal quan una dada seva canvia -com quan es van unificar els clubs i aquesta
+    taula es va quedar amb els noms vells.
+    """
     import json
 
     prog: Progress = on_progress or (lambda level, msg: None)
+    lliga = lliga_id if lliga_id is not None else LLIGA_3B_ID
     db_path = db_path or get_settings().db_path
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
@@ -1546,9 +1554,16 @@ def publish_lliga_player_rankings(
     tr = conn.execute("SELECT id FROM temporades ORDER BY nom DESC LIMIT 1").fetchone()
     season_id = tr["id"] if tr else None
     players = {r["id"]: (r["fcb_id"], r["nom"]) for r in conn.execute("SELECT id, fcb_id, nom FROM players")}
+    # El nom I l'identificador. La classificació publica `club_fcb_id` i això
+    # publicava `nom`: són camps diferents -a un club no coincideixen- i, sobre
+    # tot, aquesta taula no s'havia tornat a publicar des de la unificació de
+    # clubs, o sigui que hi quedaven noms vells («SB FOMENT MOLINS» contra
+    # «S.B.F.MOLINS»). Creuar-les per nom deixava cinc clubs sense casar.
     equip_club = {
-        r["id"]: r["nom"]
-        for r in conn.execute("SELECT e.id, c.nom FROM equips e JOIN clubs c ON c.id = e.club_id")
+        r["id"]: (r["nom"], r["fcb_id"])
+        for r in conn.execute(
+            "SELECT e.id, c.nom, c.fcb_id FROM equips e JOIN clubs c ON c.id = e.club_id"
+        )
     }
 
     acc: dict = {}
@@ -1561,7 +1576,7 @@ def publish_lliga_player_rankings(
         FROM games g JOIN encontres_lliga en ON en.id = g.encontre_lliga_id
         WHERE en.lliga_id = ? AND en.temporada_id = ? AND g.entrades > 0
         """,
-        (LLIGA_3B_ID, season_id),
+        (lliga, season_id),
     ):
         try:
             ex = json.loads(r["ex"] or "{}")
@@ -1584,8 +1599,10 @@ def publish_lliga_player_rankings(
         if not fcb:
             continue
         rows.append({
-            "lliga_id": LLIGA_3B_ID, "divisio_id": div, "grup_id": grup, "posicio": pos,
-            "player_fcb_id": fcb, "jugador": _disp(nom), "club": equip_club.get(a["eq"]),
+            "lliga_id": lliga, "divisio_id": div, "grup_id": grup, "posicio": pos,
+            "player_fcb_id": fcb, "jugador": _disp(nom),
+            "club": (equip_club.get(a["eq"]) or (None, None))[0],
+            "club_fcb_id": (equip_club.get(a["eq"]) or (None, None))[1],
             "partides": a["pj"], "punts": a["punts"], "caramboles": a["car"], "entrades": a["ent"],
             "mitjana": (a["car"] / a["ent"]) if a["ent"] else None,
         })
@@ -4370,6 +4387,18 @@ def publish_calendari(
         if "lliga_calendari" in taules
         else []
     )
+    # De qui està fet cada club, estimat. Vegeu `fcbillar.plantilles`.
+    plantilles_cal = (
+        [
+            dict(r)
+            for r in conn.execute(
+                "SELECT temporada, club, player_fcb_id, jugador, mitjana, motiu "
+                "FROM club_plantilles ORDER BY temporada, club"
+            )
+        ]
+        if "club_plantilles" in taules
+        else []
+    )
     conn.close()
 
     # Les dates ISO de SQLite ('2026-09-07') ja són vàlides per a `date` a Postgres;
@@ -4432,9 +4461,24 @@ def publish_calendari(
                 f"lliga_calendari no s'ha pogut publicar ({exc}). Si encara no "
                 f"existeix, el SQL per crear-la és a docs/sql/lliga_calendari.sql.",
             )
+    n_pla = 0
+    if plantilles_cal:
+        try:
+            n_pla = _publica_reemplaçant(
+                sb, "club_plantilles", plantilles_cal,
+                ("temporada", "club", "player_fcb_id"), ("temporada",), prog,
+                {(p["temporada"],) for p in plantilles_cal},
+            )
+        except Exception as exc:
+            prog(
+                "warn",
+                f"club_plantilles no s'ha pogut publicar ({exc}). Si encara no existeix, "
+                f"el SQL per crear-la és a docs/sql/club_plantilles.sql.",
+            )
     return {
         "calendari_events": n_ev,
         "calendari_revisions": n_rev,
         "calendari_canvis": n_can,
         "lliga_calendari": n_cal,
+        "club_plantilles": n_pla,
     }

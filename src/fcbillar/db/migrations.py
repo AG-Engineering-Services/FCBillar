@@ -44,6 +44,10 @@ Versions:
 - 17: lliga_calendari — el calendari sencer de cada grup, del PDF de la
      federació. És el que se'n sap abans que la competició existeixi. Taula
      nova: la crea l'executescript.
+- 18: club_plantilles — de qui està fet cada club, estimat de qui ha jugat les
+     dues últimes temporades o s'ha inscrit a l'individual. Taula nova.
+- 19: club_plantilles.mitjana_font — d'on surt la mitjana de cadascú, del
+     rànquing oficial o del llistat de divisions.
 """
 
 from __future__ import annotations
@@ -56,7 +60,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 17
+SCHEMA_VERSION = 19
 
 
 def _read_schema_sql() -> str:
@@ -258,6 +262,18 @@ def claus_penjades(conn: sqlite3.Connection) -> dict[str, set[str]]:
     return penjades
 
 
+def _migrate_to_v19(conn: sqlite3.Connection) -> None:
+    """Afegeix club_plantilles.mitjana_font.
+
+    Qui encara no és al rànquing general sí que té mitjana al llistat de
+    divisions, i saber de quina de les dues ve permet dir-ho a qui ho miri.
+    """
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(club_plantilles)")}
+    if cols and "mitjana_font" not in cols:
+        conn.execute("ALTER TABLE club_plantilles ADD COLUMN mitjana_font TEXT")
+        log.info("→v19: afegida columna club_plantilles.mitjana_font")
+
+
 def _migrate_to_v16(conn: sqlite3.Connection) -> None:
     """Torna a lligar les claus foranes que van quedar apuntant al no-res.
 
@@ -346,6 +362,9 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v16: repara les claus foranes que la v13 i la v15 van deixar penjades.
     if 1 <= version < 16:
         _migrate_to_v16(conn)
+    # → v19: d'on surt la mitjana de cada jugador de la plantilla.
+    if 1 <= version < 19:
+        _migrate_to_v19(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

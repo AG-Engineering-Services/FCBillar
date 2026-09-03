@@ -118,8 +118,15 @@
 	const jugadorsDeLEquip = $derived(
 		equipObert
 			? pranks
+					// Per `club_fcb_id` als dos costats. Comparar el nom del club contra
+					// l'identificador semblava funcionar perquè a gairebé tots coincideixen,
+					// però a un no; i sobretot aquesta taula arrossegava noms d'abans
+					// d'unificar els clubs, o sigui que cinc equips obrien el modal buit.
 					.filter(
-						(p) => p.grup_id === equipObert!.grup_id && p.club === equipObert!.club_fcb_id
+						(p) =>
+							p.grup_id === equipObert!.grup_id &&
+							p.club_fcb_id != null &&
+							p.club_fcb_id === equipObert!.club_fcb_id
 					)
 					.sort((a, b) => (b.mitjana ?? 0) - (a.mitjana ?? 0))
 			: []

@@ -788,6 +788,27 @@ def clubs_unifica_cmd(
         f"Torna-hi amb --aplica per fer-ho.[/]"
     )
 
+    # Duplicats que aquesta llista no veu: dues fitxes amb el MATEIX nom i
+    # `fcb_id` diferent. No hi ha cap àlies a escriure -els noms ja són iguals-
+    # i per això no surten a `clubs.ALIES`, però són dos clubs igualment. Va
+    # passar amb el Sant Adrià: una fitxa amb els 25 jugadors i una del cens
+    # buida, i el rànquing publicava l'una i la classificació l'altra, o sigui
+    # que els seus quatre equips no lligaven amb els seus jugadors.
+    repetits = list(
+        conn.execute(
+            "SELECT nom, COUNT(*) n, GROUP_CONCAT(fcb_id, ' | ') FROM clubs "
+            "GROUP BY nom HAVING n > 1"
+        )
+    )
+    if repetits:
+        console.print("\n[yellow]Clubs amb el mateix nom i identificador diferent:[/]")
+        for nom, quants, ids in repetits:
+            console.print(f"  {nom} ({quants}): {ids}")
+        console.print(
+            "[dim]  Aquests no surten a clubs.ALIES perquè no hi ha cap nom a traduir. "
+            "Mira quin té les dades i fusiona'ls amb `fcbillar clubs merge`.[/]"
+        )
+
 
 @app.command("import-temporada")
 def import_temporada_cmd(
