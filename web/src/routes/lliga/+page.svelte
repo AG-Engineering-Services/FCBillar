@@ -110,6 +110,24 @@
 			.sort((a, b) => (b.punts ?? 0) - (a.punts ?? 0) || (b.mitjana ?? 0) - (a.mitjana ?? 0))
 	);
 
+	// Qui juga a un equip: la classificació diu com va el conjunt i això diu de qui
+	// està fet. Els jugadors surten del rànquing individual del grup, que és per
+	// club i no per equip -la federació no publica de quin equip és cada partida-,
+	// o sigui que a un club amb dos equips al mateix grup hi sortirien tots.
+	let equipObert = $state<StandingRow | null>(null);
+	const jugadorsDeLEquip = $derived(
+		equipObert
+			? pranks
+					.filter(
+						(p) => p.grup_id === equipObert!.grup_id && p.club === equipObert!.club_fcb_id
+					)
+					.sort((a, b) => (b.mitjana ?? 0) - (a.mitjana ?? 0))
+			: []
+	);
+	function obreEquip(r: StandingRow) {
+		equipObert = r;
+	}
+
 	let collapsed = $state(new Set<number>());
 	function toggle(id: number) {
 		const s = new Set(collapsed);
@@ -341,14 +359,21 @@
 					</div>
 					<ul>
 						{#each teamRows(g.grup_id) as r (r.equip)}
-							<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-2 last:border-0">
-								<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</span>
-								<div class="min-w-0 flex-1">
-									<div class="truncate text-sm font-medium leading-tight">{r.equip}</div>
-									<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.g}-{r.e}-{r.p}{#if r.penalitzacio}<span class="ml-1 font-medium text-red-500 dark:text-red-400" title="Sanció federativa: −{r.penalitzacio} {r.penalitzacio === 1 ? 'punt' : 'punts'}">· −{r.penalitzacio} sanció</span>{/if}</div>
-								</div>
-								<span class="w-7 shrink-0 text-center text-sm tabular-nums text-slate-500 dark:text-slate-400">{r.pj}</span>
-								<span class="w-9 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
+							<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
+								<button
+									type="button"
+									onclick={() => obreEquip(r)}
+									class="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60"
+									title="Qui hi juga"
+								>
+									<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</span>
+									<div class="min-w-0 flex-1">
+										<div class="truncate text-sm font-medium leading-tight">{r.equip}</div>
+										<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.g}-{r.e}-{r.p}{#if r.penalitzacio}<span class="ml-1 font-medium text-red-500 dark:text-red-400" title="Sanció federativa: −{r.penalitzacio} {r.penalitzacio === 1 ? 'punt' : 'punts'}">· −{r.penalitzacio} sanció</span>{/if}</div>
+									</div>
+									<span class="w-7 shrink-0 text-center text-sm tabular-nums text-slate-500 dark:text-slate-400">{r.pj}</span>
+									<span class="w-9 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
+								</button>
 							</li>
 						{/each}
 					</ul>
@@ -412,4 +437,79 @@
 		{/each}
 	{/if}
 	{/if}
+{/if}
+
+<!--
+	Qui juga a un equip. La llista ve del rànquing individual del grup i va per
+	club: la federació no diu de quin equip és cada partida, o sigui que un club
+	amb dos equips al mateix grup els ensenya tots junts.
+-->
+{#if equipObert}
+	<div
+		class="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4"
+		role="button"
+		tabindex="-1"
+		onclick={() => (equipObert = null)}
+		onkeydown={(e) => e.key === 'Escape' && (equipObert = null)}
+	>
+		<div
+			class="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white shadow-xl dark:bg-slate-900 sm:rounded-2xl"
+			role="dialog"
+			aria-modal="true"
+			aria-label="Jugadors de {equipObert.equip}"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+		>
+			<header
+				class="sticky top-0 flex items-start justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
+			>
+				<div class="min-w-0">
+					<h2 class="truncate font-semibold text-slate-900 dark:text-slate-100">
+						{equipObert.equip}
+					</h2>
+					<p class="text-xs text-slate-500 dark:text-slate-400">
+						{jugadorsDeLEquip.length}
+						{jugadorsDeLEquip.length === 1 ? 'jugador' : 'jugadors'} · per mitjana
+					</p>
+				</div>
+				<button
+					type="button"
+					onclick={() => (equipObert = null)}
+					class="shrink-0 rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+					aria-label="Tanca">✕</button
+				>
+			</header>
+
+			{#if jugadorsDeLEquip.length === 0}
+				<p class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+					Encara no hi ha cap partida jugada en aquest grup, o sigui que la federació no en
+					publica cap jugador.
+				</p>
+			{:else}
+				<div
+					class="flex items-center gap-2 border-b border-slate-100 px-4 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400"
+				>
+					<span class="w-5 text-center">#</span>
+					<span class="flex-1">Jugador</span>
+					<span class="w-12 text-right">Mitj.</span>
+				</div>
+				<ul>
+					{#each jugadorsDeLEquip as p, i (p.player_fcb_id)}
+						<li
+							class="flex items-center gap-2 border-b border-slate-100 px-4 py-2 last:border-0 dark:border-slate-800"
+						>
+							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-400"
+								>{i + 1}</span
+							>
+							<span class="min-w-0 flex-1 truncate text-sm">{p.jugador}</span>
+							<span class="w-12 shrink-0 text-right font-mono text-sm tabular-nums"
+								>{p.mitjana != null ? p.mitjana.toFixed(3) : '—'}</span
+							>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
+	</div>
 {/if}
