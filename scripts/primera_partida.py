@@ -87,10 +87,20 @@ def main() -> int:
     else:
         print("- **Individual**: encara cap.")
 
-    if lliga or individual:
+    # Les bastides que hi ha muntades són DE LLIGA -els grups i els
+    # enfrontaments surten del PDF del calendari de lliga-, o sigui que només les
+    # tomba que s'hagi jugat lliga. L'individual és una altra competició i comença
+    # abans: les prèvies són el 19 de setembre i la primera jornada el 26. Que
+    # hagin començat les prèvies no diu res dels grups de lliga.
+    if lliga:
         print(
-            "\n**Ja s'ha jugat.** Les bastides de pretemporada —grups del PDF, "
-            "plantilles estimades, avisos de provisional— es poden treure."
+            "\n**La lliga ha començat.** Les bastides —grups del PDF, plantilles "
+            "estimades, avisos de provisional— es poden treure."
+        )
+    elif individual:
+        print(
+            "\n**L'individual ha començat**, però la lliga no. Les bastides de "
+            "lliga s'han de quedar: els grups encara surten del PDF del calendari."
         )
     else:
         print("\nPretemporada: la web va amb el calendari provisional.")

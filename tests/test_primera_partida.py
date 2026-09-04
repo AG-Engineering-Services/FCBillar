@@ -142,3 +142,50 @@ def test_no_peta_amb_una_base_buida(tmp_path, capsys) -> None:
     conn = sqlite3.connect(tmp_path / "b.db")
     assert pp.primera_de_lliga(conn, TEMPORADA) is None
     assert pp.primera_individual(conn, TEMPORADA) is None
+
+
+# El resum del job és el que llegirà algú per decidir si treu les bastides. Les
+# bastides muntades són de LLIGA -els grups i els enfrontaments surten del PDF del
+# calendari de lliga- i l'individual és una altra competició que comença abans:
+# les prèvies són el 19 de setembre i la primera jornada el 26.
+
+
+def _resum(conn, monkeypatch, capsys) -> str:
+    monkeypatch.setattr(pp.sqlite3, "connect", lambda *_a, **_k: conn)
+    pp.main()
+    return capsys.readouterr().out
+
+
+def test_amb_l_individual_començat_les_bastides_de_lliga_es_queden(
+    conn, monkeypatch, capsys
+) -> None:
+    conn.execute(
+        "INSERT INTO torneigs_individuals "
+        "(id, torneig_id_extern, divisio_id_extern, nom, modalitat_id, temporada_id) "
+        "VALUES (1, 1, 1, 'PRE-PRÈVIA 2a', "
+        "(SELECT id FROM modalitats WHERE nom = 'Tres bandes'), ?)",
+        (_temporada_id(conn),),
+    )
+    conn.execute(
+        "INSERT INTO games "
+        "(data_partida, modalitat_id, player1_id, player2_id, entrades, "
+        " torneig_id, temporada_id) "
+        "VALUES ('2026-09-19', (SELECT id FROM modalitats WHERE nom = 'Tres bandes'), "
+        "1, 2, 50, 1, ?)",
+        (_temporada_id(conn),),
+    )
+
+    resum = _resum(conn, monkeypatch, capsys)
+    assert "s'han de quedar" in resum
+    assert "es poden treure" not in resum
+
+
+def test_amb_la_lliga_començada_si_que_es_poden_treure(conn, monkeypatch, capsys) -> None:
+    _partida(conn, _encontre(conn), 42)
+    assert "es poden treure" in _resum(conn, monkeypatch, capsys)
+
+
+def test_sense_jugar_res_es_pretemporada(conn, monkeypatch, capsys) -> None:
+    resum = _resum(conn, monkeypatch, capsys)
+    assert "Pretemporada" in resum
+    assert "es poden treure" not in resum
