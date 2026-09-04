@@ -80,7 +80,18 @@ def test_els_del_club_van_de_mes_alta_a_mes_baixa(inscrits) -> None:
     meus = per_club(inscrits, "BANYOLES")
     assert len(meus) == 12
     assert [i.divisio for i in meus] == [
-        "1ª", "1ª", "1ª", "2ª", "2ª", "2ª", "3ª", "4ª", "6ª", "6ª", "6ª", "6ª",
+        "1ª",
+        "1ª",
+        "1ª",
+        "2ª",
+        "2ª",
+        "2ª",
+        "3ª",
+        "4ª",
+        "6ª",
+        "6ª",
+        "6ª",
+        "6ª",
     ]
 
 
@@ -105,7 +116,11 @@ def test_llegeix_les_fases_encara_que_estiguin_mal_escrites() -> None:
     """La federació no les escriu dues vegades igual."""
     conn = _conn_amb_calendari(
         [
-            ("2026-09-19", "2026-09-19", "Pre-Prèvia 3 Bandes 1ª Divisió · Prèvia 3 Bandes Div. Honor"),
+            (
+                "2026-09-19",
+                "2026-09-19",
+                "Pre-Prèvia 3 Bandes 1ª Divisió · Prèvia 3 Bandes Div. Honor",
+            ),
             ("2027-02-06", "2027-02-06", "Pre- Pre-Prèvia 3 B. 6ª Divisió"),
             ("2027-02-13", "2027-02-13", "Pre-Prèvia 3 Bandes 6ª Div."),
             ("2026-10-17", "2026-10-18", "FINAL 3Bandes 1ª Divisió"),
@@ -126,12 +141,15 @@ def test_no_confon_una_altra_modalitat() -> None:
 
 
 def _inscrit(nom: str, divisio: str) -> Inscrit:
-    return Inscrit(divisio=divisio, posicio=1, jugador=nom, club="C.B.BANYOLES",
-                   mitjana=0.5, definitiva=True)
+    return Inscrit(
+        divisio=divisio, posicio=1, jugador=nom, club="C.B.BANYOLES", mitjana=0.5, definitiva=True
+    )
 
 
 FASES_2A = [
-    Fase("2ª", "Pre-prèvia", date(2026, 9, 19), date(2026, 9, 19), "Pre-Prèvia 3 Bandes 2ª Divisió"),
+    Fase(
+        "2ª", "Pre-prèvia", date(2026, 9, 19), date(2026, 9, 19), "Pre-Prèvia 3 Bandes 2ª Divisió"
+    ),
     Fase("2ª", "Prèvia", date(2026, 10, 3), date(2026, 10, 4), "Prèvia 3 Bandes 2ª Divisió"),
     Fase("2ª", "Final", date(2026, 10, 17), date(2026, 10, 18), "FINAL 3Bandes 2ª Divisió"),
 ]
@@ -181,12 +199,12 @@ def test_la_fase_d_entrada_es_per_ordre_no_per_data() -> None:
 def test_els_jugadors_van_junts_a_la_fila_de_la_seva_fase() -> None:
     """Una fila per fase amb els nostres a dins, no una per jugador."""
     dos = cites(
-        [_inscrit("GÓMEZ AMETLLER, ALBERT", "2ª"), _inscrit("ALTRE, U", "2ª")],
+        [_inscrit("UN, JUGADOR", "2ª"), _inscrit("ALTRE, U", "2ª")],
         {"2ª": FASES_2A},
     )
     files = files_de_calendari(dos, "2026/2027")
     assert len(files) == 1
-    assert "GÓMEZ AMETLLER, ALBERT" in files[0][9] and "ALTRE, U" in files[0][9]
+    assert "UN, JUGADOR" in files[0][9] and "ALTRE, U" in files[0][9]
     # El separador no pot ser la coma: ja n'hi ha a «COGNOMS, NOM».
     assert " · " in files[0][9]
     # I `seu` porta el text de la fase tal com l'escriu la federació.
@@ -212,3 +230,18 @@ def test_les_files_del_calendari_porten_la_setmana_del_dilluns() -> None:
     # El grup és la fase: la clau primària de la taula és per setmana i grup, i
     # una divisió no té dues fases el mateix cap de setmana.
     assert "2ª" in files[0][5] and "Pre-prèvia" in files[0][5]
+
+
+def test_qui_no_juga_les_classificatories_no_surt_al_calendari() -> None:
+    """La federació publica qui s'ha inscrit, no qui hi anirà.
+
+    Un jugador pot constar inscrit i no presentar-se a les prèvies, i posar-lo
+    al calendari seria prometre una cita que no existeix. Això no se sap de cap
+    font: ho diu el club, i per això va escrit al codi.
+    """
+    from fcbillar.campionat_individual import NO_JUGA_CLASSIFICATORIES
+
+    exclos = next(iter(NO_JUGA_CLASSIFICATORIES))
+    llista = cites([_inscrit(exclos, "2ª"), _inscrit("ALTRE, U", "2ª")], {"2ª": FASES_2A})
+
+    assert [c.inscrit.jugador for c in llista] == ["ALTRE, U"]
