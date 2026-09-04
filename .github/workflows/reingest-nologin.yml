@@ -39,7 +39,10 @@ name: Reingesta no-logada (núvol)
 
 on:
   schedule:
-    - cron: '0 21 * * *'        # cada dia 21:00 UTC ≈ 22:00 Barcelona (hivern)
+    # Minut 17 i no :00: GitHub encua tots els crons de :00 alhora i és el primer
+    # que descarta quan va carregat. Ho tenim documentat a publish-live-opens.yml
+    # i aquest tret, que és l'únic diari, se n'havia quedat fora.
+    - cron: '17 21 * * *'       # cada dia 21:17 UTC ≈ 22:17 Barcelona (hivern)
     # Caps de setmana, cada hora 07-20 UTC (≈9-22 local): manté pending_games
     # (i lliga/copa/opens) fresc mentre hi ha opens en directe. El 'gate' ho
     # OMET si no hi ha cap open en directe, per no fer feina pesada en va.
@@ -148,6 +151,12 @@ jobs:
           # PDF no ha canviat, surt per ETag sense parsejar res.
           run "ingest-calendari"     uv run --no-dev fcbillar ingest-calendari
 
+          # De qui està fet cada club, estimat. Depèn del que s'acaba d'ingerir -qui
+          # ha jugat- i del llistat de divisions, i s'ha de refer abans de publicar
+          # o es publicaria la d'ahir. L'ordre no balla: el rànquing de referència
+          # és l'últim publicat ABANS de la primera jornada, i aquell ja no canvia.
+          run "plantilles"           uv run --no-dev fcbillar plantilles
+
           # Publicació a Supabase (fcbillar publica tot des de la BD; els rànquings
           # coincideixen amb els que el PC ja va pujar al release → idempotent).
           run "publish-cloud"        uv run --no-dev fcbillar publish-cloud
@@ -157,6 +166,16 @@ jobs:
           echo "N_OK=$NOK"     >> "$GITHUB_ENV"
           echo "N_FAIL=$NFAIL" >> "$GITHUB_ENV"
           echo "Resum: OK=$NOK FALLATS=$NFAIL"
+
+      # Mentre no es jugui res, la web va amb bastides: els grups surten del PDF
+      # del calendari i les plantilles són estimades. Això diu, cada dia, si ja
+      # s'ha disputat la primera partida —de lliga o de l'individual—, que és quan
+      # les bastides es poden treure. No atura res: just al contrari, és quan la
+      # ingesta comença a valer per a alguna cosa.
+      - name: Ja s'ha jugat res?
+        if: always() && steps.gate.outputs.skip != 'true'
+        run: |
+          uv run --no-dev python scripts/primera_partida.py >> "$GITHUB_STEP_SUMMARY"
 
       # Repuja les BD al release encara que algun pas hagi fallat (upserts parcials
       # però vàlids); mai sobre una execució saltada per l'aturada d'estiu.
