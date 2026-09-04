@@ -101,8 +101,12 @@ def test_qui_s_acaba_de_federar_no_pot_quedar_fora(conn) -> None:
     assert (nou.mitjana, nou.mitjana_font) == (0.400, FONT_DIVISIONS)
 
 
-def test_ningu_no_surt_dos_cops_encara_que_hagi_canviat_de_club(conn) -> None:
-    """El cens el té a l'antic i el PDF ja el posa al nou: és la mateixa persona."""
+def test_qui_ha_fitxat_va_al_club_nou(conn) -> None:
+    """El cens el té a l'antic -on el vam veure per última vegada- i el PDF al nou.
+
+    Mana el PDF: és el document de la temporada que comença. I hi ha de sortir un
+    sol cop, no un per club.
+    """
     _va_jugar(conn, _jugador(conn, "QUI, CANVIA", "C.B.BANYOLES"))
     _inscrit(conn, "QUI, CANVIA", "C.B.MANRESA")
 
@@ -110,6 +114,17 @@ def test_ningu_no_surt_dos_cops_encara_que_hagi_canviat_de_club(conn) -> None:
         j for j in plantilles(conn, _ranking_id(conn), TEMPORADA) if j.jugador == "QUI, CANVIA"
     ]
     assert len(quins) == 1
+    assert quins[0].club == "C.B.MANRESA"
+
+
+def test_qui_no_s_ha_inscrit_es_queda_on_diu_el_cens(conn) -> None:
+    """No sortir al llistat de divisions no vol dir haver plegat: és voluntari."""
+    _va_jugar(conn, _jugador(conn, "NOMES, JUGA", "C.B.BANYOLES"))
+
+    j = next(
+        j for j in plantilles(conn, _ranking_id(conn), TEMPORADA) if j.jugador == "NOMES, JUGA"
+    )
+    assert j.club == "C.B.BANYOLES"
 
 
 def test_la_mitjana_del_ranquing_mana_sobre_la_del_pdf(conn) -> None:

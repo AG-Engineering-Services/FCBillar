@@ -9,6 +9,11 @@ aquesta temporada o l'anterior**, o qui **consta al llistat de divisions del
 campionat individual d'aquesta temporada**. La primera condició agafa qui és en
 actiu; la segona, qui s'acaba d'inscriure i encara no ha jugat res.
 
+De quin club és cadascú ho diu el llistat de divisions, no el cens. El cens el té
+on el vam veure per última vegada, i qui ha fitxat en un altre lloc hi segueix
+constant fins que hi torni a jugar; el llistat és el document de la temporada que
+comença.
+
 És una estimació i s'ha de dir. A la interfície va marcada com a «estimat»:
 ningú no ha de creure's que això és una alineació oficial.
 """
@@ -117,6 +122,19 @@ def plantilles(conn, ranking_id: int, temporada_inscrits: str) -> list[Jugador]:
         )
     }
 
+    # De quin club és cadascú AQUESTA temporada. `players.club_id` diu el del
+    # cens, que és on el vam veure l'última vegada: qui ha fitxat en un altre lloc
+    # hi segueix constant fins que hi torni a jugar. El llistat de divisions és el
+    # document de la temporada que comença, i per tant mana ell. Són 30 jugadors
+    # del 26/27, un d'ells cap a casa (Ferran Rodríguez, de Llinars a Banyoles).
+    club_del_pdf = {
+        r[0]: r[1]
+        for r in conn.execute(
+            "SELECT jugador, club FROM inscrits_individual WHERE temporada = ?",
+            (temporada_inscrits,),
+        )
+    }
+
     out: list[Jugador] = []
     vistos: set[str] = set()
     for r in conn.execute(
@@ -134,7 +152,7 @@ def plantilles(conn, ranking_id: int, temporada_inscrits: str) -> list[Jugador]:
             mitjana, font = del_pdf.get(r["id"]), FONT_DIVISIONS
         out.append(
             Jugador(
-                club=r["club"],
+                club=club_del_pdf.get(r["nom"]) or r["club"],
                 player_fcb_id=r["fcb_id"],
                 jugador=r["nom"],
                 mitjana=mitjana,
