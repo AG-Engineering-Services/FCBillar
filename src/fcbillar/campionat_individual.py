@@ -149,6 +149,21 @@ class Cita:
     fase: Fase
 
 
+#: Qui consta inscrit però no jugarà les fases classificatòries.
+#:
+#: La federació publica qui s'ha apuntat al campionat, no qui hi anirà. Un
+#: jugador pot estar-hi inscrit i no presentar-se a les prèvies, i aleshores
+#: posar-lo al calendari és prometre una cita que no existeix.
+#:
+#: Això no se sap de cap font: ho diu el club. Per això va escrit aquí i amb el
+#: nom exacte del PDF de divisions.
+NO_JUGA_CLASSIFICATORIES: frozenset[str] = frozenset(
+    {
+        "GÓMEZ AMETLLER, ALBERT",
+    }
+)
+
+
 def cites(inscrits: list[Inscrit], per_divisio: dict[str, list[Fase]]) -> list[Cita]:
     """La fase per la qual cadascú comença, que és l'única data segura.
 
@@ -157,6 +172,8 @@ def cites(inscrits: list[Inscrit], per_divisio: dict[str, list[Fase]]) -> list[C
     """
     out: list[Cita] = []
     for i in inscrits:
+        if i.jugador in NO_JUGA_CLASSIFICATORIES:
+            continue
         classificatories = [f for f in per_divisio.get(i.divisio, []) if f.fase != FINAL]
         if not classificatories:
             continue
@@ -238,9 +255,7 @@ def ingest(conn, cites_: list[Cita], temporada: str) -> int:
             "No hi ha res per desar. No esborro el que ja hi ha per posar-hi el buit: "
             "si el filtre no ha trobat ningú, el problema és el filtre, no les dades."
         )
-    conn.execute(
-        "DELETE FROM calendari_events WHERE font = ? AND temporada = ?", (FONT, temporada)
-    )
+    conn.execute("DELETE FROM calendari_events WHERE font = ? AND temporada = ?", (FONT, temporada))
     conn.executemany(
         f"INSERT INTO calendari_events ({_CAMPS_EVENT}) VALUES ({','.join('?' * 15)})",
         files,
