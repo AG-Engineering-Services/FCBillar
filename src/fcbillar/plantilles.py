@@ -31,7 +31,9 @@ FONT_DIVISIONS = "divisions"
 @dataclass(frozen=True)
 class Jugador:
     club: str
-    player_fcb_id: str
+    #: Buit per a qui encara no té fitxa nostra: acaba de federar-se i no ha
+    #: jugat res, o sigui que no ha aparegut mai en cap partida.
+    player_fcb_id: str | None
     jugador: str
     #: La millor que en tenim. `None` si no en tenim cap.
     mitjana: float | None
@@ -66,25 +68,28 @@ def plantilles(conn, ranking_id: int, temporada_inscrits: str) -> list[Jugador]:
     """Els jugadors que es poden esperar a cada club, amb la seva mitjana."""
     conn.row_factory = sqlite3.Row
     temps = temporades_recents(conn)
-    if not temps:
-        return []
+    # Sense cap temporada amb encontres no hi ha ningú que «hagi jugat», però la
+    # meitat dels inscrits de la regla sí que existeix i s'ha de mirar igualment.
     marques = ",".join("?" * len(temps))
-
-    jugat = {
-        r[0]
-        for r in conn.execute(
-            f"""
-            SELECT g.player1_id FROM games g
-              JOIN encontres_lliga e ON e.id = g.encontre_lliga_id
-             WHERE e.temporada_id IN ({marques})
-            UNION
-            SELECT g.player2_id FROM games g
-              JOIN encontres_lliga e ON e.id = g.encontre_lliga_id
-             WHERE e.temporada_id IN ({marques})
-            """,
-            (*temps, *temps),
-        )
-    }
+    jugat = (
+        {
+            r[0]
+            for r in conn.execute(
+                f"""
+                SELECT g.player1_id FROM games g
+                  JOIN encontres_lliga e ON e.id = g.encontre_lliga_id
+                 WHERE e.temporada_id IN ({marques})
+                UNION
+                SELECT g.player2_id FROM games g
+                  JOIN encontres_lliga e ON e.id = g.encontre_lliga_id
+                 WHERE e.temporada_id IN ({marques})
+                """,
+                (*temps, *temps),
+            )
+        }
+        if temps
+        else set()
+    )
     inscrits = {
         r[0]
         for r in conn.execute(
@@ -113,6 +118,7 @@ def plantilles(conn, ranking_id: int, temporada_inscrits: str) -> list[Jugador]:
     }
 
     out: list[Jugador] = []
+    vistos: set[str] = set()
     for r in conn.execute(
         "SELECT p.id, p.fcb_id, p.nom, c.nom AS club FROM players p "
         "JOIN clubs c ON c.id = p.club_id"
@@ -134,6 +140,32 @@ def plantilles(conn, ranking_id: int, temporada_inscrits: str) -> list[Jugador]:
                 mitjana=mitjana,
                 mitjana_font=font if mitjana is not None else None,
                 motiu=motiu,
+            )
+        )
+        vistos.add(r["nom"])
+
+    # Qui s'acaba de federar consta al llistat de divisions i no té fila a
+    # `players`: no ha jugat mai res, i per aquí no hi passa. Deixar-lo fora
+    # seria buidar de la plantilla justament qui la regla dels inscrits volia
+    # agafar, i sense dir-ho. Del PDF en surt el club i la mitjana; el `fcb_id`
+    # arribarà el dia que jugui.
+    for r in conn.execute(
+        "SELECT club, jugador, mitjana FROM inscrits_individual WHERE temporada = ?",
+        (temporada_inscrits,),
+    ):
+        # Per nom i prou. Amb (club, nom) qui hagi canviat de club sortiria dos
+        # cops: el cens encara el té a l'antic i el PDF ja el posa al nou.
+        if r["jugador"] in vistos:
+            continue
+        vistos.add(r["jugador"])
+        out.append(
+            Jugador(
+                club=r["club"],
+                player_fcb_id=None,
+                jugador=r["jugador"],
+                mitjana=r["mitjana"],
+                mitjana_font=FONT_DIVISIONS if r["mitjana"] is not None else None,
+                motiu=MOTIU_INSCRIT,
             )
         )
     # Per club i, dins de cada club, de més mitjana a menys. Qui no en té va al

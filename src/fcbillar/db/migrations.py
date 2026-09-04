@@ -48,6 +48,14 @@ Versions:
      dues últimes temporades o s'ha inscrit a l'individual. Taula nova.
 - 19: club_plantilles.mitjana_font — d'on surt la mitjana de cadascú, del
      rànquing oficial o del llistat de divisions.
+- 20: club_plantilles amb `player_fcb_id` opcional i clau pel nom. Qui s'acaba
+     de federar surt al llistat de divisions i encara no té fitxa nostra: amb
+     la columna obligatòria quedava fora de la plantilla del seu club, que és
+     just el cas que la regla «o consta inscrit a l'individual» volia agafar.
+- 21: lliga_inscrits — de qui està fet cada club a cada lliga, i qui hi ve
+     fitxat, tal com ho publica la federació des del setembre de 2026. És la
+     font oficial del que `club_plantilles` estimava. Taula nova: la crea
+     l'executescript.
 """
 
 from __future__ import annotations
@@ -60,7 +68,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 19
+SCHEMA_VERSION = 21
 
 
 def _read_schema_sql() -> str:
@@ -122,7 +130,6 @@ def _migrate_to_v10(conn: sqlite3.Connection) -> None:
     if "data_pub" not in existing_cols:
         conn.execute("ALTER TABLE rankings ADD COLUMN data_pub TEXT")
         log.info("→v10: afegida columna rankings.data_pub")
-
 
 
 def _migrate_to_v13(conn: sqlite3.Connection) -> None:
@@ -249,9 +256,7 @@ def claus_penjades(conn: sqlite3.Connection) -> dict[str, set[str]]:
     un detall cosmètic: qualsevol INSERT a la taula que la porta peta amb «no
     such table». I no es veu fins que algú hi escriu.
     """
-    existents = {
-        r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
-    }
+    existents = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
     penjades: dict[str, set[str]] = {}
     for nom, sql in conn.execute(
         "SELECT name, sql FROM sqlite_master WHERE type = 'table' AND sql IS NOT NULL"
@@ -260,6 +265,49 @@ def claus_penjades(conn: sqlite3.Connection) -> dict[str, set[str]]:
         if fora:
             penjades[nom] = fora
     return penjades
+
+
+def _migrate_to_v20(conn: sqlite3.Connection) -> None:
+    """Deixa `club_plantilles.player_fcb_id` buit i posa la clau al nom.
+
+    Un jugador que s'acaba de federar consta al llistat de divisions i encara no
+    ha jugat cap partida, o sigui que no té fila a `players` ni `fcb_id`. Amb la
+    columna obligatòria no es podia desar i desapareixia de la plantilla del seu
+    club sense dir res —52 dels 379 inscrits del 26/27, un d'ells nostre.
+
+    La taula es refà **creant primer la nova amb un nom temporal** i reanomenant
+    al final: reanomenar l'original és el que va deixar claus foranes penjades a
+    la v13 i la v15.
+    """
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(club_plantilles)")}
+    if not cols:
+        return
+    notnull = {r[1] for r in conn.execute("PRAGMA table_info(club_plantilles)") if r[3]}
+    if "player_fcb_id" not in notnull:
+        return
+    conn.executescript(
+        """
+        PRAGMA foreign_keys = OFF;
+        CREATE TABLE club_plantilles_v20 (
+            temporada     TEXT NOT NULL,
+            club          TEXT NOT NULL,
+            player_fcb_id TEXT,
+            jugador       TEXT NOT NULL,
+            mitjana       REAL,
+            mitjana_font  TEXT,
+            motiu         TEXT NOT NULL,
+            PRIMARY KEY (temporada, club, jugador)
+        );
+        INSERT OR IGNORE INTO club_plantilles_v20
+            (temporada, club, player_fcb_id, jugador, mitjana, mitjana_font, motiu)
+            SELECT temporada, club, player_fcb_id, jugador, mitjana, mitjana_font, motiu
+              FROM club_plantilles;
+        DROP TABLE club_plantilles;
+        ALTER TABLE club_plantilles_v20 RENAME TO club_plantilles;
+        PRAGMA foreign_keys = ON;
+        """
+    )
+    log.info("→v20: club_plantilles refeta amb player_fcb_id opcional")
 
 
 def _migrate_to_v19(conn: sqlite3.Connection) -> None:
@@ -291,9 +339,7 @@ def _migrate_to_v16(conn: sqlite3.Connection) -> None:
     penjades = claus_penjades(conn)
     if not penjades:
         return
-    existents = {
-        r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
-    }
+    existents = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
     for taula, tots in penjades.items():
         # Només les restes de refer una taula, que porten el sufix de la versió
         # («rankings_v12»). Aquí encara no s'ha executat `schema.sql`, o sigui
@@ -317,9 +363,7 @@ def _migrate_to_v16(conn: sqlite3.Connection) -> None:
                     f"«{base}», però «{base}» tampoc no existeix. Cal mirar-ho a mà."
                 )
             nou = nou.replace(f'"{destí}"', f'"{base}"').replace(f" {destí}(", f" {base}(")
-        cols = ", ".join(
-            f'"{r[1]}"' for r in conn.execute(f"PRAGMA table_info({taula})")
-        )
+        cols = ", ".join(f'"{r[1]}"' for r in conn.execute(f"PRAGMA table_info({taula})"))
         conn.executescript(
             f"""
             PRAGMA foreign_keys = OFF;
@@ -365,6 +409,10 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v19: d'on surt la mitjana de cada jugador de la plantilla.
     if 1 <= version < 19:
         _migrate_to_v19(conn)
+    # → v20: qui s'acaba de federar encara no té fitxa; la plantilla l'ha
+    # d'admetre igualment.
+    if 1 <= version < 20:
+        _migrate_to_v20(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

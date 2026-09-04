@@ -44,10 +44,12 @@ _RE_RANKING_DADES = re.compile(
     r"rankings/(llistat|historial)-dades\?idranking=(\d+)&idmodalitat=(\d+)"
 )
 
+_RE_LLIGA_DIVISIONS = re.compile(r"lligues/divisions/(\d+)")
 _RE_LLIGA_GRUPS = re.compile(r"lligues/grups/(\d+)/(\d+)")
 _RE_LLIGA_JORNADES = re.compile(r"lligues/jornades/(\d+)/(\d+)/(\d+)")
 _RE_LLIGA_ENCONTRES = re.compile(r"lligues/encontres/(\d+)/(\d+)/(\d+)/(\d+)")
 _RE_LLIGA_PARTIDES = re.compile(r"lligues/partides/(\d+)/(\d+)/(\d+)/(\d+)/(\d+)")
+_RE_LLIGA_PARTICIPANTS = re.compile(r"lligues/participants/(\d+)/(\d+)")
 
 _RE_IND_DIVISIONS = re.compile(r"individuals/divisions/(\d+)")
 _RE_IND_FASES = re.compile(r"individuals/fases/(\d+)/(\d+)")
@@ -551,6 +553,45 @@ def parse_lliga_partides(html: str) -> list[LligaPartidaRow]:
 
 
 @dataclass(frozen=True)
+class LligaOberta:
+    """Una lliga del llistat: la temporada en joc, una per modalitat.
+
+    El llistat només ensenya les lligues vives. Les tancades continuen
+    accessibles pel seu id —la 36 i la 37 són les de 2025-26— però ja no hi
+    surten, o sigui que d'aquí no se n'obté l'històric.
+    """
+
+    lliga_id: int
+    nom: str
+    modalitat: str
+    data_limit: date | None  # límit d'inscripció
+    estat: str  # 'Inscripció', 'Activa'…
+
+
+def parse_lligues_llistat(html: str) -> list[LligaOberta]:
+    taula = taula_amb(html, "Lliga", "Estat")
+    if taula is None:
+        return []
+    out: list[LligaOberta] = []
+    for fila in taula:
+        m = _primer(_RE_LLIGA_DIVISIONS, fila.enllacos())
+        if m is None:
+            continue
+        out.append(
+            LligaOberta(
+                lliga_id=int(m.group(1)),
+                nom=fila["Lliga"],
+                modalitat=fila["Modalitat"] if fila.te("Modalitat") else "",
+                data_limit=fila.data("Data límit inscripció")
+                if fila.te("Data límit inscripció")
+                else None,
+                estat=fila["Estat"],
+            )
+        )
+    return out
+
+
+@dataclass(frozen=True)
 class LligaEquipInscrit:
     """Un equip inscrit a una lliga, amb el club a què pertany.
 
@@ -559,17 +600,91 @@ class LligaEquipInscrit:
 
     club: str
     equip: str
+    #: Id de club de la federació, per demanar-ne els jugadors inscrits. Només
+    #: surt a l'enllaç «Veure inscrits», que la pàgina posa un cop per club.
+    club_id_extern: int | None = None
 
 
 def parse_lliga_inscripcions(html: str) -> list[LligaEquipInscrit]:
+    """Els equips inscrits a una lliga.
+
+    El club només s'escriu a la **primera** fila de cada club; les altres el
+    porten buit, com una cel·la fusionada que no ho és. Per això s'arrossega:
+    filtrar les files sense club deixaria fora el segon equip de cada club i
+    una llista de 93 equips en tornaria 38, sense dir-ho.
+
+    Aquesta forma és de setembre de 2026, quan la federació hi va afegir el
+    botó «Veure inscrits». Fins llavors cada fila repetia el club.
+    """
     taula = taula_amb(html, "Club", "Equip")
     if taula is None:
         return []
-    return [
-        LligaEquipInscrit(club=fila["Club"], equip=fila["Equip"])
-        for fila in taula
-        if fila["Club"] and fila["Equip"]
-    ]
+    out: list[LligaEquipInscrit] = []
+    club = ""
+    club_id: int | None = None
+    for fila in taula:
+        if fila["Club"]:
+            club = fila["Club"]
+            m = _primer(_RE_LLIGA_PARTICIPANTS, fila.enllacos())
+            club_id = int(m.group(2)) if m else None
+        if not club or not fila["Equip"]:
+            continue
+        out.append(LligaEquipInscrit(club=club, equip=fila["Equip"], club_id_extern=club_id))
+    return out
+
+
+@dataclass(frozen=True)
+class LligaJugadorInscrit:
+    """Un jugador que un club inscriu a una lliga.
+
+    La federació no en dona l'identificador: aquesta pàgina només porta el nom
+    tal com l'escriu ella, «COGNOMS, NOM», que és per on es lliga amb
+    `players.nom` —igual que el llistat de divisions de l'individual.
+    """
+
+    jugador: str
+    #: La mitjana del rànquing vigent de la modalitat. `0.0` per a qui no hi és.
+    mitjana: float | None
+    #: Ve d'un altre club. La federació ho marca amb una etiqueta al nom.
+    fitxatge: bool
+    #: Ordre a la llista, que és de més mitjana a menys.
+    posicio: int
+
+
+#: Com la federació marca qui ve d'un altre club: `<span>(Fitxatge)</span>`.
+_RE_FITXATGE = re.compile(r"\(\s*fitxatge\s*\)", re.IGNORECASE)
+
+
+def parse_lliga_participants(html: str) -> list[LligaJugadorInscrit]:
+    """Els jugadors inscrits d'un club, de `lligues/participants/{lliga}/{club}`.
+
+    La taula té dues columnes i només una porta nom: la mitjana va a una
+    capçalera buida. Per això es llegeixen per posició i no per nom de columna.
+    """
+    for taula in taules(html):
+        capcaleres = [normalitza(h) for h in taula.capcaleres]
+        if "jugador" not in capcaleres or len(capcaleres) != 2:
+            continue
+        i_jug = capcaleres.index("jugador")
+        i_mit = 1 - i_jug
+        out: list[LligaJugadorInscrit] = []
+        for fila in taula:
+            if len(fila) < 2:
+                continue
+            brut = fila[i_jug]
+            nom = _RE_FITXATGE.sub("", brut).strip()
+            if not nom:
+                continue
+            out.append(
+                LligaJugadorInscrit(
+                    jugador=nom,
+                    mitjana=fila.decimal(i_mit),
+                    fitxatge=bool(_RE_FITXATGE.search(brut)),
+                    posicio=len(out) + 1,
+                )
+            )
+        return out
+    return []
 
 
 # ======================================================================

@@ -12,12 +12,24 @@
 CREATE TABLE IF NOT EXISTS fcbillar.club_plantilles (
   temporada     TEXT NOT NULL,
   club          TEXT NOT NULL,
-  player_fcb_id TEXT NOT NULL,
+  -- Buit per a qui s'acaba de federar: surt al llistat de divisions i encara no
+  -- ha jugat res, o sigui que no té fitxa nostra. La clau és el nom.
+  player_fcb_id TEXT,
   jugador       TEXT NOT NULL,
   mitjana       DOUBLE PRECISION,
   motiu         TEXT NOT NULL,
-  PRIMARY KEY (temporada, club, player_fcb_id)
+  PRIMARY KEY (temporada, club, jugador)
 );
+
+-- Per a la taula que ja existia amb `player_fcb_id` obligatori i a la clau.
+-- Es fa en dos passos i no amb un DROP: la taula ja té dades publicades i
+-- buidar-la deixaria les plantilles fora de línia fins a la propera publicació.
+-- La clau primera primer: mentre la columna hi sigui, Postgres no la deixa
+-- ser nul·la ("column is in a primary key").
+ALTER TABLE fcbillar.club_plantilles DROP CONSTRAINT IF EXISTS club_plantilles_pkey;
+ALTER TABLE fcbillar.club_plantilles ALTER COLUMN player_fcb_id DROP NOT NULL;
+ALTER TABLE fcbillar.club_plantilles
+  ADD CONSTRAINT club_plantilles_pkey PRIMARY KEY (temporada, club, jugador);
 
 CREATE INDEX IF NOT EXISTS ix_club_plantilles_club
   ON fcbillar.club_plantilles (temporada, club);

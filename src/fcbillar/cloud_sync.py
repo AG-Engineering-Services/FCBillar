@@ -159,12 +159,14 @@ def publish_rankings(
         """
     ):
         club = r["club_fcb_id"] if r["club_fcb_id"] in club_ids else None
-        players.append({
-            "fcb_id": r["fcb_id"],
-            "nom": _disp(r["nom"]),
-            "club_fcb_id": club,
-            "seguiment": bool(r["seguiment"]),
-        })
+        players.append(
+            {
+                "fcb_id": r["fcb_id"],
+                "nom": _disp(r["nom"]),
+                "club_fcb_id": club,
+                "seguiment": bool(r["seguiment"]),
+            }
+        )
     counts["players"] = _upsert(sb, "players", players, "fcb_id", prog)
 
     # 4. rankings
@@ -286,9 +288,7 @@ def publish_provisional_ranking(
         if not entries:
             continue
 
-        mod_id = conn.execute(
-            "SELECT id FROM modalitats WHERE codi_fcb = ?", (mod,)
-        ).fetchone()[0]
+        mod_id = conn.execute("SELECT id FROM modalitats WHERE codi_fcb = ?", (mod,)).fetchone()[0]
         # Per jugador: (data, caramboles_propis, caramboles_rival, entrades, game_id).
         games_by: dict[str, list[tuple[str, int | None, int | None, int | None, str]]] = {}
         for r in conn.execute(
@@ -299,8 +299,12 @@ def publish_provisional_ranking(
             (mod_id,),
         ):
             if r["d"] and r["d"] >= age_cutoff:
-                games_by.setdefault(r["f1"], []).append((r["d"], r["c1"], r["c2"], r["e"], r["gid"]))
-                games_by.setdefault(r["f2"], []).append((r["d"], r["c2"], r["c1"], r["e"], r["gid"]))
+                games_by.setdefault(r["f1"], []).append(
+                    (r["d"], r["c1"], r["c2"], r["e"], r["gid"])
+                )
+                games_by.setdefault(r["f2"], []).append(
+                    (r["d"], r["c2"], r["c1"], r["e"], r["gid"])
+                )
 
         # pending per jugador (de Supabase, publicat per publish_pending_games abans).
         pend: dict[str, list[tuple[int | None, int | None, int | None]]] = {}
@@ -364,11 +368,22 @@ def publish_provisional_ranking(
             proj_def = off_def or (n_pending > 0 and computable >= win)
             if n_pending == 0:
                 # Sense partides noves: ressaltem els games oficials que ja computen.
-                computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
-                                 "proj": None, "n": 0, "eff": off_mj or 0.0,
-                                 "won": None, "lost": None, "tie": None,
-                                 "gids": links_by_fcb.get(fcb) or None,
-                                 "cur_gids": links_by_fcb.get(fcb) or None})
+                computed.append(
+                    {
+                        "fcb": fcb,
+                        "pos": off_pos,
+                        "mj": off_mj,
+                        "def": proj_def,
+                        "proj": None,
+                        "n": 0,
+                        "eff": off_mj or 0.0,
+                        "won": None,
+                        "lost": None,
+                        "tie": None,
+                        "gids": links_by_fcb.get(fcb) or None,
+                        "cur_gids": links_by_fcb.get(fcb) or None,
+                    }
+                )
                 continue
             # Finestra (`win`): pendents (les més recents) + les més recents de games.
             # Desempat intradia per ordre de la federació (vegeu order_by_fcb):
@@ -410,18 +425,33 @@ def publish_provisional_ranking(
                 gids.append(gid)
             proj = (car / ent) if ent else None
             eff = proj if proj is not None else (off_mj or 0.0)
-            computed.append({"fcb": fcb, "pos": off_pos, "mj": off_mj, "def": proj_def,
-                             "proj": proj, "n": n_pending, "eff": eff,
-                             "won": won, "lost": lost, "tie": tie, "gids": gids,
-                             "cur_gids": links_by_fcb.get(fcb) or None})
+            computed.append(
+                {
+                    "fcb": fcb,
+                    "pos": off_pos,
+                    "mj": off_mj,
+                    "def": proj_def,
+                    "proj": proj,
+                    "n": n_pending,
+                    "eff": eff,
+                    "won": won,
+                    "lost": lost,
+                    "tie": tie,
+                    "gids": gids,
+                    "cur_gids": links_by_fcb.get(fcb) or None,
+                }
+            )
 
         # La federació ordena TOTS els definitius (per mitjana) abans dels no
         # definitius. Respectem-ho: un no-definitiu amb 2 bones partides NO pot
         # avançar els definitius. (Projecció pilot: la condició definitiu/no es
         # conserva de l'oficial.)
         computed.sort(
-            key=lambda c: (0 if c["def"] else 1, -c["eff"],
-                           c["pos"] if c["pos"] is not None else 1_000_000)
+            key=lambda c: (
+                0 if c["def"] else 1,
+                -c["eff"],
+                c["pos"] if c["pos"] is not None else 1_000_000,
+            )
         )
         active = [c for c in computed if c["n"] > 0]
         sb.table("ranking_provisional").delete().eq("modalitat_codi", mod).execute()
@@ -433,21 +463,29 @@ def publish_provisional_ranking(
         # partides_post > 0).
         rows = [
             {
-                "modalitat_codi": mod, "num_seq": rk["num_seq"], "player_fcb_id": c["fcb"],
-                "posicio_oficial": c["pos"], "mitjana_oficial": c["mj"],
+                "modalitat_codi": mod,
+                "num_seq": rk["num_seq"],
+                "player_fcb_id": c["fcb"],
+                "posicio_oficial": c["pos"],
+                "mitjana_oficial": c["mj"],
                 "posicio_provisional": i if active else None,
                 "mitjana_provisional": round(c["proj"], 4) if c["proj"] is not None else None,
                 "partides_post": c["n"],
-                "proj_won": c["won"], "proj_lost": c["lost"], "proj_tie": c["tie"],
-                "window_game_ids": c["gids"], "current_game_ids": c["cur_gids"],
+                "proj_won": c["won"],
+                "proj_lost": c["lost"],
+                "proj_tie": c["tie"],
+                "window_game_ids": c["gids"],
+                "current_game_ids": c["cur_gids"],
             }
             for i, c in enumerate(computed, start=1)
         ]
         for chunk in _chunks(rows):
             sb.table("ranking_provisional").insert(chunk).execute()
         total += len(rows)
-        prog("ok",
-             f"ranking_provisional[{mod}]: {len(rows)} files ({len(active)} amb partides noves)")
+        prog(
+            "ok",
+            f"ranking_provisional[{mod}]: {len(rows)} files ({len(active)} amb partides noves)",
+        )
 
     conn.close()
     return {"ranking_provisional": total}
@@ -480,10 +518,12 @@ def publish_pending_games(
         return " ".join(s.strip().lower().split())
 
     def _sig(na, ca, nb, cb, ent) -> str:
-        a, b = sorted([
-            f"{_nm(na)}:{'' if ca is None else ca}",
-            f"{_nm(nb)}:{'' if cb is None else cb}",
-        ])
+        a, b = sorted(
+            [
+                f"{_nm(na)}:{'' if ca is None else ca}",
+                f"{_nm(nb)}:{'' if cb is None else cb}",
+            ]
+        )
         return f"{a}|{b}|{'' if ent is None else ent}"
 
     _MODNM = {1: "Tres Bandes", 2: "Lliure", 3: "Quadre 47/2", 4: "Banda", 6: "Quadre 71/2"}
@@ -492,7 +532,9 @@ def publish_pending_games(
         nom2fcb.setdefault(_nm(r["nom"]), r["fcb_id"])
 
     # open_live es llegeix una sola vegada (Supabase).
-    live_rows = sb.table("open_live").select("modality, payload_json, captured_at").execute().data or []
+    live_rows = (
+        sb.table("open_live").select("modality, payload_json, captured_at").execute().data or []
+    )
 
     total = 0
     for mod in modalitats:
@@ -517,12 +559,23 @@ def publish_pending_games(
             # no tenen fitxa ni surten al rànquing, així que no aporten res.
             if pf is None or str(pf).startswith("name:"):
                 return
-            out.setdefault((pf, sig), {
-                "player_fcb_id": pf, "modalitat_codi": mod, "signatura": sig,
-                "competicio": comp, "font": font, "opponent_nom": opp_nom,
-                "opponent_fcb_id": opp_fcb, "caramboles": car, "caramboles_opp": car_opp,
-                "entrades": ent, "serie": serie, "captured_at": cap,
-            })
+            out.setdefault(
+                (pf, sig),
+                {
+                    "player_fcb_id": pf,
+                    "modalitat_codi": mod,
+                    "signatura": sig,
+                    "competicio": comp,
+                    "font": font,
+                    "opponent_nom": opp_nom,
+                    "opponent_fcb_id": opp_fcb,
+                    "caramboles": car,
+                    "caramboles_opp": car_opp,
+                    "entrades": ent,
+                    "serie": serie,
+                    "captured_at": cap,
+                },
+            )
 
         # --- COPA (Copa Catalana = 3 bandes → només modalitat 1) ---
         if mod == 1:
@@ -532,16 +585,43 @@ def publish_pending_games(
             ):
                 if not r["entrades"] or r["entrades"] <= 0:
                     continue  # fixture no jugada (caramboles 0-0, sense entrades)
-                sig = _sig(r["local_nom"], r["local_caramboles"], r["visitant_nom"],
-                           r["visitant_caramboles"], r["entrades"])
+                sig = _sig(
+                    r["local_nom"],
+                    r["local_caramboles"],
+                    r["visitant_nom"],
+                    r["visitant_caramboles"],
+                    r["entrades"],
+                )
                 if sig in game_sigs:
                     continue
                 lf = nom2fcb.get(_nm(r["local_nom"]))
                 vf = nom2fcb.get(_nm(r["visitant_nom"]))
-                _add(lf, r["visitant_nom"], vf, r["local_caramboles"], r["visitant_caramboles"],
-                     r["entrades"], r["local_serie"], "Copa", "copa", sig, None)
-                _add(vf, r["local_nom"], lf, r["visitant_caramboles"], r["local_caramboles"],
-                     r["entrades"], r["visitant_serie"], "Copa", "copa", sig, None)
+                _add(
+                    lf,
+                    r["visitant_nom"],
+                    vf,
+                    r["local_caramboles"],
+                    r["visitant_caramboles"],
+                    r["entrades"],
+                    r["local_serie"],
+                    "Copa",
+                    "copa",
+                    sig,
+                    None,
+                )
+                _add(
+                    vf,
+                    r["local_nom"],
+                    lf,
+                    r["visitant_caramboles"],
+                    r["local_caramboles"],
+                    r["entrades"],
+                    r["visitant_serie"],
+                    "Copa",
+                    "copa",
+                    sig,
+                    None,
+                )
 
             # --- OPENS 3B de la temporada en curs (torneig_partides) ---
             # Partides reals d'opens scrapejades per ingest_open_games, encara NO al
@@ -566,7 +646,10 @@ def publish_pending_games(
                 sig = _sig(r["n1"], r["c1"], r["n2"], r["c2"], r["e"])
                 if sig in game_sigs:
                     continue
-                comp = _re.sub(r"^OPEN\s+TRES BANDES\s+", "", r["comp"] or "", flags=_re.I).strip() or "Open"
+                comp = (
+                    _re.sub(r"^OPEN\s+TRES BANDES\s+", "", r["comp"] or "", flags=_re.I).strip()
+                    or "Open"
+                )
                 lf = nom2fcb.get(_nm(r["n1"]))
                 vf = nom2fcb.get(_nm(r["n2"]))
                 _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "open", sig, None)
@@ -579,7 +662,9 @@ def publish_pending_games(
                 continue
             payload = ol.get("payload_json") or {}
             cap = ol.get("captured_at")
-            comp = _re.sub(r"\s*-\s*[ÚU]NICA\s*$", "", payload.get("name") or "", flags=_re.I).strip()
+            comp = _re.sub(
+                r"\s*-\s*[ÚU]NICA\s*$", "", payload.get("name") or "", flags=_re.I
+            ).strip()
             pids = payload.get("player_ids") or {}
 
             def _pid(n):
@@ -665,6 +750,7 @@ def publish_games(
             "SELECT torneig_id_extern, divisio_id_extern, nom FROM torneigs_individuals"
         )
     }
+
     def _sigkey(p1n, c1, p2n, c2, ent):
         return (frozenset({(_nm(p1n), c1), (_nm(p2n), c2)}), ent)
 
@@ -678,8 +764,13 @@ def publish_games(
         if not nom:
             continue
         nom = _re.sub(r"\s*-\s*[ÚU]NICA\s*$", "", nom, flags=_re.I).strip()
-        key = _sigkey(r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"])
-        open_sig[key] = (nom, {_nm(r["player1_nom"]): r["serie1"], _nm(r["player2_nom"]): r["serie2"]})
+        key = _sigkey(
+            r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"]
+        )
+        open_sig[key] = (
+            nom,
+            {_nm(r["player1_nom"]): r["serie1"], _nm(r["player2_nom"]): r["serie2"]},
+        )
 
     copa_sig: dict = {}  # key -> {norm_nom: serie}
     try:
@@ -690,8 +781,17 @@ def publish_games(
     except sqlite3.OperationalError:
         cp_rows = []
     for r in cp_rows:
-        key = _sigkey(r["local_nom"], r["local_caramboles"], r["visitant_nom"], r["visitant_caramboles"], r["entrades"])
-        copa_sig[key] = {_nm(r["local_nom"]): r["local_serie"], _nm(r["visitant_nom"]): r["visitant_serie"]}
+        key = _sigkey(
+            r["local_nom"],
+            r["local_caramboles"],
+            r["visitant_nom"],
+            r["visitant_caramboles"],
+            r["entrades"],
+        )
+        copa_sig[key] = {
+            _nm(r["local_nom"]): r["local_serie"],
+            _nm(r["visitant_nom"]): r["visitant_serie"],
+        }
 
     # Índex de participació: norm(jugador) -> {(nom_torneig, modalitat, temporada)}.
     # Permet etiquetar games INDIVIDUAL quan no hi ha la partida exacta scrapejada:
@@ -751,7 +851,13 @@ def publish_games(
                 label = "Lliga 3 Bandes"
         elif comp == "INDIVIDUAL":
             hit = open_sig.get(
-                _sigkey(r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"])
+                _sigkey(
+                    r["player1_nom"],
+                    r["caramboles1"],
+                    r["player2_nom"],
+                    r["caramboles2"],
+                    r["entrades"],
+                )
             )
             # Font primària: el vincle exacte persistit a games.torneig_id
             # (linking.py). Validat localment i consistent amb la BD; substitueix
@@ -789,16 +895,18 @@ def publish_games(
                     shared = part_idx.get(_nm(r["player1_nom"]), set()) & part_idx.get(
                         _nm(r["player2_nom"]), set()
                     )
-                    noms = {
-                        t[0]
-                        for t in shared
-                        if t[1] == r["modalitat_codi"] and t[2] == season
-                    }
+                    noms = {t[0] for t in shared if t[1] == r["modalitat_codi"] and t[2] == season}
                     if len(noms) == 1:
                         label = next(iter(noms))
         elif comp == "COPA":
             sm = copa_sig.get(
-                _sigkey(r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"])
+                _sigkey(
+                    r["player1_nom"],
+                    r["caramboles1"],
+                    r["player2_nom"],
+                    r["caramboles2"],
+                    r["entrades"],
+                )
             )
             if sm:
                 if s1 is None:
@@ -808,9 +916,13 @@ def publish_games(
         # Guàrdies de sanitat: la sèrie no pot superar les caramboles del jugador;
         # a 3 bandes és impossible superar ~20 (error de parsing si ho fa).
         cap = 20 if r["modalitat_codi"] == 1 else None
-        if s1 is not None and ((r["caramboles1"] is not None and s1 > r["caramboles1"]) or (cap and s1 > cap)):
+        if s1 is not None and (
+            (r["caramboles1"] is not None and s1 > r["caramboles1"]) or (cap and s1 > cap)
+        ):
             s1 = None
-        if s2 is not None and ((r["caramboles2"] is not None and s2 > r["caramboles2"]) or (cap and s2 > cap)):
+        if s2 is not None and (
+            (r["caramboles2"] is not None and s2 > r["caramboles2"]) or (cap and s2 > cap)
+        ):
             s2 = None
         return _norm_label(label, r["modalitat_codi"]), s1, s2
 
@@ -836,15 +948,24 @@ def publish_games(
         """
     ):
         label, s1, s2 = enrich(r)
-        games.append({
-            "id": r["id"], "data_partida": r["data_partida"], "modalitat_codi": r["modalitat_codi"],
-            "competicio": label,
-            "player1_fcb_id": r["player1_fcb_id"], "player1_nom": _disp(r["player1_nom"]),
-            "caramboles1": r["caramboles1"], "serie_max1": s1,
-            "player2_fcb_id": r["player2_fcb_id"], "player2_nom": _disp(r["player2_nom"]),
-            "caramboles2": r["caramboles2"], "serie_max2": s2,
-            "entrades": r["entrades"], "guanyador_fcb_id": r["guanyador_fcb_id"],
-        })
+        games.append(
+            {
+                "id": r["id"],
+                "data_partida": r["data_partida"],
+                "modalitat_codi": r["modalitat_codi"],
+                "competicio": label,
+                "player1_fcb_id": r["player1_fcb_id"],
+                "player1_nom": _disp(r["player1_nom"]),
+                "caramboles1": r["caramboles1"],
+                "serie_max1": s1,
+                "player2_fcb_id": r["player2_fcb_id"],
+                "player2_nom": _disp(r["player2_nom"]),
+                "caramboles2": r["caramboles2"],
+                "serie_max2": s2,
+                "entrades": r["entrades"],
+                "guanyador_fcb_id": r["guanyador_fcb_id"],
+            }
+        )
     n = _upsert(sb, "games", games, "id", prog)
     conn.close()
     return {"games": n}
@@ -866,7 +987,9 @@ def publish_rating_buckets(
     conn.row_factory = sqlite3.Row
 
     fcb_by_pid = {r["id"]: r["fcb_id"] for r in conn.execute("SELECT id, fcb_id FROM players")}
-    mods = [r["codi_fcb"] for r in conn.execute("SELECT codi_fcb FROM modalitats ORDER BY codi_fcb")]
+    mods = [
+        r["codi_fcb"] for r in conn.execute("SELECT codi_fcb FROM modalitats ORDER BY codi_fcb")
+    ]
 
     bucket_rows, index_rows = [], []
     for codi in mods:
@@ -876,23 +999,27 @@ def publish_rating_buckets(
             if not fid:
                 continue
             for b in prof["buckets"]:
-                bucket_rows.append({
+                bucket_rows.append(
+                    {
+                        "player_fcb_id": fid,
+                        "modalitat_codi": codi,
+                        "bucket": f"b{b['order']}",
+                        "bucket_order": b["order"],
+                        "label": b["label"],
+                        "wins": b["wins"],
+                        "losses": b["losses"],
+                        "draws": b["draws"],
+                    }
+                )
+            index_rows.append(
+                {
                     "player_fcb_id": fid,
                     "modalitat_codi": codi,
-                    "bucket": f"b{b['order']}",
-                    "bucket_order": b["order"],
-                    "label": b["label"],
-                    "wins": b["wins"],
-                    "losses": b["losses"],
-                    "draws": b["draws"],
-                })
-            index_rows.append({
-                "player_fcb_id": fid,
-                "modalitat_codi": codi,
-                "weighted_index": prof["weighted_index"],
-                "crossover": prof["crossover"],
-                "total_games": prof["total"],
-            })
+                    "weighted_index": prof["weighted_index"],
+                    "crossover": prof["crossover"],
+                    "total_games": prof["total"],
+                }
+            )
         prog("ok", f"rating modalitat {codi}: {len(data)} jugadors")
     conn.close()
 
@@ -904,9 +1031,7 @@ def publish_rating_buckets(
         sb, "player_rating_buckets", bucket_rows, "player_fcb_id,modalitat_codi,bucket", prog
     )
     sb.table("player_rating_index").delete().gt("modalitat_codi", 0).execute()
-    ni = _upsert(
-        sb, "player_rating_index", index_rows, "player_fcb_id,modalitat_codi", prog
-    )
+    ni = _upsert(sb, "player_rating_index", index_rows, "player_fcb_id,modalitat_codi", prog)
     return {"player_rating_buckets": n, "player_rating_index": ni}
 
 
@@ -1097,10 +1222,15 @@ def publish_lliga(
     standing_rows: list[dict] = []
     for grp in groups:
         div, gid = grp["divisio_id"], grp["grup_id"]
-        group_rows.append({
-            "lliga_id": lliga, "divisio_id": div, "grup_id": gid,
-            "divisio_nom": noms.get((div, 0)), "grup_nom": noms.get((div, gid)),
-        })
+        group_rows.append(
+            {
+                "lliga_id": lliga,
+                "divisio_id": div,
+                "grup_id": gid,
+                "divisio_nom": noms.get((div, 0)),
+                "grup_nom": noms.get((div, gid)),
+            }
+        )
         enc = conn.execute(
             """
             SELECT equip_local_id AS loc, equip_visitant_id AS vis,
@@ -1123,19 +1253,27 @@ def publish_lliga(
             if pml is None or pmv is None:
                 continue
             sl, sv = _s(r["loc"]), _s(r["vis"])
-            sl["pj"] += 1; sv["pj"] += 1
-            sl["pf"] += pml; sl["pc"] += pmv
-            sv["pf"] += pmv; sv["pc"] += pml
+            sl["pj"] += 1
+            sv["pj"] += 1
+            sl["pf"] += pml
+            sl["pc"] += pmv
+            sv["pf"] += pmv
+            sv["pc"] += pml
             ppl, ppv = r["ppl"], r["ppv"]
             if ppl is not None and ppv is not None:
-                sl["ppf"] += ppl; sl["ppc"] += ppv
-                sv["ppf"] += ppv; sv["ppc"] += ppl
+                sl["ppf"] += ppl
+                sl["ppc"] += ppv
+                sv["ppf"] += ppv
+                sv["ppc"] += ppl
             if pml > pmv:
-                sl["g"] += 1; sv["p"] += 1
+                sl["g"] += 1
+                sv["p"] += 1
             elif pml < pmv:
-                sv["g"] += 1; sl["p"] += 1
+                sv["g"] += 1
+                sl["p"] += 1
             else:
-                sl["e"] += 1; sv["e"] += 1
+                sl["e"] += 1
+                sv["e"] += 1
 
         # Casa cada equip amb la seva fila oficial (posició + punts de la
         # federació). Els equips sense fila oficial s'ordenen al final per
@@ -1157,43 +1295,63 @@ def publish_lliga(
             for off in off_rows:
                 cid = repo.resolve_club_id_by_nom(off.equip)
                 fila = (
-                    conn.execute(
-                        "SELECT fcb_id FROM clubs WHERE id = ?", (cid,)
-                    ).fetchone()
+                    conn.execute("SELECT fcb_id FROM clubs WHERE id = ?", (cid,)).fetchone()
                     if cid
                     else None
                 )
-                standing_rows.append({
-                    "lliga_id": lliga, "divisio_id": div, "grup_id": gid,
-                    "posicio": off.posicio, "equip": off.equip,
-                    "club_fcb_id": fila["fcb_id"] if fila else None,
-                    "pj": 0, "g": 0, "e": 0, "p": 0,
-                    "punts": off.pm, "pf": 0, "pc": 0, "penalitzacio": None,
-                })
+                standing_rows.append(
+                    {
+                        "lliga_id": lliga,
+                        "divisio_id": div,
+                        "grup_id": gid,
+                        "posicio": off.posicio,
+                        "equip": off.equip,
+                        "club_fcb_id": fila["fcb_id"] if fila else None,
+                        "pj": 0,
+                        "g": 0,
+                        "e": 0,
+                        "p": 0,
+                        "punts": off.pm,
+                        "pf": 0,
+                        "pc": 0,
+                        "penalitzacio": None,
+                    }
+                )
             continue
 
         ranked = sorted(stats.items(), key=_rank_key)
         for pos, (eid, s) in enumerate(ranked, start=1):
             nom, fcb_id, lletra, _club_id = equips.get(eid, ("?", None, "", None))
             # "UNICO" = club amb un sol equip → no es mostra la lletra.
-            equip = nom if (lletra or "").strip().upper() in ("", "UNICO") else f"{nom} {lletra}".strip()
+            equip = (
+                nom
+                if (lletra or "").strip().upper() in ("", "UNICO")
+                else f"{nom} {lletra}".strip()
+            )
             computed_pm = 3 * s["g"] + s["e"]
             off = matched.get(eid)
             punts = off.pm if off is not None else computed_pm
             # Sanció federativa = punts esperats per victòries − punts oficials.
             # Només > 0 és sanció; < 0 vol dir que ens falten resultats (no sanció).
-            penal = (
-                computed_pm - off.pm
-                if off is not None and computed_pm > off.pm
-                else None
+            penal = computed_pm - off.pm if off is not None and computed_pm > off.pm else None
+            standing_rows.append(
+                {
+                    "lliga_id": lliga,
+                    "divisio_id": div,
+                    "grup_id": gid,
+                    "posicio": pos,
+                    "equip": equip,
+                    "club_fcb_id": fcb_id,
+                    "pj": s["pj"],
+                    "g": s["g"],
+                    "e": s["e"],
+                    "p": s["p"],
+                    "punts": punts,
+                    "pf": s["pf"],
+                    "pc": s["pc"],
+                    "penalitzacio": penal,
+                }
             )
-            standing_rows.append({
-                "lliga_id": lliga, "divisio_id": div, "grup_id": gid,
-                "posicio": pos, "equip": equip, "club_fcb_id": fcb_id,
-                "pj": s["pj"], "g": s["g"], "e": s["e"], "p": s["p"],
-                "punts": punts, "pf": s["pf"], "pc": s["pc"],
-                "penalitzacio": penal,
-            })
 
     counts = {}
     counts["lliga_groups"] = _upsert(
@@ -1252,24 +1410,38 @@ def publish_lliga(
         # resultats de tota la temporada passada. Cada fila porta el seu
         # lliga_id: qui vulgui només la d'ara, que filtri, com fa /lliga.
         counts["retirades"] = _retira_sobrants(
-            sb, "lliga_standings", lliga,
+            sb,
+            "lliga_standings",
+            lliga,
             {(r["divisio_id"], r["grup_id"], r["equip"]) for r in standing_rows},
-            ("divisio_id", "grup_id", "equip"), prog, altres_lligues=False,
+            ("divisio_id", "grup_id", "equip"),
+            prog,
+            altres_lligues=False,
         )
         # El mateix per als noms dels grups, que a més són el diccionari amb què
         # es llegeixen els encontres de totes les temporades.
         counts["grups_retirats"] = _retira_sobrants(
-            sb, "lliga_groups", lliga,
+            sb,
+            "lliga_groups",
+            lliga,
             {(r["divisio_id"], r["grup_id"]) for r in group_rows},
-            ("divisio_id", "grup_id"), prog, altres_lligues=False,
+            ("divisio_id", "grup_id"),
+            prog,
+            altres_lligues=False,
         )
     conn.close()
     return counts
 
 
 def _retira_sobrants(
-    sb, taula: str, lliga: int, vius: set, claus: tuple[str, ...], prog: Progress,
-    *, altres_lligues: bool = True,
+    sb,
+    taula: str,
+    lliga: int,
+    vius: set,
+    claus: tuple[str, ...],
+    prog: Progress,
+    *,
+    altres_lligues: bool = True,
 ) -> int:
     """Esborra de `taula` el que no s'acaba de publicar.
 
@@ -1337,14 +1509,22 @@ def publish_lliga_standings_hist(
     for r in src:
         divisio, grup = norm_divisio(r["divisio"]), norm_grup(r["grup"])
         by_pk[(r["temporada"], r["lliga"], divisio, grup, r["equip"])] = {
-            "temporada": r["temporada"], "lliga": r["lliga"], "divisio": divisio,
-            "grup": grup, "posicio": r["posicio"], "equip": r["equip"],
-            "pm": r["pm"], "pp": r["pp"],
+            "temporada": r["temporada"],
+            "lliga": r["lliga"],
+            "divisio": divisio,
+            "grup": grup,
+            "posicio": r["posicio"],
+            "equip": r["equip"],
+            "pm": r["pm"],
+            "pp": r["pp"],
         }
     rows = list(by_pk.values())
     n = _upsert(
-        sb, "lliga_standings_hist", rows,
-        "temporada,lliga,divisio,grup,equip", prog,
+        sb,
+        "lliga_standings_hist",
+        rows,
+        "temporada,lliga,divisio,grup,equip",
+        prog,
     )
     conn.close()
     return {"lliga_standings_hist": n}
@@ -1372,7 +1552,9 @@ def publish_copa(
 
     group_rows = [
         {
-            "edicio_id": edicio, "jornada": r["jornada"], "grup_id": r["grup_id"],
+            "edicio_id": edicio,
+            "jornada": r["jornada"],
+            "grup_id": r["grup_id"],
             "grup_nom": r["grup_nom"],
             "jornada_nom": jornades.get(r["jornada"], (None, None))[0],
             "ordre": jornades.get(r["jornada"], (None, None))[1],
@@ -1387,9 +1569,14 @@ def publish_copa(
     ]
     standing_rows = [
         {
-            "edicio_id": edicio, "jornada": r["jornada"], "grup_id": r["grup_id"],
-            "posicio": r["posicio"], "equip": r["equip"],
-            "punts": r["punts"], "parcials": r["parcials"], "mitjana": r["mitjana"],
+            "edicio_id": edicio,
+            "jornada": r["jornada"],
+            "grup_id": r["grup_id"],
+            "posicio": r["posicio"],
+            "equip": r["equip"],
+            "punts": r["punts"],
+            "parcials": r["parcials"],
+            "mitjana": r["mitjana"],
         }
         for r in conn.execute(
             """
@@ -1442,13 +1629,15 @@ def publish_opens(
         "FROM torneigs_individuals ti LEFT JOIN temporades te ON te.id = ti.temporada_id"
     ):
         tipus = torneig_tipus(r["nom"])
-        opens.append({
-            "open_id": r["id"],
-            "nom": _open_nom(r["nom"], tipus),
-            "tipus": tipus,
-            "temporada_id": r["temporada_id"],
-            "temporada": r["temp"],
-        })
+        opens.append(
+            {
+                "open_id": r["id"],
+                "nom": _open_nom(r["nom"], tipus),
+                "tipus": tipus,
+                "temporada_id": r["temporada_id"],
+                "temporada": r["temp"],
+            }
+        )
     seen: set[tuple[int, str]] = set()
     classifs = []
     for r in conn.execute(
@@ -1466,13 +1655,22 @@ def publish_opens(
         if key in seen:
             continue
         seen.add(key)
-        classifs.append({
-            "open_id": r["open_id"], "posicio": r["posicio"],
-            "player_fcb_id": r["player_fcb_id"], "jugador": _disp(r["jugador"]), "club": r["club"],
-            "partides": r["partides"], "punts": r["punts"], "caramboles": r["caramboles"],
-            "entrades": r["entrades"], "mitjana_general": r["mitjana_general"],
-            "mitjana_particular": r["mitjana_particular"], "serie_max": r["serie_max"],
-        })
+        classifs.append(
+            {
+                "open_id": r["open_id"],
+                "posicio": r["posicio"],
+                "player_fcb_id": r["player_fcb_id"],
+                "jugador": _disp(r["jugador"]),
+                "club": r["club"],
+                "partides": r["partides"],
+                "punts": r["punts"],
+                "caramboles": r["caramboles"],
+                "entrades": r["entrades"],
+                "mitjana_general": r["mitjana_general"],
+                "mitjana_particular": r["mitjana_particular"],
+                "serie_max": r["serie_max"],
+            }
+        )
 
     counts = {}
     counts["opens"] = _upsert(sb, "opens", opens, "open_id", prog)
@@ -1553,7 +1751,10 @@ def publish_lliga_player_rankings(
 
     tr = conn.execute("SELECT id FROM temporades ORDER BY nom DESC LIMIT 1").fetchone()
     season_id = tr["id"] if tr else None
-    players = {r["id"]: (r["fcb_id"], r["nom"]) for r in conn.execute("SELECT id, fcb_id, nom FROM players")}
+    players = {
+        r["id"]: (r["fcb_id"], r["nom"])
+        for r in conn.execute("SELECT id, fcb_id, nom FROM players")
+    }
     # El nom I l'identificador. La classificació publica `club_fcb_id` i això
     # publicava `nom`: són camps diferents -a un club no coincideixen- i, sobre
     # tot, aquesta taula no s'havia tornat a publicar des de la unificació de
@@ -1586,7 +1787,9 @@ def publish_lliga_player_rankings(
             (r["p1"], r["c1"], ex.get("punts1"), r["eq1"]),
             (r["p2"], r["c2"], ex.get("punts2"), r["eq2"]),
         ):
-            a = acc.setdefault((r["div"], r["grup"], pid), {"pj": 0, "punts": 0, "car": 0, "ent": 0, "eq": eq})
+            a = acc.setdefault(
+                (r["div"], r["grup"], pid), {"pj": 0, "punts": 0, "car": 0, "ent": 0, "eq": eq}
+            )
             a["pj"] += 1
             a["punts"] += pu or 0
             a["car"] += car or 0
@@ -1598,15 +1801,26 @@ def publish_lliga_player_rankings(
         fcb, nom = players.get(pid, (None, "?"))
         if not fcb:
             continue
-        rows.append({
-            "lliga_id": lliga, "divisio_id": div, "grup_id": grup, "posicio": pos,
-            "player_fcb_id": fcb, "jugador": _disp(nom),
-            "club": (equip_club.get(a["eq"]) or (None, None))[0],
-            "club_fcb_id": (equip_club.get(a["eq"]) or (None, None))[1],
-            "partides": a["pj"], "punts": a["punts"], "caramboles": a["car"], "entrades": a["ent"],
-            "mitjana": (a["car"] / a["ent"]) if a["ent"] else None,
-        })
-    n = _upsert(sb, "lliga_player_rankings", rows, "lliga_id,divisio_id,grup_id,player_fcb_id", prog)
+        rows.append(
+            {
+                "lliga_id": lliga,
+                "divisio_id": div,
+                "grup_id": grup,
+                "posicio": pos,
+                "player_fcb_id": fcb,
+                "jugador": _disp(nom),
+                "club": (equip_club.get(a["eq"]) or (None, None))[0],
+                "club_fcb_id": (equip_club.get(a["eq"]) or (None, None))[1],
+                "partides": a["pj"],
+                "punts": a["punts"],
+                "caramboles": a["car"],
+                "entrades": a["ent"],
+                "mitjana": (a["car"] / a["ent"]) if a["ent"] else None,
+            }
+        )
+    n = _upsert(
+        sb, "lliga_player_rankings", rows, "lliga_id,divisio_id,grup_id,player_fcb_id", prog
+    )
     conn.close()
     return {"lliga_player_rankings": n}
 
@@ -1661,12 +1875,22 @@ def publish_copa_player_rankings(
         if not fcb:
             continue
         pos += 1
-        rows.append({
-            "edicio_id": edicio, "jornada": 0, "grup_id": 0, "posicio": pos,
-            "player_fcb_id": fcb, "jugador": _disp(nom), "club": None,
-            "partides": a["pj"], "punts": a["punts"], "caramboles": a["car"], "entrades": a["ent"],
-            "mitjana": (a["car"] / a["ent"]) if a["ent"] else None,
-        })
+        rows.append(
+            {
+                "edicio_id": edicio,
+                "jornada": 0,
+                "grup_id": 0,
+                "posicio": pos,
+                "player_fcb_id": fcb,
+                "jugador": _disp(nom),
+                "club": None,
+                "partides": a["pj"],
+                "punts": a["punts"],
+                "caramboles": a["car"],
+                "entrades": a["ent"],
+                "mitjana": (a["car"] / a["ent"]) if a["ent"] else None,
+            }
+        )
     n = _upsert(sb, "copa_player_rankings", rows, "edicio_id,jornada,grup_id,player_fcb_id", prog)
     conn.close()
     return {"copa_player_rankings": n}
@@ -1688,7 +1912,9 @@ def publish_lliga_encontres(
     season_id = tr["id"] if tr else None
     equips = {
         r["id"]: (r["nom"], r["lletra"])
-        for r in conn.execute("SELECT e.id, c.nom, e.lletra FROM equips e JOIN clubs c ON c.id = e.club_id")
+        for r in conn.execute(
+            "SELECT e.id, c.nom, e.lletra FROM equips e JOIN clubs c ON c.id = e.club_id"
+        )
     }
 
     def eqname(eid):
@@ -1713,16 +1939,23 @@ def publish_lliga_encontres(
             jdates[key][e["jornada_id"]] = e["data"]
     jorder: dict = {}
     for (div, grup), jmap in jdates.items():
-        for i, (jid, _) in enumerate(sorted(jmap.items(), key=lambda kv: (kv[1] or "")), start=1):
+        for i, (jid, _) in enumerate(sorted(jmap.items(), key=lambda kv: kv[1] or ""), start=1):
             jorder[(div, grup, jid)] = i
 
-    enc_rows = [{
-        "encontre_id": e["id"], "divisio_id": e["divisio_id"], "grup_id": e["grup_id"],
-        "jornada": jorder.get((e["divisio_id"], e["grup_id"], e["jornada_id"])),
-        "data": e["data"], "equip_local": eqname(e["equip_local_id"]),
-        "equip_visitant": eqname(e["equip_visitant_id"]),
-        "gols_local": e["p_match_local"], "gols_visitant": e["p_match_visitant"],
-    } for e in encs]
+    enc_rows = [
+        {
+            "encontre_id": e["id"],
+            "divisio_id": e["divisio_id"],
+            "grup_id": e["grup_id"],
+            "jornada": jorder.get((e["divisio_id"], e["grup_id"], e["jornada_id"])),
+            "data": e["data"],
+            "equip_local": eqname(e["equip_local_id"]),
+            "equip_visitant": eqname(e["equip_visitant_id"]),
+            "gols_local": e["p_match_local"],
+            "gols_visitant": e["p_match_visitant"],
+        }
+        for e in encs
+    ]
 
     part_rows = []
     counter: dict = defaultdict(int)
@@ -1739,11 +1972,18 @@ def publish_lliga_encontres(
         (LLIGA_3B_ID, season_id),
     ):
         counter[r["eid"]] += 1
-        part_rows.append({
-            "encontre_id": r["eid"], "ordre": counter[r["eid"]], "modalitat_codi": r["mod"],
-            "jugador_local": _disp(r["j1"]), "caramboles_local": r["c1"],
-            "jugador_visitant": _disp(r["j2"]), "caramboles_visitant": r["c2"], "entrades": r["e"],
-        })
+        part_rows.append(
+            {
+                "encontre_id": r["eid"],
+                "ordre": counter[r["eid"]],
+                "modalitat_codi": r["mod"],
+                "jugador_local": _disp(r["j1"]),
+                "caramboles_local": r["c1"],
+                "jugador_visitant": _disp(r["j2"]),
+                "caramboles_visitant": r["c2"],
+                "entrades": r["e"],
+            }
+        )
 
     counts = {}
     counts["lliga_encontres"] = _upsert(sb, "lliga_encontres", enc_rows, "encontre_id", prog)
@@ -1763,29 +2003,45 @@ def publish_copa_encontres(
     sb = get_client()
 
     ed = conn.execute("SELECT MAX(edicio_id) AS m FROM copa_encontres").fetchone()["m"]
-    enc_rows = [{
-        "encontre_id": r["id"], "jornada": r["jornada"], "grup_id": r["grup_id"], "grup_nom": r["grup_nom"],
-        "equip_local": r["equip_local"], "equip_visitant": r["equip_visitant"],
-        "gols_local": r["p_match_local"], "gols_visitant": r["p_match_visitant"],
-    } for r in conn.execute(
-        """
+    enc_rows = [
+        {
+            "encontre_id": r["id"],
+            "jornada": r["jornada"],
+            "grup_id": r["grup_id"],
+            "grup_nom": r["grup_nom"],
+            "equip_local": r["equip_local"],
+            "equip_visitant": r["equip_visitant"],
+            "gols_local": r["p_match_local"],
+            "gols_visitant": r["p_match_visitant"],
+        }
+        for r in conn.execute(
+            """
         SELECT id, jornada, grup_id, grup_nom, equip_local, equip_visitant,
                p_match_local, p_match_visitant
         FROM copa_encontres WHERE edicio_id = ?
-        """, (ed,))
+        """,
+            (ed,),
+        )
     ]
-    part_rows = [{
-        "encontre_id": r["encontre_copa_id"], "ordre": r["ordre"],
-        "jugador_local": r["local_nom"], "caramboles_local": r["local_caramboles"],
-        "jugador_visitant": r["visitant_nom"], "caramboles_visitant": r["visitant_caramboles"],
-        "entrades": r["entrades"],
-    } for r in conn.execute(
-        """
+    part_rows = [
+        {
+            "encontre_id": r["encontre_copa_id"],
+            "ordre": r["ordre"],
+            "jugador_local": r["local_nom"],
+            "caramboles_local": r["local_caramboles"],
+            "jugador_visitant": r["visitant_nom"],
+            "caramboles_visitant": r["visitant_caramboles"],
+            "entrades": r["entrades"],
+        }
+        for r in conn.execute(
+            """
         SELECT cp.encontre_copa_id, cp.ordre, cp.local_nom, cp.local_caramboles,
                cp.visitant_nom, cp.visitant_caramboles, cp.entrades
         FROM copa_partides cp JOIN copa_encontres ce ON ce.id = cp.encontre_copa_id
         WHERE ce.edicio_id = ?
-        """, (ed,))
+        """,
+            (ed,),
+        )
     ]
     counts = {}
     counts["copa_encontres"] = _upsert(sb, "copa_encontres", enc_rows, "encontre_id", prog)
@@ -1820,12 +2076,18 @@ def publish_open_partides(
             continue
         key = (oid, r["fase_id"])
         counter[key] += 1
-        rows.append({
-            "open_id": oid, "fase_id": r["fase_id"], "ordre": counter[key],
-            "jugador_local": r["player1_nom"], "caramboles_local": r["caramboles1"],
-            "jugador_visitant": r["player2_nom"], "caramboles_visitant": r["caramboles2"],
-            "entrades": r["entrades"],
-        })
+        rows.append(
+            {
+                "open_id": oid,
+                "fase_id": r["fase_id"],
+                "ordre": counter[key],
+                "jugador_local": r["player1_nom"],
+                "caramboles_local": r["caramboles1"],
+                "jugador_visitant": r["player2_nom"],
+                "caramboles_visitant": r["caramboles2"],
+                "entrades": r["entrades"],
+            }
+        )
     n = _upsert(sb, "open_partides", rows, "open_id,fase_id,ordre", prog)
     conn.close()
     return {"open_partides": n}
@@ -1925,7 +2187,8 @@ def publish_open_ranking(
         for o in conn.execute(
             "SELECT id, nom, torneig_id_extern, divisio_id_extern FROM torneigs_individuals"
         ).fetchall()
-        if "OPEN" in (o["nom"] or "").upper() and not any(b in (o["nom"] or "").upper() for b in _no3b)
+        if "OPEN" in (o["nom"] or "").upper()
+        and not any(b in (o["nom"] or "").upper() for b in _no3b)
     ]
     if not open_rows:
         conn.close()
@@ -1945,21 +2208,32 @@ def publish_open_ranking(
         gdate[_sig(r["n1"], r["c1"], r["n2"], r["c2"], r["e"])] = r["d"]
     idmap = {
         (r["torneig_id_extern"], r["divisio_id_extern"]): r["id"]
-        for r in conn.execute("SELECT id, torneig_id_extern, divisio_id_extern FROM torneigs_individuals")
+        for r in conn.execute(
+            "SELECT id, torneig_id_extern, divisio_id_extern FROM torneigs_individuals"
+        )
     }
     open_date: dict = defaultdict(str)
     for r in conn.execute("SELECT * FROM torneig_partides"):
         tid = idmap.get((r["torneig_id_extern"], r["divisio_id_extern"]))
         if tid not in open_ids:
             continue
-        d = gdate.get(_sig(r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"]))
+        d = gdate.get(
+            _sig(
+                r["player1_nom"],
+                r["caramboles1"],
+                r["player2_nom"],
+                r["caramboles2"],
+                r["entrades"],
+            )
+        )
         if d and d > open_date[tid]:
             open_date[tid] = d
 
     import re as _re
 
     onom = {
-        o["id"]: _re.sub(r"\s*-\s*[ÚU]NICA\s*$", "", o["nom"], flags=_re.I).strip() for o in open_rows
+        o["id"]: _re.sub(r"\s*-\s*[ÚU]NICA\s*$", "", o["nom"], flags=_re.I).strip()
+        for o in open_rows
     }
     tnom = {
         r["id"]: r["temp"]
@@ -2002,13 +2276,18 @@ def publish_open_ranking(
             mitj[r["fcb_id"]] = r["mitjana_general"]
 
     def _ddet(oid, pos, pp):
-        return {"open": onom.get(oid), "temp": tnom.get(oid), "data": open_date.get(oid) or None, "pos": pos, "punts": pp}
-
+        return {
+            "open": onom.get(oid),
+            "temp": tnom.get(oid),
+            "data": open_date.get(oid) or None,
+            "pos": pos,
+            "punts": pp,
+        }
 
     # Un snapshot per ronda: finestra mòbil dels últims 5 opens fins a la ronda i.
     all_rows = []
     for i in range(1, len(ordered) + 1):
-        window = ordered[max(0, i - 5):i]
+        window = ordered[max(0, i - 5) : i]
         pp_player: dict = defaultdict(dict)  # fcb -> {oid: (pos, pts)}
         info: dict = {}  # fcb -> (nom, club)
         for oid in window:
@@ -2035,13 +2314,23 @@ def publish_open_ranking(
         # Desempat: punts ↓, millor open ↓, mitjana ↓, nom ↑
         rows_r.sort(key=lambda x: (-x[3], -x[6], -mitj.get(x[0], 0.0), x[1] or ""))
         for posicio, (fcb, nom, club, total, njug, det, maxs) in enumerate(rows_r, start=1):
-            all_rows.append({
-                "genere": "general", "ronda": i, "ronda_nom": onom.get(last_open),
-                "ronda_data": open_date.get(last_open) or None, "ronda_temp": tnom.get(last_open),
-                "posicio": posicio, "player_fcb_id": fcb, "jugador": _disp(nom),
-                "club": club or club_fallback.get(fcb), "opens_jugats": njug, "punts": total,
-                "detall": det, "provisional": False,
-            })
+            all_rows.append(
+                {
+                    "genere": "general",
+                    "ronda": i,
+                    "ronda_nom": onom.get(last_open),
+                    "ronda_data": open_date.get(last_open) or None,
+                    "ronda_temp": tnom.get(last_open),
+                    "posicio": posicio,
+                    "player_fcb_id": fcb,
+                    "jugador": _disp(nom),
+                    "club": club or club_fallback.get(fcb),
+                    "opens_jugats": njug,
+                    "punts": total,
+                    "detall": det,
+                    "provisional": False,
+                }
+            )
     # Penalitzacions del PDF oficial (Art. IV): -20 no presentat injustificat,
     # 0 justificat, None no inscrit. Només a la ronda actual (el PDF és la finestra vigent).
     #
@@ -2065,7 +2354,7 @@ def publish_open_ranking(
     # autoritativa dels punts i s'aplica. Els participants que només surten en
     # aquest open es recuperen de les partides reals (_open_entrants).
     max_ronda = len(ordered)
-    window = ordered[max(0, max_ronda - 5):max_ronda]
+    window = ordered[max(0, max_ronda - 5) : max_ronda]
     prov_latest = True
     try:
         import httpx
@@ -2103,11 +2392,19 @@ def publish_open_ranking(
                     if fcb in known:
                         continue
                     row = {
-                        "genere": "general", "ronda": max_ronda, "ronda_nom": onom.get(newest),
-                        "ronda_data": open_date.get(newest) or None, "ronda_temp": tnom.get(newest),
-                        "posicio": 0, "player_fcb_id": fcb, "jugador": _disp(nom),
-                        "club": club_fallback.get(fcb), "opens_jugats": 0, "punts": 0,
-                        "detall": [_ddet(oid, None, 0) for oid in window], "provisional": False,
+                        "genere": "general",
+                        "ronda": max_ronda,
+                        "ronda_nom": onom.get(newest),
+                        "ronda_data": open_date.get(newest) or None,
+                        "ronda_temp": tnom.get(newest),
+                        "posicio": 0,
+                        "player_fcb_id": fcb,
+                        "jugador": _disp(nom),
+                        "club": club_fallback.get(fcb),
+                        "opens_jugats": 0,
+                        "punts": 0,
+                        "detall": [_ddet(oid, None, 0) for oid in window],
+                        "provisional": False,
                     }
                     all_rows.append(row)
                     latest.append(row)
@@ -2153,12 +2450,19 @@ def publish_open_ranking(
                         continue
                     fcb, nom = hit
                     row = {
-                        "genere": "general", "ronda": max_ronda, "ronda_nom": onom.get(window[-1]),
+                        "genere": "general",
+                        "ronda": max_ronda,
+                        "ronda_nom": onom.get(window[-1]),
                         "ronda_data": open_date.get(window[-1]) or None,
                         "ronda_temp": tnom.get(window[-1]),
-                        "posicio": 0, "player_fcb_id": fcb, "jugador": _disp(nom),
-                        "club": club_fallback.get(fcb), "opens_jugats": 0, "punts": 0,
-                        "detall": [_ddet(oid, None, 0) for oid in window], "provisional": False,
+                        "posicio": 0,
+                        "player_fcb_id": fcb,
+                        "jugador": _disp(nom),
+                        "club": club_fallback.get(fcb),
+                        "opens_jugats": 0,
+                        "punts": 0,
+                        "detall": [_ddet(oid, None, 0) for oid in window],
+                        "provisional": False,
                     }
                     all_rows.append(row)
                     latest.append(row)
@@ -2184,7 +2488,9 @@ def publish_open_ranking(
                             d["pos"], d["absent"] = None, True
                 row["punts"] = e.total_points
                 row["opens_jugats"] = sum(1 for v in ppo if v is not None and v > 0)
-            latest.sort(key=lambda r: (-r["punts"], -mitj.get(r["player_fcb_id"], 0.0), r["jugador"] or ""))
+            latest.sort(
+                key=lambda r: (-r["punts"], -mitj.get(r["player_fcb_id"], 0.0), r["jugador"] or "")
+            )
             for posicio, r in enumerate(latest, start=1):
                 r["posicio"] = posicio
             prov_latest = False
@@ -2433,9 +2739,7 @@ def publish_estadistiques_computa(
                         and pr.get("caramboles_opp") is not None
                         and pr.get("entrades")
                     ):
-                        prox.append(
-                            (pr["caramboles"], pr["caramboles_opp"], pr["entrades"], None)
-                        )
+                        prox.append((pr["caramboles"], pr["caramboles_opp"], pr["entrades"], None))
             else:
                 prox = list(window)
 
@@ -2485,14 +2789,14 @@ def publish_estadistiques_computa(
             ).eq("usuari_id", est_uid).eq("modalitat_id", est_mod).execute()
             for chunk in _chunks([{"id": i} for i in matched]):
                 ids = [r["id"] for r in chunk]
-                pub.table("partides").update(
-                    {"computa": True, "computa_font": font}
-                ).in_("id", ids).execute()
+                pub.table("partides").update({"computa": True, "computa_font": font}).in_(
+                    "id", ids
+                ).execute()
             for chunk in _chunks([{"id": i} for i in matched_prox]):
                 ids = [r["id"] for r in chunk]
-                pub.table("partides").update(
-                    {"computa_prox": True, "computa_prox_font": font}
-                ).in_("id", ids).execute()
+                pub.table("partides").update({"computa_prox": True, "computa_prox_font": font}).in_(
+                    "id", ids
+                ).execute()
 
     conn.close()
     return {
@@ -2567,23 +2871,23 @@ def publish_estadistiques_fitxa(
         han jugat la lliga → infravalora). Torna {nom, temporada, posicio, total}."""
         if not temporada or num_seq is None:
             return None
-        p = (
-            sb.table("players").select("club_fcb_id")
-            .eq("fcb_id", the_fcb).execute().data
-        )
+        p = sb.table("players").select("club_fcb_id").eq("fcb_id", the_fcb).execute().data
         club = p[0].get("club_fcb_id") if p else None
         if not club:
             return None
-        members = (
-            sb.table("players").select("fcb_id").eq("club_fcb_id", club).execute().data or []
-        )
+        members = sb.table("players").select("fcb_id").eq("club_fcb_id", club).execute().data or []
         ids = [m["fcb_id"] for m in members]
         if not ids:
             return None
         ent = (
-            sb.table("ranking_entries").select("player_fcb_id,mitjana_general")
-            .eq("modalitat_codi", MOD).eq("num_seq", num_seq)
-            .in_("player_fcb_id", ids).execute().data or []
+            sb.table("ranking_entries")
+            .select("player_fcb_id,mitjana_general")
+            .eq("modalitat_codi", MOD)
+            .eq("num_seq", num_seq)
+            .in_("player_fcb_id", ids)
+            .execute()
+            .data
+            or []
         )
         ranked = sorted(
             (e for e in ent if e.get("mitjana_general") is not None),
@@ -2626,7 +2930,8 @@ def publish_estadistiques_fitxa(
                 or []
             )
             valid = [
-                h for h in hist
+                h
+                for h in hist
                 if h.get("posicio") is not None and h.get("mitjana_general") is not None
             ]
             if valid:
@@ -2658,9 +2963,7 @@ def publish_estadistiques_fitxa(
         opens = None
         if orr:
             latest = max(orr, key=lambda r: r["ronda"])
-            best_pos = min(
-                (r["posicio"] for r in orr if r["posicio"] is not None), default=None
-            )
+            best_pos = min((r["posicio"] for r in orr if r["posicio"] is not None), default=None)
             oc_all = (
                 sb.table("open_classifications")
                 .select("open_id,posicio")
@@ -2725,8 +3028,10 @@ def publish_estadistiques_fitxa(
         if rb:
             hardest, easiest = _est_nivell_extremes(conn, fcb_id, MOD)
             radar = {
-                "buckets": rb, "index": ri[0] if ri else None,
-                "hardest": hardest, "easiest": easiest,
+                "buckets": rb,
+                "index": ri[0] if ri else None,
+                "hardest": hardest,
+                "easiest": easiest,
             }
         else:
             radar = None
@@ -2789,9 +3094,7 @@ def publish_estadistiques_fitxa(
             "club_actual": club_actual,
             "club_anterior": club_anterior,
         }
-        rows.append(
-            {"usuari_id": est_uid, "payload_json": payload, "updated_at": fetched_at}
-        )
+        rows.append({"usuari_id": est_uid, "payload_json": payload, "updated_at": fetched_at})
         prog(
             "ok",
             f"fitxa u{est_uid} (fcb {fcb_id}): rànquing={'sí' if ranking else 'no'} "
@@ -2843,13 +3146,34 @@ def _est_location(cid: int | None, home_club: str | None, tnom: str | None) -> s
 
 
 _EST_PARTICLES = {
-    "de", "del", "dels", "d", "da", "do", "dos", "das", "la", "las", "les",
-    "el", "els", "los", "lo", "l", "i", "y", "van", "von", "der", "den", "e",
+    "de",
+    "del",
+    "dels",
+    "d",
+    "da",
+    "do",
+    "dos",
+    "das",
+    "la",
+    "las",
+    "les",
+    "el",
+    "els",
+    "los",
+    "lo",
+    "l",
+    "i",
+    "y",
+    "van",
+    "von",
+    "der",
+    "den",
+    "e",
 }
 
 
 def _est_title_name(fcb_nom: str | None) -> str:
-    """"RALITA ROS, JOAN" -> "Joan Ralita Ros" (nom + cognoms, Title Case, amb
+    """ "RALITA ROS, JOAN" -> "Joan Ralita Ros" (nom + cognoms, Title Case, amb
     preposicions/articles en minúscula: "Miquel de la Hoz Alonso")."""
     parts = (fcb_nom or "").split(",")
     surnames = parts[0].strip()
@@ -2897,8 +3221,11 @@ def _est_nivell_extremes(conn, fcb_id: str, codi_fcb: int) -> tuple[dict | None,
 
     def _mk(row):
         return {
-            "nom": _est_title_name(row["nom"]), "rating": round(row["rating"], 3),
-            "res": row["res"], "myc": row["myc"], "oppc": row["oppc"],
+            "nom": _est_title_name(row["nom"]),
+            "rating": round(row["rating"], 3),
+            "res": row["res"],
+            "myc": row["myc"],
+            "oppc": row["oppc"],
         }
 
     return _mk(rows[0]), _mk(rows[-1])
@@ -2946,8 +3273,29 @@ def publish_estadistiques_partides(
 
     # Preposicions/articles que van sempre en minúscula (excepte si obren el nom).
     _PARTICLES = {
-        "de", "del", "dels", "d", "da", "do", "dos", "das", "la", "las", "les",
-        "el", "els", "los", "lo", "l", "i", "y", "van", "von", "der", "den", "e",
+        "de",
+        "del",
+        "dels",
+        "d",
+        "da",
+        "do",
+        "dos",
+        "das",
+        "la",
+        "las",
+        "les",
+        "el",
+        "els",
+        "los",
+        "lo",
+        "l",
+        "i",
+        "y",
+        "van",
+        "von",
+        "der",
+        "den",
+        "e",
     }
 
     def _title_name(fcb_nom: str | None) -> str:
@@ -2988,45 +3336,74 @@ def publish_estadistiques_partides(
             ):
                 if g["co"] is None or g["copp"] is None or not g["e"]:
                     continue
-                feds.append({
-                    "data": g["d"], "co": g["co"], "copp": g["copp"], "e": g["e"], "sm": g["sm"],
-                    "opp": g["opp"], "comp": _est_comp_type(g["cid"], g["tnom"]),
-                    "lloc": _est_location(g["cid"], g["home"], g["tnom"]),
-                })
+                feds.append(
+                    {
+                        "data": g["d"],
+                        "co": g["co"],
+                        "copp": g["copp"],
+                        "e": g["e"],
+                        "sm": g["sm"],
+                        "opp": g["opp"],
+                        "comp": _est_comp_type(g["cid"], g["tnom"]),
+                        "lloc": _est_location(g["cid"], g["home"], g["tnom"]),
+                    }
+                )
             # 2) partides PENDENTS (recents, encara no oficials).
             try:
                 pend = (
                     sb.table("pending_games")
                     .select("opponent_nom,caramboles,caramboles_opp,entrades,serie,competicio")
-                    .eq("player_fcb_id", fcb_id).eq("modalitat_codi", codi_fcb)
-                    .execute().data or []
+                    .eq("player_fcb_id", fcb_id)
+                    .eq("modalitat_codi", codi_fcb)
+                    .execute()
+                    .data
+                    or []
                 )
             except Exception:
                 pend = []
             for pr in pend:
-                if pr.get("caramboles") is None or pr.get("caramboles_opp") is None or not pr.get("entrades"):
+                if (
+                    pr.get("caramboles") is None
+                    or pr.get("caramboles_opp") is None
+                    or not pr.get("entrades")
+                ):
                     continue
-                feds.append({
-                    "data": None, "co": pr["caramboles"], "copp": pr["caramboles_opp"],
-                    "e": pr["entrades"], "sm": pr.get("serie"), "opp": pr.get("opponent_nom") or "",
-                    "comp": _est_comp_from_text(pr.get("competicio")), "lloc": None,
-                })
+                feds.append(
+                    {
+                        "data": None,
+                        "co": pr["caramboles"],
+                        "copp": pr["caramboles_opp"],
+                        "e": pr["entrades"],
+                        "sm": pr.get("serie"),
+                        "opp": pr.get("opponent_nom") or "",
+                        "comp": _est_comp_from_text(pr.get("competicio")),
+                        "lloc": None,
+                    }
+                )
             if not feds:
                 continue
             # 3) partides actuals a c3b.
             c3 = (
                 pub.table("partides")
-                .select("id,data,oponent,caramboles,caramboles_oponent,entrades,serie_major,competicio,lloc")
-                .eq("usuari_id", est_uid).eq("modalitat_id", est_mod)
-                .execute().data or []
+                .select(
+                    "id,data,oponent,caramboles,caramboles_oponent,entrades,serie_major,competicio,lloc"
+                )
+                .eq("usuari_id", est_uid)
+                .eq("modalitat_id", est_mod)
+                .execute()
+                .data
+                or []
             )
             used: set = set()
             updates: list[tuple] = []
             inserts: list[dict] = []
             for f in sorted(feds, key=lambda x: x["data"] or ""):
                 cand = [
-                    c for c in c3 if c["id"] not in used
-                    and c["caramboles"] == f["co"] and c["caramboles_oponent"] == f["copp"]
+                    c
+                    for c in c3
+                    if c["id"] not in used
+                    and c["caramboles"] == f["co"]
+                    and c["caramboles_oponent"] == f["copp"]
                 ]
                 same = [c for c in cand if _name_match(c["oponent"], f["opp"])]
                 pool = same or cand
@@ -3040,7 +3417,9 @@ def publish_estadistiques_partides(
                     # Només si és inequívoc (1 candidat), per no sobreescriure malament;
                     # evita duplicar la mateixa partida amb un marcador diferent.
                     fb = [
-                        c for c in c3 if c["id"] not in used
+                        c
+                        for c in c3
+                        if c["id"] not in used
                         and _name_match(c["oponent"], f["opp"])
                         and _date_dist(c["data"], f["data"]) <= 2
                     ]
@@ -3077,23 +3456,37 @@ def publish_estadistiques_partides(
                 for pid, upd in updates:
                     pub.table("partides").update(upd).eq("id", pid).execute()
                 for f in inserts:
-                    pub.table("partides").insert({
-                        "usuari_id": est_uid, "modalitat_id": est_mod, "num": None,
-                        "data": f["data"], "oponent": _title_name(f["opp"]),
-                        "caramboles": f["co"], "caramboles_oponent": f["copp"], "entrades": f["e"],
-                        "serie_major": f["sm"], "competicio": f["comp"], "lloc": f["lloc"],
-                        "mitjana": round(f["co"] / f["e"], 4) if f["e"] else None,
-                        "mitjana_oponent": round(f["copp"] / f["e"], 4) if f["e"] else None,
-                        "origen": "ranquing",
-                    }).execute()
+                    pub.table("partides").insert(
+                        {
+                            "usuari_id": est_uid,
+                            "modalitat_id": est_mod,
+                            "num": None,
+                            "data": f["data"],
+                            "oponent": _title_name(f["opp"]),
+                            "caramboles": f["co"],
+                            "caramboles_oponent": f["copp"],
+                            "entrades": f["e"],
+                            "serie_major": f["sm"],
+                            "competicio": f["comp"],
+                            "lloc": f["lloc"],
+                            "mitjana": round(f["co"] / f["e"], 4) if f["e"] else None,
+                            "mitjana_oponent": round(f["copp"] / f["e"], 4) if f["e"] else None,
+                            "origen": "ranquing",
+                        }
+                    ).execute()
                 if inserts:
-                    pub.rpc("renumber_estadistiques", {"p_usuari": est_uid, "p_mod": est_mod}).execute()
+                    pub.rpc(
+                        "renumber_estadistiques", {"p_usuari": est_uid, "p_mod": est_mod}
+                    ).execute()
 
             tot_upd += len(updates)
             tot_ins += len(inserts)
             if updates or inserts:
-                prog("ok", f"partides[u{est_uid}/mod{codi_fcb}]: {len(updates)} adaptades, "
-                     f"{len(inserts)} noves" + ("  [DRY]" if dry_run else ""))
+                prog(
+                    "ok",
+                    f"partides[u{est_uid}/mod{codi_fcb}]: {len(updates)} adaptades, "
+                    f"{len(inserts)} noves" + ("  [DRY]" if dry_run else ""),
+                )
 
     conn.close()
     return {"estadistiques_partides_upd": tot_upd, "estadistiques_partides_ins": tot_ins}
@@ -3290,17 +3683,22 @@ def _open_match_key(name: str) -> str:
     s = name.split('"')[0]  # descarta el subtítol del memorial entre cometes
     s = unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode().upper()
     for w in (
-        "TRES BANDES", "3 BANDES", "QUADRE 47/2", "QUADRE 71/2",
-        "BANDA", "LLIURE", "OPEN", "MEMORIAL", "UNICA",
+        "TRES BANDES",
+        "3 BANDES",
+        "QUADRE 47/2",
+        "QUADRE 71/2",
+        "BANDA",
+        "LLIURE",
+        "OPEN",
+        "MEMORIAL",
+        "UNICA",
     ):
         s = s.replace(w, " ")
     s = re.sub(r"[^A-Z0-9 ]", " ", s)
     return re.sub(r"\s+", " ", s).strip()
 
 
-def _projection_superseded_by(
-    proj_row: dict, active: list[tuple[set[str], str]]
-) -> bool:
+def _projection_superseded_by(proj_row: dict, active: list[tuple[set[str], str]]) -> bool:
     """Diu si una projecció (id negatiu) ja té l'open REAL en curs publicat.
 
     El nom del PDF ('XIV OPEN LES SANTES DE MATARO') i el del llistat de la
@@ -3484,7 +3882,8 @@ def _autobuild_projection_payload(
         if "FEMENI" not in _n(d.title)
     ]
     rank_docs = [
-        d for d in open_docs
+        d
+        for d in open_docs
         if "RANQUING INICIAL" in _n(d.title) or "RANKING INICIAL" in _n(d.title)
     ]
     if not rank_docs:
@@ -3648,9 +4047,7 @@ def _attach_schedules(phases: list[dict], schedule_by_group: dict | None) -> Non
                 g["venue"] = f"Billar {billar}"
 
 
-def _enrich_real_groups_with_projection(
-    real_phases: list[dict], proj_phases: list[dict]
-) -> int:
+def _enrich_real_groups_with_projection(real_phases: list[dict], proj_phases: list[dict]) -> int:
     """Completa els grups de les fases REALS de grups afegint-hi els jugadors que la
     projecció ja té RESOLTS (guanyadors segurs de la ronda inferior) però que la FCB
     encara no ha col·locat al grup — p.ex. el 3r de cada grup de PRÈVIA = guanyador de
@@ -3667,15 +4064,11 @@ def _enrich_real_groups_with_projection(
         # Treu accents I tota la puntuació/espais: la FCB en viu escriu "COGNOM,
         # NOM" i el PDF de vegades "COGNOM,NOM" (sense espai) → cal casar-los.
         s = "".join(
-            c
-            for c in unicodedata.normalize("NFD", s or "")
-            if unicodedata.category(c) != "Mn"
+            c for c in unicodedata.normalize("NFD", s or "") if unicodedata.category(c) != "Mn"
         )
         return re.sub(r"[^A-Za-z0-9]", "", s).upper()
 
-    proj_by_code = {
-        _phase_code(p.get("label", ""), p.get("kind", "")): p for p in proj_phases
-    }
+    proj_by_code = {_phase_code(p.get("label", ""), p.get("kind", "")): p for p in proj_phases}
     added = 0
     for ph in real_phases:
         if ph.get("kind") != "group":
@@ -3716,9 +4109,7 @@ def _reservat_match_key(name: str, club: str) -> tuple[str, str, str]:
 
     def _strip(s: str) -> str:
         return "".join(
-            c
-            for c in unicodedata.normalize("NFD", s or "")
-            if unicodedata.category(c) != "Mn"
+            c for c in unicodedata.normalize("NFD", s or "") if unicodedata.category(c) != "Mn"
         ).upper()
 
     parts = (name or "").split(",")
@@ -3752,9 +4143,7 @@ def _complete_first_ko_reservats(state, proj_phases: list[dict]) -> int:
     ]
     if not proj_reservats:
         return 0
-    have = {
-        _reservat_match_key(s.player_name, s.club) for s in state.reservats
-    }
+    have = {_reservat_match_key(s.player_name, s.club) for s in state.reservats}
     extra: list[GroupStanding] = []
     for p in proj_reservats:
         key = _reservat_match_key(p.get("name") or "", p.get("club") or "")
@@ -3806,9 +4195,7 @@ def _seed_first_ko_by_projection(state, proj_phases: list[dict]) -> bool:
     # Posició (1..16) per cap de sèrie, casada de forma robusta amb el viu.
     pos_by_key: dict[tuple[str, str, str], int] = {}
     for idx, p in enumerate(proj_reservats, 1):
-        pos_by_key.setdefault(
-            _reservat_match_key(p.get("name") or "", p.get("club") or ""), idx
-        )
+        pos_by_key.setdefault(_reservat_match_key(p.get("name") or "", p.get("club") or ""), idx)
     seeding = dict(state.seeding or {})  # rànquing viu com a fallback
     reseeded = False
     for s in state.reservats:
@@ -3819,9 +4206,7 @@ def _seed_first_ko_by_projection(state, proj_phases: list[dict]) -> bool:
     if not reseeded:
         return False
     state.seeding = seeding
-    state.phases = _attach_ko_provisional_players(
-        state.phases, state.reservats, seeding
-    )
+    state.phases = _attach_ko_provisional_players(state.phases, state.reservats, seeding)
     return True
 
 
@@ -3829,11 +4214,11 @@ def _enrich_live_payload(
     payload: dict, sb, open_name: str = "", division_id: int | None = None
 ) -> None:
     """Enriqueix el payload en viu (in-place):
-      - PJ/caramboles/entrades per jugador a cada classificació i classificat,
-        calculats des de les partides JUGADES del grup (l'HTML de la FCB només
-        dóna jugador/club/punts/mitjana).
-      - `player_ids`: mapa nom→fcb_id (taula `players` de Supabase) perquè el web
-        pugui enllaçar cada jugador a la seva fitxa.
+    - PJ/caramboles/entrades per jugador a cada classificació i classificat,
+      calculats des de les partides JUGADES del grup (l'HTML de la FCB només
+      dóna jugador/club/punts/mitjana).
+    - `player_ids`: mapa nom→fcb_id (taula `players` de Supabase) perquè el web
+      pugui enllaçar cada jugador a la seva fitxa.
     """
     import re
     import unicodedata
@@ -3927,9 +4312,7 @@ def _enrich_live_payload(
 
         def _key(s: str) -> str:
             s = "".join(
-                c
-                for c in unicodedata.normalize("NFD", s or "")
-                if unicodedata.category(c) != "Mn"
+                c for c in unicodedata.normalize("NFD", s or "") if unicodedata.category(c) != "Mn"
             )
             return re.sub(r",\s*", ", ", " ".join(s.split())).upper()
 
@@ -3993,8 +4376,12 @@ def _latest_3b_num_seq(sb) -> int | None:
     """num_seq més alt del rànquing de TRES BANDES (modalitat_codi=1)."""
     try:
         r = (
-            sb.table("rankings").select("num_seq")
-            .eq("modalitat_codi", 1).order("num_seq", desc=True).limit(1).execute()
+            sb.table("rankings")
+            .select("num_seq")
+            .eq("modalitat_codi", 1)
+            .order("num_seq", desc=True)
+            .limit(1)
+            .execute()
         )
         return int(r.data[0]["num_seq"]) if r.data else None
     except Exception:
@@ -4012,8 +4399,11 @@ def _ranking_3b_by_fcb_id(sb, num_seq: int | None = None) -> dict[str, int]:
             return {}
         out: dict[str, int] = {}
         res = (
-            sb.table("ranking_entries").select("player_fcb_id,posicio")
-            .eq("modalitat_codi", 1).eq("num_seq", num_seq).execute()
+            sb.table("ranking_entries")
+            .select("player_fcb_id,posicio")
+            .eq("modalitat_codi", 1)
+            .eq("num_seq", num_seq)
+            .execute()
         )
         for r in res.data or []:
             if r.get("player_fcb_id") and r.get("posicio") is not None:
@@ -4137,9 +4527,7 @@ def publish_live_opens(
         except Exception:
             pass
         try:
-            state = fetch_live_state(
-                e.division_id, force=force, rank_by_name=rank_by_name
-            )
+            state = fetch_live_state(e.division_id, force=force, rank_by_name=rank_by_name)
         except Exception as exc:
             prog("warn", f"#{e.division_id} {e.name}: {exc}")
             errors += 1
@@ -4197,14 +4585,16 @@ def publish_live_opens(
                     template_phases = prev_phases
             if template_phases:
                 payload["phases"] = _merge_projected_phases(payload["phases"], template_phases)
-        rows.append({
-            "fcb_division_id": e.division_id,
-            "name": state.structure.name,
-            "modality": modality,
-            "payload_json": payload,
-            "captured_at": fetched_at,
-            "updated_at": fetched_at,
-        })
+        rows.append(
+            {
+                "fcb_division_id": e.division_id,
+                "name": state.structure.name,
+                "modality": modality,
+                "payload_json": payload,
+                "captured_at": fetched_at,
+                "updated_at": fetched_at,
+            }
+        )
         active_ids.append(e.division_id)
         prog("ok", f"#{e.division_id} {state.structure.name} ({len(state.phases)} fases)")
 
@@ -4238,18 +4628,16 @@ def publish_live_opens(
     superseded = 0
     try:
         proj_rows = (
-            sb.table("open_live").select("fcb_division_id,name,modality")
-            .lt("fcb_division_id", 0).execute().data or []
+            sb.table("open_live")
+            .select("fcb_division_id,name,modality")
+            .lt("fcb_division_id", 0)
+            .execute()
+            .data
+            or []
         )
         # Cada open REAL actiu, reduït a (tokens de la clau estable, modalitat).
-        active = [
-            (set(_open_match_key(r["name"]).split()), r.get("modality") or "")
-            for r in rows
-        ]
-        stale = [
-            p["fcb_division_id"] for p in proj_rows
-            if _projection_superseded_by(p, active)
-        ]
+        active = [(set(_open_match_key(r["name"]).split()), r.get("modality") or "") for r in rows]
+        stale = [p["fcb_division_id"] for p in proj_rows if _projection_superseded_by(p, active)]
         if stale:
             sb.table("open_live").delete().in_("fcb_division_id", stale).execute()
             superseded = len(stale)
@@ -4298,9 +4686,7 @@ def _publica_reemplaçant(
     n = _upsert(sb, taula, files, ",".join(clau), prog)
     vius = {tuple(str(f[c]) for c in clau) for f in files}
     fora = 0
-    for valors in ambits if ambits is not None else {
-        tuple(f[c] for c in ambit) for f in files
-    }:
+    for valors in ambits if ambits is not None else {tuple(f[c] for c in ambit) for f in files}:
         q = sb.table(taula).select(",".join(dict.fromkeys(clau + ambit)))
         for camp, valor in zip(ambit, valors, strict=True):
             q = q.eq(camp, valor)
@@ -4417,17 +4803,31 @@ def publish_calendari(
     n_ev = n_rev = n_can = 0
     if combinacions:
         n_ev = _publica_reemplaçant(
-            sb, "calendari_events", events,
+            sb,
+            "calendari_events",
+            events,
             ("font", "temporada", "setmana", "disciplina", "ambit", "grup", "tipus"),
-            ("font", "temporada"), prog, combinacions,
+            ("font", "temporada"),
+            prog,
+            combinacions,
         )
         n_rev = _publica_reemplaçant(
-            sb, "calendari_revisions", revisions,
-            ("font", "temporada", "sha256"), ("font", "temporada"), prog, combinacions,
+            sb,
+            "calendari_revisions",
+            revisions,
+            ("font", "temporada", "sha256"),
+            ("font", "temporada"),
+            prog,
+            combinacions,
         )
         n_can = _publica_reemplaçant(
-            sb, "calendari_canvis", canvis,
-            ("font", "temporada", "sha256", "ord"), ("font", "temporada"), prog, combinacions,
+            sb,
+            "calendari_canvis",
+            canvis,
+            ("font", "temporada", "sha256", "ord"),
+            ("font", "temporada"),
+            prog,
+            combinacions,
         )
     else:
         # Cap font ni temporada: això no és un calendari buit, és una lectura que
@@ -4448,9 +4848,12 @@ def publish_calendari(
             # en va publicant revisions que canvien enfrontaments -a la 4a B ja
             # n'ha canviat tres-, o sigui que un upsert sol deixaria els vells.
             n_cal = _publica_reemplaçant(
-                sb, "lliga_calendari", grups_cal,
+                sb,
+                "lliga_calendari",
+                grups_cal,
                 ("temporada", "divisio", "grup", "jornada", "local", "visitant"),
-                ("temporada", "divisio", "grup"), prog,
+                ("temporada", "divisio", "grup"),
+                prog,
             )
         except Exception as exc:  # noqa: BLE001
             # La taula la crea l'administrador: amb PostgREST no es pot fer cap
@@ -4465,8 +4868,12 @@ def publish_calendari(
     if plantilles_cal:
         try:
             n_pla = _publica_reemplaçant(
-                sb, "club_plantilles", plantilles_cal,
-                ("temporada", "club", "player_fcb_id"), ("temporada",), prog,
+                sb,
+                "club_plantilles",
+                plantilles_cal,
+                ("temporada", "club", "jugador"),
+                ("temporada",),
+                prog,
                 {(p["temporada"],) for p in plantilles_cal},
             )
         except Exception as exc:

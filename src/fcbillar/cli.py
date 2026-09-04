@@ -151,7 +151,10 @@ def fetch_ranking(
 @app.command("ingest-ranking")
 def ingest_ranking_cmd(
     num_seq: int = typer.Argument(..., help="Número seqüencial del rànquing"),
-    modalitat: int = typer.Argument(..., help="Codi de modalitat (1=tres bandes, 2=lliure, 3=quadre 47/2, 4=banda, 6=quadre 71/2)"),
+    modalitat: int = typer.Argument(
+        ...,
+        help="Codi de modalitat (1=tres bandes, 2=lliure, 3=quadre 47/2, 4=banda, 6=quadre 71/2)",
+    ),
 ) -> None:
     """Descarrega un rànquing, el parseja i el desa a la BD."""
     settings = get_settings()
@@ -171,7 +174,9 @@ def ingest_ranking_cmd(
 def ingest_partides_cmd(
     num_seq: int = typer.Argument(..., help="Número seqüencial del rànquing"),
     modalitat: int = typer.Argument(..., help="Codi de modalitat"),
-    player_fcb_id: str = typer.Argument(..., help="fcb_id intern del jugador (vist a la URL Partides)"),
+    player_fcb_id: str = typer.Argument(
+        ..., help="fcb_id intern del jugador (vist a la URL Partides)"
+    ),
     create_missing_players: bool = typer.Option(
         False,
         "--create-missing-players",
@@ -182,7 +187,11 @@ def ingest_partides_cmd(
     settings = get_settings()
     with ScraperClient(settings) as client:
         result = ingest_partides(
-            client, num_seq, modalitat, player_fcb_id, settings=settings,
+            client,
+            num_seq,
+            modalitat,
+            player_fcb_id,
+            settings=settings,
             create_missing_players=create_missing_players,
         )
     console.print(
@@ -447,7 +456,10 @@ def ingest_lliga_cmd(
 def discover_lliga_cmd(
     lliga_id: int = typer.Argument(..., help="Id de la lliga (36=TRES BANDES, 37=4 MODALITATS)"),
     depth: int = typer.Option(
-        2, "--depth", min=1, max=3,
+        2,
+        "--depth",
+        min=1,
+        max=3,
         help="1=divisions, 2=+grups, 3=+jornades (cada nivell descarrega més)",
     ),
 ) -> None:
@@ -462,9 +474,7 @@ def discover_lliga_cmd(
             grups = tree.grups_by_div.get(div.divisio_id, [])
             for grup in grups:
                 resp = f" [{grup.club_responsable}]" if grup.club_responsable else ""
-                console.print(
-                    f"    [green]{grup.nom}[/] (grup_id={grup.grup_id}){resp}"
-                )
+                console.print(f"    [green]{grup.nom}[/] (grup_id={grup.grup_id}){resp}")
                 if depth >= 3:
                     jornades = tree.jornades_by_grup.get((div.divisio_id, grup.grup_id), [])
                     for j in jornades:
@@ -511,9 +521,7 @@ def discover_lliga_noms_cmd(
                         (lliga_id, div.divisio_id, grup.grup_id, grup.nom),
                     )
                     total += 1
-            console.print(
-                f"[green]Lliga {lliga_id}: {len(tree.divisions)} divisions desades[/]"
-            )
+            console.print(f"[green]Lliga {lliga_id}: {len(tree.divisions)} divisions desades[/]")
     conn.commit()
     console.print(f"[green]OK {total} noms de lliga desats a lliga_noms.[/]")
 
@@ -685,9 +693,7 @@ def clubs_alias_cmd(
     except ValueError as e:
         console.print(f"[red]{e}[/]")
         raise typer.Exit(1) from e
-    console.print(
-        f"[green]OK alias '{alias_nom}' afegit al club '{club_fcb_id}'.[/]"
-    )
+    console.print(f"[green]OK alias '{alias_nom}' afegit al club '{club_fcb_id}'.[/]")
 
 
 @clubs_app.command("merge")
@@ -765,12 +771,8 @@ def clubs_unifica_cmd(
             continue
 
         cid = repo.get_club_id_by_fcb_id(real_vell)
-        n_jug = conn.execute(
-            "SELECT COUNT(*) FROM players WHERE club_id = ?", (cid,)
-        ).fetchone()[0]
-        n_eq = conn.execute(
-            "SELECT COUNT(*) FROM equips WHERE club_id = ?", (cid,)
-        ).fetchone()[0]
+        n_jug = conn.execute("SELECT COUNT(*) FROM players WHERE club_id = ?", (cid,)).fetchone()[0]
+        n_eq = conn.execute("SELECT COUNT(*) FROM equips WHERE club_id = ?", (cid,)).fetchone()[0]
         if aplica:
             try:
                 repo.merge_clubs(real_vell, real_oficial)
@@ -818,7 +820,8 @@ def import_temporada_cmd(
         False, "--historical", help="Incloure backfill històric (~2 min sense partides)"
     ),
     historical_top: int | None = typer.Option(
-        0, "--historical-top",
+        0,
+        "--historical-top",
         help="Top N per modalitat al backfill històric (0=cap, None=tots, lent)",
     ),
     only_followed: bool = typer.Option(
@@ -882,8 +885,7 @@ def clubs_players_cmd(
     players = find_club_players(repo, club_fcb_id)
     if not players:
         console.print(
-            f"[yellow]Cap jugador trobat per '{club_fcb_id}'. "
-            f"Cal ingest previ de lliga.[/]"
+            f"[yellow]Cap jugador trobat per '{club_fcb_id}'. Cal ingest previ de lliga.[/]"
         )
         return
     table = Table(title=f"Jugadors amb equip de '{club_fcb_id}' ({len(players)})")
@@ -903,15 +905,18 @@ def clubs_players_cmd(
 @app.command("ingest-individuals")
 def ingest_individuals_cmd(
     temporada: str = typer.Option(
-        "current", "--temporada",
+        "current",
+        "--temporada",
         help="Temporada (ex: '2024-2025') o 'current' per a l'actual",
     ),
     cache: bool = typer.Option(
-        False, "--cache",
+        False,
+        "--cache",
         help="Permet servir HTML de la cache (per defecte, fresc per detectar novetats)",
     ),
     historical: bool = typer.Option(
-        False, "--historical",
+        False,
+        "--historical",
         help="Ingerir TOTES les temporades (actual + històric de /ca/historial), no només una",
     ),
 ) -> None:
@@ -967,7 +972,9 @@ def link_individuals_cmd() -> None:
         f"  ·  conflictes: {res.conflicts}"
     )
     if res.conflict_samples:
-        console.print(f"  [yellow]mostres de conflicte (game→torneig):[/] {res.conflict_samples[:5]}")
+        console.print(
+            f"  [yellow]mostres de conflicte (game→torneig):[/] {res.conflict_samples[:5]}"
+        )
 
     table = Table(title="Cobertura partides INDIVIDUAL per temporada")
     table.add_column("Temporada")
@@ -1005,8 +1012,10 @@ def clean_torneig_noms_cmd(
     for _id, old, new in changes:
         console.print(f"  [yellow]{old}[/] → [green]{new}[/]")
     if not dry_run:
-        conn.executemany("UPDATE torneigs_individuals SET nom=? WHERE id=?",
-                         [(new, i) for (i, _o, new) in changes])
+        conn.executemany(
+            "UPDATE torneigs_individuals SET nom=? WHERE id=?",
+            [(new, i) for (i, _o, new) in changes],
+        )
         conn.commit()
     n_open = sum(1 for r in rows if torneig_tipus(r["nom"]) == "open")
     console.print(
@@ -1107,9 +1116,7 @@ def publish_cloud_cmd() -> None:
 
         c3 = publish_estadistiques_fitxa(on_progress=_prog)
         console.print(
-            "[green]OK Estadístiques fitxa: "
-            + ", ".join(f"{k}={v}" for k, v in c3.items())
-            + "[/]"
+            "[green]OK Estadístiques fitxa: " + ", ".join(f"{k}={v}" for k, v in c3.items()) + "[/]"
         )
     except Exception as exc:  # noqa: BLE001
         console.print(f"[yellow]Avís: no s'ha pogut publicar la fitxa a Estadístiques: {exc}[/]")
@@ -1213,14 +1220,16 @@ def project_open_ranking_cmd(
     pdf: str = typer.Argument(..., help="PDF 'RÀNQUING INICIAL' de l'open"),
     season: str | None = typer.Option(None, "--season", help="Temporada, ex: 2025-2026"),
     division_id: int | None = typer.Option(
-        None, "--division-id",
+        None,
+        "--division-id",
         help="fcb_division_id sintètic (negatiu). Per defecte, derivat del nom de l'open.",
     ),
     modality: str | None = typer.Option(
         None, "--modality", help="Modalitat (per defecte, derivada del nom o 'Tres Bandes')."
     ),
     horaris: str | None = typer.Option(
-        None, "--horaris",
+        None,
+        "--horaris",
         help="PDF 'HORARIS' de l'open: enganxa dia/billar/hores a cada grup.",
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="No publica; només mostra el resum."),
@@ -1273,6 +1282,7 @@ def project_open_ranking_cmd(
             console.print(f"[red]No existeix el PDF d'horaris: {horaris_path}[/]")
             raise typer.Exit(code=1)
         from fcb_opens.scraper.horaris_pdf import parse_horaris_pdf
+
         schedule_by_group = parse_horaris_pdf(horaris_path)
         console.print(f"[dim]Horaris: {len(schedule_by_group)} grups amb dia/billar/hores.[/]")
 
@@ -1309,16 +1319,26 @@ def project_open_ranking_cmd(
         console.print("[dim]DRY-RUN: no s'ha publicat res.[/]")
         if json_out:
             import json as _json
-            typer.echo(_json.dumps({
-                "division_id": division_id, "open_name": name,
-                "n_players": n, "modality": mod, "dry_run": True,
-            }))
+
+            typer.echo(
+                _json.dumps(
+                    {
+                        "division_id": division_id,
+                        "open_name": name,
+                        "n_players": n,
+                        "modality": mod,
+                        "dry_run": True,
+                    }
+                )
+            )
         return
 
     sb = get_client()
     fetched_at = datetime.now(timezone.utc).isoformat()
     payload = projection_to_live_payload(
-        proj, division_id=division_id, fetched_at=fetched_at,
+        proj,
+        division_id=division_id,
+        fetched_at=fetched_at,
         schedule_by_group=schedule_by_group,
     )
     try:
@@ -1335,7 +1355,9 @@ def project_open_ranking_cmd(
         "updated_at": fetched_at,
     }
     try:
-        _upsert(sb, "open_live", [row], "fcb_division_id", lambda _l, m: console.print(f"[dim]  {m}[/]"))
+        _upsert(
+            sb, "open_live", [row], "fcb_division_id", lambda _l, m: console.print(f"[dim]  {m}[/]")
+        )
     except Exception as exc:  # noqa: BLE001
         console.print(f"[red]Error publicant a open_live: {exc}[/]")
         raise typer.Exit(code=1) from exc
@@ -1348,18 +1370,29 @@ def project_open_ranking_cmd(
     )
     if json_out:
         import json as _json
-        typer.echo(_json.dumps({
-            "division_id": division_id, "open_name": name,
-            "n_players": n, "modality": mod, "n_links": n_links,
-        }))
+
+        typer.echo(
+            _json.dumps(
+                {
+                    "division_id": division_id,
+                    "open_name": name,
+                    "n_players": n,
+                    "modality": mod,
+                    "n_links": n_links,
+                }
+            )
+        )
 
 
 @app.command("remove-projected-open")
 def remove_projected_open_cmd(
     division_id: int | None = typer.Argument(
-        None, help="id sintètic negatiu a esborrar. Sense argument, --all esborra totes les projeccions."
+        None,
+        help="id sintètic negatiu a esborrar. Sense argument, --all esborra totes les projeccions.",
     ),
-    all_: bool = typer.Option(False, "--all", help="Esborra TOTES les projeccions (files amb id negatiu)."),
+    all_: bool = typer.Option(
+        False, "--all", help="Esborra TOTES les projeccions (files amb id negatiu)."
+    ),
 ) -> None:
     """Retira una projecció d'open (o totes) de `open_live`.
 
@@ -1422,8 +1455,13 @@ def set_open_prize_ranking_cmd(
             console.print(f"[red]--month ha de ser AAAA-MM (ex: 2026-04). Rebut: {month!r}[/]")
             raise typer.Exit(code=1) from exc
         rows = (
-            get_client().table("rankings").select("num_seq")
-            .eq("modalitat_codi", 1).eq("any_pub", year).eq("mes_pub", mon).execute()
+            get_client()
+            .table("rankings")
+            .select("num_seq")
+            .eq("modalitat_codi", 1)
+            .eq("any_pub", year)
+            .eq("mes_pub", mon)
+            .execute()
         ).data or []
         if not rows:
             console.print(f"[red]No hi ha rànquing 3B publicat per {year}-{mon:02d}.[/]")
@@ -1468,7 +1506,8 @@ def open_import_inscrits_cmd(
     pdf: str = typer.Argument(..., help="Ruta al PDF 'LLISTAT D'INSCRITS PER CLUBS'"),
     season: str = typer.Option("2025-2026", "--season", help="Temporada de l'Open"),
     name: str = typer.Option(
-        "", "--name",
+        "",
+        "--name",
         help="Nom de l'Open (per defecte, el llegit del PDF)",
     ),
 ) -> None:
@@ -1694,9 +1733,7 @@ def ingest_calendari_lliga_cmd(
     for cal in calendaris:
         nou = esmena_dates(cal, referencia)
         canviades = sum(
-            1
-            for a, b in zip(cal.encontres, nou.encontres, strict=True)
-            if a.data != b.data
+            1 for a, b in zip(cal.encontres, nou.encontres, strict=True) if a.data != b.data
         )
         marca = f" [yellow]({canviades} dates esmenades)[/]" if canviades else ""
         console.print(
@@ -1721,11 +1758,19 @@ def ingest_calendari_lliga_cmd(
 
 @app.command("ingest-calendari")
 def ingest_calendari_cmd(
-    url: str = typer.Option(None, "--url", help="URL del PDF (per defecte, la RFEB de la temporada en curs)."),
+    url: str = typer.Option(
+        None, "--url", help="URL del PDF (per defecte, la RFEB de la temporada en curs)."
+    ),
     fitxer: str = typer.Option(None, "--fitxer", help="Llegeix un PDF local en lloc de baixar-lo."),
-    font: str = typer.Option("RFEB", "--font", help="Federació que publica el calendari: RFEB | FCB."),
-    versio: str = typer.Option(None, "--versio", help="Revisió del PDF de la FCB ('V-1'): no la diu enlloc."),
-    force: bool = typer.Option(False, "--force", help="Reparseja encara que el PDF no hagi canviat."),
+    font: str = typer.Option(
+        "RFEB", "--font", help="Federació que publica el calendari: RFEB | FCB."
+    ),
+    versio: str = typer.Option(
+        None, "--versio", help="Revisió del PDF de la FCB ('V-1'): no la diu enlloc."
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Reparseja encara que el PDF no hagi canviat."
+    ),
 ) -> None:
     """Ingesta el calendari esportiu federatiu (PDF) i n'apunta els canvis.
 
@@ -1919,11 +1964,14 @@ def arxiva_lliga_en_viu_cmd(
                 f"és clau a l'històric.[/] Prova `fcbillar discover-lliga-noms`."
             )
             raise typer.Exit(1)
-        rows.append((temporada, lliga, divisio, grup, r["posicio"], r["equip"],
-                     r["punts"], r["pf"]))
+        rows.append(
+            (temporada, lliga, divisio, grup, r["posicio"], r["equip"], r["punts"], r["pf"])
+        )
 
     table = Table(title=f"{temporada} cap a l'històric" + ("" if aplica else " (assaig en sec)"))
-    table.add_column("Divisió"); table.add_column("Grup"); table.add_column("Equips", justify="right")
+    table.add_column("Divisió")
+    table.add_column("Grup")
+    table.add_column("Equips", justify="right")
     per_grup: dict[tuple[str, str], int] = {}
     for _t, _l, d, g, *_ in rows:
         per_grup[(d, g)] = per_grup.get((d, g), 0) + 1
@@ -1944,6 +1992,144 @@ def arxiva_lliga_en_viu_cmd(
     console.print(
         f"[green]OK {len(rows)} files desades a l'històric local.[/] "
         f"Ara `fcbillar publish --lliga-hist` per pujar-les."
+    )
+
+
+@app.command("ingest-inscrits-lliga")
+def ingest_inscrits_lliga_cmd(
+    lliga: int = typer.Option(
+        0, "--lliga", help="Id de lliga de la federació. Per defecte, totes les obertes."
+    ),
+    temporada: str = typer.Option("2026/2027", "--temporada"),
+    ranking_id: int = typer.Option(
+        0, "--ranking", help="Rànquing amb què contrastar les mitjanes. 0 = no contrastar."
+    ),
+) -> None:
+    """De qui està fet cada club a la lliga, tal com ho publica la federació.
+
+    Des del setembre de 2026 la federació publica els jugadors que cada club
+    inscriu a cada lliga, amb la mitjana i una etiqueta per als fitxatges. És la
+    font oficial del que `plantilles` estimava a partir de qui havia jugat.
+
+    Un fitxatge surt a dues llistes —al seu club sense marca i al club que se
+    l'endú amb marca— i això no és cap error: són les dues cares del mateix
+    fitxatge. El que sí que ho és va a la taula d'avisos del final.
+    """
+    from fcbillar.inscrits_lliga import (
+        clubs_sense_jugadors,
+        desa,
+        llegeix_clubs,
+        llegeix_inscrits,
+        llegeix_lligues,
+        mitjanes_del_ranquing,
+        revisa,
+    )
+
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    mitjanes = mitjanes_del_ranquing(conn, ranking_id) if ranking_id else None
+
+    with ScraperClient(settings) as client:
+        obertes = llegeix_lligues(client)
+        if not obertes:
+            console.print("[red]Cap lliga oberta al llistat de la federació.[/]")
+            raise typer.Exit(1)
+        if lliga:
+            obertes = [o for o in obertes if o.lliga_id == lliga]
+            if not obertes:
+                console.print(f"[red]La lliga {lliga} no és al llistat d'obertes.[/]")
+                raise typer.Exit(1)
+
+        avisos_totals = []
+        for oberta in obertes:
+            console.print()
+            console.print(f"[bold]{oberta.nom}[/] ({oberta.modalitat}, id {oberta.lliga_id})")
+            info = llegeix_clubs(client, oberta)
+            inscrits = llegeix_inscrits(client, info)
+            if not inscrits:
+                # Passa de debò: el setembre de 2026 la lliga de 4 Modalitats
+                # tenia 29 equips inscrits i cap jugador a cap dels 20 clubs.
+                # No és un error nostre i no ha d'aturar la resta.
+                console.print(
+                    f"  [yellow]{info.equips} equips de {len(info.clubs)} clubs, "
+                    f"però cap jugador publicat.[/] No deso res d'aquesta lliga."
+                )
+                continue
+            n = desa(conn, info, inscrits, temporada)
+            fitxatges = sum(1 for i in inscrits if i.fitxatge)
+            console.print(
+                f"  [green]{n} inscrits[/] a "
+                f"{len({i.club for i in inscrits})} de {len(info.clubs)} clubs · "
+                f"{info.equips} equips · {fitxatges} fitxatges"
+            )
+            # Un club que no contesta no s'esborra, es deixa com estava. Dir-ho
+            # és l'única manera que algú sàpiga que aquella composició és vella.
+            muts = clubs_sense_jugadors(info, inscrits)
+            if muts:
+                console.print(
+                    f"  [yellow]{len(muts)} clubs sense cap jugador publicat[/] "
+                    f"(no els toco): {', '.join(muts)}"
+                )
+            avisos_totals += [(oberta.nom, a) for a in revisa(inscrits, mitjanes)]
+
+    if not avisos_totals:
+        console.print()
+        console.print("[green]Cap contradicció.[/]")
+        return
+    taula = Table(title=f"Contradiccions ({len(avisos_totals)})")
+    taula.add_column("Tipus")
+    taula.add_column("Jugador")
+    taula.add_column("Clubs")
+    taula.add_column("Detall")
+    for _, a in avisos_totals:
+        taula.add_row(a.tipus, a.jugador, " + ".join(a.clubs), a.detall)
+    console.print()
+    console.print(taula)
+
+
+@app.command("plantilles")
+def plantilles_cmd(
+    temporada: str = typer.Option("2026/2027", "--temporada", help="La del llistat de divisions."),
+    ranking_id: int = typer.Option(
+        0, "--ranking", help="Rànquing de referència. Per defecte, l'últim abans de la 1a jornada."
+    ),
+) -> None:
+    """Recalcula de qui està fet cada club, estimat.
+
+    L'ordre de la graella de cada club és el del rànquing, i el rànquing que
+    mana és **l'últim publicat abans que comenci la lliga**: si s'agafés el més
+    recent, l'ordre canviaria a mitja temporada i el que va veure algú al
+    setembre deixaria de quadrar amb el que veu al gener.
+
+    És una estimació —la federació no publica plantilles— i va marcada com a tal
+    a la interfície.
+    """
+    from fcbillar.plantilles import desa, plantilles
+
+    conn = ensure_schema(get_settings().db_path)
+    if not ranking_id:
+        fila = conn.execute(
+            """
+            SELECT id, data_pub FROM rankings
+             WHERE modalitat_id = 1
+               AND data_pub < (SELECT MIN(data) FROM lliga_calendari WHERE data IS NOT NULL)
+             ORDER BY data_pub DESC LIMIT 1
+            """
+        ).fetchone()
+        if fila is None:
+            console.print("[red]No hi ha cap rànquing de tres bandes anterior a la 1a jornada.[/]")
+            raise typer.Exit(1)
+        ranking_id, data_pub = fila
+        console.print(f"  rànquing de referència: {ranking_id} ({data_pub})")
+
+    jugadors = plantilles(conn, ranking_id, temporada)
+    sense_fitxa = sum(1 for j in jugadors if j.player_fcb_id is None)
+    sense_mitjana = sum(1 for j in jugadors if j.mitjana is None)
+    n = desa(conn, jugadors, temporada)
+    clubs = len({j.club for j in jugadors})
+    console.print(
+        f"  [green]{n} jugadors a {clubs} clubs[/] "
+        f"({sense_fitxa} acabats de federar, {sense_mitjana} sense mitjana)"
     )
 
 
@@ -1999,8 +2185,7 @@ def sql_categoria_federativa_cmd(
         for i, (jugador, div, defin, lic) in enumerate(amb)
     )
     nota_sense = "".join(
-        f"\n--   {j} ({d})" + ("  [mitjana provisional]" if not fi else "")
-        for j, d, fi, _ in sense
+        f"\n--   {j} ({d})" + ("  [mitjana provisional]" if not fi else "") for j, d, fi, _ in sense
     )
     sql = f"""-- Categoria federativa {temporada} dels socis del {canonic(club)}.
 -- Generat per `fcbillar sql-categoria-federativa`. NO s'ha executat.

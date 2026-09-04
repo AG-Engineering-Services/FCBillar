@@ -107,6 +107,23 @@ def lligues_inscripcions(lliga: int, base: str = INTRANET) -> str:
     return _u(base, "frontend/lligues/inscripcions", lliga)
 
 
+def lligues_participants(lliga: int, club: int, base: str = INTRANET) -> str:
+    """Els jugadors que un club inscriu a una lliga, amb la mitjana i el fitxatge.
+
+    Va aparèixer el setembre de 2026, penjada del botó «Veure inscrits» de la
+    pàgina d'inscripcions. És la primera vegada que la federació publica de qui
+    està fet cada club: fins ara ho havíem d'estimar de qui havia jugat.
+
+    L'`id` de club és el de la federació i només surt a l'enllaç d'aquell botó,
+    o sigui que aquesta pàgina no es pot demanar sense passar abans per
+    `lligues_inscripcions`.
+
+    És **per club, no per equip**: diu qui hi juga, no a quin equip (A, B, C…)
+    va cadascú.
+    """
+    return _u(base, "frontend/lligues/participants", lliga, club)
+
+
 # --------------------------- individuals (opens i catalans) ---------------------------
 
 

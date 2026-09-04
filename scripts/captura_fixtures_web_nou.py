@@ -45,6 +45,11 @@ PAGINES: list[tuple[str, str]] = [
     ("lligues_encontres_36_148_316_2593", f"{INTRANET}/frontend/lligues/encontres/36/148/316/2593"),
     ("lligues_classificacio_36_148_316", f"{INTRANET}/frontend/lligues/classificacio/36/148/316"),
     ("lligues_inscripcions_39", f"{INTRANET}/frontend/lligues/inscripcions/39"),
+    ("lligues_inscripcions_38", f"{INTRANET}/frontend/lligues/inscripcions/38"),
+    # Els inscrits d'un club: el 16 és el C.B.BANYOLES (cap fitxatge) i el 22
+    # el C.B.MONT-ROIG, que en porta dos. Calen totes dues formes de fila.
+    ("lligues_participants_38_16", f"{INTRANET}/frontend/lligues/participants/38/16"),
+    ("lligues_participants_38_22", f"{INTRANET}/frontend/lligues/participants/38/22"),
     # HTTP 500 des del canvi de web; el desem igualment per veure quan es cura.
     ("lligues_partides_36_148_316_2593_10939", f"{INTRANET}/frontend/lligues/partides/36/148/316/2593/10939"),
     # --- individuals ---

@@ -485,12 +485,51 @@ CREATE INDEX IF NOT EXISTS ix_lliga_calendari_grup
 CREATE TABLE IF NOT EXISTS club_plantilles (
     temporada     TEXT NOT NULL,
     club          TEXT NOT NULL,              -- nom del cens, canonicalitzat
-    player_fcb_id TEXT NOT NULL,
+    -- Buit per a qui s'acaba de federar: surt al llistat de divisions i encara
+    -- no té fitxa nostra, perquè no ha jugat res. La clau és el nom.
+    player_fcb_id TEXT,
     jugador       TEXT NOT NULL,
     mitjana       REAL,                       -- la millor que en tenim
     mitjana_font  TEXT,                       -- 'rànquing' | 'divisions'
     motiu         TEXT NOT NULL,              -- per què se l'hi espera
-    PRIMARY KEY (temporada, club, player_fcb_id)
+    PRIMARY KEY (temporada, club, jugador)
 );
 CREATE INDEX IF NOT EXISTS ix_club_plantilles_club
     ON club_plantilles(temporada, club);
+
+-- De qui està fet cada club a una lliga, segons la federació.
+--
+-- Des del setembre de 2026 la federació publica els jugadors que cada club
+-- inscriu a cada lliga (`lligues/participants/{lliga}/{club}`). És la primera
+-- font oficial d'això: fins ara `club_plantilles` ho havia d'estimar de qui
+-- havia jugat les últimes temporades. Quan hi ha totes dues, mana aquesta.
+--
+-- És **per club, no per equip**: diu qui hi juga, no si va a l'"A" o a la "D".
+--
+-- `fitxatge` marca qui ve d'un altre club. Un fitxatge surt DUES vegades a la
+-- lliga: al seu club sense marca i al club que se l'endú amb marca. No és cap
+-- error de la font —comprovat contra el llistat de divisions de l'individual
+-- 26/27, 349 de 349 coincidències— i per això la clau porta el club: la
+-- mateixa persona hi és dos cops, i les dues files volen dir coses diferents.
+--
+-- El jugador va pel nom, «COGNOMS, NOM», perquè la pàgina no en dona
+-- l'identificador. És el mateix lligam que fa servir `inscrits_individual`.
+CREATE TABLE IF NOT EXISTS lliga_inscrits (
+    temporada      TEXT NOT NULL,             -- '2026/2027'
+    lliga_id       INTEGER NOT NULL,          -- id de la federació (38 = 3B 26-27)
+    lliga          TEXT NOT NULL,             -- 'Lliga Catalana Tres Bandes'
+    club           TEXT NOT NULL,             -- nom del cens, ja canonicalitzat
+    club_id_extern INTEGER NOT NULL,
+    jugador        TEXT NOT NULL,
+    -- La del rànquing vigent de la modalitat. 0 per a qui no hi surt: la
+    -- federació hi posa un zero, no un buit, i el zero l'envia a l'últim lloc
+    -- de la llista del seu club.
+    mitjana        REAL,
+    fitxatge       INTEGER NOT NULL,          -- 1 = ve d'un altre club
+    posicio        INTEGER NOT NULL,          -- ordre a la llista del club
+    PRIMARY KEY (lliga_id, club, jugador)
+);
+CREATE INDEX IF NOT EXISTS ix_lliga_inscrits_club
+    ON lliga_inscrits(temporada, club);
+CREATE INDEX IF NOT EXISTS ix_lliga_inscrits_jugador
+    ON lliga_inscrits(temporada, jugador);

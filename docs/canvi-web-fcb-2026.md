@@ -113,6 +113,7 @@ que l'històric en publica 3 (`1.633`).
 | Classificació | `/ca/lligues/classificacio/{l}/{d}/{g}` | `/frontend/lligues/classificacio/{l}/{d}/{g}` | ✅ |
 | **Detall d'encontre** | `/ca/lligues/partides/{l}/{d}/{g}/{j}/{e}` | `/frontend/lligues/partides/{l}/{d}/{g}/{j}/{e}` | ⚠ **HTTP 500** |
 | Inscripcions (club → equip) | — | `/frontend/lligues/inscripcions/{lliga}` | 🆕 |
+| **Inscrits d'un club** (club → jugador) | — | `/frontend/lligues/participants/{lliga}/{club}` | 🆕 (setembre) |
 
 ⚠ **El detall d'encontre de lliga està trencat al seu servidor.** La ruta
 existeix (retorna 500, no 404) i els enllaços hi apunten des de la pàgina
@@ -188,6 +189,46 @@ El descobriment del calendari de
 existeix; el calendari 2026-27 v-2 és a la categoria `calendari` del WPFD.
 
 ---
+
+### 2.6 Font nova de setembre: de qui està fet cada club
+
+El 2026-09-04, tres dies després de tancar el termini d'inscripció de la lliga
+de tres bandes, la federació va penjar un botó «Veure inscrits» a cada club de
+la pàgina d'inscripcions. Darrere hi ha
+`/frontend/lligues/participants/{lliga}/{club}`: **els jugadors que cada club
+inscriu, amb la mitjana i una etiqueta per als fitxatges**.
+
+És la primera vegada que publica això. Fins ara `plantilles.py` ho havia
+d'estimar de qui havia jugat les dues últimes temporades, i ho deia clarament
+que era una estimació.
+
+El que en surt de la lliga 38 (Tres Bandes 2026-27): **38 clubs, 93 equips, 680
+inscripcions de 669 jugadors i 11 fitxatges**. Les 676 mitjanes que es poden
+contrastar **coincideixen amb el rànquing 124 fins als 5 decimals, sense cap
+diferència**: la columna és exactament la MJ del rànquing vigent.
+
+Tres coses que cal saber per llegir-la bé:
+
+1. **És per club, no per equip.** Diu qui juga amb cada club, no si va a l'"A" o
+   a la "D", encara que el club tingui cinc equips.
+2. **Un fitxatge surt dues vegades i està bé.** Qui ve d'un altre club apareix a
+   la llista del seu club sense marca i a la del club que se l'endú amb
+   `(Fitxatge)`. Sembla una contradicció i no ho és: comprovat contra el
+   llistat de divisions de l'individual 2026/2027, que és una font
+   independent, **el club sense marca és el que hi consta 349 vegades de 349**.
+3. **El club només s'escriu al primer equip de cada club** a la pàgina
+   d'inscripcions; les altres files el porten buit. Filtrar-les —que és el que
+   feia `parse_lliga_inscripcions`— tornava 38 equips en comptes de 93.
+
+Vuit files no es poden llegir com a bones, i les treu la mateixa comanda
+(`fcbillar ingest-inscrits-lliga`, avisos de `inscrits_lliga.revisa`): dos
+jugadors que dos clubs es reclamen sense que cap fila porti la marca, dos
+fitxatges que cap club no dona, dues mitjanes a zero d'algú que ha jugat, i
+dues mitjanes que no són al rànquing i per tant no es poden contrastar.
+
+I la **lliga de 4 Modalitats (39) té 29 equips de 20 clubs i cap jugador
+publicat a cap dels vint**, tot i que el seu termini va tancar una setmana
+abans. La ingesta ho detecta, no desa res d'aquella lliga i continua.
 
 ## 3. Impacte mòdul a mòdul
 
@@ -375,7 +416,8 @@ les tres columnes mortes.
     nosaltres a partir de grups i eliminatòries, o la llegim dels PDF de
     rànquing del WPFD. La primera opció ens fa independents.
 12. Aprofitar `lligues/inscripcions/{lliga}` per a la relació club → equip →
-    jugador de la temporada nova.
+    jugador de la temporada nova. **Fet** (§2.6): `fcbillar ingest-inscrits-lliga`
+    → `lliga_inscrits`.
 
 ### Fase 3 — Classificació del que ja tenim *(independent de la Fase 1; es pot fer en paral·lel)*
 13. Derivar `temporada_id` de la data per a les 33.468 partides que no en tenen.
