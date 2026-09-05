@@ -28,7 +28,23 @@ ARREL = Path(__file__).resolve().parent.parent
 #: Els únics de control que hi poden ser: fi de línia i tabulador.
 PERMESOS = "\n\r\t"
 
-PATRONS = ("src/**/*.py", "tests/**/*.py", "scripts/**/*.py")
+#: Tot el que escrivim nosaltres. Els heredocs no distingeixen llenguatges: la
+#: mateixa corrupció pot caure a un SQL, a un workflow o a un fitxer del web.
+#:
+#: Les fixtures no hi són a posta: són pàgines capturades del web de la
+#: federació i el que hi hagi dins és seu, no nostre.
+PATRONS = (
+    "src/**/*.py",
+    "tests/**/*.py",
+    "scripts/**/*.py",
+    "scripts/**/*.ps1",
+    "src/**/*.sql",
+    "docs/**/*.sql",
+    "web/src/**/*.ts",
+    "web/src/**/*.js",
+    "web/src/**/*.svelte",
+    ".github/workflows/*.yml",
+)
 
 
 def fitxers() -> list[Path]:
@@ -37,7 +53,11 @@ def fitxers() -> list[Path]:
 
 def test_n_hi_ha_per_mirar() -> None:
     """Si el glob deixés de trobar res, la prova passaria sense comprovar res."""
-    assert len(fitxers()) > 50
+    trobats = fitxers()
+    assert len(trobats) > 190, f"nomes {len(trobats)}: algun patró ha deixat de trobar res"
+    # I que hi hagi de cada mena, no només Python.
+    extensions = {f.suffix for f in trobats}
+    assert extensions >= {".py", ".sql", ".ts", ".svelte", ".yml", ".ps1"}, extensions
 
 
 @pytest.mark.parametrize("fitxer", fitxers(), ids=lambda f: f.name)
