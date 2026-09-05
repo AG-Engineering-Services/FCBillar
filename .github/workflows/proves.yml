@@ -50,6 +50,14 @@ jobs:
     defaults:
       run:
         working-directory: web
+    # SvelteKit genera els tipus de `$env/static/public` a partir de les
+    # variables que hi ha al moment de fer el `sync`. Aquí no hi ha `.env`, o
+    # sigui que sense això els tipus no porten aquestes dues i la comprovació es
+    # queixa que no existeixen. Els valors no serveixen per a res: no s'hi
+    # connecta, només es compilen els tipus.
+    env:
+      PUBLIC_NEON_DATA_API_URL: https://exemple.invalid/neondb
+      PUBLIC_NEON_ANON_TOKEN: nomes-per-generar-els-tipus
     steps:
       - uses: actions/checkout@v4
 
