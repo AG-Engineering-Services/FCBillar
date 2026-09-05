@@ -4954,10 +4954,27 @@ def publish_calendari(
                 f"el SQL per crear-la és a docs/sql/club_plantilles.sql.",
             )
     n_insc = 0
+    # Amb la taula local buida no es toca res. No vol dir que la federació no
+    # tingui ningú inscrit: vol dir que aquí no s'ha ingerit, perquè `desa()` es
+    # nega a desar el buit precisament per no confondre les dues coses. Aquest és
+    # el cas d'una base acabada de baixar o d'una ingesta que no ha corregut.
     if inscrits_lliga:
         try:
             # Es reemplaça lliga a lliga: la taula local ja porta el que se sap de
             # cadascuna sencera, i qui la federació en tregui ha de marxar d'aquí.
+            #
+            # Els àmbits són les lligues que tenim I les que hi ha publicades.
+            # Amb només les nostres, una lliga que desapareix d'aquí no entraria
+            # mai a l'àmbit i les seves files es quedarien al núvol per sempre;
+            # posant-la-hi, es buida de debò. Que aquí hi hagi files d'alguna
+            # lliga ja diu que la ingesta funciona, que és el que fa que buidar-ne
+            # una altra sigui una decisió i no un accident.
+            ambits = {(r["lliga_id"],) for r in inscrits_lliga}
+            try:
+                publicades = sb.table("lliga_inscrits").select("lliga_id").execute().data or []
+                ambits |= {(f["lliga_id"],) for f in publicades}
+            except Exception as exc:  # noqa: BLE001 — sense la llista, només les nostres
+                prog("warn", f"no s'han pogut llegir les lligues publicades ({exc})")
             n_insc = _publica_reemplaçant(
                 sb,
                 "lliga_inscrits",
@@ -4965,7 +4982,7 @@ def publish_calendari(
                 ("lliga_id", "club", "jugador"),
                 ("lliga_id",),
                 prog,
-                {(r["lliga_id"],) for r in inscrits_lliga},
+                ambits,
             )
         except Exception as exc:
             prog(

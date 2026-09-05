@@ -167,7 +167,13 @@ def test_els_inscrits_de_la_lliga_es_publiquen(tmp_path, monkeypatch) -> None:
 
 
 def test_sense_inscrits_locals_no_es_toca_la_taula_publicada(tmp_path, monkeypatch) -> None:
-    """Encara no s'ha ingerit res: no és motiu per buidar el que ja hi ha."""
+    """Encara no s'ha ingerit res: no és motiu per buidar el que ja hi ha.
+
+    La taula local buida NO vol dir que la federació no tingui ningú inscrit:
+    `desa()` es nega a desar el buit precisament per no confondre les dues
+    coses. Una base acabada de baixar o una ingesta que no ha corregut arriben
+    aquí igual, i buidar el núvol a partir d'això se n'enduria la llista bona.
+    """
     db = tmp_path / "t.db"
     _base_amb_grups(db)
     magatzem: dict[str, list[dict]] = {
@@ -181,3 +187,44 @@ def test_sense_inscrits_locals_no_es_toca_la_taula_publicada(tmp_path, monkeypat
 
     assert res["lliga_inscrits"] == 0
     assert len(magatzem["lliga_inscrits"]) == 1
+
+
+def test_una_lliga_que_desapareix_del_local_es_retira_del_nuvol(tmp_path, monkeypatch) -> None:
+    """Els àmbits són les lligues d'aquí I les publicades.
+
+    Amb només les d'aquí, una lliga que deixa d'ingerir-se no entraria mai a
+    l'àmbit de reemplaçament i les seves files es quedarien publicades per
+    sempre, encara que la competició ja no existeixi.
+
+    Que aquí hi hagi files d'una altra lliga és el que diu que la ingesta
+    funciona, i és el que fa que buidar-ne una sigui una decisió i no un
+    accident: sense cap fila local no es toca res, i això ho diu la prova de
+    sobre.
+    """
+    db = tmp_path / "t.db"
+    _base_amb_grups(db)
+    conn = ensure_schema(db)
+    conn.execute(
+        "INSERT INTO lliga_inscrits (temporada, lliga_id, lliga, club, club_id_extern, "
+        "jugador, mitjana, fitxatge, posicio) VALUES (?,?,?,?,?,?,?,?,?)",
+        ("2026/2027", 38, "Tres Bandes", "C.B.BANYOLES", 16, "QUI, HI ES", 0.5, 0, 1),
+    )
+    conn.commit()
+    conn.close()
+
+    magatzem: dict[str, list[dict]] = {
+        "lliga_inscrits": [
+            {"lliga_id": 38, "club": "C.B.BANYOLES", "jugador": "JA, NO HI ES", "mitjana": 0.4},
+            {"lliga_id": 39, "club": "C.B.BANYOLES", "jugador": "D ALTRA, LLIGA", "mitjana": 0.4},
+        ]
+    }
+    monkeypatch.setattr(cloud_sync, "get_client", lambda: ClientFals(magatzem))
+
+    cloud_sync.publish_calendari(db_path=db)
+
+    queden = {f["jugador"] for f in magatzem["lliga_inscrits"]}
+    assert "QUI, HI ES" in queden
+    # De la seva lliga, qui ja no hi és se'n va.
+    assert "JA, NO HI ES" not in queden
+    # I la lliga sencera que ja no ingerim, també.
+    assert "D ALTRA, LLIGA" not in queden
