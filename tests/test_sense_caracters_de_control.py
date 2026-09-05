@@ -51,13 +51,25 @@ def fitxers() -> list[Path]:
     return sorted(f for p in PATRONS for f in ARREL.glob(p) if "__pycache__" not in f.parts)
 
 
+def test_cada_patro_troba_fitxers() -> None:
+    """Un patró que ha deixat de trobar res buida el guardià sense dir-ho.
+
+    Si es mou un directori o es reanomena una carpeta, el seu patró passa a no
+    casar amb res i aquells fitxers deixen de mirar-se. La prova seguiria en
+    verd, perquè els altres patrons encara en porten centenars.
+
+    Es comprova patró a patró i no per un compte total ni per una llista
+    d'extensions escrita a mà: la llista escrita a mà ja se'm va quedar curta
+    -hi vaig posar sis de les set menes- i amb un compte total, treure el patró
+    del web encara passaria pel volum dels de Python.
+    """
+    buits = [p for p in PATRONS if not list(ARREL.glob(p))]
+    assert not buits, f"aquests patrons no troben cap fitxer: {buits}"
+
+
 def test_n_hi_ha_per_mirar() -> None:
-    """Si el glob deixés de trobar res, la prova passaria sense comprovar res."""
-    trobats = fitxers()
-    assert len(trobats) > 190, f"nomes {len(trobats)}: algun patró ha deixat de trobar res"
-    # I que hi hagi de cada mena, no només Python.
-    extensions = {f.suffix for f in trobats}
-    assert extensions >= {".py", ".sql", ".ts", ".svelte", ".yml", ".ps1"}, extensions
+    """I que en conjunt siguin els que esperem, no quatre de despistats."""
+    assert len(fitxers()) > 190
 
 
 @pytest.mark.parametrize("fitxer", fitxers(), ids=lambda f: f.name)
