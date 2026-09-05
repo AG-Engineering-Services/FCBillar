@@ -2026,6 +2026,7 @@ def ingest_inscrits_lliga_cmd(
         llegeix_inscrits,
         llegeix_lligues,
         mitjanes_del_ranquing,
+        retira_lligues_tancades,
         revisa,
     )
 
@@ -2038,6 +2039,17 @@ def ingest_inscrits_lliga_cmd(
         if not obertes:
             console.print("[red]Cap lliga oberta al llistat de la federació.[/]")
             raise typer.Exit(1)
+
+        # El llistat sencer, abans de filtrar per --lliga: és l'autoritat de què
+        # segueix obert, i amb la llista retallada esborraríem les altres.
+        totes_obertes = {o.lliga_id for o in obertes}
+        tancades = retira_lligues_tancades(conn, temporada, totes_obertes)
+        for lliga_id, quants in sorted(tancades.items()):
+            console.print(
+                f"  [yellow]lliga {lliga_id}: {quants} inscrits retirats[/] "
+                f"(ja no és al llistat de la federació)"
+            )
+
         if lliga:
             obertes = [o for o in obertes if o.lliga_id == lliga]
             if not obertes:

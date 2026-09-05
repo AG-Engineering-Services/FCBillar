@@ -317,6 +317,44 @@ def desa(conn: sqlite3.Connection, lliga: Lliga, inscrits: list[Inscrit], tempor
     return len(inscrits)
 
 
+def retira_lligues_tancades(
+    conn: sqlite3.Connection, temporada: str, obertes: set[int]
+) -> dict[int, int]:
+    """Treu els inscrits de les lligues que ja no són al llistat de la federació.
+
+    `desa()` reconcilia una lliga que seguim ingerint, però una lliga que es
+    tanca deixa de sortir al llistat i no la visitem mai més: les seves files es
+    quedarien aquí per sempre, i d'aquí passarien al núvol i a la pantalla com
+    si la competició encara existís.
+
+    L'autoritat és `llegeix_lligues()`, que és el mateix llistat d'on surten les
+    que sí que s'ingereixen. Va per temporada perquè el llistat també: només
+    ensenya les de la temporada en joc, i les d'anys passats no s'han de tocar.
+
+    Amb el llistat buit no s'esborra res. Que la federació no en publiqui cap no
+    vol dir que s'hagin acabat totes: vol dir que la pàgina no ha contestat el
+    que esperàvem, i és el mateix criteri que fa que `desa()` no desi el buit.
+    """
+    if not obertes:
+        raise ValueError("Cap lliga oberta: no esborro els inscrits que hi ha.")
+
+    tancades = {
+        r[0]: r[1]
+        for r in conn.execute(
+            "SELECT lliga_id, COUNT(*) FROM lliga_inscrits WHERE temporada = ? GROUP BY lliga_id",
+            (temporada,),
+        )
+        if r[0] not in obertes
+    }
+    if tancades:
+        conn.executemany(
+            "DELETE FROM lliga_inscrits WHERE temporada = ? AND lliga_id = ?",
+            [(temporada, i) for i in tancades],
+        )
+        conn.commit()
+    return tancades
+
+
 def mitjanes_del_ranquing(conn: sqlite3.Connection, ranking_id: int) -> dict[str, float]:
     """Les mitjanes d'un rànquing per nom normalitzat, per contrastar-hi la font."""
     return {

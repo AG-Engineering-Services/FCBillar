@@ -192,14 +192,18 @@ def test_sense_inscrits_locals_no_es_toca_la_taula_publicada(tmp_path, monkeypat
 def test_una_lliga_que_desapareix_del_local_es_retira_del_nuvol(tmp_path, monkeypatch) -> None:
     """Els àmbits són les lligues d'aquí I les publicades.
 
-    Amb només les d'aquí, una lliga que deixa d'ingerir-se no entraria mai a
-    l'àmbit de reemplaçament i les seves files es quedarien publicades per
-    sempre, encara que la competició ja no existeixi.
+    Amb només les d'aquí, una lliga que ja no hi és no entraria mai a l'àmbit de
+    reemplaçament i les seves files es quedarien publicades per sempre, encara
+    que la competició ja no existeixi.
 
-    Que aquí hi hagi files d'una altra lliga és el que diu que la ingesta
-    funciona, i és el que fa que buidar-ne una sigui una decisió i no un
-    accident: sense cap fila local no es toca res, i això ho diu la prova de
-    sobre.
+    Qui buida la lliga en local és `retira_lligues_tancades()`, quan deixa de
+    sortir al llistat d'obertes de la federació; aquí es comprova l'altra meitat,
+    que allò arribi al núvol. Les dues fan falta: sense la primera l'estat no es
+    dona mai, i sense la segona no surt d'aquí.
+
+    Que hi hagi files d'una altra lliga és el que diu que la ingesta funciona, i
+    és el que fa que buidar-ne una sigui una decisió i no un accident: sense cap
+    fila local no es toca res, i això ho diu la prova de sobre.
     """
     db = tmp_path / "t.db"
     _base_amb_grups(db)

@@ -23,6 +23,7 @@ from fcbillar.inscrits_lliga import (
     desa,
     llegeix_clubs,
     llegeix_inscrits,
+    retira_lligues_tancades,
     revisa,
 )
 from fcbillar.scraper.parsers import (
@@ -369,3 +370,58 @@ def test_migracio_v21_a_v22_conserva_les_files(tmp_path) -> None:
     # `ensure_schema` deixa row_factory a sqlite3.Row, que no és una tupla.
     fila = conn.execute("SELECT jugador, mitjana, modalitat FROM lliga_inscrits").fetchone()
     assert tuple(fila) == ("GÓMEZ AMETLLER, ALBERT", 0.57982, "")
+
+
+# Una lliga que es tanca deixa de sortir al llistat de la federació i no la
+# tornem a visitar mai: `desa()` no la pot reconciliar perquè no hi passa. Si no
+# es retira aquí, les seves files es queden en local per sempre, i d'aquí passen
+# al núvol i a la pantalla com si la competició encara existís.
+
+
+def _inscriu(conn, lliga_id: int, temporada: str, jugador: str) -> None:
+    conn.execute(
+        "INSERT INTO lliga_inscrits (temporada, lliga_id, lliga, club, club_id_extern, "
+        "jugador, mitjana, fitxatge, posicio) VALUES (?,?,?,?,?,?,?,?,?)",
+        (temporada, lliga_id, f"Lliga {lliga_id}", "C.B.BANYOLES", 16, jugador, 0.5, 0, 1),
+    )
+    conn.commit()
+
+
+def test_una_lliga_que_es_tanca_es_retira(conn) -> None:
+    _inscriu(conn, 38, "2026/2027", "SEGUEIX, OBERTA")
+    _inscriu(conn, 39, "2026/2027", "JA, TANCADA")
+
+    tancades = retira_lligues_tancades(conn, "2026/2027", {38})
+
+    assert tancades == {39: 1}
+    queden = {r[0] for r in conn.execute("SELECT jugador FROM lliga_inscrits")}
+    assert queden == {"SEGUEIX, OBERTA"}
+
+
+def test_les_temporades_passades_no_es_toquen(conn) -> None:
+    """El llistat només ensenya la temporada en joc; les d'abans no hi surten."""
+    _inscriu(conn, 30, "2025/2026", "D UN, ALTRE ANY")
+    _inscriu(conn, 38, "2026/2027", "D ENGUANY, U")
+
+    retira_lligues_tancades(conn, "2026/2027", {38})
+
+    queden = {r[0] for r in conn.execute("SELECT jugador FROM lliga_inscrits")}
+    assert queden == {"D UN, ALTRE ANY", "D ENGUANY, U"}
+
+
+def test_amb_el_llistat_buit_no_s_esborra_res(conn) -> None:
+    """Cap lliga oberta no vol dir que s'hagin acabat: vol dir que no ha contestat."""
+    _inscriu(conn, 38, "2026/2027", "QUI, HI ES")
+
+    with pytest.raises(ValueError):
+        retira_lligues_tancades(conn, "2026/2027", set())
+
+    assert conn.execute("SELECT COUNT(*) FROM lliga_inscrits").fetchone()[0] == 1
+
+
+def test_una_lliga_oberta_pero_sense_ningu_no_es_toca(conn) -> None:
+    """La de 4 Modalitats: 29 equips i cap jugador publicat. Segueix oberta."""
+    _inscriu(conn, 38, "2026/2027", "QUI, HI ES")
+
+    assert retira_lligues_tancades(conn, "2026/2027", {38, 39}) == {}
+    assert conn.execute("SELECT COUNT(*) FROM lliga_inscrits").fetchone()[0] == 1
