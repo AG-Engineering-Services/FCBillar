@@ -24,6 +24,10 @@ from fcbillar.models import (
     TorneigParticipantRecord,
 )
 
+#: La lletra que distingeix els equips d'un mateix club al final del nom:
+#: «C.B. SANT ADRIÀ "A"», «C.B.MANRESA A». El club és el mateix per a totes.
+_RE_LLETRA_EQUIP = re.compile(r"""\s*["'«]?\s*[A-Z]\s*["'»]?\s*$""")
+
 
 class Repository:
     def __init__(self, conn: sqlite3.Connection) -> None:
@@ -90,6 +94,19 @@ class Repository:
         ).fetchall():
             if self.normalize_club_name(alias) == norm:
                 return cid
+        # 4. Sense la lletra de l'equip.
+        #
+        # A la classificació els equips es diuen «C.B. SANT ADRIÀ "A"» i al cens
+        # el club és «C.B.SANT ADRIÀ»: normalitzats, «cbsantadriaa» i
+        # «cbsantadria». Prou a prop per confondre i prou lluny per no casar mai.
+        #
+        # Sense això, sis dels vuit equips del grup d'Honor de la 26/27 es
+        # publicaven sense identificador de club, i qui hi clicava obria una
+        # fitxa buida. Va l'últim: només es prova si el nom sencer no ha casat,
+        # o sigui que no pot canviar cap resultat que abans ja fos bo.
+        sense_lletra = _RE_LLETRA_EQUIP.sub("", nom).strip()
+        if sense_lletra and sense_lletra != nom:
+            return self.resolve_club_id_by_nom(sense_lletra)
         return None
 
     def add_club_alias(self, alias_nom: str, club_fcb_id: str) -> int:
