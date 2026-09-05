@@ -123,14 +123,40 @@ def test_els_404_no_compten_com_a_portal_caigut(client) -> None:
     assert len(fals.urls) - abans == REINTENTS
 
 
+class _PetaXarxa:
+    """Sempre falla per xarxa, i compta els intents."""
+
+    def __init__(self) -> None:
+        self.intents = 0
+
+    def get(self, url: str):
+        self.intents += 1
+        raise httpx.ConnectError("res")
+
+
 def test_un_error_de_xarxa_no_dispara_el_rendiment(client) -> None:
     """No és el portal dient que està trencat: és que no s'hi ha arribat."""
-
-    class _Peta:
-        def get(self, url):
-            raise httpx.ConnectError("res")
-
-    client._client = _Peta()
+    client._client = _PetaXarxa()
     with pytest.raises(ErrorPortal):
         client.fetch_html("https://x/1")
     assert client._cincs_seguits == 0
+
+
+def test_amb_el_portal_caigut_la_xarxa_encara_es_reintenta(client) -> None:
+    """El rendiment és per als 5xx, no per a tot.
+
+    Amb el portal donant 500 a tot arreu, una pàgina que falla per xarxa segueix
+    tenint els seus tres intents: el segon sovint hi arriba, i deixar-la amb un
+    de sol perquè el servidor va malament seria perdre-la per res.
+    """
+    _amb(client, [500])
+    for i in range(CINCS_PER_RENDIR_SE):
+        with pytest.raises(ErrorPortal):
+            client.fetch_html(f"https://x/{i}")
+    assert client._cincs_seguits >= CINCS_PER_RENDIR_SE
+
+    peta = _PetaXarxa()
+    client._client = peta
+    with pytest.raises(ErrorPortal):
+        client.fetch_html("https://x/sense-xarxa")
+    assert peta.intents == REINTENTS

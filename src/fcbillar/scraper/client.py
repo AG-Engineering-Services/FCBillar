@@ -118,20 +118,19 @@ class ScraperClient:
         self._obre()
         assert self._client is not None
 
-        # Si el portal ja porta una pila de 5xx seguits, no és un ensopec: està
-        # caigut, i insistir-hi pàgina per pàgina només gasta el temps que li
-        # falta a la resta de la reingesta.
-        reintents = 1 if self._cincs_seguits >= CINCS_PER_RENDIR_SE else REINTENTS
         ultim_estat = 0
-        for intent in range(1, reintents + 1):
+        for intent in range(1, REINTENTS + 1):
             self._respecta_ritme()
             log.info("GET %s%s", url, f" (intent {intent})" if intent > 1 else "")
             try:
                 r = self._client.get(url)
             except httpx.HTTPError as e:
+                # Un error de xarxa SÍ que es reintenta sempre, encara que el
+                # portal vingui de donar 5xx: no és ell dient que està trencat,
+                # és que no s'hi ha arribat, i el segon intent sovint hi arriba.
                 log.warning("Xarxa KO a %s: %s", url, e)
                 ultim_estat = 0
-                if intent < reintents:
+                if intent < REINTENTS:
                     time.sleep(ESPERA_REINTENT_S * intent)
                 continue
 
@@ -148,8 +147,13 @@ class ScraperClient:
                 break
             if r.status_code >= 500:
                 self._cincs_seguits += 1
+                # Si el portal ja en porta una pila de seguits, no és un ensopec:
+                # està caigut, i insistir-hi pàgina per pàgina només gasta el
+                # temps que li fa falta a la resta de la reingesta.
+                if self._cincs_seguits >= CINCS_PER_RENDIR_SE:
+                    break
             # L'espera només val la pena si encara queda algun intent.
-            if intent < reintents:
+            if intent < REINTENTS:
                 time.sleep(ESPERA_REINTENT_S * intent)
 
         raise ErrorPortal(url, ultim_estat)
