@@ -26,12 +26,29 @@ def test_la_intranet_no_es_toca() -> None:
     assert normalitza(u) == u
 
 
-def test_no_toca_altres_dominis_que_hi_acabin() -> None:
-    """`www.fcbillar.cat.exemple.com` no és el mateix lloc."""
+def test_no_toca_un_host_que_nomes_hi_comenci() -> None:
+    """`www.fcbillar.cat.exemple.com` és d'algú altre.
+
+    Amb un `replace` de text pla també se li treia el `www.`, i això és enviar
+    la petició a un lloc que no és el que demanava qui crida.
+    """
     u = "https://www.fcbillar.cat.exemple.com/x"
-    assert normalitza(u) == "https://fcbillar.cat.exemple.com/x"
+    assert normalitza(u) == u
+
+
+def test_respecta_el_port() -> None:
+    assert normalitza("https://www.fcbillar.cat:8443/x") == "https://fcbillar.cat:8443/x"
+
+
+def test_el_host_pelat_sense_cami() -> None:
+    assert normalitza("https://www.fcbillar.cat") == "https://fcbillar.cat"
 
 
 def test_no_toca_el_www_que_surt_al_mig_del_cami() -> None:
     u = "https://fcbillar.cat/media/www.fcbillar.cat.pdf"
+    assert normalitza(u) == u
+
+
+def test_no_toca_un_altre_domini_encara_que_el_porti_al_cami() -> None:
+    u = "https://exemple.com/?redirect=https://www.fcbillar.cat/x"
     assert normalitza(u) == u

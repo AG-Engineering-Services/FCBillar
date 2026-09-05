@@ -10,6 +10,7 @@ cache responses to disk so that:
 from __future__ import annotations
 
 import hashlib
+import re
 import time
 from pathlib import Path
 
@@ -19,8 +20,16 @@ DEFAULT_TIMEOUT_S = 30.0
 DEFAULT_TTL_S = 3600  # 1 hour
 
 
+#: `www.fcbillar.cat` com a HOST i no com a principi d'un altre host.
+#:
+#: El que hi ha darrere ha de ser el final de l'amfitrió: una barra, un port,
+#: una interrogació, una coixinera o el final de la cadena. Sense això,
+#: `www.fcbillar.cat.exemple.com` —que és d'algú altre— també es reescriuria.
+_RE_WWW_FCB = re.compile(r"^(https?://)www\.fcbillar\.cat(?=[:/?#]|$)", re.IGNORECASE)
+
+
 def normalitza(url: str) -> str:
-    """Treu el `www.` de fcbillar.cat.
+    """Treu el `www.` de fcbillar.cat, i només d'ell.
 
     El seu certificat no cobreix `www.fcbillar.cat` —«Hostname mismatch»— i la
     petició no arriba a sortir: peta abans de connectar. Al domini pelat el
@@ -30,8 +39,12 @@ def normalitza(url: str) -> str:
     el dia que ho arreglin només s'ha de treure d'un lloc. No és cosa nostra:
     és una configuració seva que porta trencada des d'almenys el setembre de
     2026, i cada nit se'ns enduia el pas d'opens de la reingesta.
+
+    Només toca l'amfitrió i només al principi de la URL. Reescriure un host que
+    simplement comenci igual seria enviar la petició a un lloc que no és el que
+    demanava qui crida.
     """
-    return url.replace("://www.fcbillar.cat", "://fcbillar.cat")
+    return _RE_WWW_FCB.sub(r"\1fcbillar.cat", url, count=1)
 
 
 def _cache_path(url: str, cache_dir: Path) -> Path:
