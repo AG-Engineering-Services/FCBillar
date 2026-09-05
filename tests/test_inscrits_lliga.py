@@ -67,7 +67,8 @@ CLIENT = {
 
 
 def test_llistat_dona_les_lligues_obertes() -> None:
-    lligues = parse_lligues_llistat(fixture("lligues_llistat"))
+    lligues, descartades = parse_lligues_llistat(fixture("lligues_llistat"))
+    assert descartades == []
     assert [(x.lliga_id, x.nom) for x in lligues] == [
         (39, "Lliga Catalana 4 Modalitats"),
         (38, "Lliga Catalana Tres Bandes"),
@@ -425,3 +426,48 @@ def test_una_lliga_oberta_pero_sense_ningu_no_es_toca(conn) -> None:
 
     assert retira_lligues_tancades(conn, "2026/2027", {38, 39}) == {}
     assert conn.execute("SELECT COUNT(*) FROM lliga_inscrits").fetchone()[0] == 1
+
+
+# Una fila que no s'ha sabut llegir dona una llista CURTA PERÒ NO BUIDA. Els
+# guardians del buit no salten, la llista passa per bona, i qui la faci servir
+# per decidir què ja no existeix esborrarà les lligues que hi falten.
+
+_LLISTAT_A_MITGES = """
+<table>
+  <tr><th>Lliga</th><th>Modalitat</th><th>Estat</th></tr>
+  <tr>
+    <td><a href="/frontend/lligues/divisions/38">Lliga Catalana Tres Bandes</a></td>
+    <td>Tres bandes</td><td>Oberta</td>
+  </tr>
+  <tr>
+    <td>Lliga Catalana 4 Modalitats</td>
+    <td>4 Modalitats</td><td>Oberta</td>
+  </tr>
+</table>
+"""
+
+
+def test_una_fila_sense_enllac_es_diu_i_no_es_calla() -> None:
+    lligues, descartades = parse_lligues_llistat(_LLISTAT_A_MITGES)
+
+    assert [x.lliga_id for x in lligues] == [38]
+    assert descartades == ["Lliga Catalana 4 Modalitats"]
+
+
+def test_amb_files_descartades_no_es_pot_retirar_res(conn) -> None:
+    """La comprovació que ha de fer qui vulgui l'autoritat.
+
+    Amb la 4 Modalitats descartada, el conjunt {38} sembla la llista completa
+    del que segueix obert i esborraria la 39, que segueix ben oberta.
+    """
+    _inscriu(conn, 38, "2026/2027", "DE LA, TRES BANDES")
+    _inscriu(conn, 39, "2026/2027", "DE LA, QUATRE MODALITATS")
+
+    lligues, descartades = parse_lligues_llistat(_LLISTAT_A_MITGES)
+    assert descartades, "la fila sense enllaç ha de constar"
+
+    # Si algú s'ho salta i retira igualment, s'endú una lliga bona: per això la
+    # comanda no ho fa quan n'hi ha cap de descartada.
+    retira_lligues_tancades(conn, "2026/2027", {x.lliga_id for x in lligues})
+    queden = {r[0] for r in conn.execute("SELECT jugador FROM lliga_inscrits")}
+    assert queden == {"DE LA, TRES BANDES"}

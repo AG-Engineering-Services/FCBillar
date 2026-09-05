@@ -2035,20 +2035,31 @@ def ingest_inscrits_lliga_cmd(
     mitjanes = mitjanes_del_ranquing(conn, ranking_id) if ranking_id else None
 
     with ScraperClient(settings) as client:
-        obertes = llegeix_lligues(client)
+        obertes, descartades = llegeix_lligues(client)
         if not obertes:
             console.print("[red]Cap lliga oberta al llistat de la federació.[/]")
             raise typer.Exit(1)
 
-        # El llistat sencer, abans de filtrar per --lliga: és l'autoritat de què
-        # segueix obert, i amb la llista retallada esborraríem les altres.
-        totes_obertes = {o.lliga_id for o in obertes}
-        tancades = retira_lligues_tancades(conn, temporada, totes_obertes)
-        for lliga_id, quants in sorted(tancades.items()):
+        # Retirar el que ja no és al llistat només es pot fer si el llistat s'ha
+        # entès SENCER. Una fila que no s'ha sabut llegir dona una llista curta
+        # però no buida: passa per bona, i llavors les lligues que hi falten
+        # s'esborrarien encara que segueixin obertes. Amb una de descartada val
+        # més quedar-se files de més -es veuen i es resolen la propera vegada-
+        # que esborrar-ne de bones.
+        if descartades:
             console.print(
-                f"  [yellow]lliga {lliga_id}: {quants} inscrits retirats[/] "
-                f"(ja no és al llistat de la federació)"
+                f"  [yellow]{len(descartades)} files del llistat no s'han sabut llegir[/] "
+                f"({', '.join(descartades[:3])}…): no retiro cap lliga."
             )
+        else:
+            # El llistat sencer, abans de filtrar per --lliga: amb la llista
+            # retallada esborraríem totes les altres.
+            tancades = retira_lligues_tancades(conn, temporada, {o.lliga_id for o in obertes})
+            for lliga_id, quants in sorted(tancades.items()):
+                console.print(
+                    f"  [yellow]lliga {lliga_id}: {quants} inscrits retirats[/] "
+                    f"(ja no és al llistat de la federació)"
+                )
 
         if lliga:
             obertes = [o for o in obertes if o.lliga_id == lliga]

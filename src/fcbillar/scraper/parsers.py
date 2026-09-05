@@ -564,14 +564,26 @@ class LligaOberta:
     estat: str  # 'Inscripció', 'Activa'…
 
 
-def parse_lligues_llistat(html: str) -> list[LligaOberta]:
+def parse_lligues_llistat(html: str) -> tuple[list[LligaOberta], list[str]]:
+    """Les lligues obertes, i les files que no s'han sabut llegir.
+
+    Les dues coses juntes a posta. Una fila sense l'enllaç de divisions se salta,
+    i si només es tornés la llista, un canvi de marcatge que n'afectés unes
+    quantes donaria un resultat curt que sembla bo: no és buit, o sigui que els
+    guardians del buit no salten, i qui el faci servir com a llista completa del
+    que segueix obert n'esborrarà les que hi falten.
+
+    Qui necessiti l'autoritat ha de mirar que no n'hi hagi cap de descartada.
+    """
     taula = taula_amb(html, "Lliga", "Estat")
     if taula is None:
-        return []
+        return [], []
     out: list[LligaOberta] = []
+    descartades: list[str] = []
     for fila in taula:
         m = _primer(_RE_LLIGA_DIVISIONS, fila.enllacos())
         if m is None:
+            descartades.append(fila["Lliga"] if fila.te("Lliga") else "(fila sense nom)")
             continue
         out.append(
             LligaOberta(
@@ -584,7 +596,7 @@ def parse_lligues_llistat(html: str) -> list[LligaOberta]:
                 estat=fila["Estat"],
             )
         )
-    return out
+    return out, descartades
 
 
 @dataclass(frozen=True)

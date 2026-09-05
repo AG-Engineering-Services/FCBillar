@@ -77,8 +77,14 @@ def _norm(s: str) -> str:
 # --------------------------- descàrrega ---------------------------
 
 
-def llegeix_lligues(client) -> list[LligaOberta]:
-    """Les lligues obertes. El llistat només ensenya les de la temporada en joc."""
+def llegeix_lligues(client) -> tuple[list[LligaOberta], list[str]]:
+    """Les lligues obertes i les files del llistat que no s'han sabut llegir.
+
+    El llistat només ensenya les de la temporada en joc. Les descartades van amb
+    la llista i no a part perquè qui la faci servir per decidir què ja no
+    existeix no se les pugui deixar: una llista curta però no buida passa per
+    bona i s'endú les lligues que hi falten.
+    """
     return parse_lligues_llistat(client.fetch_html(U.lligues_llistat()))
 
 
