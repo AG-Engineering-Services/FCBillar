@@ -1435,6 +1435,21 @@ def publish_lliga(
     return counts
 
 
+def _totes_les_files(sb, taula: str, columnes: str) -> list[dict]:
+    """Totes les files d'una taula, no les mil primeres.
+
+    PostgREST en talla mil i no ho diu enlloc: la resposta arriba bé, només que
+    curta. Amb 1.607 jugadors, mirar-ne mil és no mirar-ne sis-cents.
+    """
+    files: list[dict] = []
+    for inici in range(0, 200_000, 1000):
+        pagina = sb.table(taula).select(columnes).range(inici, inici + 999).execute().data or []
+        files += pagina
+        if len(pagina) < 1000:
+            break
+    return files
+
+
 def _avisa_de_pedacos(sb, vius: set[str], prog) -> int:
     """Diu quantes fitxes de pedaç han quedat duplicades al núvol.
 
@@ -1452,7 +1467,7 @@ def _avisa_de_pedacos(sb, vius: set[str], prog) -> int:
     diu, perquè el que passava fins ara és que no ho deia ningú.
     """
     try:
-        files = sb.table("players").select("fcb_id,nom").execute().data or []
+        files = _totes_les_files(sb, "players", "fcb_id,nom")
     except Exception as exc:  # noqa: BLE001 — un avís no pot aturar la publicació
         prog("warn", f"no s'han pogut mirar els jugadors del núvol ({exc})")
         return 0
@@ -1489,7 +1504,7 @@ def _retira_clubs_fusionats(sb, vius: set[str], prog) -> int:
     penjades. Si en queda algun, es diu i no es toca.
     """
     try:
-        allà = {r["fcb_id"] for r in (sb.table("clubs").select("fcb_id").execute().data or [])}
+        allà = {r["fcb_id"] for r in _totes_les_files(sb, "clubs", "fcb_id")}
     except Exception as exc:  # noqa: BLE001 — sense la llista no es retira res
         prog("warn", f"no s'han pogut llegir els clubs del núvol ({exc})")
         return 0
