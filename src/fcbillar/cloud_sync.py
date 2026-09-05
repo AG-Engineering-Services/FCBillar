@@ -169,6 +169,7 @@ def publish_rankings(
             }
         )
     counts["players"] = _upsert(sb, "players", players, "fcb_id", prog)
+    _avisa_de_pedacos(sb, {p["fcb_id"] for p in players}, prog)
 
     # 4. rankings
     rankings = [
@@ -1432,6 +1433,46 @@ def publish_lliga(
         )
     conn.close()
     return counts
+
+
+def _avisa_de_pedacos(sb, vius: set[str], prog) -> int:
+    """Diu quantes fitxes de pedaç han quedat duplicades al núvol.
+
+    Quan una llista d'opens porta el nom i no la llicència, es crea una fitxa
+    provisional (`name:COGNOMS, NOM`). En local, quan després arriba la
+    llicència, `Repository.upsert_player` promociona el pedaç: li reanomena
+    l'identificador i no en queden dos. Però la publicació de jugadors només fa
+    upsert, o sigui que allà la fitxa antiga hi continua i la persona surt dos
+    cops a la cerca.
+
+    Aquí NO s'esborra res. Les fitxes de pedaç porten resultats d'opens
+    enganxats -60 files de rànquing i 49 de classificacions, el dia que es va
+    veure- i moure'ls vol una transacció i decidir què fer amb els que xoquen.
+    Això ho fa `docs/sql/fusiona_pedacos.sql`, que és repetible. Aquí només es
+    diu, perquè el que passava fins ara és que no ho deia ningú.
+    """
+    try:
+        files = sb.table("players").select("fcb_id,nom").execute().data or []
+    except Exception as exc:  # noqa: BLE001 — un avís no pot aturar la publicació
+        prog("warn", f"no s'han pogut mirar els jugadors del núvol ({exc})")
+        return 0
+
+    amb_llicencia = {f["nom"] for f in files if not str(f["fcb_id"]).startswith("name:")}
+    duplicats = [
+        f["fcb_id"]
+        for f in files
+        if str(f["fcb_id"]).startswith("name:")
+        and f["nom"] in amb_llicencia
+        and f["fcb_id"] not in vius
+    ]
+    if duplicats:
+        prog(
+            "warn",
+            f"{len(duplicats)} fitxes de pedaç dupliquen algú que ja té llicència "
+            f"(surten dos cops a la cerca). Es netegen amb "
+            f"docs/sql/fusiona_pedacos.sql.",
+        )
+    return len(duplicats)
 
 
 def _retira_clubs_fusionats(sb, vius: set[str], prog) -> int:
