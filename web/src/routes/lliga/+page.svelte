@@ -5,14 +5,17 @@
 		type LligaGroup,
 		type StandingRow,
 		type PlayerRankRow,
-		type LligaInscrit
+		type LligaInscrit,
+		type EncontreCalendari
 	} from '$lib/db';
 	import { titulars } from '$lib/titulars';
+	import { clubDeLEquip } from '$lib/clubEquip';
 
 	let groups = $state<LligaGroup[]>([]);
 	let standings = $state<StandingRow[]>([]);
 	let pranks = $state<PlayerRankRow[]>([]);
 	let inscrits = $state<LligaInscrit[]>([]);
+	let calendari = $state<EncontreCalendari[]>([]);
 	let selDiv = $state<number | null>(null);
 	let mode = $state<'equips' | 'jugadors'>('equips');
 	let scope = $state<'grup' | 'categoria'>('grup');
@@ -32,7 +35,8 @@
 				{ data: s, error: es },
 				{ data: pr, error: ep },
 				{ data: enc },
-				{ data: ins }
+				{ data: ins },
+				{ data: cal }
 			] = await Promise.all([
 				db.from('lliga_groups').select('*'),
 				db.from('lliga_standings').select('*').order('posicio'),
@@ -41,7 +45,11 @@
 				// Els inscrits del club: qui la federació diu que juga la lliga amb
 				// cada club, que és més que qui ja hi ha jugat. El .range() és
 				// explícit perquè PostgREST talla a mil files en silenci.
-				db.from('lliga_inscrits').select('*').order('posicio').range(0, 4999)
+				db.from('lliga_inscrits').select('*').order('posicio').range(0, 4999),
+				// El calendari de la temporada que comença. La federació no publica
+				// els encontres fins que es juguen, o sigui que fins llavors això és
+				// tot el que se'n sap: qui hi ha a cada grup, contra qui i quin dia.
+				db.from('lliga_calendari').select('*').order('jornada').range(0, 4999)
 			]);
 			if (eg) throw eg;
 			if (es) throw es;
@@ -51,6 +59,7 @@
 			pranks = (pr ?? []) as PlayerRankRow[];
 			encontres = enc ?? [];
 			inscrits = (ins ?? []) as LligaInscrit[];
+			calendari = (cal ?? []) as EncontreCalendari[];
 			// `lliga_standings_hist` i no `lliga_history`: la segona és una taula
 			// morta que no escriu ningú i es va quedar al 2024-2025, o sigui que el
 			// selector no s'actualitzava mai. La que s'omple a cada publicació és
@@ -84,18 +93,97 @@
 	const lligaActual = $derived(
 		standings.length ? Math.max(...standings.map((s) => s.lliga_id)) : null
 	);
+	// Els grups que NOMÉS coneixem pel calendari.
+	//
+	// La federació no dona d'alta els encontres al web fins que es juguen, o
+	// sigui que al setembre la classificació només porta els grups que ja ha
+	// penjat -enguany, Honor Grup A i prou. El PDF del calendari, en canvi, diu
+	// qui hi ha a cada grup, contra qui i quin dia, i això es pot ensenyar amb la
+	// mateixa forma: tots els equips a zero i les jornades senceres.
+	//
+	// Se n'exclou el que ja té competició publicada: quan la federació el penja,
+	// mana ella. Els identificadors són NEGATIUS perquè no en tenen cap de real i
+	// així no poden xocar amb els de debò.
+	interface GrupProvisional {
+		divisio: string;
+		grup: string;
+		divisioId: number;
+		grupId: number;
+		equips: string[];
+		encontres: EncontreCalendari[];
+	}
+
+	/** «1a DIVISIÓ» → «1A», «GRUP B» → «B»: com es diuen les dues fonts. */
+	function clauGrup(divisio: string, grup: string): string {
+		const d = (divisio ?? '').toUpperCase().replace(/\s*DIVISI[ÓO].*$/, '').trim();
+		const g = (grup ?? '').toUpperCase().replace(/^GRUP\s+/, '').trim();
+		return `${d}|${g}`;
+	}
+
+	const grupsProvisionals = $derived.by(() => {
+		const publicats = new Set(
+			groups
+				.filter((g) => g.lliga_id === lligaActual)
+				.map((g) => clauGrup(g.divisio_nom ?? '', g.grup_nom ?? ''))
+		);
+		const per = new Map<string, EncontreCalendari[]>();
+		for (const e of calendari) {
+			if (publicats.has(clauGrup(e.divisio, e.grup))) continue;
+			const clau = `${e.divisio}|${e.grup}`;
+			const llista = per.get(clau);
+			if (llista) llista.push(e);
+			else per.set(clau, [e]);
+		}
+		return [...per.entries()]
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([clau, encontres], i) => {
+				const [divisio, grup] = clau.split('|');
+				return {
+					divisio,
+					grup,
+					divisioId: -(i + 1),
+					grupId: -(i + 1),
+					equips: [...new Set(encontres.flatMap((e) => [e.local, e.visitant]))].sort(),
+					encontres
+				} as GrupProvisional;
+			});
+	});
+
 	const divisions = $derived.by(() => {
 		const m = new Map<number, string>();
 		for (const g of groups.filter((g) => g.lliga_id === lligaActual)) if (!m.has(g.divisio_id)) m.set(g.divisio_id, g.divisio_nom ?? `Div ${g.divisio_id}`);
-		return [...m.entries()].map(([id, nom]) => ({ id, nom })).sort((a, b) => a.id - b.id);
+		const publicades = [...m.entries()].map(([id, nom]) => ({ id, nom })).sort((a, b) => a.id - b.id);
+		// Les del calendari, darrere: primer el que ja es juga.
+		const delCalendari = new Map<number, string>();
+		for (const g of grupsProvisionals) {
+			if (![...delCalendari.values()].includes(g.divisio))
+				delCalendari.set(g.divisioId, g.divisio);
+		}
+		return [...publicades, ...[...delCalendari].map(([id, nom]) => ({ id, nom }))];
 	});
 
 	$effect(() => {
 		if (selDiv == null && divisions.length) selDiv = divisions[0].id;
 	});
 
+	/** El club del cens que hi ha darrere d'un nom d'equip, si se sap. */
+	const clubsDelCens = $derived([...new Set(inscrits.map((i) => i.club))]);
+	const fcbIdPerClub = $derived(
+		new Map(inscrits.filter((i) => i.club_fcb_id).map((i) => [i.club, i.club_fcb_id!]))
+	);
+
 	const divGroups = $derived(
-		groups
+		selDiv != null && selDiv < 0
+			? grupsProvisionals
+					.filter((g) => g.divisioId === selDiv || g.divisio === divisions.find((d) => d.id === selDiv)?.nom)
+					.map((g) => ({
+						lliga_id: lligaActual ?? 0,
+						divisio_id: selDiv,
+						grup_id: g.grupId,
+						divisio_nom: g.divisio,
+						grup_nom: `Grup ${g.grup}`
+					}))
+			: groups
 			.filter((g) => g.lliga_id === lligaActual && g.divisio_id === selDiv)
 			.sort((a, b) => {
 				const fa = (a.grup_nom ?? '').toUpperCase().startsWith('FINAL') ? 1 : 0;
@@ -105,11 +193,38 @@
 	);
 
 	function teamRows(gid: number): StandingRow[] {
+		// Els grups que només tenim del calendari: tots els equips a zero, per
+		// ordre alfabètic. Encara no s'ha jugat res, i posar-los una posició seria
+		// inventar-se una classificació.
+		if (gid < 0) {
+			const g = grupsProvisionals.find((x) => x.grupId === gid);
+			return (g?.equips ?? []).filter(matchQ).map((equip, i) => {
+				const club = clubDeLEquip(equip, clubsDelCens);
+				return {
+					lliga_id: lligaActual ?? 0,
+					divisio_id: selDiv ?? 0,
+					grup_id: gid,
+					posicio: i + 1,
+					equip,
+					club_fcb_id: club ? (fcbIdPerClub.get(club) ?? null) : null,
+					pj: 0,
+					g: 0,
+					e: 0,
+					p: 0,
+					punts: 0,
+					pf: 0,
+					pc: 0
+				} satisfies StandingRow;
+			});
+		}
 		return standings
 			.filter((s) => s.divisio_id === selDiv && s.grup_id === gid && matchQ(s.equip))
 			.sort((a, b) => (a.posicio ?? 99) - (b.posicio ?? 99));
 	}
 	function playerRows(gid: number): PlayerRankRow[] {
+		// Al rànquing individual només hi entra qui ha jugat: d'un grup que encara
+		// no ha començat no n'hi ha cap.
+		if (gid < 0) return [];
 		return pranks
 			.filter((s) => s.divisio_id === selDiv && s.grup_id === gid && matchQ(s.jugador))
 			.sort((a, b) => (a.posicio ?? 99) - (b.posicio ?? 99));
@@ -217,6 +332,10 @@
 	let expandedEnc = $state(new Set<number>());
 
 	function gJornades(gid: number): number[] {
+		if (gid < 0) {
+			const g = grupsProvisionals.find((x) => x.grupId === gid);
+			return [...new Set((g?.encontres ?? []).map((e) => e.jornada))].sort((a, b) => a - b);
+		}
 		return [
 			...new Set(
 				encontres
@@ -228,10 +347,31 @@
 	function curJornada(gid: number): number | null {
 		const js = gJornades(gid);
 		if (!js.length) return null;
+		// D'un grup que encara no ha començat, la primera: l'última no s'ha jugat
+		// més que les altres i ensenyar-la seria començar per l'final.
+		if (gid < 0) return jornadaSel[gid] ?? js[0];
 		return jornadaSel[gid] ?? js[js.length - 1];
 	}
 	function encOf(gid: number): any[] {
 		const j = curJornada(gid);
+		if (gid < 0) {
+			const g = grupsProvisionals.find((x) => x.grupId === gid);
+			// Identificador NEGATIU: aquests encontres no en tenen cap de real
+			// -la federació no en dona fins que es juguen- i així no poden xocar
+			// amb els de debò. Buscar-ne les partides no en troba cap, que és el
+			// que toca.
+			return (g?.encontres ?? [])
+				.filter((e) => e.jornada === j)
+				.map((e, i) => ({
+					encontre_id: gid * 1000 - i,
+					jornada: e.jornada,
+					data: e.data,
+					equip_local: e.local,
+					equip_visitant: e.visitant,
+					gols_local: null,
+					gols_visitant: null
+				}));
+		}
 		return encontres.filter(
 			(e) => e.grup_id === gid && e.divisio_id === selDiv && e.jornada === j
 		);
@@ -374,7 +514,16 @@
 				onclick={() => toggle(g.grup_id)}
 				class="flex w-full items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
 			>
-				<span class="flex-1">{g.grup_nom ?? 'Grup'}</span>
+				<span class="flex-1">
+					{g.grup_nom ?? 'Grup'}
+					{#if g.grup_id < 0}
+						<span
+							class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+							title="Del PDF del calendari: la federació encara no ha publicat aquest grup. Les dates i els emparellaments poden canviar."
+							>provisional</span
+						>
+					{/if}
+				</span>
 				<span class="font-normal normal-case text-slate-500 dark:text-slate-400">{count(g.grup_id)} {mode}</span>
 				<span class="text-slate-500 dark:text-slate-400 transition-transform {collapsed.has(g.grup_id) ? '' : 'rotate-90'}">›</span>
 			</button>
@@ -441,7 +590,11 @@
 								<li class="overflow-hidden rounded-lg bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 									<button onclick={() => toggleEnc(e.encontre_id)} class="flex w-full items-center gap-2 px-2 py-1.5 text-xs">
 										<span class="flex-1 truncate text-left font-medium">{e.equip_local}</span>
-										<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 font-mono font-bold tabular-nums">{e.gols_local}–{e.gols_visitant}</span>
+										<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 font-mono tabular-nums {e.gols_local == null ? 'text-[10px] font-normal text-slate-500 dark:text-slate-400' : 'font-bold'}"
+											>{e.gols_local == null
+												? (e.data ?? 'per jugar')
+												: `${e.gols_local}–${e.gols_visitant}`}</span
+										>
 										<span class="flex-1 truncate text-right font-medium">{e.equip_visitant}</span>
 									</button>
 									{#if expandedEnc.has(e.encontre_id)}

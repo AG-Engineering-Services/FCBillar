@@ -173,6 +173,26 @@ export interface PlayerRankRow {
 }
 
 /**
+ * Un encontre del calendari de lliga, tal com el publica la federació en PDF.
+ *
+ * És el que se'n sap abans que la competició existeixi: la federació no dona
+ * d'alta els encontres al web fins que es juguen. Va marcat com a provisional
+ * perquè els seus PDF porten errors i tant les dates com els emparellaments
+ * poden canviar.
+ */
+export interface EncontreCalendari {
+  temporada: string;
+  /** '1a', '2a', '4a'. No és el `divisio_id` de la competició. */
+  divisio: string;
+  /** 'A', 'B', 'D'. */
+  grup: string;
+  jornada: number;
+  data: string | null;
+  local: string;
+  visitant: string;
+}
+
+/**
  * Un jugador inscrit per un club a una lliga, tal com ho publica la federació.
  *
  * És la font OFICIAL de qui juga la lliga amb qui, i l'ordre (`posicio`) és el
