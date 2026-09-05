@@ -60,6 +60,50 @@ class Inscrit:
         return DIVISIONS.index(self.divisio) if self.divisio in DIVISIONS else len(DIVISIONS)
 
 
+def parteix_club(resta: str, cens: list[tuple[str, str]]) -> tuple[str, str] | None:
+    """Parteix «COGNOMS, NOM CLUB» en el nom i el club. `None` si no se'n surt.
+
+    `cens` són parelles (nom normalitzat, club del cens) ordenades de més llarg a
+    més curt, perquè «C.B.SANT ADRIÀ» s'ha de provar abans que «SANT ADRIÀ».
+
+    El PDF no separa les dues coses de cap manera: només es poden distingir
+    perquè el club és un dels que coneixem.
+    """
+    norm_resta = _norm(resta)
+    parell = next(((n, c) for n, c in cens if norm_resta.endswith(n)), None)
+    if parell is None:
+        return None
+
+    norm_club, club = parell
+    # El tall es fa sobre el text original, retallant tants caràcters com calgui
+    # perquè el que quedi normalitzat sigui el nom del jugador.
+    tall = len(resta)
+    while tall > 0 and _norm(resta[:tall]) != norm_resta[: -len(norm_club)]:
+        tall -= 1
+    jugador = resta[:tall].strip(" ,")
+    if not jugador:
+        return None
+
+    # El tall pot quedar-se curt, i llavors el tros que sobra del nom del club
+    # se'n va al del jugador sense que ho digui ningú: «LUQUE MARTÍNEZ, JESÚS
+    # C.B.» sembla un nom fins que el mires, i no casa amb ningú. Van sortir així
+    # vint-i-un jugadors del Sant Adrià, i abans catorze de la Unió Coral.
+    #
+    # Es veu comparant amb què s'ha tallat i com es diu el club de debò: si el nom
+    # del cens porta al davant alguna cosa més que el tros tallat -«C.B.SANT
+    # ADRIÀ» contra «SANT ADRIÀ»- i aquell tros extra és justament el final del
+    # nom que ens queda, el que hem tallat no era el club sencer.
+    #
+    # No es mira per aparença: hi ha noms que acaben amb una inicial de debò, com
+    # «GUERRERO GONZÁLEZ, MIQUEL A.».
+    norm_canonic = _norm(club)
+    if norm_canonic != norm_club and norm_canonic.endswith(norm_club):
+        sobrant = norm_canonic[: -len(norm_club)]
+        if _norm(jugador).endswith(sobrant):
+            return None
+    return jugador, club
+
+
 def llegeix(pdf_path: str | Path, clubs: list[str]) -> tuple[list[Inscrit], list[str]]:
     """Llegeix el PDF de divisions.
 
@@ -101,22 +145,11 @@ def llegeix(pdf_path: str | Path, clubs: list[str]) -> tuple[list[Inscrit], list
             continue
 
         divisio, posicio, resta, mitjana, estat = m.groups()
-        norm_resta = _norm(resta)
-        parell = next(((n, c) for n, c in cens if norm_resta.endswith(n)), None)
-        if parell is None:
+        partit = parteix_club(resta, cens)
+        if partit is None:
             rebutjades.append(linia)
             continue
-
-        norm_club, club = parell
-        # El tall es fa sobre el text original, retallant tants caràcters com
-        # calgui perquè el que quedi normalitzat sigui el nom del jugador.
-        tall = len(resta)
-        while tall > 0 and _norm(resta[:tall]) != norm_resta[: -len(norm_club)]:
-            tall -= 1
-        jugador = resta[:tall].strip(" ,")
-        if not jugador:
-            rebutjades.append(linia)
-            continue
+        jugador, club = partit
 
         inscrits.append(
             Inscrit(

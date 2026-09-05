@@ -1623,7 +1623,11 @@ def ingest_divisions_individual_cmd(
     from fcbillar.divisions_individual import desa, llegeix, per_club, traspassos
 
     conn = ensure_schema(get_settings().db_path)
-    clubs = [r[0] for r in conn.execute("SELECT fcb_id FROM clubs")]
+    # El `fcb_id` I el nom: no sempre són iguals -el Sant Adrià té el `fcb_id`
+    # escurçat, «SANT ADRIÀ» per «C.B.SANT ADRIÀ»- i el tall del club es fa amb
+    # la forma més llarga que casi. Amb només el `fcb_id`, el «C.B.» d'aquell
+    # club se n'anava al nom de 21 jugadors.
+    clubs = [x for r in conn.execute("SELECT fcb_id, nom FROM clubs") for x in r if x]
 
     inscrits, rebutjades = llegeix(pdf, clubs)
     if not inscrits:
