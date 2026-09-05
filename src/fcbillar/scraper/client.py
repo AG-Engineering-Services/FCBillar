@@ -32,6 +32,17 @@ USER_AGENT = "FCBillar/2.0 (seguiment de jugadors federats; contacte via fcbilla
 REINTENTS = 3
 ESPERA_REINTENT_S = 2.0
 
+#: Quants 5xx seguits fan pensar que el portal està caigut i no que sigui un
+#: entrebanc puntual. A partir d'aquí es prova un sol cop cada pàgina.
+#:
+#: Reintentar un 500 té sentit quan és un ensopec del servidor. Quan la secció
+#: sencera està trencada no en té cap, i surt caríssim: la reingesta del 5 de
+#: setembre de 2026 va trobar 401 encontres amb 500 seguits i, a tres intents amb
+#: espera creixent, hi va cremar prop de 87 minuts —el job es va cancel·lar als
+#: 90 sense acabar. Amb un sol intent, els mateixos 401 es despatxen de seguida i
+#: la resta de la reingesta arriba a fer-se.
+CINCS_PER_RENDIR_SE = 10
+
 
 class ErrorPortal(RuntimeError):
     """El portal ha respost amb un codi d'error després de tots els reintents.
@@ -54,6 +65,8 @@ class ScraperClient:
         self.settings = settings or get_settings()
         self._client: httpx.Client | None = None
         self._last_request_ts: float = 0.0
+        #: 5xx seguits. Es posa a zero a la primera pàgina que torna bé.
+        self._cincs_seguits = 0
 
     # ---------------- cicle de vida ----------------
 
@@ -105,8 +118,12 @@ class ScraperClient:
         self._obre()
         assert self._client is not None
 
+        # Si el portal ja porta una pila de 5xx seguits, no és un ensopec: està
+        # caigut, i insistir-hi pàgina per pàgina només gasta el temps que li
+        # falta a la resta de la reingesta.
+        reintents = 1 if self._cincs_seguits >= CINCS_PER_RENDIR_SE else REINTENTS
         ultim_estat = 0
-        for intent in range(1, REINTENTS + 1):
+        for intent in range(1, reintents + 1):
             self._respecta_ritme()
             log.info("GET %s%s", url, f" (intent {intent})" if intent > 1 else "")
             try:
@@ -114,10 +131,12 @@ class ScraperClient:
             except httpx.HTTPError as e:
                 log.warning("Xarxa KO a %s: %s", url, e)
                 ultim_estat = 0
-                time.sleep(ESPERA_REINTENT_S * intent)
+                if intent < reintents:
+                    time.sleep(ESPERA_REINTENT_S * intent)
                 continue
 
             if r.status_code == 200:
+                self._cincs_seguits = 0
                 html = r.text
                 if self.settings.cache_html:
                     cache_file.write_text(html, encoding="utf-8")
@@ -127,6 +146,10 @@ class ScraperClient:
             # Un 404 és definitiu: l'id no existeix i reprovar-ho no el crearà.
             if r.status_code == 404:
                 break
-            time.sleep(ESPERA_REINTENT_S * intent)
+            if r.status_code >= 500:
+                self._cincs_seguits += 1
+            # L'espera només val la pena si encara queda algun intent.
+            if intent < reintents:
+                time.sleep(ESPERA_REINTENT_S * intent)
 
         raise ErrorPortal(url, ultim_estat)
