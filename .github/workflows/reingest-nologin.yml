@@ -142,7 +142,16 @@ jobs:
           run "ingest-copa"          uv run --no-dev fcbillar ingest-copa "$COPA_EDICIO"
           run "ingest-individuals"   uv run --no-dev fcbillar ingest-individuals
           run "scrape-current-opens" uv run --no-dev python -m fcb_opens.cli scrape-current-opens
-          run "scrape-lliga"         uv run --no-dev python -m fcb_opens.cli scrape-lliga 36 --full
+          # scrape-lliga: FORA des del 6 de setembre de 2026. Feia servir els camins
+          # del WordPress vell (/ca/lligues/...), que van morir amb el canvi de web
+          # de l'agost i responen 404, o sigui que fallava cada nit sense ingerir
+          # res. I encara que funcionés, la lliga ja l'ingereix `ingest-lliga` per
+          # la intranet: omplia l'esquema `fcb_opens` del núvol, que no llegeix cap
+          # dels projectes -ni el web de FCBillar, ni NouProjecte, ni c3b- mentre
+          # que l'esquema `fcbillar` el llegeixen tots.
+          #
+          # Es torna a posar amb una línia si algun dia aquelles dades fan falta,
+          # pero llavors caldra migrar-ne els camins i els analitzadors.
 
           # Calendari esportiu federatiu: PDF de la RFEB (i detecció del de la FCB).
           # Va aquí perquè és HTTP pur, sense login ni Chromium, i perquè les
