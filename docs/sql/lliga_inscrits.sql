@@ -31,6 +31,9 @@ CREATE TABLE IF NOT EXISTS fcbillar.lliga_inscrits (
   -- taula per ordenar jugadors ha de filtrar per temporada I modalitat.
   modalitat      TEXT    NOT NULL DEFAULT '',
   club           TEXT    NOT NULL,          -- nom del cens, ja canonicalitzat
+  -- El mateix identificador que porta la classificació, que és el que hi lliga.
+  -- El NOM no serveix per creuar-les: ja va fallar al rànquing de jugadors.
+  club_fcb_id   TEXT,
   club_id_extern INTEGER NOT NULL,
   jugador        TEXT    NOT NULL,          -- 'COGNOMS, NOM', com l'escriu la federació
   -- La del rànquing vigent de la modalitat. 0 per a qui no hi surt: la federació
@@ -64,3 +67,5 @@ GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
   ON fcbillar.lliga_inscrits TO service_role;
 
 NOTIFY pgrst, 'reload schema';
+
+ALTER TABLE fcbillar.lliga_inscrits ADD COLUMN IF NOT EXISTS club_fcb_id TEXT;

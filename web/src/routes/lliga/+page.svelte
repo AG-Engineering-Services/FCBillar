@@ -1,10 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { db, type LligaGroup, type StandingRow, type PlayerRankRow } from '$lib/db';
+	import {
+		db,
+		type LligaGroup,
+		type StandingRow,
+		type PlayerRankRow,
+		type LligaInscrit
+	} from '$lib/db';
+	import { titulars } from '$lib/titulars';
 
 	let groups = $state<LligaGroup[]>([]);
 	let standings = $state<StandingRow[]>([]);
 	let pranks = $state<PlayerRankRow[]>([]);
+	let inscrits = $state<LligaInscrit[]>([]);
 	let selDiv = $state<number | null>(null);
 	let mode = $state<'equips' | 'jugadors'>('equips');
 	let scope = $state<'grup' | 'categoria'>('grup');
@@ -23,12 +31,17 @@
 				{ data: g, error: eg },
 				{ data: s, error: es },
 				{ data: pr, error: ep },
-				{ data: enc }
+				{ data: enc },
+				{ data: ins }
 			] = await Promise.all([
 				db.from('lliga_groups').select('*'),
 				db.from('lliga_standings').select('*').order('posicio'),
 				db.from('lliga_player_rankings').select('*').order('posicio'),
-				db.from('lliga_encontres').select('*')
+				db.from('lliga_encontres').select('*'),
+				// Els inscrits del club: qui la federació diu que juga la lliga amb
+				// cada club, que és més que qui ja hi ha jugat. El .range() és
+				// explícit perquè PostgREST talla a mil files en silenci.
+				db.from('lliga_inscrits').select('*').order('posicio').range(0, 4999)
 			]);
 			if (eg) throw eg;
 			if (es) throw es;
@@ -37,6 +50,7 @@
 			standings = (s ?? []) as StandingRow[];
 			pranks = (pr ?? []) as PlayerRankRow[];
 			encontres = enc ?? [];
+			inscrits = (ins ?? []) as LligaInscrit[];
 			// `lliga_standings_hist` i no `lliga_history`: la segona és una taula
 			// morta que no escriu ningú i es va quedar al 2024-2025, o sigui que el
 			// selector no s'actualitzava mai. La que s'omple a cada publicació és
@@ -111,25 +125,33 @@
 	);
 
 	// Qui juga a un equip: la classificació diu com va el conjunt i això diu de qui
-	// està fet. Els jugadors surten del rànquing individual del grup, que és per
-	// club i no per equip -la federació no publica de quin equip és cada partida-,
-	// o sigui que a un club amb dos equips al mateix grup hi sortirien tots.
+	// està fet.
+	//
+	// Surt de la llista d'INSCRITS de la federació i no del rànquing individual.
+	// El rànquing només porta qui ja ha jugat, o sigui que a l'inici de temporada
+	// el modal sortia buit; i la llista d'inscrits, a més, ve amb l'ordre que la
+	// federació fixa per a tot l'any, que és el que decideix a quins equips del
+	// club pot jugar cadascú.
 	let equipObert = $state<StandingRow | null>(null);
 	const jugadorsDeLEquip = $derived(
 		equipObert
-			? pranks
+			? inscrits
 					// Per `club_fcb_id` als dos costats. Comparar el nom del club contra
 					// l'identificador semblava funcionar perquè a gairebé tots coincideixen,
-					// però a un no; i sobretot aquesta taula arrossegava noms d'abans
-					// d'unificar els clubs, o sigui que cinc equips obrien el modal buit.
+					// però a un no; i les taules arrosseguen noms d'abans d'unificar els
+					// clubs, o sigui que hi havia equips que obrien el modal buit.
 					.filter(
 						(p) =>
-							p.grup_id === equipObert!.grup_id &&
 							p.club_fcb_id != null &&
-							p.club_fcb_id === equipObert!.club_fcb_id
+							p.club_fcb_id === equipObert!.club_fcb_id &&
+							p.lliga_id === equipObert!.lliga_id
 					)
-					.sort((a, b) => (b.mitjana ?? 0) - (a.mitjana ?? 0))
+					.sort((a, b) => a.posicio - b.posicio)
 			: []
+	);
+	/** Els quatre que és més probable que formin AQUEST equip, per la regla de la federació. */
+	const titularsDeLEquip = $derived(
+		equipObert ? titulars(equipObert.equip, jugadorsDeLEquip) : new Set<string>()
 	);
 	function obreEquip(r: StandingRow) {
 		equipObert = r;
@@ -477,7 +499,7 @@
 					</h2>
 					<p class="text-xs text-slate-500 dark:text-slate-400">
 						{jugadorsDeLEquip.length}
-						{jugadorsDeLEquip.length === 1 ? 'jugador' : 'jugadors'} · per mitjana
+						{jugadorsDeLEquip.length === 1 ? 'inscrit' : 'inscrits'} · per l'ordre de la federació
 					</p>
 				</div>
 				<button
@@ -490,8 +512,7 @@
 
 			{#if jugadorsDeLEquip.length === 0}
 				<p class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-					Encara no hi ha cap partida jugada en aquest grup, o sigui que la federació no en
-					publica cap jugador.
+					La federació encara no ha publicat qui inscriu aquest club a la lliga.
 				</p>
 			{:else}
 				<div
@@ -502,20 +523,38 @@
 					<span class="w-12 text-right">Mitj.</span>
 				</div>
 				<ul>
-					{#each jugadorsDeLEquip as p, i (p.player_fcb_id)}
+					{#each jugadorsDeLEquip as p (p.jugador)}
 						<li
-							class="flex items-center gap-2 border-b border-slate-100 px-4 py-2 last:border-0 dark:border-slate-800"
+							class="flex items-center gap-2 border-b border-slate-100 px-4 py-2 last:border-0 dark:border-slate-800 {titularsDeLEquip.has(
+								p.jugador
+							)
+								? 'bg-emerald-50 font-medium dark:bg-emerald-950/20'
+								: ''}"
 						>
 							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-400"
-								>{i + 1}</span
+								>{p.posicio}</span
 							>
-							<span class="min-w-0 flex-1 truncate text-sm">{p.jugador}</span>
+							<span class="min-w-0 flex-1 truncate text-sm">
+								{p.jugador}
+								{#if p.fitxatge}
+									<span
+										class="ml-1 text-[10px] font-normal uppercase tracking-wide text-sky-700 dark:text-sky-400"
+										title="Ve d'un altre club: la federació el llista als dos.">fitxatge</span
+									>
+								{/if}
+							</span>
 							<span class="w-12 shrink-0 text-right font-mono text-sm tabular-nums"
 								>{p.mitjana != null ? p.mitjana.toFixed(3) : '—'}</span
 							>
 						</li>
 					{/each}
 				</ul>
+				<p class="px-4 py-3 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+					Ombrejats, els quatre que s'esperen en aquest equip. L'ordre és el que fixa la
+					federació i diu on pot jugar cadascú: del 1r al 3r només a l'A, del 4t al 8è a l'A
+					i al B, del 9è al 12è fins al C, del 13è al 16è fins al D i del 17è endavant fins
+					a l'E.
+				</p>
 			{/if}
 		</div>
 	</div>

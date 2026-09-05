@@ -4927,9 +4927,15 @@ def publish_calendari(
         [
             dict(r)
             for r in conn.execute(
-                "SELECT temporada, lliga_id, lliga, modalitat, club, club_id_extern, "
-                "       jugador, mitjana, fitxatge, posicio "
-                "FROM lliga_inscrits ORDER BY lliga_id, club, posicio"
+                # `club_fcb_id` a més del nom: creuar taules pel NOM del club ja
+                # ens ha fallat una vegada -al rànquing de jugadors, on cinc
+                # equips obrien el modal buit- i aquí es fa exactament el mateix
+                # creuament contra la classificació.
+                "SELECT i.temporada, i.lliga_id, i.lliga, i.modalitat, i.club, "
+                "       c.fcb_id AS club_fcb_id, i.club_id_extern, "
+                "       i.jugador, i.mitjana, i.fitxatge, i.posicio "
+                "FROM lliga_inscrits i LEFT JOIN clubs c ON c.nom = i.club "
+                "ORDER BY i.lliga_id, i.club, i.posicio"
             )
         ]
         if "lliga_inscrits" in taules

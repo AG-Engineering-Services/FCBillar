@@ -172,6 +172,27 @@ export interface PlayerRankRow {
   mitjana: number | null;
 }
 
+/**
+ * Un jugador inscrit per un club a una lliga, tal com ho publica la federació.
+ *
+ * És la font OFICIAL de qui juga la lliga amb qui, i l'ordre (`posicio`) és el
+ * que la federació fixa per a tota la temporada: és el mateix que decideix a
+ * quins equips del club pot jugar cadascú.
+ */
+export interface LligaInscrit {
+  temporada: string;
+  lliga_id: number;
+  modalitat: string;
+  club: string;
+  /** El que lliga amb la classificació. El nom no serveix per creuar-les. */
+  club_fcb_id: string | null;
+  jugador: string;
+  mitjana: number | null;
+  /** Ve d'un altre club: la federació el llista als dos mentre no ho corregeixi. */
+  fitxatge: boolean;
+  posicio: number;
+}
+
 export interface Open {
   open_id: number;
   nom: string;
