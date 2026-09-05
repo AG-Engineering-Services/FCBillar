@@ -19,6 +19,21 @@ DEFAULT_TIMEOUT_S = 30.0
 DEFAULT_TTL_S = 3600  # 1 hour
 
 
+def normalitza(url: str) -> str:
+    """Treu el `www.` de fcbillar.cat.
+
+    El seu certificat no cobreix `www.fcbillar.cat` —«Hostname mismatch»— i la
+    petició no arriba a sortir: peta abans de connectar. Al domini pelat el
+    mateix contingut es serveix bé.
+
+    Es fa aquí i no a les constants de cada mòdul perquè n'hi ha cinc, i perquè
+    el dia que ho arreglin només s'ha de treure d'un lloc. No és cosa nostra:
+    és una configuració seva que porta trencada des d'almenys el setembre de
+    2026, i cada nit se'ns enduia el pas d'opens de la reingesta.
+    """
+    return url.replace("://www.fcbillar.cat", "://fcbillar.cat")
+
+
 def _cache_path(url: str, cache_dir: Path) -> Path:
     digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:16]
     return cache_dir / f"{digest}.html"
@@ -41,6 +56,7 @@ def fetch_binary(
     """
     import httpx
 
+    url = normalitza(url)
     cache_dir.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:16]
     cache_file = cache_dir / f"{digest}{suffix}"
@@ -90,6 +106,7 @@ def fetch(
     # fetch() lets tests and pure-parsing workflows run without it.
     import httpx
 
+    url = normalitza(url)
     cache_dir.mkdir(parents=True, exist_ok=True)
     cache_file = _cache_path(url, cache_dir)
 

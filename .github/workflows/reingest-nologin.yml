@@ -175,6 +175,20 @@ jobs:
       - name: Ja s'ha jugat res?
         if: always() && steps.gate.outputs.skip != 'true'
         run: |
+          # Quants passos han fallat, al resum. Els passos van aïllats a posta
+          # -si un falla, la resta continua i es publica el que sí que s'ha
+          # pogut-, però això vol dir que el job surt verd igualment. El 5 de
+          # setembre de 2026 en fallaven dos de deu cada nit i no ho deia res:
+          # el certificat de www.fcbillar.cat i el scrape d'opens.
+          if [ "${N_FAIL:-0}" != "0" ]; then
+            echo "### ⚠ $N_FAIL de $((N_OK + N_FAIL)) passos han fallat" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "El job surt verd a posta: els passos van aïllats i el que sí que s'ha"                  "ingerit es publica igualment. Però mira'ls al registre." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Els $N_OK passos han anat bé" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          fi
           uv run --no-dev python scripts/primera_partida.py >> "$GITHUB_STEP_SUMMARY"
 
       # Repuja les BD al release encara que algun pas hagi fallat (upserts parcials
