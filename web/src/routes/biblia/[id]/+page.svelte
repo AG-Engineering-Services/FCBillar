@@ -103,9 +103,6 @@
 						<div class="nom">{data.jugador.nom}</div>
 						<div class="ko">{data.jugador.nomKo}</div>
 					</div>
-					{#if data.jugador.banderaUrl}
-						<img class="bandera" src={data.jugador.banderaUrl} alt={data.jugador.nacionalitat} />
-					{/if}
 				</div>
 			{/if}
 

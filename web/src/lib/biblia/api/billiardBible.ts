@@ -27,25 +27,41 @@ export interface Jugador {
 	nomKo: string;
 	nacionalitat: string;
 	retratUrl: string;
-	banderaUrl: string;
 }
 
+/**
+ * Els jugadors amb tirades analitzades.
+ *
+ * La llista alimenta el filtre i posa nom a la fitxa d'una tirada; no és el
+ * contingut de la pàgina. Si l'API de tercers falla es torna buida i s'apunta
+ * al registre: val més ensenyar les tirades sense el filtre que no ensenyar
+ * res. El 2 de setembre de 2026 van treure la columna `flag_image_url` i la
+ * consulta va començar a rebre un 400 que tombava /biblia sencera —i tres dies
+ * després encara petava.
+ */
 export async function fetchJugadors(fetch: Fetch): Promise<Jugador[]> {
 	const url =
 		`${BB_URL}/rest/v1/players` +
-		`?select=id,name_en,name_kr,nationality,portrait_image_url,flag_image_url,order,has_shot_data` +
+		`?select=id,name_en,name_kr,nationality,portrait_image_url,order,has_shot_data` +
 		`&has_shot_data=eq.1&order=name_en.asc`;
-	const r = await fetch(url, { headers: capsaleres() });
-	if (!r.ok) throw new Error(`players ${r.status}`);
-	const files = (await r.json()) as Array<Record<string, unknown>>;
-	return files.map((p) => ({
-		id: p.id as number,
-		nom: (p.name_en as string) ?? '',
-		nomKo: (p.name_kr as string) ?? '',
-		nacionalitat: (p.nationality as string) ?? '',
-		retratUrl: (p.portrait_image_url as string) ?? '',
-		banderaUrl: (p.flag_image_url as string) ?? ''
-	}));
+	try {
+		const r = await fetch(url, { headers: capsaleres() });
+		if (!r.ok) {
+			console.error(`[biblia] players ${r.status}: ${(await r.text()).slice(0, 200)}`);
+			return [];
+		}
+		const files = (await r.json()) as Array<Record<string, unknown>>;
+		return files.map((p) => ({
+			id: p.id as number,
+			nom: (p.name_en as string) ?? '',
+			nomKo: (p.name_kr as string) ?? '',
+			nacionalitat: (p.nationality as string) ?? '',
+			retratUrl: (p.portrait_image_url as string) ?? ''
+		}));
+	} catch (e) {
+		console.error('[biblia] players', e);
+		return [];
+	}
 }
 
 // ---------------------------------------------------------------------------
