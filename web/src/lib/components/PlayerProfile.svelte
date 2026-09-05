@@ -73,13 +73,16 @@
 	let shown = $state(60);
 	let serieFilter = $state(false);
 	let clubHist = $state<{ temporada: string; club: string | null }[]>([]);
+	/** Què és una entrada del palmarès. La federació no ho diu: es dedueix del nom. */
+	type MenaDePalmares = 'campionat' | 'open' | 'torneig';
+
 	let palmares = $state<
 		{
 			openId: number;
 			nom: string;
 			categoria: string | null;
 			modalitat: number | null;
-			tipus: 'campionat' | 'open' | 'torneig';
+			tipus: MenaDePalmares;
 			temporada: string;
 			posicio: number;
 			club: string | null;
@@ -317,7 +320,7 @@
 								rawNom
 							));
 					const categoria = isChampionship ? championshipCategory : !isOpen && parts.length > 1 ? parts.at(-1)! : null;
-					const tipus = isOpen ? 'open' : isChampionship ? 'campionat' : 'torneig';
+					const tipus: MenaDePalmares = isOpen ? 'open' : isChampionship ? 'campionat' : 'torneig';
 					return o
 						? {
 								openId: p.open_id,

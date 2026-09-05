@@ -233,12 +233,6 @@
 		color: var(--text-suau);
 		font-size: 0.82rem;
 	}
-	.bandera {
-		width: 26px;
-		height: auto;
-		margin-left: auto;
-		border-radius: 3px;
-	}
 	.info {
 		display: flex;
 		flex-direction: column;

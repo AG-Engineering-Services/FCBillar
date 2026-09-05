@@ -3,7 +3,9 @@
 	import { db } from '$lib/db';
 	import { clubFollows, toggleClubFollow } from '$lib/follows';
 
-	const fcbId = $derived($page.params.fcb_id);
+	// La ruta és `club/[fcb_id]`: si s'hi arriba, el paràmetre hi és. Els altres
+	// camins amb paràmetre del web ho diuen igual.
+	const fcbId = $derived($page.params.fcb_id!);
 	let clubNom = $state('');
 	let players = $state<
 		{ fcb_id: string; nom: string; rank: { posicio: number; mitjana: number } | null }[]
