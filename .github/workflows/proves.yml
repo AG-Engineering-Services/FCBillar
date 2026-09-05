@@ -62,6 +62,13 @@ jobs:
       - name: Instal·la
         run: npm ci
 
+      # SvelteKit genera `.svelte-kit/tsconfig.json`, del qual penja el
+      # `tsconfig.json` del projecte. En local hi és de compilacions anteriors i
+      # en una màquina neta no, o sigui que sense això la comprovació de tipus
+      # falla dient que no troba el seu propi fitxer de configuració.
+      - name: Prepara SvelteKit
+        run: npx svelte-kit sync
+
       - name: Tipus
         # Només els errors: els avisos que queden són previs i coneguts.
         run: npx svelte-check --threshold error --output human
