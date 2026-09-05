@@ -89,16 +89,42 @@ def test_amb_el_portal_caigut_es_prova_un_sol_cop(client) -> None:
     assert len(fals.urls) - fins_a_rendir_se == 10
 
 
-def test_una_pagina_bona_torna_a_donar_confiança(client) -> None:
-    """Si el portal es recupera, es torna a insistir com sempre."""
+def test_una_pagina_bona_no_esborra_la_ratxa(client) -> None:
+    """Resta, no reinicia.
+
+    Reiniciar sembla el natural i no serveix de res quan el portal va a
+    batzegades: amb 929 pàgines amb 500 i 272 de bones repartides pel mig, el
+    comptador no passava mai de tretze i el tall no arribava a valer per res.
+    """
     fals = _amb(client, [500])
     for i in range(CINCS_PER_RENDIR_SE):
         with pytest.raises(ErrorPortal):
             client.fetch_html(f"https://x/{i}")
-    assert client._cincs_seguits >= CINCS_PER_RENDIR_SE
+    dalt = client._cincs_seguits
+    assert dalt >= CINCS_PER_RENDIR_SE
 
     fals.estats = [200]
     client.fetch_html("https://x/bona")
+    assert client._cincs_seguits == dalt - 1
+
+    # Segueix tallat: una pàgina bona no torna a obrir la porta als tres intents.
+    fals.estats = [500]
+    abans = len(fals.urls)
+    with pytest.raises(ErrorPortal):
+        client.fetch_html("https://x/altra")
+    assert len(fals.urls) - abans == 1
+
+
+def test_amb_el_portal_recuperat_es_torna_a_insistir(client) -> None:
+    """Prou pàgines bones seguides sí que tornen a donar confiança."""
+    fals = _amb(client, [500])
+    for i in range(CINCS_PER_RENDIR_SE):
+        with pytest.raises(ErrorPortal):
+            client.fetch_html(f"https://x/{i}")
+
+    fals.estats = [200]
+    for i in range(client._cincs_seguits):
+        client.fetch_html(f"https://x/bona-{i}")
     assert client._cincs_seguits == 0
 
     fals.estats = [500]

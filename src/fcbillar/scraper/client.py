@@ -32,8 +32,9 @@ USER_AGENT = "FCBillar/2.0 (seguiment de jugadors federats; contacte via fcbilla
 REINTENTS = 3
 ESPERA_REINTENT_S = 2.0
 
-#: Quants 5xx seguits fan pensar que el portal està caigut i no que sigui un
-#: entrebanc puntual. A partir d'aquí es prova un sol cop cada pàgina.
+#: Quants 5xx de més que d'encerts fan pensar que el portal està caigut i no
+#: que sigui un entrebanc puntual. A partir d'aquí es prova un sol cop cada
+#: pàgina.
 #:
 #: Reintentar un 500 té sentit quan és un ensopec del servidor. Quan la secció
 #: sencera està trencada no en té cap, i surt caríssim: la reingesta del 5 de
@@ -135,7 +136,14 @@ class ScraperClient:
                 continue
 
             if r.status_code == 200:
-                self._cincs_seguits = 0
+                # Una pàgina bona RESTA, no reinicia. Reiniciar sembla el
+                # natural i no serveix de res quan el portal va a batzegades:
+                # la reingesta del 5 de setembre de 2026 va donar 929 pàgines
+                # amb 500 i 272 de bones, prou repartides perquè el comptador no
+                # passés mai de tretze, i el tall no va arribar a valer per res.
+                # Restant, amb aquell repartiment es queda tallat i les esperes
+                # baixen de 47 minuts a menys d'un.
+                self._cincs_seguits = max(0, self._cincs_seguits - 1)
                 html = r.text
                 if self.settings.cache_html:
                     cache_file.write_text(html, encoding="utf-8")
