@@ -46,10 +46,6 @@ EXCLOSOS_PER_CAMI = (
     "tests/fixtures/",
     "scripts/opens_ui_shots/",
     "docs/ajuts-desplacaments/",
-    # Còpies binàries de la base de dades que es van committejar sense voler:
-    # 92 MB que el .gitignore no atrapa perquè cobreix data/*.db i aquestes
-    # porten un sufix al darrere. Aquesta prova és qui les ha trobades.
-    "data/fcbillar.db.bak-",
 )
 EXCLOSES_PER_EXTENSIO = (".pdf", ".png", ".db", ".csv", ".ico", ".woff", ".woff2", ".zip")
 
