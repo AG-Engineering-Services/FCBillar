@@ -46,11 +46,7 @@ def repair_name(s):
     if not s:
         return s
     # Només si sembla corrupte: 'Ã'/'Â' o substituts solitaris (surrogateescape).
-    if (
-        "Ã" not in s
-        and "Â" not in s
-        and not any(0xDC80 <= ord(c) <= 0xDCFF for c in s)
-    ):
+    if "Ã" not in s and "Â" not in s and not any(0xDC80 <= ord(c) <= 0xDCFF for c in s):
         return s
     try:
         return s.encode("cp1252", errors="surrogateescape").decode("utf-8")
@@ -67,8 +63,7 @@ def repair_json(obj):
         return [repair_json(x) for x in obj]
     if isinstance(obj, dict):
         return {
-            (repair_name(k) if isinstance(k, str) else k): repair_json(v)
-            for k, v in obj.items()
+            (repair_name(k) if isinstance(k, str) else k): repair_json(v) for k, v in obj.items()
         }
     return obj
 
@@ -85,14 +80,23 @@ TARGETS = [
     ("fcbillar", "players", ["fcb_id"], ["nom"], []),
     ("fcbillar", "clubs", ["fcb_id"], ["nom"], []),
     ("fcbillar", "games", ["id"], ["player1_nom", "player2_nom"], []),
-    ("fcbillar", "pending_games",
-     ["player_fcb_id", "modalitat_codi", "signatura"], ["opponent_nom"], []),
+    (
+        "fcbillar",
+        "pending_games",
+        ["player_fcb_id", "modalitat_codi", "signatura"],
+        ["opponent_nom"],
+        [],
+    ),
     ("fcbillar", "player_clubs", ["player_fcb_id", "temporada"], ["club"], []),
-    ("fcbillar", "open_classifications",
-     ["open_id", "player_fcb_id"], ["jugador", "club"], []),
+    ("fcbillar", "open_classifications", ["open_id", "player_fcb_id"], ["jugador", "club"], []),
     ("fcbillar", "opens", ["open_id"], ["nom"], []),
-    ("fcbillar", "open_ranking",
-     ["genere", "ronda", "posicio"], ["jugador", "club", "ronda_nom"], ["detall"]),
+    (
+        "fcbillar",
+        "open_ranking",
+        ["genere", "ronda", "posicio"],
+        ["jugador", "club", "ronda_nom"],
+        ["detall"],
+    ),
     ("fcbillar", "open_live", ["fcb_division_id"], ["name"], ["payload_json"]),
     # --- esquema fcb_opens (escrit per src/fcb_opens/supabase_sync.py i snapshot_live.py) ---
     ("fcb_opens", "players", ["id"], ["display_name", "current_club"], []),
@@ -111,19 +115,22 @@ PAGE = 1000
 
 
 def _client():
-    """Crea el client Supabase (service-role) amb credencials del .env.
+    """Crea el client del núvol (service-role) amb credencials del .env.
+
+    Les variables són les de Neon, on van anar a parar les dades l'agost del
+    2026. Es proven també les de Supabase perquè aquest guió és d'abans i algú
+    el pot tenir configurat així; però el que hi ha en marxa és Neon, i quan hi
+    van canviar el nom aquest guió va començar a plantar-se cada nit a la
+    reingesta sense que ho llegís ningú.
 
     El client base permet adreçar qualsevol esquema amb `.schema(nom)`."""
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
     from fcbillar.cloud_sync import _env
 
-    url = _env("SUPABASE_URL")
-    key = _env("SUPABASE_SERVICE_ROLE_KEY")
+    url = _env("NEON_DATA_API_URL") or _env("SUPABASE_URL")
+    key = _env("NEON_SERVICE_ROLE_TOKEN") or _env("SUPABASE_SERVICE_ROLE_KEY")
     if not url or not key:
-        raise SystemExit("Falten SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (.env).")
-    # Exposa-les també a l'entorn per si algun mòdul les llegeix d'allà.
-    os.environ.setdefault("SUPABASE_URL", url)
-    os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", key)
+        raise SystemExit("Falten NEON_DATA_API_URL / NEON_SERVICE_ROLE_TOKEN (entorn o .env).")
 
     from supabase import create_client
 
@@ -188,8 +195,7 @@ def main(apply: bool) -> int:
                         before = row.get(col0)
                         if isinstance(before, str):
                             print(
-                                f"    · {schema}.{table}.{col0}: "
-                                f"[{_cps(before)}] → {patch[col0]!r}"
+                                f"    · {schema}.{table}.{col0}: [{_cps(before)}] → {patch[col0]!r}"
                             )
                             sample_shown += 1
                     if apply:
@@ -213,9 +219,11 @@ def main(apply: bool) -> int:
         grand_fixed += fixed
         flag = "" if corrupt == 0 else f"  ⚠ {corrupt} corruptes"
         extra = f", {skipped_key} sense clau (manual)" if skipped_key else ""
-        print(f"  {schema}.{table}: {total} files{flag}"
-              + (f" → {fixed} reparades" if apply and corrupt else "")
-              + extra)
+        print(
+            f"  {schema}.{table}: {total} files{flag}"
+            + (f" → {fixed} reparades" if apply and corrupt else "")
+            + extra
+        )
 
     print()
     if grand_corrupt == 0:
@@ -227,8 +235,7 @@ def main(apply: bool) -> int:
             print("  (algunes files sense clau identificable; cal repassar-les a mà)")
             return 2
         return 0
-    print(f"⚠ {grand_corrupt} files corruptes detectades. "
-          f"Executa amb --apply per reparar-les.")
+    print(f"⚠ {grand_corrupt} files corruptes detectades. Executa amb --apply per reparar-les.")
     return 2
 
 
