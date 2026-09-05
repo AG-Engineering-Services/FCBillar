@@ -24,6 +24,7 @@ class TaulaFalsa:
         self._m, self._nom, self._peta = magatzem, nom, peta_a_upsert
         self._filtres: list[tuple[str, Any]] = []
         self._accio = ""
+        self._tram: tuple[int, int] | None = None
 
     def select(self, *_a: Any, **_k: Any) -> TaulaFalsa:
         self._accio = "select"
@@ -49,6 +50,11 @@ class TaulaFalsa:
     def limit(self, _n: int) -> TaulaFalsa:
         return self
 
+    def range(self, inici: int, fi: int) -> TaulaFalsa:
+        """Com PostgREST: un tram tancat pels dos costats."""
+        self._tram = (inici, fi)
+        return self
+
     def execute(self) -> Any:
         files = self._m.setdefault(self._nom, [])
         if self._accio == "upsert":
@@ -68,6 +74,8 @@ class TaulaFalsa:
             for f in self._m.get(self._nom, [])
             if all(str(f.get(c)) == str(v) for c, v in self._filtres)
         ]
+        if self._tram is not None:
+            vistes = vistes[self._tram[0] : self._tram[1] + 1]
         return type("Res", (), {"data": vistes, "count": len(vistes)})()
 
 

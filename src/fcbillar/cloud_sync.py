@@ -1435,19 +1435,27 @@ def publish_lliga(
     return counts
 
 
-def _totes_les_files(sb, taula: str, columnes: str) -> list[dict]:
-    """Totes les files d'una taula, no les mil primeres.
+def _totes_amb(fes_consulta) -> list[dict]:
+    """Totes les files d'una consulta, no les mil primeres.
 
     PostgREST en talla mil i no ho diu enlloc: la resposta arriba bé, només que
-    curta. Amb 1.607 jugadors, mirar-ne mil és no mirar-ne sis-cents.
+    curta. On decideixes què esborrar, això vol dir esborrar amb mitja taula.
+
+    `fes_consulta` torna a construir la consulta a cada tram, perquè el client
+    no deixa reutilitzar-la un cop executada.
     """
     files: list[dict] = []
     for inici in range(0, 200_000, 1000):
-        pagina = sb.table(taula).select(columnes).range(inici, inici + 999).execute().data or []
+        pagina = fes_consulta().range(inici, inici + 999).execute().data or []
         files += pagina
         if len(pagina) < 1000:
             break
     return files
+
+
+def _totes_les_files(sb, taula: str, columnes: str) -> list[dict]:
+    """Totes les files d'una taula, no les mil primeres."""
+    return _totes_amb(lambda: sb.table(taula).select(columnes))
 
 
 def _avisa_de_pedacos(sb, vius: set[str], prog) -> int:
@@ -1520,14 +1528,23 @@ def _retira_clubs_fusionats(sb, vius: set[str], prog) -> int:
         ("lliga_standings", "club_fcb_id"),
         ("lliga_player_rankings", "club_fcb_id"),
     ]
+    # Es pregunta CLUB A CLUB i no tots de cop amb un `in_`. Amb la llista
+    # sencera, la resposta la talla PostgREST a mil files: si un club en té mil
+    # cinc-centes, les del següent queden fora del tall, aquell sembla lliure i
+    # se n'aniria tenint jugadors a sobre. Aquí només cal saber SI n'hi ha cap,
+    # o sigui que amb una fila n'hi ha prou i surt més barat.
     ocupats: set[str] = set()
     for taula, columna in referents:
-        try:
-            files = sb.table(taula).select(columna).in_(columna, sobren).execute().data or []
-        except Exception as exc:  # noqa: BLE001
-            prog("warn", f"no s'ha pogut mirar {taula}.{columna} ({exc}); no retiro cap club")
-            return 0
-        ocupats |= {f[columna] for f in files if f.get(columna)}
+        for club in sobren:
+            try:
+                files = (
+                    sb.table(taula).select(columna).eq(columna, club).limit(1).execute().data or []
+                )
+            except Exception as exc:  # noqa: BLE001
+                prog("warn", f"no s'ha pogut mirar {taula}.{columna} ({exc}); no retiro cap club")
+                return 0
+            if files:
+                ocupats.add(club)
 
     lliures = [c for c in sobren if c not in ocupats]
     if ocupats:
@@ -1561,7 +1578,7 @@ def _retira_sobrants(
     taules que són «la temporada en curs», no per als diccionaris.
     """
     fora = 0
-    r = sb.table(taula).select(",".join(("lliga_id", *claus))).execute().data or []
+    r = _totes_les_files(sb, taula, ",".join(("lliga_id", *claus)))
     for fila in r:
         if fila["lliga_id"] != lliga:
             if not altres_lligues:
@@ -4796,11 +4813,19 @@ def _publica_reemplaçant(
     n = _upsert(sb, taula, files, ",".join(clau), prog)
     vius = {tuple(str(f[c]) for c in clau) for f in files}
     fora = 0
+    columnes = ",".join(dict.fromkeys(clau + ambit))
+
+    def consulta(valors):
+        def fes():
+            q = sb.table(taula).select(columnes)
+            for camp, valor in zip(ambit, valors, strict=True):
+                q = q.eq(camp, valor)
+            return q
+
+        return fes
+
     for valors in ambits if ambits is not None else {tuple(f[c] for c in ambit) for f in files}:
-        q = sb.table(taula).select(",".join(dict.fromkeys(clau + ambit)))
-        for camp, valor in zip(ambit, valors, strict=True):
-            q = q.eq(camp, valor)
-        for fila in q.execute().data or []:
+        for fila in _totes_amb(consulta(valors)):
             if tuple(str(fila[c]) for c in clau) in vius:
                 continue
             d = sb.table(taula).delete()

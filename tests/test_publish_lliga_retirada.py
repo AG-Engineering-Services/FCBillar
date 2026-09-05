@@ -38,6 +38,7 @@ class TaulaFalsa:
         self._m, self._nom = magatzem, nom
         self._filtres: list[tuple[str, Any]] = []
         self._accio = ""
+        self._tram: tuple[int, int] | None = None
 
     def select(self, *_a: Any, **_k: Any) -> TaulaFalsa:
         self._accio = "select"
@@ -59,13 +60,21 @@ class TaulaFalsa:
     def limit(self, _n: int) -> TaulaFalsa:
         return self
 
+    def range(self, inici: int, fi: int) -> TaulaFalsa:
+        """Com PostgREST: un tram tancat pels dos costats."""
+        self._tram = (inici, fi)
+        return self
+
     def execute(self) -> Any:
         files = self._m.setdefault(self._nom, [])
         if self._accio == "upsert":
             files.extend(self._files)
         elif self._accio == "delete":
             self._m[self._nom] = [f for f in files if any(f.get(c) != v for c, v in self._filtres)]
-        return type("Res", (), {"data": list(self._m.get(self._nom, [])), "count": 0})()
+        dades = list(self._m.get(self._nom, []))
+        if self._tram is not None:
+            dades = dades[self._tram[0] : self._tram[1] + 1]
+        return type("Res", (), {"data": dades, "count": 0})()
 
 
 class ClientFals:
