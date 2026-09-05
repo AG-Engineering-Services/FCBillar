@@ -56,6 +56,9 @@ Versions:
      fitxat, tal com ho publica la federació des del setembre de 2026. És la
      font oficial del que `club_plantilles` estimava. Taula nova: la crea
      l'executescript.
+- 22: lliga_inscrits.modalitat. Sense ella, les mitjanes de la lliga de tres
+     bandes i les de la de 4 modalitats es barregen en una sola llista, i no
+     són comparables: cadascuna és de la seva modalitat.
 """
 
 from __future__ import annotations
@@ -68,7 +71,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 21
+SCHEMA_VERSION = 22
 
 
 def _read_schema_sql() -> str:
@@ -310,6 +313,25 @@ def _migrate_to_v20(conn: sqlite3.Connection) -> None:
     log.info("→v20: club_plantilles refeta amb player_fcb_id opcional")
 
 
+def _migrate_to_v22(conn: sqlite3.Connection) -> None:
+    """Afegeix lliga_inscrits.modalitat.
+
+    Les files que ja hi són van totes de la lliga de tres bandes, que és
+    l'única que en va publicar jugadors, però no s'omplen aquí: el valor el
+    posa la ingesta, que és qui llegeix el llistat de la federació. Deixar-lo
+    buit fa que una lectura per modalitat no en retorni cap fins que es torni a
+    ingerir, que és millor que endevinar-lo.
+    """
+    if "lliga_inscrits" not in {
+        r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    }:
+        return
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(lliga_inscrits)")}
+    if "modalitat" not in cols:
+        conn.execute("ALTER TABLE lliga_inscrits ADD COLUMN modalitat TEXT NOT NULL DEFAULT ''")
+        log.info("→v22: afegida columna lliga_inscrits.modalitat")
+
+
 def _migrate_to_v19(conn: sqlite3.Connection) -> None:
     """Afegeix club_plantilles.mitjana_font.
 
@@ -413,6 +435,9 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # d'admetre igualment.
     if 1 <= version < 20:
         _migrate_to_v20(conn)
+    # → v22: les mitjanes de dues lligues no es poden barrejar.
+    if 1 <= version < 22:
+        _migrate_to_v22(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

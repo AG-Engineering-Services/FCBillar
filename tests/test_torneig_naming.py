@@ -61,7 +61,7 @@ def test_tipus_open_for_named_trophies(nom):
         "BANDA - HONOR",
         "LLIURE - FEMENÍ",
         "CAMPIONAT CATALUNYA BANDA - 1ª DIVISIÓ",
-        "TRES BANDES - FEMENÍ SANT BOI",        # borderline → campionat (decisió usuari)
+        "TRES BANDES - FEMENÍ SANT BOI",  # borderline → campionat (decisió usuari)
         "TRES BANDES - GP JUNIOR LA UNIÓ CORAL",  # borderline → campionat
         "5 QUILLES",
         "ARTISTIC",

@@ -30,11 +30,20 @@ QUARTA_D = FIXTURES / "calendari_lliga_2627_4a_grupD.pdf"
 
 #: Les catorze jornades de la 2026-27, totes en dissabte.
 DATES = {
-    1: date(2026, 9, 26), 2: date(2026, 10, 10), 3: date(2026, 10, 17),
-    4: date(2026, 11, 7), 5: date(2026, 11, 21), 6: date(2026, 12, 19),
-    7: date(2027, 1, 2), 8: date(2027, 1, 9), 9: date(2027, 1, 30),
-    10: date(2027, 2, 20), 11: date(2027, 2, 27), 12: date(2027, 3, 13),
-    13: date(2027, 3, 20), 14: date(2027, 4, 3),
+    1: date(2026, 9, 26),
+    2: date(2026, 10, 10),
+    3: date(2026, 10, 17),
+    4: date(2026, 11, 7),
+    5: date(2026, 11, 21),
+    6: date(2026, 12, 19),
+    7: date(2027, 1, 2),
+    8: date(2027, 1, 9),
+    9: date(2027, 1, 30),
+    10: date(2027, 2, 20),
+    11: date(2027, 2, 27),
+    12: date(2027, 3, 13),
+    13: date(2027, 3, 20),
+    14: date(2027, 4, 3),
 }
 
 
@@ -115,9 +124,7 @@ def test_la_segona_divisio_porta_les_dates_malament(segona_a) -> None:
     assert len(repetides) == 13, "totes menys la 8a duien la data de la 1a"
 
 
-def test_les_dates_de_referencia_ignoren_el_grup_espatllat(
-    primera_b, quarta_d, segona_a
-) -> None:
+def test_les_dates_de_referencia_ignoren_el_grup_espatllat(primera_b, quarta_d, segona_a) -> None:
     assert dates_de_referencia([primera_b, quarta_d, segona_a]) == DATES
 
 

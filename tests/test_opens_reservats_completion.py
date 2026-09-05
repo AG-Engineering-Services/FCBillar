@@ -79,9 +79,9 @@ def test_reservat_match_key_is_robust_to_abbreviation_and_comma_spacing():
         "GARCIA ALARCÓN,RICARDO", "C.B. MONFORTE"
     ) == cs._reservat_match_key("GARCIA ALARCON, RICARDO", "C.B.MONFORTE")
     # Persones diferents (mateix 1r cognom, club diferent) → claus diferents.
-    assert cs._reservat_match_key(
-        "PÉREZ ZORRILLA, RAFAEL", "C.B.MOLLET"
-    ) != cs._reservat_match_key("PÉREZ DONAIRE, JAVIER", "C.B.CARDONA")
+    assert cs._reservat_match_key("PÉREZ ZORRILLA, RAFAEL", "C.B.MOLLET") != cs._reservat_match_key(
+        "PÉREZ DONAIRE, JAVIER", "C.B.CARDONA"
+    )
 
 
 def test_complete_first_ko_reservats_adds_only_the_missing_one():

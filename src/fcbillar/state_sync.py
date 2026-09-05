@@ -215,9 +215,7 @@ def push(
             except Exception as exc:
                 if not _is_missing(exc):
                     raise
-            cli.upload_file(
-                str(src), bucket, key, ExtraArgs={"Metadata": {"sha256": local_sha}}
-            )
+            cli.upload_file(str(src), bucket, key, ExtraArgs={"Metadata": {"sha256": local_sha}})
         else:
             cli.upload_file(str(src), bucket, key)
             pushed_db = True

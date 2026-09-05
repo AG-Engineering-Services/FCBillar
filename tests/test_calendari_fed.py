@@ -65,9 +65,9 @@ def test_columnes_totes_representades(cal):
     és que el mapatge de COLUMNES ha quedat desplaçat."""
     vistes = {(e.disciplina, e.ambit, e.tipus) for e in cal.esdeveniments}
     for c in COLUMNES:
-        assert (c.disciplina, c.ambit, c.tipus or "") in {
-            (d, a, t or "") for d, a, t in vistes
-        }, f"cap esdeveniment a la columna {c}"
+        assert (c.disciplina, c.ambit, c.tipus or "") in {(d, a, t or "") for d, a, t in vistes}, (
+            f"cap esdeveniment a la columna {c}"
+        )
 
 
 def test_lliga_nacional_reparteix_per_dies(cal):
@@ -209,9 +209,7 @@ def test_ingest_reemplaça_les_baixes(tmp_path):
     r = ingest_calendari(db, pdf_bytes=FIXTURE.read_bytes(), force=True)
     assert any(c.tipus_canvi == "baixa" and c.abans == "INVENTAT" for c in r["canvis"])
     conn = sqlite3.connect(str(db))
-    (n,) = conn.execute(
-        "SELECT count(*) FROM calendari_events WHERE titol = 'INVENTAT'"
-    ).fetchone()
+    (n,) = conn.execute("SELECT count(*) FROM calendari_events WHERE titol = 'INVENTAT'").fetchone()
     assert n == 0
 
 

@@ -108,7 +108,9 @@ def short_divisio_inline(name: str | None) -> str | None:
 
 
 # Prefix redundant dels Campionats de Catalunya (el `tipus` ja marca que ho és).
-_CAMP_PREFIX = re.compile(r"^\s*CAMPIONAT\s+(?:DE\s+)?CATALUNYA\s+(?:HIST[ÒO]RIC\s+)?", re.IGNORECASE)
+_CAMP_PREFIX = re.compile(
+    r"^\s*CAMPIONAT\s+(?:DE\s+)?CATALUNYA\s+(?:HIST[ÒO]RIC\s+)?", re.IGNORECASE
+)
 # Modalitats de carambola, a forma canònica. Quadre abans (porta números); "3/TRES
 # BANDES" abans de BANDA perquè \bBANDA\b no casa amb "BANDES".
 _MODALITATS = (

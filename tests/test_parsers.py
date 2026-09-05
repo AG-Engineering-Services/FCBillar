@@ -88,9 +88,7 @@ def test_parse_ranking_primera_fila(ranking_vigent: str) -> None:
     }
 
 
-def test_parse_ranking_vigent_te_mes_decimals(
-    ranking_vigent: str, ranking_historic: str
-) -> None:
+def test_parse_ranking_vigent_te_mes_decimals(ranking_vigent: str, ranking_historic: str) -> None:
     """El rànquing vigent publica cinc decimals i l'històric només tres."""
     vigent = parse_ranking(ranking_vigent, 124, 1).entries[0].mitjana_general
     historic = parse_ranking(ranking_historic, 123, 6).entries[0].mitjana_general
@@ -112,7 +110,11 @@ def test_index_separa_vigent_i_historial(index_rankings: str) -> None:
     idx = parse_rankings_index(index_rankings)
     assert idx.data_vigent == date(2026, 7, 27)
     assert [(c.modalitat_codi_fcb, c.num_seq) for c in idx.vigents] == [
-        (1, 124), (2, 124), (3, 124), (4, 124), (6, 124)
+        (1, 124),
+        (2, 124),
+        (3, 124),
+        (4, 124),
+        (6, 124),
     ]
     assert all(c.format_url == "llistat" for c in idx.vigents)
     assert len(idx.historial) == 15
@@ -143,8 +145,9 @@ def partides_843() -> str:
 
 def test_partides_reparteix_per_competicio(partides_843: str) -> None:
     res = parse_partides_jugador(partides_843)
-    per_competicio = {c: sum(1 for r in res.rows if r.competicio == c) for c in
-                      {r.competicio for r in res.rows}}
+    per_competicio = {
+        c: sum(1 for r in res.rows if r.competicio == c) for c in {r.competicio for r in res.rows}
+    }
     assert per_competicio == {"LLIGA": 1, "INDIVIDUAL": 14}
     assert len(res.rows) == 15
 
@@ -232,9 +235,7 @@ def test_lliga_partides_llegeix_la_taula_de_partides() -> None:
     prova contra la d'un grup d'individuals, que sí que funciona. El dia que la
     federació arregli el 500 caldrà confirmar-ho amb una pàgina de debò.
     """
-    partides = parse_lliga_partides(
-        fixture("individuals_partides_grup_211_447_799_5100")
-    )
+    partides = parse_lliga_partides(fixture("individuals_partides_grup_211_447_799_5100"))
     # Sis files: cinc partides i el buit que deixa un grup incomplet. A la lliga
     # no hi ha buits —els dos equips presenten jugadors—, o sigui que aquest
     # parser no els filtra; el d'individuals sí.
@@ -270,16 +271,12 @@ def test_individuals_fases_separa_grups_i_eliminatories() -> None:
     grups = [f for f in fases if f.tipus == "grups"]
     ko = [f for f in fases if f.tipus == "ko"]
     assert [f.nom for f in grups] == ["PRE-PRE-PREVIA", "PRE-PREVIA", "PREVIA"]
-    assert [f.nom for f in ko] == [
-        "SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "FINAL"
-    ]
+    assert [f.nom for f in ko] == ["SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "FINAL"]
     assert all(f.torneig_id == 211 for f in fases)
 
 
 def test_individuals_membres_de_grup() -> None:
-    membres = parse_individuals_grups_membership(
-        fixture("individuals_grups_211_447_799")
-    )
+    membres = parse_individuals_grups_membership(fixture("individuals_grups_211_447_799"))
     assert len(membres) == 3
     assert membres[0].jugador_nom == "CALLS SARROCA, JOSEP"
     assert all(m.grup_nom == "Grup A" for m in membres)
@@ -287,9 +284,7 @@ def test_individuals_membres_de_grup() -> None:
 
 def test_individuals_partides_de_grup_descarta_els_buits() -> None:
     """Una fila amb el mateix jugador als dos costats i tot a zero no és partida."""
-    partides = parse_individuals_partides(
-        fixture("individuals_partides_grup_211_447_799_5100")
-    )
+    partides = parse_individuals_partides(fixture("individuals_partides_grup_211_447_799_5100"))
     assert len(partides) == 3  # de sis files, una és un buit i dues no s'han jugat
     assert all(p.local_nom != p.visitant_nom for p in partides)
 

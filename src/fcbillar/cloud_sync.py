@@ -149,6 +149,7 @@ def publish_rankings(
     ]
     club_ids = {c["fcb_id"] for c in clubs}
     counts["clubs"] = _upsert(sb, "clubs", clubs, "fcb_id", prog)
+    counts["clubs_retirats"] = _retira_clubs_fusionats(sb, club_ids, prog)
 
     # 3. players (club_fcb_id null si el club no és a la taula → respecta la FK)
     players = []
@@ -1431,6 +1432,59 @@ def publish_lliga(
         )
     conn.close()
     return counts
+
+
+def _retira_clubs_fusionats(sb, vius: set[str], prog) -> int:
+    """Treu del núvol els clubs que ja no són al cens.
+
+    La publicació de clubs i jugadors només fa upsert, o sigui que el que
+    s'esborra aquí es queda allà per sempre. Es va veure amb els nou duplicats
+    que vam fusionar al setembre del 2026: la pàgina de clubs en seguia
+    ensenyant cinquanta-set, amb «C.B. CANET» al costat de «C.B.CANET DE MAR».
+
+    Només se'n va el que no referencia ningú. Un club amb jugadors, amb
+    classificacions o amb rànquings a sobre no és un duplicat oblidat: és un
+    club que encara es fa servir, i esborrar-lo deixaria aquelles files
+    penjades. Si en queda algun, es diu i no es toca.
+    """
+    try:
+        allà = {r["fcb_id"] for r in (sb.table("clubs").select("fcb_id").execute().data or [])}
+    except Exception as exc:  # noqa: BLE001 — sense la llista no es retira res
+        prog("warn", f"no s'han pogut llegir els clubs del núvol ({exc})")
+        return 0
+
+    sobren = sorted(allà - vius)
+    if not sobren:
+        return 0
+
+    # Qui els referencia. Són poques taules i la llista va explícita: afegir-ne
+    # una de nova ha de ser una decisió, no un descuit.
+    referents = [
+        ("players", "club_fcb_id"),
+        ("lliga_standings", "club_fcb_id"),
+        ("lliga_player_rankings", "club_fcb_id"),
+    ]
+    ocupats: set[str] = set()
+    for taula, columna in referents:
+        try:
+            files = sb.table(taula).select(columna).in_(columna, sobren).execute().data or []
+        except Exception as exc:  # noqa: BLE001
+            prog("warn", f"no s'ha pogut mirar {taula}.{columna} ({exc}); no retiro cap club")
+            return 0
+        ocupats |= {f[columna] for f in files if f.get(columna)}
+
+    lliures = [c for c in sobren if c not in ocupats]
+    if ocupats:
+        prog(
+            "warn",
+            f"{len(ocupats)} clubs sobrants encara referenciats, no els toco: {sorted(ocupats)}",
+        )
+    if not lliures:
+        return 0
+
+    sb.table("clubs").delete().in_("fcb_id", lliures).execute()
+    prog("ok", f"clubs: {len(lliures)} retirats (ja no són al cens)")
+    return len(lliures)
 
 
 def _retira_sobrants(
@@ -4785,6 +4839,23 @@ def publish_calendari(
         if "club_plantilles" in taules
         else []
     )
+    # De qui està fet cada club de debò, que això ho diu la federació. La mitjana
+    # d'aquí és la que ordena els jugadors d'un club a la lliga, i n'hi ha per a
+    # qui no surt al rànquing general. Vegeu `fcbillar.inscrits_lliga`.
+    inscrits_lliga = (
+        [
+            dict(r)
+            for r in conn.execute(
+                "SELECT temporada, lliga_id, lliga, modalitat, club, club_id_extern, "
+                "       jugador, mitjana, fitxatge, posicio "
+                "FROM lliga_inscrits ORDER BY lliga_id, club, posicio"
+            )
+        ]
+        if "lliga_inscrits" in taules
+        else []
+    )
+    for r in inscrits_lliga:
+        r["fitxatge"] = bool(r["fitxatge"])  # SQLite el desa com a 0/1
     conn.close()
 
     # Les dates ISO de SQLite ('2026-09-07') ja són vàlides per a `date` a Postgres;
@@ -4882,10 +4953,31 @@ def publish_calendari(
                 f"club_plantilles no s'ha pogut publicar ({exc}). Si encara no existeix, "
                 f"el SQL per crear-la és a docs/sql/club_plantilles.sql.",
             )
+    n_insc = 0
+    if inscrits_lliga:
+        try:
+            # Es reemplaça lliga a lliga: la taula local ja porta el que se sap de
+            # cadascuna sencera, i qui la federació en tregui ha de marxar d'aquí.
+            n_insc = _publica_reemplaçant(
+                sb,
+                "lliga_inscrits",
+                inscrits_lliga,
+                ("lliga_id", "club", "jugador"),
+                ("lliga_id",),
+                prog,
+                {(r["lliga_id"],) for r in inscrits_lliga},
+            )
+        except Exception as exc:
+            prog(
+                "warn",
+                f"lliga_inscrits no s'ha pogut publicar ({exc}). Si encara no existeix, "
+                f"el SQL per crear-la és a docs/sql/lliga_inscrits.sql.",
+            )
     return {
         "calendari_events": n_ev,
         "calendari_revisions": n_rev,
         "calendari_canvis": n_can,
         "lliga_calendari": n_cal,
         "club_plantilles": n_pla,
+        "lliga_inscrits": n_insc,
     }

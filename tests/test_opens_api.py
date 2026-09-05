@@ -19,8 +19,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 pytestmark = pytest.mark.skipif(
-    not (ROOT / "data" / "fcbillar.db").exists()
-    or not (ROOT / "data" / "fcb_opens.db").exists(),
+    not (ROOT / "data" / "fcbillar.db").exists() or not (ROOT / "data" / "fcb_opens.db").exists(),
     reason="databases not present",
 )
 

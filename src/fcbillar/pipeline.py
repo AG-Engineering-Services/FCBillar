@@ -96,8 +96,7 @@ def fetch_ranking_html(
     if preferred_format in ordre:
         ordre = (preferred_format, *(f for f in ordre if f != preferred_format))
     candidates = [
-        (f, U.ranking_dades(num_seq, modalitat_codi_fcb, f, base=settings.base_url))
-        for f in ordre
+        (f, U.ranking_dades(num_seq, modalitat_codi_fcb, f, base=settings.base_url)) for f in ordre
     ]
     for fmt, url in candidates:
         try:
@@ -208,42 +207,40 @@ def _partides_url(
     format_url: str = "llistat",
 ) -> str:
     vigencia = format_url if format_url in _VIGENCIES else "llistat"
-    return U.ranking_partides(
-        num_seq, modalitat, player_fcb_id, vigencia, base=base_url
-    )
+    return U.ranking_partides(num_seq, modalitat, player_fcb_id, vigencia, base=base_url)
 
 
 def _select_last_15_games(games: list[tuple[date, int | None, int | None]]) -> list[int]:
     """Selecciona els últims 15 games, amb desempat per mitjana si empat de data en frontera 15/16.
-    
+
     Args:
         games: llista de tuples (data, caramboles, entrades) ordenades per data desc.
-    
+
     Returns:
         llista d'índex dels games seleccionats (fins a 15 games).
     """
     if len(games) <= 15:
         return list(range(len(games)))
-    
+
     # Si tenim més de 15 i la 15ena (índex 14) i 16ena (índex 15) són del mateix dia,
     # mantenir la 15ena excepte si la 16ena té millor mitjana.
     selected_idxs = list(range(15))  # indices 0..14 (15 games)
-    
+
     date_15 = games[14][0]
     date_16 = games[15][0]
-    
+
     if date_15 == date_16:
         # Comparar mitjanes (caramboles/entrades)
         car_15, ent_15 = games[14][1], games[14][2]
         car_16, ent_16 = games[15][1], games[15][2]
-        
+
         avg_15 = (car_15 / ent_15) if ent_15 else 0
         avg_16 = (car_16 / ent_16) if ent_16 else 0
-        
+
         if avg_16 > avg_15:
             # Triar la 16ena en comptes de la 15ena
             selected_idxs[14] = 15
-    
+
     return selected_idxs
 
 
@@ -277,8 +274,7 @@ def ingest_partides(
     owner_nom = repo.get_player_nom_by_fcb_id(player_fcb_id)
     if owner_nom is None:
         raise ValueError(
-            f"Player {player_fcb_id} no està a la BD; "
-            f"ingest primer el rànquing on apareix."
+            f"Player {player_fcb_id} no està a la BD; ingest primer el rànquing on apareix."
         )
     format_url = repo.get_ranking_format_url(num_seq, modalitat_codi_fcb)
     if format_url is None:
@@ -297,14 +293,17 @@ def ingest_partides(
     skipped = 0
     links = 0
     new = 0
-    
+
     # Primera passa: construir games i upsertarlos.
     # Recopilarem (data, caramboles_del_jugador, entrades) per filtrar darrers 15.
     games_info: list[tuple[date, Game, int | None, int | None]] = []
-    
+
     for row in parsed.rows:
         game = _build_game_from_raw_row(
-            row, modalitat_codi_fcb, owner_nom, repo,
+            row,
+            modalitat_codi_fcb,
+            owner_nom,
+            repo,
             create_missing_players=create_missing_players,
         )
         if game is None:
@@ -314,21 +313,21 @@ def ingest_partides(
             new += 1
         repo.upsert_game(game)
         upserted += 1
-        
+
         # Obtenim els caramboles del jugador consultat.
         if game.player1_fcb_id == player_fcb_id:
             car_jugador = game.caramboles1
         else:
             car_jugador = game.caramboles2
-        
+
         games_info.append((game.data_partida, game, car_jugador, game.entrades))
-    
+
     # Segona passa: seleccionar darrers 15 games i crear links.
     if games_info:
         # Preparar llista de (data, caramboles, entrades) per al filtre.
         game_stats = [(g[0], g[2], g[3]) for g in games_info]
         selected_idxs = _select_last_15_games(game_stats)
-        
+
         for idx in selected_idxs:
             if idx < len(games_info):
                 _, game, _, _ = games_info[idx]
@@ -511,9 +510,7 @@ def reconcile_ranking_dates(
     return ReconcileDatesResult(changed=changed, dated=dated, not_in_db=not_in_db)
 
 
-def sync_current_rankings(
-    client: ScraperClient, *, settings: Settings | None = None
-) -> SyncResult:
+def sync_current_rankings(client: ScraperClient, *, settings: Settings | None = None) -> SyncResult:
     """Si la home mostra un rànquing nou per a alguna modalitat, l'ingereix."""
     settings = settings or client.settings
     conn = ensure_schema(settings.db_path)
@@ -525,7 +522,10 @@ def sync_current_rankings(
         latest_db = repo.latest_ranking_num_seq(current.modalitat_codi_fcb) or 0
         if current.num_seq > latest_db:
             result = ingest_ranking(
-                client, current.num_seq, current.modalitat_codi_fcb, settings=settings,
+                client,
+                current.num_seq,
+                current.modalitat_codi_fcb,
+                settings=settings,
                 data_pub=home.data_ranking,
             )
             if result is not None:
@@ -571,8 +571,12 @@ def backfill_ranking(
     """
     settings = settings or client.settings
     res = ingest_ranking(
-        client, num_seq, modalitat_codi_fcb, settings=settings,
-        preferred_format=preferred_format, data_pub=data_pub,
+        client,
+        num_seq,
+        modalitat_codi_fcb,
+        settings=settings,
+        preferred_format=preferred_format,
+        data_pub=data_pub,
     )
     if res is None:
         return BackfillResult(False, 0, 0, 0)
@@ -602,9 +606,7 @@ def backfill_ranking(
     total_skip = 0
     for fcb_id, _ in candidates:
         try:
-            r = ingest_partides(
-                client, num_seq, modalitat_codi_fcb, fcb_id, settings=settings
-            )
+            r = ingest_partides(client, num_seq, modalitat_codi_fcb, fcb_id, settings=settings)
             total_up += r.games_upserted
             total_skip += r.games_skipped_missing_opponent
         except Exception as e:
@@ -629,9 +631,7 @@ def backfill_modalitat(
     """Backfill del rànquing actual d'una modalitat (descobert de /jugador/home)."""
     settings = settings or client.settings
     home = discover_current_rankings(client)
-    current = next(
-        (r for r in home.rankings if r.modalitat_codi_fcb == modalitat_codi_fcb), None
-    )
+    current = next((r for r in home.rankings if r.modalitat_codi_fcb == modalitat_codi_fcb), None)
     if current is None:
         raise ValueError(
             f"Modalitat {modalitat_codi_fcb} no apareix als rànquings actuals de la home"
@@ -730,9 +730,7 @@ _EQUIP_PREFIX_NUM_RE = re.compile(r"^\d{1,3}\s+")
 _QUOTES = r"['‘’\"“”]"
 # Exigim espai O cometa abans de la lletra final per no malinterpretar
 # noms que simplement acaben en lletra (BANYOLES, MATADEPERA, etc.).
-_EQUIP_NOM_RE = re.compile(
-    rf"^(.+?)(?:\s+|{_QUOTES}\s*)([ABCDEFGH])\s*{_QUOTES}?\s*$"
-)
+_EQUIP_NOM_RE = re.compile(rf"^(.+?)(?:\s+|{_QUOTES}\s*)([ABCDEFGH])\s*{_QUOTES}?\s*$")
 
 
 def _split_equip_nom(equip_nom: str) -> tuple[str, str]:
@@ -758,9 +756,7 @@ def _derive_temporada(d: date) -> str:
     return f"{d.year - 1}-{d.year}"
 
 
-def _ensure_club_equip(
-    repo: Repository, equip_nom: str
-) -> tuple[str, str, int]:
+def _ensure_club_equip(repo: Repository, equip_nom: str) -> tuple[str, str, int]:
     """Crea/obté el club i l'equip a la BD. Retorna (club_fcb_id, lletra, equip_id).
 
     Si ja existeix un club amb el mateix nom (matching exacte, normalitzat o
@@ -770,9 +766,7 @@ def _ensure_club_equip(
     club_nom, lletra = _split_equip_nom(equip_nom)
     existing_id = repo.resolve_club_id_by_nom(club_nom)
     if existing_id is not None:
-        row = repo.conn.execute(
-            "SELECT fcb_id FROM clubs WHERE id = ?", (existing_id,)
-        ).fetchone()
+        row = repo.conn.execute("SELECT fcb_id FROM clubs WHERE id = ?", (existing_id,)).fetchone()
         club_fcb_id = row[0]
     else:
         # Creem un nou club amb el nom tal com surt a la lliga.
@@ -825,9 +819,7 @@ def ingest_lliga_encontre(
     # _ensure_club_equip resol el club via match exacte / normalitzat / alias,
     # i retorna el club_fcb_id real (que pot diferir del nom variant que ve
     # de la lliga). Usem aquest fcb_id resolt per construir l'Equip.
-    local_club_fcb, local_lletra, local_equip_id = _ensure_club_equip(
-        repo, encontre.equip_local
-    )
+    local_club_fcb, local_lletra, local_equip_id = _ensure_club_equip(repo, encontre.equip_local)
     visitant_club_fcb, visitant_lletra, visitant_equip_id = _ensure_club_equip(
         repo, encontre.equip_visitant
     )
@@ -888,8 +880,12 @@ def ingest_lliga_encontre(
                 _MOD_CODI.get((row.modalitat or "").strip().lower(), modalitat_codi_fcb),
                 competicio_nom,
                 data.isoformat() if data else None,
-                row.local_nom, row.local_caramboles, row.local_serie_major,
-                row.visitant_nom, row.visitant_caramboles, row.visitant_serie_major,
+                row.local_nom,
+                row.local_caramboles,
+                row.local_serie_major,
+                row.visitant_nom,
+                row.visitant_caramboles,
+                row.visitant_serie_major,
                 row.entrades,
             ),
         )
@@ -1102,9 +1098,7 @@ class IngestLligaJornadaResult:
     total_games_skipped: int
 
 
-def _lliga_encontres_url(
-    base_url: str, lliga: int, divisio: int, grup: int, jornada: int
-) -> str:
+def _lliga_encontres_url(base_url: str, lliga: int, divisio: int, grup: int, jornada: int) -> str:
     return U.lligues_encontres(lliga, divisio, grup, jornada, base=base_url)
 
 
@@ -1199,9 +1193,7 @@ def import_clubs_oficials(
     repo = Repository(conn)
     for c in clubs:
         repo.upsert_club(Club(fcb_id=c.nom, nom=c.nom))
-    return ImportClubsResult(
-        imported=len(clubs), list_of_names=[c.nom for c in clubs]
-    )
+    return ImportClubsResult(imported=len(clubs), list_of_names=[c.nom for c in clubs])
 
 
 @dataclass
@@ -1222,9 +1214,7 @@ def _lliga_grups_url(base_url: str, lliga_id: int, divisio_id: int) -> str:
     return U.lligues_grups(lliga_id, divisio_id, base=base_url)
 
 
-def discover_lliga(
-    client: ScraperClient, lliga_id: int, *, depth: int = 2
-) -> LligaTree:
+def discover_lliga(client: ScraperClient, lliga_id: int, *, depth: int = 2) -> LligaTree:
     """Descobreix l'estructura d'una lliga sense ingerir res.
 
     `depth` controla quants nivells es descarreguen:
@@ -1247,9 +1237,7 @@ def discover_lliga(
                     html = client.fetch_html(
                         _lliga_jornades_url(base_url, lliga_id, div.divisio_id, grup.grup_id)
                     )
-                    jornades_by_grup[(div.divisio_id, grup.grup_id)] = parse_lliga_jornades(
-                        html
-                    )
+                    jornades_by_grup[(div.divisio_id, grup.grup_id)] = parse_lliga_jornades(html)
     return LligaTree(
         lliga_id=lliga_id,
         divisions=divisions,
@@ -1267,9 +1255,7 @@ class IngestLligaGrupResult:
     total_games_skipped: int
 
 
-def _lliga_jornades_url(
-    base_url: str, lliga: int, divisio: int, grup: int
-) -> str:
+def _lliga_jornades_url(base_url: str, lliga: int, divisio: int, grup: int) -> str:
     return U.lligues_jornades(lliga, divisio, grup, base=base_url)
 
 
@@ -1415,9 +1401,7 @@ def import_temporada(
     )
 
 
-def find_club_grups(
-    repo: Repository, club_fcb_id: str
-) -> list[tuple[int, int, int]]:
+def find_club_grups(repo: Repository, club_fcb_id: str) -> list[tuple[int, int, int]]:
     """Llista (lliga_id, divisio_id, grup_id) on hi ha equip d'un club.
 
     Requereix que prèviament s'hagi fet ingest dels grups de lliga amb
@@ -1440,9 +1424,7 @@ def find_club_grups(
     return [(r[0], r[1], r[2]) for r in rows]
 
 
-def find_club_players(
-    repo: Repository, club_fcb_id: str
-) -> list[tuple[str, str]]:
+def find_club_players(repo: Repository, club_fcb_id: str) -> list[tuple[str, str]]:
     """Llista (fcb_id, nom) dels jugadors que han jugat amb equip d'aquest club.
 
     Es deriva dels games (no de players.club_id, que pot estar buit).
@@ -1516,6 +1498,7 @@ def ingest_individuals_temporada(
     if temporada_nom is None:
         # Per a "current", agafem la temporada actual del context (deriva de data avui).
         from datetime import date as _date
+
         today = _date.today()
         if today.month >= 8:
             temporada_nom = f"{today.year}-{today.year + 1}"
@@ -1662,8 +1645,9 @@ def ingest_individuals_all_temporades(
     current = _current_temporada_label()
     seasons = [s for s in discover_individual_seasons(client) if s != current]
     targets: list[str | None] = [None, *seasons]  # None = temporada en curs
-    log.info("Individuals històric: %d temporades (actual + %d passades)",
-             len(targets), len(seasons))
+    log.info(
+        "Individuals històric: %d temporades (actual + %d passades)", len(targets), len(seasons)
+    )
 
     processed = 0
     failed = 0
@@ -1755,24 +1739,41 @@ def ingest_copa_edicio(
 
             for row in data.classificacio:
                 repo.upsert_copa_classificacio(
-                    edicio_id=edicio_id, jornada=jor.jornada, grup_id=g.grup_id,
-                    grup_nom=grup_nom, posicio=row.posicio, equip=row.equip,
-                    punts=row.punts, parcials=row.parcials, mitjana=row.mitjana,
+                    edicio_id=edicio_id,
+                    jornada=jor.jornada,
+                    grup_id=g.grup_id,
+                    grup_nom=grup_nom,
+                    posicio=row.posicio,
+                    equip=row.equip,
+                    punts=row.punts,
+                    parcials=row.parcials,
+                    mitjana=row.mitjana,
                 )
 
             for enc in data.encontres:
                 enc_id = repo.upsert_copa_encontre(
-                    edicio_id=edicio_id, jornada=jor.jornada, grup_id=g.grup_id,
-                    grup_nom=grup_nom, enc_id_extern=enc.enc_id_extern,
-                    team_a_extern=enc.team_a_extern, team_b_extern=enc.team_b_extern,
-                    equip_local=enc.equip_local, equip_visitant=enc.equip_visitant,
-                    p_match_local=enc.p_match_local, p_match_visitant=enc.p_match_visitant,
+                    edicio_id=edicio_id,
+                    jornada=jor.jornada,
+                    grup_id=g.grup_id,
+                    grup_nom=grup_nom,
+                    enc_id_extern=enc.enc_id_extern,
+                    team_a_extern=enc.team_a_extern,
+                    team_b_extern=enc.team_b_extern,
+                    equip_local=enc.equip_local,
+                    equip_visitant=enc.equip_visitant,
+                    p_match_local=enc.p_match_local,
+                    p_match_visitant=enc.p_match_visitant,
                 )
                 n_enc += 1
                 phtml = client.fetch_html(
                     U.copa_partides_grup(
-                        edicio_id, jor.jornada, g.grup_id, enc.enc_id_extern,
-                        enc.team_a_extern, enc.team_b_extern, base=base,
+                        edicio_id,
+                        jor.jornada,
+                        g.grup_id,
+                        enc.enc_id_extern,
+                        enc.team_a_extern,
+                        enc.team_b_extern,
+                        base=base,
                     ),
                     use_cache=use_cache,
                 )
@@ -1781,18 +1782,23 @@ def ingest_copa_edicio(
                     enc_id,
                     [
                         (
-                            p.ordre, p.local_nom, p.local_caramboles, p.local_serie,
-                            p.visitant_nom, p.visitant_caramboles, p.visitant_serie,
-                            p.entrades, p.punts_local, p.punts_visitant,
+                            p.ordre,
+                            p.local_nom,
+                            p.local_caramboles,
+                            p.local_serie,
+                            p.visitant_nom,
+                            p.visitant_caramboles,
+                            p.visitant_serie,
+                            p.entrades,
+                            p.punts_local,
+                            p.punts_visitant,
                         )
                         for p in partides
                     ],
                 )
                 n_part += len(partides)
 
-    return IngestCopaResult(
-        jornades=n_jor, grups=n_grups, encontres=n_enc, partides=n_part
-    )
+    return IngestCopaResult(jornades=n_jor, grups=n_grups, encontres=n_enc, partides=n_part)
 
 
 def run_status(settings: Settings | None = None) -> dict[str, int]:

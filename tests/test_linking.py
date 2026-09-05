@@ -13,8 +13,15 @@ from fcbillar.linking import (
 
 def _g(**kw) -> GameRow:
     base = dict(
-        id="g", modalitat_id=1, player1_id=1, player2_id=2,
-        caramboles1=40, caramboles2=30, serie_max1=5, serie_max2=3, entrades=34,
+        id="g",
+        modalitat_id=1,
+        player1_id=1,
+        player2_id=2,
+        caramboles1=40,
+        caramboles2=30,
+        serie_max1=5,
+        serie_max2=3,
+        entrades=34,
     )
     base.update(kw)
     return GameRow(**base)
@@ -27,7 +34,10 @@ def test_normalize_name_strips_accents_and_case() -> None:
 
 def test_match_unique_by_caramboles_and_entrades() -> None:
     hits = match_partida_to_games(
-        modalitat_id=1, caramboles=(30, 40), entrades=34, serie=(5, 3),
+        modalitat_id=1,
+        caramboles=(30, 40),
+        entrades=34,
+        serie=(5, 3),
         candidates=[_g(), _g(id="other", caramboles1=40, caramboles2=20)],
     )
     assert [h.id for h in hits] == ["g"]
@@ -35,7 +45,10 @@ def test_match_unique_by_caramboles_and_entrades() -> None:
 
 def test_match_filters_by_modality() -> None:
     hits = match_partida_to_games(
-        modalitat_id=2, caramboles=(30, 40), entrades=34, serie=(5, 3),
+        modalitat_id=2,
+        caramboles=(30, 40),
+        entrades=34,
+        serie=(5, 3),
         candidates=[_g(modalitat_id=1)],
     )
     assert hits == []
@@ -43,7 +56,10 @@ def test_match_filters_by_modality() -> None:
 
 def test_match_unknown_modality_does_not_filter() -> None:
     hits = match_partida_to_games(
-        modalitat_id=None, caramboles=(30, 40), entrades=34, serie=(5, 3),
+        modalitat_id=None,
+        caramboles=(30, 40),
+        entrades=34,
+        serie=(5, 3),
         candidates=[_g(modalitat_id=4)],
     )
     assert len(hits) == 1
@@ -51,7 +67,10 @@ def test_match_unknown_modality_does_not_filter() -> None:
 
 def test_match_entrades_mismatch_excluded() -> None:
     hits = match_partida_to_games(
-        modalitat_id=1, caramboles=(30, 40), entrades=99, serie=(5, 3),
+        modalitat_id=1,
+        caramboles=(30, 40),
+        entrades=99,
+        serie=(5, 3),
         candidates=[_g(entrades=34)],
     )
     assert hits == []
@@ -61,7 +80,10 @@ def test_match_serie_breaks_ties() -> None:
     a = _g(id="a", serie_max1=5, serie_max2=3)
     b = _g(id="b", serie_max1=7, serie_max2=2)
     hits = match_partida_to_games(
-        modalitat_id=1, caramboles=(30, 40), entrades=34, serie=(7, 2),
+        modalitat_id=1,
+        caramboles=(30, 40),
+        entrades=34,
+        serie=(7, 2),
         candidates=[a, b],
     )
     assert [h.id for h in hits] == ["b"]
@@ -72,13 +94,14 @@ def _setup_db(tmp_path):
     conn.execute("INSERT INTO temporades(id, nom) VALUES (1, '2023-2024')")
     conn.executemany(
         "INSERT INTO players(id, fcb_id, nom) VALUES (?,?,?)",
-        [(1, "p1", "PASTOR RIVAS, MANUEL"), (2, "p2", "MORENO CORTÉS, ARMAND"),
-         (3, "p3", "MAS CANADELL, JOSEP")],
+        [
+            (1, "p1", "PASTOR RIVAS, MANUEL"),
+            (2, "p2", "MORENO CORTÉS, ARMAND"),
+            (3, "p3", "MAS CANADELL, JOSEP"),
+        ],
     )
     # competició INDIVIDUAL (modalitat 1 = Tres bandes, ja sembrada per schema.sql)
-    conn.execute(
-        "INSERT INTO competicions(id, nom, modalitat_id) VALUES (100, 'INDIVIDUAL', 1)"
-    )
+    conn.execute("INSERT INTO competicions(id, nom, modalitat_id) VALUES (100, 'INDIVIDUAL', 1)")
     conn.execute(
         "INSERT INTO torneigs_individuals(id, torneig_id_extern, divisio_id_extern, nom, modalitat_id, temporada_id)"
         " VALUES (500, 2, 2, 'TRES BANDES - 1A DIVISIÓ', 1, 1)"
@@ -126,7 +149,10 @@ def test_link_individual_games_endtoend(tmp_path) -> None:
     assert row["torneig_id"] == 500
     assert row["torneig_fase_id"] == 66
     assert row["torneig_link_method"] == "exacte"
-    assert conn.execute("SELECT torneig_id FROM games WHERE id='nomatch'").fetchone()["torneig_id"] is None
+    assert (
+        conn.execute("SELECT torneig_id FROM games WHERE id='nomatch'").fetchone()["torneig_id"]
+        is None
+    )
 
 
 def test_conflict_resolved_by_season(tmp_path) -> None:
@@ -149,12 +175,14 @@ def test_conflict_resolved_by_season(tmp_path) -> None:
     conn.execute(
         "INSERT INTO torneig_partides(torneig_id_extern, divisio_id_extern, fase_id,"
         " player1_nom, caramboles1, serie1, punts1, player2_nom, caramboles2, serie2, punts2, entrades)"
-        " VALUES (2,2,66,?,?,?,?,?,?,?,?,?)", base,
+        " VALUES (2,2,66,?,?,?,?,?,?,?,?,?)",
+        base,
     )
     conn.execute(
         "INSERT INTO torneig_partides(torneig_id_extern, divisio_id_extern, fase_id,"
         " player1_nom, caramboles1, serie1, punts1, player2_nom, caramboles2, serie2, punts2, entrades)"
-        " VALUES (9,9,77,?,?,?,?,?,?,?,?,?)", base,
+        " VALUES (9,9,77,?,?,?,?,?,?,?,?,?)",
+        base,
     )
     link_individual_games(conn)
     assert conn.execute("SELECT torneig_id FROM games WHERE id='x'").fetchone()["torneig_id"] == 501

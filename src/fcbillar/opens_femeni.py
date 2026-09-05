@@ -139,7 +139,13 @@ def femeni_ranking_rows(conn: sqlite3.Connection) -> list[dict]:
         if tid not in id_set:
             continue
         d = gdate.get(
-            _sig(r["player1_nom"], r["caramboles1"], r["player2_nom"], r["caramboles2"], r["entrades"])
+            _sig(
+                r["player1_nom"],
+                r["caramboles1"],
+                r["player2_nom"],
+                r["caramboles2"],
+                r["entrades"],
+            )
         )
         if d and d > open_date[tid]:
             open_date[tid] = d
@@ -183,15 +189,18 @@ def femeni_ranking_rows(conn: sqlite3.Connection) -> list[dict]:
 
     def _ddet(oid, pos, pp):
         return {
-            "open": onom.get(oid), "temp": tnom.get(oid),
-            "data": open_date.get(oid) or None, "pos": pos, "punts": pp,
+            "open": onom.get(oid),
+            "temp": tnom.get(oid),
+            "data": open_date.get(oid) or None,
+            "pos": pos,
+            "punts": pp,
         }
 
     club_fallback = club_master(conn)  # vegeu opens_club: la FCB hi posa "Cap"
 
     rows: list[dict] = []
     for i in range(1, len(ordered) + 1):
-        window = ordered[max(0, i - WINDOW):i]
+        window = ordered[max(0, i - WINDOW) : i]
         pp_player: dict = defaultdict(dict)
         info: dict = {}
         for oid in window:
@@ -217,11 +226,20 @@ def femeni_ranking_rows(conn: sqlite3.Connection) -> list[dict]:
         # Desempat: punts ↓, millor prova ↓, mitjana 3b ↓, nom ↑
         rr.sort(key=lambda x: (-x[3], -x[6], -mitj.get(x[0], 0.0), x[1] or ""))
         for posicio, (fcb, nom, club, total, njug, det, _maxs) in enumerate(rr, start=1):
-            rows.append({
-                "genere": "femeni", "ronda": i, "ronda_nom": onom.get(last),
-                "ronda_data": open_date.get(last) or None, "ronda_temp": tnom.get(last),
-                "posicio": posicio, "player_fcb_id": fcb, "jugador": nom,
-                "club": club or club_fallback.get(fcb),
-                "opens_jugats": njug, "punts": total, "detall": det,
-            })
+            rows.append(
+                {
+                    "genere": "femeni",
+                    "ronda": i,
+                    "ronda_nom": onom.get(last),
+                    "ronda_data": open_date.get(last) or None,
+                    "ronda_temp": tnom.get(last),
+                    "posicio": posicio,
+                    "player_fcb_id": fcb,
+                    "jugador": nom,
+                    "club": club or club_fallback.get(fcb),
+                    "opens_jugats": njug,
+                    "punts": total,
+                    "detall": det,
+                }
+            )
     return rows

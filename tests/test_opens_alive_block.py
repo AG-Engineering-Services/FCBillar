@@ -28,9 +28,16 @@ from fcb_opens.scraper.open_live import (
 
 def _played(a: str, b: str) -> MatchResult:
     return MatchResult(
-        player_a=a, player_b=b, punts_a=2, punts_b=0,
-        caramboles_a=30, caramboles_b=20, serie_major_a=3, serie_major_b=2,
-        entrades=40, arbitre=None,
+        player_a=a,
+        player_b=b,
+        punts_a=2,
+        punts_b=0,
+        caramboles_a=30,
+        caramboles_b=20,
+        serie_major_a=3,
+        serie_major_b=2,
+        entrades=40,
+        arbitre=None,
     )
 
 
@@ -48,8 +55,15 @@ def _state(groups: list[Group], reservats: list[tuple[str, str]] | None = None) 
     so ko_size=8 and the PRÈVIA losers land at 9+. `reservats` is a list of
     (name, club) seeded directly into the KO."""
     quals = tuple(
-        ProvisionalQualifier(g.label, 1, g.standings[0].player_name, "",
-                             g.standings[0].punts, g.standings[0].mitjana, 0)
+        ProvisionalQualifier(
+            g.label,
+            1,
+            g.standings[0].player_name,
+            "",
+            g.standings[0].punts,
+            g.standings[0].mitjana,
+            0,
+        )
         for g in groups
     )
     previa = PhaseDetail(
@@ -58,8 +72,9 @@ def _state(groups: list[Group], reservats: list[tuple[str, str]] | None = None) 
         provisional_qualifiers=quals,
     )
     quarts = PhaseDetail(ref=PhaseRef(label="QUARTS", kind="ko", url=""))
-    struct = OpenStructure(division_id=1, name="OPEN TEST", phase_id=1,
-                           phases=(previa.ref, quarts.ref))
+    struct = OpenStructure(
+        division_id=1, name="OPEN TEST", phase_id=1, phases=(previa.ref, quarts.ref)
+    )
     res = tuple(GroupStanding(n, c, 0, 0.0) for n, c in (reservats or []))
     return OpenLiveState(structure=struct, phases=[previa, quarts], reservats=res)
 
@@ -89,8 +104,7 @@ def test_reservats_first_by_seeding_then_previa_by_qualification():
     state = _state(_groups(), reservats=[("RES_X", "CX"), ("RES_Y", "CY")])
     # Seeding: RES_Y millor que RES_X (i, per provar que NO afecta la prèvia,
     # els winners reben un seeding contrari al seu ordre de classificació).
-    state.seeding = {"RES_Y": 2, "RES_X": 5,
-                     "WIN_C": 1, "WIN_A": 3, "WIN_B": 7, "WIN_D": 9}
+    state.seeding = {"RES_Y": 2, "RES_X": 5, "WIN_C": 1, "WIN_A": 3, "WIN_B": 7, "WIN_D": 9}
     rows = compute_open_classification(state)
     alive = sorted([r for r in rows if r.round_label == "EN JOC"], key=lambda r: r.position)
     order = [r.player_name for r in alive]
@@ -105,8 +119,11 @@ def test_without_reservats_previa_is_ordered_by_qualification_not_seeding():
     state = _state(_groups())
     # Seeding contrari a l'ordre de mitjana: ha de guanyar la classificació.
     state.seeding = {"WIN_A": 1, "WIN_B": 2, "WIN_C": 3, "WIN_D": 4}
-    order = [r.player_name for r in sorted(compute_open_classification(state),
-             key=lambda r: r.position) if r.round_label == "EN JOC"]
+    order = [
+        r.player_name
+        for r in sorted(compute_open_classification(state), key=lambda r: r.position)
+        if r.round_label == "EN JOC"
+    ]
     assert order == ["WIN_D", "WIN_B", "WIN_A", "WIN_C"]  # mitjana DESC, no seeding
 
 
@@ -135,14 +152,21 @@ def test_walkover_does_not_count_as_a_played_match_in_the_totals():
         ref=state.phases[1].ref,
         ko_matches=(
             MatchResult(
-                player_a="WIN_A", player_b="WIN_B", punts_a=2, punts_b=0,
-                caramboles_a=0, caramboles_b=0, serie_major_a=0, serie_major_b=0,
-                entrades=0, arbitre=None,
+                player_a="WIN_A",
+                player_b="WIN_B",
+                punts_a=2,
+                punts_b=0,
+                caramboles_a=0,
+                caramboles_b=0,
+                serie_major_a=0,
+                serie_major_b=0,
+                entrades=0,
+                arbitre=None,
             ),
         ),
     )
     rows = {r.player_name: r for r in compute_open_classification(state)}
-    assert rows["WIN_A"].partides == 2          # només les dues de la prèvia
+    assert rows["WIN_A"].partides == 2  # només les dues de la prèvia
     assert rows["WIN_A"].entrades == 80
     assert rows["WIN_B"].partides == 2
 
@@ -157,9 +181,9 @@ def test_eliminated_reservat_keeps_its_club():
         ko_matches=(_played("WIN_A", "RES_X"),),
     )
     rows = {r.player_name: r for r in compute_open_classification(state)}
-    assert rows["RES_X"].round_label == "QUARTS"    # ja eliminat
+    assert rows["RES_X"].round_label == "QUARTS"  # ja eliminat
     assert rows["RES_X"].club == "CX"
-    assert rows["RES_Y"].club == "CY"               # encara viu
+    assert rows["RES_Y"].club == "CY"  # encara viu
 
 
 def test_walkover_loser_is_eliminated_not_still_in_competition():
@@ -174,9 +198,16 @@ def test_walkover_loser_is_eliminated_not_still_in_competition():
             _played("WIN_D", "WIN_C"),
             # WIN_A guanya per incompareixença de WIN_B: 2-0 i tot a zero.
             MatchResult(
-                player_a="WIN_A", player_b="WIN_B", punts_a=2, punts_b=0,
-                caramboles_a=0, caramboles_b=0, serie_major_a=0, serie_major_b=0,
-                entrades=0, arbitre=None,
+                player_a="WIN_A",
+                player_b="WIN_B",
+                punts_a=2,
+                punts_b=0,
+                caramboles_a=0,
+                caramboles_b=0,
+                serie_major_a=0,
+                serie_major_b=0,
+                entrades=0,
+                arbitre=None,
             ),
         ),
     )

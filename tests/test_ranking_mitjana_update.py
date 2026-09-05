@@ -25,7 +25,9 @@ def repo() -> Repository:
 
 def test_mitjana_update_only_with_new_games(repo) -> None:
     # Crea un rànquing
-    rid = repo.upsert_ranking(Ranking(num_seq=999, modalitat_codi_fcb=2, url="u", format_url="datahome"))
+    rid = repo.upsert_ranking(
+        Ranking(num_seq=999, modalitat_codi_fcb=2, url="u", format_url="datahome")
+    )
 
     # Create common opponent
     repo.upsert_player(Player(fcb_id="9999", nom="OPPONENT"))
@@ -67,7 +69,12 @@ def test_mitjana_update_only_with_new_games(repo) -> None:
             )
             repo.upsert_game(g)
             repo.link_game_to_ranking(
-                RankingGameLink(ranking_num_seq=999, ranking_modalitat=2, game_id=g.id_natural, player_fcb_id_origen=fcb)
+                RankingGameLink(
+                    ranking_num_seq=999,
+                    ranking_modalitat=2,
+                    game_id=g.id_natural,
+                    player_fcb_id_origen=fcb,
+                )
             )
 
     # Ara fem que alguns jugadors tinguin partides noves (2 més)
@@ -86,7 +93,12 @@ def test_mitjana_update_only_with_new_games(repo) -> None:
                 )
                 repo.upsert_game(g)
                 repo.link_game_to_ranking(
-                    RankingGameLink(ranking_num_seq=999, ranking_modalitat=2, game_id=g.id_natural, player_fcb_id_origen=fcb)
+                    RankingGameLink(
+                        ranking_num_seq=999,
+                        ranking_modalitat=2,
+                        game_id=g.id_natural,
+                        player_fcb_id_origen=fcb,
+                    )
                 )
             updated_players.append((fcb, nom))
 

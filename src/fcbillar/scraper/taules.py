@@ -231,8 +231,4 @@ def taules_amb(html_o_taules: str | list[Taula], *columnes: str) -> list[Taula]:
     """Totes les taules que tenen les columnes demanades."""
     llista = taules(html_o_taules) if isinstance(html_o_taules, str) else html_o_taules
     volgudes = [normalitza(c) for c in columnes]
-    return [
-        t
-        for t in llista
-        if all(c in {normalitza(h) for h in t.capcaleres} for c in volgudes)
-    ]
+    return [t for t in llista if all(c in {normalitza(h) for h in t.capcaleres} for c in volgudes)]

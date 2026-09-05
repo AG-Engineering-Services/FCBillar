@@ -29,8 +29,7 @@ PDF = (
 
 # The RÀNQUING INICIAL PDF the user provided (repo root, not committed).
 RANKING_PDF = (
-    Path(__file__).resolve().parents[1]
-    / "RANKING INICIAL XIV OPEN LES SANTES DE MATARO.pdf"
+    Path(__file__).resolve().parents[1] / "RANKING INICIAL XIV OPEN LES SANTES DE MATARO.pdf"
 )
 
 needs_inscrits = pytest.mark.skipif(not PDF.exists(), reason="inscrits PDF not present")
@@ -230,4 +229,8 @@ def test_build_projection_from_seeded_uses_posicio_verbatim():
     assert placed == list(range(17, 99))
     # The deepest group (PPP) still gets the last three seeds.
     ppp = next(p for p in proj["phases"] if p["name"] == "PPP")
-    assert [p["seed_order"] for p in ppp["groups"][0]["players"] if p["kind"] == "player"] == [96, 97, 98]
+    assert [p["seed_order"] for p in ppp["groups"][0]["players"] if p["kind"] == "player"] == [
+        96,
+        97,
+        98,
+    ]

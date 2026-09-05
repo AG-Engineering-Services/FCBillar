@@ -20,15 +20,24 @@ from fcb_opens.scraper.open_live import (
 
 def _match(a, b, ca, cb, sma=0, smb=0, ent=50):
     return MatchResult(
-        player_a=a, player_b=b, punts_a=0, punts_b=0,
-        caramboles_a=ca, caramboles_b=cb, serie_major_a=sma, serie_major_b=smb,
-        entrades=ent, arbitre=None,
+        player_a=a,
+        player_b=b,
+        punts_a=0,
+        punts_b=0,
+        caramboles_a=ca,
+        caramboles_b=cb,
+        serie_major_a=sma,
+        serie_major_b=smb,
+        entrades=ent,
+        arbitre=None,
     )
 
 
 def _group(label, standings, matches):
     return Group(
-        label=label, url="", venue=None,
+        label=label,
+        url="",
+        venue=None,
         standings=tuple(GroupStanding(*s) for s in standings),
         matches=tuple(matches),
     )
@@ -50,8 +59,8 @@ def test_rank_winners_serie_major_tiebreak():
 def test_rank_winners_full_order():
     ws = [
         RoundWinner("A", "", "g1", 4, 0.5, 3),
-        RoundWinner("B", "", "g2", 4, 0.9, 2),   # més mitjana → primer
-        RoundWinner("C", "", "g3", 2, 1.5, 9),   # menys punts → últim tot i mitjana alta
+        RoundWinner("B", "", "g2", 4, 0.9, 2),  # més mitjana → primer
+        RoundWinner("C", "", "g3", 2, 1.5, 9),  # menys punts → últim tot i mitjana alta
     ]
     assert [w.player_name for w in rank_winners(ws)] == ["B", "A", "C"]
 
@@ -76,7 +85,8 @@ def test_group_closed_all_played():
 
 def test_group_open_pending_match():
     g = _group(
-        "Grup A", [("X", "", 2, 1.0)],
+        "Grup A",
+        [("X", "", 2, 1.0)],
         [_match("X", "Y", 25, 10), MatchResult("X", "Z", 0, 0, 0, 0, 0, 0, None, None)],
     )
     assert group_is_closed(g) is False
@@ -85,7 +95,8 @@ def test_group_open_pending_match():
 def test_group_closed_no_show():
     # Grup de 3 amb Z no presentat: X i Y juguen dos cops → tancat amb 2 partides.
     g = _group(
-        "Grup A", [("X", "", 4, 1.0)],
+        "Grup A",
+        [("X", "", 4, 1.0)],
         [_match("X", "Y", 25, 10), _match("Y", "X", 12, 25)],
     )
     assert group_is_closed(g) is True
@@ -99,7 +110,8 @@ def test_group_closed_no_show():
 def test_secured_winners_only_closed_regular():
     closed = _group("Grup A", [("WIN_A", "CB", 4, 1.2)], [_match("WIN_A", "L", 25, 8, sma=7)])
     open_g = _group(
-        "Grup B", [("LEAD_B", "", 2, 0.9)],
+        "Grup B",
+        [("LEAD_B", "", 2, 0.9)],
         [_match("LEAD_B", "L2", 25, 5), MatchResult("LEAD_B", "L3", 0, 0, 0, 0, 0, 0, None, None)],
     )
     reservats = _group("Grup ww", [("R", "", 0, 0.0)], [])  # no regular
@@ -126,14 +138,20 @@ def test_resolve_fills_placeholders_by_rank():
     ]
     ranked = rank_winners(winners)
     groups = [
-        _proj_group("A", [
-            {"slot": 0, "kind": "player", "player_name": "SEED1"},
-            {"slot": 1, "kind": "winner", "placeholder": "2-PP", "label": "Guanyador ..."},
-        ]),
-        _proj_group("B", [
-            {"slot": 0, "kind": "winner", "placeholder": "1-PP", "label": "Guanyador ..."},
-            {"slot": 1, "kind": "winner", "placeholder": "3-PP", "label": "Guanyador ..."},
-        ]),
+        _proj_group(
+            "A",
+            [
+                {"slot": 0, "kind": "player", "player_name": "SEED1"},
+                {"slot": 1, "kind": "winner", "placeholder": "2-PP", "label": "Guanyador ..."},
+            ],
+        ),
+        _proj_group(
+            "B",
+            [
+                {"slot": 0, "kind": "winner", "placeholder": "1-PP", "label": "Guanyador ..."},
+                {"slot": 1, "kind": "winner", "placeholder": "3-PP", "label": "Guanyador ..."},
+            ],
+        ),
     ]
     out, nres, npend = resolve_next_round(groups, ranked, "PP")
     assert (nres, npend) == (2, 1)
@@ -148,9 +166,14 @@ def test_resolve_fills_placeholders_by_rank():
 
 def test_resolve_ignores_other_phase_placeholders():
     ranked = [RoundWinner("W", "", "g", 4, 1.0, 5)]
-    groups = [_proj_group("Q", [
-        {"slot": 0, "kind": "winner", "placeholder": "1-PPP", "label": "..."},  # altra fase
-    ])]
+    groups = [
+        _proj_group(
+            "Q",
+            [
+                {"slot": 0, "kind": "winner", "placeholder": "1-PPP", "label": "..."},  # altra fase
+            ],
+        )
+    ]
     out, nres, npend = resolve_next_round(groups, ranked, "PP")
     assert (nres, npend) == (0, 0)
     assert out[0]["players"][0]["kind"] == "winner"  # intacte

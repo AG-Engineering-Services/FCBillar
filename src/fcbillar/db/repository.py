@@ -43,9 +43,7 @@ class Repository:
         return cur.fetchone()[0]
 
     def get_club_id_by_fcb_id(self, fcb_id: str) -> int | None:
-        row = self.conn.execute(
-            "SELECT id FROM clubs WHERE fcb_id = ?", (fcb_id,)
-        ).fetchone()
+        row = self.conn.execute("SELECT id FROM clubs WHERE fcb_id = ?", (fcb_id,)).fetchone()
         return row[0] if row else None
 
     @staticmethod
@@ -72,9 +70,7 @@ class Repository:
         Retorna None si cap funciona.
         """
         # 1. Exact
-        row = self.conn.execute(
-            "SELECT id FROM clubs WHERE fcb_id = ?", (nom,)
-        ).fetchone()
+        row = self.conn.execute("SELECT id FROM clubs WHERE fcb_id = ?", (nom,)).fetchone()
         if row:
             return row[0]
         # 2. Normalitzat
@@ -337,9 +333,7 @@ class Repository:
         return cur.fetchone()[0]
 
     def get_player_id_by_fcb_id(self, fcb_id: str) -> int | None:
-        row = self.conn.execute(
-            "SELECT id FROM players WHERE fcb_id = ?", (fcb_id,)
-        ).fetchone()
+        row = self.conn.execute("SELECT id FROM players WHERE fcb_id = ?", (fcb_id,)).fetchone()
         return row[0] if row else None
 
     def get_player_fcb_id_by_nom(self, nom: str) -> str | None:
@@ -348,17 +342,13 @@ class Repository:
         Si hi ha homònims, retornem None per evitar associar partides incorrectes
         (cas a investigar amb dades reals).
         """
-        rows = self.conn.execute(
-            "SELECT fcb_id FROM players WHERE nom = ?", (nom,)
-        ).fetchall()
+        rows = self.conn.execute("SELECT fcb_id FROM players WHERE nom = ?", (nom,)).fetchall()
         if len(rows) == 1:
             return rows[0][0]
         return None
 
     def get_player_nom_by_fcb_id(self, fcb_id: str) -> str | None:
-        row = self.conn.execute(
-            "SELECT nom FROM players WHERE fcb_id = ?", (fcb_id,)
-        ).fetchone()
+        row = self.conn.execute("SELECT nom FROM players WHERE fcb_id = ?", (fcb_id,)).fetchone()
         return row[0] if row else None
 
     def set_seguiment(self, fcb_id: str, seguiment: bool) -> bool:
@@ -517,8 +507,7 @@ class Repository:
 
     def game_exists(self, game_id: str) -> bool:
         return (
-            self.conn.execute("SELECT 1 FROM games WHERE id = ?", (game_id,)).fetchone()
-            is not None
+            self.conn.execute("SELECT 1 FROM games WHERE id = ?", (game_id,)).fetchone() is not None
         )
 
     def upsert_game(self, game: Game) -> str:
@@ -532,7 +521,9 @@ class Repository:
         competicio_id = self.upsert_competicio(
             Competicio(nom=game.competicio_nom, modalitat_codi_fcb=game.modalitat_codi_fcb)
         )
-        guanyador_id = self.get_player_id_by_fcb_id(game.guanyador_fcb_id) if game.guanyador_fcb_id else None
+        guanyador_id = (
+            self.get_player_id_by_fcb_id(game.guanyador_fcb_id) if game.guanyador_fcb_id else None
+        )
         extras = json.dumps(game.extras, ensure_ascii=False) if game.extras else None
         self.conn.execute(
             """
@@ -588,7 +579,9 @@ class Repository:
         )
         return game.id_natural
 
-    def enrich_game_by_signature(self, game: Game, season_range: tuple[str, str] | None = None) -> bool:
+    def enrich_game_by_signature(
+        self, game: Game, season_range: tuple[str, str] | None = None
+    ) -> bool:
         """Enriqueix un game EXISTENT (de partideshome) amb context de competició.
 
         Cerca per signatura física (jugadors + caramboles + entrades),
@@ -608,7 +601,16 @@ class Repository:
             "((player1_id=? AND player2_id=? AND caramboles1 IS ? AND caramboles2 IS ?) "
             "OR (player1_id=? AND player2_id=? AND caramboles1 IS ? AND caramboles2 IS ?))"
         )
-        pargs = (p1, p2, game.caramboles1, game.caramboles2, p2, p1, game.caramboles2, game.caramboles1)
+        pargs = (
+            p1,
+            p2,
+            game.caramboles1,
+            game.caramboles2,
+            p2,
+            p1,
+            game.caramboles2,
+            game.caramboles1,
+        )
         if game.data_partida is not None:
             row = self.conn.execute(
                 f"SELECT id, player1_id FROM games WHERE data_partida=? AND entrades IS ? AND {players} LIMIT 1",
@@ -628,7 +630,9 @@ class Repository:
         e1, e2 = (game.equip2_id, game.equip1_id) if swapped else (game.equip1_id, game.equip2_id)
         # La sèrie major SÍ ve a les partides de lliga; partideshome no la porta.
         # L'assignem (COALESCE: no sobreescriu si ja n'hi ha). Respecta l'ordre.
-        s1, s2 = (game.serie_max2, game.serie_max1) if swapped else (game.serie_max1, game.serie_max2)
+        s1, s2 = (
+            (game.serie_max2, game.serie_max1) if swapped else (game.serie_max1, game.serie_max2)
+        )
         self.conn.execute(
             """
             UPDATE games SET
@@ -642,8 +646,17 @@ class Repository:
                 serie_max2 = COALESCE(serie_max2, ?)
             WHERE id = ?
             """,
-            (e1, e2, game.encontre_lliga_id, game.temporada_id, game.arbitre,
-             game.assistencia, s1, s2, row["id"]),
+            (
+                e1,
+                e2,
+                game.encontre_lliga_id,
+                game.temporada_id,
+                game.arbitre,
+                game.assistencia,
+                s1,
+                s2,
+                row["id"],
+            ),
         )
         return True
 
@@ -714,9 +727,7 @@ class Repository:
         return cur.fetchone()[0]
 
     def get_temporada_id_by_nom(self, nom: str) -> int | None:
-        row = self.conn.execute(
-            "SELECT id FROM temporades WHERE nom = ?", (nom,)
-        ).fetchone()
+        row = self.conn.execute("SELECT id FROM temporades WHERE nom = ?", (nom,)).fetchone()
         return row[0] if row else None
 
     # ---------------------- equips ----------------------
@@ -816,7 +827,9 @@ class Repository:
         )
         return cur.fetchone()[0]
 
-    def upsert_torneig_participant(self, p: TorneigParticipantRecord, temporada_nom: str | None = None) -> None:
+    def upsert_torneig_participant(
+        self, p: TorneigParticipantRecord, temporada_nom: str | None = None
+    ) -> None:
         # Resoldre torneig_id intern via clau composta
         temporada_id: int | None = None
         if temporada_nom:
@@ -855,9 +868,17 @@ class Repository:
                 club_text = COALESCE(excluded.club_text, torneig_participants.club_text)
             """,
             (
-                torneig_row[0], player_id, p.posicio, p.partides_jugades, p.punts,
-                p.caramboles, p.entrades, p.mitjana_general, p.mitjana_particular,
-                p.serie_max, p.club_text,
+                torneig_row[0],
+                player_id,
+                p.posicio,
+                p.partides_jugades,
+                p.punts,
+                p.caramboles,
+                p.entrades,
+                p.mitjana_general,
+                p.mitjana_particular,
+                p.serie_max,
+                p.club_text,
             ),
         )
 
@@ -911,9 +932,17 @@ class Repository:
             RETURNING id
             """,
             (
-                edicio_id, jornada, grup_id, grup_nom, enc_id_extern,
-                team_a_extern, team_b_extern, equip_local, equip_visitant,
-                p_match_local, p_match_visitant,
+                edicio_id,
+                jornada,
+                grup_id,
+                grup_nom,
+                enc_id_extern,
+                team_a_extern,
+                team_b_extern,
+                equip_local,
+                equip_visitant,
+                p_match_local,
+                p_match_visitant,
             ),
         )
         return int(cur.fetchone()[0])
@@ -947,9 +976,7 @@ class Repository:
             (edicio_id, jornada, grup_id, grup_nom, posicio, equip, punts, parcials, mitjana),
         )
 
-    def replace_copa_partides(
-        self, encontre_copa_id: int, rows: list[tuple]
-    ) -> None:
+    def replace_copa_partides(self, encontre_copa_id: int, rows: list[tuple]) -> None:
         """Reescriu les partides d'un encontre (delete + insert) — idempotent.
 
         Cada tupla: (ordre, local_nom, local_caramboles, local_serie,

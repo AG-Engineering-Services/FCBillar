@@ -69,15 +69,17 @@ def _quantile_buckets(games: list[tuple[int, float]], n: int = QUANTILE_N) -> li
     for j, (lo_i, hi_i) in enumerate(pairwise(edges)):
         chunk = gs[lo_i:hi_i]
         lo_r, hi_r = ratings[lo_i], ratings[hi_i - 1]
-        buckets.append({
-            "order": j,
-            "label": _fmt(lo_r) if lo_r == hi_r else f"{_fmt(lo_r)}-{_fmt(hi_r)}",
-            "rating_min": round(lo_r, 4),
-            "rating_max": round(hi_r, 4),
-            "wins": sum(1 for res, _r in chunk if res == 1),
-            "losses": sum(1 for res, _r in chunk if res == -1),
-            "draws": sum(1 for res, _r in chunk if res == 0),
-        })
+        buckets.append(
+            {
+                "order": j,
+                "label": _fmt(lo_r) if lo_r == hi_r else f"{_fmt(lo_r)}-{_fmt(hi_r)}",
+                "rating_min": round(lo_r, 4),
+                "rating_max": round(hi_r, 4),
+                "wins": sum(1 for res, _r in chunk if res == 1),
+                "losses": sum(1 for res, _r in chunk if res == -1),
+                "draws": sum(1 for res, _r in chunk if res == 0),
+            }
+        )
     return buckets
 
 

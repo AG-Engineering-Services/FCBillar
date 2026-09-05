@@ -42,9 +42,7 @@ def clubs_repetits(ordre, grups) -> list[str]:
     dolents = []
     for g, lst in enumerate(grups):
         compte = collections.Counter(ordre[i][0] for i in lst)
-        dolents += [
-            f"grup {chr(ord('A') + g)}: {club} x{n}" for club, n in compte.items() if n > 1
-        ]
+        dolents += [f"grup {chr(ord('A') + g)}: {club} x{n}" for club, n in compte.items() if n > 1]
     return dolents
 
 
@@ -78,17 +76,34 @@ def test_els_grups_queden_equilibrats(n_grups: int) -> None:
 #: Mataró D i E junts al B, amb dues permutes que es desfeien l'una a l'altra
 #: (24↔23 i 23↔24) fins que el detector de cicle abandonava.
 QUARTA_2627 = [
-    ("C.B.VILANOVA", ""), ("C.B. BORGES", ""), ("C.B. CANET", "C"),
-    ("C.B.BLANES", "B"), ("C.B.MONT-ROIG", "C"), ("S.B.CORAL COLÓN", "B"),
-    ("C.B.LLINARS", "D"), ("B.LA UNIÓ CORAL", "B"),
-    ("B.C.SANT FELIU DE CODINES", ""), ("C.B.MONFORTE", "E"),
-    ("S.B.ESPLUGUES L'AVENÇ", "B"), ("C.B.2000 CERDANYOLA", "C"),
-    ("C.B.BANYOLES", "C"), ("C.B.MANRESA", "B"), ("C.B.MATARÓ", "D"),
-    ("C.B.SANTS", "E"), ("C.B.LLEIDA", ""), ("C.B.VIC", ""),
-    ("C.B.CARDONA", ""), ("C.B.SANT ADRIÀ", ""), ("B.C.GRANOLLERS", ""),
-    ("S.B.LA GRAN PENYA", ""), ("B.LA UNIÓ CORAL", ""),
-    ("B.C.SANT FELIU DE CODINES", ""), ("C.B.BANYOLES", ""),
-    ("C.B.MATARÓ", ""), ("C.B.MATADEPERA", ""), ("C.B.PUNT D'ATAC", ""),
+    ("C.B.VILANOVA", ""),
+    ("C.B. BORGES", ""),
+    ("C.B. CANET", "C"),
+    ("C.B.BLANES", "B"),
+    ("C.B.MONT-ROIG", "C"),
+    ("S.B.CORAL COLÓN", "B"),
+    ("C.B.LLINARS", "D"),
+    ("B.LA UNIÓ CORAL", "B"),
+    ("B.C.SANT FELIU DE CODINES", ""),
+    ("C.B.MONFORTE", "E"),
+    ("S.B.ESPLUGUES L'AVENÇ", "B"),
+    ("C.B.2000 CERDANYOLA", "C"),
+    ("C.B.BANYOLES", "C"),
+    ("C.B.MANRESA", "B"),
+    ("C.B.MATARÓ", "D"),
+    ("C.B.SANTS", "E"),
+    ("C.B.LLEIDA", ""),
+    ("C.B.VIC", ""),
+    ("C.B.CARDONA", ""),
+    ("C.B.SANT ADRIÀ", ""),
+    ("B.C.GRANOLLERS", ""),
+    ("S.B.LA GRAN PENYA", ""),
+    ("B.LA UNIÓ CORAL", ""),
+    ("B.C.SANT FELIU DE CODINES", ""),
+    ("C.B.BANYOLES", ""),
+    ("C.B.MATARÓ", ""),
+    ("C.B.MATADEPERA", ""),
+    ("C.B.PUNT D'ATAC", ""),
 ]
 
 
@@ -102,10 +117,18 @@ def test_la_quarta_del_2627_no_ajunta_equips_d_un_club() -> None:
 def test_cas_dificil_amb_molts_equips_del_mateix_club() -> None:
     """Quatre grups i tres clubs amb tres equips cadascun, tots seguits."""
     ordre = [
-        ("A", "1"), ("A", "2"), ("A", "3"),
-        ("B", "1"), ("B", "2"), ("B", "3"),
-        ("C", "1"), ("C", "2"), ("C", "3"),
-        ("D", "1"), ("E", "1"), ("F", "1"),
+        ("A", "1"),
+        ("A", "2"),
+        ("A", "3"),
+        ("B", "1"),
+        ("B", "2"),
+        ("B", "3"),
+        ("C", "1"),
+        ("C", "2"),
+        ("C", "3"),
+        ("D", "1"),
+        ("E", "1"),
+        ("F", "1"),
     ]
     grups, _ = P.forma_grups(ordre, 4)
     assert clubs_repetits(ordre, grups) == []

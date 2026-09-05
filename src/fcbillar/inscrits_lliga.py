@@ -62,6 +62,10 @@ class Lliga:
     nom: str
     clubs: dict[int, str]  # id de la federació → nom del club, canonicalitzat
     equips: int
+    #: 'Tres bandes', '4 Modalitats'. Va a cada fila perquè les mitjanes de dues
+    #: lligues no es poden comparar: són de modalitats diferents, i qui les
+    #: llegeixi per ordenar jugadors ha de poder demanar-ne una de sola.
+    modalitat: str = ""
 
 
 def _norm(s: str) -> str:
@@ -100,7 +104,11 @@ def llegeix_clubs(client, oberta: LligaOberta) -> Lliga:
             f"inscrits»: sense l'id de club no se'n poden demanar els jugadors."
         )
     return Lliga(
-        lliga_id=oberta.lliga_id, nom=oberta.nom, clubs=clubs, equips=len(equips)
+        lliga_id=oberta.lliga_id,
+        nom=oberta.nom,
+        clubs=clubs,
+        equips=len(equips),
+        modalitat=oberta.modalitat,
     )
 
 
@@ -272,25 +280,29 @@ def desa(conn: sqlite3.Connection, lliga: Lliga, inscrits: list[Inscrit], tempor
     for club in {i.club for i in inscrits}:
         cens.setdefault(club, del_cens(conn, club))
 
+    # Sense llista de clubs no hi ha contra què comparar, i esborrar-ho tot
+    # seria justament el que aquesta funció evita.
     inscrits_al_cens = {cens[c] for c in lliga.clubs.values()}
-    conn.execute(
-        "DELETE FROM lliga_inscrits WHERE lliga_id = ? AND club NOT IN "
-        f"({','.join('?' * len(inscrits_al_cens))})",
-        (lliga.lliga_id, *sorted(inscrits_al_cens)),
-    )
+    if inscrits_al_cens:
+        conn.execute(
+            "DELETE FROM lliga_inscrits WHERE lliga_id = ? AND club NOT IN "
+            f"({','.join('?' * len(inscrits_al_cens))})",
+            (lliga.lliga_id, *sorted(inscrits_al_cens)),
+        )
     conn.executemany(
         "DELETE FROM lliga_inscrits WHERE lliga_id = ? AND club = ?",
         [(lliga.lliga_id, cens[c]) for c in {i.club for i in inscrits}],
     )
     conn.executemany(
-        "INSERT INTO lliga_inscrits "
-        "(temporada, lliga_id, lliga, club, club_id_extern, jugador, mitjana, fitxatge, posicio) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO lliga_inscrits (temporada, lliga_id, lliga, modalitat, club, "
+        "club_id_extern, jugador, mitjana, fitxatge, posicio) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             (
                 temporada,
                 lliga.lliga_id,
                 lliga.nom,
+                lliga.modalitat,
                 cens[i.club],
                 i.club_id_extern,
                 i.jugador,

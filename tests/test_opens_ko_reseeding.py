@@ -101,8 +101,12 @@ def test_no_winner_when_unplayed_or_unresolvable():
 def test_dedupe_drops_mirrored_duplicate():
     # Real-world case: same match entered twice with swapped A/B (different
     # arbitre). Keep one; in a KO round each player plays at most once.
-    a = _m("MAS CANADELL, JOSEP Mª", "NAVARRO CARMONA, JOAN ANT.", punts=(2, 0), car=(40, 29), ent=27)
-    b = _m("NAVARRO CARMONA, JOAN ANT.", "MAS CANADELL, JOSEP Mª", punts=(0, 2), car=(29, 40), ent=27)
+    a = _m(
+        "MAS CANADELL, JOSEP Mª", "NAVARRO CARMONA, JOAN ANT.", punts=(2, 0), car=(40, 29), ent=27
+    )
+    b = _m(
+        "NAVARRO CARMONA, JOAN ANT.", "MAS CANADELL, JOSEP Mª", punts=(0, 2), car=(29, 40), ent=27
+    )
     other = _m("GASCÓN REYES, RAFAEL", "PRATS PERI, IVÁN", punts=(2, 2), car=(39, 31), ent=50)
     out = _dedupe_ko_matches((a, b, other))
     assert len(out) == 2

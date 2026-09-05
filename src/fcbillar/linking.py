@@ -99,9 +99,7 @@ def match_partida_to_games(
     # Desempat per sèrie major (quan la tenim a totes dues bandes).
     target_serie = _multiset(serie[0], serie[1])
     if target_serie is not None:
-        refined = [
-            g for g in hits if _multiset(g.serie_max1, g.serie_max2) == target_serie
-        ]
+        refined = [g for g in hits if _multiset(g.serie_max1, g.serie_max2) == target_serie]
         if refined:
             return refined
     return hits
@@ -109,14 +107,14 @@ def match_partida_to_games(
 
 @dataclass
 class LinkResult:
-    torneig_partides: int = 0          # files de torneig_partides processades
-    linked_games: int = 0             # partides del rànquing vinculades
-    matched_partides: int = 0         # partides de campionat amb ≥1 game
-    ambiguous: int = 0                # >1 game i la sèrie no desempata
-    unresolved_players: int = 0       # noms no resolts (byes "Descansa", etc.)
-    unknown_torneig: int = 0          # (torneig,divisió) sense fila a torneigs_individuals
-    no_game: int = 0                  # cap game casa (forat del rànquing)
-    conflicts: int = 0                # un game que casaria amb torneigs diferents
+    torneig_partides: int = 0  # files de torneig_partides processades
+    linked_games: int = 0  # partides del rànquing vinculades
+    matched_partides: int = 0  # partides de campionat amb ≥1 game
+    ambiguous: int = 0  # >1 game i la sèrie no desempata
+    unresolved_players: int = 0  # noms no resolts (byes "Descansa", etc.)
+    unknown_torneig: int = 0  # (torneig,divisió) sense fila a torneigs_individuals
+    no_game: int = 0  # cap game casa (forat del rànquing)
+    conflicts: int = 0  # un game que casaria amb torneigs diferents
     conflict_samples: list = field(default_factory=list)
 
 
@@ -138,7 +136,9 @@ def _build_torneig_index(
         "FROM torneigs_individuals ti LEFT JOIN temporades te ON te.id = ti.temporada_id"
     ):
         out[(r["torneig_id_extern"], r["divisio_id_extern"])] = (
-            r["id"], r["modalitat_id"], r["temp"],
+            r["id"],
+            r["modalitat_id"],
+            r["temp"],
         )
     return out
 

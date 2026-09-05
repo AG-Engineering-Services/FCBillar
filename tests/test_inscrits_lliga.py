@@ -84,9 +84,7 @@ def test_inscripcions_arrossega_el_club_de_la_fila_de_sobre() -> None:
     equips = parse_lliga_inscripcions(fixture("lligues_inscripcions_38"))
     assert len(equips) == 93
     granollers = [e for e in equips if e.club == "B.C.GRANOLLERS"]
-    assert [e.equip for e in granollers] == [
-        f'B.C. GRANOLLERS "{lletra}"' for lletra in "ABCDE"
-    ]
+    assert [e.equip for e in granollers] == [f'B.C. GRANOLLERS "{lletra}"' for lletra in "ABCDE"]
     assert {e.club_id_extern for e in granollers} == {13}
 
 
@@ -308,3 +306,66 @@ def test_clubs_sense_jugadors_els_anomena() -> None:
     info = Lliga(38, "Lliga Catalana Tres Bandes", {1: "C.B.BANYOLES", 2: "C.B.VIC"}, 2)
     assert clubs_sense_jugadors(info, [fila("C.B.BANYOLES", "A, A")]) == ["C.B.VIC"]
     assert clubs_sense_jugadors(info, []) == ["C.B.BANYOLES", "C.B.VIC"]
+
+
+def test_desa_sense_llista_de_clubs_no_esborra_ningu(conn) -> None:
+    """Sense llista de clubs no hi ha contra què comparar qui ha marxat."""
+    info = Lliga(38, "Lliga Catalana Tres Bandes", {1: "C.B.VIC"}, 1)
+    desa(conn, info, [fila("C.B.VIC", "B, B")], "2026/2027")
+    desa(
+        conn,
+        Lliga(38, "Lliga Catalana Tres Bandes", {}, 0),
+        [fila("C.B.BANYOLES", "A, A")],
+        "2026/2027",
+    )
+    files = dict(conn.execute("SELECT club, jugador FROM lliga_inscrits").fetchall())
+    assert files == {"C.B.VIC": "B, B", "C.B.BANYOLES": "A, A"}
+
+
+def test_la_modalitat_va_a_cada_fila(conn) -> None:
+    """Les mitjanes de dues lligues no es poden comparar.
+
+    Les de tres bandes i les de 4 modalitats són de modalitats diferents, i qui
+    llegeixi la taula per ordenar jugadors ha de poder demanar-ne una de sola.
+    """
+    client = ClientFals(CLIENT)
+    oberta = LligaOberta(38, "Lliga Catalana Tres Bandes", "Tres bandes", None, "Activa")
+    info = llegeix_clubs(client, oberta)
+    assert info.modalitat == "Tres bandes"
+    info = Lliga(38, info.nom, {16: info.clubs[16]}, info.equips, "Tres bandes")
+    desa(conn, info, llegeix_inscrits(client, info), "2026/2027")
+    modalitats = {r[0] for r in conn.execute("SELECT modalitat FROM lliga_inscrits")}
+    assert modalitats == {"Tres bandes"}
+
+
+def test_migracio_v21_a_v22_conserva_les_files(tmp_path) -> None:
+    """La columna arriba a una base que ja porta inscrits desats.
+
+    Les files velles es queden amb la modalitat buida a posta: el valor el diu
+    el llistat de la federació, i qui llegeixi per modalitat val més que no en
+    trobi cap fins que es torni a ingerir que no pas que se n'inventi una.
+    """
+    db = tmp_path / "v21.db"
+    vella = sqlite3.connect(db)
+    vella.executescript(
+        """
+        CREATE TABLE lliga_inscrits (
+            temporada TEXT NOT NULL, lliga_id INTEGER NOT NULL, lliga TEXT NOT NULL,
+            club TEXT NOT NULL, club_id_extern INTEGER NOT NULL, jugador TEXT NOT NULL,
+            mitjana REAL, fitxatge INTEGER NOT NULL, posicio INTEGER NOT NULL,
+            PRIMARY KEY (lliga_id, club, jugador)
+        );
+        INSERT INTO lliga_inscrits VALUES
+            ('2026/2027', 38, 'Lliga Catalana Tres Bandes', 'C.B.BANYOLES', 16,
+             'GÓMEZ AMETLLER, ALBERT', 0.57982, 0, 5);
+        PRAGMA user_version = 21;
+        """
+    )
+    vella.commit()
+    vella.close()
+
+    conn = ensure_schema(db)
+
+    # `ensure_schema` deixa row_factory a sqlite3.Row, que no és una tupla.
+    fila = conn.execute("SELECT jugador, mitjana, modalitat FROM lliga_inscrits").fetchone()
+    assert tuple(fila) == ("GÓMEZ AMETLLER, ALBERT", 0.57982, "")

@@ -30,8 +30,9 @@ PROJECTED = [
 
 
 def test_phase_code_collapses_every_ko_round():
-    codes = {_phase_code(lbl, "ko") for lbl in
-             ("SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "FINAL")}
+    codes = {
+        _phase_code(lbl, "ko") for lbl in ("SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "FINAL")
+    }
     assert codes == {"FINAL"}
     assert _phase_code("PRE-PRE-PREVIA", "group") == "PPP"
     assert _phase_code("Pre-prèvies", "group") == "PP"
@@ -53,8 +54,14 @@ def test_merge_keeps_every_real_ko_round():
     ]
     merged = _merge_projected_phases(real, PROJECTED)
     assert [p["label"] for p in merged] == [
-        "PRE-PRE-PREVIA", "PRE-PREVIA", "PREVIA",
-        "SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "FINAL",
+        "PRE-PRE-PREVIA",
+        "PRE-PREVIA",
+        "PREVIA",
+        "SETZENS",
+        "VUITENS",
+        "QUARTS",
+        "SEMIFINALS",
+        "FINAL",
     ]
     assert not any(p.get("projected") for p in merged)
     # Els classificats per a la ronda següent sobreviuen a la fusió.
@@ -67,10 +74,13 @@ def test_merge_keeps_projected_phase_when_no_real_ko_yet():
     real = [_grp("PRE-PREVIA"), _grp("PREVIA")]
     merged = _merge_projected_phases(real, PROJECTED)
     assert [p["label"] for p in merged] == [
-        "Pre-pre-prèvies", "PRE-PREVIA", "PREVIA", "Fase Final (K.O.)",
+        "Pre-pre-prèvies",
+        "PRE-PREVIA",
+        "PREVIA",
+        "Fase Final (K.O.)",
     ]
-    assert merged[0]["projected"] is True    # prèvia que la FCB encara no ha penjat
-    assert merged[-1]["projected"] is True   # quadre final encara no publicat
+    assert merged[0]["projected"] is True  # prèvia que la FCB encara no ha penjat
+    assert merged[-1]["projected"] is True  # quadre final encara no publicat
     assert "projected" not in merged[1]
 
 

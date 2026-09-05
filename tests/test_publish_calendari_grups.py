@@ -112,3 +112,72 @@ def test_sense_calendari_federatiu_no_es_buida_el_que_hi_ha_publicat(tmp_path, m
     cloud_sync.publish_calendari(db_path=db)
 
     assert len(magatzem["calendari_events"]) == 1
+
+
+def test_els_inscrits_de_la_lliga_es_publiquen(tmp_path, monkeypatch) -> None:
+    """La font oficial de qui juga amb cada club també puja al núvol.
+
+    És la que dona mitjana a qui no surt al rànquing general, i sense ella
+    aquells socis van al final de la graella de participació amb un 0.
+    """
+    db = tmp_path / "t.db"
+    _base_amb_grups(db)
+    conn = ensure_schema(db)
+    conn.executemany(
+        "INSERT INTO lliga_inscrits (temporada, lliga_id, lliga, club, club_id_extern, "
+        "jugador, mitjana, fitxatge, posicio) VALUES (?,?,?,?,?,?,?,?,?)",
+        [
+            (
+                "2026/2027",
+                38,
+                "Lliga Catalana Tres Bandes",
+                "C.B.BANYOLES",
+                16,
+                "GÓMEZ AMETLLER, ALBERT",
+                0.57982,
+                0,
+                5,
+            ),
+            (
+                "2026/2027",
+                38,
+                "Lliga Catalana Tres Bandes",
+                "C.B.MONT-ROIG",
+                22,
+                "ARNAU ABILLEIRA, ALEIX",
+                0.6176,
+                1,
+                6,
+            ),
+        ],
+    )
+    conn.commit()
+    conn.close()
+    magatzem: dict[str, list[dict]] = {}
+    monkeypatch.setattr(cloud_sync, "get_client", lambda: ClientFals(magatzem))
+
+    res = cloud_sync.publish_calendari(db_path=db)
+
+    assert res["lliga_inscrits"] == 2
+    files = {f["jugador"]: f for f in magatzem["lliga_inscrits"]}
+    # El 0/1 de SQLite ha d'arribar com a booleà: la columna de Postgres ho és.
+    assert files["ARNAU ABILLEIRA, ALEIX"]["fitxatge"] is True
+    assert files["GÓMEZ AMETLLER, ALBERT"]["fitxatge"] is False
+    assert files["GÓMEZ AMETLLER, ALBERT"]["mitjana"] == 0.57982
+
+
+def test_sense_inscrits_locals_no_es_toca_la_taula_publicada(tmp_path, monkeypatch) -> None:
+    """Encara no s'ha ingerit res: no és motiu per buidar el que ja hi ha."""
+    db = tmp_path / "t.db"
+    _base_amb_grups(db)
+    magatzem: dict[str, list[dict]] = {
+        "lliga_inscrits": [
+            {"lliga_id": 38, "club": "C.B.BANYOLES", "jugador": "hi era", "mitjana": 0.5}
+        ]
+    }
+    monkeypatch.setattr(cloud_sync, "get_client", lambda: ClientFals(magatzem))
+
+    res = cloud_sync.publish_calendari(db_path=db)
+
+    assert res["lliga_inscrits"] == 0
+    assert len(magatzem["lliga_inscrits"]) == 1

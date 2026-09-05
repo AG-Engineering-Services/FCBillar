@@ -518,6 +518,10 @@ CREATE TABLE IF NOT EXISTS lliga_inscrits (
     temporada      TEXT NOT NULL,             -- '2026/2027'
     lliga_id       INTEGER NOT NULL,          -- id de la federació (38 = 3B 26-27)
     lliga          TEXT NOT NULL,             -- 'Lliga Catalana Tres Bandes'
+    -- 'Tres bandes', '4 Modalitats'. Hi és perquè les mitjanes de dues lligues
+    -- NO es poden comparar: cadascuna és de la seva modalitat, i qui les
+    -- llegeixi per ordenar jugadors ha de poder demanar-ne una de sola.
+    modalitat      TEXT NOT NULL DEFAULT '',
     club           TEXT NOT NULL,             -- nom del cens, ja canonicalitzat
     club_id_extern INTEGER NOT NULL,
     jugador        TEXT NOT NULL,

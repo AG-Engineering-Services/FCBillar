@@ -58,9 +58,7 @@ _RE_IND_KO = re.compile(r"individuals/partides-eliminatories/(\d+)/(\d+)/(\d+)")
 
 _RE_COPA_GRUPS = re.compile(r"copa/grups/(\d+)/(\d+)")
 _RE_COPA_ENCGRUP = re.compile(r"copa/encontres-grup/(\d+)/(\d+)/(\d+)")
-_RE_COPA_PARTIDES = re.compile(
-    r"copa/partides-grup/(\d+)/(\d+)/(\d+)/(\d+)/(\d+)/(\d+)"
-)
+_RE_COPA_PARTIDES = re.compile(r"copa/partides-grup/(\d+)/(\d+)/(\d+)/(\d+)/(\d+)/(\d+)")
 
 # "NOM JUGADOR (4 / 30 / 3)" — sèrie major, caramboles i punts a la fitxa de copa.
 _RE_COPA_JUGADOR = re.compile(r"^(.*?)\s*\(\s*(\d+)\s*/\s*(\d+)\s*/\s*(\d+)\s*\)\s*$")
@@ -229,9 +227,7 @@ def parse_rankings_index(html: str) -> RankingsIndex:
             if es_vigent:
                 data_vigent = data_vigent or data
                 vigents.extend(
-                    CurrentRankingInfo(
-                        modalitat_codi_fcb=mod, num_seq=num, format_url=vigencia
-                    )
+                    CurrentRankingInfo(modalitat_codi_fcb=mod, num_seq=num, format_url=vigencia)
                     for mod, (vigencia, num) in sorted(per_modalitat.items())
                 )
             elif data is not None:
@@ -748,9 +744,7 @@ def parse_individuals_torneigs_list(html: str) -> list[TorneigIndividual]:
         if m is None:
             continue
         out.append(
-            TorneigIndividual(
-                torneig_id_extern=int(m.group(1)), nom=fila["Torneig"].upper()
-            )
+            TorneigIndividual(torneig_id_extern=int(m.group(1)), nom=fila["Torneig"].upper())
         )
     return out
 
@@ -1024,11 +1018,7 @@ def parse_copa_jornades(html: str) -> list[CopaJornadaLink]:
         if jornada in vistes:
             continue
         vistes.add(jornada)
-        out.append(
-            CopaJornadaLink(
-                edicio_id=int(m.group(1)), jornada=jornada, nom=fila["Fase"]
-            )
-        )
+        out.append(CopaJornadaLink(edicio_id=int(m.group(1)), jornada=jornada, nom=fila["Fase"]))
     return out
 
 

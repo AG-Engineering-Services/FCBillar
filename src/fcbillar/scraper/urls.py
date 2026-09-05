@@ -152,9 +152,7 @@ def individuals_partides_grup(
 def individuals_partides_eliminatories(
     torneig: int, divisio: int, eliminatoria: int, base: str = INTRANET
 ) -> str:
-    return _u(
-        base, "frontend/individuals/partides-eliminatories", torneig, divisio, eliminatoria
-    )
+    return _u(base, "frontend/individuals/partides-eliminatories", torneig, divisio, eliminatoria)
 
 
 def individuals_inscripcions(torneig: int, base: str = INTRANET) -> str:

@@ -158,13 +158,57 @@ class Calendari:
 # Cal-hi perquè moltes seus s'escriuen en majúscules i sense parèntesi
 # (`ZARAGOZA`, `MADRID`, `VALLADOLID`) igual que les modalitats (`TRES BANDAS`).
 _NO_SEU = (
-    "LIGA", "HONOR", "DIV.", "PLAYOFF", "COPA", "CTO", "CAMPEONATO", "TROFEO",
-    "GRAN PREMIO", "GRAND PRIX", "OPEN", "TOUR", "MUNDO", "MUNDIAL", "EUROPA",
-    "WORLD", "CHAMPIONSHIP", "BANDA", "QUILLAS", "ARTISTIC", "ARTÍSTIC", "LIBRE",
-    "CUADRO", "SERIE", "CLASICOS", "CLÁSICOS", "SNOOKER", "POOL", "BALL",
-    "EQUIPOS", "CLUBES", "CLUBS", "PRIMERA", "SEGUNDA", "MASC", "FEM", "JUNIOR",
-    "SENIOR", "SUB-", "SS.NN", "SS.AA", "GAMES", "NEXTGEN", "EUROYOUTH", "WPA",
-    "CEB", "PREDATOR", "LONGONI", "NAVIDAD", "SEMANA SANTA", "AÑO NUEVO",
+    "LIGA",
+    "HONOR",
+    "DIV.",
+    "PLAYOFF",
+    "COPA",
+    "CTO",
+    "CAMPEONATO",
+    "TROFEO",
+    "GRAN PREMIO",
+    "GRAND PRIX",
+    "OPEN",
+    "TOUR",
+    "MUNDO",
+    "MUNDIAL",
+    "EUROPA",
+    "WORLD",
+    "CHAMPIONSHIP",
+    "BANDA",
+    "QUILLAS",
+    "ARTISTIC",
+    "ARTÍSTIC",
+    "LIBRE",
+    "CUADRO",
+    "SERIE",
+    "CLASICOS",
+    "CLÁSICOS",
+    "SNOOKER",
+    "POOL",
+    "BALL",
+    "EQUIPOS",
+    "CLUBES",
+    "CLUBS",
+    "PRIMERA",
+    "SEGUNDA",
+    "MASC",
+    "FEM",
+    "JUNIOR",
+    "SENIOR",
+    "SUB-",
+    "SS.NN",
+    "SS.AA",
+    "GAMES",
+    "NEXTGEN",
+    "EUROYOUTH",
+    "WPA",
+    "CEB",
+    "PREDATOR",
+    "LONGONI",
+    "NAVIDAD",
+    "SEMANA SANTA",
+    "AÑO NUEVO",
 )
 _JORNADA = re.compile(r"\bJ\s?\d+\b|\d+[ªº]")
 
@@ -563,9 +607,7 @@ def _pagines_de_calendari() -> list[str]:
     with httpx.Client(follow_redirects=True, timeout=60.0) as client:
         sitemap = client.get(FCB_SITEMAP_DOCS).text
         enllacos = [
-            u
-            for u in re.findall(r"<loc>([^<]+)</loc>", sitemap)
-            if "calendari" in u.lower()
+            u for u in re.findall(r"<loc>([^<]+)</loc>", sitemap) if "calendari" in u.lower()
         ]
         return [client.get(u).text for u in enllacos]
 
@@ -657,8 +699,18 @@ def registra_fcb(db_path, html: str | None = None) -> dict:
 AMBIT_CATALA = "catala"
 
 _MESOS_FCB = {
-    "ene": 1, "feb": 2, "mar": 3, "abr": 4, "may": 5, "jun": 6,
-    "jul": 7, "ago": 8, "sep": 9, "oct": 10, "nov": 11, "dic": 12,
+    "ene": 1,
+    "feb": 2,
+    "mar": 3,
+    "abr": 4,
+    "may": 5,
+    "jun": 6,
+    "jul": 7,
+    "ago": 8,
+    "sep": 9,
+    "oct": 10,
+    "nov": 11,
+    "dic": 12,
 }
 _DIES_FCB = {"LUN": 0, "MAR": 1, "MIE": 2, "JUE": 3, "VIE": 4, "SAB": 5, "DOM": 6}
 
@@ -732,9 +784,7 @@ def _linies_fcb(page) -> list[tuple[float, list[tuple[float, float, str]]]]:
         blocs: list[list] = [[chars[0]]]
         for a, b in pairwise(chars):
             blocs.append([b]) if b["x0"] - a["x1"] > _GAP_CELLA_FCB else blocs[-1].append(b)
-        out.append(
-            (top, [(bl[0]["x0"], bl[-1]["x1"], _text_fcb(bl)) for bl in blocs])
-        )
+        out.append((top, [(bl[0]["x0"], bl[-1]["x1"], _text_fcb(bl)) for bl in blocs]))
     return out
 
 
@@ -874,7 +924,10 @@ def parse_calendari_fcb(pdf_bytes: bytes, versio: str | None = None) -> Calendar
             for top, blocs in linies:
                 # Fila a què pertany la línia: l'última que comença per damunt seu,
                 # amb el marge que el text de la cel·la puja sobre el rètol del dia.
-                j = max((k for k, (t, _) in enumerate(files) if t <= top + _PUJADA_FILA_FCB), default=None)
+                j = max(
+                    (k for k, (t, _) in enumerate(files) if t <= top + _PUJADA_FILA_FCB),
+                    default=None,
+                )
                 fora = j is None or top - files[j][0] > _ALCADA_FILA_FCB
                 for x0, x1, text in blocs:
                     if x1 <= xs[1] + 1:
@@ -891,7 +944,11 @@ def parse_calendari_fcb(pdf_bytes: bytes, versio: str | None = None) -> Calendar
                         seguent = next((d for t, d in files if t > top), None)
                         if anterior and seguent:
                             festius.append(
-                                (anterior + dt.timedelta(days=1), seguent - dt.timedelta(days=1), text)
+                                (
+                                    anterior + dt.timedelta(days=1),
+                                    seguent - dt.timedelta(days=1),
+                                    text,
+                                )
                             )
                         continue
                     # Columna amb què la cel·la solapa més: les fusionades («REUNIÓ
@@ -1178,10 +1235,13 @@ def ingest_calendari(
             len(canvis),
         ),
     )
-    versio_id = cur.lastrowid or conn.execute(
-        "SELECT id FROM calendari_versions WHERE font = ? AND temporada = ? AND sha256 = ?",
-        (font, cal.temporada, cal.sha256),
-    ).fetchone()[0]
+    versio_id = (
+        cur.lastrowid
+        or conn.execute(
+            "SELECT id FROM calendari_versions WHERE font = ? AND temporada = ? AND sha256 = ?",
+            (font, cal.temporada, cal.sha256),
+        ).fetchone()[0]
+    )
     conn.execute("DELETE FROM calendari_canvis WHERE versio_id = ?", (versio_id,))
     conn.executemany(
         "INSERT INTO calendari_canvis (versio_id, tipus_canvi, setmana, disciplina, "

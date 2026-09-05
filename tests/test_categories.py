@@ -16,9 +16,9 @@ from fcbillar.categories import (
     "raw,expected",
     [
         ("1a DIVISIÓ", "1a"),
-        ("1a DIVISIÒ", "1a"),   # Ò en lloc de Ó
-        ("1º DIVISIÓ", "1a"),   # ordinal masculí
-        ("4ª DIVISIÓ", "4a"),   # ordinal femení
+        ("1a DIVISIÒ", "1a"),  # Ò en lloc de Ó
+        ("1º DIVISIÓ", "1a"),  # ordinal masculí
+        ("4ª DIVISIÓ", "4a"),  # ordinal femení
         ("4a DIVISIÓ", "4a"),
         ("HONOR", "Honor"),
         ("L'AMISTAT", "L'Amistat"),
@@ -82,7 +82,10 @@ def test_short_divisio_inline(raw, expected):
         ("QUADRE 71/2 - HONOR", "Quadre 71/2 - HONOR"),
         ("LLIURE - FEMENÍ", "Lliure - FEMENÍ"),
         ("BANDA - 3a", "Banda - 3a"),
-        ("CAMPIONAT CATALUNYA HISTÒRIC LLIURE - CATEGORIA NO PUBLICADA", "Lliure - CATEGORIA NO PUBLICADA"),
+        (
+            "CAMPIONAT CATALUNYA HISTÒRIC LLIURE - CATEGORIA NO PUBLICADA",
+            "Lliure - CATEGORIA NO PUBLICADA",
+        ),
         # "BANDES" no s'ha de confondre amb la modalitat "BANDA".
         ("3 BANDES - 2a", "Tres Bandes - 2a"),
     ],

@@ -6,35 +6,35 @@ from datetime import date
 
 def select_last_15_games(games):
     """Selecciona els últims 15 games, amb desempat per mitjana si empat de data en frontera 15/16.
-    
+
     Args:
         games: llista de tuples (data, caramboles, entrades) ordenades per data desc.
-    
+
     Returns:
         llista d'índex dels games seleccionats (fins a 15 games).
     """
     if len(games) <= 15:
         return list(range(len(games)))
-    
+
     # Si tenim més de 15 i la 15ena (índex 14) i 16ena (índex 15) són del mateix dia,
     # mantenir la 15ena excepte si la 16ena té millor mitjana.
     selected_idxs = list(range(15))  # indices 0..14 (15 games)
-    
+
     date_15 = games[14][0]
     date_16 = games[15][0]
-    
+
     if date_15 == date_16:
         # Comparar mitjanes (caramboles/entrades)
         car_15, ent_15 = games[14][1], games[14][2]
         car_16, ent_16 = games[15][1], games[15][2]
-        
+
         avg_15 = (car_15 / ent_15) if ent_15 else 0
         avg_16 = (car_16 / ent_16) if ent_16 else 0
-        
+
         if avg_16 > avg_15:
             # Triar la 16ena en comptes de la 15ena
             selected_idxs[14] = 15
-    
+
     return selected_idxs
 
 

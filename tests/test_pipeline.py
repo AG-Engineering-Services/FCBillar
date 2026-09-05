@@ -197,9 +197,7 @@ def test_sync_skips_when_db_at_or_above_current(settings: StubSettings) -> None:
 def test_backfill_top_n_processes_only_top(settings: StubSettings) -> None:
     """backfill amb --top 1 processa només el jugador rànquing 1."""
     client = StubScraperClient(settings, URL_FIXTURES)
-    result = backfill_modalitat(
-        client, modalitat_codi_fcb=1, top_n=1, settings=settings
-    )
+    result = backfill_modalitat(client, modalitat_codi_fcb=1, top_n=1, settings=settings)
     assert result.players_processed == 1
     # El número 1 de tres bandes és Mas Canadell (843), amb 15 partides.
     assert result.total_games_upserted == 15
@@ -207,7 +205,8 @@ def test_backfill_top_n_processes_only_top(settings: StubSettings) -> None:
 
 def test_backfill_unknown_modalitat_raises(settings: StubSettings) -> None:
     client = StubScraperClient(
-        settings, {"https://www.fcbillar.cat/frontend/rankings/llistat": "nou/rankings_llistat.html"}
+        settings,
+        {"https://www.fcbillar.cat/frontend/rankings/llistat": "nou/rankings_llistat.html"},
     )
     with pytest.raises(ValueError, match="Modalitat 99"):
         backfill_modalitat(client, 99, settings=settings)
@@ -222,9 +221,7 @@ def test_backfill_only_followed_skips_non_followed(settings: StubSettings) -> No
     repo.set_seguiment("843", True)
 
     # Torno a fer backfill amb only_followed: només ha de processar Mas Canadell.
-    result = backfill_modalitat(
-        client, modalitat_codi_fcb=1, only_followed=True, settings=settings
-    )
+    result = backfill_modalitat(client, modalitat_codi_fcb=1, only_followed=True, settings=settings)
     assert result.players_processed == 1
     assert result.total_games_upserted == 15
 
@@ -257,9 +254,7 @@ def test_backfill_historical_processes_what_stub_can_serve(
         ),
     }
     client = StubScraperClient(settings, fixtures)
-    res = backfill_historical(
-        client, modalitat_codi_fcb=6, top_n=0, settings=settings
-    )
+    res = backfill_historical(client, modalitat_codi_fcb=6, top_n=0, settings=settings)
     # 1 OK (el 123/6, que és el que tenim capturat) + 14 sense fixture.
     assert res.rankings_processed == [(123, 6)]
     assert len(res.rankings_failed) == 14
@@ -394,9 +389,17 @@ def test_ingest_lliga_encontre_skips_unknown_players(settings: StubSettings) -> 
     }
     client = StubScraperClient(settings, fixtures)
     encontre = LligaEncontre(
-        lliga_id=36, divisio_id=148, grup_id=316, jornada_id=2593, encontre_id=10939,
-        equip_local='C.B. SANTS "A"', p_parcials_local=5, p_match_local=3,
-        equip_visitant='SB FOMENT MOLINS "A"', p_parcials_visitant=3, p_match_visitant=0,
+        lliga_id=36,
+        divisio_id=148,
+        grup_id=316,
+        jornada_id=2593,
+        encontre_id=10939,
+        equip_local='C.B. SANTS "A"',
+        p_parcials_local=5,
+        p_match_local=3,
+        equip_visitant='SB FOMENT MOLINS "A"',
+        p_parcials_visitant=3,
+        p_match_visitant=0,
     )
     result = ingest_lliga_encontre(
         client, encontre, modalitat_codi_fcb=1, data=date(2025, 9, 27), settings=settings
@@ -443,9 +446,17 @@ def test_ingest_lliga_encontre_enriches_existing_game(settings: StubSettings) ->
     repo.upsert_game(old_game)
 
     encontre = LligaEncontre(
-        lliga_id=36, divisio_id=148, grup_id=316, jornada_id=2593, encontre_id=10939,
-        equip_local='C.B. SANTS "A"', p_parcials_local=5, p_match_local=3,
-        equip_visitant='SB FOMENT MOLINS "A"', p_parcials_visitant=3, p_match_visitant=0,
+        lliga_id=36,
+        divisio_id=148,
+        grup_id=316,
+        jornada_id=2593,
+        encontre_id=10939,
+        equip_local='C.B. SANTS "A"',
+        p_parcials_local=5,
+        p_match_local=3,
+        equip_visitant='SB FOMENT MOLINS "A"',
+        p_parcials_visitant=3,
+        p_match_visitant=0,
     )
     # Per a aquesta verificació només cal que un dels jugadors resolgui, però
     # la fixture té 4 partides i 8 jugadors; els altres es saltaran sense impacte.
@@ -570,8 +581,12 @@ def test_impute_lliga_entrades_full_distance_match() -> None:
     assert (
         _impute_lliga_entrades(
             repo,
-            lliga_id=36, divisio_id=148, grup_id=317,
-            modalitat_codi_fcb=1, caramboles1=28, caramboles2=27,
+            lliga_id=36,
+            divisio_id=148,
+            grup_id=317,
+            modalitat_codi_fcb=1,
+            caramboles1=28,
+            caramboles2=27,
         )
         == 50
     )
@@ -586,8 +601,12 @@ def test_impute_lliga_entrades_someone_reached_distance() -> None:
     assert (
         _impute_lliga_entrades(
             repo,
-            lliga_id=36, divisio_id=148, grup_id=317,
-            modalitat_codi_fcb=1, caramboles1=40, caramboles2=15,
+            lliga_id=36,
+            divisio_id=148,
+            grup_id=317,
+            modalitat_codi_fcb=1,
+            caramboles1=40,
+            caramboles2=15,
         )
         is None
     )
@@ -601,8 +620,12 @@ def test_impute_lliga_entrades_uses_tres_bandes_constant_limit() -> None:
     assert (
         _impute_lliga_entrades(
             repo,
-            lliga_id=36, divisio_id=148, grup_id=317,
-            modalitat_codi_fcb=1, caramboles1=28, caramboles2=27,
+            lliga_id=36,
+            divisio_id=148,
+            grup_id=317,
+            modalitat_codi_fcb=1,
+            caramboles1=28,
+            caramboles2=27,
         )
         == 50
     )
@@ -616,8 +639,12 @@ def test_impute_lliga_entrades_no_reference_data() -> None:
     assert (
         _impute_lliga_entrades(
             repo,
-            lliga_id=36, divisio_id=148, grup_id=317,
-            modalitat_codi_fcb=1, caramboles1=28, caramboles2=27,
+            lliga_id=36,
+            divisio_id=148,
+            grup_id=317,
+            modalitat_codi_fcb=1,
+            caramboles1=28,
+            caramboles2=27,
         )
         is None
     )
@@ -651,13 +678,25 @@ def test_ingest_lliga_reuses_existing_club_via_normalization(
     assert repo.counts()["clubs"] == 2
 
     encontre = LligaEncontre(
-        lliga_id=36, divisio_id=148, grup_id=316, jornada_id=2593, encontre_id=10939,
-        equip_local='C.B. SANTS "A"', p_parcials_local=5, p_match_local=3,
-        equip_visitant='SB FOMENT MOLINS "A"', p_parcials_visitant=3, p_match_visitant=0,
+        lliga_id=36,
+        divisio_id=148,
+        grup_id=316,
+        jornada_id=2593,
+        encontre_id=10939,
+        equip_local='C.B. SANTS "A"',
+        p_parcials_local=5,
+        p_match_local=3,
+        equip_visitant='SB FOMENT MOLINS "A"',
+        p_parcials_visitant=3,
+        p_match_visitant=0,
     )
     ingest_lliga_encontre(
-        client, encontre, modalitat_codi_fcb=1, data=date(2025, 9, 27),
-        create_missing_players=True, settings=settings,
+        client,
+        encontre,
+        modalitat_codi_fcb=1,
+        data=date(2025, 9, 27),
+        create_missing_players=True,
+        settings=settings,
     )
 
     # Cap club nou: els dos existeixen al listing i s'han reutilitzat.
@@ -685,13 +724,25 @@ def test_ingest_lliga_encontre_create_missing_persists_all(
     }
     client = StubScraperClient(settings, fixtures)
     encontre = LligaEncontre(
-        lliga_id=36, divisio_id=148, grup_id=316, jornada_id=2593, encontre_id=10939,
-        equip_local='C.B. SANTS "A"', p_parcials_local=5, p_match_local=3,
-        equip_visitant='SB FOMENT MOLINS "A"', p_parcials_visitant=3, p_match_visitant=0,
+        lliga_id=36,
+        divisio_id=148,
+        grup_id=316,
+        jornada_id=2593,
+        encontre_id=10939,
+        equip_local='C.B. SANTS "A"',
+        p_parcials_local=5,
+        p_match_local=3,
+        equip_visitant='SB FOMENT MOLINS "A"',
+        p_parcials_visitant=3,
+        p_match_visitant=0,
     )
     result = ingest_lliga_encontre(
-        client, encontre, modalitat_codi_fcb=1, data=date(2025, 9, 27),
-        create_missing_players=True, settings=settings,
+        client,
+        encontre,
+        modalitat_codi_fcb=1,
+        data=date(2025, 9, 27),
+        create_missing_players=True,
+        settings=settings,
     )
     assert result.games_upserted == 0
     assert result.games_skipped_missing_player == 4
@@ -716,13 +767,25 @@ def test_placeholder_fusion_after_ranking_ingest(settings: StubSettings) -> None
     }
     client = StubScraperClient(settings, lliga_fixtures)
     encontre = LligaEncontre(
-        lliga_id=36, divisio_id=148, grup_id=316, jornada_id=2593, encontre_id=10939,
-        equip_local='C.B. SANTS "A"', p_parcials_local=5, p_match_local=3,
-        equip_visitant='SB FOMENT MOLINS "A"', p_parcials_visitant=3, p_match_visitant=0,
+        lliga_id=36,
+        divisio_id=148,
+        grup_id=316,
+        jornada_id=2593,
+        encontre_id=10939,
+        equip_local='C.B. SANTS "A"',
+        p_parcials_local=5,
+        p_match_local=3,
+        equip_visitant='SB FOMENT MOLINS "A"',
+        p_parcials_visitant=3,
+        p_match_visitant=0,
     )
     ingest_lliga_encontre(
-        client, encontre, modalitat_codi_fcb=1, data=date(2025, 9, 27),
-        create_missing_players=True, settings=settings,
+        client,
+        encontre,
+        modalitat_codi_fcb=1,
+        data=date(2025, 9, 27),
+        create_missing_players=True,
+        settings=settings,
     )
 
     conn = ensure_schema(settings.db_path)

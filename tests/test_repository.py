@@ -118,17 +118,13 @@ def test_latest_ranking_num_seq(repo: Repository) -> None:
 
 
 def test_upsert_ranking_entry_requires_player(repo: Repository) -> None:
-    repo.upsert_ranking(
-        Ranking(num_seq=121, modalitat_codi_fcb=2, url="", format_url="datahome")
-    )
+    repo.upsert_ranking(Ranking(num_seq=121, modalitat_codi_fcb=2, url="", format_url="datahome"))
     rid = repo.get_ranking_id(121, 2)
     assert rid is not None
     with pytest.raises(ValueError, match="Player 999 no registrat"):
         repo.upsert_ranking_entry(
             rid,
-            RankingEntry(
-                ranking_num_seq=121, ranking_modalitat=2, player_fcb_id="999", posicio=1
-            ),
+            RankingEntry(ranking_num_seq=121, ranking_modalitat=2, player_fcb_id="999", posicio=1),
         )
 
 
@@ -180,9 +176,7 @@ def test_link_game_to_ranking_dedupes(repo: Repository) -> None:
     """Crear el mateix link dues vegades no falla i no duplica."""
     repo.upsert_player(Player(fcb_id="566", nom="VILALTA"))
     repo.upsert_player(Player(fcb_id="424", nom="PALLISA"))
-    repo.upsert_ranking(
-        Ranking(num_seq=121, modalitat_codi_fcb=2, url="", format_url="datahome")
-    )
+    repo.upsert_ranking(Ranking(num_seq=121, modalitat_codi_fcb=2, url="", format_url="datahome"))
     g = Game(
         data_partida=date(2026, 2, 1),
         competicio_nom="LLIGA",
@@ -206,9 +200,7 @@ def test_link_game_to_ranking_distinct_owners_both_kept(repo: Repository) -> Non
     """Dos owners diferents per al mateix joc → dos links."""
     repo.upsert_player(Player(fcb_id="566", nom="VILALTA"))
     repo.upsert_player(Player(fcb_id="424", nom="PALLISA"))
-    repo.upsert_ranking(
-        Ranking(num_seq=121, modalitat_codi_fcb=2, url="", format_url="datahome")
-    )
+    repo.upsert_ranking(Ranking(num_seq=121, modalitat_codi_fcb=2, url="", format_url="datahome"))
     g = Game(
         data_partida=date(2026, 2, 1),
         competicio_nom="LLIGA",
@@ -231,12 +223,8 @@ def test_link_game_to_ranking_distinct_owners_both_kept(repo: Repository) -> Non
 
 def test_upsert_club_and_player_with_club(repo: Repository) -> None:
     repo.upsert_club(Club(fcb_id="C5", nom="C.B. SANTS"))
-    pid = repo.upsert_player(
-        Player(fcb_id="566", nom="VILALTA", club_fcb_id="C5")
-    )
-    row = repo.conn.execute(
-        "SELECT club_id FROM players WHERE id = ?", (pid,)
-    ).fetchone()
+    pid = repo.upsert_player(Player(fcb_id="566", nom="VILALTA", club_fcb_id="C5"))
+    row = repo.conn.execute("SELECT club_id FROM players WHERE id = ?", (pid,)).fetchone()
     expected_club_id = repo.get_club_id_by_fcb_id("C5")
     assert row[0] == expected_club_id
 
@@ -645,15 +633,20 @@ def test_migration_v1_to_v2_preserves_games(tmp_path: Path) -> None:
 
     # Columnes noves presents amb valor NULL.
     cols = {row[1] for row in conn.execute("PRAGMA table_info(games)").fetchall()}
-    for c in ("equip1_id", "equip2_id", "encontre_lliga_id", "temporada_id", "arbitre", "assistencia"):
+    for c in (
+        "equip1_id",
+        "equip2_id",
+        "encontre_lliga_id",
+        "temporada_id",
+        "arbitre",
+        "assistencia",
+    ):
         assert c in cols
 
     # Taules noves creades.
     tables = {
         row[0]
-        for row in conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table'"
-        ).fetchall()
+        for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
     }
     assert "temporades" in tables
     assert "equips" in tables

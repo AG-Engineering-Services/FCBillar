@@ -26,8 +26,20 @@ _OPEN_MARKERS = ("OPEN", "MEMORIAL", "TROFEU", "CIUTAT", "GRAN PREMI", "CRITERIU
 # Paraules genèriques que no compten com a "informació nova" al sufix d'una divisió
 # a l'hora de detectar redundància (modalitats, articles, números romans buits...).
 _STOP = {
-    "DE", "DEL", "LA", "EL", "LES", "ELS", "I", "D",
-    "3", "BANDES", "TRES", "LLIURE", "BANDA", "QUADRE",
+    "DE",
+    "DEL",
+    "LA",
+    "EL",
+    "LES",
+    "ELS",
+    "I",
+    "D",
+    "3",
+    "BANDES",
+    "TRES",
+    "LLIURE",
+    "BANDA",
+    "QUADRE",
 }
 
 _TOKEN_RE = re.compile(r"[A-Z0-9]+")

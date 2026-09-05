@@ -28,11 +28,16 @@ from fcb_opens.scraper.open_live import (
 
 def _m(a: str, b: str, *, punts=(0, 0), car=(0, 0), ent=None, sm=(0, 0)) -> MatchResult:
     return MatchResult(
-        player_a=a, player_b=b,
-        punts_a=punts[0], punts_b=punts[1],
-        caramboles_a=car[0], caramboles_b=car[1],
-        serie_major_a=sm[0], serie_major_b=sm[1],
-        entrades=ent, arbitre=None,
+        player_a=a,
+        player_b=b,
+        punts_a=punts[0],
+        punts_b=punts[1],
+        caramboles_a=car[0],
+        caramboles_b=car[1],
+        serie_major_a=sm[0],
+        serie_major_b=sm[1],
+        entrades=ent,
+        arbitre=None,
     )
 
 
@@ -48,8 +53,8 @@ def _wo(winner: str, loser: str) -> MatchResult:
 
 def test_walkover_is_detected_and_decided():
     m = _wo("UCEDA", "JUÁREZ")
-    assert m.is_played is False          # sense entrades no s'ha jugat…
-    assert _is_walkover(m) is True       # …però el resultat és ferm
+    assert m.is_played is False  # sense entrades no s'ha jugat…
+    assert _is_walkover(m) is True  # …però el resultat és ferm
     assert _ko_winner(m) == "UCEDA"
 
 
@@ -79,8 +84,7 @@ def test_round_with_walkovers_is_not_active_anymore():
         ),
     )
     state = OpenLiveState(
-        structure=OpenStructure(division_id=1, name="OPEN TEST", phase_id=1,
-                                phases=(setzens.ref,)),
+        structure=OpenStructure(division_id=1, name="OPEN TEST", phase_id=1, phases=(setzens.ref,)),
         phases=[setzens],
     )
     payload = _state_payload(state, "2026-07-27T00:00:00Z")
@@ -129,8 +133,8 @@ def _setzens_with_two_walkovers() -> list[PhaseDetail]:
     seeds = [f"S{i:02d}" for i in range(1, 33)]
     matches = []
     for i in range(16):
-        a, b = seeds[i], seeds[31 - i]           # piràmide 1-32, 2-31, …
-        if i in (6, 15):                         # 7è i 16è: passen per W.O.
+        a, b = seeds[i], seeds[31 - i]  # piràmide 1-32, 2-31, …
+        if i in (6, 15):  # 7è i 16è: passen per W.O.
             matches.append(_wo(a, b))
         else:
             # Mitjana decreixent amb el seed, per tenir un ordre inequívoc.
@@ -198,9 +202,7 @@ def test_provisional_pairings_follow_the_full_pyramid():
         _m(order[0], order[15], punts=(2, 0), car=(40, 20), ent=30),
         _m(order[2], order[13], punts=(2, 0), car=(40, 20), ent=30),
     )
-    phases[2] = PhaseDetail(
-        ref=PhaseRef(label="VUITENS", kind="ko", url=""), ko_matches=official
-    )
+    phases[2] = PhaseDetail(ref=PhaseRef(label="VUITENS", kind="ko", url=""), ko_matches=official)
     out = _attach_ko_provisional_players(phases, (), {})
     calc = [(m.player_a, m.player_b) for m in out[2].provisional_matches]
     assert calc == [
@@ -223,11 +225,9 @@ def test_orphans_left_by_an_off_pyramid_official_pairing_are_repaired():
     order = [p.name for p in ranked]
     # Emparellament oficial fora de piràmide: el 1r contra el 2n (no 1-16).
     official = (_m(order[0], order[1], punts=(2, 0), car=(40, 20), ent=30),)
-    phases[2] = PhaseDetail(
-        ref=PhaseRef(label="VUITENS", kind="ko", url=""), ko_matches=official
-    )
+    phases[2] = PhaseDetail(ref=PhaseRef(label="VUITENS", kind="ko", url=""), ko_matches=official)
     out = _attach_ko_provisional_players(phases, (), {})
     calc = [(m.player_a, m.player_b) for m in out[2].provisional_matches]
     paired = {n for pair in calc for n in pair} | {order[0], order[1]}
-    assert paired == set(order)                     # ningú es queda fora
-    assert (order[14], order[15]) in calc           # els dos orfes, junts
+    assert paired == set(order)  # ningú es queda fora
+    assert (order[14], order[15]) in calc  # els dos orfes, junts
