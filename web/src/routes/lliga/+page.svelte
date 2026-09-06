@@ -10,6 +10,7 @@
 	} from '$lib/db';
 	import { titulars } from '$lib/titulars';
 	import { clubDeLEquip } from '$lib/clubEquip';
+	import { clauDivisio, clauGrup, clauNomGrup, comparaGrups } from '$lib/divisions';
 
 	let groups = $state<LligaGroup[]>([]);
 	let standings = $state<StandingRow[]>([]);
@@ -114,21 +115,6 @@
 	}
 
 	/** «1a DIVISIÓ» → «1A», «GRUP B» → «B»: com es diuen les dues fonts. */
-	/** On va cada divisió. L'Honor és la de dalt i es diu 'Honor', o sigui que
-	 *  ordenades com a text quedaria darrere de la 4a. */
-	function ordreDivisio(divisio: string): number {
-		const d = (divisio ?? '').trim().toUpperCase();
-		if (d.startsWith('HONOR')) return 0;
-		const n = parseInt(d, 10);
-		return Number.isNaN(n) ? 99 : n;
-	}
-
-	function clauGrup(divisio: string, grup: string): string {
-		const d = (divisio ?? '').toUpperCase().replace(/\s*DIVISI[ÓO].*$/, '').trim();
-		const g = (grup ?? '').toUpperCase().replace(/^GRUP\s+/, '').trim();
-		return `${d}|${g}`;
-	}
-
 	const grupsProvisionals = $derived.by(() => {
 		const publicats = new Set(
 			groups
@@ -147,9 +133,7 @@
 			.sort(([a], [b]) => {
 				const [da, ga] = a.split('|');
 				const [db, gb] = b.split('|');
-				return (
-					ordreDivisio(da) - ordreDivisio(db) || da.localeCompare(db) || ga.localeCompare(gb)
-				);
+				return comparaGrups({ divisio: da, grup: ga }, { divisio: db, grup: gb });
 			})
 			.map(([clau, encontres], i) => {
 				const [divisio, grup] = clau.split('|');
@@ -168,11 +152,15 @@
 		const m = new Map<number, string>();
 		for (const g of groups.filter((g) => g.lliga_id === lligaActual)) if (!m.has(g.divisio_id)) m.set(g.divisio_id, g.divisio_nom ?? `Div ${g.divisio_id}`);
 		const publicades = [...m.entries()].map(([id, nom]) => ({ id, nom })).sort((a, b) => a.id - b.id);
-		// Les del calendari, darrere: primer el que ja es juga.
+		// Les del calendari, darrere: primer el que ja es juga. I una divisió que
+		// ja hi és no s'hi torna a posar: la intranet en diu 'HONOR' i el PDF
+		// 'Honor', i comparant els noms tal qual sortien totes dues.
+		const jaHi = new Set(publicades.map((d) => clauDivisio(d.nom)));
 		const delCalendari = new Map<number, string>();
 		for (const g of grupsProvisionals) {
-			if (![...delCalendari.values()].includes(g.divisio))
-				delCalendari.set(g.divisioId, g.divisio);
+			if (jaHi.has(clauDivisio(g.divisio))) continue;
+			jaHi.add(clauDivisio(g.divisio));
+			delCalendari.set(g.divisioId, g.divisio);
 		}
 		return [...publicades, ...[...delCalendari].map(([id, nom]) => ({ id, nom }))];
 	});
@@ -187,25 +175,31 @@
 		new Map(inscrits.filter((i) => i.club_fcb_id).map((i) => [i.club, i.club_fcb_id!]))
 	);
 
-	const divGroups = $derived(
-		selDiv != null && selDiv < 0
-			? grupsProvisionals
-					.filter((g) => g.divisioId === selDiv || g.divisio === divisions.find((d) => d.id === selDiv)?.nom)
-					.map((g) => ({
-						lliga_id: lligaActual ?? 0,
-						divisio_id: selDiv,
-						grup_id: g.grupId,
-						divisio_nom: g.divisio,
-						grup_nom: `Grup ${g.grup}`
-					}))
-			: groups
-			.filter((g) => g.lliga_id === lligaActual && g.divisio_id === selDiv)
-			.sort((a, b) => {
-				const fa = (a.grup_nom ?? '').toUpperCase().startsWith('FINAL') ? 1 : 0;
-				const fb = (b.grup_nom ?? '').toUpperCase().startsWith('FINAL') ? 1 : 0;
-				return fa - fb || (a.grup_nom ?? '').localeCompare(b.grup_nom ?? '');
-			})
-	);
+	const divGroups = $derived.by(() => {
+		if (selDiv == null) return [];
+		const clauSel = clauDivisio(divisions.find((d) => d.id === selDiv)?.nom);
+		const publicats = groups.filter((g) => g.lliga_id === lligaActual && g.divisio_id === selDiv);
+
+		// Els grups que només tenim del calendari van amb els publicats, no a
+		// part: de l'Honor de la 26/27 la intranet en publica el grup A i del B
+		// només se'n sap pel PDF, i són la mateixa divisió.
+		const delCalendari = grupsProvisionals
+			.filter((g) => clauDivisio(g.divisio) === clauSel)
+			.map((g) => ({
+				lliga_id: lligaActual ?? 0,
+				divisio_id: selDiv,
+				grup_id: g.grupId,
+				divisio_nom: g.divisio,
+				grup_nom: `Grup ${g.grup}`
+			}));
+
+		return [...publicats, ...delCalendari].sort((a, b) => {
+			// La final, l'última: no és un grup de la fase regular.
+			const fa = (a.grup_nom ?? '').toUpperCase().startsWith('FINAL') ? 1 : 0;
+			const fb = (b.grup_nom ?? '').toUpperCase().startsWith('FINAL') ? 1 : 0;
+			return fa - fb || clauNomGrup(a.grup_nom).localeCompare(clauNomGrup(b.grup_nom));
+		});
+	});
 
 	function teamRows(gid: number): StandingRow[] {
 		// Els grups que només tenim del calendari: tots els equips a zero, per
