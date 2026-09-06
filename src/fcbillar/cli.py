@@ -1685,7 +1685,9 @@ def ingest_divisions_individual_cmd(
 
 @app.command("ingest-calendari-lliga")
 def ingest_calendari_lliga_cmd(
-    carpeta: str = typer.Argument(..., help="Carpeta amb els PDF de calendari de grup."),
+    carpeta: str = typer.Argument(
+        None, help="Carpeta amb els PDF. Si no la poses, els busca al web de la federació."
+    ),
     club: str = typer.Option("BANYOLES", "--club", help="Part del nom del club a seguir."),
     temporada: str = typer.Option("2026/2027", "--temporada"),
     ics_a: str = typer.Option(
@@ -1695,41 +1697,61 @@ def ingest_calendari_lliga_cmd(
     """Ingesta els calendaris oficials de grup: encontres del club amb data.
 
     La federació publica un PDF per grup, i és l'única font que diu EL DIA de
-    cada jornada; el calendari esportiu general només diu la setmana. Passa-li
-    la carpeta amb els PDF dels grups on juga el club:
+    cada jornada; el calendari esportiu general només diu la setmana, i la
+    intranet no publica ni els grups. Sense arguments els busca al web:
 
-        fcbillar ingest-calendari-lliga ~/Descarregues --ics data/billar.ics
+        fcbillar ingest-calendari-lliga --ics data/billar.ics
+
+    i amb una carpeta llegeix els PDF que hi hagi, per si vols provar-ne un o
+    la federació canvia de lloc:
+
+        fcbillar ingest-calendari-lliga ~/Descarregues
 
     Les dates es contrasten entre grups. Si un PDF repeteix la mateixa data a
     mitja graella —com el de 2a divisió grup A de la 2026-27, que la federació
     va publicar amb la data de la primera jornada a totes— se li posen les dels
     grups que sí que la porten bé, perquè les jornades són comunes a la lliga.
+
+    Si algun grup surt amb forats no es desa res. Un calendari incomplet no
+    s'assembla a un error: s'assembla a un calendari, i qui el mira no té cap
+    manera de saber que li falta el seu encontre.
     """
     from pathlib import Path
 
     from fcbillar.calendari_lliga import (
         dates_de_referencia,
         desa_grups,
+        descobreix_grups,
         esmena_dates,
         ics,
         ingest,
         llegeix,
+        problemes,
     )
 
-    pdfs = sorted(Path(carpeta).glob("*.pdf"))
+    if carpeta:
+        origens = [(p.name, p) for p in sorted(Path(carpeta).glob("*.pdf"))]
+    else:
+        import httpx
+
+        publicats = descobreix_grups(temporada)
+        console.print(f"[bold]{len(publicats)}[/] calendaris de grup publicats al web")
+        with httpx.Client(follow_redirects=True, timeout=120.0) as client:
+            origens = [(c.etiqueta, client.get(c.url).content) for c in publicats]
+
     calendaris = []
-    for p in pdfs:
+    for nom, origen in origens:
         try:
-            cal = llegeix(p)
+            cal = llegeix(origen)
         except Exception as e:
             # Un PDF que no sigui d'aquests no ha d'aturar la resta.
-            console.print(f"  [dim]{p.name}: no és un calendari de grup ({e})[/]")
+            console.print(f"  [dim]{nom}: no és un calendari de grup ({e})[/]")
             continue
         if cal.encontres:
             calendaris.append(cal)
 
     if not calendaris:
-        console.print(f"[red]Cap calendari de grup a {carpeta}[/]")
+        console.print(f"[red]Cap calendari de grup a {carpeta or 'el web de la federació'}[/]")
         raise typer.Exit(1)
 
     referencia = dates_de_referencia(calendaris)
@@ -1745,6 +1767,13 @@ def ingest_calendari_lliga_cmd(
             f"{len(cal.encontres)} encontres{marca}"
         )
         esmenats.append(nou)
+
+    forats = [(cal, p) for cal in esmenats if (p := problemes(cal))]
+    if forats:
+        console.print("\n[red]No es desa res: hi ha grups que no quadren.[/]")
+        for cal, p in forats:
+            console.print(f"  [red]{cal.divisio} grup {cal.grup}[/]: {'; '.join(p)}")
+        raise typer.Exit(1)
 
     conn = ensure_schema(get_settings().db_path)
     n = ingest(conn, esmenats, club, temporada)

@@ -69,6 +69,12 @@ PAGINES: list[tuple[str, str]] = [
     ("wp_clubs", f"{WEB}/federacio/llistat-de-clubs-federacio-catalana-de-billar/"),
     ("wp_sitemap_documents", f"{WEB}/wpfd_file-sitemap.xml"),
     ("wp_document_calendari", f"{WEB}/wpfd_file/ranquing-opens-3-bandes-25-26/"),
+    # El calendari d'un grup de lliga: la pàgina porta l'enllaç al seu PDF i
+    # també el del calendari esportiu de la temporada, que no és el mateix.
+    (
+        "wp_document_calendari_grup",
+        f"{WEB}/wpfd_file/calendari-lliga-tres-bandes-2026-27-honor-grup-a/",
+    ),
 ]
 
 UA = "FCBillar/1.0 (seguiment de jugadors del C.B. Banyoles)"

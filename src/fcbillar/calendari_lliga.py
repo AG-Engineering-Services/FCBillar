@@ -45,6 +45,7 @@ import re
 from dataclasses import dataclass, replace
 from datetime import date
 from pathlib import Path
+from typing import NamedTuple
 
 log = logging.getLogger(__name__)
 
@@ -62,7 +63,10 @@ _TOLERANCIA_FILA = 3.0
 
 _RE_JORNADA = re.compile(r"(\d+)ª\s+JORNADA")
 _RE_DATA = re.compile(r"(\d{2})/(\d{2})/(\d{4})")
-_RE_DIVISIO = re.compile(r"(\d+)ª\s+DIVISIÓ")
+#: «1ª DIVISIÓ», i també «DIVISIÓ HONOR», que va al davant i no porta número.
+#: Els noms que en surten —'1a'…'4a' i 'Honor'— són els de `categories.norm_divisio`,
+#: que és el vocabulari de divisions de tot el projecte.
+_RE_DIVISIO = re.compile(r"(?:(\d+)ª\s+DIVISIÓ|DIVISIÓ\s+(HONOR))")
 _RE_GRUP = re.compile(r'GRUP\s+"?([A-Z])"?')
 _RE_TEMPORADA = re.compile(r"TEMPORADA\s+(\d{4}/\d{2,4})")
 
@@ -82,7 +86,7 @@ class CalendariGrup:
     """El calendari sencer d'un grup, tal com el publica la federació."""
 
     temporada: str  # '2026/27'
-    divisio: str  # '1a', '2a', '4a'
+    divisio: str  # 'Honor', '1a', '2a', '3a', '4a'
     grup: str  # 'B'
     equips: tuple[str, ...]
     encontres: tuple[Encontre, ...]
@@ -111,22 +115,44 @@ def _files(pagina) -> list[list[dict]]:
     ]
 
 
-def _columnes(fila: list[dict], *, nomes_dreta_de: float = 0.0) -> list[tuple[float, str]]:
-    """Parteix una fila allà on hi ha un salt horitzontal ample.
+class Columna(NamedTuple):
+    """Una columna d'una fila: on comença, on té el centre i què hi diu.
 
-    Retorna (x on comença, text) de cada columna.
+    Les dues coordenades no són intercanviables i cadascuna té la seva feina.
+    El marge esquerre —la llista numerada d'equips— es reconeix per on
+    **comença** la columna. Agrupar columnes entre files, en canvi, s'ha de fer
+    pel **centre**: el text hi va centrat, o sigui que el punt on comença es mou
+    amb la llargada del nom de l'equip i el centre no es mou gens.
     """
-    out: list[tuple[float, str]] = []
+
+    esquerra: float
+    centre: float
+    text: str
+
+
+def _columnes(fila: list[dict], *, nomes_dreta_de: float = 0.0) -> list[Columna]:
+    """Parteix una fila allà on hi ha un salt horitzontal ample."""
+    out: list[Columna] = []
     actual: list[dict] = []
+
+    def tanca(paraules: list[dict]) -> None:
+        out.append(
+            Columna(
+                esquerra=paraules[0]["x0"],
+                centre=(paraules[0]["x0"] + paraules[-1]["x1"]) / 2,
+                text=" ".join(w["text"] for w in paraules),
+            )
+        )
+
     for w in fila:
         if w["x0"] < nomes_dreta_de:
             continue
         if actual and w["x0"] - actual[-1]["x1"] > _SALT_COLUMNA:
-            out.append((actual[0]["x0"], " ".join(x["text"] for x in actual)))
+            tanca(actual)
             actual = []
         actual.append(w)
     if actual:
-        out.append((actual[0]["x0"], " ".join(x["text"] for x in actual)))
+        tanca(actual)
     return out
 
 
@@ -137,10 +163,17 @@ def _data_de(text: str) -> date | None:
     return date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
 
 
-def llegeix(pdf_path: str | Path) -> CalendariGrup:
-    """Llegeix el PDF del calendari d'un grup."""
+def llegeix(pdf_path: str | Path | bytes) -> CalendariGrup:
+    """Llegeix el PDF del calendari d'un grup, d'un fitxer o de la memòria.
+
+    Els bytes hi són perquè baixant-los del web no cal escriure'ls enlloc: la
+    ingesta en fa una dotzena seguits i no té cap motiu per deixar-los al disc.
+    """
+    import io
+
     import pdfplumber
 
+    origen = io.BytesIO(pdf_path) if isinstance(pdf_path, bytes) else str(pdf_path)
     capcalera = {"temporada": "", "divisio": "", "grup": ""}
     encontres: list[Encontre] = []
 
@@ -149,14 +182,14 @@ def llegeix(pdf_path: str | Path) -> CalendariGrup:
     # quants per pàgina, o sigui que es tanca quan n'arriba un de nou.
     jornades: list[tuple[float, int]] = []
     dates: dict[int, date] = {}
-    files: list[list[tuple[float, str]]] = []
+    files: list[list[Columna]] = []
 
     def tanca_bloc() -> None:
         if jornades and dates and files:
             encontres.extend(_encontres_del_bloc(files, jornades, dates))
         files.clear()
 
-    with pdfplumber.open(str(pdf_path)) as pdf:
+    with pdfplumber.open(origen) as pdf:
         for pagina in pdf.pages:
             for fila in _files(pagina):
                 text = " ".join(w["text"] for w in fila)
@@ -165,9 +198,9 @@ def llegeix(pdf_path: str | Path) -> CalendariGrup:
                 if _RE_JORNADA.search(text):
                     tanca_bloc()
                     jornades = [
-                        (x, int(m.group(1)))
-                        for x, t in _columnes(fila)
-                        if (m := _RE_JORNADA.match(t))
+                        (c.centre, int(m.group(1)))
+                        for c in _columnes(fila)
+                        if (m := _RE_JORNADA.match(c.text))
                     ]
                     dates = {}
                     continue
@@ -175,16 +208,16 @@ def llegeix(pdf_path: str | Path) -> CalendariGrup:
                 cols = _columnes(fila)
 
                 # La fila de les dates ve just sota la capçalera.
-                if jornades and not dates and any(_RE_DATA.search(t) for _, t in cols):
-                    for x, t in cols:
-                        d = _data_de(t)
-                        j = _bloc_de(x, jornades)
+                if jornades and not dates and any(_RE_DATA.search(c.text) for c in cols):
+                    for c in cols:
+                        d = _data_de(c.text)
+                        j = _bloc_de(c.centre, jornades)
                         if d is not None and j is not None:
                             dates[j] = d
                     continue
 
                 if jornades and dates:
-                    files.append([(x, t) for x, t in cols if x >= _MARGE_LLISTA])
+                    files.append([c for c in cols if c.esquerra >= _MARGE_LLISTA])
             tanca_bloc()
 
     # Els equips surten dels mateixos encontres. La llista numerada del marge
@@ -209,13 +242,13 @@ def _llegeix_capcalera(text: str, dest: dict[str, str]) -> None:
     if not dest["temporada"] and (m := _RE_TEMPORADA.search(text)):
         dest["temporada"] = m.group(1)
     if not dest["divisio"] and (m := _RE_DIVISIO.search(text)):
-        dest["divisio"] = f"{m.group(1)}a"
+        dest["divisio"] = f"{m.group(1)}a" if m.group(1) else "Honor"
     if not dest["grup"] and (m := _RE_GRUP.search(text)):
         dest["grup"] = m.group(1)
 
 
 def _encontres_del_bloc(
-    files: list[list[tuple[float, str]]],
+    files: list[list[Columna]],
     jornades: list[tuple[float, int]],
     dates: dict[int, date],
 ) -> list[Encontre]:
@@ -230,8 +263,14 @@ def _encontres_del_bloc(
     de debò —n'hi ha dues per bloc, local i visitant—, i després cada fila posa
     el que tingui al seu lloc. Una fila amb una sola columna d'un bloc és un
     equip que descansa, i no genera cap encontre.
+
+    Les columnes s'agrupen pel centre. Fent-ho pel punt on comencen, els noms
+    d'equip llargs i els curts d'una mateixa columna quedaven a més de vint
+    punts els uns dels altres, la columna es partia en dues i les files del mig
+    no cabien ni en una ni en l'altra: desapareixien. A la 1a divisió grup A de
+    la 26-27 això s'enduia vint dels cinquanta-sis encontres sense dir res.
     """
-    posicions = sorted({x for fila in files for x, _ in fila})
+    posicions = sorted({c.centre for fila in files for c in fila})
     if not posicions:
         return []
 
@@ -269,11 +308,11 @@ def _encontres_del_bloc(
     return out
 
 
-def _text_a(fila: list[tuple[float, str]], x: float) -> str:
-    """El text de la fila que cau a la columna que comença a `x`."""
-    for xc, t in fila:
-        if abs(xc - x) <= _SALT_COLUMNA:
-            return t
+def _text_a(fila: list[Columna], centre: float) -> str:
+    """El text de la fila que cau a la columna centrada a `centre`."""
+    for c in fila:
+        if abs(c.centre - centre) <= _SALT_COLUMNA:
+            return c.text
     return ""
 
 
@@ -289,6 +328,58 @@ def _bloc_de(x: float, jornades: list[tuple[float, int]]) -> int | None:
     """A quina jornada pertany una columna que comença a `x`."""
     candidats = [(abs(x - xj), j) for xj, j in jornades]
     return min(candidats)[1] if candidats else None
+
+
+def problemes(cal: CalendariGrup) -> list[str]:
+    """Què no quadra d'un calendari llegit, dit en pla.
+
+    El lector treballa per posició, i quan una columna no li acaba de quadrar no
+    peta: es deixa files. Això no es veu enlloc —el que en surt continua sent un
+    calendari, només que amb forats—, i un calendari amb forats publicat fa més
+    mal que no tenir-ne cap: qui el mira no té cap manera de saber que li falta
+    el seu encontre. Per això es comprova el que ha de ser cert sempre.
+
+    A cada jornada hi juga tothom qui pot. Amb un nombre parell d'equips totes
+    les jornades tenen els mateixos encontres; amb un nombre senar, també,
+    perquè el que descansa va rodant. Una jornada amb menys encontres que una
+    altra no és una jornada curta: és una fila que s'ha perdut.
+    """
+    fallen: list[str] = []
+    if not cal.encontres:
+        fallen.append("cap encontre")
+        return fallen
+
+    for camp in ("temporada", "divisio", "grup"):
+        if not getattr(cal, camp):
+            fallen.append(f"sense {camp}")
+
+    per_jornada: dict[int, list[Encontre]] = collections.defaultdict(list)
+    for e in cal.encontres:
+        per_jornada[e.jornada].append(e)
+
+    jornades = sorted(per_jornada)
+    if jornades != list(range(1, len(jornades) + 1)):
+        falten = sorted(set(range(1, max(jornades) + 1)) - set(jornades))
+        fallen.append(f"jornades que falten: {falten}")
+
+    compte = {j: len(enc) for j, enc in per_jornada.items()}
+    if len(set(compte.values())) > 1:
+        normal = collections.Counter(compte.values()).most_common(1)[0][0]
+        curtes = {j: n for j, n in sorted(compte.items()) if n != normal}
+        fallen.append(f"jornades amb {normal} encontres menys aquestes: {curtes}")
+
+    # Un equip no pot jugar dos cops el mateix dia, i encara menys contra ell
+    # mateix: si surt, dues columnes s'han aparellat malament.
+    for j, enc in sorted(per_jornada.items()):
+        for e in enc:
+            if e.local == e.visitant:
+                fallen.append(f"jornada {j}: {e.local} contra ell mateix")
+        equips = [x for e in enc for x in (e.local, e.visitant)]
+        repetits = sorted({x for x in equips if equips.count(x) > 1})
+        if repetits:
+            fallen.append(f"jornada {j}: {', '.join(repetits)} hi surt més d'un cop")
+
+    return fallen
 
 
 def dates_de_referencia(calendaris: list[CalendariGrup]) -> dict[int, date]:
@@ -325,6 +416,95 @@ def esmena_dates(cal: CalendariGrup, referencia: dict[int, date]) -> CalendariGr
         cal,
         encontres=tuple(replace(e, data=referencia.get(e.jornada, e.data)) for e in cal.encontres),
     )
+
+
+# ======================================================================
+# Descobriment: quins calendaris de grup té publicats la federació
+# ======================================================================
+
+#: Els PDF de calendari de grup tenen tots la mateixa forma d'slug al gestor de
+#: fitxers del WordPress: `calendari-lliga-tres-bandes-2026-27-honor-grup-a`.
+#: La divisió i el grup que s'hi llegeixen només serveixen per anomenar-los
+#: abans de baixar-los; els bons són els de la capçalera del PDF.
+_RE_SLUG_GRUP = re.compile(
+    r"calendari-lliga-tres-bandes-(\d{4})-(\d{2,4})-([a-z]+)-grup-([a-z])\b",
+    re.IGNORECASE,
+)
+
+#: L'enllaç directe al PDF dins la pàgina de document. La pàgina en porta dos
+#: més que no volem —el CSS del connector i una URL d'`admin-ajax`—, i també
+#: l'enllaç al calendari general de la temporada, que és d'una altra categoria.
+_RE_DESCARREGA_GRUP = re.compile(
+    r"https?://[^\"'\s<>]*/download/\d+/[^\"'\s<>]*/\d+/"
+    r"(calendari-lliga-tres-bandes-[^\"'\s<>]+\.pdf)",
+    re.IGNORECASE,
+)
+
+
+@dataclass(frozen=True)
+class CalendariPublicat:
+    """Un PDF de calendari de grup que la federació té penjat."""
+
+    temporada: str  # '2026/2027'
+    etiqueta: str  # 'honor grup A', tal com ho diu l'slug
+    url: str
+
+
+def slugs_de_grup(sitemap: str, temporada: str | None = None) -> list[tuple[str, str, str]]:
+    """(slug, temporada, etiqueta) de cada calendari de grup que hi ha al sitemap."""
+    out: list[tuple[str, str, str]] = []
+    for u in re.findall(r"<loc>([^<]+)</loc>", sitemap):
+        m = _RE_SLUG_GRUP.search(u)
+        if m is None:
+            continue
+        a, b = m.group(1), m.group(2)
+        if len(b) == 2:  # «2026-27» → «2026/2027»
+            b = a[:2] + b
+        temp = f"{a}/{b}"
+        if temporada and temp != temporada:
+            continue
+        out.append(
+            (u.rstrip("/").rsplit("/", 1)[-1], temp, f"{m.group(3)} grup {m.group(4).upper()}")
+        )
+    return sorted(out)
+
+
+def url_del_pdf(pagina: str) -> str | None:
+    """L'enllaç directe al PDF dins una pàgina de document del WordPress."""
+    m = _RE_DESCARREGA_GRUP.search(pagina)
+    return m.group(0) if m else None
+
+
+def descobreix_grups(temporada: str | None = None, *, client=None) -> list[CalendariPublicat]:
+    """Els calendaris de grup publicats, trobats pel sitemap de documents.
+
+    La federació no els enllaça des de cap pantalla: viuen al gestor de fitxers
+    del WordPress i només el sitemap els llista. Cal entrar a la pàgina de cada
+    document per treure'n l'enllaç al PDF, o sigui una petició per grup.
+
+    És l'única font d'aquesta informació. El setembre de 2026, amb els dotze
+    grups de la 26-27 ja publicats aquí, la intranet encara responia 500 a
+    `lligues/grups` i la pàgina de divisions no tenia ni un enllaç.
+    """
+    import httpx
+
+    from fcbillar.scraper.urls import web_sitemap_documents
+
+    tanca = client is None
+    client = client or httpx.Client(follow_redirects=True, timeout=60.0)
+    try:
+        slugs = slugs_de_grup(client.get(web_sitemap_documents()).text, temporada)
+        out: list[CalendariPublicat] = []
+        for slug, temp, etiqueta in slugs:
+            url = url_del_pdf(client.get(f"https://fcbillar.cat/wpfd_file/{slug}/").text)
+            if url is None:
+                log.warning("%s: la pàgina del document no porta l'enllaç al PDF", slug)
+                continue
+            out.append(CalendariPublicat(temporada=temp, etiqueta=etiqueta, url=url))
+        return out
+    finally:
+        if tanca:
+            client.close()
 
 
 # ======================================================================

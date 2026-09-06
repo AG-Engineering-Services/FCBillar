@@ -160,6 +160,15 @@ jobs:
           # PDF no ha canviat, surt per ETag sense parsejar res.
           run "ingest-calendari"     uv run --no-dev fcbillar ingest-calendari
 
+          # Calendari de cada grup de la lliga: un PDF per grup, i sense arguments
+          # se'ls busca al sitemap de documents del WordPress. És l'única font que
+          # els té: el 6 de setembre de 2026, amb els dotze grups de la 26/27 ja
+          # publicats aquí, `lligues/grups` de la intranet responia 500 i la pàgina
+          # de divisions no tenia ni un enllaç. Va cada dia perquè la federació els
+          # va reeditant -els va publicar tots de cop, i abans n'hi havia quatre-,
+          # i perquè el comandament no desa res si algun grup surt amb forats.
+          run "calendari-lliga"      uv run --no-dev fcbillar ingest-calendari-lliga
+
           # De qui està fet cada club, estimat. Depèn del que s'acaba d'ingerir -qui
           # ha jugat- i del llistat de divisions, i s'ha de refer abans de publicar
           # o es publicaria la d'ahir. L'ordre no balla: el rànquing de referència

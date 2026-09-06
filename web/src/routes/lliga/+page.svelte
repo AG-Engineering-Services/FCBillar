@@ -114,6 +114,15 @@
 	}
 
 	/** «1a DIVISIÓ» → «1A», «GRUP B» → «B»: com es diuen les dues fonts. */
+	/** On va cada divisió. L'Honor és la de dalt i es diu 'Honor', o sigui que
+	 *  ordenades com a text quedaria darrere de la 4a. */
+	function ordreDivisio(divisio: string): number {
+		const d = (divisio ?? '').trim().toUpperCase();
+		if (d.startsWith('HONOR')) return 0;
+		const n = parseInt(d, 10);
+		return Number.isNaN(n) ? 99 : n;
+	}
+
 	function clauGrup(divisio: string, grup: string): string {
 		const d = (divisio ?? '').toUpperCase().replace(/\s*DIVISI[ÓO].*$/, '').trim();
 		const g = (grup ?? '').toUpperCase().replace(/^GRUP\s+/, '').trim();
@@ -135,7 +144,13 @@
 			else per.set(clau, [e]);
 		}
 		return [...per.entries()]
-			.sort(([a], [b]) => a.localeCompare(b))
+			.sort(([a], [b]) => {
+				const [da, ga] = a.split('|');
+				const [db, gb] = b.split('|');
+				return (
+					ordreDivisio(da) - ordreDivisio(db) || da.localeCompare(db) || ga.localeCompare(gb)
+				);
+			})
 			.map(([clau, encontres], i) => {
 				const [divisio, grup] = clau.split('|');
 				return {

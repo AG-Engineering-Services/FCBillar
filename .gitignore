@@ -52,3 +52,6 @@ htmlcov/
 
 .vercel
 data/*.ics
+
+# Restes de pytest (tmp_path) que de vegades queden a l arrel.
+pytest-of-*/

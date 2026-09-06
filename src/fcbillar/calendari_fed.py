@@ -540,6 +540,12 @@ _RE_DESCARREGA_CAL = re.compile(
     r"https?://[^\"'\s<>]*/download/\d+/[^/]*calendari[^/]*/\d+/([^\"'\s<>]+\.pdf)",
     re.IGNORECASE,
 )
+#: El setembre de 2026 la federació va publicar els calendaris de cada grup de
+#: la lliga, i tenen «calendari» al camí de descàrrega igual que aquest: sortien
+#: aquí barrejats amb el calendari esportiu de la temporada, que no és el
+#: mateix document ni de bon tros. Els llegeix `calendari_lliga.descobreix_grups`.
+_RE_CAL_DE_GRUP = re.compile(r"calendari-lliga-", re.IGNORECASE)
+
 _RE_TEMPORADA_FITXER = re.compile(r"(\d{4})[-_](\d{2,4})")
 _RE_VERSIO_FITXER = re.compile(r"\bV[-_ ]?(\d+)", re.IGNORECASE)
 
@@ -579,6 +585,8 @@ def descobreix_fcb(html: str | None = None) -> list[CalendariFCB]:
     for pagina in pagines:
         for m in _RE_DESCARREGA_CAL.finditer(pagina):
             url, fitxer = m.group(0), unquote(m.group(1))
+            if _RE_CAL_DE_GRUP.match(fitxer):
+                continue  # el calendari d'un grup de lliga, que va per un altre camí
             mt = _RE_TEMPORADA_FITXER.search(fitxer)
             if mt is None:
                 continue  # sense temporada al nom no el sabem col·locar
