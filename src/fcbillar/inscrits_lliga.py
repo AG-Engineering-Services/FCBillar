@@ -323,6 +323,56 @@ def desa(conn: sqlite3.Connection, lliga: Lliga, inscrits: list[Inscrit], tempor
     return len(inscrits)
 
 
+def assigna_clubs_desconeguts(conn: sqlite3.Connection, temporada: str) -> dict[str, str]:
+    """Dona club als jugadors que no en tenen, a partir dels inscrits a la lliga.
+
+    `players.club_id` surt del cens de llicències, i qui s'acaba de federar
+    encara no hi és: es queda sense club fins que la federació el publiqui.
+    Mentrestant, la llista d'inscrits SÍ que diu de quin club juga —és ella qui
+    l'inscriu—, i qualsevol pantalla que filtri per club el deixa fora.
+
+    Es va veure el 6 de setembre de 2026: en Jordi Soler i en Josep Carreras no
+    sortien al rànquing dels socis del club de NouProjecte tot i sortir a la
+    pàgina de participants de la federació. N'hi havia 97 en aquella situació.
+
+    Només s'omple el que és BUIT. Un club que ja hi consta no es toca: pot ser
+    que el jugador estigui inscrit amb un altre per un fitxatge, i el cens no és
+    pitjor font que la llista d'inscrits per a qui ja hi surt.
+
+    Un fitxatge apareix a dues llistes, la del club d'origen i la del que se
+    l'endú. Si passa amb algú sense club, mana el club que el fitxa: és el que
+    hi jugarà.
+    """
+    assignats: dict[str, str] = {}
+    files = conn.execute(
+        """
+        SELECT p.id, p.nom, i.club, i.fitxatge
+          FROM players p
+          JOIN lliga_inscrits i ON i.jugador = p.nom
+         WHERE p.club_id IS NULL AND i.temporada = ?
+         ORDER BY p.id, i.fitxatge DESC
+        """,
+        (temporada,),
+    ).fetchall()
+
+    vistos: set[int] = set()
+    for pid, nom, club, _fitxatge in files:
+        if pid in vistos:
+            continue  # ja se li ha donat el club que el fitxa, que va primer
+        vistos.add(pid)
+        cid = conn.execute("SELECT id FROM clubs WHERE nom = ?", (club,)).fetchone()
+        if cid is None:
+            continue
+        conn.execute(
+            "UPDATE players SET club_id = ?, updated_at = datetime('now') WHERE id = ?",
+            (cid[0], pid),
+        )
+        assignats[nom] = club
+    if assignats:
+        conn.commit()
+    return assignats
+
+
 def retira_lligues_tancades(
     conn: sqlite3.Connection, temporada: str, obertes: set[int]
 ) -> dict[int, int]:

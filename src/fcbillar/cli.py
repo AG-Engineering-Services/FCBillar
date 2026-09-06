@@ -2020,6 +2020,7 @@ def ingest_inscrits_lliga_cmd(
     fitxatge. El que sí que ho és va a la taula d'avisos del final.
     """
     from fcbillar.inscrits_lliga import (
+        assigna_clubs_desconeguts,
         clubs_sense_jugadors,
         desa,
         llegeix_clubs,
@@ -2098,6 +2099,18 @@ def ingest_inscrits_lliga_cmd(
                     f"(no els toco): {', '.join(muts)}"
                 )
             avisos_totals += [(oberta.nom, a) for a in revisa(inscrits, mitjanes)]
+
+        # Qui s'acaba de federar encara no és al cens de llicències i es queda
+        # sense club, però la llista d'inscrits SÍ que diu de quin club juga.
+        # Sense això, qualsevol pantalla que filtri per club el deixa fora.
+        nous = assigna_clubs_desconeguts(conn, temporada)
+        if nous:
+            console.print()
+            console.print(f"[bold]Club assignat des dels inscrits ({len(nous)})[/]")
+            for jugador, club in sorted(nous.items())[:10]:
+                console.print(f"  {jugador:36} [dim]→[/] {club}")
+            if len(nous) > 10:
+                console.print(f"  [dim]… i {len(nous) - 10} més[/]")
 
     if not avisos_totals:
         console.print()
