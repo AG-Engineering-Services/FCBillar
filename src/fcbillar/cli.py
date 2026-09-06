@@ -1814,11 +1814,14 @@ def ingest_calendari_cmd(
     Sense `--url` ni `--fitxer` prova la temporada en curs I la següent: la RFEB
     publica la del curs vinent al juliol, molt abans que se n'acabi l'actual.
 
-    El de la FCB va a part, perquè la graella és una altra i perquè encara no en
-    tenim URL estable. Amb el PDF a mà:
+    El de la FCB va a part perquè la graella és una altra, però tampoc no li cal
+    res: se'l busca al gestor de fitxers del WordPress i n'agafa la revisió més
+    nova de la temporada més nova.
 
-        fcbillar ingest-calendari --font FCB --versio V-1 \\
-            --fitxer "CALENDARI FCB 2026-27 V-1.pdf" --url <on és publicat>
+        fcbillar ingest-calendari --font FCB
+
+    Amb `--fitxer` es llegeix un PDF concret, que serveix per a una revisió que
+    encara no hagin penjat o per rellegir-ne una de vella.
     """
     from pathlib import Path
 

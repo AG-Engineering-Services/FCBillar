@@ -160,6 +160,14 @@ jobs:
           # PDF no ha canviat, surt per ETag sense parsejar res.
           run "ingest-calendari"     uv run --no-dev fcbillar ingest-calendari
 
+          # I el de la FCB, que és una graella diferent i va a part. Fins al 6 de
+          # setembre de 2026 el pas de sobre només en REGISTRAVA les revisions:
+          # quan la federació en penjava una de nova quedava apuntada a
+          # `calendari_versions` i els esdeveniments es quedaven a la d'abans
+          # fins que algú l'ingeria a mà. Ja no li cal res -es busca la revisió
+          # més nova sol- i si no ha canviat surt pel sha256 sense parsejar.
+          run "calendari-fcb"        uv run --no-dev fcbillar ingest-calendari --font FCB
+
           # Calendari de cada grup de la lliga: un PDF per grup, i sense arguments
           # se'ls busca al sitemap de documents del WordPress. És l'única font que
           # els té: el 6 de setembre de 2026, amb els dotze grups de la 26/27 ja

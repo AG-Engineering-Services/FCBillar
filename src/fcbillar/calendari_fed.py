@@ -609,13 +609,20 @@ def descobreix_fcb(html: str | None = None) -> list[CalendariFCB]:
 
 
 def _pagines_de_calendari() -> list[str]:
-    """Les pàgines de document del web que parlen de calendari."""
+    """Les pàgines de document del web que parlen del calendari de la temporada.
+
+    Els calendaris de grup de la lliga també diuen «calendari» a l'adreça i
+    n'hi ha dotze: baixar-los per llençar-los després són dotze peticions cada
+    nit per no res. Els llegeix `calendari_lliga.descobreix_grups`.
+    """
     import httpx
 
     with httpx.Client(follow_redirects=True, timeout=60.0) as client:
         sitemap = client.get(FCB_SITEMAP_DOCS).text
         enllacos = [
-            u for u in re.findall(r"<loc>([^<]+)</loc>", sitemap) if "calendari" in u.lower()
+            u
+            for u in re.findall(r"<loc>([^<]+)</loc>", sitemap)
+            if "calendari" in u.lower() and not _RE_CAL_DE_GRUP.search(u)
         ]
         return [client.get(u).text for u in enllacos]
 
