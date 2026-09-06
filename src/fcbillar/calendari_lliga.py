@@ -2,10 +2,15 @@
 
 La federació publica un PDF per grup («CALENDARI LLIGA TRES BANDES 2026-27
 PRIMERA GRUP B») amb les catorze jornades i, per a cadascuna, la data i els
-quatre encontres. És l'única font que concreta **el dia** de cada jornada: el
-calendari esportiu general que llegeix `calendari_fed.py` només diu quina
-setmana es juga, i per això la graella federativa de la zona soci va per
-setmanes i no per dies.
+encontres. És l'única font que concreta **el dia** de cada jornada: el calendari
+esportiu general que llegeix `calendari_fed.py` només diu quina setmana es juga,
+i per això la graella federativa de la zona soci va per setmanes i no per dies.
+
+I el 6 de setembre de 2026, quan van publicar de cop els dotze grups de la
+26/27, va resultar ser l'única font de res: la intranet responia 500 a
+`lligues/grups` i la pàgina de divisions no tenia ni un enllaç. `descobreix_grups()`
+els busca al sitemap de documents del WordPress, que és l'únic lloc on hi són
+tots —la federació no els enllaça des de cap pantalla.
 
 ## Com és el PDF
 
@@ -24,6 +29,16 @@ forma part de cap encontre.
 No es llegeix per línies de text: els noms d'equip porten espais i les columnes
 es barrejarien. Es llegeix per posició — les paraules d'una fila es reparteixen
 en columnes allà on hi ha un salt horitzontal ample.
+
+I les columnes s'agrupen entre files **pel centre**, no per on comencen: el text
+hi va centrat, o sigui que el principi es mou amb la llargada del nom de l'equip.
+Fent-ho pel principi, la columna del visitant de la 1a divisió grup A ballava
+25,9 punts —més que el llindar de columna—, es partia en dues i les files del mig
+no cabien ni en una ni en l'altra. Pel centre, aquella mateixa columna balla 0,1.
+
+Un forat així no s'assembla a un error: el que en surt continua sent un
+calendari. Per això hi ha `problemes()`, que comprova el que ha de ser cert
+sempre, i per això el comandament no desa res si algun grup no quadra.
 
 ## Les dates que la federació s'equivoca
 
