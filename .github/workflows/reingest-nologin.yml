@@ -138,7 +138,13 @@ jobs:
           run() { local name="$1"; shift; echo "::group::$name"; "$@"; local rc=$?; echo "exit=$rc"; echo "::endgroup::"; if [ "$rc" -eq 0 ]; then NOK=$((NOK+1)); else NFAIL=$((NFAIL+1)); fi; }
 
           # Pàgines públiques (Chromium amb sessió buida — n'hi ha prou)
-          run "ingest-lliga"         uv run --no-dev fcbillar ingest-lliga 36
+          # Sense id: les lligues que la federació té obertes ARA. Fins al 7 de
+          # setembre de 2026 hi deia `36`, la Tres Bandes de la 25/26, i quan va
+          # començar la temporada nova aquest pas va continuar reingerint la
+          # vella cada nit -sortint OK- mentre la 26/27 no l'agafava ningú. El
+          # dia que ho vam mirar, la federació ja publicava cinc grups de la 38 i
+          # al núvol n'hi havia un.
+          run "ingest-lliga"         uv run --no-dev fcbillar ingest-lliga
           run "ingest-copa"          uv run --no-dev fcbillar ingest-copa "$COPA_EDICIO"
           run "ingest-individuals"   uv run --no-dev fcbillar ingest-individuals
           run "scrape-current-opens" uv run --no-dev python -m fcb_opens.cli scrape-current-opens

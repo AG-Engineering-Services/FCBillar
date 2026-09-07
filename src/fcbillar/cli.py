@@ -406,15 +406,51 @@ def ingest_lliga_grup_cmd(
 
 @app.command("ingest-lliga")
 def ingest_lliga_cmd(
-    lliga_id: int = typer.Argument(36, help="Id de la lliga (36=TRES BANDES, 37=4 MODALITATS)"),
+    lliga_id: int = typer.Argument(
+        None, help="Id de la lliga. Sense id, les que la federació té obertes."
+    ),
     modalitat: int = typer.Option(1, "--modalitat", help="Codi de modalitat"),
     create_missing_players: bool = typer.Option(
         False, "--create-missing-players", help="Crea placeholders pels jugadors no registrats"
     ),
 ) -> None:
     """Ingest de TOTA una lliga: descobreix divisions+grups (incloses PROMOCIONS i
-    FINALS) i ingest totes les jornades de cada grup. Pàgines públiques (no login)."""
+    FINALS) i ingest totes les jornades de cada grup. Pàgines públiques (no login).
+
+    Sense id s'ingereixen les lligues que la federació té obertes, que és el que
+    ha de fer la ingesta diària. Un id fix envelleix sense avisar: la nocturna
+    duia `36` -la Tres Bandes de la 25/26- i quan va començar la temporada nova
+    va continuar reingerint la vella cada nit, sense fallar mai i sense agafar
+    ni una de les dades de la 26/27.
+    """
     settings = get_settings()
+
+    if lliga_id is None:
+        from fcbillar.inscrits_lliga import llegeix_lligues
+
+        with ScraperClient(settings) as client:
+            obertes, descartades = llegeix_lligues(client)
+        # Cap lliga oberta no és una resposta: o s'ha acabat la temporada o el
+        # llistat ha canviat de forma. Ingerir «res» sense dir-ho seria el mateix
+        # error d'abans amb una altra cara.
+        if not obertes:
+            console.print("[red]El llistat de lligues no en dona cap d'oberta.[/]")
+            raise typer.Exit(1)
+        for linia in descartades:
+            console.print(f"  [yellow]fila del llistat sense interpretar:[/] {linia}")
+        console.print(
+            "[cyan]Lligues obertes: "
+            + ", ".join(f"{ll.lliga_id} {ll.nom}" for ll in obertes)
+            + "[/]"
+        )
+        for ll in obertes:
+            ingest_lliga_cmd(
+                lliga_id=ll.lliga_id,
+                modalitat=modalitat,
+                create_missing_players=create_missing_players,
+            )
+        return
+
     tot_enc = tot_up = tot_skip = 0
     with ScraperClient(settings) as client:
         tree = discover_lliga(client, lliga_id, depth=2)
