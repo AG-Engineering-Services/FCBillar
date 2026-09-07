@@ -458,6 +458,12 @@ def ingest_lliga_cmd(
         console.print(
             f"[cyan]Lliga {lliga_id}: {len(tree.divisions)} divisions, {n_grups} grups[/]"
         )
+        # Els noms es desen aquí i no en una comanda a part que s'executa «un cop
+        # per temporada»: la publicació els necessita per saber quins grups hi ha,
+        # i el 7 de setembre de 2026 la federació ja en publicava cinc de la 26/27
+        # mentre al núvol n'hi havia un, perquè ningú no havia tornat a executar
+        # `discover-lliga-noms` des de la temporada anterior.
+        _desa_noms_de_lliga(ensure_schema(settings.db_path), lliga_id, tree)
         for div in tree.divisions:
             for grup in tree.grups_by_div.get(div.divisio_id, []):
                 try:
@@ -520,45 +526,63 @@ def discover_lliga_cmd(
                         )
 
 
+def _desa_noms_de_lliga(conn, lliga_id: int, tree) -> int:
+    """Desa a `lliga_noms` com es diuen les divisions i els grups d'una lliga.
+
+    Els encontres només porten ids numèrics, i `publish-cloud` treu d'aquí la
+    llista de grups a publicar. O sigui que un grup que no hi és no arriba al
+    núvol encara que la federació el publiqui, i no ho diu ningú: la publicació
+    surt bé, només que amb un grup de menys.
+    """
+    total = 0
+    for div in tree.divisions:
+        conn.execute(
+            "INSERT OR REPLACE INTO lliga_noms (lliga_id, divisio_id, grup_id, nom) "
+            "VALUES (?, ?, 0, ?)",
+            (lliga_id, div.divisio_id, div.nom),
+        )
+        total += 1
+        for grup in tree.grups_by_div.get(div.divisio_id, []):
+            conn.execute(
+                "INSERT OR REPLACE INTO lliga_noms (lliga_id, divisio_id, grup_id, nom) "
+                "VALUES (?, ?, ?, ?)",
+                (lliga_id, div.divisio_id, grup.grup_id, grup.nom),
+            )
+            total += 1
+    conn.commit()
+    return total
+
+
 @app.command("discover-lliga-noms")
 def discover_lliga_noms_cmd(
     lligues: list[int] = typer.Argument(
-        None, help="Ids de lligues a descobrir (per defecte 36 i 37)"
+        None, help="Ids de lligues. Sense cap, les que la federació té obertes."
     ),
 ) -> None:
     """Descobreix i desa els noms de divisions i grups de lliga (taula lliga_noms).
 
     Els encontres només desen ids numèrics; aquesta comanda omple els noms
     llegibles perquè la web app mostri les classificacions per categoria amb
-    noms reals. Executa-la un cop per temporada (pàgines públiques, sense login).
+    noms reals. Ja no cal executar-la a mà cada temporada: `ingest-lliga` desa
+    els noms del que recorre, que és el mateix arbre.
     """
     settings = get_settings()
     conn = ensure_schema(settings.db_path)
-    targets = lligues or [36, 37]
     total = 0
     with ScraperClient(settings) as client:
-        for lliga_id in targets:
+        if not lligues:
+            from fcbillar.inscrits_lliga import llegeix_lligues
+
+            obertes, _ = llegeix_lligues(client)
+            lligues = [ll.lliga_id for ll in obertes]
+        for lliga_id in lligues:
             try:
                 tree = discover_lliga(client, lliga_id, depth=2)
             except Exception as e:  # noqa: BLE001
                 console.print(f"[red]FAIL lliga {lliga_id}: {e}[/]")
                 continue
-            for div in tree.divisions:
-                conn.execute(
-                    "INSERT OR REPLACE INTO lliga_noms (lliga_id, divisio_id, grup_id, nom) "
-                    "VALUES (?, ?, 0, ?)",
-                    (lliga_id, div.divisio_id, div.nom),
-                )
-                total += 1
-                for grup in tree.grups_by_div.get(div.divisio_id, []):
-                    conn.execute(
-                        "INSERT OR REPLACE INTO lliga_noms (lliga_id, divisio_id, grup_id, nom) "
-                        "VALUES (?, ?, ?, ?)",
-                        (lliga_id, div.divisio_id, grup.grup_id, grup.nom),
-                    )
-                    total += 1
+            total += _desa_noms_de_lliga(conn, lliga_id, tree)
             console.print(f"[green]Lliga {lliga_id}: {len(tree.divisions)} divisions desades[/]")
-    conn.commit()
     console.print(f"[green]OK {total} noms de lliga desats a lliga_noms.[/]")
 
 
