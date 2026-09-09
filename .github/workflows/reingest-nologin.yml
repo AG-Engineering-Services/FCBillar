@@ -183,6 +183,14 @@ jobs:
           # i perquè el comandament no desa res si algun grup surt amb forats.
           run "calendari-lliga"      uv run --no-dev fcbillar ingest-calendari-lliga
 
+          # Qui inscriu cada club a cada lliga, tal com ho publica la federació.
+          # Va cada dia perquè la van corregint: la llista d'un club pot canviar
+          # setmanes després de publicada -a Sants hi va sortir un jugador que no
+          # s'hi havia apuntat-, i mentre no es tornés a ingerir la pàgina
+          # ensenyava la primera versió per sempre. Ha d'anar ABANS de
+          # `plantilles`, que la fa servir, i abans de publicar.
+          run "inscrits-lliga"       uv run --no-dev fcbillar ingest-inscrits-lliga
+
           # De qui està fet cada club, estimat. Depèn del que s'acaba d'ingerir -qui
           # ha jugat- i del llistat de divisions, i s'ha de refer abans de publicar
           # o es publicaria la d'ahir. L'ordre no balla: el rànquing de referència
