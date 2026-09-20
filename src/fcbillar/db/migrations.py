@@ -67,6 +67,9 @@ Versions:
      punts i la mitjana: la classificació de cada grup d'una fase d'individual,
      que la federació publica a la mateixa pàgina de les partides i que no
      llegia ningú. És l'única cosa que diu qui s'ha classificat.
+- 28: `torneig_fases.regla` i `.places` (qui passa de ronda, tal com ho escriu
+     el PDF del sorteig) i `torneig_ronda_projectada`, la ronda següent
+     projectada mentre la federació no la publiqui. Es retira sola.
 - 27: `torneig_fase_grups.serie_major` — el quart criteri de desempat del
      rànquing d'una fase, després de la posició al grup, els punts i la mitjana.
      No surt a la taula de classificació del grup: es calcula de les partides.
@@ -90,7 +93,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 27
+SCHEMA_VERSION = 28
 
 
 def _read_schema_sql() -> str:
@@ -581,6 +584,21 @@ def _migrate_to_v27(conn: sqlite3.Connection) -> None:
         log.info("→v27: afegida columna torneig_fase_grups.serie_major")
 
 
+def _migrate_to_v28(conn: sqlite3.Connection) -> None:
+    """La regla de classificació d'una fase, i la ronda següent projectada.
+
+    La taula nova la crea l'executescript; aquí només hi van les dues columnes de
+    `torneig_fases`.
+    """
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(torneig_fases)").fetchall()}
+    if not cols:
+        return
+    for nom, tipus in (("regla", "TEXT"), ("places", "INTEGER")):
+        if nom not in cols:
+            conn.execute(f"ALTER TABLE torneig_fases ADD COLUMN {nom} {tipus}")
+            log.info("→v28: afegida columna torneig_fases.%s", nom)
+
+
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
     conn = connect(db_path)
     version = current_version(conn)
@@ -632,6 +650,9 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v27: la sèrie major de cada jugador a cada ronda.
     if 1 <= version < 27:
         _migrate_to_v27(conn)
+    # → v28: la regla de classificació d'una fase i la ronda projectada.
+    if 1 <= version < 28:
+        _migrate_to_v28(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

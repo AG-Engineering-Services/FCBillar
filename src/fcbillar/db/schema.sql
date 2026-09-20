@@ -329,6 +329,15 @@ CREATE TABLE IF NOT EXISTS torneig_fases (
     nom             TEXT,
     tipus           TEXT,                -- 'grups' | 'ko'
     ordre           INTEGER,
+    -- v28: qui passa de ronda, tal com ho escriu el PDF del sorteig:
+    -- «Es classificaran per a la prèvia, els primers de cada grup i els set
+    -- millors segons.» Es desa la frase i no la interpretació, perquè és el que
+    -- diu la federació; el nombre de places en surt de llegir-la.
+    regla           TEXT,
+    -- v28: les places que en surten (11 primers + 7 segons = 18). Es calcula de
+    -- la regla i del nombre de grups de la fase, i es desa perquè el nombre de
+    -- grups pot canviar després.
+    places          INTEGER,
     UNIQUE (torneig_id, fase_id_extern)
 );
 
@@ -639,3 +648,38 @@ CREATE INDEX IF NOT EXISTS ix_afiliacions_jugador
     ON afiliacions(temporada, jugador);
 CREATE INDEX IF NOT EXISTS ix_afiliacions_club
     ON afiliacions(temporada, club);
+
+-- La ronda següent d'un campionat, projectada mentre la federació no la publiqui.
+--
+-- Quan s'acaba una pre-prèvia ja se sap QUI passa —la regla és al PDF del sorteig
+-- i l'ordre entre grups es calcula— però la federació tarda dies a publicar COM
+-- queden repartits. Això es projecta, com el rànquing provisional, i la publicació
+-- oficial el substitueix.
+--
+-- Què és exacte i què no:
+--
+--   qui passa      -> la regla del PDF + la classificació publicada.  EXACTE
+--   quin bombo     -> del nombre de places i la mida de grup.         EXACTE
+--   quin grup      -> el repartiment que fem nosaltres.               PROJECCIÓ
+--
+-- L'última no es pot encertar: el sorteig de la federació és GEOGRÀFIC. Al PDF de
+-- la prèvia d'Honor de 2026-27 la seu de cada grup té sempre jugadors de casa i
+-- els clubs no se separen —tres del Granollers al mateix grup—, i les seus no es
+-- publiquen fins que surt el sorteig.
+--
+-- Es retira sola: `projeccio_ronda.ja_publicada` mira si la ronda ja té grups a
+-- `torneig_fase_grups`, i si en té, la projecció se'n va.
+CREATE TABLE IF NOT EXISTS torneig_ronda_projectada (
+    torneig_id      INTEGER NOT NULL REFERENCES torneigs_individuals(id) ON DELETE CASCADE,
+    -- La fase d'on surten els classificats (la que s'acaba de jugar).
+    fase_origen_id  INTEGER NOT NULL REFERENCES torneig_fases(id) ON DELETE CASCADE,
+    ronda           TEXT NOT NULL,          -- 'PRÈVIA', la ronda projectada
+    jugador_nom     TEXT NOT NULL,
+    posicio         INTEGER NOT NULL,       -- l'ordre al rànquing de la ronda jugada
+    bombo           INTEGER NOT NULL,
+    grup_projectat  TEXT NOT NULL,
+    mida_grup       INTEGER NOT NULL,
+    PRIMARY KEY (torneig_id, ronda, jugador_nom)
+);
+CREATE INDEX IF NOT EXISTS ix_ronda_projectada_torneig
+    ON torneig_ronda_projectada(torneig_id, ronda);

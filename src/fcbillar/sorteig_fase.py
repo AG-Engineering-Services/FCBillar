@@ -477,3 +477,99 @@ def casa_amb_fase(titol: str, divisio_nom: str, fase_nom: str) -> bool:
     if not div or not fase:
         return False
     return div in t and f" {fase} " in t
+
+
+# --------------------------- la regla, lligada a la seva fase ---------------------------
+
+
+def desa_regles(conn, client=None, temporada: str | None = None) -> tuple[int, list[str]]:
+    """Llegeix els PDF de sorteig publicats i desa la regla a la seva fase.
+
+    És el que fa que la projecció de la ronda següent es pugui calcular sola: sense
+    la regla no se sap quantes places hi ha, i la regla només és al PDF.
+
+    El lligam PDF → fase va pel títol, que porta la divisió i la ronda
+    («Pre-Prèvies 3 bandes 1a Divisió» → divisió «1a DIVISIÓ», fase «PRE-PRÈVIA»).
+    Vegeu `casa_amb_fase`, que iguala el plural i no confon «PRÈVIA» amb
+    «PRE-PRÈVIA».
+
+    Les places es calculen de la regla i del nombre de grups que té la fase, i es
+    desen: el nombre de grups pot canviar després i la xifra que valia el dia del
+    sorteig és la que manava.
+
+    Retorna (quantes fases actualitzades, avisos).
+    """
+    import httpx
+
+    propi = client is None
+    client = client or httpx.Client(follow_redirects=True, timeout=60.0)
+    avisos: list[str] = []
+    n = 0
+    try:
+        from fcbillar.config import get_settings
+
+        cache = get_settings().cache_dir
+        for pub in descobreix(client):
+            desti = cache / pub.nom_fitxer
+            if not desti.exists():
+                desti.parent.mkdir(parents=True, exist_ok=True)
+                desti.write_bytes(client.get(pub.url).content)
+            sorteig = llegeix(desti)
+            if not sorteig.regla:
+                avisos.append(f"{pub.nom_fitxer}: no hi trobo la regla de classificació")
+                continue
+            regla_llegida = classificats(sorteig.regla)
+            if regla_llegida is None:
+                avisos.append(f"{sorteig.titol}: la regla no encaixa amb cap patró conegut")
+                continue
+
+            # Quina fase és: es comparen el títol del PDF amb la divisió i la fase.
+            # Només les fases de la temporada en curs.
+            #
+            # El PDF del sorteig és d'enguany, i les divisions es diuen igual cada
+            # any: sense filtrar, «Pre-Prèvies 3 bandes 1a Divisió» casava també
+            # amb la 1a divisió de la temporada passada i li escrivia la regla
+            # d'ara a sobre —amb un nombre de places calculat dels SEUS grups, que
+            # eren dotze i no onze, i per tant 19 en lloc de 18.
+            fases = conn.execute(
+                """
+                SELECT f.id, f.nom, ti.nom AS torneig,
+                       (SELECT COUNT(DISTINCT grup_nom) FROM torneig_fase_grups g
+                         WHERE g.fase_id = f.id) AS grups
+                  FROM torneig_fases f
+                  JOIN torneigs_individuals ti ON ti.id = f.torneig_id
+                  JOIN temporades te ON te.id = ti.temporada_id
+                 WHERE f.tipus = 'grups'
+                   AND te.nom = COALESCE(
+                         ?, (SELECT nom FROM temporades ORDER BY nom DESC LIMIT 1))
+                """,
+                (temporada,),
+            ).fetchall()
+
+            # Del nom del torneig se n'agafa la DIVISIÓ i no el nom sencer:
+            # `torneigs_individuals.nom` és «TRES BANDES INDIVIDUAL - 2A DIVISIÓ» i
+            # el títol del PDF, «Pre-Prèvia 3 Bandes 2a Divisió». Comparant-los
+            # sencers no casen mai, perquè el PDF no diu «INDIVIDUAL».
+            def _divisio(nom_torneig: str) -> str:
+                return nom_torneig.rsplit(" - ", 1)[-1] if " - " in nom_torneig else nom_torneig
+
+            casades = [
+                f
+                for f in fases
+                if casa_amb_fase(sorteig.titol, _divisio(f["torneig"] or ""), f["nom"] or "")
+            ]
+            if not casades:
+                avisos.append(f"{sorteig.titol}: no sé a quina fase correspon")
+                continue
+            for f in casades:
+                places = regla_llegida.places(f["grups"] or 0) if f["grups"] else None
+                conn.execute(
+                    "UPDATE torneig_fases SET regla = ?, places = ? WHERE id = ?",
+                    (sorteig.regla, places, f["id"]),
+                )
+                n += 1
+        conn.commit()
+    finally:
+        if propi:
+            client.close()
+    return n, avisos
