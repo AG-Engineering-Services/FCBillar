@@ -2355,7 +2355,69 @@ def publish_lliga_encontres(
     counts = {}
     counts["lliga_encontres"] = _upsert(sb, "lliga_encontres", enc_rows, "encontre_id", prog)
     counts["lliga_partides"] = _upsert(sb, "lliga_partides", part_rows, "encontre_id,ordre", prog)
+
+    # I ara es retira el que sobra, que sense això es veien encontres DUPLICATS.
+    #
+    # `encontre_id` al núvol és l'`id` LOCAL de la taula, i un id local no és per
+    # sempre: la migració v23 va refer `encontres_lliga` -calia, que la identitat
+    # d'un encontre havia de passar a ser l'emparellament- i en refer-la els ids es
+    # van tornar a repartir. Cada fila publicada abans va quedar orfe al núvol, amb
+    # el seu id vell, i com que aquí només s'hi feia un upsert s'hi va quedar al
+    # costat de la nova: el mateix encontre dues vegades, amb el mateix resultat.
+    # Eren 23, i sis de la primera jornada d'aquesta temporada.
+    #
+    # La regla és la mateixa que a les altres publicacions: el núvol és una còpia
+    # del local i no pot tenir una fila que el local no tingui. Es mira contra TOTS
+    # els encontres locals i no contra els d'aquesta publicació -que només porta la
+    # lliga de tres bandes de la temporada en curs-, perquè si no s'enduria les
+    # temporades anteriors, que són bones i ningú no torna a publicar.
+    ids_locals = {r[0] for r in conn.execute("SELECT id FROM encontres_lliga")}
     conn.close()
+
+    def _tots(taula: str, camps: str) -> list[dict]:
+        fora: list[dict] = []
+        pas, desde = 1000, 0
+        while True:
+            tram = sb.table(taula).select(camps).range(desde, desde + pas - 1).execute().data or []
+            fora.extend(tram)
+            if len(tram) < pas:
+                return fora
+            desde += pas
+
+    orfes = sorted({r["encontre_id"] for r in _tots("lliga_encontres", "encontre_id")} - ids_locals)
+    for i in range(0, len(orfes), 50):
+        tram = orfes[i : i + 50]
+        # Primer les partides: pengen de l'encontre.
+        sb.table("lliga_partides").delete().in_("encontre_id", tram).execute()
+        sb.table("lliga_encontres").delete().in_("encontre_id", tram).execute()
+    if orfes:
+        prog("ok", f"lliga_encontres: {len(orfes)} encontres orfes retirats (i les seves partides)")
+    counts["lliga_encontres_retirats"] = len(orfes)
+
+    # I les partides que sobren d'un encontre que SÍ que hi és: si una acta passa de
+    # quatre partides a tres, la quarta es quedava.
+    per_encontre: dict[int, int] = defaultdict(int)
+    for r in part_rows:
+        per_encontre[r["encontre_id"]] = max(per_encontre[r["encontre_id"]], r["ordre"])
+    publicats = {e["encontre_id"] for e in enc_rows}
+    per_quantes: dict[int, list[int]] = defaultdict(list)
+    for eid in publicats:
+        per_quantes[per_encontre.get(eid, 0)].append(eid)
+    sobrants = 0
+    for quantes, eids in per_quantes.items():
+        for i in range(0, len(eids), 50):
+            tram = eids[i : i + 50]
+            res = (
+                sb.table("lliga_partides")
+                .delete()
+                .in_("encontre_id", tram)
+                .gt("ordre", quantes)
+                .execute()
+            )
+            sobrants += len(res.data or [])
+    if sobrants:
+        prog("ok", f"lliga_partides: {sobrants} partides retirades (ja no son a l'acta)")
+    counts["lliga_partides_retirades"] = sobrants
     return counts
 
 
@@ -2688,6 +2750,22 @@ def publish_ronda_projectada(
         conn.close()
         return {"open_ronda_projectada": 0}
     conn.close()
+
+    # Cap projecció a la base local vol dir «no en sé res», no «no n'hi ha cap».
+    #
+    # La retirada d'aquí baixa serveix per a quan la federació publica els grups
+    # d'una ronda: la projecció d'aquella ronda desapareix del local i se l'ha
+    # d'endur del núvol. Però si la taula local queda BUIDA del tot, això no ha
+    # passat: el més probable és que la projecció no s'hagi pogut calcular -sense
+    # la regla del PDF del sorteig no es projecta res, i el PDF es va a buscar per
+    # xarxa cada nit-, i llavors retirar-ho tot deixaria la pàgina del campionat
+    # sense la ronda que ve sense que ningú n'hagi publicat cap grup.
+    #
+    # És la mateixa regla que `publish_afiliacions`, i pel mateix motiu: una font
+    # que falla no és una font que diu que no hi ha res.
+    if not rows:
+        prog("warn", "cap ronda projectada a la BD local: no publico ni retiro res")
+        return {"open_ronda_projectada": 0}
 
     n = _upsert(sb, "open_ronda_projectada", rows, "open_id,ronda,jugador", prog)
 

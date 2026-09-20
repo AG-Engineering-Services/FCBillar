@@ -23,6 +23,7 @@ classificació oficial ha respost», que és l'única que fa de cens dels equips
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -36,7 +37,8 @@ class TaulaFalsa:
 
     def __init__(self, magatzem: dict[str, list[dict]], nom: str) -> None:
         self._m, self._nom = magatzem, nom
-        self._filtres: list[tuple[str, Any]] = []
+        # Predicats i no parelles camp/valor: hi ha filtres que no son igualtats.
+        self._filtres: list[Callable[[dict], bool]] = []
         self._accio = ""
         self._tram: tuple[int, int] | None = None
 
@@ -54,7 +56,16 @@ class TaulaFalsa:
         return self
 
     def eq(self, camp: str, valor: Any) -> TaulaFalsa:
-        self._filtres.append((camp, valor))
+        self._filtres.append(lambda f: f.get(camp) == valor)
+        return self
+
+    def in_(self, camp: str, valors: list[Any]) -> TaulaFalsa:
+        conjunt = set(valors)
+        self._filtres.append(lambda f: f.get(camp) in conjunt)
+        return self
+
+    def gt(self, camp: str, valor: Any) -> TaulaFalsa:
+        self._filtres.append(lambda f: f.get(camp) is not None and f.get(camp) > valor)
         return self
 
     def limit(self, _n: int) -> TaulaFalsa:
@@ -70,7 +81,12 @@ class TaulaFalsa:
         if self._accio == "upsert":
             files.extend(self._files)
         elif self._accio == "delete":
-            self._m[self._nom] = [f for f in files if any(f.get(c) != v for c, v in self._filtres)]
+            # Un `delete` s'endu les files que compleixen TOTS els filtres, i
+            # retorna les que s'ha endut: es el que fa supabase-py, que demana la
+            # representacio, i hi ha codi que les compta.
+            fora = [f for f in files if all(p(f) for p in self._filtres)]
+            self._m[self._nom] = [f for f in files if f not in fora]
+            return type("Res", (), {"data": fora, "count": len(fora)})()
         dades = list(self._m.get(self._nom, []))
         if self._tram is not None:
             dades = dades[self._tram[0] : self._tram[1] + 1]

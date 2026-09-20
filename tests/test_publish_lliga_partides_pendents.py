@@ -104,3 +104,45 @@ def test_quan_el_ranquing_la_publica_no_surt_dues_vegades(entorn) -> None:
     assert counts["lliga_partides"] == 4, "quatre partides, no cinc"
     noms = [f["jugador_local"] for f in files]
     assert noms.count("SÁNCHEZ MARTÍNEZ, PASCUAL") == 1
+
+
+def test_els_encontres_sense_fila_local_es_retiren(entorn) -> None:
+    """El núvol no pot tenir un encontre que la base local ja no té.
+
+    `encontre_id` al núvol és l'`id` LOCAL, i un id local no és per sempre: la
+    migració v23 va refer `encontres_lliga` —la identitat d'un encontre havia de
+    passar a ser l'emparellament— i en refer-la els ids es van tornar a repartir.
+    Cada fila publicada abans va quedar orfe amb el seu id vell i, com que aquí
+    només s'hi feia un upsert, s'hi quedava al costat de la nova: el mateix
+    encontre dues vegades, amb el mateix resultat i la mateixa data. N'hi havia
+    23, i sis de la primera jornada de la 26/27.
+
+    I les partides que sobren d'un encontre que sí que hi és: si una acta passa de
+    quatre partides a tres, la quarta es quedava.
+    """
+    db, magatzem, _mod = entorn
+    magatzem["lliga_encontres"] = [
+        {
+            "encontre_id": 999,  # el mateix encontre amb l'id d'abans de la v23
+            "divisio_id": 159,
+            "grup_id": 343,
+            "jornada": 1,
+            "data": "2026-09-26",
+            "equip_local": "C.B.BANYOLES A",
+            "equip_visitant": "B.C.GRANOLLERS A",
+            "gols_local": 0,
+            "gols_visitant": 3,
+        }
+    ]
+    magatzem["lliga_partides"] = [
+        {"encontre_id": 999, "ordre": 1, "jugador_local": "QUI SIGUI"},
+        {"encontre_id": 500, "ordre": 5, "jugador_local": "UNA QUE JA NO ES A L'ACTA"},
+    ]
+
+    counts = cloud_sync.publish_lliga_encontres(db_path=db)
+
+    assert counts["lliga_encontres_retirats"] == 1
+    assert {f["encontre_id"] for f in magatzem["lliga_encontres"]} == {500}
+    assert counts["lliga_partides_retirades"] == 1
+    assert {f["encontre_id"] for f in magatzem["lliga_partides"]} == {500}
+    assert {f["ordre"] for f in magatzem["lliga_partides"]} == {1, 2, 3, 4}
