@@ -1126,6 +1126,7 @@ def publish_cloud_cmd() -> None:
         publish_player_clubs,
         publish_provisional_ranking,
         publish_rankings,
+        publish_ronda_projectada,
         publish_rating_buckets,
     )
 

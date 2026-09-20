@@ -2435,18 +2435,33 @@ def publish_open_partides(
             "SELECT id, torneig_id_extern, divisio_id_extern FROM torneigs_individuals"
         )
     }
+    # De l'id INTERN de la fase al de la FEDERACIÓ.
+    #
+    # `torneig_partides.fase_id` porta l'id intern de `torneig_fases`, i
+    # `publish_open_fases` publica l'extern. Publicant-los tal qual, les dues
+    # taules del núvol parlaven de fases diferents —la 105 i la 808— i el filtre
+    # per fase de la pàgina no trobava cap partida: la classificació de cada grup
+    # es veia i els resultats no.
+    #
+    # Manda l'extern, que és l'identificador que la federació dona a la fase i el
+    # que `open_fases` i `open_fase_ranquing` ja fan servir.
+    fase_extern = {
+        r["id"]: r["fase_id_extern"]
+        for r in conn.execute("SELECT id, fase_id_extern FROM torneig_fases")
+    }
     counter: dict = defaultdict(int)
     rows = []
     for r in conn.execute("SELECT * FROM torneig_partides"):
         oid = idmap.get((r["torneig_id_extern"], r["divisio_id_extern"]))
         if oid is None:
             continue
-        key = (oid, r["fase_id"])
+        fid = fase_extern.get(r["fase_id"], r["fase_id"])
+        key = (oid, fid)
         counter[key] += 1
         rows.append(
             {
                 "open_id": oid,
-                "fase_id": r["fase_id"],
+                "fase_id": fid,
                 "ordre": counter[key],
                 "grup_nom": r["grup_nom"],
                 "jugador_local": r["player1_nom"],
@@ -2605,6 +2620,103 @@ def publish_open_fases(
     )
     conn.close()
     return counts
+
+
+def publish_ronda_projectada(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """La ronda següent d'un campionat, projectada mentre la federació no la publiqui.
+
+    Es RETIRA el que sobra a cada publicació, i això no és opcional: quan la
+    federació penja els grups de debò, la projecció desapareix de la base local, i
+    si aquí només s'hi fes un upsert es quedaria per sempre al núvol al costat dels
+    grups bons. Com que la taula és petita i sencera —surt tota de la base local—,
+    es pot comparar amb el que hi ha i treure'n la diferència.
+
+    Del que hi va, el que val de debò és el BOMBO; el grup és una projecció. Vegeu
+    `projeccio_ronda`.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    by_norm = _players_by_norm(conn)
+
+    def _nm(nom: str) -> str:
+        import unicodedata as _ud
+
+        n = "".join(c for c in _ud.normalize("NFD", nom or "") if _ud.category(c) != "Mn")
+        return " ".join(n.strip().lower().split())
+
+    clubs: dict[str, str] = {}
+    try:
+        for r in conn.execute(
+            "SELECT jugador, club FROM afiliacions WHERE competicio = 'INDIVIDUAL'"
+        ):
+            clubs.setdefault(_nm(r["jugador"]), r["club"])
+    except sqlite3.OperationalError:
+        pass
+
+    rows: list[dict] = []
+    try:
+        for r in conn.execute(
+            """
+            SELECT p.torneig_id AS open_id, p.ronda, p.jugador_nom, p.posicio, p.bombo,
+                   p.grup_projectat, p.mida_grup
+              FROM torneig_ronda_projectada p
+             ORDER BY p.torneig_id, p.ronda, p.posicio
+            """
+        ):
+            hit = by_norm.get(_nm(r["jugador_nom"]))
+            rows.append(
+                {
+                    "open_id": r["open_id"],
+                    "ronda": r["ronda"],
+                    "jugador": _disp(r["jugador_nom"]),
+                    "player_fcb_id": hit[0] if hit else None,
+                    "posicio": r["posicio"],
+                    "bombo": r["bombo"],
+                    "grup_projectat": r["grup_projectat"],
+                    "mida_grup": r["mida_grup"],
+                    "club": clubs.get(_nm(r["jugador_nom"])),
+                }
+            )
+    except sqlite3.OperationalError:
+        prog("warn", "no hi ha `torneig_ronda_projectada` a la BD local")
+        conn.close()
+        return {"open_ronda_projectada": 0}
+    conn.close()
+
+    n = _upsert(sb, "open_ronda_projectada", rows, "open_id,ronda,jugador", prog)
+
+    # I fora el que ja no hi és: una projecció que la federació ha substituït.
+    vives = {(r["open_id"], r["ronda"], r["jugador"]) for r in rows}
+    retirades = 0
+    try:
+        actuals = (
+            sb.table("open_ronda_projectada")
+            .select("open_id,ronda,jugador")
+            .range(0, 9999)
+            .execute()
+            .data
+            or []
+        )
+    except Exception as e:
+        prog("warn", f"open_ronda_projectada: no s'ha pogut llegir per retirar ({e})")
+        actuals = []
+    for x in actuals:
+        clau = (x["open_id"], x["ronda"], x["jugador"])
+        if clau in vives:
+            continue
+        sb.table("open_ronda_projectada").delete().eq("open_id", x["open_id"]).eq(
+            "ronda", x["ronda"]
+        ).eq("jugador", x["jugador"]).execute()
+        retirades += 1
+    if retirades:
+        prog("ok", f"open_ronda_projectada: {retirades} files retirades (ja no es projecten)")
+    return {"open_ronda_projectada": n, "ronda_projectada_retirades": retirades}
 
 
 def _players_by_norm(conn) -> dict[str, tuple[str, str]]:
