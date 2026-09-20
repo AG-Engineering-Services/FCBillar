@@ -154,9 +154,7 @@ def resol_club(repo, nom: str, cens: list[str]) -> str | None:
     return candidats[0] if len(candidats) == 1 else None
 
 
-def del_sorteig(
-    repo, sorteig, temporada: str, modalitat: str
-) -> tuple[list[Afiliacio], list[str]]:
+def del_sorteig(repo, sorteig, temporada: str, modalitat: str) -> tuple[list[Afiliacio], list[str]]:
     """Les afiliacions d'individual, d'un PDF de sorteig ja llegit.
 
     El club es canonicalitza amb `resol_club`: el PDF els escriu curts i sense

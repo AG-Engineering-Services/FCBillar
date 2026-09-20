@@ -140,7 +140,11 @@ def quadre(*partides: Partida) -> Divisio:
         torneig_id_extern=1,
         divisio_id_extern=1,
         nom="OPEN DE PROVA",
-        fases=[fase(10, "GRUPS", "grups", 1), fase(20, "SEMIFINALS", "ko", 2), fase(30, "FINAL", "ko", 3)],
+        fases=[
+            fase(10, "GRUPS", "grups", 1),
+            fase(20, "SEMIFINALS", "ko", 2),
+            fase(30, "FINAL", "ko", 3),
+        ],
         partides=list(partides),
     )
 
@@ -239,6 +243,7 @@ def test_el_ranquing_duna_fase_ordena_per_posicio_i_despres_punts() -> None:
     presentat. Sense aquest ordre no es pot dir qui passa quan la federació
     s'emporta els millors segons.
     """
+
     def membre(grup, jugador, pos, punts, mitjana):
         from fcbillar.individuals import Membre
 
@@ -266,11 +271,11 @@ def test_el_ranquing_duna_fase_ordena_per_posicio_i_despres_punts() -> None:
         ],
     )
     assert [r.jugador for r in ranquing_fase(d, 99)] == [
-        "PRIMER FORT",   # 1r amb 4 punts
+        "PRIMER FORT",  # 1r amb 4 punts
         "PRIMER FLUIX",  # 1r amb 2 punts, tot i tenir més mitjana
-        "SEGON FORT",    # 2n amb 2 punts
-        "SEGON FLUIX",   # 2n amb 0
-        "SENSE JUGAR",   # 3r; hi surt, que hi era
+        "SEGON FORT",  # 2n amb 2 punts
+        "SEGON FLUIX",  # 2n amb 0
+        "SENSE JUGAR",  # 3r; hi surt, que hi era
     ]
 
 

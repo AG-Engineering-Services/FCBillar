@@ -1583,9 +1583,7 @@ def ingest_individuals_temporada(
 
         for div in amb_joc:
             try:
-                n = desa_torneig(
-                    conn, div, temporada_nom, crea_jugadors=create_missing_players
-                )
+                n = desa_torneig(conn, div, temporada_nom, crea_jugadors=create_missing_players)
             except Exception as e:
                 log.warning("    FAIL desar %s: %s", div.nom, e)
                 continue

@@ -1163,17 +1163,13 @@ def publish_cloud_cmd() -> None:
         # coneix -mitja hora de cache d'esquemes després del DDL- avisa i segueix
         # en comptes d'aturar la publicació sencera.
         counts.update(
-            publica_si_hi_es(
-                "open_fases", lambda: publish_open_fases(on_progress=_prog), _prog
-            )
+            publica_si_hi_es("open_fases", lambda: publish_open_fases(on_progress=_prog), _prog)
         )
         counts.update(publish_open_ranking(on_progress=_prog))
         counts.update(publish_open_ranking_femeni(on_progress=_prog))
         counts.update(publish_player_clubs(on_progress=_prog))
         counts.update(
-            publica_si_hi_es(
-                "afiliacions", lambda: publish_afiliacions(on_progress=_prog), _prog
-            )
+            publica_si_hi_es("afiliacions", lambda: publish_afiliacions(on_progress=_prog), _prog)
         )
         counts.update(publish_rating_buckets(on_progress=_prog))
         counts.update(publish_calendari(on_progress=_prog))
@@ -2365,8 +2361,7 @@ def afiliacions_cmd(
                 avisos += av
                 totes += fil
                 console.print(
-                    f"    [dim]{sorteig.titol}: {len(fil)} jugadors, "
-                    f"{len(sorteig.grups)} grups[/]"
+                    f"    [dim]{sorteig.titol}: {len(fil)} jugadors, {len(sorteig.grups)} grups[/]"
                 )
                 if sorteig.regla:
                     console.print(f"      [dim]{sorteig.regla}[/]")

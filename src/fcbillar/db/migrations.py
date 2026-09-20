@@ -227,9 +227,20 @@ def _migrate_to_v15(conn: sqlite3.Connection) -> None:
     # columnes de migracions posteriors (perquè algú n'hi ha corregut l'esquema
     # sencer) en té més, i copiar-les totes petaria amb «no such column».
     meves = [
-        "id", "lliga_id", "divisio_id", "grup_id", "jornada_id", "encontre_id_extern",
-        "data", "temporada_id", "equip_local_id", "equip_visitant_id",
-        "p_parcials_local", "p_match_local", "p_parcials_visitant", "p_match_visitant",
+        "id",
+        "lliga_id",
+        "divisio_id",
+        "grup_id",
+        "jornada_id",
+        "encontre_id_extern",
+        "data",
+        "temporada_id",
+        "equip_local_id",
+        "equip_visitant_id",
+        "p_parcials_local",
+        "p_match_local",
+        "p_parcials_visitant",
+        "p_match_visitant",
     ]
     llista = ", ".join(c for c in meves if c in cols)
     conn.executescript(

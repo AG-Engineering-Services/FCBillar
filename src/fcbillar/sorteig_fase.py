@@ -345,19 +345,43 @@ def descobreix(client=None) -> list[SorteigPublicat]:
         if propi:
             client.close()
 
+
 # --------------------------- quants se'n classifiquen ---------------------------
 
 #: Els nombres escrits amb lletra que surten a les regles. La federació no passa
 #: de deu, però costa el mateix tenir-los tots.
 _NOMBRES = {
-    "un": 1, "una": 1, "dos": 2, "dues": 2, "tres": 3, "quatre": 4, "cinc": 5,
-    "sis": 6, "set": 7, "vuit": 8, "nou": 9, "deu": 10, "onze": 11, "dotze": 12,
-    "tretze": 13, "catorze": 14, "quinze": 15, "setze": 16,
+    "un": 1,
+    "una": 1,
+    "dos": 2,
+    "dues": 2,
+    "tres": 3,
+    "quatre": 4,
+    "cinc": 5,
+    "sis": 6,
+    "set": 7,
+    "vuit": 8,
+    "nou": 9,
+    "deu": 10,
+    "onze": 11,
+    "dotze": 12,
+    "tretze": 13,
+    "catorze": 14,
+    "quinze": 15,
+    "setze": 16,
 }
 
 #: Les posicions dins d'un grup, escrites com les escriu la regla.
-_POSICIONS = {"primer": 1, "primers": 1, "segon": 2, "segons": 2, "tercer": 3, "tercers": 3,
-              "quart": 4, "quarts": 4}
+_POSICIONS = {
+    "primer": 1,
+    "primers": 1,
+    "segon": 2,
+    "segons": 2,
+    "tercer": 3,
+    "tercers": 3,
+    "quart": 4,
+    "quarts": 4,
+}
 
 #: «els dos primers de cada grup», «el primer de cada grup», «els primers de cada grup».
 _RE_PER_GRUP = re.compile(

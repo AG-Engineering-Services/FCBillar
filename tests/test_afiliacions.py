@@ -62,7 +62,9 @@ def test_dues_lligues_son_dues_afiliacions(conn) -> None:
     """
     _inscrit(conn, 38, "Tres Bandes", "Tres bandes", "C.B.MATARÓ", "CREGO, DIDIER", fitxatge=1)
     _inscrit(conn, 38, "Tres Bandes", "Tres bandes", "C.B.BANYOLES", "CREGO, DIDIER")
-    _inscrit(conn, 39, "4 Modalitats", "4 Modalitats", "C.B.SANT ADRIÀ", "CREGO, DIDIER", fitxatge=1)
+    _inscrit(
+        conn, 39, "4 Modalitats", "4 Modalitats", "C.B.SANT ADRIÀ", "CREGO, DIDIER", fitxatge=1
+    )
     _inscrit(conn, 39, "4 Modalitats", "4 Modalitats", "C.B.BANYOLES", "CREGO, DIDIER")
     conn.commit()
 

@@ -1073,7 +1073,9 @@ def parse_individuals_grup_classificacio(html: str) -> list[IndividualGrupClassi
                     posicio=i,
                     jugador_nom=nom,
                     punts=fila.enter("Punts"),
-                    mitjana=fila.decimal("Mitjana") if fila.te("Mitjana") else fila.decimal("Promig"),
+                    mitjana=fila.decimal("Mitjana")
+                    if fila.te("Mitjana")
+                    else fila.decimal("Promig"),
                     caramboles=fila.enter("Caramboles") if fila.te("Caramboles") else None,
                     entrades=fila.enter("Entrades") if fila.te("Entrades") else None,
                 )

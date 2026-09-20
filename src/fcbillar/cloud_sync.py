@@ -613,9 +613,7 @@ def publish_pending_games(
 
         out: dict[tuple[str, str], dict] = {}
 
-        def _add(
-            pf, opp_nom, opp_fcb, car, car_opp, ent, serie, comp, font, sig, cap, data=None
-        ):
+        def _add(pf, opp_nom, opp_fcb, car, car_opp, ent, serie, comp, font, sig, cap, data=None):
             # Només jugadors amb fcb_id federatiu real; els placeholders ("name:…")
             # no tenen fitxa ni surten al rànquing, així que no aporten res.
             if pf is None or str(pf).startswith("name:"):
@@ -729,10 +727,34 @@ def publish_pending_games(
                 )
                 lf = nom2fcb.get(_nm(r["n1"]))
                 vf = nom2fcb.get(_nm(r["n2"]))
-                _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "open", sig,
-                     None, r["data"])
-                _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "open", sig,
-                     None, r["data"])
+                _add(
+                    lf,
+                    r["n2"],
+                    vf,
+                    r["c1"],
+                    r["c2"],
+                    r["e"],
+                    r["s1"],
+                    comp,
+                    "open",
+                    sig,
+                    None,
+                    r["data"],
+                )
+                _add(
+                    vf,
+                    r["n1"],
+                    lf,
+                    r["c2"],
+                    r["c1"],
+                    r["e"],
+                    r["s2"],
+                    comp,
+                    "open",
+                    sig,
+                    None,
+                    r["data"],
+                )
 
         # --- OPENS EN CURS (open_live) ---
         modname = _MODNM.get(mod)
@@ -788,10 +810,34 @@ def publish_pending_games(
             lf = nom2fcb.get(_nm(r["n1"]))
             vf = nom2fcb.get(_nm(r["n2"]))
             comp = r["competicio"] or "Lliga"
-            _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "lliga", sig,
-                 None, r["data"])
-            _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "lliga", sig,
-                 None, r["data"])
+            _add(
+                lf,
+                r["n2"],
+                vf,
+                r["c1"],
+                r["c2"],
+                r["e"],
+                r["s1"],
+                comp,
+                "lliga",
+                sig,
+                None,
+                r["data"],
+            )
+            _add(
+                vf,
+                r["n1"],
+                lf,
+                r["c2"],
+                r["c1"],
+                r["e"],
+                r["s2"],
+                comp,
+                "lliga",
+                sig,
+                None,
+                r["data"],
+            )
 
         sb.table("pending_games").delete().eq("modalitat_codi", mod).execute()
         rows = list(out.values())
@@ -2247,8 +2293,12 @@ def publish_lliga_encontres(
             x = "".join(c for c in _ud.normalize("NFD", x or "") if _ud.category(c) != "Mn")
             return " ".join(x.strip().lower().split())
 
-        a, b = sorted([f"{_nm(na)}:{ca if ca is not None else ''}",
-                       f"{_nm(nb)}:{cb if cb is not None else ''}"])
+        a, b = sorted(
+            [
+                f"{_nm(na)}:{ca if ca is not None else ''}",
+                f"{_nm(nb)}:{cb if cb is not None else ''}",
+            ]
+        )
         return f"{a}|{b}|{ent if ent is not None else ''}"
 
     part_rows = []
@@ -2436,7 +2486,9 @@ def publish_open_partides(
         except Exception as e:  # noqa: BLE001
             prog("warn", f"open_partides {oid}: no s'ha pogut llegir per retirar ({e})")
             continue
-        sobren = [(x["fase_id"], x["ordre"]) for x in actuals if (x["fase_id"], x["ordre"]) not in claus]
+        sobren = [
+            (x["fase_id"], x["ordre"]) for x in actuals if (x["fase_id"], x["ordre"]) not in claus
+        ]
         for fase_id, ordre in sobren:
             sb.table("open_partides").delete().eq("open_id", oid).eq("fase_id", fase_id).eq(
                 "ordre", ordre
@@ -3817,9 +3869,7 @@ def publish_estadistiques_partides(
                     # ella la fila no casa amb res ni s'hi pot inserir. La columna
                     # existia i aquest select no la demanava, que és pitjor que si
                     # no existís: sembla que hi sigui i arriba buida.
-                    .select(
-                        "data,opponent_nom,caramboles,caramboles_opp,entrades,serie,competicio"
-                    )
+                    .select("data,opponent_nom,caramboles,caramboles_opp,entrades,serie,competicio")
                     .eq("player_fcb_id", fcb_id)
                     .eq("modalitat_codi", codi_fcb)
                     .execute()
@@ -4018,9 +4068,7 @@ def publish_afiliacions(
         # hagués de bo al núvol.
         prog("warn", "cap afiliació a la BD local: no publico ni retiro res")
         return {"afiliacions": 0}
-    n = _upsert(
-        sb, "afiliacions", rows, "temporada,competicio,modalitat,jugador", prog
-    )
+    n = _upsert(sb, "afiliacions", rows, "temporada,competicio,modalitat,jugador", prog)
     return {"afiliacions": n}
 
 
@@ -4121,9 +4169,7 @@ def publish_player_clubs(
             if fila is not None:
                 fila["club"] = club
             else:
-                rows.append(
-                    {"player_fcb_id": clau[0], "temporada": clau[1], "club": club}
-                )
+                rows.append({"player_fcb_id": clau[0], "temporada": clau[1], "club": club})
 
     # Canonicalitza els noms de club: neteja (Descansa/sufixos/codis/AMISTAT),
     # agrupa pel nucli i aplica el mapping manual de clubs_list.txt.

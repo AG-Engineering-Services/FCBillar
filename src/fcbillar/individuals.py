@@ -173,7 +173,9 @@ def _partida(p: P.IndividualPartidaRow, fase: int, grup: str | None, data: date 
     )
 
 
-def llegeix(client, torneig_id_extern: int, nom_torneig: str, *, use_cache: bool = False) -> list[Divisio]:
+def llegeix(
+    client, torneig_id_extern: int, nom_torneig: str, *, use_cache: bool = False
+) -> list[Divisio]:
     """Un torneig sencer: divisions, fases, grups i totes les partides.
 
     Es baixa una pàgina per fase i una més per grup. Un open petit com el de
