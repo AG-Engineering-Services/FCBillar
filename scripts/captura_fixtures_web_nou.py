@@ -50,8 +50,25 @@ PAGINES: list[tuple[str, str]] = [
     # el C.B.MONT-ROIG, que en porta dos. Calen totes dues formes de fila.
     ("lligues_participants_38_16", f"{INTRANET}/frontend/lligues/participants/38/16"),
     ("lligues_participants_38_22", f"{INTRANET}/frontend/lligues/participants/38/22"),
-    # HTTP 500 des del canvi de web; el desem igualment per veure quan es cura.
+    # El detall d'encontre va tornar a funcionar el setembre de 2026, i per a
+    # totes les temporades: el 500 era un error seu, no un tancament.
     ("lligues_partides_36_148_316_2593_10939", f"{INTRANET}/frontend/lligues/partides/36/148/316/2593/10939"),
+    # --- lliga 38: Tres Bandes 2026-27, la temporada en joc ---
+    # Honor Grup A, jornada 1: DOS encontres jugats i DOS oberts a la mateixa
+    # pàgina. És la forma que importa: els oberts no porten enllaç ni id, i si
+    # el parser els salta la jornada surt mig buida a la web.
+    ("lligues_jornades_38_159_343", f"{INTRANET}/frontend/lligues/jornades/38/159/343"),
+    ("lligues_encontres_38_159_343_2790", f"{INTRANET}/frontend/lligues/encontres/38/159/343/2790"),
+    # La classificació porta els VUIT equips del grup des del primer dia, quatre
+    # amb J=1 i quatre amb J=0. És l'únic cens dels equips d'un grup.
+    ("lligues_classificacio_38_159_343", f"{INTRANET}/frontend/lligues/classificacio/38/159/343"),
+    # El detall d'un encontre de debò de la temporada nova: les capçaleres són
+    # els NOMS DELS EQUIPS i els resultats venen aparellats, "SM / Caramboles".
+    ("lligues_partides_38_159_343_2790_11656", f"{INTRANET}/frontend/lligues/partides/38/159/343/2790/11656"),
+    # Els inscrits d'un club a la lliga de 4 Modalitats: la federació els va
+    # publicar el setembre de 2026 i, a diferència dels de tres bandes, van
+    # SENSE mitjana. El mateix jugador pot sortir a clubs diferents a cada lliga.
+    ("lligues_participants_39_13", f"{INTRANET}/frontend/lligues/participants/39/13"),
     # --- individuals ---
     ("individuals_llistat", f"{INTRANET}/frontend/individuals/llistat"),
     ("individuals_divisions_211", f"{INTRANET}/frontend/individuals/divisions/211"),
@@ -59,6 +76,26 @@ PAGINES: list[tuple[str, str]] = [
     ("individuals_grups_211_447_799", f"{INTRANET}/frontend/individuals/grups/211/447/799"),
     ("individuals_partides_grup_211_447_799_5100", f"{INTRANET}/frontend/individuals/partides-grup/211/447/799/5100"),
     ("individuals_partides_eliminatories_211_447_1185", f"{INTRANET}/frontend/individuals/partides-eliminatories/211/447/1185"),
+    # L'OPEN LLIURE PUNT D'ATAC 2026-27 (217), tancat el 2026-09-06: un open
+    # sencer i petit -3 fases de grups i 3 eliminatories, 44 partides- que
+    # serveix de prova de regressio de la ingesta d'opens del web nou.
+    ("individuals_divisions_217", f"{INTRANET}/frontend/individuals/divisions/217"),
+    ("individuals_fases_217_452", f"{INTRANET}/frontend/individuals/fases/217/452"),
+    ("individuals_grups_217_452_807", f"{INTRANET}/frontend/individuals/grups/217/452/807"),
+    ("individuals_partides_grup_217_452_807_5257", f"{INTRANET}/frontend/individuals/partides-grup/217/452/807/5257"),
+    ("individuals_partides_eliminatories_217_452_1189", f"{INTRANET}/frontend/individuals/partides-eliminatories/217/452/1189"),
+    # El CAMPIONAT DE CATALUNYA de tres bandes 2026-27 (216). No és un open: té
+    # vuit divisions (Honor, 1a…6a, Única) i les fases es diuen PRÈVIA i
+    # PRE-PRÈVIA. La pàgina de partides d'un grup porta, a més de les partides,
+    # la CLASSIFICACIÓ del grup amb punts i mitjana —que és el que fa falta per
+    # saber qui s'ha classificat, i que cap parser no llegia.
+    ("individuals_divisions_216", f"{INTRANET}/frontend/individuals/divisions/216"),
+    ("individuals_fases_216_454", f"{INTRANET}/frontend/individuals/fases/216/454"),
+    ("individuals_grups_216_454_808", f"{INTRANET}/frontend/individuals/grups/216/454/808"),
+    ("individuals_partides_grup_216_454_808_5263", f"{INTRANET}/frontend/individuals/partides-grup/216/454/808/5263"),
+    # Un grup de la pre-prèvia de 1a: TRES jugadors, i un d'ells sense cap
+    # partida jugada, que a la classificació surt amb la mitjana buida.
+    ("individuals_partides_grup_216_455_809_5268", f"{INTRANET}/frontend/individuals/partides-grup/216/455/809/5268"),
     # --- copa ---
     ("copa_llistat", f"{INTRANET}/frontend/copa/llistat"),
     ("copa_fase_grups_7", f"{INTRANET}/frontend/copa/fase-grups/7"),

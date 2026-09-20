@@ -1,6 +1,6 @@
 // Client del Data API de Neon, fixat al schema `fcbillar` (només lectura via
-// RLS). Les variables s'inlinen en build (Vite) → al .env.local en dev i a les
-// env vars de Vercel en producció.
+// RLS). Les variables surten de l'entorn: del .env.local en dev i de les env
+// vars de Vercel en desplegament.
 //
 // El Data API de Neon exigeix un JWT a cada petició: no té equivalent de l'anon
 // key de Supabase. `PUBLIC_NEON_ANON_TOKEN` fa el mateix paper —és una credencial
@@ -10,11 +10,24 @@
 //
 // Sota el capó és el mateix postgrest-js que hi havia amb supabase-js, així que
 // la sintaxi de les consultes no canvia.
+//
+// `$env/dynamic/public` i no `$env/static/public`: la versió estàtica les inlina
+// en compilar i fa PETAR EL BUILD si una no hi és, amb un error que no parla
+// d'entorn sinó de rollup («"PUBLIC_NEON_DATA_API_URL" is not exported by
+// virtual:env/static/public»). Com que aquestes variables no estan posades a
+// l'entorn de Preview de Vercel, tots els desplegaments que no són de `master`
+// fallaven a compilar, i feia l'efecte que ho hagués trencat el canvi que
+// s'estava provant.
+//
+// Amb la dinàmica es llegeixen en executar-se i el build no hi depèn. La garantia
+// no es perd: la comprovació de sota continua plantant-se si falten, ara on toca
+// —quan s'intenta fer servir el client— i amb un missatge que diu el nom de la
+// variable. És, a més, el que ja fa NouProjecte per llegir aquesta mateixa API.
 import { NeonPostgrestClient } from "@neondatabase/postgrest-js";
-import {
-  PUBLIC_NEON_ANON_TOKEN,
-  PUBLIC_NEON_DATA_API_URL,
-} from "$env/static/public";
+import { env } from "$env/dynamic/public";
+
+const PUBLIC_NEON_DATA_API_URL = env.PUBLIC_NEON_DATA_API_URL;
+const PUBLIC_NEON_ANON_TOKEN = env.PUBLIC_NEON_ANON_TOKEN;
 
 if (!PUBLIC_NEON_DATA_API_URL)
   throw new Error("Falta PUBLIC_NEON_DATA_API_URL");
@@ -425,6 +438,65 @@ export interface OpenClassification {
   mitjana_general: number | null;
   mitjana_particular: number | null;
   serie_max: number | null;
+}
+
+// Les fases d'un torneig individual i el rànquing de cada fase de grups.
+//
+// Fa falta per als campionats de Catalunya, que es juguen per rondes:
+// pre-prèvia, prèvia, vuitens, i després el quadre. La federació publica la
+// classificació de cada grup però cap ordre ENTRE grups, i sense aquell ordre no
+// es pot dir qui s'ha classificat: quan passen «els dos primers de cada grup»
+// n'hi ha prou amb la posició, però quan passen «els set millors segons» cal
+// comparar els segons dels onze grups.
+//
+// L'ordre és el que aplica la federació: posició dins del grup, després punts de
+// la ronda, i a igualtat de tots dos la mitjana. El calcula FCBillar.
+//
+// NO és la classificació final del torneig (`open_classifications`): és la foto
+// d'una ronda mentre el campionat es juga.
+export interface OpenFase {
+  open_id: number;
+  fase_id: number;
+  nom: string;
+  tipus: string;
+  ordre: number | null;
+  data: string | null;
+}
+
+export interface OpenPartida {
+  open_id: number;
+  fase_id: number;
+  ordre: number;
+  /** De quin grup de la fase és. `null` a les eliminatòries, que no en tenen. */
+  grup_nom: string | null;
+  jugador_local: string | null;
+  caramboles_local: number | null;
+  jugador_visitant: string | null;
+  caramboles_visitant: number | null;
+  entrades: number | null;
+}
+
+export interface OpenFaseRanquing {
+  open_id: number;
+  fase_id: number;
+  /** L'ordre entre TOTS els grups de la fase. */
+  posicio: number;
+  jugador: string;
+  player_fcb_id: string | null;
+  grup_nom: string | null;
+  /** Com ha quedat dins del seu grup. */
+  posicio_grup: number | null;
+  /** Punts de la ronda: 2 per victòria, 1 per empat. */
+  punts: number | null;
+  /** `null` = no ha jugat cap partida. Hi surt igualment: hi era. */
+  mitjana: number | null;
+  /**
+   * El club amb què juga AQUEST campionat, que no és necessàriament el de la
+   * lliga: hi ha qui va fitxat a la lliga per un club i juga l'individual pel
+   * seu. No entra a l'ordre del rànquing —la federació ordena per posició al
+   * grup, punts i mitjana— i hi és per poder llegir la llista.
+   */
+  club: string | null;
 }
 
 // Calendari esportiu federatiu (taules fcbillar.calendari_*). Dues fonts, totes

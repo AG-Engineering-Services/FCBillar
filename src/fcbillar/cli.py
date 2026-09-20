@@ -1000,10 +1000,17 @@ def ingest_individuals_cmd(
                 use_cache=cache,
             )
             scope = f"temporada {temporada}"
+    # Zero partides no és cap èxit: vol dir que s'ha recorregut el web i no
+    # se n'ha tret res. Abans això sortia com un OK i no es veia.
+    color = "green" if result.total_partides else "yellow"
     console.print(
-        f"[green]OK individuals {scope}: "
+        f"[{color}]OK individuals {scope}: "
         f"{result.torneigs_processed} torneigs ({result.torneigs_failed} fallats), "
-        f"{result.total_participants} participants[/]"
+        f"{result.total_partides} partides, {result.total_participants} participants[/]"
+    )
+    console.print(
+        "[dim]  La posició de cada participant està DEDUÏDA del quadre: "
+        "la federació ja no publica cap classificació final.[/]"
     )
 
 
@@ -1087,12 +1094,20 @@ def clean_torneig_noms_cmd(
 
 @app.command("publish-cloud")
 def publish_cloud_cmd() -> None:
-    """Publica la BD local a Supabase (schema fcbillar) per al frontend de Vercel.
+    """Publica la BD local a **Neon** (esquema `fcbillar`) per al frontend de Vercel.
 
-    FASE 1: rànquings. Cal NEON_DATA_API_URL i NEON_SERVICE_ROLE_TOKEN (al .env o a
-    l'entorn). Idempotent: es pot reexecutar després de cada actualització.
+    A Neon i no a Supabase: la migració es va tancar el 16/08/2026 i la còpia de
+    Supabase va quedar congelada. El Data API de Neon és PostgREST igual que el
+    seu, i per això les crides no van canviar —només la URL base i la
+    credencial—, però el nom antic encara surt en comentaris i en el nom de la
+    carpeta `supabase/migrations/`. Vegeu `MIGRACIO-NEON.md`.
+
+    Cal `NEON_DATA_API_URL` i `NEON_SERVICE_ROLE_TOKEN` (al `.env` o a l'entorn).
+    Idempotent: es pot reexecutar després de cada actualització.
     """
     from fcbillar.cloud_sync import (
+        publica_si_hi_es,
+        publish_afiliacions,
         publish_calendari,
         publish_copa,
         publish_copa_encontres,
@@ -1102,6 +1117,7 @@ def publish_cloud_cmd() -> None:
         publish_lliga_encontres,
         publish_lliga_player_rankings,
         publish_lliga_standings_hist,
+        publish_open_fases,
         publish_open_partides,
         publish_open_ranking,
         publish_open_ranking_femeni,
@@ -1119,7 +1135,13 @@ def publish_cloud_cmd() -> None:
     try:
         counts = publish_rankings(on_progress=_prog)
         counts.update(publish_games(on_progress=_prog))
-        counts.update(publish_pending_games(on_progress=_prog))
+        # `pending_games` ha guanyat la columna `data`: mentre el Data API no la
+        # vegi, avisa i segueix en comptes d'aturar la publicació sencera.
+        counts.update(
+            publica_si_hi_es(
+                "pending_games", lambda: publish_pending_games(on_progress=_prog), _prog
+            )
+        )
         counts.update(publish_provisional_ranking(on_progress=_prog))
         counts.update(publish_lliga(on_progress=_prog))
         counts.update(publish_lliga_standings_hist(on_progress=_prog))
@@ -1129,17 +1151,33 @@ def publish_cloud_cmd() -> None:
         counts.update(publish_copa_player_rankings(on_progress=_prog))
         counts.update(publish_lliga_encontres(on_progress=_prog))
         counts.update(publish_copa_encontres(on_progress=_prog))
-        counts.update(publish_open_partides(on_progress=_prog))
+        # Igual que les dues de sota: `open_partides` ha guanyat la columna
+        # `grup_nom` i, fins que el Data API no la vegi, val més avisar que
+        # aturar la publicació sencera a mig camí.
+        counts.update(
+            publica_si_hi_es(
+                "open_partides", lambda: publish_open_partides(on_progress=_prog), _prog
+            )
+        )
+        # Les dues taules noves d'aquesta tanda. Si el Data API encara no les
+        # coneix -mitja hora de cache d'esquemes després del DDL- avisa i segueix
+        # en comptes d'aturar la publicació sencera.
+        counts.update(
+            publica_si_hi_es("open_fases", lambda: publish_open_fases(on_progress=_prog), _prog)
+        )
         counts.update(publish_open_ranking(on_progress=_prog))
         counts.update(publish_open_ranking_femeni(on_progress=_prog))
         counts.update(publish_player_clubs(on_progress=_prog))
+        counts.update(
+            publica_si_hi_es("afiliacions", lambda: publish_afiliacions(on_progress=_prog), _prog)
+        )
         counts.update(publish_rating_buckets(on_progress=_prog))
         counts.update(publish_calendari(on_progress=_prog))
     except Exception as exc:  # noqa: BLE001
         console.print(f"[red]Error publicant al núvol: {exc}[/]")
         raise typer.Exit(code=1) from exc
     total = ", ".join(f"{k}={v}" for k, v in counts.items())
-    console.print(f"[green]OK publicat a Supabase (fcbillar): {total}[/]")
+    console.print(f"[green]OK publicat a Neon (esquema fcbillar): {total}[/]")
 
     # App germana "Estadístiques": alimenta public.partides amb els games oficials i
     # pendents de FCBillar (adapta les del jugador i completa el que hi manqui; evita
@@ -1253,7 +1291,7 @@ def publish_estadistiques_partides_cmd(
 
 @app.command("publish-live-opens")
 def publish_live_opens_cmd() -> None:
-    """Bolca l'estat EN VIU dels Opens en curs a Supabase (taula `open_live`).
+    """Bolca l'estat EN VIU dels Opens en curs a Neon (taula `open_live`).
 
     Raspa la federació en directe (pàgines públiques, sense login) i puja l'estat
     de cada Open en curs perquè l'app web en mostri el seguiment en temps real.
@@ -2263,6 +2301,102 @@ def plantilles_cmd(
         f"  [green]{n} jugadors a {clubs} clubs[/] "
         f"({sense_fitxa} acabats de federar, {sense_mitjana} sense mitjana)"
     )
+
+
+@app.command("afiliacions")
+def afiliacions_cmd(
+    temporada: str = typer.Option("2026/2027", "--temporada"),
+    sense_xarxa: bool = typer.Option(
+        False, "--sense-xarxa", help="Només refà la part de lliga, del que ja hi ha a la BD."
+    ),
+) -> None:
+    """Amb quin club juga cadascú CADA competició d'aquesta temporada.
+
+    Un jugador no té un club: en té un per competició. Es pot anar fitxat a la
+    lliga per un club i jugar el campionat individual pel de sempre, i es pot
+    anar fitxat a la lliga de tres bandes per un club i a la de 4 Modalitats per
+    un altre. `players.club_id` és una columna sola i no ho pot dir.
+
+    La part de lliga surt de `lliga_inscrits`, que ja hi ha a la base de dades
+    (`fcbillar ingest-inscrits-lliga`). La de l'individual surt dels PDF del
+    sorteig de cada fase, que és l'única font que diu el club: el portal no el
+    publica a cap pàgina del campionat.
+    """
+    import httpx
+
+    from fcbillar import afiliacions as A
+    from fcbillar import sorteig_fase as S
+    from fcbillar.db.repository import Repository
+
+    conn = ensure_schema(get_settings().db_path)
+    repo = Repository(conn)
+    avisos: list[str] = []
+
+    files, av = A.de_la_lliga(conn, temporada)
+    avisos += av
+    n = A.desa(conn, files)
+    per_modalitat: dict[str, int] = {}
+    for f in files:
+        per_modalitat[f.modalitat] = per_modalitat.get(f.modalitat, 0) + 1
+    detall = ", ".join(f"{m or '?'}: {q}" for m, q in sorted(per_modalitat.items()))
+    console.print(f"  [green]lliga: {n} afiliacions[/] ({detall or 'cap lliga ingerida'})")
+    if not files:
+        console.print(
+            "  [yellow]Cap inscrit de lliga a la BD: corre primer "
+            "`fcbillar ingest-inscrits-lliga`.[/]"
+        )
+
+    if not sense_xarxa:
+        with httpx.Client(follow_redirects=True, timeout=60.0) as client:
+            publicats = S.descobreix(client)
+            console.print(f"  {len(publicats)} sortejos de fase publicats al web")
+            totes: list[A.Afiliacio] = []
+            for pub in publicats:
+                desti = get_settings().cache_dir / pub.nom_fitxer
+                if not desti.exists():
+                    desti.parent.mkdir(parents=True, exist_ok=True)
+                    desti.write_bytes(client.get(pub.url).content)
+                sorteig = S.llegeix(desti)
+                fil, av = A.del_sorteig(repo, sorteig, temporada, pub.modalitat)
+                avisos += av
+                totes += fil
+                console.print(
+                    f"    [dim]{sorteig.titol}: {len(fil)} jugadors, {len(sorteig.grups)} grups[/]"
+                )
+                if sorteig.regla:
+                    console.print(f"      [dim]{sorteig.regla}[/]")
+            # Les fases d'una mateixa modalitat comparteixen clau, o sigui que
+            # s'han de desar juntes: desar-les una a una faria que l'última
+            # esborrés les altres.
+            if totes:
+                console.print(
+                    f"  [green]individual: {A.desa(conn, totes)} afiliacions[/] "
+                    f"({len({f.club for f in totes})} clubs)"
+                )
+
+    # I el club de la temporada va a `players.club_id`, que és d'on el treu tot
+    # el que ensenya «el club de» algú. Hi quedava el d'on venia l'última cosa
+    # ingerida, que per a qui no ha jugat res aquest any és el de fa temporades.
+    n_players, canvis_club = A.aplica_a_players(conn, temporada)
+    console.print(f"  [green]{n_players} fitxes amb el club actualitzat[/]")
+    for linia in canvis_club[:40]:
+        console.print(f"    [dim]{linia}[/]")
+    if len(canvis_club) > 40:
+        console.print(f"    [dim]… i {len(canvis_club) - 40} més[/]")
+
+    canvis = A.canvia_de_club(conn, temporada)
+    if canvis:
+        console.print()
+        console.print(f"[bold]{len(canvis)} jugadors amb club diferent segons la competició[/]")
+        for jugador, clubs in canvis:
+            detall = " · ".join(f"{k}: {v}" for k, v in sorted(clubs.items()))
+            console.print(f"  {jugador} — {detall}")
+
+    if avisos:
+        console.print()
+        console.print(f"[yellow]{len(avisos)} coses per revisar[/]")
+        for a in avisos:
+            console.print(f"  [yellow]{a}[/]")
 
 
 @app.command("sql-categoria-federativa")

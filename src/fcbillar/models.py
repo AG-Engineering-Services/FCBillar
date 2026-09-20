@@ -182,7 +182,10 @@ class EncontreLliga:
     divisio_id: int
     grup_id: int
     jornada_id: int
-    encontre_id_extern: int
+    #: `None` mentre l'encontre no s'hagi jugat: la federació no li dona número
+    #: fins que algú n'introdueix el resultat. Vegeu `encontres_lliga` a
+    #: `schema.sql`.
+    encontre_id_extern: int | None
     equip_local: Equip
     equip_visitant: Equip
     data: date | None = None
@@ -191,3 +194,7 @@ class EncontreLliga:
     p_match_local: int | None = None
     p_parcials_visitant: int | None = None
     p_match_visitant: int | None = None
+    #: El número que hi escriu la federació («Jornada 1»).
+    jornada_num: int | None = None
+    #: 'Finalitzada' | 'Oberta' | 'Pendent'…
+    estat: str | None = None

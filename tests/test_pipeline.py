@@ -305,7 +305,7 @@ def test_ingest_lliga_encontre_creates_full_context(settings: StubSettings) -> N
     fixtures = {
         # URL de partides del primer encontre de la jornada 01 GRUP A HONOR.
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -384,7 +384,7 @@ def test_ingest_lliga_encontre_skips_unknown_players(settings: StubSettings) -> 
     """Sense pre-popular jugadors, totes les 4 partides es salten."""
     fixtures = {
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -415,11 +415,17 @@ def test_ingest_lliga_encontre_skips_unknown_players(settings: StubSettings) -> 
 
 
 def test_ingest_lliga_encontre_enriches_existing_game(settings: StubSettings) -> None:
-    """Si una partida ja venia de partideshome (sense club/àrbitre), ingest_lliga
-    la complementa amb els camps de lliga via COALESCE."""
+    """Si una partida ja venia de partideshome, ingest_lliga la complementa.
+
+    Hi entren la sèrie major, els equips i la temporada. L'ÀRBITRE ja no: el web
+    antic el publicava al detall d'encontre i el nou no —la taula només porta
+    jugadors, sèrie, caramboles, entrades, modalitat, estat i punts—, i per tant
+    es queda buit. L'única font que encara en dona és el panell del jugador
+    logat, que només serveix per a un jugador.
+    """
     fixtures = {
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -470,7 +476,7 @@ def test_ingest_lliga_encontre_enriches_existing_game(settings: StubSettings) ->
         "FROM games WHERE id = ?",
         (old_game.id_natural,),
     ).fetchone()
-    assert row[0] == "BOTERO"  # arbitre afegit
+    assert row[0] is None  # l'àrbitre ja no el publica ningú
     assert row[1] == 6  # serie_max1 afegida
     assert row[2] == 3
     assert row[3] is not None and row[4] is not None
@@ -663,7 +669,7 @@ def test_ingest_lliga_reuses_existing_club_via_normalization(
 
     fixtures = {
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -719,7 +725,7 @@ def test_ingest_lliga_encontre_create_missing_persists_all(
     """
     fixtures = {
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -762,7 +768,7 @@ def test_placeholder_fusion_after_ranking_ingest(settings: StubSettings) -> None
     # Pas 1: ingest lliga amb placeholders
     lliga_fixtures = {
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, lliga_fixtures)
@@ -830,16 +836,16 @@ def test_ingest_lliga_jornada_processes_all_encontres(settings: StubSettings) ->
         # Mateixa fixture per als 4 encontres → 16 vistes amb molts noms iguals
         # (els 8 jugadors de la fixture).
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10941": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10943": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10945": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)
@@ -868,6 +874,121 @@ def test_ingest_lliga_jornada_processes_all_encontres(settings: StubSettings) ->
     assert counts["clubs"] == 7
 
 
+def test_ingest_lliga_jornada_desa_tambe_els_encontres_no_jugats(
+    settings: StubSettings,
+) -> None:
+    """Una jornada a mitges es desa SENCERA, no només el que ja s'ha jugat.
+
+    Jornada 1 d'Honor Grup A de la lliga 38 (2026-27): quatre enfrontaments, dos
+    «Finalitzada» amb enllaç al detall i dos «Oberta» sense enllaç ni número. Amb
+    la clau vella —que exigia l'id de la federació— els dos oberts no es podien
+    desar, i la web ensenyava mitja jornada. Ara hi són els quatre, i els dos que
+    no s'han jugat hi consten sense `encontre_id_extern`.
+    """
+    fixtures = {
+        "https://www.fcbillar.cat/frontend/lligues/encontres/38/159/343/2790": (
+            "nou/lligues_encontres_38_159_343_2790.html"
+        ),
+        "https://www.fcbillar.cat/frontend/lligues/partides/38/159/343/2790/11656": (
+            "nou/lligues_partides_38_159_343_2790_11656.html"
+        ),
+        "https://www.fcbillar.cat/frontend/lligues/partides/38/159/343/2790/11658": (
+            "nou/lligues_partides_38_159_343_2790_11656.html"
+        ),
+    }
+    client = StubScraperClient(settings, fixtures)
+    result = ingest_lliga_jornada(
+        client,
+        lliga_id=38,
+        divisio_id=159,
+        grup_id=343,
+        jornada_id=2790,
+        modalitat_codi_fcb=1,
+        data=date(2026, 9, 26),
+        jornada_num=1,
+        settings=settings,
+    )
+    assert result.encontres_processed == 4
+    assert result.encontres_failed == 0
+
+    conn = ensure_schema(settings.db_path)
+    files = conn.execute(
+        "SELECT encontre_id_extern, estat, jornada_num FROM encontres_lliga "
+        "WHERE lliga_id = 38 ORDER BY encontre_id_extern"
+    ).fetchall()
+    assert len(files) == 4
+    assert [f[0] for f in files] == [None, None, 11656, 11658]
+    assert {f[1] for f in files} == {"Oberta", "Finalitzada"}
+    assert {f[2] for f in files} == {1}
+    # Els que no s'han jugat no porten resultat. La federació hi escriu «0 / 0» i
+    # això no és un empat a zero: és un lloc per posar-n'hi un.
+    oberts = conn.execute(
+        "SELECT p_match_local, p_match_visitant, p_parcials_local, p_parcials_visitant "
+        "FROM encontres_lliga WHERE lliga_id = 38 AND encontre_id_extern IS NULL"
+    ).fetchall()
+    assert all(all(v is None for v in fila) for fila in oberts)
+    # Només s'ha demanat el detall dels dos que s'han jugat: un encontre obert no
+    # té pàgina, i demanar-la seria un 500 per a res.
+    assert sum(1 for u in client.fetched_urls if "/lligues/partides/" in u) == 2
+
+
+def test_ingest_lliga_jornada_omple_l_encontre_quan_es_juga(
+    settings: StubSettings,
+) -> None:
+    """El mateix encontre, primer obert i després jugat, és UNA fila.
+
+    És el que ha de passar cada cap de setmana: l'enfrontament ja hi era des que
+    es va publicar el calendari, i quan es juga hi entren l'id, els punts i
+    l'estat. Si en sortissin dues files, la jornada es duplicaria a la web.
+    """
+    obert = LligaEncontre(
+        lliga_id=38,
+        divisio_id=159,
+        grup_id=343,
+        jornada_id=2790,
+        encontre_id=None,
+        equip_local='C.B. SANT BOI "A"',
+        p_parcials_local=0,
+        p_match_local=0,
+        equip_visitant='B.C. GRANOLLERS "B"',
+        p_parcials_visitant=0,
+        p_match_visitant=0,
+        estat="Oberta",
+    )
+    jugat = LligaEncontre(
+        lliga_id=38,
+        divisio_id=159,
+        grup_id=343,
+        jornada_id=2790,
+        encontre_id=11656,
+        equip_local='C.B. SANT BOI "A"',
+        p_parcials_local=0,
+        p_match_local=0,
+        equip_visitant='B.C. GRANOLLERS "B"',
+        p_parcials_visitant=8,
+        p_match_visitant=3,
+        estat="Finalitzada",
+    )
+    fixtures = {
+        "https://www.fcbillar.cat/frontend/lligues/partides/38/159/343/2790/11656": (
+            "nou/lligues_partides_38_159_343_2790_11656.html"
+        ),
+    }
+    client = StubScraperClient(settings, fixtures)
+    for enc in (obert, jugat):
+        ingest_lliga_encontre(
+            client, enc, modalitat_codi_fcb=1, data=date(2026, 9, 26), settings=settings
+        )
+
+    conn = ensure_schema(settings.db_path)
+    files = conn.execute(
+        "SELECT encontre_id_extern, estat, p_parcials_visitant, p_match_visitant "
+        "FROM encontres_lliga WHERE lliga_id = 38"
+    ).fetchall()
+    assert len(files) == 1
+    assert tuple(files[0]) == (11656, "Finalitzada", 8, 3)
+
+
 # ---------------- ingest_lliga_grup ----------------
 
 
@@ -886,16 +1007,16 @@ def test_ingest_lliga_grup_iterates_jornades(settings: StubSettings) -> None:
             "nou/lligues_encontres_36_148_316_2593.html"
         ),
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10939": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10941": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10943": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
         "https://www.fcbillar.cat/frontend/lligues/partides/36/148/316/2593/10945": (
-            "nou/lligues_partides_RECONSTRUIT_36_148_316_2593_10939.html"
+            "nou/lligues_partides_36_148_316_2593_10939.html"
         ),
     }
     client = StubScraperClient(settings, fixtures)

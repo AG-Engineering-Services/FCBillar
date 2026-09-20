@@ -26,6 +26,7 @@ from fcbillar.scraper.parsers import (
     parse_individuals_torneigs_list,
     parse_lliga_classificacio,
     parse_lliga_divisions,
+    parse_lliga_encontre_detall,
     parse_lliga_encontres,
     parse_lliga_grups,
     parse_lliga_inscripcions,
@@ -228,33 +229,61 @@ def test_lliga_inscripcions_dona_el_club_de_cada_equip() -> None:
     assert granollers.equip == "B.C. GRANOLLERS"
 
 
-def test_lliga_partides_llegeix_la_taula_de_partides() -> None:
-    """El detall d'encontre de lliga retorna HTTP 500 des del canvi de web.
+def test_lliga_encontre_detall_els_equips_son_les_capcaleres() -> None:
+    """El detall d'encontre va tornar a funcionar el setembre de 2026.
 
-    Com que la taula de partides és la mateixa a tot el portal, el parser es
-    prova contra la d'un grup d'individuals, que sí que funciona. El dia que la
-    federació arregli el 500 caldrà confirmar-ho amb una pàgina de debò.
+    Mentre retornava HTTP 500 el parser es va escriure a cegues contra la forma
+    de les taules d'individuals —«Local | SM | Caramboles | Visitant | …»— i no
+    era aquesta: els equips són les CAPÇALERES i cada resultat ve aparellat dins
+    d'una sola cel·la. Amb el parser vell no en sortia cap partida.
     """
-    partides = parse_lliga_partides(fixture("individuals_partides_grup_211_447_799_5100"))
-    # Sis files: cinc partides i el buit que deixa un grup incomplet. A la lliga
-    # no hi ha buits —els dos equips presenten jugadors—, o sigui que aquest
-    # parser no els filtra; el d'individuals sí.
-    assert len(partides) == 6
-    primera = partides[1]
-    assert primera.local_nom == "MAS CANADELL, JOSEP Mª"
-    assert primera.local_caramboles == 30
-    assert primera.local_serie_major == 6
-    assert primera.entrades == 22
-    assert primera.arbitre == "MIGUEL"
+    detall = parse_lliga_encontre_detall(fixture("lligues_partides_38_159_343_2790_11656"))
+    assert detall is not None
+    assert detall.equip_local == 'C.B. SANT BOI "A"'
+    assert detall.equip_visitant == 'B.C. GRANOLLERS "B"'
+    assert len(detall.partides) == 4
+    primera = detall.partides[0]
+    assert primera.local_nom == "SÁNCHEZ MARTÍNEZ, PASCUAL"
+    assert (primera.local_serie_major, primera.local_caramboles) == (4, 27)
+    assert primera.visitant_nom == "HERNÁNDEZ PARRA, ANTONI"
+    assert (primera.visitant_serie_major, primera.visitant_caramboles) == (5, 39)
+    assert primera.entrades == 50
+    assert primera.modalitat == "Tres bandes"
+    # Els punts de la partida són l'última columna i no tenen capçalera.
+    assert (primera.local_punts, primera.visitant_punts) == (0, 2)
+    # Aquesta pàgina ja no dona ni data, ni àrbitre, ni assistència.
+    assert primera.arbitre is None and primera.data_partida is None
+
+
+def test_lliga_partides_tambe_de_les_temporades_tancades() -> None:
+    """El 500 era seu: arreglat, la pàgina serveix també la 2025-26.
+
+    Importa perquè són les 2.464 partides de lliga que es van quedar pendents
+    mentre l'endpoint no anava.
+    """
+    partides = parse_lliga_partides(fixture("lligues_partides_36_148_316_2593_10939"))
+    assert len(partides) == 4
+    # Un empat: un punt per banda. El web antic no publicava els punts per partida.
+    empat = partides[1]
+    assert empat.local_nom == "MARTÍN LIMA, MELCHOR"
+    assert (empat.local_punts, empat.visitant_punts) == (1, 1)
 
 
 # ---------------- individuals ----------------
 
 
 def test_individuals_llistat_de_torneigs() -> None:
+    """Els quatre de la temporada 2026-27: dos opens i dos campionats.
+
+    El 216 és el CAMPIONAT DE CATALUNYA de tres bandes i el 218 el de quadre
+    47/2. Hi han de sortir: és la temporada en curs, i és justament la que no
+    s'ensenyava.
+    """
     torneigs = parse_individuals_torneigs_list(fixture("individuals_llistat"))
-    assert {t.torneig_id_extern for t in torneigs} == {216, 217}
-    assert torneigs[0].nom == "OPEN LLIURE PUNT D'ATAC"
+    assert {t.torneig_id_extern for t in torneigs} == {216, 217, 218, 219}
+    noms = {t.torneig_id_extern: t.nom for t in torneigs}
+    assert noms[216] == "TRES BANDES INDIVIDUAL"
+    assert noms[217] == "OPEN LLIURE PUNT D'ATAC"
 
 
 def test_individuals_divisions() -> None:

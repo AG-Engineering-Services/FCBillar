@@ -124,6 +124,52 @@ def _upsert(sb, table: str, rows: list[dict], on_conflict: str, prog: Progress) 
     return total
 
 
+#: Els codis amb què PostgREST diu «aquesta taula (o columna) encara no la veig».
+#: PGRST205 = taula desconeguda, PGRST204 = columna desconeguda al cos.
+_CODIS_ESQUEMA_NOU = ("PGRST204", "PGRST205")
+
+
+def esquema_encara_no_hi_es(exc: Exception) -> bool:
+    """L'error diu que el Data API encara no coneix la taula o la columna?
+
+    El Data API de Neon reparteix les peticions entre diverses instàncies i
+    cadascuna porta el seu cache d'esquemes. Just després d'un `CREATE TABLE` les
+    respostes **alternen**: unes ja el veuen i les altres no, i la convergència
+    triga de l'ordre de mitja hora. `NOTIFY pgrst, 'reload schema'` no hi arriba.
+
+    No es pot distingir d'un DDL que no s'ha aplicat mai, i per això qui ho fa
+    servir ho ha de dir ben fort en comptes de passar-hi de llarg.
+    """
+    text = str(exc)
+    return any(codi in text for codi in _CODIS_ESQUEMA_NOU)
+
+
+def publica_si_hi_es(nom: str, fn, prog: Progress) -> dict[str, int]:
+    """Executa un publicador i, si la seva taula encara no existeix, avisa i segueix.
+
+    Només s'empassa això: que el Data API digui que no coneix la taula o la
+    columna. Qualsevol altre error puja, perquè una publicació que falla en
+    silància és pitjor que una que peta.
+
+    Hi és perquè una taula nova triga mitja hora a ser visible a totes les
+    instàncies del Data API, i durant aquella mitja hora la publicació nocturna no
+    s'ha d'aturar per una cosa que es cura sola. El que NO fa és donar-ho per bo:
+    el compte queda a -1 i el missatge diu què cal fer.
+    """
+    try:
+        return fn()
+    except Exception as exc:
+        if not esquema_encara_no_hi_es(exc):
+            raise
+        prog(
+            "warn",
+            f"{nom}: el Data API encara no coneix la taula. O el DDL no s'ha "
+            f"aplicat, o el cache d'esquemes no ha convergit (triga ~30 min). "
+            f"NO s'ha publicat res; torna-ho a provar.",
+        )
+        return {nom: -1}
+
+
 def publish_rankings(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
@@ -533,7 +579,18 @@ def publish_pending_games(
     for r in conn.execute("SELECT nom, fcb_id FROM players"):
         nom2fcb.setdefault(_nm(r["nom"]), r["fcb_id"])
 
-    # open_live es llegeix una sola vegada (Supabase).
+    # La temporada en curs, i no un id escrit al codi.
+    #
+    # Aquí hi havia `ti.temporada_id = 1`, que és la 2025-26. Quan va començar la
+    # 2026-27 —que porta l'id 118604— aquesta font va quedar publicant els
+    # torneigs de l'any passat i cap dels d'ara, sense fallar. És el mateix error
+    # que el `36` escrit a `ingest-lliga`, amb una altra cara: les dues partides
+    # que SÁEZ ROMERO va jugar el 2026-09-19 a la pre-prèvia de 2a no arribaven a
+    # la seva fitxa, i no hi havia manera de veure per què.
+    fila_temp = conn.execute("SELECT id FROM temporades ORDER BY nom DESC LIMIT 1").fetchone()
+    temporada_actual = fila_temp[0] if fila_temp else None
+
+    # open_live es llegeix una sola vegada (Neon).
     live_rows = (
         sb.table("open_live").select("modality, payload_json, captured_at").execute().data or []
     )
@@ -556,7 +613,7 @@ def publish_pending_games(
 
         out: dict[tuple[str, str], dict] = {}
 
-        def _add(pf, opp_nom, opp_fcb, car, car_opp, ent, serie, comp, font, sig, cap):
+        def _add(pf, opp_nom, opp_fcb, car, car_opp, ent, serie, comp, font, sig, cap, data=None):
             # Només jugadors amb fcb_id federatiu real; els placeholders ("name:…")
             # no tenen fitxa ni surten al rànquing, així que no aporten res.
             if pf is None or str(pf).startswith("name:"):
@@ -576,6 +633,20 @@ def publish_pending_games(
                     "entrades": ent,
                     "serie": serie,
                     "captured_at": cap,
+                    # El dia que es va jugar.
+                    #
+                    # Hi ha de ser. `public.partides` de c3b creua les partides
+                    # federatives amb les del jugador PER DATA (signatura + cognom
+                    # del rival + data més propera) i insereix les que no hi troba;
+                    # una fila sense data no casa amb res i tampoc no s'hi pot
+                    # inserir, o sigui que desapareixia en silància. És el que
+                    # passava amb les partides de lliga jugades i encara no
+                    # publicades al rànquing: sortien a la fitxa i no a c3b.
+                    #
+                    # A la lliga és la data de la JORNADA i no el dia exacte: el web
+                    # nou no publica cap data per partida i un encontre avançat es
+                    # juga dies abans. És el que tenim, i val més que no res.
+                    "data": data,
                 },
             )
 
@@ -635,13 +706,15 @@ def publish_pending_games(
             # per "TRES BANDES" i temporada en curs (temporada_id=1, no femení).
             for r in conn.execute(
                 """SELECT ti.nom comp, tp.player1_nom n1, tp.caramboles1 c1, tp.serie1 s1,
-                          tp.player2_nom n2, tp.caramboles2 c2, tp.serie2 s2, tp.entrades e
+                          tp.player2_nom n2, tp.caramboles2 c2, tp.serie2 s2, tp.entrades e,
+                          tp.data
                    FROM torneig_partides tp
                    JOIN torneigs_individuals ti
                      ON ti.torneig_id_extern = tp.torneig_id_extern
                         AND ti.divisio_id_extern = tp.divisio_id_extern
-                   WHERE ti.temporada_id = 1
-                     AND ti.nom LIKE '%TRES BANDES%' AND ti.nom NOT LIKE '%FEMENI%'"""
+                   WHERE ti.temporada_id = ?
+                     AND ti.nom LIKE '%TRES BANDES%' AND ti.nom NOT LIKE '%FEMENI%'""",
+                (temporada_actual,),
             ):
                 if not r["e"] or r["e"] <= 0:
                     continue
@@ -654,8 +727,34 @@ def publish_pending_games(
                 )
                 lf = nom2fcb.get(_nm(r["n1"]))
                 vf = nom2fcb.get(_nm(r["n2"]))
-                _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "open", sig, None)
-                _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "open", sig, None)
+                _add(
+                    lf,
+                    r["n2"],
+                    vf,
+                    r["c1"],
+                    r["c2"],
+                    r["e"],
+                    r["s1"],
+                    comp,
+                    "open",
+                    sig,
+                    None,
+                    r["data"],
+                )
+                _add(
+                    vf,
+                    r["n1"],
+                    lf,
+                    r["c2"],
+                    r["c1"],
+                    r["e"],
+                    r["s2"],
+                    comp,
+                    "open",
+                    sig,
+                    None,
+                    r["data"],
+                )
 
         # --- OPENS EN CURS (open_live) ---
         modname = _MODNM.get(mod)
@@ -699,7 +798,7 @@ def publish_pending_games(
         # en incorporar-les la ingesta oficial, deixen de ser pendents.
         for r in conn.execute(
             """SELECT competicio, player1_nom n1, caramboles1 c1, serie1 s1,
-                      player2_nom n2, caramboles2 c2, serie2 s2, entrades e
+                      player2_nom n2, caramboles2 c2, serie2 s2, entrades e, data
                FROM lliga_pending_partides WHERE modalitat_codi = ?""",
             (mod,),
         ):
@@ -711,8 +810,34 @@ def publish_pending_games(
             lf = nom2fcb.get(_nm(r["n1"]))
             vf = nom2fcb.get(_nm(r["n2"]))
             comp = r["competicio"] or "Lliga"
-            _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "lliga", sig, None)
-            _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "lliga", sig, None)
+            _add(
+                lf,
+                r["n2"],
+                vf,
+                r["c1"],
+                r["c2"],
+                r["e"],
+                r["s1"],
+                comp,
+                "lliga",
+                sig,
+                None,
+                r["data"],
+            )
+            _add(
+                vf,
+                r["n1"],
+                lf,
+                r["c2"],
+                r["c1"],
+                r["e"],
+                r["s2"],
+                comp,
+                "lliga",
+                sig,
+                None,
+                r["data"],
+            )
 
         sb.table("pending_games").delete().eq("modalitat_codi", mod).execute()
         rows = list(out.values())
@@ -1093,6 +1218,45 @@ def _fetch_official_lliga_standings(
     return out
 
 
+def _equip_id_oficial(equip_text: str, equips: dict, repo) -> int | None:
+    """De «C.B. BANYOLES "A"» al nostre `equips.id`, si el tenim.
+
+    És el segon intent, per a les files de la classificació oficial que
+    `_match_official_rows` no ha sabut col·locar. Sense ell aquelles files es
+    publiquen amb el text de la federació —amb cometes— i, si a més en tenim
+    encontres, l'equip surt DUES vegades al mateix grup: un cop com a
+    «C.B. BANYOLES "A"» i un altre com a «C.B.BANYOLES A». Són el mateix equip i
+    la clau de la taula és el text, o sigui que les dues files hi caben.
+
+    El club es resol amb el mateix resolutor (exacte / normalitzat / àlies / sense
+    la lletra) que fa servir la ingesta d'encontres, i la lletra amb el mateix
+    partidor. Si el club té un sol equip al grup, la lletra no ha de coincidir:
+    les fases FINAL la reassignen ("B" → "A").
+    """
+    from fcbillar.pipeline import _split_equip_nom
+
+    club_nom, lletra = _split_equip_nom(equip_text)
+    club_id = repo.resolve_club_id_by_nom(club_nom)
+    if club_id is None:
+        return None
+    candidats = [eid for eid, meta in equips.items() if meta and meta[3] == club_id]
+    if not candidats:
+        return None
+    lletra = (lletra or "").upper()
+    for eid in candidats:
+        if (equips[eid][2] or "").upper() == lletra:
+            return eid
+    return candidats[0] if len(candidats) == 1 else None
+
+
+def _nom_equip(eid: int | None, equips: dict) -> str:
+    """«C.B. MATARÓ» + «A» → «C.B. MATARÓ A». "UNICO" vol dir que no en té."""
+    nom, _fcb, lletra, _club = equips.get(eid, ("?", None, "", None))
+    if (lletra or "").strip().upper() in ("", "UNICO"):
+        return nom
+    return f"{nom} {lletra}".strip()
+
+
 def _match_official_rows(off_rows, stats: dict, equips: dict, repo) -> dict:
     """Casa cada fila oficial amb un equip del grup → {eid: LligaClassificacioRow}.
 
@@ -1277,83 +1441,104 @@ def publish_lliga(
                 sl["e"] += 1
                 sv["e"] += 1
 
-        # Casa cada equip amb la seva fila oficial (posició + punts de la
-        # federació). Els equips sense fila oficial s'ordenen al final per
-        # (PM, parcials a favor), el mateix desempat que aplica la federació.
+        # El cens dels equips d'un grup és la classificació OFICIAL, no els
+        # encontres. Els encontres només diuen qui HA JUGAT, i un equip que
+        # encara no ha jugat cap partit també és del grup: a la primera jornada
+        # d'Honor Grup A de la 2026-27, quatre dels vuit.
+        #
+        # Abans les files es construïen recorrent `stats`, que surt dels
+        # encontres, i la classificació oficial només s'usava quan no s'havia
+        # jugat RES. El cas de mig grup —que és el normal tota la temporada—
+        # queia entremig: la web ensenyava quatre equips de vuit, i els altres
+        # quatre no hi eren ni a zero. Ara es recorre la classificació oficial i
+        # els encontres només hi posen els comptadors.
         off_rows = official.get((div, gid))
         matched = _match_official_rows(off_rows, stats, equips, repo) if off_rows else {}
+        eid_per_oficial: dict[int, int] = {}  # id(fila oficial) → equip nostre
+        for eid, off in matched.items():
+            eid_per_oficial[id(off)] = eid
 
-        def _rank_key(kv):
-            eid, s = kv
-            off = matched.get(eid)
-            if off is not None:
-                return (0, off.posicio, 0, 0)
-            return (1, 0, -(3 * s["g"] + s["e"]), -s["ppf"])
+        ZEROS = {"pj": 0, "g": 0, "e": 0, "p": 0, "pf": 0, "pc": 0, "ppf": 0, "ppc": 0}
 
-        # Encara no s'ha jugat res en aquest grup: els equips i l'ordre surten
-        # de la classificació oficial, i tota la resta és zero perquè zero és el
-        # que hi ha. Val més ensenyar la lliga nova buida que la vella plena.
-        if not stats and off_rows:
+        # El grup entra per paràmetre i no des del bucle: una funció definida dins
+        # d'un bucle que en llegeix les variables es queda amb l'última volta si
+        # arriba a sobreviure-hi, i aquí no ha de poder passar.
+        def _fila(pos, eid, s, punts, penal, equip_text=None, club_fcb=None, *, div=div, gid=gid):
+            return {
+                "lliga_id": lliga,
+                "divisio_id": div,
+                "grup_id": gid,
+                "posicio": pos,
+                "equip": equip_text if equip_text is not None else _nom_equip(eid, equips),
+                "club_fcb_id": club_fcb if eid is None else equips.get(eid, (None, None))[1],
+                "pj": s["pj"],
+                "g": s["g"],
+                "e": s["e"],
+                "p": s["p"],
+                "punts": punts,
+                "pf": s["pf"],
+                "pc": s["pc"],
+                "penalitzacio": penal,
+            }
+
+        if off_rows:
+            # L'ordre i els punts són els de la federació: ja porten les
+            # penalitzacions restades i el desempat oficial per parcials.
+            vistos: set[int] = set()
             for off in off_rows:
-                cid = repo.resolve_club_id_by_nom(off.equip)
-                fila = (
-                    conn.execute("SELECT fcb_id FROM clubs WHERE id = ?", (cid,)).fetchone()
-                    if cid
-                    else None
-                )
-                standing_rows.append(
-                    {
-                        "lliga_id": lliga,
-                        "divisio_id": div,
-                        "grup_id": gid,
-                        "posicio": off.posicio,
-                        "equip": off.equip,
-                        "club_fcb_id": fila["fcb_id"] if fila else None,
-                        "pj": 0,
-                        "g": 0,
-                        "e": 0,
-                        "p": 0,
-                        "punts": off.pm,
-                        "pf": 0,
-                        "pc": 0,
-                        "penalitzacio": None,
-                    }
-                )
+                # Si `_match_official_rows` no l'ha col·locat, es prova pel club i
+                # la lletra. El que no pot passar és publicar-lo amb el text de la
+                # federació i tornar-lo a publicar amb el nostre als sobrants: la
+                # clau de la taula és el text i hi caben totes dues.
+                eid = eid_per_oficial.get(id(off)) or _equip_id_oficial(off.equip, equips, repo)
+                s = stats.get(eid, ZEROS) if eid is not None else ZEROS
+                computed_pm = 3 * s["g"] + s["e"]
+                # Sanció federativa = punts esperats per victòries − punts
+                # oficials. Només > 0 és sanció; < 0 vol dir que ens falten
+                # resultats, que no és cap sanció.
+                penal = computed_pm - off.pm if computed_pm > off.pm else None
+                if eid is not None:
+                    vistos.add(eid)
+                    standing_rows.append(_fila(off.posicio, eid, s, off.pm, penal))
+                else:
+                    # Un equip oficial que no sabem casar amb cap equip nostre.
+                    # Hi ha de sortir igualment, amb el nom que li dona la
+                    # federació: desaparèixer no és una opció.
+                    cid = repo.resolve_club_id_by_nom(off.equip)
+                    fila = (
+                        conn.execute("SELECT fcb_id FROM clubs WHERE id = ?", (cid,)).fetchone()
+                        if cid
+                        else None
+                    )
+                    standing_rows.append(
+                        _fila(
+                            off.posicio,
+                            None,
+                            ZEROS,
+                            off.pm,
+                            None,
+                            equip_text=off.equip,
+                            club_fcb=fila["fcb_id"] if fila else None,
+                        )
+                    )
+            # Un equip del qual tenim encontres i que l'oficial no llista —una
+            # promoció, un canvi de nom a mitja temporada— va al final amb el
+            # que n'hem comptat. Perdre'l seria pitjor que ensenyar-lo desordenat.
+            sobrants = sorted(
+                ((eid, s) for eid, s in stats.items() if eid not in vistos and eid is not None),
+                key=lambda kv: (-(3 * kv[1]["g"] + kv[1]["e"]), -kv[1]["ppf"]),
+            )
+            for pos, (eid, s) in enumerate(sobrants, start=len(off_rows) + 1):
+                standing_rows.append(_fila(pos, eid, s, 3 * s["g"] + s["e"], None))
             continue
 
-        ranked = sorted(stats.items(), key=_rank_key)
+        # Sense classificació oficial (la petició ha fallat) l'ordre es calcula
+        # dels encontres, amb el mateix desempat que aplica la federació.
+        ranked = sorted(
+            stats.items(), key=lambda kv: (-(3 * kv[1]["g"] + kv[1]["e"]), -kv[1]["ppf"])
+        )
         for pos, (eid, s) in enumerate(ranked, start=1):
-            nom, fcb_id, lletra, _club_id = equips.get(eid, ("?", None, "", None))
-            # "UNICO" = club amb un sol equip → no es mostra la lletra.
-            equip = (
-                nom
-                if (lletra or "").strip().upper() in ("", "UNICO")
-                else f"{nom} {lletra}".strip()
-            )
-            computed_pm = 3 * s["g"] + s["e"]
-            off = matched.get(eid)
-            punts = off.pm if off is not None else computed_pm
-            # Sanció federativa = punts esperats per victòries − punts oficials.
-            # Només > 0 és sanció; < 0 vol dir que ens falten resultats (no sanció).
-            penal = computed_pm - off.pm if off is not None and computed_pm > off.pm else None
-            standing_rows.append(
-                {
-                    "lliga_id": lliga,
-                    "divisio_id": div,
-                    "grup_id": gid,
-                    "posicio": pos,
-                    "equip": equip,
-                    "club_fcb_id": fcb_id,
-                    "pj": s["pj"],
-                    "g": s["g"],
-                    "e": s["e"],
-                    "p": s["p"],
-                    "punts": punts,
-                    "pf": s["pf"],
-                    "pc": s["pc"],
-                    "penalitzacio": penal,
-                }
-            )
+            standing_rows.append(_fila(pos, eid, s, 3 * s["g"] + s["e"], None))
 
     counts = {}
     counts["lliga_groups"] = _upsert(
@@ -2084,8 +2269,61 @@ def publish_lliga_encontres(
         for e in encs
     ]
 
+    # Les partides d'un encontre, de les DUES fonts, i en aquest ordre:
+    #
+    # 1. `games`, que és la partida oficial (ve del rànquing) i porta l'id de
+    #    jugador ja resolt.
+    # 2. `lliga_pending_partides`, que és el que diu l'acta de la lliga d'una
+    #    partida que el rànquing encara no ha publicat.
+    #
+    # La segona font hi és perquè sense ella la temporada en curs surt BUIDA. El
+    # rànquing es publica un cop al mes i la ingesta de lliga no desa a `games` una
+    # partida que no hi trobi ja -deixa que l'autoritat sigui el rànquing-, o sigui
+    # que entre la jornada i el rànquing següent no hi ha cap fila: les 28 partides
+    # de la primera jornada de la 26/27 no arribaven al web de cap manera, i el que
+    # es veia era el resultat de l'encontre i res més.
+    #
+    # La dedup va per signatura (parella de noms normalitzats + caramboles +
+    # entrades), la mateixa que fa servir `publish_pending_games`: quan el rànquing
+    # publiqui la partida, la fila pendent deixa d'afegir-s'hi i no en surten dues.
+    def _sig_partida(na, ca, nb, cb, ent) -> str:
+        import unicodedata as _ud
+
+        def _nm(x):
+            x = "".join(c for c in _ud.normalize("NFD", x or "") if _ud.category(c) != "Mn")
+            return " ".join(x.strip().lower().split())
+
+        a, b = sorted(
+            [
+                f"{_nm(na)}:{ca if ca is not None else ''}",
+                f"{_nm(nb)}:{cb if cb is not None else ''}",
+            ]
+        )
+        return f"{a}|{b}|{ent if ent is not None else ''}"
+
     part_rows = []
     counter: dict = defaultdict(int)
+    vistes: dict[int, set[str]] = defaultdict(set)
+
+    def _afegeix(eid, mod, j1, c1, j2, c2, ent) -> None:
+        sig = _sig_partida(j1, c1, j2, c2, ent)
+        if sig in vistes[eid]:
+            return
+        vistes[eid].add(sig)
+        counter[eid] += 1
+        part_rows.append(
+            {
+                "encontre_id": eid,
+                "ordre": counter[eid],
+                "modalitat_codi": mod,
+                "jugador_local": _disp(j1),
+                "caramboles_local": c1,
+                "jugador_visitant": _disp(j2),
+                "caramboles_visitant": c2,
+                "entrades": ent,
+            }
+        )
+
     for r in conn.execute(
         """
         SELECT g.encontre_lliga_id AS eid, m.codi_fcb AS mod,
@@ -2098,19 +2336,21 @@ def publish_lliga_encontres(
         """,
         (LLIGA_3B_ID, season_id),
     ):
-        counter[r["eid"]] += 1
-        part_rows.append(
-            {
-                "encontre_id": r["eid"],
-                "ordre": counter[r["eid"]],
-                "modalitat_codi": r["mod"],
-                "jugador_local": _disp(r["j1"]),
-                "caramboles_local": r["c1"],
-                "jugador_visitant": _disp(r["j2"]),
-                "caramboles_visitant": r["c2"],
-                "entrades": r["e"],
-            }
-        )
+        _afegeix(r["eid"], r["mod"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"])
+
+    for r in conn.execute(
+        """
+        SELECT lp.encontre_lliga_id AS eid, lp.modalitat_codi AS mod,
+               lp.player1_nom AS j1, lp.caramboles1 AS c1,
+               lp.player2_nom AS j2, lp.caramboles2 AS c2, lp.entrades AS e
+        FROM lliga_pending_partides lp
+        JOIN encontres_lliga en ON en.id = lp.encontre_lliga_id
+        WHERE en.lliga_id = ? AND en.temporada_id = ?
+        ORDER BY lp.encontre_lliga_id, lp.rowid
+        """,
+        (LLIGA_3B_ID, season_id),
+    ):
+        _afegeix(r["eid"], r["mod"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"])
 
     counts = {}
     counts["lliga_encontres"] = _upsert(sb, "lliga_encontres", enc_rows, "encontre_id", prog)
@@ -2208,6 +2448,7 @@ def publish_open_partides(
                 "open_id": oid,
                 "fase_id": r["fase_id"],
                 "ordre": counter[key],
+                "grup_nom": r["grup_nom"],
                 "jugador_local": r["player1_nom"],
                 "caramboles_local": r["caramboles1"],
                 "jugador_visitant": r["player2_nom"],
@@ -2216,8 +2457,153 @@ def publish_open_partides(
             }
         )
     n = _upsert(sb, "open_partides", rows, "open_id,fase_id,ordre", prog)
+
+    # I es retira el que ha quedat de més.
+    #
+    # L'upsert només escriu i sobreescriu: no sap què ha desaparegut. Quan un
+    # torneig es reingereix i les seves partides queden repartides d'una altra
+    # manera —menys files a una fase, una fase que la federació retira— les velles
+    # s'hi quedaven, i cada partida sortia dues vegades a la pantalla.
+    #
+    # Es retira per `open_id`, i només dels torneigs que s'acaben de publicar: un
+    # que no hi surti no s'hi toca, perquè no saber-ne res no vol dir que no hi
+    # sigui.
+    retirades = 0
+    vius: dict[int, set[tuple[int, int]]] = {}
+    for r in rows:
+        vius.setdefault(r["open_id"], set()).add((r["fase_id"], r["ordre"]))
+    for oid, claus in vius.items():
+        try:
+            actuals = (
+                sb.table("open_partides")
+                .select("fase_id,ordre")
+                .eq("open_id", oid)
+                .range(0, 9999)
+                .execute()
+                .data
+                or []
+            )
+        except Exception as e:  # noqa: BLE001
+            prog("warn", f"open_partides {oid}: no s'ha pogut llegir per retirar ({e})")
+            continue
+        sobren = [
+            (x["fase_id"], x["ordre"]) for x in actuals if (x["fase_id"], x["ordre"]) not in claus
+        ]
+        for fase_id, ordre in sobren:
+            sb.table("open_partides").delete().eq("open_id", oid).eq("fase_id", fase_id).eq(
+                "ordre", ordre
+            ).execute()
+            retirades += 1
+    if retirades:
+        prog("ok", f"open_partides: {retirades} files retirades (ja no hi són)")
+
     conn.close()
-    return {"open_partides": n}
+    return {"open_partides": n, "open_partides_retirades": retirades}
+
+
+def publish_open_fases(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Les fases de cada torneig individual i el rànquing de cada fase de grups.
+
+    És el que fa falta per als CAMPIONATS DE CATALUNYA, que es juguen per rondes.
+    La federació publica la classificació de cada grup i cap ordre entre grups, i
+    sense aquell ordre no es pot dir qui s'ha classificat. L'ordre —posició al
+    grup, punts de la ronda, mitjana— surt de `torneig_fase_grups`, que és el que
+    hi desa la ingesta.
+
+    La classificació final del torneig continua a `open_classifications`. Això és
+    una altra cosa: la foto d'una ronda mentre el campionat es juga.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    by_norm = _players_by_norm(conn)
+
+    def _nm(nom: str) -> str:
+        import unicodedata as _ud
+
+        n = "".join(c for c in _ud.normalize("NFD", nom or "") if _ud.category(c) != "Mn")
+        return " ".join(n.strip().lower().split())
+
+    def _fcb_id(nom: str) -> str | None:
+        hit = by_norm.get(_nm(nom))
+        return hit[0] if hit else None
+
+    # El club amb què cadascú juga l'INDIVIDUAL, que no és necessàriament el de la
+    # lliga: hi ha qui va fitxat a la lliga per un club i juga el campionat pel
+    # seu. Ve de `afiliacions`, que és l'únic lloc que ho sap (§2.10 del document
+    # del canvi de web).
+    #
+    # No entra a l'ORDRE del rànquing i no hi ha d'entrar: la federació ordena per
+    # posició al grup, punts de la ronda i mitjana, i el club no hi juga cap paper.
+    # Hi és per poder llegir la llista.
+    club_individual: dict[str, str] = {}
+    try:
+        for r in conn.execute(
+            "SELECT jugador, club FROM afiliacions WHERE competicio = 'INDIVIDUAL'"
+        ):
+            club_individual.setdefault(_nm(r["jugador"]), r["club"])
+    except sqlite3.OperationalError:
+        pass  # BD sense `afiliacions`: la columna queda buida i prou
+
+    fase_rows: list[dict] = []
+    ranquing_rows: list[dict] = []
+    for f in conn.execute(
+        """
+        SELECT tf.id AS fid, tf.torneig_id AS open_id, tf.fase_id_extern, tf.nom,
+               tf.tipus, tf.ordre
+        FROM torneig_fases tf ORDER BY tf.torneig_id, tf.ordre
+        """
+    ):
+        fase_rows.append(
+            {
+                "open_id": f["open_id"],
+                "fase_id": f["fase_id_extern"],
+                "nom": f["nom"] or "",
+                "tipus": f["tipus"] or "",
+                "ordre": f["ordre"],
+                "data": None,
+            }
+        )
+        # L'ordre entre grups: posició al grup, punts, mitjana. El fa SQLite
+        # perquè és el mateix criteri que `individuals.ranquing_fase` i aquí les
+        # dades ja hi són desades.
+        files = conn.execute(
+            """
+            SELECT jugador_nom, grup_nom, posicio_grup, punts, mitjana
+            FROM torneig_fase_grups
+            WHERE fase_id = ? AND posicio_grup IS NOT NULL
+            ORDER BY posicio_grup, punts DESC, mitjana DESC, jugador_nom
+            """,
+            (f["fid"],),
+        ).fetchall()
+        for pos, r in enumerate(files, start=1):
+            ranquing_rows.append(
+                {
+                    "open_id": f["open_id"],
+                    "fase_id": f["fase_id_extern"],
+                    "posicio": pos,
+                    "jugador": _disp(r["jugador_nom"]),
+                    "player_fcb_id": _fcb_id(r["jugador_nom"]),
+                    "grup_nom": r["grup_nom"],
+                    "posicio_grup": r["posicio_grup"],
+                    "punts": r["punts"],
+                    "mitjana": r["mitjana"],
+                    "club": club_individual.get(_nm(r["jugador_nom"])),
+                }
+            )
+
+    counts = {}
+    counts["open_fases"] = _upsert(sb, "open_fases", fase_rows, "open_id,fase_id", prog)
+    counts["open_fase_ranquing"] = _upsert(
+        sb, "open_fase_ranquing", ranquing_rows, "open_id,fase_id,jugador", prog
+    )
+    conn.close()
+    return counts
 
 
 def _players_by_norm(conn) -> dict[str, tuple[str, str]]:
@@ -3479,7 +3865,11 @@ def publish_estadistiques_partides(
             try:
                 pend = (
                     sb.table("pending_games")
-                    .select("opponent_nom,caramboles,caramboles_opp,entrades,serie,competicio")
+                    # `data` hi ha de ser: el creuament amb c3b va per data i sense
+                    # ella la fila no casa amb res ni s'hi pot inserir. La columna
+                    # existia i aquest select no la demanava, que és pitjor que si
+                    # no existís: sembla que hi sigui i arriba buida.
+                    .select("data,opponent_nom,caramboles,caramboles_opp,entrades,serie,competicio")
                     .eq("player_fcb_id", fcb_id)
                     .eq("modalitat_codi", codi_fcb)
                     .execute()
@@ -3497,7 +3887,10 @@ def publish_estadistiques_partides(
                     continue
                 feds.append(
                     {
-                        "data": None,
+                        # La data de la partida pendent. Abans hi anava `None` i
+                        # aixo la treia de joc: el creuament amb c3b va per data i
+                        # una fila sense data no casa amb res ni s'hi pot inserir.
+                        "data": pr.get("data"),
                         "co": pr["caramboles"],
                         "copp": pr["caramboles_opp"],
                         "e": pr["entrades"],
@@ -3619,6 +4012,66 @@ def publish_estadistiques_partides(
     return {"estadistiques_partides_upd": tot_upd, "estadistiques_partides_ins": tot_ins}
 
 
+def publish_afiliacions(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Amb quin club juga cadascú CADA competició de la temporada en curs.
+
+    `player_clubs` en publica un per jugador i temporada, que per a l'històric fa
+    el fet. Això és l'altra cosa: un jugador pot anar fitxat a la lliga de 4
+    Modalitats per un club i a la de tres bandes per un altre, i pot jugar el
+    campionat individual pel seu de sempre. Amb una fila sola, una de les
+    respostes ha de ser falsa.
+
+    Es publiquen TOTES les temporades que hi hagi a la taula local: de moment
+    només n'hi ha una, la 2026-27, perquè és la primera que la federació publica
+    prou detallada per poder-ho saber.
+
+    Qui la llegeixi ha de paginar: la 2026-27 sola ja passa de mil files (1.086) i
+    el Data API en torna mil sense dir-ho.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    by_norm = _players_by_norm(conn)
+
+    def _fcb_id(nom: str) -> str | None:
+        import unicodedata as _ud
+
+        n = "".join(c for c in _ud.normalize("NFD", nom or "") if _ud.category(c) != "Mn")
+        hit = by_norm.get(" ".join(n.strip().lower().split()))
+        return hit[0] if hit else None
+
+    rows = [
+        {
+            "temporada": r["temporada"],
+            "competicio": r["competicio"],
+            "modalitat": r["modalitat"],
+            "jugador": _disp(r["jugador"]),
+            "player_fcb_id": _fcb_id(r["jugador"]),
+            "club": r["club"],
+            "fitxatge": bool(r["fitxatge"]),
+            "font": r["font"],
+        }
+        for r in conn.execute(
+            "SELECT temporada, competicio, modalitat, jugador, club, fitxatge, font "
+            "FROM afiliacions ORDER BY temporada, competicio, modalitat, jugador"
+        )
+    ]
+    conn.close()
+    if not rows:
+        # Buit no vol dir «ningú no juga»: vol dir que la taula local no s'ha
+        # omplert (`fcbillar afiliacions`). Retirar-hi res se n'enduria el que hi
+        # hagués de bo al núvol.
+        prog("warn", "cap afiliació a la BD local: no publico ni retiro res")
+        return {"afiliacions": 0}
+    n = _upsert(sb, "afiliacions", rows, "temporada,competicio,modalitat,jugador", prog)
+    return {"afiliacions": n}
+
+
 def publish_player_clubs(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
@@ -3674,6 +4127,49 @@ def publish_player_clubs(
         }
         for (fcb, temp) in set(best) | set(lliga)
     ]
+
+    # La temporada en curs mana des de `afiliacions`, que és l'única font que la
+    # sap de debò: diu qui inscriu cada club ABANS que es jugui res, mentre les
+    # altres dues l'han de deduir de partides que encara no existeixen. MAS
+    # CANADELL, JOSEP Mª hi sortia al C.B.LLINARS -d'on venia l'última cosa
+    # ingerida- jugant aquest any amb el B.C.GRANOLLERS.
+    #
+    # `player_clubs` només admet un club per temporada, i per tant aquí se'n perd
+    # la diferència entre competicions. No és cap descuit: qui la necessiti ha de
+    # llegir `afiliacions`, que les porta totes.
+    per_afiliacio: dict[tuple[str, str], tuple[str, int]] = {}
+    # Una connexió nova: la d'aquesta funció ja s'ha tancat unes línies més amunt.
+    conn2 = sqlite3.connect(str(db_path))
+    conn2.row_factory = sqlite3.Row
+    try:
+        for r in conn2.execute(
+            """SELECT a.temporada, a.competicio, a.modalitat, a.jugador, a.club, p.fcb_id
+               FROM afiliacions a
+               LEFT JOIN players p ON UPPER(p.nom) = UPPER(a.jugador)"""
+        ):
+            if not r["fcb_id"]:
+                continue
+            # '2026/2027' (federatiu) -> '2026-2027' (el de `temporades`).
+            temp = (r["temporada"] or "").replace("/", "-")
+            clau = (r["fcb_id"], temp)
+            pes = {("LLIGA", "Tres bandes"): 0, ("LLIGA", "4 Modalitats"): 1}.get(
+                (r["competicio"], r["modalitat"]), 2
+            )
+            ja = per_afiliacio.get(clau)
+            if ja is None or pes < ja[1]:
+                per_afiliacio[clau] = (r["club"], pes)
+    except sqlite3.OperationalError:
+        per_afiliacio = {}
+    finally:
+        conn2.close()
+    if per_afiliacio:
+        per_clau = {(r["player_fcb_id"], r["temporada"]): r for r in rows}
+        for clau, (club, _pes) in per_afiliacio.items():
+            fila = per_clau.get(clau)
+            if fila is not None:
+                fila["club"] = club
+            else:
+                rows.append({"player_fcb_id": clau[0], "temporada": clau[1], "club": club})
 
     # Canonicalitza els noms de club: neteja (Descansa/sufixos/codis/AMISTAT),
     # agrupa pel nucli i aplica el mapping manual de clubs_list.txt.

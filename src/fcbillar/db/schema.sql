@@ -129,14 +129,31 @@ CREATE TABLE IF NOT EXISTS equips (
 );
 CREATE INDEX IF NOT EXISTS ix_equips_club ON equips(club_id);
 
+-- Un encontre de lliga. El que l'identifica és la PARELLA dins de la jornada,
+-- no l'identificador de la federació (v23).
+--
+-- Perquè aquell identificador no existeix fins que l'encontre s'ha jugat: la
+-- federació el crea quan algú introdueix el resultat, i és llavors que la fila
+-- de la pàgina d'encontres estrena enllaç. Abans hi surt igualment, amb els dos
+-- equips i l'estat «Oberta», i no porta cap número.
+--
+-- Amb la clau vella —que l'exigia i el volia NOT NULL— la meitat d'una jornada
+-- no es podia desar, i la web ensenyava només els partits ja jugats. Amb la
+-- parella com a clau, l'encontre s'hi desa el dia que es publica el calendari i
+-- el mateix registre s'omple quan es juga: hi entren l'id, els punts i l'estat.
+--
+-- `encontre_id_extern` continua sent-hi perquè és la clau per demanar-ne el
+-- detall (`lligues/partides/...`), però ara és un atribut que arriba tard, no
+-- una part de la identitat.
 CREATE TABLE IF NOT EXISTS encontres_lliga (
     id                      INTEGER PRIMARY KEY AUTOINCREMENT,
-    -- Identificadors derivats de la URL del portal (composta única):
+    -- Identificadors derivats de la URL del portal:
     lliga_id                INTEGER NOT NULL,
     divisio_id              INTEGER NOT NULL,
     grup_id                 INTEGER NOT NULL,
     jornada_id              INTEGER NOT NULL,
-    encontre_id_extern      INTEGER NOT NULL,
+    -- NULL mentre no s'hagi jugat. Vegeu la nota de dalt.
+    encontre_id_extern      INTEGER,
     --
     data                    TEXT,
     temporada_id            INTEGER REFERENCES temporades(id),
@@ -149,11 +166,19 @@ CREATE TABLE IF NOT EXISTS encontres_lliga (
     p_match_local           INTEGER,
     p_parcials_visitant     INTEGER,
     p_match_visitant        INTEGER,
-    UNIQUE(lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern)
+    -- v23: el número de jornada que escriu la federació («Jornada 1»). Abans
+    -- s'havia de deduir ordenant els jornada_id per data, i les jornades sense
+    -- cap encontre jugat no hi sortien.
+    jornada_num             INTEGER,
+    -- v23: 'Finalitzada' | 'Oberta' | 'Pendent'…, tal com ho diu la federació.
+    estat                   TEXT,
+    UNIQUE(lliga_id, divisio_id, grup_id, jornada_id, equip_local_id, equip_visitant_id)
 );
 CREATE INDEX IF NOT EXISTS ix_encontres_data ON encontres_lliga(data);
 CREATE INDEX IF NOT EXISTS ix_encontres_local ON encontres_lliga(equip_local_id);
 CREATE INDEX IF NOT EXISTS ix_encontres_visitant ON encontres_lliga(equip_visitant_id);
+CREATE INDEX IF NOT EXISTS ix_encontres_extern
+    ON encontres_lliga(lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern);
 
 CREATE TABLE IF NOT EXISTS games (
     id                      TEXT PRIMARY KEY,  -- id_natural (hash determinista)
@@ -307,11 +332,26 @@ CREATE TABLE IF NOT EXISTS torneig_fases (
     UNIQUE (torneig_id, fase_id_extern)
 );
 
+-- Qui juga a quin grup d'una fase i com hi ha quedat.
+--
+-- v24: hi entren la posició dins del grup, els punts i la mitjana. Són les tres
+-- coses que la federació publica a la mateixa pàgina de les partides del grup
+-- («Grup I - CLASSIFICACIÓ») i que no llegia ningú, tot i ser les úniques que
+-- diuen qui s'ha classificat. Amb això el rànquing d'una fase es pot fer:
+-- primer per posició al grup, després pels punts, i a igualtat de tots dos per
+-- la mitjana. Vegeu `fcbillar.individuals.ranquing_fase`.
 CREATE TABLE IF NOT EXISTS torneig_fase_grups (
-    fase_id      INTEGER NOT NULL REFERENCES torneig_fases(id) ON DELETE CASCADE,
-    grup_nom     TEXT,
-    jugador_nom  TEXT,
-    ordre        INTEGER
+    fase_id        INTEGER NOT NULL REFERENCES torneig_fases(id) ON DELETE CASCADE,
+    grup_nom       TEXT,
+    jugador_nom    TEXT,
+    ordre          INTEGER,
+    -- v24: l'id del grup al portal. Fa falta per tornar-hi: la pàgina de les
+    -- partides d'un grup no és abastable de cap altra manera.
+    grup_id_extern INTEGER,
+    -- v24: NULL mentre el grup no s'hagi jugat.
+    posicio_grup   INTEGER,
+    punts          INTEGER,
+    mitjana        REAL
 );
 CREATE INDEX IF NOT EXISTS ix_tfg_fase ON torneig_fase_grups(fase_id);
 
@@ -327,6 +367,23 @@ CREATE TABLE IF NOT EXISTS torneig_partides (
     torneig_id_extern  INTEGER,
     divisio_id_extern  INTEGER,
     fase_id            INTEGER,
+    -- v26: de quin GRUP de la fase és la partida ('Grup I'), o NULL a les
+    -- eliminatòries, que no en tenen.
+    --
+    -- Sense això, les partides d'una fase de grups són un sac: es pot dir que
+    -- són de la pre-prèvia però no quines són del Grup A i quines del Grup K, i
+    -- per tant no es pot ensenyar un grup amb la seva classificació i les seves
+    -- partides al costat, que és com es llegeix un campionat.
+    grup_nom           TEXT,
+    -- v26: el dia que es va jugar, que és el del grup (el portal no en dona cap
+    -- altra data).
+    --
+    -- Aquí s'havia decidit NO tenir-la, amb el raonament que la data d'una
+    -- partida ja arriba pel rànquing quan es creua amb `games`. I és veritat...
+    -- el mes que ve. Una partida jugada ahir no és a cap rànquing, i sense data
+    -- no es pot publicar com a pendent: no sortia a la fitxa de ningú. Va passar
+    -- amb les dues que SÁEZ ROMERO va jugar el 2026-09-19 a la pre-prèvia de 2a.
+    data               TEXT,
     player1_nom        TEXT,
     caramboles1        INTEGER,
     serie1             INTEGER,
@@ -537,3 +594,41 @@ CREATE INDEX IF NOT EXISTS ix_lliga_inscrits_club
     ON lliga_inscrits(temporada, club);
 CREATE INDEX IF NOT EXISTS ix_lliga_inscrits_jugador
     ON lliga_inscrits(temporada, jugador);
+
+-- Amb quin club juga cadascú CADA competició d'aquesta temporada (v25).
+--
+-- Un jugador no té un club: en té un per competició. La federació ho publica
+-- així i passa de debò:
+--
+-- - es pot anar fitxat a la lliga per un club i jugar el campionat individual
+--   pel de sempre (PARERAS MÉNDEZ juga l'individual d'Honor 2026-27 per
+--   GRANOLLERS);
+-- - i es pot anar fitxat a la lliga de tres bandes per un club i a la de 4
+--   Modalitats per un altre, que són dues lligues i dues inscripcions.
+--
+-- `players.club_id` no ho pot dir: és una columna sola, i el que hi ha escrit és
+-- el club d'on surt l'última cosa que hem ingerit. Es queda perquè hi ha catorze
+-- temporades penjades d'ella, però per a la temporada en curs la font és
+-- aquesta.
+--
+-- El jugador va pel nom, «COGNOMS, NOM», perquè cap de les dues fonts no en dona
+-- l'identificador: ni `lligues/participants` ni els PDF de sorteig.
+CREATE TABLE IF NOT EXISTS afiliacions (
+    temporada   TEXT NOT NULL,              -- '2026/2027'
+    competicio  TEXT NOT NULL,              -- 'LLIGA' | 'INDIVIDUAL'
+    modalitat   TEXT NOT NULL,              -- 'Tres bandes' | '4 Modalitats' | …
+    jugador     TEXT NOT NULL,              -- 'COGNOMS, NOM'
+    club        TEXT NOT NULL,              -- nom del cens, ja canonicalitzat
+    -- 1 = hi ve fitxat d'un altre club. A la lliga la federació ho marca; al
+    -- sorteig de l'individual, no, i llavors val 0 perquè no ho sabem, no
+    -- perquè sabem que no.
+    fitxatge    INTEGER NOT NULL DEFAULT 0,
+    -- D'on surt: 'lliga_inscrits' (la llista oficial de cada club) o
+    -- 'sorteig_fase' (el PDF del sorteig d'una ronda de l'individual).
+    font        TEXT NOT NULL,
+    PRIMARY KEY (temporada, competicio, modalitat, jugador)
+);
+CREATE INDEX IF NOT EXISTS ix_afiliacions_jugador
+    ON afiliacions(temporada, jugador);
+CREATE INDEX IF NOT EXISTS ix_afiliacions_club
+    ON afiliacions(temporada, club);

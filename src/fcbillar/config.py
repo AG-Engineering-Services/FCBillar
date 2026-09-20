@@ -26,6 +26,20 @@ class Settings(BaseSettings):
     request_delay_sec: float = 1.0
     cache_html: bool = True
 
+    #: Quant pot durar una pàgina a la caché de disc abans de tornar-la a baixar.
+    #:
+    #: Hi ha de ser i no pot ser infinit. La caché no caducava mai, i una ingesta
+    #: d'una competició EN JOC llegia per sempre la pàgina del dia que es va
+    #: baixar per primer cop: el 2026-09-20 hi havia 157.856 fitxers amb una
+    #: edat mitjana de 82 dies, i els inscrits de la lliga de 4 Modalitats
+    #: seguien sent els del dia que la federació encara no n'havia publicat cap,
+    #: setze dies abans. La ingesta no fallava; simplement no veia res de nou.
+    #:
+    #: Una hora: prou per no repetir la mateixa pàgina dins d'una execució ni
+    #: mentre s'hi treballa a sobre, i prou poc per no tapar res a una tasca que
+    #: corre cada nit. `0` la deixa sense caducitat, que és el que feia abans.
+    cache_max_age_sec: int = 3600
+
     db_path: Path = Path("data/fcbillar.db")
     cache_dir: Path = Path("data/cache")
 

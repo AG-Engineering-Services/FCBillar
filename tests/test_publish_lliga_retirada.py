@@ -207,6 +207,50 @@ def test_un_grup_a_mig_jugar_amb_l_oficial_mut_no_perd_equips(entorn, monkeypatc
     )
 
 
+def test_un_grup_a_mig_jugar_publica_TOTS_els_equips(entorn, monkeypatch) -> None:
+    """La classificació ha de portar els vuit equips del grup, no els que han jugat.
+
+    És el que es veia a la web el setembre de 2026: la primera jornada d'Honor
+    Grup A va tenir dos encontres jugats i dos oberts, i la classificació
+    ensenyava quatre equips de vuit. Els altres quatre no hi eren de cap manera,
+    ni a zero.
+
+    El motiu: les files es construïen a partir dels encontres ingerits, i els
+    encontres només diuen qui ha jugat. La classificació oficial, que sí que és
+    el cens del grup, només s'usava quan NO s'havia jugat res —el cas del primer
+    dia—, i no el de mig grup, que és el normal tota la temporada.
+    """
+    db, magatzem = entorn
+    _grup_a_mig_jugar(db)
+    oficial = [
+        _classificacio(1, "C.B.MATARÓ A", 3),
+        _classificacio(2, "C.B.LLEIDA A", 0),
+        _classificacio(3, "B. C. OLESA", 0),
+        _classificacio(4, "C.B.SANT BOI A", 0),
+    ]
+    monkeypatch.setattr(
+        cloud_sync,
+        "_fetch_official_lliga_standings",
+        lambda claus, prog, lliga=38: {(159, 343): oficial, (159, 344): []},
+    )
+    cloud_sync.publish_lliga(db_path=db, lliga_id=38)
+
+    grup = [f for f in magatzem["lliga_standings"] if f.get("grup_id") == 343]
+    assert {f["equip"] for f in grup} == {
+        "C.B.MATARÓ A",
+        "C.B.LLEIDA A",
+        "B. C. OLESA",
+        "C.B.SANT BOI A",
+    }
+    # Els dos que han jugat porten el partit comptat; els altres dos, zeros.
+    per_equip = {f["equip"]: f for f in grup}
+    assert per_equip["C.B.MATARÓ A"]["pj"] == 1
+    assert per_equip["B. C. OLESA"]["pj"] == 0
+    assert per_equip["B. C. OLESA"]["punts"] == 0
+    # I l'ordre és el de la federació, no el nostre.
+    assert [f["posicio"] for f in sorted(grup, key=lambda f: f["posicio"])] == [1, 2, 3, 4]
+
+
 def test_quan_tot_respon_si_que_retira(entorn, monkeypatch) -> None:
     """La retirada segueix fent la seva feina: sense això tornen els duplicats."""
     db, magatzem = entorn

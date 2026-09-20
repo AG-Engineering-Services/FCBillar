@@ -9,6 +9,8 @@ from datetime import date
 
 from fcbillar.config import Settings, get_settings
 from fcbillar.db.migrations import ensure_schema
+from fcbillar.individuals import desa as desa_torneig
+from fcbillar.individuals import llegeix as llegeix_torneig
 from fcbillar.db.repository import Repository
 from fcbillar.ranking_dates import month_for_publication_date
 from fcbillar.models import (
@@ -20,8 +22,6 @@ from fcbillar.models import (
     Ranking,
     RankingGameLink,
     Temporada,
-    TorneigIndividualRecord,
-    TorneigParticipantRecord,
 )
 from fcbillar.scraper.client import ScraperClient
 from fcbillar.scraper.parsers import (
@@ -43,8 +43,6 @@ from fcbillar.scraper.parsers import (
     parse_copa_jornades,
     parse_copa_partides,
     parse_home_current_rankings,
-    parse_individuals_classificaciofinal,
-    parse_individuals_divisions,
     parse_individuals_torneigs_list,
     parse_lliga_divisions,
     parse_lliga_encontres,
@@ -57,7 +55,6 @@ from fcbillar.scraper.parsers import (
 )
 from fcbillar.scraper import urls as U
 from fcbillar.scraper.taules import taula_amb
-from fcbillar.torneig_naming import clean_torneig_nom
 
 log = logging.getLogger(__name__)
 
@@ -796,6 +793,7 @@ def ingest_lliga_encontre(
     *,
     modalitat_codi_fcb: int,
     data: date | None = None,
+    jornada_num: int | None = None,
     competicio_nom: str = "LLIGA",
     settings: Settings | None = None,
     create_missing_players: bool = False,
@@ -843,8 +841,23 @@ def ingest_lliga_encontre(
         p_match_local=encontre.p_match_local,
         p_parcials_visitant=encontre.p_parcials_visitant,
         p_match_visitant=encontre.p_match_visitant,
+        jornada_num=jornada_num,
+        estat=encontre.estat or None,
     )
     encontre_lliga_id = repo.upsert_encontre_lliga(encontre_full)
+
+    # Un encontre que encara no s'ha jugat no té pàgina de detall —ni id per
+    # demanar-la—, i això no és cap error: és el calendari. Es desa la parella,
+    # que és el que se'n sap, i s'acaba aquí. Quan es jugui, la mateixa fila
+    # estrenarà l'id i els resultats.
+    if encontre.encontre_id is None:
+        conn.commit()
+        return IngestLligaEncontreResult(
+            encontre_lliga_id=encontre_lliga_id,
+            partides_total=0,
+            games_upserted=0,
+            games_skipped_missing_player=0,
+        )
 
     # 2. Descarregar i parsejar les partides individuals de l'encontre.
     url = _lliga_partides_url(
@@ -1111,6 +1124,7 @@ def ingest_lliga_jornada(
     *,
     modalitat_codi_fcb: int,
     data: date | None = None,
+    jornada_num: int | None = None,
     competicio_nom: str = "LLIGA",
     settings: Settings | None = None,
     create_missing_players: bool = False,
@@ -1123,7 +1137,12 @@ def ingest_lliga_jornada(
     settings = settings or client.settings
     url = _lliga_encontres_url(settings.base_url, lliga_id, divisio_id, grup_id, jornada_id)
     html = client.fetch_html(url)
-    encontres = parse_lliga_encontres(html)
+    # Els paràmetres són per als encontres que encara no s'han jugat: no porten
+    # enllaç i per tant tampoc cap identificador d'on treure'ls. Vegeu
+    # `parse_lliga_encontres`.
+    encontres = parse_lliga_encontres(
+        html, lliga_id=lliga_id, divisio_id=divisio_id, grup_id=grup_id, jornada_id=jornada_id
+    )
 
     processed = 0
     failed = 0
@@ -1136,6 +1155,7 @@ def ingest_lliga_jornada(
                 encontre,
                 modalitat_codi_fcb=modalitat_codi_fcb,
                 data=data,
+                jornada_num=jornada_num,
                 competicio_nom=competicio_nom,
                 settings=settings,
                 create_missing_players=create_missing_players,
@@ -1259,6 +1279,20 @@ def _lliga_jornades_url(base_url: str, lliga: int, divisio: int, grup: int) -> s
     return U.lligues_jornades(lliga, divisio, grup, base=base_url)
 
 
+def _num_jornada(nom: str | None) -> int | None:
+    """«Jornada 1» → 1. El número que escriu la federació, no el que deduïm.
+
+    Fins ara l'ordinal de jornada es calculava ordenant els `jornada_id` per
+    data, i les jornades sense cap encontre jugat no hi sortien perquè no
+    s'ingerien. Amb el calendari sencer a la base de dades, el número el diu la
+    pàgina i no cal endevinar-lo.
+    """
+    if not nom:
+        return None
+    m = re.search(r"(\d+)", nom)
+    return int(m.group(1)) if m else None
+
+
 def ingest_lliga_grup(
     client: ScraperClient,
     lliga_id: int,
@@ -1296,6 +1330,7 @@ def ingest_lliga_grup(
                 jornada_id=jornada.jornada_id,
                 modalitat_codi_fcb=modalitat_codi_fcb,
                 data=jornada.data,
+                jornada_num=_num_jornada(jornada.nom),
                 competicio_nom=competicio_nom,
                 settings=settings,
                 create_missing_players=create_missing_players,
@@ -1458,6 +1493,7 @@ class IngestIndividualsResult:
     torneigs_processed: int
     torneigs_failed: int
     total_participants: int
+    total_partides: int = 0
 
 
 def _individuals_llistat_url(base_url: str, temporada: str | None) -> str:
@@ -1490,8 +1526,9 @@ def ingest_individuals_temporada(
     """
     settings = settings or client.settings
     base = settings.base_url.rstrip("/")
+    # `individuals.desa` es construeix el seu Repository, i aquí només fa falta la
+    # connexió amb l'esquema garantit.
     conn = ensure_schema(settings.db_path)
-    repo = Repository(conn)
 
     # Si temporada no és string, deduïm de l'historial
     temporada_nom = temporada
@@ -1518,85 +1555,54 @@ def ingest_individuals_temporada(
     processed = 0
     failed = 0
     total_part = 0
+    total_partides = 0
     for torneig in torneigs:
-        torneig_url = U.individuals_divisions(torneig.torneig_id_extern, base=base)
         try:
-            torneig_html = client.fetch_html(torneig_url, use_cache=use_cache)
+            divisions = llegeix_torneig(
+                client, torneig.torneig_id_extern, torneig.nom, use_cache=use_cache
+            )
         except Exception as e:
             log.warning("FAIL torneig %s: %s", torneig.nom, e)
             failed += 1
             continue
-        divisions = parse_individuals_divisions(torneig_html)
         if not divisions:
             log.info("  %s: sense divisions parsejables", torneig.nom)
             failed += 1
             continue
-        for div in divisions:
-            classif_href = div.classif_href or (
-                f"ca/individuals/classificaciofinal/{div.torneig_id}/{div.divisio_id_extern}"
+
+        # Un torneig acabat de publicar encara no té cap partida jugada. No és
+        # cap error i no ha de comptar com a fallada: no hi ha res a desar
+        # perquè encara no ha passat res.
+        buides = [d for d in divisions if not d.partides]
+        for d in buides:
+            log.info("  %s: encara sense partides publicades", d.nom)
+        amb_joc = [d for d in divisions if d.partides]
+        if not amb_joc:
+            processed += 1
+            continue
+
+        for div in amb_joc:
+            try:
+                n = desa_torneig(conn, div, temporada_nom, crea_jugadors=create_missing_players)
+            except Exception as e:
+                log.warning("    FAIL desar %s: %s", div.nom, e)
+                continue
+            total_part += n["participants"]
+            total_partides += n["partides"]
+            log.info(
+                "    %s: %d partides, %d participants (%d fases, %d grups)",
+                div.nom,
+                n["partides"],
+                n["participants"],
+                n["fases"],
+                n["grups"],
             )
-            classif_url = f"{base}/{classif_href.lstrip('/')}"
-            try:
-                classif_html = client.fetch_html(classif_url, use_cache=use_cache)
-            except Exception as e:
-                log.warning("    FAIL classif %s %s: %s", torneig.nom, div.nom, e)
-                continue
-            participants = parse_individuals_classificaciofinal(classif_html)
-            # Nom complet del torneig: "TRES BANDES - 1A DIVISIÓ". clean_torneig_nom
-            # treu el sufix redundant quan la divisió només repeteix el nom del
-            # torneig (p.ex. "VI OPEN MATARÓ - OPEN MATARÓ").
-            raw_nom = torneig.nom if div.nom == "UNICA" else f"{torneig.nom} - {div.nom}"
-            nom_complet = clean_torneig_nom(raw_nom)
-            try:
-                repo.upsert_torneig_individual(
-                    TorneigIndividualRecord(
-                        torneig_id_extern=torneig.torneig_id_extern,
-                        divisio_id_extern=div.divisio_id_extern,
-                        nom=nom_complet,
-                        temporada_nom=temporada_nom,
-                    )
-                )
-            except Exception as e:
-                log.warning("    FAIL upsert torneig %s: %s", nom_complet, e)
-                continue
-            # Participants
-            n_ok = 0
-            for p in participants:
-                # Resoldre player_fcb_id
-                fcb_id = repo.get_player_fcb_id_by_nom(p.jugador_nom)
-                if fcb_id is None:
-                    if create_missing_players:
-                        fcb_id = repo.resolve_or_create_player_by_nom(p.jugador_nom)
-                    else:
-                        continue
-                try:
-                    repo.upsert_torneig_participant(
-                        TorneigParticipantRecord(
-                            torneig_id_extern=torneig.torneig_id_extern,
-                            divisio_id_extern=div.divisio_id_extern,
-                            player_fcb_id=fcb_id,
-                            posicio=p.posicio,
-                            partides_jugades=p.partides_jugades,
-                            punts=p.punts,
-                            caramboles=p.caramboles,
-                            entrades=p.entrades,
-                            mitjana_general=p.mitjana_general,
-                            mitjana_particular=p.mitjana_particular,
-                            serie_max=p.serie_max,
-                            club_text=p.club,
-                        ),
-                        temporada_nom=temporada_nom,
-                    )
-                    n_ok += 1
-                except Exception as e:
-                    log.debug("FAIL participant %s: %s", p.jugador_nom, e)
-            total_part += n_ok
-            log.info("    %s %s: %d participants", torneig.nom, div.nom, n_ok)
         processed += 1
     return IngestIndividualsResult(
         torneigs_processed=processed,
         torneigs_failed=failed,
         total_participants=total_part,
+        total_partides=total_partides,
     )
 
 
