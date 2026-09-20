@@ -459,15 +459,43 @@ def desa(
     )
 
     # Fases i composició de grups.
-    conn.execute("DELETE FROM torneig_fases WHERE torneig_id = ?", (torneig_id,))
+    #
+    # Les fases s'ACTUALITZEN, no es refan. Abans es feia un DELETE i un INSERT, i
+    # això donava un `torneig_fases.id` nou a cada reingesta.
+    #
+    # I aquell id viatja: `torneig_partides.fase_id` el porta, i la publicació al
+    # núvol desa `open_partides` amb la clau (open_id, fase_id, ordre). Amb ids
+    # nous, les files de la ingesta anterior no s'hi sobreescriuen: s'hi queden al
+    # costat. Reingerir dues vegades el campionat de 2a divisió va deixar 84 files
+    # on n'hi havia d'haver 42, i cada partida sortia dues vegades a la pantalla.
+    #
+    # `UNIQUE (torneig_id, fase_id_extern)` fa que l'upsert sigui exacte: la fase
+    # es reconeix per l'identificador que li dona la federació, que sí que és
+    # estable.
     fase_ids: dict[int, int] = {}
     for f in divisio.fases:
         cur = conn.execute(
             "INSERT INTO torneig_fases (torneig_id, fase_id_extern, nom, tipus, ordre) "
-            "VALUES (?, ?, ?, ?, ?) RETURNING id",
+            "VALUES (?, ?, ?, ?, ?) "
+            "ON CONFLICT(torneig_id, fase_id_extern) DO UPDATE SET "
+            "  nom = excluded.nom, tipus = excluded.tipus, ordre = excluded.ordre "
+            "RETURNING id",
             (torneig_id, f.fase_id_extern, f.nom, f.tipus, f.ordre),
         )
         fase_ids[f.fase_id_extern] = cur.fetchone()[0]
+    # Una fase que la federació hagi retirat sí que se'n va, amb el que en penja.
+    if fase_ids:
+        marques = ",".join("?" * len(fase_ids))
+        conn.execute(
+            f"DELETE FROM torneig_fases WHERE torneig_id = ? AND id NOT IN ({marques})",
+            (torneig_id, *fase_ids.values()),
+        )
+    # La composició dels grups es refà sencera: és el contingut de la fase, no la
+    # fase, i el DELETE de `torneig_fase_grups` ja no l'arrossega cap cascada.
+    conn.executemany(
+        "DELETE FROM torneig_fase_grups WHERE fase_id = ?",
+        [(fid,) for fid in fase_ids.values()],
+    )
     conn.executemany(
         "INSERT INTO torneig_fase_grups (fase_id, grup_nom, jugador_nom, ordre, "
         "grup_id_extern, posicio_grup, punts, mitjana) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",

@@ -54,5 +54,19 @@ create index if not exists idx_fcbillar_afiliacions_player
     on fcbillar.afiliacions(player_fcb_id);
 
 alter table fcbillar.afiliacions enable row level security;
+drop policy if exists "read afiliacions" on fcbillar.afiliacions;
 create policy "read afiliacions" on fcbillar.afiliacions
     for select to anon, authenticated using (true);
+
+-- Els permisos, que la política RLS tota sola no dona.
+--
+-- RLS diu QUINES FILES es poden llegir; el GRANT diu si el rol pot tocar la taula
+-- per començar. Sense ell la publicació peta amb «permission denied for table», i
+-- no es veu fins que s'hi escriu: crear la taula i la política sembla que ja
+-- estigui, i no ho està.
+--
+-- És el mateix repartiment que tenen `opens` i `open_partides`: lectura per als
+-- dos rols públics, i tot per al de servei, que és qui publica.
+
+grant select on fcbillar.afiliacions to anon, authenticated;
+grant all on fcbillar.afiliacions to service_role;

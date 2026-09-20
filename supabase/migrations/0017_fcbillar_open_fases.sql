@@ -50,7 +50,7 @@ create table if not exists fcbillar.open_fase_ranquing (
     -- No entra a l'ordre del rànquing i no hi ha d'entrar: la federació ordena
     -- per posició al grup, punts de la ronda i mitjana, i el club no hi juga cap
     -- paper. Hi és per poder llegir la llista, que és una altra cosa.
-    club          text
+    club          text,
     primary key (open_id, fase_id, jugador),
     foreign key (open_id, fase_id) references fcbillar.open_fases(open_id, fase_id) on delete cascade
 );
@@ -59,9 +59,26 @@ create index if not exists idx_fcbillar_ofr_player on fcbillar.open_fase_ranquin
 
 alter table fcbillar.open_fases         enable row level security;
 alter table fcbillar.open_fase_ranquing enable row level security;
+drop policy if exists "read open_fases" on fcbillar.open_fases;
 create policy "read open_fases"         on fcbillar.open_fases         for select to anon, authenticated using (true);
+drop policy if exists "read open_fase_ranquing" on fcbillar.open_fase_ranquing;
 create policy "read open_fase_ranquing" on fcbillar.open_fase_ranquing for select to anon, authenticated using (true);
 
 -- Si la taula ja existia d'una execució anterior d'aquest fitxer, la columna del
 -- club s'hi afegeix aquí. Les dues formes deixen el mateix resultat.
 alter table fcbillar.open_fase_ranquing add column if not exists club text;
+
+-- Els permisos, que la política RLS tota sola no dona.
+--
+-- RLS diu QUINES FILES es poden llegir; el GRANT diu si el rol pot tocar la taula
+-- per començar. Sense ell la publicació peta amb «permission denied for table», i
+-- no es veu fins que s'hi escriu: crear la taula i la política sembla que ja
+-- estigui, i no ho està.
+--
+-- És el mateix repartiment que tenen `opens` i `open_partides`: lectura per als
+-- dos rols públics, i tot per al de servei, que és qui publica.
+
+grant select on fcbillar.open_fases to anon, authenticated;
+grant all on fcbillar.open_fases to service_role;
+grant select on fcbillar.open_fase_ranquing to anon, authenticated;
+grant all on fcbillar.open_fase_ranquing to service_role;

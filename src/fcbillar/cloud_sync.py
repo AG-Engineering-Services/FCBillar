@@ -2407,8 +2407,46 @@ def publish_open_partides(
             }
         )
     n = _upsert(sb, "open_partides", rows, "open_id,fase_id,ordre", prog)
+
+    # I es retira el que ha quedat de més.
+    #
+    # L'upsert només escriu i sobreescriu: no sap què ha desaparegut. Quan un
+    # torneig es reingereix i les seves partides queden repartides d'una altra
+    # manera —menys files a una fase, una fase que la federació retira— les velles
+    # s'hi quedaven, i cada partida sortia dues vegades a la pantalla.
+    #
+    # Es retira per `open_id`, i només dels torneigs que s'acaben de publicar: un
+    # que no hi surti no s'hi toca, perquè no saber-ne res no vol dir que no hi
+    # sigui.
+    retirades = 0
+    vius: dict[int, set[tuple[int, int]]] = {}
+    for r in rows:
+        vius.setdefault(r["open_id"], set()).add((r["fase_id"], r["ordre"]))
+    for oid, claus in vius.items():
+        try:
+            actuals = (
+                sb.table("open_partides")
+                .select("fase_id,ordre")
+                .eq("open_id", oid)
+                .range(0, 9999)
+                .execute()
+                .data
+                or []
+            )
+        except Exception as e:  # noqa: BLE001
+            prog("warn", f"open_partides {oid}: no s'ha pogut llegir per retirar ({e})")
+            continue
+        sobren = [(x["fase_id"], x["ordre"]) for x in actuals if (x["fase_id"], x["ordre"]) not in claus]
+        for fase_id, ordre in sobren:
+            sb.table("open_partides").delete().eq("open_id", oid).eq("fase_id", fase_id).eq(
+                "ordre", ordre
+            ).execute()
+            retirades += 1
+    if retirades:
+        prog("ok", f"open_partides: {retirades} files retirades (ja no hi són)")
+
     conn.close()
-    return {"open_partides": n}
+    return {"open_partides": n, "open_partides_retirades": retirades}
 
 
 def publish_open_fases(
