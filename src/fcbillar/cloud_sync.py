@@ -2208,6 +2208,24 @@ def publish_copa_player_rankings(
     return {"copa_player_rankings": n}
 
 
+def _agrupa_per_jornada(encs, eqname) -> dict[tuple, list]:
+    """Els encontres de cada jornada d'un grup, per ordre del nom de l'equip de casa.
+
+    Serveix per donar un lloc a cada encontre dins la seva jornada, que és el que
+    completa la clau dels que encara no tenen id de la federació. L'ordre ha de ser
+    el mateix a totes les màquines, i per això va pel NOM de l'equip -que ve de la
+    federació- i no per cap id local.
+    """
+    from collections import defaultdict as _dd
+
+    per: dict[tuple, list] = _dd(list)
+    for e in encs:
+        per[(e["divisio_id"], e["grup_id"], e["jornada_id"])].append(e)
+    for files in per.values():
+        files.sort(key=lambda e: (eqname(e["equip_local_id"]), eqname(e["equip_visitant_id"])))
+    return per
+
+
 def publish_lliga_encontres(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
@@ -2235,7 +2253,7 @@ def publish_lliga_encontres(
 
     encs = conn.execute(
         """
-        SELECT id, divisio_id, grup_id, jornada_id, data,
+        SELECT id, encontre_id_extern, divisio_id, grup_id, jornada_id, data,
                equip_local_id, equip_visitant_id, p_match_local, p_match_visitant
         FROM encontres_lliga WHERE lliga_id = ? AND temporada_id = ?
         """,
@@ -2254,9 +2272,51 @@ def publish_lliga_encontres(
         for i, (jid, _) in enumerate(sorted(jmap.items(), key=lambda kv: kv[1] or ""), start=1):
             jorder[(div, grup, jid)] = i
 
+    # L'ID AMB QUÈ ES PUBLICA UN ENCONTRE, que no pot ser l'id local.
+    #
+    # Ho era, i per això es veien encontres duplicats: un id local no és per
+    # sempre -la migració v23 va refer la taula i els va tornar a repartir- ni és
+    # el mateix a dues màquines, i la feina nocturna publica des de la seva còpia
+    # de la base de dades. Cada vegada que els ids ballaven, el que hi havia
+    # publicat quedava orfe al costat del nou.
+    #
+    # Ara la clau surt de la font, i per tant no balla:
+    #
+    #   jugat     l'id de la federació (`encontre_id_extern`)
+    #   no jugat  10.000.000 + jornada_id * 100 + el lloc dins la jornada
+    #
+    # Els no jugats no en tenen: la federació els publica tots des del primer dia
+    # -amb els dos equips i l'estat «Oberta»- però sense enllaç i sense id, i
+    # només en tenen quan es juguen (7 dels 672 d'aquesta temporada). Per a
+    # aquells la clau es fa amb el que SÍ que ve de la federació: el `jornada_id`,
+    # que és seu, i el lloc de l'encontre dins la jornada pel nom de l'equip de
+    # casa, que és igual a totes les màquines.
+    #
+    # El desplaçament de deu milions manté les dues famílies separades: els ids de
+    # la federació van pels vint-i-cinc mil i creixen a poc a poc. I el dia que un
+    # encontre es juga canvia de clau una vegada, que és correcte: passa a tenir
+    # nom propi a la federació, i la retirada s'endú el provisional.
+    DESPLACAMENT_SENSE_ID = 10_000_000
+
+    llocs: dict[tuple, int] = {}
+    for grup, files in _agrupa_per_jornada(encs, eqname).items():
+        for lloc, e in enumerate(files, start=1):
+            llocs[(e["divisio_id"], e["grup_id"], e["jornada_id"], e["id"])] = lloc
+
+    def _clau(e) -> int:
+        if e["encontre_id_extern"] is not None:
+            return int(e["encontre_id_extern"])
+        lloc = llocs[(e["divisio_id"], e["grup_id"], e["jornada_id"], e["id"])]
+        return DESPLACAMENT_SENSE_ID + int(e["jornada_id"]) * 100 + lloc
+
+    clau_de: dict[int, int] = {e["id"]: _clau(e) for e in encs}
+    repetides = len(clau_de) - len(set(clau_de.values()))
+    if repetides:
+        prog("warn", f"lliga_encontres: {repetides} claus repetides; reviseu `_clau`")
+
     enc_rows = [
         {
-            "encontre_id": e["id"],
+            "encontre_id": clau_de[e["id"]],
             "divisio_id": e["divisio_id"],
             "grup_id": e["grup_id"],
             "jornada": jorder.get((e["divisio_id"], e["grup_id"], e["jornada_id"])),
@@ -2306,6 +2366,8 @@ def publish_lliga_encontres(
     vistes: dict[int, set[str]] = defaultdict(set)
 
     def _afegeix(eid, mod, j1, c1, j2, c2, ent) -> None:
+        # `eid` ve de la base local; al núvol hi va la clau estable.
+        eid = clau_de.get(eid, eid)
         sig = _sig_partida(j1, c1, j2, c2, ent)
         if sig in vistes[eid]:
             return
@@ -2356,35 +2418,36 @@ def publish_lliga_encontres(
     counts["lliga_encontres"] = _upsert(sb, "lliga_encontres", enc_rows, "encontre_id", prog)
     counts["lliga_partides"] = _upsert(sb, "lliga_partides", part_rows, "encontre_id,ordre", prog)
 
-    # I ara es retira el que sobra, que sense això es veien encontres DUPLICATS.
+    # I ara es retira el que sobra, que sense això es veien encontres DUPLICATS:
+    # el mateix enfrontament dues vegades, amb el mateix resultat i la mateixa
+    # data, un amb la clau d'abans i l'altre amb la d'ara.
     #
-    # `encontre_id` al núvol és l'`id` LOCAL de la taula, i un id local no és per
-    # sempre: la migració v23 va refer `encontres_lliga` -calia, que la identitat
-    # d'un encontre havia de passar a ser l'emparellament- i en refer-la els ids es
-    # van tornar a repartir. Cada fila publicada abans va quedar orfe al núvol, amb
-    # el seu id vell, i com que aquí només s'hi feia un upsert s'hi va quedar al
-    # costat de la nova: el mateix encontre dues vegades, amb el mateix resultat.
-    # Eren 23, i sis de la primera jornada d'aquesta temporada.
-    #
-    # La regla és la mateixa que a les altres publicacions: el núvol és una còpia
-    # del local i no pot tenir una fila que el local no tingui. Es mira contra TOTS
-    # els encontres locals i no contra els d'aquesta publicació -que només porta la
-    # lliga de tres bandes de la temporada en curs-, perquè si no s'enduria les
-    # temporades anteriors, que són bones i ningú no torna a publicar.
-    ids_locals = {r[0] for r in conn.execute("SELECT id FROM encontres_lliga")}
+    # La regla és la de les altres publicacions -el núvol és una còpia del local i
+    # no pot tenir una fila que el local no tingui-, però amb l'abast comptat: es
+    # retira dins de les DIVISIONS que s'acaben de publicar i no a tota la taula.
+    # El núvol guarda també les temporades anteriors, les divisions de cada
+    # temporada tenen ids seus (159 i 162 enguany, 152 i 149 l'any passat) i
+    # aquesta publicació només porta la lliga de tres bandes de la temporada en
+    # curs: sense l'abast, s'enduria tot el que ja ningú no republica.
     conn.close()
 
-    def _tots(taula: str, camps: str) -> list[dict]:
+    def _tots(taula: str, camps: str, **filtres) -> list[dict]:
         fora: list[dict] = []
         pas, desde = 1000, 0
         while True:
-            tram = sb.table(taula).select(camps).range(desde, desde + pas - 1).execute().data or []
+            q = sb.table(taula).select(camps)
+            for camp, valors in filtres.items():
+                q = q.in_(camp, valors)
+            tram = q.range(desde, desde + pas - 1).execute().data or []
             fora.extend(tram)
             if len(tram) < pas:
                 return fora
             desde += pas
 
-    orfes = sorted({r["encontre_id"] for r in _tots("lliga_encontres", "encontre_id")} - ids_locals)
+    divisions = sorted({e["divisio_id"] for e in enc_rows})
+    publicats = {e["encontre_id"] for e in enc_rows}
+    al_nuvol = _tots("lliga_encontres", "encontre_id", divisio_id=divisions) if divisions else []
+    orfes = sorted({r["encontre_id"] for r in al_nuvol} - publicats)
     for i in range(0, len(orfes), 50):
         tram = orfes[i : i + 50]
         # Primer les partides: pengen de l'encontre.
@@ -2399,7 +2462,6 @@ def publish_lliga_encontres(
     per_encontre: dict[int, int] = defaultdict(int)
     for r in part_rows:
         per_encontre[r["encontre_id"]] = max(per_encontre[r["encontre_id"]], r["ordre"])
-    publicats = {e["encontre_id"] for e in enc_rows}
     per_quantes: dict[int, list[int]] = defaultdict(list)
     for eid in publicats:
         per_quantes[per_encontre.get(eid, 0)].append(eid)

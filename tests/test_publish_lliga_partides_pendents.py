@@ -76,7 +76,8 @@ def test_les_partides_pendents_es_publiquen(entorn) -> None:
     primera = next(f for f in files if f["jugador_local"] == "SÁNCHEZ MARTÍNEZ, PASCUAL")
     assert (primera["caramboles_local"], primera["caramboles_visitant"]) == (27, 39)
     assert primera["entrades"] == 50
-    assert primera["encontre_id"] == 500
+    # L'id de la federació (`encontre_id_extern`), no l'`id` local (500).
+    assert primera["encontre_id"] == 11656
 
 
 def test_quan_el_ranquing_la_publica_no_surt_dues_vegades(entorn) -> None:
@@ -106,24 +107,52 @@ def test_quan_el_ranquing_la_publica_no_surt_dues_vegades(entorn) -> None:
     assert noms.count("SÁNCHEZ MARTÍNEZ, PASCUAL") == 1
 
 
-def test_els_encontres_sense_fila_local_es_retiren(entorn) -> None:
-    """El núvol no pot tenir un encontre que la base local ja no té.
+def test_l_id_publicat_no_depen_de_l_id_local(entorn) -> None:
+    """La clau d'un encontre al núvol surt de la font, no de la base local.
 
-    `encontre_id` al núvol és l'`id` LOCAL, i un id local no és per sempre: la
-    migració v23 va refer `encontres_lliga` —la identitat d'un encontre havia de
-    passar a ser l'emparellament— i en refer-la els ids es van tornar a repartir.
-    Cada fila publicada abans va quedar orfe amb el seu id vell i, com que aquí
-    només s'hi feia un upsert, s'hi quedava al costat de la nova: el mateix
-    encontre dues vegades, amb el mateix resultat i la mateixa data. N'hi havia
-    23, i sis de la primera jornada de la 26/27.
+    Ho feia de l'`id` local, i per això es veien encontres DUPLICATS: el mateix
+    enfrontament dues vegades, amb el mateix resultat i la mateixa data. Un id
+    local no és per sempre -la migració v23 va refer `encontres_lliga` i els va
+    tornar a repartir- ni és el mateix a dues màquines, i la feina nocturna publica
+    des de la seva còpia de la base de dades. Cada vegada que els ids ballaven, el
+    que hi havia publicat quedava orfe al costat del nou.
 
-    I les partides que sobren d'un encontre que sí que hi és: si una acta passa de
-    quatre partides a tres, la quarta es quedava.
+    Aquí es publica dues vegades el mateix encontre amb un `id` local diferent, com
+    si la taula s'hagués refet entremig: la clau publicada ha de ser la mateixa i no
+    n'han de quedar dues.
+    """
+    db, magatzem, _mod = entorn
+    cloud_sync.publish_lliga_encontres(db_path=db)
+    assert {f["encontre_id"] for f in magatzem["lliga_encontres"]} == {11656}
+
+    conn = sqlite3.connect(db)
+    conn.execute("UPDATE encontres_lliga SET id = 900 WHERE id = 500")
+    conn.execute("UPDATE lliga_pending_partides SET encontre_lliga_id = 900")
+    conn.commit()
+    conn.close()
+
+    counts = cloud_sync.publish_lliga_encontres(db_path=db)
+
+    assert {f["encontre_id"] for f in magatzem["lliga_encontres"]} == {11656}
+    assert counts["lliga_encontres_retirats"] == 0, "no hi ha res a retirar: la clau no ha canviat"
+
+
+def test_el_que_hi_havia_amb_la_clau_vella_es_retira(entorn) -> None:
+    """El núvol no pot tenir el mateix encontre dues vegades.
+
+    Les files publicades abans del canvi porten l'`id` local, i cap d'elles és una
+    clau que ara es publiqui: se n'han d'anar. La retirada va per DIVISIONS -les
+    que s'acaben de publicar- i no per tota la taula, perquè el núvol guarda també
+    les temporades anteriors, cada temporada té els seus ids de divisió i aquesta
+    publicació només porta la lliga de tres bandes de la temporada en curs.
+
+    Les partides se'n van soles: la clau forana té `on delete cascade`.
     """
     db, magatzem, _mod = entorn
     magatzem["lliga_encontres"] = [
+        # El mateix encontre amb l'id local d'abans de la v23...
         {
-            "encontre_id": 999,  # el mateix encontre amb l'id d'abans de la v23
+            "encontre_id": 500,
             "divisio_id": 159,
             "grup_id": 343,
             "jornada": 1,
@@ -132,17 +161,58 @@ def test_els_encontres_sense_fila_local_es_retiren(entorn) -> None:
             "equip_visitant": "B.C.GRANOLLERS A",
             "gols_local": 0,
             "gols_visitant": 3,
-        }
+        },
+        # ...i un de la temporada passada, que ningú no republica i s'ha de quedar.
+        {
+            "encontre_id": 16528,
+            "divisio_id": 152,
+            "grup_id": 315,
+            "jornada": 9,
+            "data": "2025-09-13",
+            "equip_local": "C.B. BORGES",
+            "equip_visitant": "C.B.BARCELONA C",
+            "gols_local": 3,
+            "gols_visitant": 0,
+        },
     ]
     magatzem["lliga_partides"] = [
-        {"encontre_id": 999, "ordre": 1, "jugador_local": "QUI SIGUI"},
-        {"encontre_id": 500, "ordre": 5, "jugador_local": "UNA QUE JA NO ES A L'ACTA"},
+        {"encontre_id": 500, "ordre": 1, "jugador_local": "QUI SIGUI"},
     ]
 
     counts = cloud_sync.publish_lliga_encontres(db_path=db)
 
     assert counts["lliga_encontres_retirats"] == 1
-    assert {f["encontre_id"] for f in magatzem["lliga_encontres"]} == {500}
-    assert counts["lliga_partides_retirades"] == 1
-    assert {f["encontre_id"] for f in magatzem["lliga_partides"]} == {500}
-    assert {f["ordre"] for f in magatzem["lliga_partides"]} == {1, 2, 3, 4}
+    ids = {f["encontre_id"] for f in magatzem["lliga_encontres"]}
+    assert ids == {11656, 16528}, "fora el de la clau vella, i la temporada passada es queda"
+
+
+def test_un_encontre_sense_jugar_te_clau_i_no_es_l_id_local(entorn) -> None:
+    """Els que no s'han jugat no tenen id de la federació i també necessiten clau.
+
+    La federació publica tots els enfrontaments des del primer dia -amb els dos
+    equips i l'estat «Oberta»- però sense enllaç i sense id: en tenen un quan es
+    juguen, i d'aquesta temporada només 7 dels 672. La clau d'aquells es fa amb el
+    que sí que ve de la federació, el `jornada_id`, i amb el lloc de l'encontre dins
+    la jornada per nom de l'equip de casa, que és igual a totes les màquines.
+    """
+    db, magatzem, _mod = entorn
+    conn = sqlite3.connect(db)
+    conn.execute("INSERT INTO clubs (id, fcb_id, nom) VALUES (3, 'C.B.MONFORTE', 'C.B.MONFORTE')")
+    conn.execute("INSERT INTO equips (id, club_id, lletra) VALUES (3, 3, 'A')")
+    conn.execute(
+        """
+        INSERT INTO encontres_lliga
+            (id, lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern, temporada_id,
+             equip_local_id, equip_visitant_id, jornada_num, estat)
+        VALUES (501, 38, 159, 343, 2790, NULL, 1, 3, 1, 1, 'Oberta')
+        """
+    )
+    conn.commit()
+    conn.close()
+
+    cloud_sync.publish_lliga_encontres(db_path=db)
+
+    per_equip = {f["equip_local"]: f["encontre_id"] for f in magatzem["lliga_encontres"]}
+    # Dos encontres a la jornada 2790: BANYOLES i MONFORTE, per aquest ordre.
+    assert per_equip["C.B.BANYOLES A"] == 11656, "el jugat, amb l'id de la federació"
+    assert per_equip["C.B.MONFORTE A"] == 10_000_000 + 2790 * 100 + 2
