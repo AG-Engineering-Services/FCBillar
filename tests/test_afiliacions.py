@@ -169,3 +169,72 @@ def test_el_club_del_sorteig_es_canonicalitza(conn) -> None:
     assert len(avisos) == 1 and "CLUB QUE NO EXISTEIX" in avisos[0]
     # El sorteig no marca els fitxatges: diu el club i prou.
     assert all(not f.fitxatge for f in files)
+
+
+def test_el_club_de_la_fitxa_es_el_de_l_individual(conn) -> None:
+    """A `players.club_id` hi va el club de l'individual, no el de la lliga.
+
+    Un fitxatge vol dir que la lliga es juga amb un altre club; el campionat
+    individual es juga amb el propi. O sigui que quan les dues competicions no
+    diuen el mateix, la que diu de qui és el jugador és l'individual.
+
+    Hi anava el de la lliga i canviava de club els dos que en tenen dos: ARNAU
+    ABILLEIRA passava al C.B.MONT-ROIG i SÁNCHEZ GALLEGO al S.B.F.MOLINS, quan
+    són del C.B.TARRAGONA i del C.B.MATARÓ i només hi van cedits una temporada.
+    """
+    club_lliga = conn.execute("SELECT id FROM clubs WHERE nom = 'B.C.GRANOLLERS'").fetchone()[0]
+    conn.execute(
+        "INSERT INTO players (fcb_id, nom, club_id) VALUES ('9001', 'MAS, JOSEP', ?)",
+        (club_lliga,),
+    )
+    conn.commit()
+
+    A.desa(
+        conn,
+        [
+            A.Afiliacio(
+                "2026/2027", A.LLIGA, "Tres bandes", "MAS, JOSEP", "B.C.GRANOLLERS", True, "f"
+            ),
+            A.Afiliacio(
+                "2026/2027", A.INDIVIDUAL, "Tres bandes", "MAS, JOSEP", "C.B.MATARÓ", False, "f"
+            ),
+        ],
+    )
+
+    n, canvis = A.aplica_a_players(conn, "2026/2027")
+    assert n == 1, canvis
+    club = conn.execute(
+        "SELECT c.nom FROM players p JOIN clubs c ON c.id = p.club_id WHERE p.fcb_id = '9001'"
+    ).fetchone()[0]
+    assert club == "C.B.MATARÓ"
+
+
+def test_sense_individual_el_club_de_la_fitxa_es_el_de_la_lliga(conn) -> None:
+    """De qui no juga l'individual no en tenim el club propi, i s'hi posa el de la lliga.
+
+    La font del club de l'individual és el PDF del sorteig de cada fase: qui no
+    n'ha jugat cap no hi surt. Deixar-lo sense club seria pitjor que posar-hi el
+    de la lliga, que és on el juga.
+    """
+    conn.execute("INSERT INTO players (fcb_id, nom) VALUES ('9002', 'PONS, MARIA')")
+    conn.commit()
+
+    A.desa(
+        conn,
+        [
+            A.Afiliacio(
+                "2026/2027", A.LLIGA, "4 Modalitats", "PONS, MARIA", "C.B.SANT ADRIÀ", False, "f"
+            ),
+            A.Afiliacio(
+                "2026/2027", A.LLIGA, "Tres bandes", "PONS, MARIA", "C.B.BANYOLES", False, "f"
+            ),
+        ],
+    )
+
+    n, _ = A.aplica_a_players(conn, "2026/2027")
+    assert n == 1
+    club = conn.execute(
+        "SELECT c.nom FROM players p JOIN clubs c ON c.id = p.club_id WHERE p.fcb_id = '9002'"
+    ).fetchone()[0]
+    # La de tres bandes, que és la principal del calendari.
+    assert club == "C.B.BANYOLES"

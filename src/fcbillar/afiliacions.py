@@ -240,12 +240,25 @@ def canvia_de_club(conn: sqlite3.Connection, temporada: str) -> list[tuple[str, 
 
 
 #: Quina competició manda per a «el club d'aquest jugador», quan se n'ha de dir un
-#: de sol. La lliga de tres bandes és la competició principal del calendari i la
-#: que juga més gent; si algú no hi és, s'agafa el que hi hagi.
+#: de sol.
+#:
+#: Manda l'INDIVIDUAL, perquè és el que diu de qui és el jugador. Això és què vol
+#: dir un fitxatge: el campionat individual es juga amb el club d'un —el seu— i la
+#: lliga amb el que te fitxa. ARNAU ABILLEIRA juga l'individual amb el
+#: C.B.TARRAGONA i la lliga amb el C.B.MONT-ROIG, i SÁNCHEZ GALLEGO l'individual
+#: amb el C.B.MATARÓ i la lliga amb el S.B.F.MOLINS: el seu club és el primer, i
+#: posar-hi el segon els canviaria de club per haver anat cedits una temporada.
+#:
+#: Darrere hi ha les dues lligues, per a qui no juga l'individual —la majoria: la
+#: lliga és la competició que juga més gent—, i la de tres bandes abans que la de
+#: 4 modalitats perquè és la principal del calendari. Per a algú que hi vagi
+#: fitxat, el club que surt a la fitxa serà el que el fitxa, i no hi ha res millor
+#: a posar-hi: la font del club propi és el PDF del sorteig de l'individual, i de
+#: qui no el juga no en tenim cap.
 _PRIORITAT = (
+    (INDIVIDUAL, "Tres bandes"),
     (LLIGA, "Tres bandes"),
     (LLIGA, "4 Modalitats"),
-    (INDIVIDUAL, "Tres bandes"),
 )
 
 
@@ -262,7 +275,8 @@ def aplica_a_players(conn: sqlite3.Connection, temporada: str) -> tuple[int, lis
     B.C.GRANOLLERS.
 
     Quan un jugador té clubs diferents segons la competició s'escull per
-    `_PRIORITAT`, i el que es perd d'aquesta tria no es perd: és a `afiliacions`
+    `_PRIORITAT` —manda l'individual, que és el club d'on és; la lliga pot ser un
+    fitxatge—, i el que es perd d'aquesta tria no es perd: és a `afiliacions`
     sencer, que és on s'ha de mirar quan la pregunta és «i a la de 4 modalitats?».
     """
     from fcbillar.db.repository import Repository
