@@ -1598,6 +1598,37 @@ def ingest_individuals_temporada(
                 n["grups"],
             )
         processed += 1
+    # Les regles de classificació dels PDF de sorteig, i la projecció de la ronda
+    # següent. Van aquí i no a una comanda a part perquè han de córrer soles: la
+    # projecció serveix els dies que hi ha entre una ronda jugada i el sorteig de
+    # la següent, i si s'ha d'executar a mà arriba tard.
+    try:
+        from fcbillar.individuals import projecta_ronda_seguent
+        from fcbillar.sorteig_fase import desa_regles
+
+        n_regles, avisos_regles = desa_regles(conn)
+        for avis in avisos_regles:
+            log.warning("sorteig: %s", avis)
+        log.info("Regles de classificació desades a %d fases", n_regles)
+        for r in conn.execute(
+            "SELECT DISTINCT ti.id, ti.nom FROM torneigs_individuals ti "
+            "JOIN temporades te ON te.id = ti.temporada_id WHERE te.nom = ?",
+            (temporada_nom,),
+        ).fetchall():
+            resum = projecta_ronda_seguent(conn, r[0])
+            if resum.get("estat") == "projectada":
+                log.info(
+                    "  %s: %s projectada amb %d jugadors en %d grups",
+                    r[1],
+                    resum["ronda"],
+                    resum["jugadors"],
+                    resum["grups"],
+                )
+    except Exception as e:  # noqa: BLE001
+        # Una projecció que falla no ha d'aturar la ingesta: el que importa són
+        # les dades de la federació, i això n'és una lectura.
+        log.warning("No s'ha pogut projectar la ronda següent: %s", e)
+
     return IngestIndividualsResult(
         torneigs_processed=processed,
         torneigs_failed=failed,

@@ -626,3 +626,76 @@ def desa(
         "partides": len(divisio.partides),
         "participants": n_part,
     }
+
+
+# --------------------------- la ronda següent, projectada ---------------------------
+
+
+def projecta_ronda_seguent(conn: sqlite3.Connection, torneig_id: int) -> dict:
+    """Projecta la ronda següent d'aquest torneig, si es pot i si cal.
+
+    Es crida a cada ingesta, i per tant sola. Va en DUES passades, i l'ordre
+    importa:
+
+    1. **Es retira** tota projecció d'una ronda que la federació ja hagi publicat.
+       Ha d'anar primer i ha de mirar-les totes: fent-ho en una sola passada de
+       l'última fase a la primera, quan la PRÈVIA apareixia se'n mirava la ronda
+       següent —la FINAL, que no té regla— i es sortia sense arribar a retirar la
+       projecció de la PRE-PRÈVIA, que es quedava per sempre al costat dels grups
+       de debò.
+    2. **Es projecta** la ronda següent de la darrera fase de grups jugada, si
+       porta la regla del PDF i si aquella ronda no és publicada.
+
+    No fa cap endevinalla: una fase a mitges o sense regla no es projecta i es diu
+    per què.
+    """
+    from fcbillar import projeccio_ronda as PR
+
+    fases = conn.execute(
+        "SELECT id, nom, regla, places FROM torneig_fases "
+        "WHERE torneig_id = ? AND tipus = 'grups' ORDER BY ordre DESC",
+        (torneig_id,),
+    ).fetchall()
+
+    # 1) Fora les projeccions que la federació ja ha substituït.
+    retirades = 0
+    for fase_id, nom_fase, _regla, _places in fases:
+        ronda = PR.ronda_seguent(nom_fase or "")
+        if ronda and PR.ja_publicada(conn, torneig_id, ronda):
+            tretes = PR.retira(conn, torneig_id, ronda)
+            if tretes:
+                log.info(
+                    "%s: la federació ja ha publicat la %s; retiro la projecció (%d files)",
+                    nom_fase,
+                    ronda,
+                    tretes,
+                )
+            retirades += tretes
+
+    # 2) I la projecció de la ronda que ve, si es pot.
+    for fase_id, nom_fase, _regla, places in fases:
+        ronda = PR.ronda_seguent(nom_fase or "")
+        if ronda is None or PR.ja_publicada(conn, torneig_id, ronda):
+            continue
+        membres = conn.execute(
+            "SELECT jugador_nom, posicio_grup FROM torneig_fase_grups WHERE fase_id = ? "
+            "ORDER BY posicio_grup, punts DESC, mitjana DESC, serie_major DESC, jugador_nom",
+            (fase_id,),
+        ).fetchall()
+        if not membres:
+            continue
+        if any(m[1] is None for m in membres):
+            return {"ronda": ronda, "estat": "fase a mitges", "retirades": retirades}
+        if not places:
+            return {"ronda": ronda, "estat": "sense regla", "retirades": retirades}
+
+        files = PR.projecta([m[0] for m in membres[:places]])
+        n = PR.desa(conn, torneig_id, fase_id, ronda, files)
+        return {
+            "ronda": ronda,
+            "estat": "projectada",
+            "jugadors": n,
+            "grups": len({f.grup_projectat for f in files}),
+            "retirades": retirades,
+        }
+    return {"estat": "publicada" if retirades else "res a projectar", "retirades": retirades}

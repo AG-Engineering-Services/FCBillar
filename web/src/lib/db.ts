@@ -463,6 +463,37 @@ export interface OpenFase {
   data: string | null;
 }
 
+/**
+ * La ronda següent d'un campionat, projectada mentre la federació no la publiqui.
+ *
+ * Quan s'acaba una pre-prèvia ja se sap qui passa —la regla és al PDF del sorteig
+ * i l'ordre entre grups es calcula— però la federació tarda dies a publicar com
+ * queden repartits. Això és el que s'ensenya mentrestant, i la publicació oficial
+ * el substitueix (la taula es buida sola).
+ *
+ * QUÈ ÉS EXACTE I QUÈ NO, que la pantalla ho ha de dir:
+ *
+ *   jugador, posicio   la regla del PDF + la classificació publicada   exacte
+ *   bombo              de les places i la mida de grup                 exacte
+ *   grup_projectat     el repartiment que fa FCBillar                  PROJECCIÓ
+ *
+ * El sorteig de la federació és geogràfic —la seu de cada grup té jugadors de
+ * casa i els clubs no se separen— i les seus no es publiquen fins que surt. O
+ * sigui que el bombo no canviarà i el grup sí.
+ */
+export interface OpenRondaProjectada {
+  open_id: number;
+  ronda: string;
+  jugador: string;
+  player_fcb_id: string | null;
+  /** L'ordre al rànquing de la ronda que s'acaba de jugar. */
+  posicio: number;
+  bombo: number;
+  grup_projectat: string;
+  mida_grup: number;
+  club: string | null;
+}
+
 export interface OpenPartida {
   open_id: number;
   fase_id: number;

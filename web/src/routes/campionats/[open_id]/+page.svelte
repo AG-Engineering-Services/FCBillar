@@ -25,7 +25,8 @@
 		type Open,
 		type OpenFase,
 		type OpenFaseRanquing,
-		type OpenPartida
+		type OpenPartida,
+		type OpenRondaProjectada
 	} from '$lib/db';
 
 	const openId = $derived(Number($page.params.open_id));
@@ -34,6 +35,7 @@
 	let ranquing = $state<OpenFaseRanquing[]>([]);
 	let partides = $state<OpenPartida[]>([]);
 	let faseSel = $state<number | null>(null);
+	let projectada = $state<OpenRondaProjectada[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
@@ -48,7 +50,7 @@
 		try {
 			// Els .range() són explícits: PostgREST talla a mil files en silenci i
 			// un campionat de vuit divisions les passa de sobres.
-			const [{ data: o }, { data: fs, error: ef }, { data: rq }, { data: pt }] =
+			const [{ data: o }, { data: fs, error: ef }, { data: rq }, { data: pt }, { data: pj }] =
 				await Promise.all([
 					db.from('opens').select('*').eq('open_id', id).maybeSingle(),
 					db.from('open_fases').select('*').eq('open_id', id).order('ordre'),
@@ -65,13 +67,20 @@
 						.eq('open_id', id)
 						.order('fase_id')
 						.order('ordre')
-						.range(0, 9999)
+						.range(0, 9999),
+					db
+						.from('open_ronda_projectada')
+						.select('*')
+						.eq('open_id', id)
+						.order('posicio')
+						.range(0, 4999)
 				]);
 			if (ef) throw ef;
 			open = (o ?? null) as Open | null;
 			fases = (fs ?? []) as OpenFase[];
 			ranquing = (rq ?? []) as OpenFaseRanquing[];
 			partides = (pt ?? []) as OpenPartida[];
+			projectada = (pj ?? []) as OpenRondaProjectada[];
 			// S'obre la darrera ronda que s'ha jugat, que és la que algú ve a mirar.
 			const jugades = fases.filter(
 				(f) =>
@@ -107,6 +116,26 @@
 			partides: partFase.filter((p) => p.grup_nom === g)
 		}));
 	});
+
+	/** La ronda projectada, agrupada pel grup que li hem posat. */
+	const grupsProjectats = $derived.by(() => {
+		const per = new Map<string, OpenRondaProjectada[]>();
+		for (const r of projectada) {
+			const llista = per.get(r.grup_projectat) ?? [];
+			llista.push(r);
+			per.set(r.grup_projectat, llista);
+		}
+		return [...per.entries()]
+			.sort((a, b) => a[0].localeCompare(b[0], 'ca', { numeric: true }))
+			.map(([nom, files]) => ({ nom, files: files.sort((x, y) => x.bombo - y.bombo) }));
+	});
+	const rondaProjectada = $derived(projectada[0]?.ronda ?? '');
+	/** «18 places en 6 grups de 3»: el que la regla del PDF dona per a aquesta ronda. */
+	const placesText = $derived(
+		projectada.length
+			? `${projectada.length} places en ${grupsProjectats.length} grups de ${projectada[0].mida_grup}`
+			: ''
+	);
 
 	/** Les partides de la ronda que no són de cap grup: les eliminatòries. */
 	const eliminatories = $derived(partFase.filter((p) => !p.grup_nom));
@@ -217,6 +246,55 @@
 							<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 font-mono font-bold tabular-nums">{p.caramboles_local}–{p.caramboles_visitant}</span>
 							<span class="flex-1 truncate">{p.jugador_visitant}</span>
 							<span class="w-12 shrink-0 text-right text-slate-500 dark:text-slate-400">{p.entrades ?? '—'} ent</span>
+						</div>
+					{/each}
+				</div>
+			</section>
+		{/if}
+
+		<!-- La ronda que ve, projectada mentre la federació no la sortegi. -->
+		{#if grupsProjectats.length}
+			<section class="mb-4">
+				<h2 class="mb-1 text-sm font-semibold">
+					{rondaProjectada}: com podria quedar
+				</h2>
+				<div
+					class="mb-2 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-[11px] leading-snug text-amber-900 dark:text-amber-200"
+				>
+					<strong>Això és una projecció</strong>, no el sorteig. Qui passa i en quin
+					<strong>bombo</strong> va són exactes: surten de la regla del PDF de la
+					federació («{placesText}») i de la classificació publicada. El <strong
+						>grup</strong
+					> no: el seu sorteig és geogràfic —la seu de cada grup hi posa jugadors de
+					casa i no separa clubs— i les seus no es publiquen fins que surt. Quan la
+					federació el publiqui, això desapareixerà i hi haurà els grups de debò.
+				</div>
+				<div class="grid gap-2 sm:grid-cols-2">
+					{#each grupsProjectats as g (g.nom)}
+						<div
+							class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800"
+						>
+							<h3
+								class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-3 py-1 text-[11px] font-semibold"
+							>
+								{g.nom} <span class="font-normal text-slate-500 dark:text-slate-400">· projectat</span>
+							</h3>
+							<ul>
+								{#each g.files as r (r.jugador)}
+									<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 last:border-0">
+										<span class="w-11 shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1 text-center text-[10px] text-slate-600 dark:text-slate-300">B{r.bombo}</span>
+										<div class="min-w-0 flex-1">
+											{#if r.player_fcb_id}
+												<a href="/jugador/{r.player_fcb_id}" class="block truncate text-sm leading-tight underline decoration-slate-300 dark:decoration-slate-600">{r.jugador}</a>
+											{:else}
+												<span class="block truncate text-sm leading-tight">{r.jugador}</span>
+											{/if}
+											{#if r.club}<span class="block truncate text-[10px] text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
+										</div>
+										<span class="w-7 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">#{r.posicio}</span>
+									</li>
+								{/each}
+							</ul>
 						</div>
 					{/each}
 				</div>
