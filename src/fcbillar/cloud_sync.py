@@ -2377,12 +2377,32 @@ def publish_open_fases(
 
     by_norm = _players_by_norm(conn)
 
-    def _fcb_id(nom: str) -> str | None:
+    def _nm(nom: str) -> str:
         import unicodedata as _ud
 
         n = "".join(c for c in _ud.normalize("NFD", nom or "") if _ud.category(c) != "Mn")
-        hit = by_norm.get(" ".join(n.strip().lower().split()))
+        return " ".join(n.strip().lower().split())
+
+    def _fcb_id(nom: str) -> str | None:
+        hit = by_norm.get(_nm(nom))
         return hit[0] if hit else None
+
+    # El club amb què cadascú juga l'INDIVIDUAL, que no és necessàriament el de la
+    # lliga: hi ha qui va fitxat a la lliga per un club i juga el campionat pel
+    # seu. Ve de `afiliacions`, que és l'únic lloc que ho sap (§2.10 del document
+    # del canvi de web).
+    #
+    # No entra a l'ORDRE del rànquing i no hi ha d'entrar: la federació ordena per
+    # posició al grup, punts de la ronda i mitjana, i el club no hi juga cap paper.
+    # Hi és per poder llegir la llista.
+    club_individual: dict[str, str] = {}
+    try:
+        for r in conn.execute(
+            "SELECT jugador, club FROM afiliacions WHERE competicio = 'INDIVIDUAL'"
+        ):
+            club_individual.setdefault(_nm(r["jugador"]), r["club"])
+    except sqlite3.OperationalError:
+        pass  # BD sense `afiliacions`: la columna queda buida i prou
 
     fase_rows: list[dict] = []
     ranquing_rows: list[dict] = []
@@ -2427,6 +2447,7 @@ def publish_open_fases(
                     "posicio_grup": r["posicio_grup"],
                     "punts": r["punts"],
                     "mitjana": r["mitjana"],
+                    "club": club_individual.get(_nm(r["jugador_nom"])),
                 }
             )
 

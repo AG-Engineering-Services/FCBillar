@@ -477,6 +477,13 @@ export interface OpenFaseRanquing {
   punts: number | null;
   /** `null` = no ha jugat cap partida. Hi surt igualment: hi era. */
   mitjana: number | null;
+  /**
+   * El club amb què juga AQUEST campionat, que no és necessàriament el de la
+   * lliga: hi ha qui va fitxat a la lliga per un club i juga l'individual pel
+   * seu. No entra a l'ordre del rànquing —la federació ordena per posició al
+   * grup, punts i mitjana— i hi és per poder llegir la llista.
+   */
+  club: string | null;
 }
 
 // Calendari esportiu federatiu (taules fcbillar.calendari_*). Dues fonts, totes

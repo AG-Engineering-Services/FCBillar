@@ -177,6 +177,7 @@
 									{:else}
 										<span class="block truncate text-sm leading-tight">{r.jugador}</span>
 									{/if}
+									{#if r.club}<span class="block truncate text-[10px] text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
 								</div>
 								<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts ?? 0}</span>
 								<span class="w-14 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{mitj(r.mitjana)}</span>
@@ -247,6 +248,10 @@
 									{:else}
 										<span class="block truncate text-sm leading-tight">{r.jugador}</span>
 									{/if}
+									<!-- El club de l'INDIVIDUAL, que no és sempre el de la lliga. No
+									     entra a l'ordre: la federació ordena per posició al grup,
+									     punts i mitjana. -->
+									{#if r.club}<span class="block truncate text-[10px] text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
 								</div>
 								<span class="w-14 shrink-0 text-center text-[11px] text-slate-500 dark:text-slate-400">{r.grup_nom ?? '—'}</span>
 								<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts ?? 0}</span>

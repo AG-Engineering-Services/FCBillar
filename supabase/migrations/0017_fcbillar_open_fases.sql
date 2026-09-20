@@ -44,6 +44,13 @@ create table if not exists fcbillar.open_fase_ranquing (
     posicio_grup  integer,                   -- com ha quedat dins del seu grup
     punts         integer,                   -- punts de la ronda (2 per victòria, 1 per empat)
     mitjana       double precision,          -- null = no ha jugat cap partida
+    -- El club amb què juga AQUEST campionat, que no és necessàriament el de la
+    -- lliga: ve de `fcbillar.afiliacions` (competicio = 'INDIVIDUAL').
+    --
+    -- No entra a l'ordre del rànquing i no hi ha d'entrar: la federació ordena
+    -- per posició al grup, punts de la ronda i mitjana, i el club no hi juga cap
+    -- paper. Hi és per poder llegir la llista, que és una altra cosa.
+    club          text
     primary key (open_id, fase_id, jugador),
     foreign key (open_id, fase_id) references fcbillar.open_fases(open_id, fase_id) on delete cascade
 );
@@ -54,3 +61,7 @@ alter table fcbillar.open_fases         enable row level security;
 alter table fcbillar.open_fase_ranquing enable row level security;
 create policy "read open_fases"         on fcbillar.open_fases         for select to anon, authenticated using (true);
 create policy "read open_fase_ranquing" on fcbillar.open_fase_ranquing for select to anon, authenticated using (true);
+
+-- Si la taula ja existia d'una execució anterior d'aquest fitxer, la columna del
+-- club s'hi afegeix aquí. Les dues formes deixen el mateix resultat.
+alter table fcbillar.open_fase_ranquing add column if not exists club text;
