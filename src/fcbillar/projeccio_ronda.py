@@ -92,13 +92,25 @@ def projecta(classificats: list[str], mida_grup: int = MIDA_GRUP) -> list[Projec
     mitjana, sèrie major). Els bombos es fan per trams: amb 18 jugadors i grups de
     tres, els llocs 1-6 són el bombo 1, 7-12 el 2 i 13-18 el 3.
 
-    El repartiment és en **serpentina**: el bombo 1 va del grup A al F i el bombo 2
-    torna del F a l'A, que és el que reparteix els trams sense donar-los tots a un
-    grup. No és el que fa la federació —el seu sorteig és geogràfic, vegeu la
+    El repartiment: el bombo 1 va del grup A al F i **tots els altres tornen del F
+    a l'A**. Amb 18 i grups de tres, el grup A es queda l'1, el 12 i el 18.
+
+    No és la serpentina d'un calendari, que aniria A→F, F→A, A→F i deixaria el 13
+    al grup A al costat de l'1. Aquí el primer de cada bombo ha d'acompanyar
+    l'últim del bombo d'abans: el que fa de contrapès al millor classificat és el
+    pitjor de cada tram, no el millor.
+
+    Tampoc no és el que fa la federació —el seu sorteig és geogràfic, vegeu la
     capçalera— i per això això és una projecció i va marcada com a tal.
 
-    Si els classificats no són múltiple de la mida de grup, els que sobren van als
-    primers grups: val més un grup de quatre que deixar algú fora.
+    Si els classificats no són múltiple de la mida de grup no es deixa ningú fora:
+    surten els grups que hi caben i els que sobren fan un bombo més, que va a parar
+    als últims grups del gir. Amb 20 i grups de tres són sis grups, i el F i l'E en
+    tenen quatre.
+
+    El nombre de bombos, doncs, és el del grup més gran i no `mida_grup`: en un grup
+    de quatre hi ha quatre bombos. Anar-hi amb el `mida_grup` posava dos jugadors al
+    mateix bombo del mateix grup, que no vol dir res.
     """
     if not classificats or mida_grup < 2:
         return []
@@ -107,10 +119,10 @@ def projecta(classificats: list[str], mida_grup: int = MIDA_GRUP) -> list[Projec
 
     out: list[Projectat] = []
     for i, jugador in enumerate(classificats):
-        bombo = min(i // n_grups, mida_grup - 1) + 1
+        bombo = i // n_grups + 1
         dins = i % n_grups
-        # Serpentina: els bombos parells van a l'inrevés.
-        k = dins if (i // n_grups) % 2 == 0 else n_grups - 1 - dins
+        # El primer bombo va A→F i tots els altres tornen F→A.
+        k = dins if i // n_grups == 0 else n_grups - 1 - dins
         out.append(
             Projectat(
                 jugador=jugador,

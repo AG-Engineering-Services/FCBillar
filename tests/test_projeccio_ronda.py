@@ -56,16 +56,20 @@ def test_els_bombos_son_trams_del_ranquing() -> None:
     assert per_bombo[3] == list(range(13, 19))
 
 
-def test_va_en_serpentina() -> None:
-    """El primer del bombo 2 acompanya l'ÚLTIM del bombo 1, no el primer.
+def test_el_primer_de_cada_bombo_acompanya_l_ultim_de_l_anterior() -> None:
+    """El bombo 1 va A→F i tots els altres tornen F→A.
 
-    Sense la serpentina, el grup A s'enduria el millor de cada bombo i el F el
-    pitjor de cada un: sis grups de dificultat molt diferent.
+    Sense girar-los, el grup A s'enduria el millor de cada bombo i el F el pitjor de
+    cada un: sis grups de dificultat molt diferent.
+
+    I NO és la serpentina d'un calendari, que aniria A→F, F→A, A→F i tornaria a
+    deixar el 13 al grup A al costat de l'1. El que fa de contrapès al millor
+    classificat és el pitjor de cada tram: al grup A hi van l'1, el 12 i el 18.
     """
     files = {f.posicio: f.grup_projectat for f in PR.projecta([f"J{i:02}" for i in range(1, 19)])}
     assert files[1] == "Grup A" and files[6] == "Grup F"
     assert files[7] == "Grup F" and files[12] == "Grup A"
-    assert files[13] == "Grup A" and files[18] == "Grup F"
+    assert files[13] == "Grup F" and files[18] == "Grup A"
 
 
 def test_els_que_sobren_no_queden_fora() -> None:
@@ -196,3 +200,20 @@ def test_es_projecta_la_ronda_nova_quan_te_regla(conn) -> None:
     assert resum["jugadors"] == 12
     rondes = {r[0] for r in conn.execute("SELECT DISTINCT ronda FROM torneig_ronda_projectada")}
     assert rondes == {"FINAL"}, "no hi pot quedar cap projecció de la PRÈVIA"
+
+
+def test_en_un_grup_de_quatre_hi_ha_quatre_bombos() -> None:
+    """El nombre de bombos és el del grup més gran, no la mida demanada.
+
+    La final de la 26/27 de 3a divisió té 8 places i, amb grups de tres, en surten
+    dos de quatre. Amb el bombo topat a `mida_grup` hi havia dos jugadors al bombo
+    3 del mateix grup i cap al 4, que no vol dir res: el bombo és el tram del
+    rànquing d'on surt cadascú i en un grup de quatre n'hi ha quatre.
+    """
+    files = PR.projecta([f"J{i}" for i in range(1, 9)])
+    per_grup: dict[str, list[int]] = {}
+    for f in files:
+        per_grup.setdefault(f.grup_projectat, []).append(f.bombo)
+    assert len(per_grup) == 2
+    for grup, bombos in per_grup.items():
+        assert sorted(bombos) == [1, 2, 3, 4], f"{grup}: {bombos}"
