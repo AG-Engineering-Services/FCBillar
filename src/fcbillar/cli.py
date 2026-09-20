@@ -1135,7 +1135,13 @@ def publish_cloud_cmd() -> None:
     try:
         counts = publish_rankings(on_progress=_prog)
         counts.update(publish_games(on_progress=_prog))
-        counts.update(publish_pending_games(on_progress=_prog))
+        # `pending_games` ha guanyat la columna `data`: mentre el Data API no la
+        # vegi, avisa i segueix en comptes d'aturar la publicació sencera.
+        counts.update(
+            publica_si_hi_es(
+                "pending_games", lambda: publish_pending_games(on_progress=_prog), _prog
+            )
+        )
         counts.update(publish_provisional_ranking(on_progress=_prog))
         counts.update(publish_lliga(on_progress=_prog))
         counts.update(publish_lliga_standings_hist(on_progress=_prog))
@@ -2372,6 +2378,16 @@ def afiliacions_cmd(
                     f"  [green]individual: {A.desa(conn, totes)} afiliacions[/] "
                     f"({len({f.club for f in totes})} clubs)"
                 )
+
+    # I el club de la temporada va a `players.club_id`, que és d'on el treu tot
+    # el que ensenya «el club de» algú. Hi quedava el d'on venia l'última cosa
+    # ingerida, que per a qui no ha jugat res aquest any és el de fa temporades.
+    n_players, canvis_club = A.aplica_a_players(conn, temporada)
+    console.print(f"  [green]{n_players} fitxes amb el club actualitzat[/]")
+    for linia in canvis_club[:40]:
+        console.print(f"    [dim]{linia}[/]")
+    if len(canvis_club) > 40:
+        console.print(f"    [dim]… i {len(canvis_club) - 40} més[/]")
 
     canvis = A.canvia_de_club(conn, temporada)
     if canvis:

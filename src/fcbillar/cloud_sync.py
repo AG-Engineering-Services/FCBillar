@@ -613,7 +613,9 @@ def publish_pending_games(
 
         out: dict[tuple[str, str], dict] = {}
 
-        def _add(pf, opp_nom, opp_fcb, car, car_opp, ent, serie, comp, font, sig, cap):
+        def _add(
+            pf, opp_nom, opp_fcb, car, car_opp, ent, serie, comp, font, sig, cap, data=None
+        ):
             # Només jugadors amb fcb_id federatiu real; els placeholders ("name:…")
             # no tenen fitxa ni surten al rànquing, així que no aporten res.
             if pf is None or str(pf).startswith("name:"):
@@ -633,6 +635,20 @@ def publish_pending_games(
                     "entrades": ent,
                     "serie": serie,
                     "captured_at": cap,
+                    # El dia que es va jugar.
+                    #
+                    # Hi ha de ser. `public.partides` de c3b creua les partides
+                    # federatives amb les del jugador PER DATA (signatura + cognom
+                    # del rival + data més propera) i insereix les que no hi troba;
+                    # una fila sense data no casa amb res i tampoc no s'hi pot
+                    # inserir, o sigui que desapareixia en silància. És el que
+                    # passava amb les partides de lliga jugades i encara no
+                    # publicades al rànquing: sortien a la fitxa i no a c3b.
+                    #
+                    # A la lliga és la data de la JORNADA i no el dia exacte: el web
+                    # nou no publica cap data per partida i un encontre avançat es
+                    # juga dies abans. És el que tenim, i val més que no res.
+                    "data": data,
                 },
             )
 
@@ -692,7 +708,8 @@ def publish_pending_games(
             # per "TRES BANDES" i temporada en curs (temporada_id=1, no femení).
             for r in conn.execute(
                 """SELECT ti.nom comp, tp.player1_nom n1, tp.caramboles1 c1, tp.serie1 s1,
-                          tp.player2_nom n2, tp.caramboles2 c2, tp.serie2 s2, tp.entrades e
+                          tp.player2_nom n2, tp.caramboles2 c2, tp.serie2 s2, tp.entrades e,
+                          tp.data
                    FROM torneig_partides tp
                    JOIN torneigs_individuals ti
                      ON ti.torneig_id_extern = tp.torneig_id_extern
@@ -712,8 +729,10 @@ def publish_pending_games(
                 )
                 lf = nom2fcb.get(_nm(r["n1"]))
                 vf = nom2fcb.get(_nm(r["n2"]))
-                _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "open", sig, None)
-                _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "open", sig, None)
+                _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "open", sig,
+                     None, r["data"])
+                _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "open", sig,
+                     None, r["data"])
 
         # --- OPENS EN CURS (open_live) ---
         modname = _MODNM.get(mod)
@@ -757,7 +776,7 @@ def publish_pending_games(
         # en incorporar-les la ingesta oficial, deixen de ser pendents.
         for r in conn.execute(
             """SELECT competicio, player1_nom n1, caramboles1 c1, serie1 s1,
-                      player2_nom n2, caramboles2 c2, serie2 s2, entrades e
+                      player2_nom n2, caramboles2 c2, serie2 s2, entrades e, data
                FROM lliga_pending_partides WHERE modalitat_codi = ?""",
             (mod,),
         ):
@@ -769,8 +788,10 @@ def publish_pending_games(
             lf = nom2fcb.get(_nm(r["n1"]))
             vf = nom2fcb.get(_nm(r["n2"]))
             comp = r["competicio"] or "Lliga"
-            _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "lliga", sig, None)
-            _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "lliga", sig, None)
+            _add(lf, r["n2"], vf, r["c1"], r["c2"], r["e"], r["s1"], comp, "lliga", sig,
+                 None, r["data"])
+            _add(vf, r["n1"], lf, r["c2"], r["c1"], r["e"], r["s2"], comp, "lliga", sig,
+                 None, r["data"])
 
         sb.table("pending_games").delete().eq("modalitat_codi", mod).execute()
         rows = list(out.values())
@@ -1151,6 +1172,37 @@ def _fetch_official_lliga_standings(
     return out
 
 
+def _equip_id_oficial(equip_text: str, equips: dict, repo) -> int | None:
+    """De «C.B. BANYOLES "A"» al nostre `equips.id`, si el tenim.
+
+    És el segon intent, per a les files de la classificació oficial que
+    `_match_official_rows` no ha sabut col·locar. Sense ell aquelles files es
+    publiquen amb el text de la federació —amb cometes— i, si a més en tenim
+    encontres, l'equip surt DUES vegades al mateix grup: un cop com a
+    «C.B. BANYOLES "A"» i un altre com a «C.B.BANYOLES A». Són el mateix equip i
+    la clau de la taula és el text, o sigui que les dues files hi caben.
+
+    El club es resol amb el mateix resolutor (exacte / normalitzat / àlies / sense
+    la lletra) que fa servir la ingesta d'encontres, i la lletra amb el mateix
+    partidor. Si el club té un sol equip al grup, la lletra no ha de coincidir:
+    les fases FINAL la reassignen ("B" → "A").
+    """
+    from fcbillar.pipeline import _split_equip_nom
+
+    club_nom, lletra = _split_equip_nom(equip_text)
+    club_id = repo.resolve_club_id_by_nom(club_nom)
+    if club_id is None:
+        return None
+    candidats = [eid for eid, meta in equips.items() if meta and meta[3] == club_id]
+    if not candidats:
+        return None
+    lletra = (lletra or "").upper()
+    for eid in candidats:
+        if (equips[eid][2] or "").upper() == lletra:
+            return eid
+    return candidats[0] if len(candidats) == 1 else None
+
+
 def _nom_equip(eid: int | None, equips: dict) -> str:
     """«C.B. MATARÓ» + «A» → «C.B. MATARÓ A». "UNICO" vol dir que no en té."""
     nom, _fcb, lletra, _club = equips.get(eid, ("?", None, "", None))
@@ -1388,7 +1440,11 @@ def publish_lliga(
             # penalitzacions restades i el desempat oficial per parcials.
             vistos: set[int] = set()
             for off in off_rows:
-                eid = eid_per_oficial.get(id(off))
+                # Si `_match_official_rows` no l'ha col·locat, es prova pel club i
+                # la lletra. El que no pot passar és publicar-lo amb el text de la
+                # federació i tornar-lo a publicar amb el nostre als sobrants: la
+                # clau de la taula és el text i hi caben totes dues.
+                eid = eid_per_oficial.get(id(off)) or _equip_id_oficial(off.equip, equips, repo)
                 s = stats.get(eid, ZEROS) if eid is not None else ZEROS
                 computed_pm = 3 * s["g"] + s["e"]
                 # Sanció federativa = punts esperats per victòries − punts
@@ -3737,7 +3793,10 @@ def publish_estadistiques_partides(
                     continue
                 feds.append(
                     {
-                        "data": None,
+                        # La data de la partida pendent. Abans hi anava `None` i
+                        # aixo la treia de joc: el creuament amb c3b va per data i
+                        # una fila sense data no casa amb res ni s'hi pot inserir.
+                        "data": pr.get("data"),
                         "co": pr["caramboles"],
                         "copp": pr["caramboles_opp"],
                         "e": pr["entrades"],
@@ -3976,6 +4035,51 @@ def publish_player_clubs(
         }
         for (fcb, temp) in set(best) | set(lliga)
     ]
+
+    # La temporada en curs mana des de `afiliacions`, que és l'única font que la
+    # sap de debò: diu qui inscriu cada club ABANS que es jugui res, mentre les
+    # altres dues l'han de deduir de partides que encara no existeixen. MAS
+    # CANADELL, JOSEP Mª hi sortia al C.B.LLINARS -d'on venia l'última cosa
+    # ingerida- jugant aquest any amb el B.C.GRANOLLERS.
+    #
+    # `player_clubs` només admet un club per temporada, i per tant aquí se'n perd
+    # la diferència entre competicions. No és cap descuit: qui la necessiti ha de
+    # llegir `afiliacions`, que les porta totes.
+    per_afiliacio: dict[tuple[str, str], tuple[str, int]] = {}
+    # Una connexió nova: la d'aquesta funció ja s'ha tancat unes línies més amunt.
+    conn2 = sqlite3.connect(str(db_path))
+    conn2.row_factory = sqlite3.Row
+    try:
+        for r in conn2.execute(
+            """SELECT a.temporada, a.competicio, a.modalitat, a.jugador, a.club, p.fcb_id
+               FROM afiliacions a
+               LEFT JOIN players p ON UPPER(p.nom) = UPPER(a.jugador)"""
+        ):
+            if not r["fcb_id"]:
+                continue
+            # '2026/2027' (federatiu) -> '2026-2027' (el de `temporades`).
+            temp = (r["temporada"] or "").replace("/", "-")
+            clau = (r["fcb_id"], temp)
+            pes = {("LLIGA", "Tres bandes"): 0, ("LLIGA", "4 Modalitats"): 1}.get(
+                (r["competicio"], r["modalitat"]), 2
+            )
+            ja = per_afiliacio.get(clau)
+            if ja is None or pes < ja[1]:
+                per_afiliacio[clau] = (r["club"], pes)
+    except sqlite3.OperationalError:
+        per_afiliacio = {}
+    finally:
+        conn2.close()
+    if per_afiliacio:
+        per_clau = {(r["player_fcb_id"], r["temporada"]): r for r in rows}
+        for clau, (club, _pes) in per_afiliacio.items():
+            fila = per_clau.get(clau)
+            if fila is not None:
+                fila["club"] = club
+            else:
+                rows.append(
+                    {"player_fcb_id": clau[0], "temporada": clau[1], "club": club}
+                )
 
     # Canonicalitza els noms de club: neteja (Descansa/sufixos/codis/AMISTAT),
     # agrupa pel nucli i aplica el mapping manual de clubs_list.txt.

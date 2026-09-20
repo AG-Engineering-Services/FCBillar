@@ -239,3 +239,71 @@ def canvia_de_club(conn: sqlite3.Connection, temporada: str) -> list[tuple[str, 
         for jugador, clubs in sorted(per_jugador.items())
         if len({_norm(c) for c in clubs.values()}) > 1
     ]
+
+
+#: Quina competició manda per a «el club d'aquest jugador», quan se n'ha de dir un
+#: de sol. La lliga de tres bandes és la competició principal del calendari i la
+#: que juga més gent; si algú no hi és, s'agafa el que hi hagi.
+_PRIORITAT = (
+    (LLIGA, "Tres bandes"),
+    (LLIGA, "4 Modalitats"),
+    (INDIVIDUAL, "Tres bandes"),
+)
+
+
+def aplica_a_players(conn: sqlite3.Connection, temporada: str) -> tuple[int, list[str]]:
+    """Posa a `players.club_id` el club d'aquesta temporada. Retorna (quants, canvis).
+
+    `players.club_id` és una columna sola i no pot dir amb quin club juga cadascú
+    cada competició —per això hi ha `afiliacions`—, però hi ha catorze temporades
+    de fitxes penjades d'ella i el que hi ha escrit ha de ser **el club d'ara**.
+
+    I no ho era: hi quedava el d'on venia l'última cosa ingerida, que per a qui no
+    ha jugat res aquesta temporada és el de fa anys. MAS CANADELL, JOSEP Mª hi
+    constava al C.B.LLINARS quan aquest any juga —les tres competicions— amb el
+    B.C.GRANOLLERS.
+
+    Quan un jugador té clubs diferents segons la competició s'escull per
+    `_PRIORITAT`, i el que es perd d'aquesta tria no es perd: és a `afiliacions`
+    sencer, que és on s'ha de mirar quan la pregunta és «i a la de 4 modalitats?».
+    """
+    from fcbillar.db.repository import Repository
+
+    repo = Repository(conn)
+    per_jugador: dict[str, dict[tuple[str, str], str]] = {}
+    for r in conn.execute(
+        "SELECT competicio, modalitat, jugador, club FROM afiliacions WHERE temporada = ?",
+        (temporada,),
+    ):
+        per_jugador.setdefault(r[2], {})[(r[0], r[1])] = r[3]
+
+    canvis: list[str] = []
+    n = 0
+    for jugador, clubs in sorted(per_jugador.items()):
+        club = next((clubs[k] for k in _PRIORITAT if k in clubs), None)
+        if club is None:
+            club = next(iter(clubs.values()))
+        fcb_id = repo.get_player_fcb_id_by_nom(jugador)
+        if fcb_id is None:
+            continue  # encara no té fitxa: no hi ha res a actualitzar
+        fila = conn.execute(
+            "SELECT p.id, c.nom FROM players p LEFT JOIN clubs c ON c.id = p.club_id "
+            "WHERE p.fcb_id = ?",
+            (fcb_id,),
+        ).fetchone()
+        if fila is None:
+            continue
+        player_id, actual = fila[0], fila[1]
+        if actual and _norm(actual) == _norm(club):
+            continue
+        club_id = repo.resolve_club_id_by_nom(club)
+        if club_id is None:
+            continue
+        conn.execute(
+            "UPDATE players SET club_id = ?, updated_at = datetime('now') WHERE id = ?",
+            (club_id, player_id),
+        )
+        canvis.append(f"{jugador}: {actual or 'sense club'} -> {club}")
+        n += 1
+    conn.commit()
+    return n, canvis

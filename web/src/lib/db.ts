@@ -1,6 +1,6 @@
 // Client del Data API de Neon, fixat al schema `fcbillar` (només lectura via
-// RLS). Les variables s'inlinen en build (Vite) → al .env.local en dev i a les
-// env vars de Vercel en producció.
+// RLS). Les variables surten de l'entorn: del .env.local en dev i de les env
+// vars de Vercel en desplegament.
 //
 // El Data API de Neon exigeix un JWT a cada petició: no té equivalent de l'anon
 // key de Supabase. `PUBLIC_NEON_ANON_TOKEN` fa el mateix paper —és una credencial
@@ -10,11 +10,24 @@
 //
 // Sota el capó és el mateix postgrest-js que hi havia amb supabase-js, així que
 // la sintaxi de les consultes no canvia.
+//
+// `$env/dynamic/public` i no `$env/static/public`: la versió estàtica les inlina
+// en compilar i fa PETAR EL BUILD si una no hi és, amb un error que no parla
+// d'entorn sinó de rollup («"PUBLIC_NEON_DATA_API_URL" is not exported by
+// virtual:env/static/public»). Com que aquestes variables no estan posades a
+// l'entorn de Preview de Vercel, tots els desplegaments que no són de `master`
+// fallaven a compilar, i feia l'efecte que ho hagués trencat el canvi que
+// s'estava provant.
+//
+// Amb la dinàmica es llegeixen en executar-se i el build no hi depèn. La garantia
+// no es perd: la comprovació de sota continua plantant-se si falten, ara on toca
+// —quan s'intenta fer servir el client— i amb un missatge que diu el nom de la
+// variable. És, a més, el que ja fa NouProjecte per llegir aquesta mateixa API.
 import { NeonPostgrestClient } from "@neondatabase/postgrest-js";
-import {
-  PUBLIC_NEON_ANON_TOKEN,
-  PUBLIC_NEON_DATA_API_URL,
-} from "$env/static/public";
+import { env } from "$env/dynamic/public";
+
+const PUBLIC_NEON_DATA_API_URL = env.PUBLIC_NEON_DATA_API_URL;
+const PUBLIC_NEON_ANON_TOKEN = env.PUBLIC_NEON_ANON_TOKEN;
 
 if (!PUBLIC_NEON_DATA_API_URL)
   throw new Error("Falta PUBLIC_NEON_DATA_API_URL");
