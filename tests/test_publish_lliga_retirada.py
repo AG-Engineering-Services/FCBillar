@@ -51,6 +51,12 @@ class TaulaFalsa:
         self._files = files
         return self
 
+    def insert(self, files: list[dict], **_k: Any) -> TaulaFalsa:
+        # Com l'upsert per al que aqui interessa: hi afegeix les files.
+        self._accio = "upsert"
+        self._files = files
+        return self
+
     def delete(self) -> TaulaFalsa:
         self._accio = "delete"
         return self
