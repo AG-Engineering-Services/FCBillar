@@ -2041,6 +2041,30 @@ def _rank_players(acc: dict) -> list[tuple]:
     return out
 
 
+def _nm_simple(nom: str) -> str:
+    """El nom sense accents ni majuscules, per casar l'acta amb les fitxes."""
+    import unicodedata as _ud
+
+    n = "".join(c for c in _ud.normalize("NFD", nom or "") if _ud.category(c) != "Mn")
+    return " ".join(n.strip().lower().split())
+
+
+def _sig_partida_lliga(na, ca, nb, cb, ent) -> str:
+    """La signatura d'una partida: la parella, les caramboles i les entrades.
+
+    Serveix per no comptar dues vegades la mateixa partida quan ve de les dues
+    fonts -el ranquing i l'acta-, que es el que passa entre que es juga i el
+    ranquing la publica. Es la mateixa que fa servir `publish_lliga_encontres`.
+    """
+    a, b = sorted(
+        [
+            f"{_nm_simple(na)}:{ca if ca is not None else ''}",
+            f"{_nm_simple(nb)}:{cb if cb is not None else ''}",
+        ]
+    )
+    return f"{a}|{b}|{ent if ent is not None else ''}"
+
+
 def publish_lliga_player_rankings(
     db_path: Path | None = None,
     on_progress: Progress | None = None,
@@ -2061,12 +2085,23 @@ def publish_lliga_player_rankings(
     conn.row_factory = sqlite3.Row
     sb = get_client()
 
-    tr = conn.execute("SELECT id FROM temporades ORDER BY nom DESC LIMIT 1").fetchone()
-    season_id = tr["id"] if tr else None
+    # La temporada surt de la LLIGA i no de la més nova de la taula: `lliga_id` és
+    # per republicar-ne una de passada, i el seu id de lliga és un altre (36 l'any
+    # passat, 38 aquest). Agafant sempre la temporada més nova, demanar la 36 no
+    # tornava cap fila i el paràmetre no feia el que diu que fa.
+    tr = conn.execute(
+        "SELECT temporada_id FROM encontres_lliga WHERE lliga_id = ? LIMIT 1", (lliga,)
+    ).fetchone()
+    if tr is None:
+        tr = conn.execute(
+            "SELECT id AS temporada_id FROM temporades ORDER BY nom DESC LIMIT 1"
+        ).fetchone()
+    season_id = tr["temporada_id"] if tr else None
     players = {
         r["id"]: (r["fcb_id"], r["nom"])
         for r in conn.execute("SELECT id, fcb_id, nom FROM players")
     }
+    per_nom = {_nm_simple(nom): pid for pid, (_fcb, nom) in players.items()}
     # El nom I l'identificador. La classificació publica `club_fcb_id` i això
     # publicava `nom`: són camps diferents -a un club no coincideixen- i, sobre
     # tot, aquesta taula no s'havia tornat a publicar des de la unificació de
@@ -2080,9 +2115,21 @@ def publish_lliga_player_rankings(
     }
 
     acc: dict = {}
+    vistes: dict[int, set[str]] = {}
+
+    def _suma(eid, div, grup, pid, car, pu, ent, eq) -> None:
+        a = acc.setdefault((div, grup, pid), {"pj": 0, "punts": 0, "car": 0, "ent": 0, "eq": eq})
+        a["pj"] += 1
+        a["punts"] += pu or 0
+        a["car"] += car or 0
+        a["ent"] += ent or 0
+        a["eq"] = eq
+
+    # 1. `games`, que és la partida oficial: ve del rànquing federatiu i porta els
+    #    jugadors ja resolts i els punts a `extras_json`.
     for r in conn.execute(
         """
-        SELECT en.divisio_id AS div, en.grup_id AS grup,
+        SELECT en.id AS eid, en.divisio_id AS div, en.grup_id AS grup,
                g.player1_id AS p1, g.player2_id AS p2,
                g.caramboles1 AS c1, g.caramboles2 AS c2, g.entrades AS e,
                g.equip1_id AS eq1, g.equip2_id AS eq2, g.extras_json AS ex
@@ -2095,18 +2142,62 @@ def publish_lliga_player_rankings(
             ex = json.loads(r["ex"] or "{}")
         except (ValueError, TypeError):
             ex = {}
+        vistes.setdefault(r["eid"], set()).add(
+            _sig_partida_lliga(
+                players.get(r["p1"], (None, ""))[1],
+                r["c1"],
+                players.get(r["p2"], (None, ""))[1],
+                r["c2"],
+                r["e"],
+            )
+        )
         for pid, car, pu, eq in (
             (r["p1"], r["c1"], ex.get("punts1"), r["eq1"]),
             (r["p2"], r["c2"], ex.get("punts2"), r["eq2"]),
         ):
-            a = acc.setdefault(
-                (r["div"], r["grup"], pid), {"pj": 0, "punts": 0, "car": 0, "ent": 0, "eq": eq}
-            )
-            a["pj"] += 1
-            a["punts"] += pu or 0
-            a["car"] += car or 0
-            a["ent"] += r["e"] or 0
-            a["eq"] = eq
+            _suma(r["eid"], r["div"], r["grup"], pid, car, pu, r["e"], eq)
+
+    # 2. `lliga_pending_partides`, que és el que diu l'acta d'una partida que el
+    #    rànquing encara no ha publicat. Sense això la temporada en curs surt BUIDA
+    #    i la pestanya de jugadors no ensenya res: el rànquing es publica un cop al
+    #    mes i la ingesta de lliga no desa a `games` una partida que no hi trobi ja.
+    #
+    #    Dues coses no vénen de l'acta i es resolen aquí:
+    #
+    #    - els PUNTS. L'acta publica les caramboles i no els punts, i el conveni és
+    #      2 al guanyador i 1 a cadascú si empaten (així són les 395 partides de
+    #      l'any passat, i els punts de l'encontre hi quadren).
+    #    - l'EQUIP, per al club de la fila: el jugador 1 de l'acta és el de casa.
+    #
+    #    La dedup va per signatura, la mateixa que `publish_lliga_encontres`: quan el
+    #    rànquing publiqui la partida, la fila pendent deixa de comptar i no es suma
+    #    dues vegades.
+    for r in conn.execute(
+        """
+        SELECT en.id AS eid, en.divisio_id AS div, en.grup_id AS grup,
+               en.equip_local_id AS eq1, en.equip_visitant_id AS eq2,
+               lp.player1_nom AS n1, lp.caramboles1 AS c1,
+               lp.player2_nom AS n2, lp.caramboles2 AS c2, lp.entrades AS e
+        FROM lliga_pending_partides lp
+        JOIN encontres_lliga en ON en.id = lp.encontre_lliga_id
+        WHERE en.lliga_id = ? AND en.temporada_id = ? AND lp.entrades > 0
+        """,
+        (lliga, season_id),
+    ):
+        sig = _sig_partida_lliga(r["n1"], r["c1"], r["n2"], r["c2"], r["e"])
+        if sig in vistes.get(r["eid"], set()):
+            continue
+        vistes.setdefault(r["eid"], set()).add(sig)
+        c1, c2 = r["c1"] or 0, r["c2"] or 0
+        punts1, punts2 = (2, 0) if c1 > c2 else ((0, 2) if c2 > c1 else (1, 1))
+        for nom, car, pu, eq in (
+            (r["n1"], r["c1"], punts1, r["eq1"]),
+            (r["n2"], r["c2"], punts2, r["eq2"]),
+        ):
+            pid = per_nom.get(_nm_simple(nom))
+            if pid is None:
+                continue  # encara no té fitxa: no se li pot penjar res
+            _suma(r["eid"], r["div"], r["grup"], pid, car, pu, r["e"], eq)
 
     rows = []
     for (div, grup), pos, pid, a in _rank_players(acc):
