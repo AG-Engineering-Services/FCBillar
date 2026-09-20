@@ -314,7 +314,7 @@ def publish_provisional_ranking(
     total = 0
     for mod in modalitats:
         rk = conn.execute(
-            """SELECT r.id, r.num_seq, r.any_pub, r.mes_pub
+            """SELECT r.id, r.num_seq, r.any_pub, r.mes_pub, r.data_pub
                FROM rankings r JOIN modalitats m ON m.id = r.modalitat_id
                WHERE m.codi_fcb = ? ORDER BY r.num_seq DESC LIMIT 1""",
             (mod,),
@@ -445,6 +445,26 @@ def publish_provisional_ranking(
                 key=lambda x: (x[0], order.get(x[4], -1)),
                 reverse=True,
             )
+            # Una partida que la federació ja ha vist i no ha comptat no torna.
+            #
+            # La finestra oficial és «les últimes N que computen», i n'hi ha que la
+            # federació es deixa: AMETLLER CONGOST té la del 21/03/2026 fora de la
+            # seva -que recula fins a l'abril i el maig de 2025 per completar les
+            # quinze- i ha tingut dos rànquings per comptar-la, l'1 i el 27 de juliol
+            # de 2026. La seva mitjana oficial no s'ha mogut en cap dels dos.
+            #
+            # Agafant les més recents de `games` sense mirar res, la projecció la
+            # tornava a posar i la fitxa la marcava com si hagués d'entrar al proper
+            # rànquing. No hi entrarà: si la federació l'hagués de comptar ja ho
+            # hauria fet.
+            #
+            # O sigui que d'abans de l'últim rànquing publicat només es projecta el
+            # que ell mateix compta, i d'allà endavant, tot. Als jugadors sense cap
+            # partida lligada -que no surten a la seva llista- no s'hi aplica: no
+            # tenim cap finestra oficial per comparar i el que sabem és el que hi ha.
+            seves = set(links_by_fcb.get(fcb, ()))
+            if seves and rk["data_pub"]:
+                recent = [x for x in recent if x[4] in seves or x[0] > rk["data_pub"]]
             recent_window = recent[: max(0, win - min(n_pending, win))]
             car = ent = won = lost = tie = 0
 
