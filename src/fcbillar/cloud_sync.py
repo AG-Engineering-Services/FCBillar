@@ -3813,7 +3813,13 @@ def publish_estadistiques_partides(
             try:
                 pend = (
                     sb.table("pending_games")
-                    .select("opponent_nom,caramboles,caramboles_opp,entrades,serie,competicio")
+                    # `data` hi ha de ser: el creuament amb c3b va per data i sense
+                    # ella la fila no casa amb res ni s'hi pot inserir. La columna
+                    # existia i aquest select no la demanava, que és pitjor que si
+                    # no existís: sembla que hi sigui i arriba buida.
+                    .select(
+                        "data,opponent_nom,caramboles,caramboles_opp,entrades,serie,competicio"
+                    )
                     .eq("player_fcb_id", fcb_id)
                     .eq("modalitat_codi", codi_fcb)
                     .execute()
