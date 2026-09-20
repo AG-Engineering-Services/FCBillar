@@ -217,3 +217,27 @@ def test_en_un_grup_de_quatre_hi_ha_quatre_bombos() -> None:
     assert len(per_grup) == 2
     for grup, bombos in per_grup.items():
         assert sorted(bombos) == [1, 2, 3, 4], f"{grup}: {bombos}"
+
+
+def test_com_escriu_la_federacio_el_nom_de_cada_ronda() -> None:
+    """Els noms no són iguals a tot arreu, i «aquí s'acaba» té dues formes.
+
+    La ronda final d'un campionat es diu «FASE FINAL» i no «FINAL». I n'hi ha que
+    acaben amb «QUALIFICACIÓ» o «GRUP UNIC», que no són cap ronda de la seqüència:
+    els campionats de tres bandes de la 2025-26 acaben així, i si la seva última
+    fase semblés una prèvia es donarien per no acabats.
+    """
+    assert PR.ronda_de_fase("PRE-PRÈVIA") == "PRE-PRÈVIA"
+    assert PR.ronda_de_fase("PRE-PREVIA") == "PRE-PRÈVIA", "sense accents també"
+    assert PR.ronda_de_fase("PRE-PRE-PRÈVIA") == "PRE-PRE-PRÈVIA"
+    assert PR.ronda_de_fase("PRÈVIA") == "PRÈVIA"
+    assert PR.ronda_de_fase("FASE FINAL") == "FINAL"
+    assert PR.ronda_de_fase("QUALIFICACIÓ") is None
+    assert PR.ronda_de_fase("GRUP UNIC") is None
+    assert PR.ronda_de_fase("PREVIES") is None, "el plural de la 2a divisió no és cap ronda"
+
+    # I el que ve després: la final no en té, i el que no és ronda tampoc.
+    assert PR.ronda_seguent("PRE-PRÈVIA") == "PRÈVIA"
+    assert PR.ronda_seguent("PRÈVIA") == "FINAL"
+    assert PR.ronda_seguent("FASE FINAL") is None
+    assert PR.ronda_seguent("QUALIFICACIÓ") is None

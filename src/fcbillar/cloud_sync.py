@@ -1950,6 +1950,19 @@ def publish_opens(
                 "temporada": r["temp"],
             }
         )
+    # Un campionat que s'ESTA JUGANT no té classificació final, i aquesta taula és
+    # la classificació final: d'ella pengen el palmarès de la fitxa, el de c3b i la
+    # pàgina del torneig, i totes tres llegeixen «1r, 2n, 3r» com un podi.
+    #
+    # `torneig_participants.posicio` sempre en porta una, perquè és el rànquing de
+    # la ronda que s'ha jugat -i ha de ser-hi, que és el que ensenya la pàgina del
+    # campionat-, o sigui que publicar-la sense mirar res convertia una PRE-PRÈVIA
+    # en un campionat guanyat. El 20/09/2026 el palmarès deia que en Corominas havia
+    # guanyat la 1a divisió i l'Ametller hi era segon amb una pre-prèvia jugada.
+    en_joc = _torneigs_en_joc(conn)
+    if en_joc:
+        prog("ok", f"{len(en_joc)} torneigs s'estan jugant: no en publico la classificació")
+
     seen: set[tuple[int, str]] = set()
     classifs = []
     for r in conn.execute(
@@ -1963,6 +1976,8 @@ def publish_opens(
         ORDER BY tp.torneig_id, tp.posicio
         """
     ):
+        if r["open_id"] in en_joc:
+            continue
         key = (r["open_id"], r["player_fcb_id"])
         if key in seen:
             continue
@@ -1995,8 +2010,63 @@ def publish_opens(
     # vegades a la temporada 2025-2026 a la web (ids 2831 i 2991). L'upsert sol
     # no ho pot veure: només escriu, no sap què ha desaparegut.
     counts["removed"] = _prune_orphan_opens(sb, {o["open_id"] for o in opens}, prog)
+
+    # I fora la classificació que s'hagués publicat d'un torneig que encara es juga.
+    if en_joc:
+        tretes = 0
+        for i in range(0, len(en_joc), 50):
+            tram = sorted(en_joc)[i : i + 50]
+            res = sb.table("open_classifications").delete().in_("open_id", tram).execute()
+            tretes += len(res.data or [])
+        if tretes:
+            prog(
+                "ok", f"open_classifications: {tretes} files retirades (el torneig encara es juga)"
+            )
+        counts["classificacions_en_joc_retirades"] = tretes
+
     conn.close()
     return counts
+
+
+def _torneigs_en_joc(conn) -> set[int]:
+    """Els torneigs que encara s'estan jugant, i per tant no tenen classificació final.
+
+    Es mira l'ÚLTIMA fase de cada torneig -la de més `ordre`- i es pregunta si la
+    seqüència de rondes en té cap després. Si en té i no hi és, el torneig es juga.
+
+    Ha de ser l'última fase i no el conjunt, i el que ho decideix és la temporada
+    2025-26: els campionats de tres bandes acabats hi tenen «PRÈVIA / QUALIFICACIÓ»,
+    o sigui que la PRÈVIA hi és i la FINAL no, i mirant el conjunt sortirien «en
+    joc» set campionats que fa mesos que estan tancats. L'última fase, en canvi, és
+    «QUALIFICACIÓ», que no és cap ronda de la seqüència i vol dir «aquí s'acaba».
+
+    I només la temporada EN CURS, que és l'altra meitat de la resposta. De la
+    2025-26 hi ha quatre opens acabats —Sants, Manresa, Sant Adrià, Llinars— que
+    només tenen ingerides les fases de grups fins a la prèvia: els seus quadres no
+    es van capturar mai, i sense la temporada sortirien «en joc» per sempre i el
+    palmarès els perdria.
+
+    Els 287 campionats històrics no tenen cap fase: d'aquells no en sabem
+    l'estructura i es publiquen com sempre.
+    """
+    from fcbillar.projeccio_ronda import ronda_seguent
+
+    try:
+        files = conn.execute(
+            """
+            SELECT f.torneig_id AS tid, f.nom
+              FROM torneig_fases f
+              JOIN (SELECT torneig_id, MAX(ordre) AS ultim
+                      FROM torneig_fases GROUP BY torneig_id) u
+                ON u.torneig_id = f.torneig_id AND u.ultim = f.ordre
+              JOIN torneigs_individuals ti ON ti.id = f.torneig_id
+             WHERE ti.temporada_id = (SELECT id FROM temporades ORDER BY nom DESC LIMIT 1)
+            """
+        ).fetchall()
+    except sqlite3.OperationalError:
+        return set()
+
+    return {r["tid"] for r in files if ronda_seguent(r["nom"] or "")}
 
 
 def _prune_orphan_opens(sb, local_ids: set[int], prog: Progress) -> int:

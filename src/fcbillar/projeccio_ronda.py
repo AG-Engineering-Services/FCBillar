@@ -62,13 +62,36 @@ def _norm(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", s)
 
 
-def ronda_seguent(nom_fase: str) -> str | None:
-    """De «PRE-PRÈVIA» a «PRÈVIA». `None` si no se sap què ve després."""
+def ronda_de_fase(nom_fase: str) -> str | None:
+    """Quina ronda de la seqüència és aquesta fase. `None` si no n'és cap.
+
+    La federació no escriu els noms igual a tot arreu: la ronda final d'un
+    campionat es diu «FASE FINAL» i no «FINAL», i n'hi ha que acaben amb
+    «QUALIFICACIÓ» o «GRUP UNIC», que no són cap ronda de la seqüència.
+
+    Es busca el nom de ronda més llarg que hi càpiga a dins, i l'ordre importa:
+    «PRE-PRÈVIA» conté «PRÈVIA», i qui mana és la llarga.
+    """
     clau = _norm(nom_fase)
-    noms = [_norm(x) for x in ORDRE_RONDES]
-    if clau not in noms:
+    if not clau:
         return None
-    i = noms.index(clau)
+    for ronda in sorted(ORDRE_RONDES, key=lambda r: -len(_norm(r))):
+        if _norm(ronda) in clau:
+            return ronda
+    return None
+
+
+def ronda_seguent(nom_fase: str) -> str | None:
+    """De «PRE-PRÈVIA» a «PRÈVIA». `None` si no se sap què ve després.
+
+    Una fase que no és cap ronda de la seqüència —«QUALIFICACIÓ», «GRUP UNIC»— i
+    l'última de totes —la final— no en tenen cap: les dues tornen `None`, i les dues
+    volen dir «aquí s'acaba».
+    """
+    ronda = ronda_de_fase(nom_fase)
+    if ronda is None:
+        return None
+    i = ORDRE_RONDES.index(ronda)
     return ORDRE_RONDES[i + 1] if i + 1 < len(ORDRE_RONDES) else None
 
 
