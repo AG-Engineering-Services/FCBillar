@@ -262,6 +262,24 @@
 	// federació fixa per a tot l'any, que és el que decideix a quins equips del
 	// club pot jugar cadascú.
 	let equipObert = $state<StandingRow | null>(null);
+	/**
+	 * Qui se'n va fitxat a un altre club: la seva fila d'origen no compta.
+	 *
+	 * Un fitxatge vol dir que algú juga el campionat individual amb el seu club i la
+	 * lliga amb un altre, i la federació el publica a les DUES llistes: a la del seu
+	 * club sense marca i a la del que se l'endú amb `(Fitxatge)`.
+	 *
+	 * Deixar-hi les dues volia dir que a la llista del club d'origen sortia com un
+	 * inscrit més i sense res que ho digués —la marca és a l'altra fila—, o sigui que
+	 * l'equip ensenyava algú que aquesta temporada no hi juga. Són nou jugadors, i
+	 * cinc són el número 1 o el 2 del seu club.
+	 *
+	 * La clau porta la lliga: qui va fitxat a la de tres bandes pot jugar la de 4
+	 * Modalitats amb el seu club de sempre, i allà la seva fila val.
+	 */
+	const fitxatsFora = $derived(
+		new Set(inscrits.filter((i) => i.fitxatge).map((i) => `${i.lliga_id}|${i.jugador}`))
+	);
 	const jugadorsDeLEquip = $derived(
 		equipObert
 			? inscrits
@@ -273,7 +291,9 @@
 						(p) =>
 							p.club_fcb_id != null &&
 							p.club_fcb_id === equipObert!.club_fcb_id &&
-							p.lliga_id === equipObert!.lliga_id
+							p.lliga_id === equipObert!.lliga_id &&
+							// Qui se'n va fitxat juga amb l'altre club, no amb aquest.
+							(p.fitxatge || !fitxatsFora.has(`${p.lliga_id}|${p.jugador}`))
 					)
 					.sort((a, b) => a.posicio - b.posicio)
 			: []
@@ -751,7 +771,8 @@
 					Ombrejats, els quatre que s'esperen en aquest equip. L'ordre és el que fixa la
 					federació i diu on pot jugar cadascú: del 1r al 3r només a l'A, del 4t al 8è a l'A
 					i al B, del 9è al 12è fins al C, del 13è al 16è fins al D i del 17è endavant fins
-					a l'E.
+					a l'E. Qui ve fitxat d'un altre club hi surt marcat i qui se'n va fitxat no hi
+					surt, que la lliga la juga amb ells; el salt a la numeració és seu.
 				</p>
 			{/if}
 		</div>

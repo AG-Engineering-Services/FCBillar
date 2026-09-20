@@ -191,6 +191,23 @@ jobs:
           # `plantilles`, que la fa servir, i abans de publicar.
           run "inscrits-lliga"       uv run --no-dev fcbillar ingest-inscrits-lliga
 
+          # Amb quin club juga cadascú CADA competició: la lliga surt dels inscrits
+          # que s'acaben d'ingerir i el campionat individual dels PDF del sorteig
+          # de cada fase, que és l'única font que en diu el club -el portal no el
+          # publica a cap pàgina del campionat.
+          #
+          # Va cada nit i DESPRÉS d'`inscrits-lliga`, que és el que llegeix, i
+          # abans de publicar. Sense això el núvol es quedava amb les afiliacions
+          # del dia que es van calcular al PC: la publicació no les esborra -si la
+          # BD local no en té cap, no retira res- però tampoc no les refresca, i
+          # els fitxatges es corregeixen setmanes després de publicats.
+          #
+          # També escriu el club de la temporada a `players.club_id`, que és d'on
+          # surt «el club de» algú a tot arreu. Quan les competicions no diuen el
+          # mateix hi va el club de l'INDIVIDUAL: un fitxatge vol dir que algú juga
+          # l'individual amb el seu club i la lliga amb un altre.
+          run "afiliacions"          uv run --no-dev fcbillar afiliacions
+
           # De qui està fet cada club, estimat. Depèn del que s'acaba d'ingerir -qui
           # ha jugat- i del llistat de divisions, i s'ha de refer abans de publicar
           # o es publicaria la d'ahir. L'ordre no balla: el rànquing de referència
