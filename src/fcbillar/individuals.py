@@ -103,6 +103,12 @@ class Membre:
     La posició, els punts i la mitjana són els que publica la federació a la
     pàgina del grup («Grup I - CLASSIFICACIÓ»). Són `None` mentre el grup no
     s'hagi jugat.
+
+    La **sèrie major** no és a aquella taula: allà només hi ha jugador, punts i
+    mitjana. Es calcula del màxim de les partides que el jugador ha disputat en
+    aquella ronda, que és on el portal la publica. Fa falta perquè és el quart
+    criteri de desempat del rànquing d'una fase, després de la posició al grup,
+    els punts i la mitjana.
     """
 
     fase_id_extern: int
@@ -112,6 +118,7 @@ class Membre:
     posicio_grup: int | None = None
     punts: int | None = None
     mitjana: float | None = None
+    serie_major: int | None = None
 
 
 @dataclass(frozen=True)
@@ -228,6 +235,19 @@ def llegeix(
                 # partida —dos dels 33 de la pre-prèvia de 1a de la 2026-27—, i
                 # aquesta els porta tots, amb la mitjana buida.
                 dins = per_grup.setdefault(g.nom, {})
+                # La sèrie major de cadascú en aquesta ronda: el màxim de les
+                # seves partides del grup. La taula de classificació no la porta.
+                serie_grup: dict[str, int] = {}
+                for p_ in P.parse_individuals_partides(phtml):
+                    for nom_j, serie in (
+                        (p_.local_nom, p_.local_serie_major),
+                        (p_.visitant_nom, p_.visitant_serie_major),
+                    ):
+                        if not nom_j or serie is None:
+                            continue
+                        clau_j = _norm(nom_j)
+                        if serie > serie_grup.get(clau_j, -1):
+                            serie_grup[clau_j] = serie
                 for c in P.parse_individuals_grup_classificacio(phtml):
                     dins[_norm(c.jugador_nom)] = Membre(
                         fase_id_extern=f.fase_id_extern,
@@ -237,6 +257,7 @@ def llegeix(
                         posicio_grup=c.posicio,
                         punts=c.punts,
                         mitjana=c.mitjana,
+                        serie_major=serie_grup.get(_norm(c.jugador_nom)),
                     )
                 for clau, m in dins.items():
                     if m.grup_id_extern is None:
@@ -248,6 +269,7 @@ def llegeix(
                             posicio_grup=m.posicio_grup,
                             punts=m.punts,
                             mitjana=m.mitjana,
+                            serie_major=m.serie_major,
                         )
             for grup_nom in sorted(per_grup):
                 membres.extend(per_grup[grup_nom].values())
@@ -357,8 +379,15 @@ def classificacio(divisio: Divisio) -> list[Posicio]:
         m = grups.get((a["fase_id"], _norm(a["nom"])))
         mitjana_general = a["car"] / a["ent"] if a["ent"] else 0.0
         if m is not None and tipus_fase.get(a["fase_id"]) != "ko":
-            return (-a["fase"], m.posicio_grup, -(m.punts or 0), -(m.mitjana or 0.0), a["nom"])
-        return (-a["fase"], 0 if a["guanya"] else 1, 0, -mitjana_general, a["nom"])
+            return (
+                -a["fase"],
+                m.posicio_grup,
+                -(m.punts or 0),
+                -(m.mitjana or 0.0),
+                -(m.serie_major or 0),
+                a["nom"],
+            )
+        return (-a["fase"], 0 if a["guanya"] else 1, 0, -mitjana_general, 0, a["nom"])
 
     ultima = {f.ordre: f.nom for f in divisio.fases}
     out: list[Posicio] = []
@@ -390,6 +419,7 @@ class FilaRanquing:
     posicio_grup: int
     punts: int
     mitjana: float | None
+    serie_major: int | None = None
 
 
 def ranquing_fase(divisio: Divisio, fase_id_extern: int) -> list[FilaRanquing]:
@@ -401,10 +431,13 @@ def ranquing_fase(divisio: Divisio, fase_id_extern: int) -> list[FilaRanquing]:
     s'emporten «els dos primers de cada grup» n'hi ha prou amb la posició, però
     quan passen els millors segons, o uns quants tercers, fa falta comparar-los.
 
-    L'ordre és el que la federació aplica: **primer la posició dins del grup,
-    després els punts de la ronda, i a igualtat de tots dos la mitjana**. O
-    sigui: tots els primers, ordenats entre ells, després tots els segons, i així
-    fins al final.
+    L'ordre és el que la federació aplica, i són QUATRE criteris: **posició dins
+    del grup, punts de la ronda, mitjana i sèrie major**. O sigui: tots els
+    primers, ordenats entre ells, després tots els segons, i així fins al final.
+
+    La sèrie major hi és perquè els altres tres empaten més sovint del que
+    sembla: a la pre-prèvia de 2a divisió de 2026-27 hi ha catorze grups de tres,
+    i els primers de grup que han fet 4 punts són dotze.
 
     Qui no ha jugat cap partida hi surt, amb zero punts i sense mitjana: hi era.
     """
@@ -413,7 +446,15 @@ def ranquing_fase(divisio: Divisio, fase_id_extern: int) -> list[FilaRanquing]:
         for m in divisio.membres
         if m.fase_id_extern == fase_id_extern and m.posicio_grup is not None
     ]
-    files.sort(key=lambda m: (m.posicio_grup, -(m.punts or 0), -(m.mitjana or 0.0), m.jugador))
+    files.sort(
+        key=lambda m: (
+            m.posicio_grup,
+            -(m.punts or 0),
+            -(m.mitjana or 0.0),
+            -(m.serie_major or 0),
+            m.jugador,
+        )
+    )
     return [
         FilaRanquing(
             posicio=i,
@@ -422,6 +463,7 @@ def ranquing_fase(divisio: Divisio, fase_id_extern: int) -> list[FilaRanquing]:
             posicio_grup=m.posicio_grup or 0,
             punts=m.punts or 0,
             mitjana=m.mitjana,
+            serie_major=m.serie_major,
         )
         for i, m in enumerate(files, start=1)
     ]
@@ -500,7 +542,8 @@ def desa(
     )
     conn.executemany(
         "INSERT INTO torneig_fase_grups (fase_id, grup_nom, jugador_nom, ordre, "
-        "grup_id_extern, posicio_grup, punts, mitjana) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "grup_id_extern, posicio_grup, punts, mitjana, serie_major) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             (
                 fase_ids[m.fase_id_extern],
@@ -511,6 +554,7 @@ def desa(
                 m.posicio_grup,
                 m.punts,
                 m.mitjana,
+                m.serie_major,
             )
             for i, m in enumerate(divisio.membres)
             if m.fase_id_extern in fase_ids

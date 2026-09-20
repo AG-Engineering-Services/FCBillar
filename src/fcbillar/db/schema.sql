@@ -351,7 +351,14 @@ CREATE TABLE IF NOT EXISTS torneig_fase_grups (
     -- v24: NULL mentre el grup no s'hagi jugat.
     posicio_grup   INTEGER,
     punts          INTEGER,
-    mitjana        REAL
+    mitjana        REAL,
+    -- v27: la sèrie major d'aquella ronda, que és el QUART criteri de desempat
+    -- del rànquing d'una fase: posició al grup, punts, mitjana i sèrie major.
+    --
+    -- No surt a la taula de classificació del grup —allà només hi ha jugador,
+    -- punts i mitjana—: es calcula del màxim de les partides que el jugador ha
+    -- disputat a la ronda.
+    serie_major    INTEGER
 );
 CREATE INDEX IF NOT EXISTS ix_tfg_fase ON torneig_fase_grups(fase_id);
 

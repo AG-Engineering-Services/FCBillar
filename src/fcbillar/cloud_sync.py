@@ -2574,10 +2574,10 @@ def publish_open_fases(
         # dades ja hi són desades.
         files = conn.execute(
             """
-            SELECT jugador_nom, grup_nom, posicio_grup, punts, mitjana
+            SELECT jugador_nom, grup_nom, posicio_grup, punts, mitjana, serie_major
             FROM torneig_fase_grups
             WHERE fase_id = ? AND posicio_grup IS NOT NULL
-            ORDER BY posicio_grup, punts DESC, mitjana DESC, jugador_nom
+            ORDER BY posicio_grup, punts DESC, mitjana DESC, serie_major DESC, jugador_nom
             """,
             (f["fid"],),
         ).fetchall()
@@ -2593,6 +2593,7 @@ def publish_open_fases(
                     "posicio_grup": r["posicio_grup"],
                     "punts": r["punts"],
                     "mitjana": r["mitjana"],
+                    "serie_major": r["serie_major"],
                     "club": club_individual.get(_nm(r["jugador_nom"])),
                 }
             )
