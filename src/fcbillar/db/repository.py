@@ -782,6 +782,45 @@ class Repository:
         temporada_id: int | None = None
         if encontre.temporada_nom:
             temporada_id = self.upsert_temporada(Temporada(nom=encontre.temporada_nom))
+        # La clau és la PARELLA dins de la jornada, no l'id de la federació
+        # (v23): un encontre que encara no s'ha jugat no en té, i l'ha d'estrenar
+        # sobre la fila que ja hi havia, no crear-ne una de nova. Per això l'id
+        # extern, els punts i l'estat entren amb COALESCE: el que arriba buit no
+        # esborra el que ja sabíem.
+        #
+        # Abans, però, cal recollir la fila que porta el MATEIX id de la federació
+        # i no sap qui el va jugar. A SQLite dos NULL no són iguals, o sigui que
+        # l'ON CONFLICT de sota no l'agafaria mai i en sortiria una fila nova al
+        # costat de la vella: la mateixa jornada amb l'encontre dues vegades.
+        #
+        # Passa de debò. La lliga 36 tenia sis encontres de promoció amb un equip
+        # sense resoldre, i reingerir-la en feia sis duplicats. No és cap cas
+        # antic: qualsevol encontre que una vegada no es va saber llegir del tot
+        # el tornaria a fer.
+        #
+        # Els encontres del backfill històric que no porten NI id NI equips no els
+        # agafa ni aquest UPDATE ni l'ON CONFLICT, i és el que toca: d'aquells no
+        # en sabem la parella i no hi ha res amb què aparellar-los.
+        if encontre.encontre_id_extern is not None:
+            self.conn.execute(
+                """
+                UPDATE encontres_lliga
+                   SET equip_local_id = COALESCE(equip_local_id, ?),
+                       equip_visitant_id = COALESCE(equip_visitant_id, ?)
+                 WHERE lliga_id = ? AND divisio_id = ? AND grup_id = ?
+                   AND jornada_id = ? AND encontre_id_extern = ?
+                   AND (equip_local_id IS NULL OR equip_visitant_id IS NULL)
+                """,
+                (
+                    local_id,
+                    visitant_id,
+                    encontre.lliga_id,
+                    encontre.divisio_id,
+                    encontre.grup_id,
+                    encontre.jornada_id,
+                    encontre.encontre_id_extern,
+                ),
+            )
         cur = self.conn.execute(
             """
             INSERT INTO encontres_lliga (
@@ -789,18 +828,22 @@ class Repository:
                 data, temporada_id,
                 equip_local_id, equip_visitant_id,
                 p_parcials_local, p_match_local,
-                p_parcials_visitant, p_match_visitant
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern)
+                p_parcials_visitant, p_match_visitant,
+                jornada_num, estat
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(lliga_id, divisio_id, grup_id, jornada_id,
+                        equip_local_id, equip_visitant_id)
             DO UPDATE SET
+                encontre_id_extern = COALESCE(
+                    excluded.encontre_id_extern, encontres_lliga.encontre_id_extern),
                 data = COALESCE(excluded.data, encontres_lliga.data),
                 temporada_id = COALESCE(excluded.temporada_id, encontres_lliga.temporada_id),
-                equip_local_id = excluded.equip_local_id,
-                equip_visitant_id = excluded.equip_visitant_id,
                 p_parcials_local = COALESCE(excluded.p_parcials_local, encontres_lliga.p_parcials_local),
                 p_match_local = COALESCE(excluded.p_match_local, encontres_lliga.p_match_local),
                 p_parcials_visitant = COALESCE(excluded.p_parcials_visitant, encontres_lliga.p_parcials_visitant),
-                p_match_visitant = COALESCE(excluded.p_match_visitant, encontres_lliga.p_match_visitant)
+                p_match_visitant = COALESCE(excluded.p_match_visitant, encontres_lliga.p_match_visitant),
+                jornada_num = COALESCE(excluded.jornada_num, encontres_lliga.jornada_num),
+                estat = COALESCE(excluded.estat, encontres_lliga.estat)
             RETURNING id
             """,
             (
@@ -817,6 +860,8 @@ class Repository:
                 encontre.p_match_local,
                 encontre.p_parcials_visitant,
                 encontre.p_match_visitant,
+                encontre.jornada_num,
+                encontre.estat,
             ),
         )
         return cur.fetchone()[0]

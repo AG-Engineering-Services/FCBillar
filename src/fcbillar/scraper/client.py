@@ -109,10 +109,28 @@ class ScraperClient:
         slug = slug.replace("/", "_").replace("?", "_").replace("&", "_")[:80]
         return self.settings.cache_dir / f"{slug}__{h}.html"
 
+    def _cache_vigent(self, cache_file: Path) -> bool:
+        """La còpia de disc encara val, o ja és massa vella?
+
+        Una caché que no caduca no és una caché: és una foto. Les pàgines que
+        ingerim són de competicions EN JOC —la classificació de la jornada
+        passada, els inscrits d'una lliga que encara admet fitxatges— i servir-ne
+        la versió del dia que es va baixar per primer cop fa que la ingesta corri
+        sense fallar i no vegi res de nou. Ha passat: els inscrits de la lliga de
+        4 Modalitats van estar setze dies sortint buits perquè el dia que es van
+        demanar per primera vegada la federació encara no n'havia publicat cap.
+        """
+        if not cache_file.exists():
+            return False
+        max_age = self.settings.cache_max_age_sec
+        if max_age <= 0:
+            return True  # sense caducitat, el comportament d'abans
+        return (time.time() - cache_file.stat().st_mtime) < max_age
+
     def fetch_html(self, url: str, *, use_cache: bool = True) -> str:
-        """Descarrega una pàgina, amb caché a disc opcional."""
+        """Descarrega una pàgina, amb caché a disc opcional i amb caducitat."""
         cache_file = self._cache_path(url)
-        if use_cache and self.settings.cache_html and cache_file.exists():
+        if use_cache and self.settings.cache_html and self._cache_vigent(cache_file):
             log.debug("CACHE HIT %s", url)
             return cache_file.read_text(encoding="utf-8")
 

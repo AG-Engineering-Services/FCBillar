@@ -55,6 +55,7 @@ _RE_IND_DIVISIONS = re.compile(r"individuals/divisions/(\d+)")
 _RE_IND_FASES = re.compile(r"individuals/fases/(\d+)/(\d+)")
 _RE_IND_GRUPS = re.compile(r"individuals/grups/(\d+)/(\d+)/(\d+)")
 _RE_IND_KO = re.compile(r"individuals/partides-eliminatories/(\d+)/(\d+)/(\d+)")
+_RE_IND_PARTIDES_GRUP = re.compile(r"individuals/partides-grup/(\d+)/(\d+)/(\d+)/(\d+)")
 
 _RE_COPA_GRUPS = re.compile(r"copa/grups/(\d+)/(\d+)")
 _RE_COPA_ENCGRUP = re.compile(r"copa/encontres-grup/(\d+)/(\d+)/(\d+)")
@@ -350,17 +351,31 @@ class LligaJornadaLink:
 
 @dataclass(frozen=True)
 class LligaEncontre:
+    """Un enfrontament d'una jornada, jugat o no.
+
+    `encontre_id` és `None` mentre no s'hagi jugat, i no és cap mancança de la
+    pàgina: la federació no dona identificador a un encontre fins que algú
+    n'introdueix el resultat, i llavors la fila estrena enllaç. Fins aleshores
+    l'enfrontament existeix igualment —hi surt amb els dos equips, l'estat
+    «Oberta» i els punts a zero— i és l'única cosa que identifica la parella.
+
+    Saltar-se'ls, que és el que es feia, deixava la jornada mig buida a la web:
+    de la primera d'Honor Grup A en sortien dos encontres de quatre.
+    """
+
     lliga_id: int
     divisio_id: int
     grup_id: int
     jornada_id: int
-    encontre_id: int
+    encontre_id: int | None
     equip_local: str
     p_parcials_local: int | None
     p_match_local: int | None
     equip_visitant: str
     p_parcials_visitant: int | None
     p_match_visitant: int | None
+    #: 'Finalitzada', 'Oberta', 'Pendent'… tal com l'escriu la federació.
+    estat: str = ""
 
 
 @dataclass(frozen=True)
@@ -387,6 +402,8 @@ class LligaPartidaRow:
     entrades: int | None
     arbitre: str | None
     assistencia: str | None
+    #: 'Tancada', 'Pendent'… El web antic no ho deia i el nou sí.
+    estat: str = ""
 
 
 def parse_lliga_divisions(html: str) -> list[LligaDivisio]:
@@ -454,32 +471,63 @@ def parse_lliga_jornades(html: str) -> list[LligaJornadaLink]:
     return out
 
 
-def parse_lliga_encontres(html: str) -> list[LligaEncontre]:
-    """Encontres d'una jornada: equips, punts parcials i punts de match."""
+def parse_lliga_encontres(
+    html: str, *, lliga_id: int = 0, divisio_id: int = 0, grup_id: int = 0, jornada_id: int = 0
+) -> list[LligaEncontre]:
+    """Tots els enfrontaments d'una jornada, jugats o no.
+
+    Els jugats porten enllaç al detall i d'allà surten els cinc identificadors.
+    Els que encara no s'han jugat no en porten cap —vegeu `LligaEncontre`—, i
+    per això cal dir-li de quina jornada és la pàgina: sense els paràmetres, un
+    encontre obert no es pot situar i se salta.
+
+    Es demanen com a paràmetres i no s'endevinen de la pàgina perquè la pàgina
+    no ho diu: el títol de la targeta és «Jornada 1» i prou. Qui la baixa sí que
+    ho sap, que és qui n'ha muntat la URL.
+    """
     taula = taula_amb(html, "Encontre")
     if taula is None:
         return []
     out: list[LligaEncontre] = []
     for fila in taula:
-        m = _primer(_RE_LLIGA_PARTIDES, fila.enllacos())
-        if m is None:
-            continue
         local, visitant = _parteix_encontre(fila["Encontre"])
-        pp_local, pp_visitant = fila.parell("Punts Parcials")
-        pm_local, pm_visitant = fila.parell("Punts de Match")
+        if not local or not visitant:
+            continue
+        m = _primer(_RE_LLIGA_PARTIDES, fila.enllacos())
+        if m is not None:
+            claus = (int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)))
+            encontre_id: int | None = int(m.group(5))
+            pp_local, pp_visitant = fila.parell("Punts Parcials")
+            pm_local, pm_visitant = fila.parell("Punts de Match")
+        else:
+            claus = (lliga_id, divisio_id, grup_id, jornada_id)
+            encontre_id = None
+            if not all(claus):
+                continue
+            # La federació escriu «0 / 0» als encontres que no s'han jugat, i
+            # això no és un resultat: és un lloc per posar-n'hi un. Desar-hi el
+            # zero els faria semblar empats a zero —que a més no existeixen, els
+            # punts de matx van 3/0 o 1/1— i els comptaria com a jugats a
+            # qualsevol suma. És el mateix error que el 0 als equips que la v15
+            # va haver de desfer.
+            #
+            # El senyal és l'enllaç i no el text de l'estat: l'enllaç apareix
+            # exactament quan algú ha introduït el resultat.
+            pp_local = pp_visitant = pm_local = pm_visitant = None
         out.append(
             LligaEncontre(
-                lliga_id=int(m.group(1)),
-                divisio_id=int(m.group(2)),
-                grup_id=int(m.group(3)),
-                jornada_id=int(m.group(4)),
-                encontre_id=int(m.group(5)),
+                lliga_id=claus[0],
+                divisio_id=claus[1],
+                grup_id=claus[2],
+                jornada_id=claus[3],
+                encontre_id=encontre_id,
                 equip_local=local,
                 p_parcials_local=pp_local,
                 p_match_local=pm_local,
                 equip_visitant=visitant,
                 p_parcials_visitant=pp_visitant,
                 p_match_visitant=pm_visitant,
+                estat=fila["Estat"] if fila.te("Estat") else "",
             )
         )
     return out
@@ -509,43 +557,94 @@ def parse_lliga_classificacio(html: str) -> list[LligaClassificacioRow]:
     return out
 
 
-def parse_lliga_partides(html: str) -> list[LligaPartidaRow]:
-    """Partides d'un encontre de lliga.
+@dataclass(frozen=True)
+class LligaEncontreDetall:
+    """El detall d'un encontre: qui hi jugava i les partides una per una.
 
-    ATENCIÓ: aquest endpoint retorna HTTP 500 des del canvi de web d'agost de
-    2026, o sigui que aquest parser no s'ha pogut verificar contra una pàgina
-    real. S'escriu contra la forma que tenen les taules de partides a la resta
-    del portal —individuals i copa, que sí que funcionen— perquè el dia que la
-    federació ho arregli només calgui confirmar-ho:
-
-        Local | SM | Caramboles | Visitant | SM | Caramboles | Entrades | Àrbitre | Estat
-
-    Aquesta forma no porta ni data ni modalitat ni assistència; el web antic sí.
-    Els deixem a `None` i el pipeline els omple amb els de l'encontre.
+    Els noms dels equips surten de les CAPÇALERES de la taula, que és on la
+    federació els posa: la primera columna es titula «C.B. SANT BOI "A"» i la
+    segona «B.C. GRANOLLERS "B"». Val la pena tenir-los perquè permeten
+    comprovar que la pàgina que hem baixat és la de l'encontre que demanàvem.
     """
-    out: list[LligaPartidaRow] = []
-    for taula in taules_amb(html, "Local", "Visitant", "Entrades"):
+
+    equip_local: str
+    equip_visitant: str
+    partides: list[LligaPartidaRow]
+
+
+def parse_lliga_encontre_detall(html: str) -> LligaEncontreDetall | None:
+    """Detall d'un encontre de lliga: sèrie major, caramboles, entrades i punts.
+
+    Aquesta pàgina va retornar HTTP 500 des del canvi de web d'agost de 2026
+    fins al setembre, i durant aquell temps el parser es va escriure a cegues
+    contra la forma que tenien les taules de partides d'individuals i de copa:
+
+        Local | SM | Caramboles | Visitant | SM | Caramboles | Entrades | …
+
+    No és aquesta. Quan la federació la va arreglar —i la va arreglar per a
+    totes les temporades, o sigui que el 500 era seu— la taula va resultar ser:
+
+        <equip local> | <equip visitant> | SM/Caramboles | SM/Caramboles |
+        Entrades | Modalitat | Estat | <punts>
+
+    És a dir: els equips són les capçaleres, cada resultat ve aparellat dins
+    d'una sola cel·la («4 / 27» = sèrie major 4, 27 caramboles) i l'última
+    columna, que no té títol, són els punts de la partida («2 / 0», «1 / 1» si
+    han empatat). No hi surt ni la data, ni l'àrbitre, ni l'assistència: el web
+    antic els donava i el nou no. Els deixem a `None` i el pipeline hi posa els
+    de l'encontre.
+
+    La modalitat SÍ que hi és, i per partida, que és com ha de ser: a la lliga
+    de 4 Modalitats cada partida d'un encontre juga una modalitat diferent.
+    """
+    for taula in taules(html):
+        caps = [normalitza(c) for c in taula.capcaleres]
+        parells = [i for i, c in enumerate(caps) if c in ("sm caramboles", "sm cara")]
+        if len(parells) < 2 or "entrades" not in caps:
+            continue
+        i_local, i_visitant = parells[0], parells[1]
+        # Els jugadors van a les dues primeres columnes, les que porten el nom
+        # de l'equip per títol; no es busquen per nom perquè el títol ÉS l'equip.
+        out: list[LligaPartidaRow] = []
         for fila in taula:
-            if len(fila) < 7:
+            if len(fila) <= i_visitant:
                 continue
+            sm_l, car_l = fila.parell(i_local)
+            sm_v, car_v = fila.parell(i_visitant)
+            punts_l, punts_v = (None, None)
+            # Els punts són l'última columna i no tenen capçalera.
+            if len(fila) > len(caps) - 1 and not caps[-1]:
+                punts_l, punts_v = fila.parell(len(caps) - 1)
             out.append(
                 LligaPartidaRow(
                     data_partida=fila.data("Data") if fila.te("Data") else None,
                     modalitat=fila["Modalitat"] if fila.te("Modalitat") else "",
                     local_nom=fila[0],
-                    local_serie_major=fila.enter(1),
-                    local_caramboles=fila.enter(2),
-                    local_punts=fila.enter("Punts") if fila.te("Punts") else None,
-                    visitant_nom=fila[3],
-                    visitant_serie_major=fila.enter(4),
-                    visitant_caramboles=fila.enter(5),
-                    visitant_punts=None,
+                    local_serie_major=sm_l,
+                    local_caramboles=car_l,
+                    local_punts=punts_l,
+                    visitant_nom=fila[1],
+                    visitant_serie_major=sm_v,
+                    visitant_caramboles=car_v,
+                    visitant_punts=punts_v,
                     entrades=fila.enter("Entrades"),
-                    arbitre=fila["Àrbitre"] or None if fila.te("Àrbitre") else None,
+                    arbitre=None,
                     assistencia=None,
+                    estat=fila["Estat"] if fila.te("Estat") else "",
                 )
             )
-    return out
+        return LligaEncontreDetall(
+            equip_local=taula.capcaleres[0] if taula.capcaleres else "",
+            equip_visitant=taula.capcaleres[1] if len(taula.capcaleres) > 1 else "",
+            partides=out,
+        )
+    return None
+
+
+def parse_lliga_partides(html: str) -> list[LligaPartidaRow]:
+    """Només les partides del detall d'un encontre. Vegeu `parse_lliga_encontre_detall`."""
+    detall = parse_lliga_encontre_detall(html)
+    return detall.partides if detall else []
 
 
 @dataclass(frozen=True)
@@ -828,6 +927,50 @@ def parse_individuals_grups_membership(html: str) -> list[IndividualGrupMembre]:
 
 
 @dataclass(frozen=True)
+class IndividualGrupLink:
+    """Un grup d'una fase, amb l'id que fa falta per demanar-ne les partides."""
+
+    grup_id_extern: int
+    nom: str  # 'Grup A'
+    club_organitzador: str | None
+    #: El dia que es juga el grup. És l'única data que dona el portal per a una
+    #: partida d'individual: la taula de partides no en porta cap.
+    data: date | None
+
+
+def parse_individuals_grups(html: str) -> list[IndividualGrupLink]:
+    """Els grups d'una fase amb el seu identificador.
+
+    La pàgina d'una fase de grups en porta DUES taules: aquesta, amb un grup per
+    fila, i la de participants, que diu qui juga a quin grup i que llegeix
+    `parse_individuals_grups_membership`.
+
+    L'id del grup no surt escrit enlloc: només és a l'enllaç d'aquesta fila. Per
+    això sense aquest parser les partides dels grups són inabastables, encara
+    que la pàgina que les serveix funcioni.
+    """
+    taula = taula_amb(html, "Grup", "Data partits")
+    if taula is None:
+        return []
+    out: list[IndividualGrupLink] = []
+    for fila in taula:
+        m = _primer(_RE_IND_PARTIDES_GRUP, fila.enllacos())
+        if m is None:
+            continue
+        out.append(
+            IndividualGrupLink(
+                grup_id_extern=int(m.group(4)),
+                nom=fila["Grup"],
+                club_organitzador=fila["Club organitzador"] or None
+                if fila.te("Club organitzador")
+                else None,
+                data=fila.data("Data partits"),
+            )
+        )
+    return out
+
+
+@dataclass(frozen=True)
 class IndividualPartidaRow:
     """Una partida d'un grup o d'una eliminatòria d'un torneig individual.
 
@@ -875,6 +1018,67 @@ def parse_individuals_partides(html: str) -> list[IndividualPartidaRow]:
                     estat=fila["Estat"] or None if fila.te("Estat") else None,
                 )
             )
+    return out
+
+
+@dataclass(frozen=True)
+class IndividualGrupClassifRow:
+    """Una línia de la classificació d'un grup, tal com la publica la federació.
+
+    La `posicio` no s'escriu a la pàgina: és l'ordre de la fila, i la federació
+    ja les dona ordenades (punts, i a igualtat de punts la mitjana). Tres
+    jugadors amb dos punts cadascun al Grup F de la pre-prèvia de 1a surten
+    ordenats per mitjana, i és així com es desempaten.
+    """
+
+    posicio: int
+    jugador_nom: str
+    punts: int | None
+    mitjana: float | None
+    #: Només a les eliminatòries: aquella taula porta caramboles i entrades.
+    caramboles: int | None = None
+    entrades: int | None = None
+
+
+def parse_individuals_grup_classificacio(html: str) -> list[IndividualGrupClassifRow]:
+    """Com ha quedat un grup: qui, amb quants punts i amb quina mitjana.
+
+    Aquesta taula és a la mateixa pàgina que les partides del grup
+    (`partides-grup`) i no la llegia ningú, tot i ser l'única cosa que diu qui
+    s'ha classificat. La ingesta d'individuals deduïa la classificació del
+    quadre —quina fase havia jugat cadascú i qui va guanyar l'última partida—,
+    que serveix per a un open acabat i no serveix de res per a un campionat a
+    mitges: al setembre de 2026 el campionat de Catalunya de tres bandes només
+    havia jugat la prèvia i la pre-prèvia, i del que en calia era justament
+    això: l'ordre dins de cada grup.
+
+    Els punts són 2 per victòria i 1 per empat; la mitjana és la del grup, i és
+    buida per a qui no hi ha jugat cap partida.
+    """
+    out: list[IndividualGrupClassifRow] = []
+    for taula in taules(html):
+        cols = {normalitza(c) for c in taula.capcaleres}
+        if "jugador" not in cols or "punts" not in cols:
+            continue
+        # La taula de la fase de grups porta «Mitjana»; la d'eliminatòries,
+        # «Promig» amb caramboles i entrades. Totes dues valen.
+        if not ({"mitjana", "promig"} & cols):
+            continue
+        for i, fila in enumerate(taula, start=1):
+            nom = fila["Jugador"]
+            if not nom:
+                continue
+            out.append(
+                IndividualGrupClassifRow(
+                    posicio=i,
+                    jugador_nom=nom,
+                    punts=fila.enter("Punts"),
+                    mitjana=fila.decimal("Mitjana") if fila.te("Mitjana") else fila.decimal("Promig"),
+                    caramboles=fila.enter("Caramboles") if fila.te("Caramboles") else None,
+                    entrades=fila.enter("Entrades") if fila.te("Entrades") else None,
+                )
+            )
+        return out
     return out
 
 

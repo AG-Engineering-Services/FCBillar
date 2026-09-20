@@ -427,6 +427,58 @@ export interface OpenClassification {
   serie_max: number | null;
 }
 
+// Les fases d'un torneig individual i el rànquing de cada fase de grups.
+//
+// Fa falta per als campionats de Catalunya, que es juguen per rondes:
+// pre-prèvia, prèvia, vuitens, i després el quadre. La federació publica la
+// classificació de cada grup però cap ordre ENTRE grups, i sense aquell ordre no
+// es pot dir qui s'ha classificat: quan passen «els dos primers de cada grup»
+// n'hi ha prou amb la posició, però quan passen «els set millors segons» cal
+// comparar els segons dels onze grups.
+//
+// L'ordre és el que aplica la federació: posició dins del grup, després punts de
+// la ronda, i a igualtat de tots dos la mitjana. El calcula FCBillar.
+//
+// NO és la classificació final del torneig (`open_classifications`): és la foto
+// d'una ronda mentre el campionat es juga.
+export interface OpenFase {
+  open_id: number;
+  fase_id: number;
+  nom: string;
+  tipus: string;
+  ordre: number | null;
+  data: string | null;
+}
+
+export interface OpenPartida {
+  open_id: number;
+  fase_id: number;
+  ordre: number;
+  /** De quin grup de la fase és. `null` a les eliminatòries, que no en tenen. */
+  grup_nom: string | null;
+  jugador_local: string | null;
+  caramboles_local: number | null;
+  jugador_visitant: string | null;
+  caramboles_visitant: number | null;
+  entrades: number | null;
+}
+
+export interface OpenFaseRanquing {
+  open_id: number;
+  fase_id: number;
+  /** L'ordre entre TOTS els grups de la fase. */
+  posicio: number;
+  jugador: string;
+  player_fcb_id: string | null;
+  grup_nom: string | null;
+  /** Com ha quedat dins del seu grup. */
+  posicio_grup: number | null;
+  /** Punts de la ronda: 2 per victòria, 1 per empat. */
+  punts: number | null;
+  /** `null` = no ha jugat cap partida. Hi surt igualment: hi era. */
+  mitjana: number | null;
+}
+
 // Calendari esportiu federatiu (taules fcbillar.calendari_*). Dues fonts, totes
 // dues parsejades per `fcbillar.calendari_fed`: el PDF de la RFEB (competicions
 // estatals i internacionals) i el de la FCB, del qual només se n'agafa la meitat

@@ -34,26 +34,33 @@ def _equip(r: Repository, club_id: int, lletra: str) -> int:
     return cur.fetchone()[0]
 
 
-def _encontre(r: Repository, local: int, visitant: int, extern: int) -> None:
+def _encontre(r: Repository, local: int, visitant: int, extern: int, lliga: int = 1) -> None:
     r.conn.execute(
         """
         INSERT INTO encontres_lliga
             (lliga_id, divisio_id, grup_id, jornada_id, encontre_id_extern,
              equip_local_id, equip_visitant_id)
-        VALUES (1, 1, 1, 1, ?, ?, ?)
+        VALUES (?, 1, 1, 1, ?, ?, ?)
         """,
-        (extern, local, visitant),
+        (lliga, extern, local, visitant),
     )
 
 
 def test_els_encontres_de_l_equip_que_sobra_no_es_perden(repo: Repository) -> None:
-    """El cas del Coral Colón: A històrica i A nova acaben sent la mateixa A."""
+    """El cas del Coral Colón: A històrica i A nova acaben sent la mateixa A.
+
+    Les temporades velles van a una `lliga_id` i la nova a una altra, que és com
+    ho fa la federació: estrena identificador de lliga cada any. Importa perquè
+    des de la v23 el que identifica un encontre és la parella dins de la
+    jornada: si les tres files fossin de la mateixa lliga i la mateixa jornada,
+    en fusionar els clubs dues passarien a ser literalment el mateix encontre.
+    """
     vell, nou = _club(repo, "CORAL COLÓN"), _club(repo, "S.B.CORAL COLÓN")
     a_vella, a_nova = _equip(repo, vell, "A"), _equip(repo, nou, "A")
     altre = _equip(repo, _club(repo, "C.B.BANYOLES"), "A")
-    _encontre(repo, a_vella, altre, 1)  # temporades velles
-    _encontre(repo, altre, a_vella, 2)
-    _encontre(repo, a_nova, altre, 3)  # la temporada nova
+    _encontre(repo, a_vella, altre, 1, lliga=34)  # temporades velles
+    _encontre(repo, altre, a_vella, 2, lliga=34)
+    _encontre(repo, a_nova, altre, 3, lliga=36)  # la temporada nova
 
     repo.merge_clubs("CORAL COLÓN", "S.B.CORAL COLÓN")
 

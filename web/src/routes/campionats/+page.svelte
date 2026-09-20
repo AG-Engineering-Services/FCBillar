@@ -97,7 +97,7 @@
 			<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 				{#each g.items as o (o.open_id)}
 					<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
-						<a href="/opens/{o.open_id}" class="flex items-center gap-3 px-3 py-1.5 active:bg-slate-50 dark:active:bg-slate-800/50">
+						<a href="/campionats/{o.open_id}" class="flex items-center gap-3 px-3 py-1.5 active:bg-slate-50 dark:active:bg-slate-800/50">
 							<div class="min-w-0 flex-1 truncate text-sm font-medium leading-tight">{clean(o.nom)}</div>
 							<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
 						</a>

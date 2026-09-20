@@ -42,7 +42,12 @@
 				db.from('lliga_groups').select('*'),
 				db.from('lliga_standings').select('*').order('posicio'),
 				db.from('lliga_player_rankings').select('*').order('posicio'),
-				db.from('lliga_encontres').select('*'),
+				// El .range() és explícit, com als dos de sota: PostgREST talla a mil
+				// files en silenci i aquesta taula acaba de passar-hi. Guarda els
+				// encontres de TOTES les temporades, i des del setembre de 2026 no
+				// només els jugats -la federació publica el calendari sencer i la
+				// ingesta el desa-, o sigui que una temporada sola ja en són 672.
+				db.from('lliga_encontres').select('*').range(0, 19999),
 				// Els inscrits del club: qui la federació diu que juga la lliga amb
 				// cada club, que és més que qui ja hi ha jugat. El .range() és
 				// explícit perquè PostgREST talla a mil files en silenci.
@@ -353,13 +358,44 @@
 			)
 		].sort((a, b) => a - b);
 	}
+	/**
+	 * La jornada que s'ensenya de primer: la que s'està jugant o la que ve.
+	 *
+	 * Ensenyava l'última de la llista, i mentre només hi havia els encontres ja
+	 * jugats això era el mateix. Des del setembre de 2026 hi ha el calendari
+	 * SENCER —la federació publica les catorze jornades des del primer dia— i
+	 * l'última de la llista és l'abril de l'any que ve.
+	 *
+	 * La regla, en ordre:
+	 *
+	 * 1. Si cap jornada no té cap resultat, la primera: la competició no ha
+	 *    començat i el que toca és ensenyar per on comença.
+	 * 2. Si n'hi ha, es mira la més avançada amb algún resultat, que és fins on ha
+	 *    arribat la competició. Si encara li falten encontres, és la que s'està
+	 *    jugant. Si està completa, la següent, que és la que ve.
+	 *
+	 * Es mira la més avançada amb resultats i no la primera incompleta perquè un
+	 * encontre que no s'arriba a jugar mai —una retirada— deixaria la vista
+	 * clavada a una jornada de fa mesos per sempre.
+	 */
 	function curJornada(gid: number): number | null {
 		const js = gJornades(gid);
 		if (!js.length) return null;
-		// D'un grup que encara no ha començat, la primera: l'última no s'ha jugat
-		// més que les altres i ensenyar-la seria començar per l'final.
-		if (gid < 0) return jornadaSel[gid] ?? js[0];
-		return jornadaSel[gid] ?? js[js.length - 1];
+		if (jornadaSel[gid] != null) return jornadaSel[gid];
+		if (gid < 0) return js[0]; // només calendari: no hi ha cap resultat
+
+		const delGrup = encontres.filter((e) => e.grup_id === gid && e.divisio_id === selDiv);
+		const jugada = (j: number) =>
+			delGrup.some((e) => e.jornada === j && e.gols_local != null);
+		const completa = (j: number) =>
+			delGrup.some((e) => e.jornada === j) &&
+			delGrup.every((e) => e.jornada !== j || e.gols_local != null);
+
+		const ambResultats = js.filter(jugada);
+		if (!ambResultats.length) return js[0];
+		const ultima = ambResultats[ambResultats.length - 1];
+		if (!completa(ultima)) return ultima;
+		return js[Math.min(js.indexOf(ultima) + 1, js.length - 1)];
 	}
 	function encOf(gid: number): any[] {
 		const j = curJornada(gid);

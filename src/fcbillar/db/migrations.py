@@ -59,6 +59,22 @@ Versions:
 - 22: lliga_inscrits.modalitat. Sense ella, les mitjanes de la lliga de tres
      bandes i les de la de 4 modalitats es barregen en una sola llista, i no
      són comparables: cadascuna és de la seva modalitat.
+- 23: un encontre de lliga s'identifica per la PARELLA dins de la jornada, no
+     per l'id de la federació, que no existeix fins que s'ha jugat. Amb la clau
+     vella la meitat d'una jornada no es podia desar i la web només ensenyava
+     els partits ja disputats.
+- 24: `torneig_fase_grups` guanya l'id del grup, la posició dins del grup, els
+     punts i la mitjana: la classificació de cada grup d'una fase d'individual,
+     que la federació publica a la mateixa pàgina de les partides i que no
+     llegia ningú. És l'única cosa que diu qui s'ha classificat.
+- 26: `torneig_partides.grup_nom` — de quin grup d'una fase és cada partida.
+     Sense això les partides d'una fase de grups són un sac i no es pot ensenyar
+     un grup amb la seva classificació i les seves partides al costat.
+- 25: afiliacions — amb quin club juga cadascú CADA competició. Un jugador pot
+     anar fitxat a la lliga per un club i jugar l'individual pel seu, i pot anar
+     fitxat a la lliga de tres bandes per un club i a la de 4 Modalitats per un
+     altre. `players.club_id` és una columna sola i no ho pot dir. Taula nova:
+     la crea l'executescript.
 """
 
 from __future__ import annotations
@@ -71,7 +87,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 22
+SCHEMA_VERSION = 26
 
 
 def _read_schema_sql() -> str:
@@ -207,7 +223,15 @@ def _migrate_to_v15(conn: sqlite3.Connection) -> None:
     cols = [row[1] for row in conn.execute("PRAGMA table_info(encontres_lliga)").fetchall()]
     if not cols:
         return  # BD nova: la crearà schema.sql amb els camps ja opcionals
-    llista = ", ".join(cols)
+    # Només les columnes que la taula d'AQUESTA migració té. Una BD que ja porti
+    # columnes de migracions posteriors (perquè algú n'hi ha corregut l'esquema
+    # sencer) en té més, i copiar-les totes petaria amb «no such column».
+    meves = [
+        "id", "lliga_id", "divisio_id", "grup_id", "jornada_id", "encontre_id_extern",
+        "data", "temporada_id", "equip_local_id", "equip_visitant_id",
+        "p_parcials_local", "p_match_local", "p_parcials_visitant", "p_match_visitant",
+    ]
+    llista = ", ".join(c for c in meves if c in cols)
     conn.executescript(
         f"""
         PRAGMA foreign_keys = OFF;
@@ -399,6 +423,134 @@ def _migrate_to_v16(conn: sqlite3.Connection) -> None:
         log.info("→v16: %s tornava a apuntar a %s", taula, ", ".join(sorted(destins)))
 
 
+def _migrate_to_v23(conn: sqlite3.Connection) -> None:
+    """Un encontre és la parella dins de la jornada, no l'id de la federació.
+
+    La federació no dona identificador a un encontre fins que algú n'introdueix
+    el resultat. Fins llavors la seva fila hi és —els dos equips, «Oberta», els
+    punts a zero— però sense enllaç i sense número. Amb `encontre_id_extern`
+    dins de la clau i NOT NULL, aquells encontres no es podien desar, i per això
+    la web ensenyava mitja jornada: de la primera d'Honor Grup A, dos de quatre.
+
+    La clau passa a ser (lliga, divisió, grup, jornada, equip local, equip
+    visitant). Els 2.035 encontres històrics sense equips no s'hi barallen: a
+    SQLite dos NULL no són iguals, i per tant no xoquen entre ells.
+
+    Es crea la taula amb un nom temporal i es reanomena al final, i no al revés:
+    reanomenar l'original faria que SQLite reescrigués cap al nom temporal les
+    claus foranes de `games` i `lliga_pending_partides`, que tot seguit
+    s'esborra. Vegeu `_migrate_to_v15` i `_migrate_to_v16`.
+    """
+    cols = [row[1] for row in conn.execute("PRAGMA table_info(encontres_lliga)").fetchall()]
+    if cols:
+        # Si dos encontres de la mateixa jornada tenen la mateixa parella, la
+        # clau nova no els admetria tots dos. No hauria de passar —una parella
+        # juga un sol cop per jornada— però val més saber-ho abans de refer la
+        # taula que petar a mitges.
+        xocs = conn.execute(
+            """
+            SELECT COUNT(*) FROM (
+                SELECT 1 FROM encontres_lliga
+                WHERE equip_local_id IS NOT NULL AND equip_visitant_id IS NOT NULL
+                GROUP BY lliga_id, divisio_id, grup_id, jornada_id,
+                         equip_local_id, equip_visitant_id
+                HAVING COUNT(*) > 1
+            )
+            """
+        ).fetchone()[0]
+        if xocs:
+            log.warning(
+                "→v23: %d parelles repetides dins d'una jornada; es queda la de "
+                "l'encontre_id_extern més petit i la resta es descarten",
+                xocs,
+            )
+        antigues = ", ".join(cols)
+        conn.executescript(
+            f"""
+            PRAGMA foreign_keys = OFF;
+            CREATE TABLE encontres_lliga_nou (
+                id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+                lliga_id                INTEGER NOT NULL,
+                divisio_id              INTEGER NOT NULL,
+                grup_id                 INTEGER NOT NULL,
+                jornada_id              INTEGER NOT NULL,
+                encontre_id_extern      INTEGER,
+                data                    TEXT,
+                temporada_id            INTEGER REFERENCES temporades(id),
+                equip_local_id          INTEGER REFERENCES equips(id),
+                equip_visitant_id       INTEGER REFERENCES equips(id),
+                p_parcials_local        INTEGER,
+                p_match_local           INTEGER,
+                p_parcials_visitant     INTEGER,
+                p_match_visitant        INTEGER,
+                jornada_num             INTEGER,
+                estat                   TEXT,
+                UNIQUE(lliga_id, divisio_id, grup_id, jornada_id,
+                       equip_local_id, equip_visitant_id)
+            );
+            -- L'`id` es conserva: `games.encontre_lliga_id` i
+            -- `lliga_pending_partides.encontre_lliga_id` hi apunten.
+            INSERT OR IGNORE INTO encontres_lliga_nou ({antigues})
+                SELECT {antigues} FROM encontres_lliga
+                ORDER BY encontre_id_extern;
+            DROP TABLE encontres_lliga;
+            ALTER TABLE encontres_lliga_nou RENAME TO encontres_lliga;
+            PRAGMA foreign_keys = ON;
+            """
+        )
+        n = conn.execute("SELECT COUNT(*) FROM encontres_lliga").fetchone()[0]
+        log.info("→v23: encontres_lliga refet amb la parella com a clau; %d files", n)
+
+
+def _migrate_to_v24(conn: sqlite3.Connection) -> None:
+    """Com ha quedat cada grup d'una fase d'individual.
+
+    La federació ho publica a la mateixa pàgina que les partides del grup («Grup I
+    - CLASSIFICACIÓ»: jugador, punts, mitjana) i no ho llegia ningú, tot i ser
+    l'única cosa que diu qui s'ha classificat. Amb això, el rànquing d'una fase es
+    pot fer: posició al grup, punts de la ronda, i la mitjana per desempatar.
+
+    `grup_id_extern` hi és perquè sense ell no es pot tornar a la pàgina d'un grup:
+    aquell id només s'escriu a l'enllaç de la seva fila.
+    """
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(torneig_fase_grups)").fetchall()}
+    if not cols:
+        return  # BD nova: la crearà schema.sql amb les columnes ja posades
+    for nom, tipus in (
+        ("grup_id_extern", "INTEGER"),
+        ("posicio_grup", "INTEGER"),
+        ("punts", "INTEGER"),
+        ("mitjana", "REAL"),
+    ):
+        if nom not in cols:
+            conn.execute(f"ALTER TABLE torneig_fase_grups ADD COLUMN {nom} {tipus}")
+            log.info("→v24: afegida columna torneig_fase_grups.%s", nom)
+
+
+def _migrate_to_v26(conn: sqlite3.Connection) -> None:
+    """Una partida d'un torneig ha de dir de quin grup és i quin dia es va jugar.
+
+    Sense el grup, les partides d'una fase són un sac: no es pot ensenyar un grup
+    amb la seva classificació i les seves partides al costat.
+
+    I sense la data no es pot publicar com a PENDENT, que és l'única manera que
+    una partida arribi a la fitxa d'un jugador abans que el rànquing la publiqui
+    —i el rànquing surt un cop al mes. Es va decidir no tenir-la perquè «la data
+    ja arriba pel rànquing»; arriba, sí, el mes que ve.
+
+    Les files que ja hi ha es queden amb NULL: la ingesta antiga no ho desava i
+    no es pot deduir de res del que hi ha. Es tornen a omplir reingerint el
+    torneig, que és idempotent.
+    """
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(torneig_partides)").fetchall()}
+    if not cols:
+        return  # BD nova: la crearà schema.sql amb les columnes ja posades
+    for nom, tipus in (("grup_nom", "TEXT"), ("data", "TEXT")):
+        if nom not in cols:
+            conn.execute(f"ALTER TABLE torneig_partides ADD COLUMN {nom} {tipus}")
+            log.info("→v26: afegida columna torneig_partides.%s", nom)
+
+
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
     conn = connect(db_path)
     version = current_version(conn)
@@ -438,6 +590,15 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v22: les mitjanes de dues lligues no es poden barrejar.
     if 1 <= version < 22:
         _migrate_to_v22(conn)
+    # → v23: un encontre és la parella, no l'id que la federació no ha creat encara.
+    if 1 <= version < 23:
+        _migrate_to_v23(conn)
+    # → v24: com ha quedat cada grup d'una fase d'individual.
+    if 1 <= version < 24:
+        _migrate_to_v24(conn)
+    # → v26: de quin grup és cada partida d'un torneig.
+    if 1 <= version < 26:
+        _migrate_to_v26(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

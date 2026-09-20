@@ -651,3 +651,52 @@ def test_migration_v1_to_v2_preserves_games(tmp_path: Path) -> None:
     assert "temporades" in tables
     assert "equips" in tables
     assert "encontres_lliga" in tables
+
+
+def test_un_encontre_sense_equips_no_es_duplica_en_reingerir(repo) -> None:
+    """La fila que sabíem per l'id, en tornar-hi amb els equips, és la mateixa.
+
+    Des de la v23 el que identifica un encontre és la parella dins de la jornada,
+    i a SQLite dos NULL no són iguals: una fila que no sabia qui la va jugar no
+    s'aparella amb res i l'ON CONFLICT no l'agafa. Sense recollir-la abans, una
+    reingesta en feia una de nova al costat i la jornada sortia amb l'encontre
+    dues vegades.
+
+    Va passar amb sis encontres de promoció de la lliga 36.
+    """
+    from fcbillar.models import Club, EncontreLliga, Equip
+
+    repo.upsert_club(Club(fcb_id="C.B.BANYOLES", nom="C.B.BANYOLES"))
+    repo.upsert_club(Club(fcb_id="B.C.GRANOLLERS", nom="B.C.GRANOLLERS"))
+    visitant = repo.upsert_equip(Equip(club_fcb_id="B.C.GRANOLLERS", lletra="A"))
+
+    # Com quedava una ingesta que no va saber resoldre l'equip local.
+    repo.conn.execute(
+        "INSERT INTO encontres_lliga (lliga_id, divisio_id, grup_id, jornada_id, "
+        "encontre_id_extern, equip_local_id, equip_visitant_id, p_match_local, "
+        "p_match_visitant) VALUES (36, 148, 338, 2781, 11640, NULL, ?, 2, 0)",
+        (visitant,),
+    )
+
+    # I la reingesta, que ara sí que el resol.
+    eid = repo.upsert_encontre_lliga(
+        EncontreLliga(
+            lliga_id=36,
+            divisio_id=148,
+            grup_id=338,
+            jornada_id=2781,
+            encontre_id_extern=11640,
+            equip_local=Equip(club_fcb_id="C.B.BANYOLES", lletra="A"),
+            equip_visitant=Equip(club_fcb_id="B.C.GRANOLLERS", lletra="A"),
+            p_match_local=2,
+            p_match_visitant=0,
+        )
+    )
+
+    files = repo.conn.execute(
+        "SELECT id, equip_local_id, equip_visitant_id FROM encontres_lliga "
+        "WHERE lliga_id = 36 AND encontre_id_extern = 11640"
+    ).fetchall()
+    assert len(files) == 1, "l'encontre no es pot duplicar"
+    assert files[0][0] == eid
+    assert files[0][1] is not None and files[0][2] == visitant
