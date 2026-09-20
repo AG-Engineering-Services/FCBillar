@@ -20,8 +20,10 @@ from fcbillar.models import (
     Ranking,
     RankingGameLink,
     Temporada,
+    TorneigFaseGrupRow,
     TorneigIndividualRecord,
     TorneigParticipantRecord,
+    TorneigPartidaRow,
 )
 from fcbillar.scraper.client import ScraperClient
 from fcbillar.scraper.parsers import (
@@ -29,7 +31,8 @@ from fcbillar.scraper.parsers import (
     HistorialEntry,
     HomeRankingsResult,
     IndividualDivisio,
-    IndividualParticipant,
+    IndividualFaseLink,
+    IndividualGrup,
     LligaDivisio,
     LligaEncontre,
     LligaGrup,
@@ -43,8 +46,12 @@ from fcbillar.scraper.parsers import (
     parse_copa_jornades,
     parse_copa_partides,
     parse_home_current_rankings,
-    parse_individuals_classificaciofinal,
+    parse_individuals_classificacio_grup,
     parse_individuals_divisions,
+    parse_individuals_fases,
+    parse_individuals_grups,
+    parse_individuals_grups_membership,
+    parse_individuals_partides,
     parse_individuals_torneigs_list,
     parse_lliga_divisions,
     parse_lliga_encontres,
@@ -1458,6 +1465,9 @@ class IngestIndividualsResult:
     torneigs_processed: int
     torneigs_failed: int
     total_participants: int
+    fases: int = 0
+    grups: int = 0
+    partides: int = 0
 
 
 def _individuals_llistat_url(base_url: str, temporada: str | None) -> str:
@@ -1471,6 +1481,251 @@ def _individuals_llistat_url(base_url: str, temporada: str | None) -> str:
     )
 
 
+def _punts_de_partida(car1: int | None, car2: int | None) -> tuple[int | None, int | None]:
+    """Punts d'una partida: 2 al guanyador, 1 a cadascú si empaten.
+
+    Reglament, art. XI.3 i VII.1. Es calculen perquè el web nou dona caramboles
+    i sèrie major però ja no els punts, que abans venien donats.
+    """
+    if car1 is None or car2 is None:
+        return None, None
+    if car1 > car2:
+        return 2, 0
+    if car1 < car2:
+        return 0, 2
+    return 1, 1
+
+
+def _partida_jugada(p) -> bool:
+    """Una fila de partides pot ser un partit pendent, amb tot a zero."""
+    return bool(p.entrades) or bool(p.local_caramboles) or bool(p.visitant_caramboles)
+
+
+@dataclass
+class _StatsJugador:
+    """El que sabem d'un jugador dins d'una divisió, sumant-hi totes les fases.
+
+    Els camps `fase_*` són només de la fase més alta on ha arribat, que és el
+    que el desempata amb els altres que hi han arribat també.
+    """
+
+    nom: str
+    partides: int = 0
+    punts: int = 0
+    caramboles: int = 0
+    entrades: int = 0
+    serie_max: int = 0
+    fase_ordre: int = -1
+    fase_punts: int = 0
+    fase_caramboles: int = 0
+    fase_entrades: int = 0
+    #: La mitjana que publica la classificació del grup. Mana per damunt de la
+    #: que sortiria de sumar les partides: és la de la federació.
+    fase_mitjana_pub: float | None = None
+
+    @property
+    def mitjana(self) -> float | None:
+        return round(self.caramboles / self.entrades, 4) if self.entrades else None
+
+    @property
+    def fase_mitjana(self) -> float:
+        if self.fase_mitjana_pub is not None:
+            return self.fase_mitjana_pub
+        return self.fase_caramboles / self.fase_entrades if self.fase_entrades else 0.0
+
+
+def _acumula_partida(stats: dict[str, _StatsJugador], p, fase_ordre: int) -> None:
+    punts1, punts2 = _punts_de_partida(p.local_caramboles, p.visitant_caramboles)
+    for nom, car, serie, punts in (
+        (p.local_nom, p.local_caramboles, p.local_serie_major, punts1),
+        (p.visitant_nom, p.visitant_caramboles, p.visitant_serie_major, punts2),
+    ):
+        if not nom:
+            continue
+        _entra_a_la_fase(stats, nom, fase_ordre)
+        st = stats[nom]
+        st.partides += 1
+        st.punts += punts or 0
+        st.caramboles += car or 0
+        st.entrades += p.entrades or 0
+        st.serie_max = max(st.serie_max, serie or 0)
+        if st.fase_ordre == fase_ordre:
+            st.fase_punts += punts or 0
+            st.fase_caramboles += car or 0
+            st.fase_entrades += p.entrades or 0
+
+
+def _entra_a_la_fase(stats: dict[str, _StatsJugador], nom: str, fase_ordre: int) -> None:
+    """Marca que un jugador ha arribat a una fase i buida el que duia de l'anterior."""
+    st = stats.setdefault(nom, _StatsJugador(nom=nom))
+    if fase_ordre > st.fase_ordre:
+        st.fase_ordre = fase_ordre
+        st.fase_punts = 0
+        st.fase_caramboles = 0
+        st.fase_entrades = 0
+        st.fase_mitjana_pub = None
+
+
+def _classifica(stats: dict[str, _StatsJugador]) -> list[_StatsJugador]:
+    """Ordena els jugadors d'una divisió: fase assolida, punts i mitjana.
+
+    La federació no publica cap classificació del campionat sencer —només la de
+    cada grup—, o sigui que aquesta la fem nosaltres. El criteri és el que fa
+    servir ella a tot arreu (punts, després mitjana), però primer de tot hi va
+    fins on va arribar cadascú: qui passa la prèvia i hi perd ha anat més lluny
+    que qui va guanyar dos partits a la pre-prèvia i es va quedar allà.
+    """
+    return sorted(
+        stats.values(),
+        key=lambda s: (-s.fase_ordre, -s.fase_punts, -s.fase_mitjana, s.nom),
+    )
+
+
+def _ingest_fase_de_grups(
+    client: ScraperClient,
+    *,
+    base: str,
+    torneig_id_extern: int,
+    divisio_id_extern: int,
+    fase: IndividualFaseLink,
+    fase_ordre: int,
+    use_cache: bool,
+    stats: dict[str, _StatsJugador],
+) -> tuple[list[TorneigFaseGrupRow], list[TorneigPartidaRow]]:
+    """Una fase de grups: la graella de grups, i de cada grup, classificació i partides."""
+    html = client.fetch_html(
+        U.individuals_grups(torneig_id_extern, divisio_id_extern, fase.fase_id_extern, base=base),
+        use_cache=use_cache,
+    )
+    grups: list[IndividualGrup] = parse_individuals_grups(html)
+    # Qui juga a quin grup. Serveix de recanvi quan un grup encara no té
+    # classificació, i de poc més: qui no es presenta desapareix d'aquesta
+    # taula però continua sortint a la classificació del seu grup.
+    per_grup: dict[str, list[str]] = {}
+    for m in parse_individuals_grups_membership(html):
+        per_grup.setdefault(m.grup_nom, []).append(m.jugador_nom)
+
+    files_grup: list[TorneigFaseGrupRow] = []
+    partides: list[TorneigPartidaRow] = []
+    for g in grups:
+        data_txt = g.data.isoformat() if g.data else None
+        try:
+            ghtml = client.fetch_html(
+                U.individuals_partides_grup(
+                    torneig_id_extern,
+                    divisio_id_extern,
+                    fase.fase_id_extern,
+                    g.grup_id_extern,
+                    base=base,
+                ),
+                use_cache=use_cache,
+            )
+        except Exception as e:
+            log.warning("      FAIL grup %s de la fase %s: %s", g.grup_nom, fase.nom, e)
+            continue
+
+        classif = parse_individuals_classificacio_grup(ghtml)
+        for c in classif:
+            files_grup.append(
+                TorneigFaseGrupRow(
+                    grup_nom=g.grup_nom,
+                    jugador_nom=c.jugador_nom,
+                    ordre=c.posicio,
+                    punts=c.punts,
+                    mitjana=c.mitjana,
+                    data=data_txt,
+                    club_organitzador=g.club_organitzador,
+                )
+            )
+            _entra_a_la_fase(stats, c.jugador_nom, fase_ordre)
+        if not classif:
+            for i, nom in enumerate(per_grup.get(g.grup_nom, []), start=1):
+                files_grup.append(
+                    TorneigFaseGrupRow(
+                        grup_nom=g.grup_nom,
+                        jugador_nom=nom,
+                        ordre=i,
+                        data=data_txt,
+                        club_organitzador=g.club_organitzador,
+                    )
+                )
+                _entra_a_la_fase(stats, nom, fase_ordre)
+
+        for p in parse_individuals_partides(ghtml):
+            if not _partida_jugada(p):
+                continue
+            _acumula_partida(stats, p, fase_ordre)
+            punts1, punts2 = _punts_de_partida(p.local_caramboles, p.visitant_caramboles)
+            partides.append(
+                TorneigPartidaRow(
+                    fase_id=fase.fase_id_extern,
+                    player1_nom=p.local_nom,
+                    caramboles1=p.local_caramboles,
+                    serie1=p.local_serie_major,
+                    punts1=punts1,
+                    player2_nom=p.visitant_nom,
+                    caramboles2=p.visitant_caramboles,
+                    serie2=p.visitant_serie_major,
+                    punts2=punts2,
+                    entrades=p.entrades,
+                    grup_nom=g.grup_nom,
+                    data=data_txt,
+                    estat=p.estat,
+                )
+            )
+        # Els punts i la mitjana del grup manen per damunt del que en sortiria
+        # de sumar les partides: són els de la federació, amb els seus desempats.
+        for c in classif:
+            st = stats.get(c.jugador_nom)
+            if st is not None and st.fase_ordre == fase_ordre:
+                st.fase_punts = c.punts or 0
+                st.fase_mitjana_pub = c.mitjana or 0.0
+    return files_grup, partides
+
+
+def _ingest_fase_ko(
+    client: ScraperClient,
+    *,
+    base: str,
+    torneig_id_extern: int,
+    divisio_id_extern: int,
+    fase: IndividualFaseLink,
+    fase_ordre: int,
+    use_cache: bool,
+    stats: dict[str, _StatsJugador],
+) -> list[TorneigPartidaRow]:
+    """Una eliminatòria: només partides, i qui la guanya puja de fase tot sol."""
+    html = client.fetch_html(
+        U.individuals_partides_eliminatories(
+            torneig_id_extern, divisio_id_extern, fase.fase_id_extern, base=base
+        ),
+        use_cache=use_cache,
+    )
+    partides: list[TorneigPartidaRow] = []
+    for p in parse_individuals_partides(html):
+        if not _partida_jugada(p):
+            continue
+        _acumula_partida(stats, p, fase_ordre)
+        punts1, punts2 = _punts_de_partida(p.local_caramboles, p.visitant_caramboles)
+        partides.append(
+            TorneigPartidaRow(
+                fase_id=fase.fase_id_extern,
+                player1_nom=p.local_nom,
+                caramboles1=p.local_caramboles,
+                serie1=p.local_serie_major,
+                punts1=punts1,
+                player2_nom=p.visitant_nom,
+                caramboles2=p.visitant_caramboles,
+                serie2=p.visitant_serie_major,
+                punts2=punts2,
+                entrades=p.entrades,
+                grup_nom=fase.nom,
+                estat=p.estat,
+            )
+        )
+    return partides
+
+
 def ingest_individuals_temporada(
     client: ScraperClient,
     *,
@@ -1479,33 +1734,28 @@ def ingest_individuals_temporada(
     settings: Settings | None = None,
     use_cache: bool = True,
 ) -> IngestIndividualsResult:
-    """Ingest dels torneigs individuals d'una temporada.
+    """Ingest dels torneigs individuals (opens i campionats) de la temporada en curs.
 
-    `temporada=None` o `'current'` → temporada actual (`/ca/individuals/llistat`).
-    Per cada torneig, descobreix divisions i ingest classificació final.
+    Per cada torneig i divisió, segueix el que el portal publica de debò des del
+    canvi de web de l'agost de 2026: fases → grups → classificació i partides de
+    cada grup, i les partides de cada eliminatòria.
 
-    `use_cache=False` força fetch fresc — imprescindible per al re-scrape setmanal:
-    detecta torneigs nous (apareixen amb ID més alt al llistat) i partides noves
-    dins competicions encara obertes (no tancades fins a la classificació definitiva).
+    Fins al setembre de 2026 això anava a buscar `/individuals/classificaciofinal`,
+    que amb el web nou respon 404. No ingeria res des de llavors i no ho deia:
+    cada nit provava les divisions una per una, cada una fallava per separat i el
+    pas sortia verd amb zero participants. La temporada 26/27 no va arribar mai ni
+    a la BD ni al web.
+
+    `use_cache=False` força fetch fresc — imprescindible per al re-scrape diari:
+    detecta torneigs nous i resultats nous dins de competicions ja obertes.
     """
     settings = settings or client.settings
     base = settings.base_url.rstrip("/")
     conn = ensure_schema(settings.db_path)
     repo = Repository(conn)
 
-    # Si temporada no és string, deduïm de l'historial
-    temporada_nom = temporada
-    if temporada_nom is None:
-        # Per a "current", agafem la temporada actual del context (deriva de data avui).
-        from datetime import date as _date
+    temporada_nom = temporada if temporada not in (None, "current") else _current_temporada_label()
 
-        today = _date.today()
-        if today.month >= 8:
-            temporada_nom = f"{today.year}-{today.year + 1}"
-        else:
-            temporada_nom = f"{today.year - 1}-{today.year}"
-
-    # 1. Fetch llistat de torneigs
     url = _individuals_llistat_url(base, temporada)
     try:
         html = client.fetch_html(url, use_cache=use_cache)
@@ -1515,13 +1765,12 @@ def ingest_individuals_temporada(
     torneigs = parse_individuals_torneigs_list(html)
     log.info("Individuals %s: %d torneigs descoberts", temporada_nom, len(torneigs))
 
-    processed = 0
-    failed = 0
-    total_part = 0
+    processed = failed = total_part = n_fases = n_grups = n_partides = 0
     for torneig in torneigs:
-        torneig_url = U.individuals_divisions(torneig.torneig_id_extern, base=base)
         try:
-            torneig_html = client.fetch_html(torneig_url, use_cache=use_cache)
+            torneig_html = client.fetch_html(
+                U.individuals_divisions(torneig.torneig_id_extern, base=base), use_cache=use_cache
+            )
         except Exception as e:
             log.warning("FAIL torneig %s: %s", torneig.nom, e)
             failed += 1
@@ -1532,72 +1781,185 @@ def ingest_individuals_temporada(
             failed += 1
             continue
         for div in divisions:
-            classif_href = div.classif_href or (
-                f"ca/individuals/classificaciofinal/{div.torneig_id}/{div.divisio_id_extern}"
+            res = _ingest_divisio_individual(
+                client,
+                repo=repo,
+                base=base,
+                torneig=torneig,
+                div=div,
+                temporada_nom=temporada_nom,
+                create_missing_players=create_missing_players,
+                use_cache=use_cache,
             )
-            classif_url = f"{base}/{classif_href.lstrip('/')}"
-            try:
-                classif_html = client.fetch_html(classif_url, use_cache=use_cache)
-            except Exception as e:
-                log.warning("    FAIL classif %s %s: %s", torneig.nom, div.nom, e)
-                continue
-            participants = parse_individuals_classificaciofinal(classif_html)
-            # Nom complet del torneig: "TRES BANDES - 1A DIVISIÓ". clean_torneig_nom
-            # treu el sufix redundant quan la divisió només repeteix el nom del
-            # torneig (p.ex. "VI OPEN MATARÓ - OPEN MATARÓ").
-            raw_nom = torneig.nom if div.nom == "UNICA" else f"{torneig.nom} - {div.nom}"
-            nom_complet = clean_torneig_nom(raw_nom)
-            try:
-                repo.upsert_torneig_individual(
-                    TorneigIndividualRecord(
-                        torneig_id_extern=torneig.torneig_id_extern,
-                        divisio_id_extern=div.divisio_id_extern,
-                        nom=nom_complet,
-                        temporada_nom=temporada_nom,
-                    )
-                )
-            except Exception as e:
-                log.warning("    FAIL upsert torneig %s: %s", nom_complet, e)
-                continue
-            # Participants
-            n_ok = 0
-            for p in participants:
-                # Resoldre player_fcb_id
-                fcb_id = repo.get_player_fcb_id_by_nom(p.jugador_nom)
-                if fcb_id is None:
-                    if create_missing_players:
-                        fcb_id = repo.resolve_or_create_player_by_nom(p.jugador_nom)
-                    else:
-                        continue
-                try:
-                    repo.upsert_torneig_participant(
-                        TorneigParticipantRecord(
-                            torneig_id_extern=torneig.torneig_id_extern,
-                            divisio_id_extern=div.divisio_id_extern,
-                            player_fcb_id=fcb_id,
-                            posicio=p.posicio,
-                            partides_jugades=p.partides_jugades,
-                            punts=p.punts,
-                            caramboles=p.caramboles,
-                            entrades=p.entrades,
-                            mitjana_general=p.mitjana_general,
-                            mitjana_particular=p.mitjana_particular,
-                            serie_max=p.serie_max,
-                            club_text=p.club,
-                        ),
-                        temporada_nom=temporada_nom,
-                    )
-                    n_ok += 1
-                except Exception as e:
-                    log.debug("FAIL participant %s: %s", p.jugador_nom, e)
-            total_part += n_ok
-            log.info("    %s %s: %d participants", torneig.nom, div.nom, n_ok)
+            n_fases += res[0]
+            n_grups += res[1]
+            n_partides += res[2]
+            total_part += res[3]
         processed += 1
     return IngestIndividualsResult(
         torneigs_processed=processed,
         torneigs_failed=failed,
         total_participants=total_part,
+        fases=n_fases,
+        grups=n_grups,
+        partides=n_partides,
     )
+
+
+def _ingest_divisio_individual(
+    client: ScraperClient,
+    *,
+    repo: Repository,
+    base: str,
+    torneig: TorneigIndividual,
+    div: IndividualDivisio,
+    temporada_nom: str,
+    create_missing_players: bool,
+    use_cache: bool,
+) -> tuple[int, int, int, int]:
+    """Una divisió sencera: fases, grups, partides i classificació derivada.
+
+    Una divisió sense cap fase publicada no es desa. El portal té la pàgina de
+    totes les divisions des del dia que obre la inscripció —la 3a del campionat
+    de tres bandes no es juga fins al maig—, i desar-les totes ompliria el
+    llistat de campionats del web d'entrades buides on no hi ha res per veure.
+    """
+    # Nom complet del torneig: "TRES BANDES - 1A DIVISIÓ". clean_torneig_nom
+    # treu el sufix redundant quan la divisió només repeteix el nom del torneig.
+    raw_nom = torneig.nom if div.nom in ("UNICA", "ÚNICA") else f"{torneig.nom} - {div.nom}"
+    nom_complet = clean_torneig_nom(raw_nom)
+    try:
+        fases_html = client.fetch_html(
+            U.individuals_fases(torneig.torneig_id_extern, div.divisio_id_extern, base=base),
+            use_cache=use_cache,
+        )
+    except Exception as e:
+        log.warning("    FAIL fases %s %s: %s", torneig.nom, div.nom, e)
+        return 0, 0, 0, 0
+    fases = parse_individuals_fases(fases_html)
+    if not fases:
+        log.info("    %s %s: encara no té cap fase publicada", torneig.nom, div.nom)
+        return 0, 0, 0, 0
+
+    try:
+        torneig_id = repo.upsert_torneig_individual(
+            TorneigIndividualRecord(
+                torneig_id_extern=torneig.torneig_id_extern,
+                divisio_id_extern=div.divisio_id_extern,
+                nom=nom_complet,
+                temporada_nom=temporada_nom,
+            )
+        )
+    except Exception as e:
+        log.warning("    FAIL upsert torneig %s: %s", nom_complet, e)
+        return 0, 0, 0, 0
+
+    stats: dict[str, _StatsJugador] = {}
+    partides: list[TorneigPartidaRow] = []
+    n_fases = n_grups = 0
+    for ordre, fase in enumerate(fases, start=1):
+        try:
+            fase_db_id = repo.upsert_torneig_fase(
+                torneig_id=torneig_id,
+                fase_id_extern=fase.fase_id_extern,
+                nom=fase.nom,
+                tipus=fase.tipus,
+                ordre=ordre,
+            )
+            n_fases += 1
+            if fase.tipus == "grups":
+                files_grup, noves = _ingest_fase_de_grups(
+                    client,
+                    base=base,
+                    torneig_id_extern=torneig.torneig_id_extern,
+                    divisio_id_extern=div.divisio_id_extern,
+                    fase=fase,
+                    fase_ordre=ordre,
+                    use_cache=use_cache,
+                    stats=stats,
+                )
+                n_grups += repo.replace_torneig_fase_grups(fase_db_id, files_grup)
+                partides += noves
+            else:
+                partides += _ingest_fase_ko(
+                    client,
+                    base=base,
+                    torneig_id_extern=torneig.torneig_id_extern,
+                    divisio_id_extern=div.divisio_id_extern,
+                    fase=fase,
+                    fase_ordre=ordre,
+                    use_cache=use_cache,
+                    stats=stats,
+                )
+        except Exception as e:
+            log.warning("    FAIL fase %s de %s %s: %s", fase.nom, torneig.nom, div.nom, e)
+
+    n_partides = repo.replace_torneig_partides(
+        torneig.torneig_id_extern, div.divisio_id_extern, partides
+    )
+    n_part = _desa_classificacio(
+        repo,
+        torneig=torneig,
+        div=div,
+        temporada_nom=temporada_nom,
+        stats=stats,
+        create_missing_players=create_missing_players,
+    )
+    log.info(
+        "    %s %s: %d fases, %d files de grup, %d partides, %d classificats",
+        torneig.nom,
+        div.nom,
+        n_fases,
+        n_grups,
+        n_partides,
+        n_part,
+    )
+    return n_fases, n_grups, n_partides, n_part
+
+
+def _desa_classificacio(
+    repo: Repository,
+    *,
+    torneig: TorneigIndividual,
+    div: IndividualDivisio,
+    temporada_nom: str,
+    stats: dict[str, _StatsJugador],
+    create_missing_players: bool,
+) -> int:
+    """Desa la classificació derivada de la divisió a `torneig_participants`.
+
+    Només hi entra qui ha jugat. Un open acabat de sortejar té els grups fets i
+    ni una partida: posar-hi tothom amb zero punts publicaria la llista
+    d'inscrits per ordre alfabètic disfressada de classificació.
+    """
+    n_ok = 0
+    jugats = [s for s in _classifica(stats) if s.partides]
+    for posicio, st in enumerate(jugats, start=1):
+        fcb_id = repo.get_player_fcb_id_by_nom(st.nom)
+        if fcb_id is None:
+            if not create_missing_players:
+                continue
+            fcb_id = repo.resolve_or_create_player_by_nom(st.nom)
+        try:
+            repo.upsert_torneig_participant(
+                TorneigParticipantRecord(
+                    torneig_id_extern=torneig.torneig_id_extern,
+                    divisio_id_extern=div.divisio_id_extern,
+                    player_fcb_id=fcb_id,
+                    posicio=posicio,
+                    partides_jugades=st.partides,
+                    punts=st.punts,
+                    caramboles=st.caramboles,
+                    entrades=st.entrades,
+                    mitjana_general=st.mitjana,
+                    serie_max=st.serie_max or None,
+                ),
+                temporada_nom=temporada_nom,
+            )
+            n_ok += 1
+        except Exception as e:
+            log.debug("FAIL participant %s: %s", st.nom, e)
+    return n_ok
 
 
 def _current_temporada_label(today: date | None = None) -> str:

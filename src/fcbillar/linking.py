@@ -3,7 +3,7 @@
 El portal etiqueta les partides baixades del rànquing només amb la categoria
 genèrica `INDIVIDUAL`. Per saber de QUIN campionat és cada partida creuem la taula
 `games` amb `torneig_partides` (els resultats reals scrapejats de cada campionat,
-vegeu scripts/ingest_open_games.py):
+vegeu `pipeline.ingest_individuals_temporada`):
 
     una partida de campionat (parella de jugadors + caramboles + entrades, dins
     d'una modalitat) identifica de manera (gairebé) única una partida del rànquing.

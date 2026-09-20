@@ -111,6 +111,11 @@ def short_divisio_inline(name: str | None) -> str | None:
 _CAMP_PREFIX = re.compile(
     r"^\s*CAMPIONAT\s+(?:DE\s+)?CATALUNYA\s+(?:HIST[ÒO]RIC\s+)?", re.IGNORECASE
 )
+# La federació va començar a dir «TRES BANDES INDIVIDUAL» a la temporada 26/27
+# al que sempre havia dit «TRES BANDES». La paraula no distingeix res —tots els
+# campionats de Catalunya són individuals, i el camp `tipus` ja ho diu—, i
+# deixar-la-hi faria que la mateixa competició sortís amb dos noms segons l'any.
+_INDIVIDUAL_RE = re.compile(r"\s*\bINDIVIDUALS?\b", re.IGNORECASE)
 # Modalitats de carambola, a forma canònica. Quadre abans (porta números); "3/TRES
 # BANDES" abans de BANDA perquè \bBANDA\b no casa amb "BANDES".
 _MODALITATS = (
@@ -126,6 +131,7 @@ def unify_modalitat(name: str | None) -> str | None:
     """Unifica la modalitat (i treu el prefix 'Campionat Catalunya') als noms de campionat.
 
     'CAMPIONAT CATALUNYA 3 BANDES - 1a' → 'Tres Bandes - 1a'
+    'TRES BANDES INDIVIDUAL - HONOR'    → 'Tres Bandes - HONOR'
     'TRES BANDES - HONOR'               → 'Tres Bandes - HONOR'
     'QUADRE 47/2 - 2a A'                → 'Quadre 47/2 - 2a A'
 
@@ -134,6 +140,7 @@ def unify_modalitat(name: str | None) -> str | None:
     if not name:
         return name
     s = _CAMP_PREFIX.sub("", name)
+    s = _INDIVIDUAL_RE.sub("", s)
     for rx, repl in _MODALITATS:
         s = rx.sub(repl, s)
     return re.sub(r"\s{2,}", " ", s).strip()

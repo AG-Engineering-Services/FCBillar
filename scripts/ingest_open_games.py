@@ -1,5 +1,12 @@
 """Ingest dels resultats reals (partides) dels opens/campionats individuals.
 
+RETIRAT. Llegeix el web de la federació d'abans de l'agost de 2026 —`www`, i el
+marcatge `div.row.box.black`— que ja no existeix: contra el portal d'avui no
+ingereix res. Qui pobla `torneig_partides` és
+`fcbillar.pipeline.ingest_individuals_temporada`, que a més en treu les fases,
+els grups i la classificació. Això es manté perquè encara sap llegir l'HTML
+arxivat d'aquelles temporades; no el poseu a cap automatisme.
+
 Per cada (torneig, divisió), segueix els enllaços reals publicats:
   - fases → eliminatòries
   - fases → grups → partides de grup

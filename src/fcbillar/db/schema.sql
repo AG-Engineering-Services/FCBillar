@@ -292,11 +292,11 @@ CREATE TABLE IF NOT EXISTS copa_partides (
 );
 CREATE INDEX IF NOT EXISTS ix_copa_part_enc ON copa_partides(encontre_copa_id);
 
--- v7/v8: Fases de grups dels torneigs individuals (PRÈVIA, QUALIFICACIÓ...).
--- El portal NO publica classificacions amb punts per a aquestes fases: només
--- l'assignació de cada jugador al seu grup. La classificació rica (PJ, punts,
--- mitjanes...) només existeix a la final → torneig_participants. Aquí desem la
--- composició de grups de cada fase.
+-- v7/v8/v23: Fases de grups dels torneigs individuals (PRÈVIA, QUALIFICACIÓ...).
+-- Aquí hi va la composició dels grups de cada fase. Del web antic només en
+-- sortia qui jugava a quin grup; el d'agost de 2026 hi publica, a més, la
+-- classificació de cada grup (punts i mitjana) i el dia i la seu on es juga,
+-- i per això la taula de grups té les columnes de la v23.
 CREATE TABLE IF NOT EXISTS torneig_fases (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     torneig_id      INTEGER NOT NULL REFERENCES torneigs_individuals(id) ON DELETE CASCADE,
@@ -307,22 +307,34 @@ CREATE TABLE IF NOT EXISTS torneig_fases (
     UNIQUE (torneig_id, fase_id_extern)
 );
 
+-- `ordre` és la posició a la classificació del grup, tal com la publica el
+-- portal (amb els seus desempats ja aplicats). `data` i `club_organitzador`
+-- són del grup, no del jugador: es repeteixen a cada fila perquè la taula és
+-- la llista plana de qui juga on, i no val la pena una taula més per a dos
+-- camps que només tenen sentit mirant el grup sencer.
 CREATE TABLE IF NOT EXISTS torneig_fase_grups (
-    fase_id      INTEGER NOT NULL REFERENCES torneig_fases(id) ON DELETE CASCADE,
-    grup_nom     TEXT,
-    jugador_nom  TEXT,
-    ordre        INTEGER
+    fase_id            INTEGER NOT NULL REFERENCES torneig_fases(id) ON DELETE CASCADE,
+    grup_nom           TEXT,
+    jugador_nom        TEXT,
+    ordre              INTEGER,
+    punts              INTEGER,
+    mitjana            REAL,
+    data               TEXT,
+    club_organitzador  TEXT
 );
 CREATE INDEX IF NOT EXISTS ix_tfg_fase ON torneig_fase_grups(fase_id);
 
--- v9: Partides reals (resultats) dels campionats individuals, scrapejades de les
--- pàgines `/individuals/partidesgrups/...` i `/individuals/partideseliminatoria/...`
--- (i les variants històriques). NO porten data: la data ve de creuar-les amb les
--- partides del rànquing (taula `games`). `fase_id` és l'id extern de la pàgina del
--- portal. Poblada per scripts/ingest_open_games.py; consumida pel linker (linking.py)
--- per omplir games.torneig_id. Identitat lògica: (torneig, divisió, fase, jugadors,
+-- v9/v23: Partides reals (resultats) dels campionats individuals, de les pàgines
+-- `/individuals/partides-grup/...` i `/individuals/partides-eliminatories/...`.
+-- `fase_id` és l'id extern de la pàgina del portal. Poblada per
+-- `pipeline.ingest_individuals_temporada`; consumida pel linker (linking.py) per
+-- omplir games.torneig_id. Identitat lògica: (torneig, divisió, fase, jugadors,
 -- caramboles, entrades) — no s'hi posa PRIMARY KEY perquè el portal pot repetir el
 -- mateix enfrontament en fases diferents.
+--
+-- La `data` surt de la taula de grups de la fase (v23). Abans no en teníem cap i
+-- s'havia d'endevinar creuant la partida amb el rànquing; als grups que encara no
+-- s'han jugat, i a les eliminatòries, continua sent NULL.
 CREATE TABLE IF NOT EXISTS torneig_partides (
     torneig_id_extern  INTEGER,
     divisio_id_extern  INTEGER,
@@ -335,7 +347,10 @@ CREATE TABLE IF NOT EXISTS torneig_partides (
     caramboles2        INTEGER,
     serie2             INTEGER,
     punts2             INTEGER,
-    entrades           INTEGER
+    entrades           INTEGER,
+    grup_nom           TEXT,
+    data               TEXT,
+    estat              TEXT
 );
 CREATE INDEX IF NOT EXISTS ix_torneig_partides_div
     ON torneig_partides(torneig_id_extern, divisio_id_extern);

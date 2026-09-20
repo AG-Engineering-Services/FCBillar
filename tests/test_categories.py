@@ -88,6 +88,11 @@ def test_short_divisio_inline(raw, expected):
         ),
         # "BANDES" no s'ha de confondre amb la modalitat "BANDA".
         ("3 BANDES - 2a", "Tres Bandes - 2a"),
+        # 26/27: la federació va rebatejar el campionat "TRES BANDES INDIVIDUAL".
+        # Ha de sortir amb el mateix nom que els anys anteriors, o a la llista
+        # de campionats del web la mateixa competició hi surt dues vegades.
+        ("TRES BANDES INDIVIDUAL - 1a", "Tres Bandes - 1a"),
+        ("TRES BANDES INDIVIDUAL - HONOR", "Tres Bandes - HONOR"),
     ],
 )
 def test_unify_modalitat(raw, expected):

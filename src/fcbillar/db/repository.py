@@ -6,7 +6,7 @@ import json
 import re
 import sqlite3
 import unicodedata
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 
 from fcbillar.models import (
     Club,
@@ -20,8 +20,10 @@ from fcbillar.models import (
     RankingEntry,
     RankingGameLink,
     Temporada,
+    TorneigFaseGrupRow,
     TorneigIndividualRecord,
     TorneigParticipantRecord,
+    TorneigPartidaRow,
 )
 
 #: La lletra que distingeix els equips d'un mateix club al final del nom:
@@ -898,6 +900,107 @@ class Repository:
                 p.club_text,
             ),
         )
+
+    # ------------- fases, grups i partides dels individuals (v7/v8/v9/v23) -------------
+    # Les fases s'upserten (l'id intern el referencien els grups); els grups i
+    # les partides es reescriuen senceres, que és l'única manera de no arrossegar
+    # files d'una ingesta anterior quan la federació en corregeix una.
+
+    def upsert_torneig_fase(
+        self,
+        *,
+        torneig_id: int,
+        fase_id_extern: int,
+        nom: str | None,
+        tipus: str | None,
+        ordre: int | None,
+    ) -> int:
+        cur = self.conn.execute(
+            """
+            INSERT INTO torneig_fases (torneig_id, fase_id_extern, nom, tipus, ordre)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(torneig_id, fase_id_extern) DO UPDATE SET
+                nom = COALESCE(excluded.nom, torneig_fases.nom),
+                tipus = COALESCE(excluded.tipus, torneig_fases.tipus),
+                ordre = COALESCE(excluded.ordre, torneig_fases.ordre)
+            RETURNING id
+            """,
+            (torneig_id, fase_id_extern, nom, tipus, ordre),
+        )
+        return cur.fetchone()[0]
+
+    def replace_torneig_fase_grups(self, fase_id: int, files: Sequence[TorneigFaseGrupRow]) -> int:
+        """Reescriu la composició dels grups d'una fase. Sense files, no toca res.
+
+        El «sense files, no toca res» és a posta: si la pàgina no s'ha pogut
+        llegir, val més la composició d'ahir que cap.
+        """
+        if not files:
+            return 0
+        self.conn.execute("DELETE FROM torneig_fase_grups WHERE fase_id = ?", (fase_id,))
+        self.conn.executemany(
+            """
+            INSERT INTO torneig_fase_grups
+                (fase_id, grup_nom, jugador_nom, ordre, punts, mitjana, data, club_organitzador)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    fase_id,
+                    f.grup_nom,
+                    f.jugador_nom,
+                    f.ordre,
+                    f.punts,
+                    f.mitjana,
+                    f.data,
+                    f.club_organitzador,
+                )
+                for f in files
+            ],
+        )
+        return len(files)
+
+    def replace_torneig_partides(
+        self, torneig_id_extern: int, divisio_id_extern: int, files: Sequence[TorneigPartidaRow]
+    ) -> int:
+        """Reescriu les partides d'una divisió sencera. Sense files, no toca res."""
+        if not files:
+            return 0
+        self.conn.execute(
+            "DELETE FROM torneig_partides WHERE torneig_id_extern = ? AND divisio_id_extern = ?",
+            (torneig_id_extern, divisio_id_extern),
+        )
+        self.conn.executemany(
+            """
+            INSERT INTO torneig_partides
+                (torneig_id_extern, divisio_id_extern, fase_id,
+                 player1_nom, caramboles1, serie1, punts1,
+                 player2_nom, caramboles2, serie2, punts2,
+                 entrades, grup_nom, data, estat)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    torneig_id_extern,
+                    divisio_id_extern,
+                    f.fase_id,
+                    f.player1_nom,
+                    f.caramboles1,
+                    f.serie1,
+                    f.punts1,
+                    f.player2_nom,
+                    f.caramboles2,
+                    f.serie2,
+                    f.punts2,
+                    f.entrades,
+                    f.grup_nom,
+                    f.data,
+                    f.estat,
+                )
+                for f in files
+            ],
+        )
+        return len(files)
 
     # ---------------------- copa ----------------------
     # La connexió és autocommit (isolation_level=None), així que cada execute

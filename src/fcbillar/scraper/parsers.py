@@ -55,6 +55,7 @@ _RE_IND_DIVISIONS = re.compile(r"individuals/divisions/(\d+)")
 _RE_IND_FASES = re.compile(r"individuals/fases/(\d+)/(\d+)")
 _RE_IND_GRUPS = re.compile(r"individuals/grups/(\d+)/(\d+)/(\d+)")
 _RE_IND_KO = re.compile(r"individuals/partides-eliminatories/(\d+)/(\d+)/(\d+)")
+_RE_IND_PARTIDES_GRUP = re.compile(r"individuals/partides-grup/(\d+)/(\d+)/(\d+)/(\d+)")
 
 _RE_COPA_GRUPS = re.compile(r"copa/grups/(\d+)/(\d+)")
 _RE_COPA_ENCGRUP = re.compile(r"copa/encontres-grup/(\d+)/(\d+)/(\d+)")
@@ -724,6 +725,37 @@ class IndividualFaseLink:
 
 
 @dataclass(frozen=True)
+class IndividualGrup:
+    """Un grup d'una fase, amb on i quan es juga.
+
+    El web nou el publica en una taula a part de la dels participants, i és
+    l'únic lloc de tot el portal on una partida de campionat porta data: ni la
+    pàgina de partides ni la de classificació no en diuen res.
+    """
+
+    grup_id_extern: int
+    grup_nom: str
+    club_organitzador: str | None
+    responsable: str | None
+    data: date | None
+
+
+@dataclass(frozen=True)
+class IndividualGrupClassif:
+    """Una línia de la classificació d'un grup: qui, quants punts i quina mitjana.
+
+    Això el web antic no ho tenia: la classificació només existia a la final del
+    torneig. Ara cada grup en publica una, ja ordenada i amb els desempats de la
+    federació aplicats, o sigui que la posició és la seva i no se'n calcula cap.
+    """
+
+    posicio: int
+    jugador_nom: str
+    punts: int | None
+    mitjana: float | None
+
+
+@dataclass(frozen=True)
 class IndividualGrupMembre:
     """Assignació d'un jugador a un grup dins d'una fase de grups."""
 
@@ -813,6 +845,54 @@ def parse_individuals_fases(html: str) -> list[IndividualFaseLink]:
                 )
             )
     return out
+
+
+def parse_individuals_grups(html: str) -> list[IndividualGrup]:
+    """Els grups d'una fase de grups: id, seu i dia.
+
+    L'id del grup no surt enlloc del text: és a l'enllaç cap a les seves
+    partides, que és el que fa falta per anar-les a buscar.
+    """
+    taula = taula_amb(html, "Grup")
+    if taula is None:
+        return []
+    out: list[IndividualGrup] = []
+    for fila in taula:
+        m = _primer(_RE_IND_PARTIDES_GRUP, fila.enllacos())
+        if m is None:
+            continue
+        out.append(
+            IndividualGrup(
+                grup_id_extern=int(m.group(4)),
+                grup_nom=fila["Grup"],
+                club_organitzador=fila["Club organitzador"] or None,
+                responsable=fila["Responsable"] or None,
+                data=fila.data("Data partits"),
+            )
+        )
+    return out
+
+
+def parse_individuals_classificacio_grup(html: str) -> list[IndividualGrupClassif]:
+    """La classificació d'un grup, tal com la publica el portal.
+
+    L'ordre de les files és el bo: ja hi ha aplicats els desempats de la
+    federació. Un jugador que no s'hi ha presentat hi surt amb zero punts i
+    sense mitjana, i s'hi deixa: forma part del grup igualment.
+    """
+    taula = taula_amb(html, "Jugador", "Punts", "Mitjana")
+    if taula is None:
+        return []
+    return [
+        IndividualGrupClassif(
+            posicio=i,
+            jugador_nom=fila["Jugador"],
+            punts=fila.enter("Punts"),
+            mitjana=fila.decimal("Mitjana"),
+        )
+        for i, fila in enumerate(taula, start=1)
+        if fila["Jugador"]
+    ]
 
 
 def parse_individuals_grups_membership(html: str) -> list[IndividualGrupMembre]:

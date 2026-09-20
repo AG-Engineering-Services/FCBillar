@@ -59,6 +59,10 @@ Versions:
 - 22: lliga_inscrits.modalitat. Sense ella, les mitjanes de la lliga de tres
      bandes i les de la de 4 modalitats es barregen en una sola llista, i no
      són comparables: cadascuna és de la seva modalitat.
+- 23: el que el web nou publica dels campionats individuals i el vell no tenia:
+     la classificació de cada grup (torneig_fase_grups.punts/mitjana) i on i
+     quan es juga (.data/.club_organitzador), i a cada partida el grup, el dia
+     i l'estat (torneig_partides.grup_nom/data/estat). Columnes noves.
 """
 
 from __future__ import annotations
@@ -71,7 +75,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 22
+SCHEMA_VERSION = 23
 
 
 def _read_schema_sql() -> str:
@@ -399,6 +403,37 @@ def _migrate_to_v16(conn: sqlite3.Connection) -> None:
         log.info("→v16: %s tornava a apuntar a %s", taula, ", ".join(sorted(destins)))
 
 
+_V23_NEW_COLUMNS = {
+    "torneig_fase_grups": [
+        ("punts", "INTEGER"),
+        ("mitjana", "REAL"),
+        ("data", "TEXT"),
+        ("club_organitzador", "TEXT"),
+    ],
+    "torneig_partides": [
+        ("grup_nom", "TEXT"),
+        ("data", "TEXT"),
+        ("estat", "TEXT"),
+    ],
+}
+
+
+def _migrate_to_v23(conn: sqlite3.Connection) -> None:
+    """Afegeix el que el web nou publica dels individuals i el vell no tenia.
+
+    Només ALTER TABLE ADD COLUMN: les files que ja hi ha es queden amb NULL,
+    que és la veritat —d'aquelles dades no en sabíem res.
+    """
+    for taula, columnes in _V23_NEW_COLUMNS.items():
+        existents = {row[1] for row in conn.execute(f"PRAGMA table_info({taula})").fetchall()}
+        if not existents:
+            continue  # la taula encara no existeix: la crearà l'executescript
+        for nom, tipus in columnes:
+            if nom not in existents:
+                conn.execute(f"ALTER TABLE {taula} ADD COLUMN {nom} {tipus}")
+                log.info("→v23: afegida columna %s.%s", taula, nom)
+
+
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
     conn = connect(db_path)
     version = current_version(conn)
@@ -438,6 +473,10 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v22: les mitjanes de dues lligues no es poden barrejar.
     if 1 <= version < 22:
         _migrate_to_v22(conn)
+    # → v23: la classificació de grup i les dates dels individuals, que el web
+    # nou publica i el vell no tenia.
+    if 1 <= version < 23:
+        _migrate_to_v23(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

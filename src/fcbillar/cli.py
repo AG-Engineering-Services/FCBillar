@@ -1003,8 +1003,17 @@ def ingest_individuals_cmd(
     console.print(
         f"[green]OK individuals {scope}: "
         f"{result.torneigs_processed} torneigs ({result.torneigs_failed} fallats), "
-        f"{result.total_participants} participants[/]"
+        f"{result.fases} fases, {result.grups} files de grup, "
+        f"{result.partides} partides, {result.total_participants} classificats[/]"
     )
+    if result.torneigs_processed and not result.partides:
+        # Un zero aquí vol dir que la ingesta llegeix les pàgines però no en
+        # treu res, que és com va passar desapercebut que el web havia canviat:
+        # el pas sortia verd cada nit amb la BD igual de buida.
+        console.print(
+            "[yellow]Avís: cap partida ingerida. O no s'ha jugat res encara, o "
+            "el portal ha tornat a canviar de forma.[/]"
+        )
 
 
 @app.command("link-individuals")

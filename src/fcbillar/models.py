@@ -175,6 +175,42 @@ class TorneigParticipantRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class TorneigFaseGrupRow:
+    """Un jugador dins d'un grup d'una fase, amb el que en diu la classificació.
+
+    `data` i `club_organitzador` són del grup i es repeteixen a cada jugador;
+    vegeu el comentari de `torneig_fase_grups` al schema.
+    """
+
+    grup_nom: str
+    jugador_nom: str
+    ordre: int | None = None
+    punts: int | None = None
+    mitjana: float | None = None
+    data: str | None = None
+    club_organitzador: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class TorneigPartidaRow:
+    """Una partida jugada d'un campionat individual, tal com la publica el portal."""
+
+    fase_id: int
+    player1_nom: str
+    caramboles1: int | None
+    serie1: int | None
+    punts1: int | None
+    player2_nom: str
+    caramboles2: int | None
+    serie2: int | None
+    punts2: int | None
+    entrades: int | None
+    grup_nom: str | None = None
+    data: str | None = None
+    estat: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class EncontreLliga:
     """Un encontre equip-vs-equip d'una jornada de lliga."""
 

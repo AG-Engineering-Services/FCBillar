@@ -216,20 +216,20 @@ class ReingestaView(QWidget):
     def _run_nologada(self) -> None:
         steps: list[tuple[str, list[str]]] = []
         if self._cb_opens.isChecked():
+            # Els resultats reals (torneig_partides) els porta el mateix
+            # `ingest-individuals` des del setembre de 2026, amb les fases, els
+            # grups i la classificació. Abans hi havia un pas a part amb
+            # scripts/ingest_open_games.py, que llegia el web d'abans de l'agost
+            # i contra el portal d'avui no ingereix res.
             if self._rb_opens_all.isChecked():
-                # Reimport històric: totes les temporades. ingest_open_games recorre
-                # tots els torneigs de la taula, així que en treu també els històrics.
                 steps.append(("Ingest individuals — TOT l'històric",
                               [*FCB, "ingest-individuals", "--historical"]))
-                steps.append(("Resultats reals d'opens (torneig_partides)",
-                              [*UV, "python", "scripts/ingest_open_games.py"]))
                 steps.append(("Scrape historical opens (fcb_opens)", [*OPENS, "scrape-historical"]))
                 steps.append(("Scrape current opens (fcb_opens)", [*OPENS, "scrape-current-opens"]))
             else:
                 steps.append(("Ingest individuals (opens/catalans)", [*FCB, "ingest-individuals"]))
-                steps.append(("Resultats reals d'opens (torneig_partides)",
-                              [*UV, "python", "scripts/ingest_open_games.py"]))
                 steps.append(("Scrape current opens (fcb_opens)", [*OPENS, "scrape-current-opens"]))
+            steps.append(("Partides del rànquing → campionat", [*FCB, "link-individuals"]))
         if self._cb_oprank.isChecked():
             steps.append(("Rànquing d'opens en directe (open_live)", [*FCB, "publish-live-opens"]))
         if self._cb_copa.isChecked():

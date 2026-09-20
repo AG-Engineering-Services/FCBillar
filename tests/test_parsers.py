@@ -19,8 +19,10 @@ import pytest
 from fcbillar.scraper.parsers import (
     parse_clubs_listing,
     parse_home_current_rankings,
+    parse_individuals_classificacio_grup,
     parse_individuals_divisions,
     parse_individuals_fases,
+    parse_individuals_grups,
     parse_individuals_grups_membership,
     parse_individuals_partides,
     parse_individuals_torneigs_list,
@@ -273,6 +275,37 @@ def test_individuals_fases_separa_grups_i_eliminatories() -> None:
     assert [f.nom for f in grups] == ["PRE-PRE-PREVIA", "PRE-PREVIA", "PREVIA"]
     assert [f.nom for f in ko] == ["SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "FINAL"]
     assert all(f.torneig_id == 211 for f in fases)
+
+
+def test_individuals_grups_amb_seu_i_data() -> None:
+    """La taula de grups és l'únic lloc del portal que diu quin dia es juga."""
+    grups = parse_individuals_grups(fixture("individuals_grups_211_447_799"))
+    assert len(grups) == 1
+    g = grups[0]
+    assert (g.grup_id_extern, g.grup_nom) == (5201, "Grup A")
+    assert g.club_organitzador == "C.B.MATARÓ"
+    assert g.data == date(2026, 7, 10)
+
+
+def test_individuals_classificacio_de_grup() -> None:
+    """L'ordre de les files és el de la federació, amb els desempats fets."""
+    classif = parse_individuals_classificacio_grup(
+        fixture("individuals_partides_grup_211_447_799_5100")
+    )
+    assert [(c.posicio, c.jugador_nom, c.punts, c.mitjana) for c in classif] == [
+        (1, "MAS CANADELL, JOSEP Mª", 4, 1.4634),
+        (2, "SÁNCHEZ MARTÍNEZ, PASCUAL", 2, 0.8333),
+        (3, "SANTIAGO ROMERO, JUAN", 0, 0.2982),
+    ]
+
+
+def test_individuals_una_eliminatoria_no_te_classificacio() -> None:
+    assert (
+        parse_individuals_classificacio_grup(
+            fixture("individuals_partides_eliminatories_211_447_1185")
+        )
+        == []
+    )
 
 
 def test_individuals_membres_de_grup() -> None:

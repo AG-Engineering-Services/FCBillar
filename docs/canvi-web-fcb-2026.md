@@ -16,7 +16,8 @@ el que retorna el servidor avui, no una suposició.
 3. **Ja no cal login, ni captcha, ni Playwright**: rànquings i partides ara són
    públics i es baixen amb un `GET` normal.
 4. **Han desaparegut dues fonts**: la classificació final d'individuals i
-   l'històric per temporades. També tot `/media/**` (els PDF antics).
+   l'històric per temporades. També tot `/media/**` (els PDF antics). La
+   classificació d'individuals la derivem des del setembre de 2026 (§2.3b).
 5. **Un endpoint està trencat al seu servidor**: el detall d'encontre de lliga
    retorna HTTP 500.
 
@@ -138,8 +139,10 @@ la **39**.
 | Grups | `/ca/individuals/grups/{t}/{d}/{f}` | `/frontend/individuals/grups/{t}/{d}/{f}` | ✅ |
 | Partides d'un grup | `/ca/individuals/partidesgrups/…` | `/frontend/individuals/**partides-grup**/{t}/{d}/{f}/{g}` | ✅ renom |
 | Partides d'eliminatòria | `/ca/individuals/partideseliminatoria/…` | `/frontend/individuals/**partides-eliminatories**/{t}/{d}/{e}` | ✅ renom |
-| **Classificació final** | `/ca/individuals/classificaciofinal/{d}/{c}` | — | ❌ **desapareguda** |
+| **Classificació final** | `/ca/individuals/classificaciofinal/{d}/{c}` | — | ❌ **desapareguda** (la derivem, §2.3b) |
 | Inscripcions | — | `/frontend/individuals/inscripcions/{t}` | 🆕 |
+| Classificació d'un grup | — | dins de `partides-grup` | 🆕 punts i mitjana |
+| Seu i dia de cada grup | — | dins de `grups` | 🆕 |
 
 Els ids antics continuen resolent: `divisions/211` és l'OPEN TRES BANDES
 MATARÓ i `divisions/14` és el CAMPIONAT CATALUNYA HISTÒRIC QUADRE 47/2 de la
@@ -148,6 +151,32 @@ enllaçable.**
 
 La pàgina de partides d'un grup ha guanyat qualitat: dona sèrie major,
 caramboles, entrades, àrbitre i estat per partida.
+
+### 2.3b La classificació d'individuals, un any després
+
+La ingesta d'individuals va continuar demanant `classificaciofinal` fins al
+setembre de 2026. Amb el web nou responia 404 a cada divisió, i com que cada
+divisió fallava per separat i la fallada només s'apuntava al registre, el pas
+nocturn sortia verd cada nit amb zero participants: de la temporada 26/27 no
+n'hi va haver mai res ni a la BD ni al web. Un zero que ningú no mirava.
+
+Ara `ingest_individuals_temporada` recorre el que el portal sí que publica
+—fases → grups → classificació i partides de cada grup, i les partides de cada
+eliminatòria— i n'omple `torneig_fases`, `torneig_fase_grups`, `torneig_partides`
+i `torneig_participants`. Tres coses que val la pena saber:
+
+- **La classificació del campionat sencer la fem nosaltres** (punt 11 de la
+  Fase 2, resolt per la primera opció). Ordena per fase assolida, després punts
+  i després mitjana: qui perd la prèvia ha anat més lluny que qui va guanyar el
+  seu grup a la pre-prèvia i s'hi va quedar. Els punts i la mitjana de dins de
+  cada grup no es calculen: són els que publica la federació, amb els seus
+  desempats ja aplicats.
+- **Els punts de cada partida sí que es calculen** (2 al guanyador, 1 a cadascú
+  si empaten, art. XI.3 i VII.1 del reglament): el web nou dona caramboles i
+  sèrie major, però ja no els punts.
+- **Una divisió sense cap fase publicada no es desa.** El portal té la pàgina
+  de totes les divisions des del dia que obre la inscripció, i la 3a de tres
+  bandes no es juga fins al maig.
 
 ### 2.4 Copa — tota renombrada
 
@@ -414,7 +443,8 @@ les tres columnes mortes.
     reglaments) i arreglar `calendari_fed.descobreix_fcb`.
 11. Decidir què fem amb la **classificació final d'individuals**: o la calculem
     nosaltres a partir de grups i eliminatòries, o la llegim dels PDF de
-    rànquing del WPFD. La primera opció ens fa independents.
+    rànquing del WPFD. **Fet** (§2.3b): la calculem nosaltres, que ens fa
+    independents del que la federació decideixi publicar.
 12. Aprofitar `lligues/inscripcions/{lliga}` per a la relació club → equip →
     jugador de la temporada nova. **Fet** (§2.6): `fcbillar ingest-inscrits-lliga`
     → `lliga_inscrits`.

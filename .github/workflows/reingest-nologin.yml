@@ -146,7 +146,18 @@ jobs:
           # al núvol n'hi havia un.
           run "ingest-lliga"         uv run --no-dev fcbillar ingest-lliga
           run "ingest-copa"          uv run --no-dev fcbillar ingest-copa "$COPA_EDICIO"
+          # Fins al 20 de setembre de 2026 aquest pas anava a buscar la
+          # classificació final de cada divisió, que el web d'agost va retirar.
+          # Responia 404, cada divisió fallava per separat i el pas sortia verd
+          # amb zero participants: de la temporada 26/27 no n'hi havia res ni a
+          # la BD ni al web. Ara recorre fases, grups i partides, que és el que
+          # el portal publica.
           run "ingest-individuals"   uv run --no-dev fcbillar ingest-individuals
+          # I diu de quin campionat és cada partida INDIVIDUAL del rànquing,
+          # creuant-la amb el resultat que s'acaba d'ingerir. Va aquí i no al PC
+          # perquè és aquí on arriben les partides noves dels campionats; és
+          # idempotent i recalcula els vincles des de zero.
+          run "link-individuals"     uv run --no-dev fcbillar link-individuals
           run "scrape-current-opens" uv run --no-dev python -m fcb_opens.cli scrape-current-opens
           # scrape-lliga: FORA des del 6 de setembre de 2026. Feia servir els camins
           # del WordPress vell (/ca/lligues/...), que van morir amb el canvi de web
