@@ -67,6 +67,9 @@ Versions:
      punts i la mitjana: la classificació de cada grup d'una fase d'individual,
      que la federació publica a la mateixa pàgina de les partides i que no
      llegia ningú. És l'única cosa que diu qui s'ha classificat.
+- 27: `torneig_fase_grups.serie_major` — el quart criteri de desempat del
+     rànquing d'una fase, després de la posició al grup, els punts i la mitjana.
+     No surt a la taula de classificació del grup: es calcula de les partides.
 - 26: `torneig_partides.grup_nom` — de quin grup d'una fase és cada partida.
      Sense això les partides d'una fase de grups són un sac i no es pot ensenyar
      un grup amb la seva classificació i les seves partides al costat.
@@ -87,7 +90,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 26
+SCHEMA_VERSION = 27
 
 
 def _read_schema_sql() -> str:
@@ -562,6 +565,22 @@ def _migrate_to_v26(conn: sqlite3.Connection) -> None:
             log.info("→v26: afegida columna torneig_partides.%s", nom)
 
 
+def _migrate_to_v27(conn: sqlite3.Connection) -> None:
+    """La sèrie major de cada jugador a cada ronda d'un individual.
+
+    És el quart criteri de desempat del rànquing d'una fase i els altres tres
+    empaten més sovint del que sembla: a la pre-prèvia de 2a divisió de 2026-27,
+    dotze dels catorze primers de grup han fet els mateixos 4 punts.
+
+    Les files que ja hi ha es queden amb NULL i es tornen a omplir reingerint el
+    torneig, que és idempotent.
+    """
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(torneig_fase_grups)").fetchall()}
+    if cols and "serie_major" not in cols:
+        conn.execute("ALTER TABLE torneig_fase_grups ADD COLUMN serie_major INTEGER")
+        log.info("→v27: afegida columna torneig_fase_grups.serie_major")
+
+
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
     conn = connect(db_path)
     version = current_version(conn)
@@ -610,6 +629,9 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v26: de quin grup és cada partida d'un torneig.
     if 1 <= version < 26:
         _migrate_to_v26(conn)
+    # → v27: la sèrie major de cada jugador a cada ronda.
+    if 1 <= version < 27:
+        _migrate_to_v27(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

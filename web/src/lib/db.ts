@@ -491,6 +491,13 @@ export interface OpenFaseRanquing {
   /** `null` = no ha jugat cap partida. Hi surt igualment: hi era. */
   mitjana: number | null;
   /**
+   * La sèrie major de la ronda: el QUART criteri de desempat, després de la
+   * posició al grup, els punts i la mitjana. Els altres tres empaten més sovint
+   * del que sembla —dotze dels catorze primers de grup de la pre-prèvia de 2a
+   * van fer els mateixos 4 punts.
+   */
+  serie_major: number | null;
+  /**
    * El club amb què juga AQUEST campionat, que no és necessàriament el de la
    * lliga: hi ha qui va fitxat a la lliga per un club i juga l'individual pel
    * seu. No entra a l'ordre del rànquing —la federació ordena per posició al

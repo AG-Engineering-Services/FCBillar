@@ -181,6 +181,7 @@
 								</div>
 								<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts ?? 0}</span>
 								<span class="w-14 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{mitj(r.mitjana)}</span>
+								<span class="w-8 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.serie_major ?? '—'}</span>
 							</li>
 						{/each}
 					</ul>
@@ -228,9 +229,9 @@
 				<h2 class="mb-1 text-sm font-semibold">Rànquing de la ronda</h2>
 				<p class="mb-2 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
 					Els grups es juguen per separat i la federació no publica cap ordre entre
-					ells. Aquí van com ella els ordena: primer la posició dins del grup,
-					després els punts de la ronda, i a igualtat de tots dos la mitjana. És el
-					que fa falta quan se n'emporten «els millors segons».
+					ells. Aquí van com ella els ordena, amb quatre criteris: posició dins del
+					grup, punts de la ronda, mitjana i sèrie major. És el que fa falta quan
+					se n'emporten «els millors segons».
 				</p>
 				<div class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 					<ul>
@@ -256,6 +257,7 @@
 								<span class="w-14 shrink-0 text-center text-[11px] text-slate-500 dark:text-slate-400">{r.grup_nom ?? '—'}</span>
 								<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts ?? 0}</span>
 								<span class="w-14 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{mitj(r.mitjana)}</span>
+								<span class="w-8 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.serie_major ?? '—'}</span>
 							</li>
 						{/each}
 					</ul>

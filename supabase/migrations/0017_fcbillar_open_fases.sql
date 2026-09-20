@@ -67,6 +67,10 @@ create policy "read open_fase_ranquing" on fcbillar.open_fase_ranquing for selec
 -- Si la taula ja existia d'una execució anterior d'aquest fitxer, la columna del
 -- club s'hi afegeix aquí. Les dues formes deixen el mateix resultat.
 alter table fcbillar.open_fase_ranquing add column if not exists club text;
+-- La sèrie major de la ronda: el QUART criteri de desempat, després de la
+-- posició al grup, els punts i la mitjana. No surt a la taula de classificació
+-- del grup; es calcula del màxim de les partides que s'hi han jugat.
+alter table fcbillar.open_fase_ranquing add column if not exists serie_major integer;
 
 -- Els permisos, que la política RLS tota sola no dona.
 --
