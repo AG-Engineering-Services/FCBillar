@@ -87,7 +87,9 @@ class TaulaFalsa:
             fora = [f for f in files if all(p(f) for p in self._filtres)]
             self._m[self._nom] = [f for f in files if f not in fora]
             return type("Res", (), {"data": fora, "count": len(fora)})()
-        dades = list(self._m.get(self._nom, []))
+        # Un `select` respon NOMES el que passa els filtres, com PostgREST: hi ha
+        # retirades que es limiten a un abast i sense aixo no es poden provar.
+        dades = [f for f in self._m.get(self._nom, []) if all(p(f) for p in self._filtres)]
         if self._tram is not None:
             dades = dades[self._tram[0] : self._tram[1] + 1]
         return type("Res", (), {"data": dades, "count": 0})()
