@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { db } from '$lib/db';
-	import { IDIOMES, ambReintentsCache, mmss, segmentA, type Segment, type VideoTraduccio } from '$lib/traductor';
+	import { IDIOMES, ambReintentsCache, eliminaVideo, mmss, segmentA, type Segment, type VideoTraduccio } from '$lib/traductor';
 
 	// Reproductor de YouTube (IFrame API), només la part que fem servir.
 	interface YTPlayer {
@@ -27,6 +28,11 @@
 	let ambOriginal = $state(false);
 	let temps = $state(0);
 	let avisAudio = $state(false);
+	let esAdmin = $state(false);
+
+	async function elimina() {
+		if (v && (await eliminaVideo((f, a) => db.rpc(f, a), v))) goto('/traductor');
+	}
 
 	let contenidor = $state<HTMLDivElement>();
 	let audio = $state<HTMLAudioElement>();
@@ -104,6 +110,11 @@
 	onMount(() => {
 		let rellotge: ReturnType<typeof setInterval> | undefined;
 		let mort = false;
+		try {
+			esAdmin = localStorage.getItem('fcb_admin') === '1';
+		} catch {
+			esAdmin = false;
+		}
 		(async () => {
 			const { data } = await ambReintentsCache(() =>
 				db
@@ -152,6 +163,12 @@
 		<p class="text-sm text-slate-500 dark:text-slate-400">
 			{v.canal ?? ''}{v.canal ? ' · ' : ''}Traduït del {nomIdioma.toLowerCase()} ·
 			<a href={v.url} target="_blank" rel="noopener" class="hover:underline">vídeo original ↗</a>
+			{#if esAdmin}
+				·
+				<button class="text-red-700 hover:underline dark:text-red-400" onclick={elimina}
+					>Elimina</button
+				>
+			{/if}
 		</p>
 	</header>
 

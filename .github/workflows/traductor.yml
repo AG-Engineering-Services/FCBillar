@@ -55,6 +55,24 @@ jobs:
               | jq length)
           echo "pendents=$n" >> "$GITHUB_OUTPUT"
 
+      # Els mp3 dels vídeos que l'admin ha eliminat a la PWA (migració 0024). Va
+      # abans del guard: s'ha de fer encara que no hi hagi res a traduir. Si la
+      # consulta falla (p. ex. la memòria cau de Neon), curl -f atura el pas i no
+      # s'esborra res: una llista buida per error ho eliminaria tot.
+      - name: Neteja els àudios de vídeos eliminats
+        continue-on-error: true   # que una neteja fallida no deixi la cua sense traduir
+        run: |
+          base="${NEON_DATA_API_URL%/}"; [[ "$base" == */rest/v1 ]] || base="$base/rest/v1"
+          resposta=$(curl -sf "$base/video_traduccio?select=audio_url&audio_url=not.is.null" \
+            -H "Authorization: Bearer $NEON_SERVICE_ROLE_TOKEN" -H "Accept-Profile: fcbillar")
+          vius=$(jq -r '.[].audio_url | split("/") | last' <<<"$resposta")
+          assets=$(gh release view traduccions -R "$GITHUB_REPOSITORY" --json assets -q '.assets[].name' 2>/dev/null || true)
+          for nom in $assets; do
+            grep -qxF "$nom" <<<"$vius" && continue
+            echo "esborro $nom"
+            gh release delete-asset traduccions "$nom" -R "$GITHUB_REPOSITORY" -y
+          done
+
       - uses: actions/checkout@v4
         if: steps.cua.outputs.pendents != '0'
 

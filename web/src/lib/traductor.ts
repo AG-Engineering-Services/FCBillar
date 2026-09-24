@@ -74,14 +74,16 @@ export function segmentA(segments: Segment[], t: number): Segment | null {
  * cau d'esquemes. Després d'una migració, unes veuen la taula nova i d'altres
  * responen PGRST205 («Could not find the table») durant molta estona: amb la
  * 0022, quaranta minuts després, encara una petició de cada dues. Una consulta
- * que cau en una d'aquestes es torna a fer.
+ * que cau en una d'aquestes es torna a fer. PGRST202 és el mateix per a una
+ * funció nova (la 0024).
  */
 export async function ambReintentsCache<R extends { error: { code?: string } | null }>(
 	consulta: () => PromiseLike<R>,
 	intents = 6
 ): Promise<R> {
 	let r = await consulta();
-	for (let i = 1; i < intents && r.error?.code === 'PGRST205'; i++) {
+	const noVista = () => r.error?.code === 'PGRST205' || r.error?.code === 'PGRST202';
+	for (let i = 1; i < intents && noVista(); i++) {
 		await new Promise((resol) => setTimeout(resol, 700));
 		r = await consulta();
 	}
@@ -200,4 +202,56 @@ export function quantFalta(fins: Date, ara: Date): string {
 
 export function hora(d: Date): string {
 	return d.toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' });
+}
+
+// --- Eliminar (només l'admin) -------------------------------------------------
+//
+// L'anon no té DELETE: s'esborra amb la funció `elimina_video_traduccio`
+// (migració 0024), que demana la clau d'admin. La clau es demana el primer cop i
+// es recorda en aquest navegador; si deixa de ser bona, s'oblida.
+
+const CLAU_ADMIN = 'fcb_traductor_clau';
+
+type CridaRpc = (
+	funcio: string,
+	args: Record<string, unknown>
+) => PromiseLike<{ error: { code?: string; message: string } | null }>;
+
+function llegeixClau(): string | null {
+	try {
+		return localStorage.getItem(CLAU_ADMIN);
+	} catch {
+		return null;
+	}
+}
+function desaClau(clau: string | null) {
+	try {
+		if (clau) localStorage.setItem(CLAU_ADMIN, clau);
+		else localStorage.removeItem(CLAU_ADMIN);
+	} catch {
+		// sense emmagatzematge: la tornarà a demanar
+	}
+}
+
+/** Demana confirmació i la clau, i esborra. Torna true si s'ha esborrat. */
+export async function eliminaVideo(
+	rpc: CridaRpc,
+	v: Pick<VideoTraduccio, 'id' | 'titol' | 'video_id'>
+): Promise<boolean> {
+	if (!confirm(`Eliminar «${v.titol ?? v.video_id}»? La traducció desapareixerà per a tothom.`))
+		return false;
+	const clau = llegeixClau() ?? prompt("Clau d'admin del traductor:")?.trim();
+	if (!clau) return false;
+	const { error } = await ambReintentsCache(() =>
+		rpc('elimina_video_traduccio', { p_id: v.id, p_clau: clau })
+	);
+	if (error) {
+		if (error.code === '42501') {
+			desaClau(null);
+			alert('Clau incorrecta.');
+		} else alert(`No s'ha pogut eliminar: ${error.message}`);
+		return false;
+	}
+	desaClau(clau);
+	return true;
 }
