@@ -128,14 +128,29 @@ class Cua:
             },
         )
 
+    def _crida(self, metode: str, ruta: str, **kw) -> httpx.Response:
+        """El Data API de Neon corre en diverses instàncies i cada una té la seva
+        memòria cau d'esquemes: després d'una migració, unes veuen la taula i
+        d'altres responen 404 PGRST205 durant una bona estona (el 24/09/2026, amb
+        la 0022 aplicada feia 13 minuts, 3 de cada 8 peticions). Es torna a provar."""
+        for intent in range(8):
+            r = self.http.request(metode, ruta, **kw)
+            if r.status_code == 404 and "PGRST205" in r.text and intent < 7:
+                time.sleep(10)
+                continue
+            r.raise_for_status()
+            return r
+        raise AssertionError("inabastable")
+
     def reprèn_encallades(self) -> None:
         """Una execució que mor a mitges deixa la fila 'processant' per sempre."""
         fa_dues_hores = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() - 7200))
-        self.http.patch(
+        self._crida(
+            "PATCH",
             "/video_traduccio",
             params={"estat": "eq.processant", "processat": f"lt.{fa_dues_hores}"},
             json={"estat": "pendent"},
-        ).raise_for_status()
+        )
 
     def agafa(self, excepte: set[int] | None = None) -> dict | None:
         """La pendent més antiga. `excepte` són les que aquesta execució ja ha
@@ -145,13 +160,13 @@ class Cua:
         params = {"estat": "eq.pendent", "order": "creat.asc", "limit": "1"}
         if excepte:
             params["id"] = f"not.in.({','.join(map(str, excepte))})"
-        r = self.http.get("/video_traduccio", params=params)
-        r.raise_for_status()
+        r = self._crida("GET", "/video_traduccio", params=params)
         if not r.json():
             return None
         fila = r.json()[0]
         # Només ens la quedem si encara és pendent: dues execucions no la fan alhora.
-        r = self.http.patch(
+        r = self._crida(
+            "PATCH",
             "/video_traduccio",
             params={"id": f"eq.{fila['id']}", "estat": "eq.pendent"},
             json={
@@ -160,14 +175,11 @@ class Cua:
                 "processat": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             },
         )
-        r.raise_for_status()
         return r.json()[0] if r.json() else None
 
     def desa(self, id_: int, **camps) -> None:
         camps["processat"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        self.http.patch(
-            "/video_traduccio", params={"id": f"eq.{id_}"}, json=camps
-        ).raise_for_status()
+        self._crida("PATCH", "/video_traduccio", params={"id": f"eq.{id_}"}, json=camps)
 
 
 # --- àudio ------------------------------------------------------------------
