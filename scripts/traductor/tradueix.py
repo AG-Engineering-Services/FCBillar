@@ -137,11 +137,15 @@ class Cua:
             json={"estat": "pendent"},
         ).raise_for_status()
 
-    def agafa(self) -> dict | None:
-        r = self.http.get(
-            "/video_traduccio",
-            params={"estat": "eq.pendent", "order": "creat.asc", "limit": "1"},
-        )
+    def agafa(self, excepte: set[int] | None = None) -> dict | None:
+        """La pendent més antiga. `excepte` són les que aquesta execució ja ha
+        provat: una que falla torna a 'pendent' per a la propera execució, i sense
+        això la tornaria a agafar al moment (el primer tret a Actions va provar el
+        mateix vídeo tres vegades seguides i el va deixar 'error' en un minut)."""
+        params = {"estat": "eq.pendent", "order": "creat.asc", "limit": "1"}
+        if excepte:
+            params["id"] = f"not.in.({','.join(map(str, excepte))})"
+        r = self.http.get("/video_traduccio", params=params)
         r.raise_for_status()
         if not r.json():
             return None
@@ -185,8 +189,13 @@ class BaixadaError(Exception):
 
 
 def yt_dlp(*args: str) -> str:
+    # A les IP de GitHub Actions YouTube hi respon «Sign in to confirm you're not a
+    # bot». Provat el 24/09/2026: directe 0/2, amb PO tokens (bgutil) 0/2, sortint
+    # per Cloudflare WARP 2/2. El workflow aixeca WARP en mode proxy i el passa
+    # aquí; només hi va yt-dlp, NVIDIA i Neon surten directes.
+    proxy = ["--proxy", os.environ["YTDLP_PROXY"]] if os.environ.get("YTDLP_PROXY") else []
     r = subprocess.run(
-        [sys.executable, "-m", "yt_dlp", "--no-playlist", *args],
+        [sys.executable, "-m", "yt_dlp", "--no-playlist", *proxy, *args],
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -501,8 +510,9 @@ def main() -> None:
         return
     whisper = Whisper()
     veu = Veu(Path(os.environ.get("PIPER_MODELS", Path.home() / ".cache" / "piper")))
-    fets = 0
+    provades: set[int] = set()
     while fila:
+        provades.add(fila["id"])
         print(f"#{fila['id']} {fila['plataforma']} {fila['video_id']} ({fila['idioma']})")
         try:
             camps = processa(fila, whisper, veu, pujar=not args.sense_pujar)
@@ -513,8 +523,7 @@ def main() -> None:
             definitiu = isinstance(e, ValueError) or fila["intents"] >= MAX_INTENTS
             cua.desa(fila["id"], estat="error" if definitiu else "pendent", missatge=missatge)
             print(f"  error: {missatge}")
-        fets += 1
-        fila = cua.agafa() if fets < args.max else None
+        fila = cua.agafa(provades) if len(provades) < args.max else None
 
 
 if __name__ == "__main__":
