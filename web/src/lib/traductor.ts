@@ -36,6 +36,8 @@ export interface VideoTraduccio {
 	processat: string | null;
 	/** Quan el workflow va agafar la fila (migració 0023). */
 	iniciat: string | null;
+	/** Còpia a 480p per als que no es poden incrustar: Instagram i Facebook (0025). */
+	video_url?: string | null;
 }
 
 /** Plataforma i identificador del vídeo, o null si l'enllaç no és de cap de les tres. */
@@ -88,6 +90,22 @@ export async function ambReintentsCache<R extends { error: { code?: string } | n
 		r = await consulta();
 	}
 	return r;
+}
+
+/** Els subtítols catalans en WebVTT, per a la pista del reproductor propi. */
+export function aVtt(segments: Segment[]): string {
+	const t = (x: number) => {
+		const ms = Math.round(x * 1000);
+		const h = Math.floor(ms / 3_600_000);
+		const m = Math.floor(ms / 60_000) % 60;
+		const s = Math.floor(ms / 1000) % 60;
+		const p = (n: number, w = 2) => String(n).padStart(w, '0');
+		return `${p(h)}:${p(m)}:${p(s)}.${p(ms % 1000, 3)}`;
+	};
+	const cues = segments
+		.filter((s) => s.ca)
+		.map((s) => `${t(s.t0)} --> ${t(s.t1)}\n${s.ca.replace(/-->/g, '→')}`);
+	return ['WEBVTT', ...cues].join('\n\n') + '\n';
 }
 
 export function mmss(segons: number): string {

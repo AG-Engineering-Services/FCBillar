@@ -257,6 +257,41 @@ def baixa_audio(url: str, dir_: Path) -> Path:
     return wav
 
 
+def baixa_video(url: str, dir_: Path) -> Path:
+    """Còpia del vídeo per als que no es poden incrustar (Instagram, Facebook):
+    480p, H.264 i AAC, que qualsevol navegador reprodueix, i `faststart` perquè
+    comenci a sonar abans d'haver-lo baixat sencer (migració 0025)."""
+    yt_dlp("-q", "-S", "res:480,ext:mp4:m4a", "-o", str(dir_ / "video.%(ext)s"), url)
+    original = next(dir_.glob("video.*"))
+    mp4 = dir_ / "video480.mp4"
+    ffmpeg(
+        "-i", str(original),
+        "-vf", "scale=-2:'min(480,ih)'",
+        "-c:v", "libx264", "-preset", "veryfast", "-crf", "28",
+        "-c:a", "aac", "-b:a", "96k",
+        "-movflags", "+faststart",
+        str(mp4),
+    )  # fmt: skip
+    return mp4
+
+
+def a_wav16k(entrada: Path, dir_: Path) -> Path:
+    wav = dir_ / "audio16k.wav"
+    ffmpeg("-i", str(entrada), "-vn", "-ac", "1", "-ar", "16000", str(wav))
+    return wav
+
+
+def nom_fitxer(fila: dict, extensio: str) -> str:
+    return f"{fila['plataforma']}-{re.sub(r'[^A-Za-z0-9_-]', '_', fila['video_id'])}.{extensio}"
+
+
+def puja(fitxer: Path) -> str:
+    subprocess.run(
+        ["gh", "release", "upload", RELEASE, str(fitxer), "--clobber", "-R", REPO], check=True
+    )
+    return f"https://github.com/{REPO}/releases/download/{RELEASE}/{fitxer.name}"
+
+
 def silencis(wav: Path) -> list[tuple[float, float]]:
     r = ffmpeg("-i", str(wav), "-af", "silencedetect=noise=-35dB:d=0.3", "-f", "null", "-")
     inicis = [float(x) for x in re.findall(r"silence_start: ([\d.]+)", r.stderr)]
@@ -526,7 +561,15 @@ def processa(fila: dict, whisper: Whisper, veu: Veu, pujar: bool, cua: Cua | Non
                 canal=meta.get("channel") or meta.get("uploader"),
                 durada=durada or None,
             )
-        wav = baixa_audio(fila["url"], dir_)
+        # YouTube es reprodueix amb el seu reproductor; la resta, amb una còpia.
+        video_url = None
+        if fila["plataforma"] == "youtube":
+            wav = baixa_audio(fila["url"], dir_)
+        else:
+            mp4 = baixa_video(fila["url"], dir_)
+            wav = a_wav16k(mp4, dir_)
+            if pujar:
+                video_url = puja(mp4.rename(dir_ / nom_fitxer(fila, "mp4")))
         if not durada:
             with wave.open(str(wav)) as w:
                 durada = w.getnframes() / w.getframerate()
@@ -538,6 +581,7 @@ def processa(fila: dict, whisper: Whisper, veu: Veu, pujar: bool, cua: Cua | Non
                 segments.append({"t0": round(t0, 2), "t1": round(t1, 2), "orig": text})
         camps = tradueix_i_dobla(fila, segments, durada, veu, pujar)
         return {
+            "video_url": video_url,
             "titol": meta.get("title"),
             "canal": meta.get("channel") or meta.get("uploader"),
             "durada": durada,
@@ -558,15 +602,12 @@ def tradueix_i_dobla(
     ):
         s["ca"] = ca
     with tempfile.TemporaryDirectory() as tmp:
-        nom = f"{fila['plataforma']}-{re.sub(r'[^A-Za-z0-9_-]', '_', fila['video_id'])}.mp3"
+        nom = nom_fitxer(fila, "mp3")
         mp3 = Path(tmp) / nom
         doblatge(veu, segments, durada, mp3)
         audio_url = None
         if pujar:
-            subprocess.run(
-                ["gh", "release", "upload", RELEASE, str(mp3), "--clobber", "-R", REPO], check=True
-            )
-            audio_url = f"https://github.com/{REPO}/releases/download/{RELEASE}/{nom}"
+            audio_url = puja(mp3)
         else:
             desat = Path("traduccions") / nom
             desat.parent.mkdir(exist_ok=True)
@@ -591,6 +632,12 @@ def retradueix(cua: Cua, ids: list[int], veu: Veu, pujar: bool) -> None:
         ]
         try:
             camps = tradueix_i_dobla(fila, originals, float(fila["durada"] or 0), veu, pujar)
+            if fila["plataforma"] != "youtube" and not fila.get("video_url") and pujar:
+                # Traduïts abans de la 0025: encara no en tenien còpia.
+                with tempfile.TemporaryDirectory() as tmp:
+                    mp4 = baixa_video(fila["url"], Path(tmp))
+                    camps["video_url"] = puja(mp4.rename(Path(tmp) / nom_fitxer(fila, "mp4")))
+                print("  còpia del vídeo penjada")
             print(f"  fet: {len(camps['segments'])} fragments")
         except ValueError as e:
             # Tot era soroll: deixa de ser una traducció i l'mp3 el treu la neteja.

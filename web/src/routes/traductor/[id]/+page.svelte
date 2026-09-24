@@ -3,7 +3,16 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { db } from '$lib/db';
-	import { IDIOMES, ambReintentsCache, eliminaVideo, mmss, segmentA, type Segment, type VideoTraduccio } from '$lib/traductor';
+	import {
+		IDIOMES,
+		aVtt,
+		ambReintentsCache,
+		eliminaVideo,
+		mmss,
+		segmentA,
+		type Segment,
+		type VideoTraduccio
+	} from '$lib/traductor';
 
 	// Reproductor de YouTube (IFrame API), només la part que fem servir.
 	interface YTPlayer {
@@ -19,6 +28,7 @@
 	}
 	type YTNamespace = { Player: new (el: HTMLElement, opts: object) => YTPlayer };
 	const REPRODUINT = 1;
+	const CARREGANT = 3;
 
 	let v = $state<VideoTraduccio | null>(null);
 	let noTrobat = $state(false);
@@ -28,6 +38,8 @@
 	let ambOriginal = $state(false);
 	let temps = $state(0);
 	let avisAudio = $state(false);
+	let errorAudio = $state('');
+	let sonant = $state(false);
 	let esAdmin = $state(false);
 
 	async function elimina() {
@@ -36,11 +48,17 @@
 
 	let contenidor = $state<HTMLDivElement>();
 	let audio = $state<HTMLAudioElement>();
+	// Instagram i Facebook no es poden controlar incrustats: es reprodueix la còpia
+	// que en desa el workflow (migració 0025), amb els subtítols com a pista WebVTT.
+	let videoEl = $state<HTMLVideoElement>();
+	let vttUrl = $state<string | null>(null);
 	let player: YTPlayer | null = null;
 
 	const segments = $derived<Segment[]>(v?.segments ?? []);
 	const actual = $derived(segmentA(segments, temps));
 	const esYoutube = $derived(v?.plataforma === 'youtube');
+	const teVideo = $derived(!esYoutube && !!v?.video_url);
+	const controlable = $derived(esYoutube || teVideo);
 	const nomIdioma = $derived(IDIOMES.find((i) => i.codi === v?.idioma)?.nom ?? '');
 
 	function carregaApiYoutube(): Promise<YTNamespace> {
@@ -55,49 +73,104 @@
 	}
 
 	function aplicaVolum() {
-		if (!player) return;
-		if (mode === 'ca' && volumFons === 0) player.mute();
-		else {
-			player.unMute();
-			player.setVolume(mode === 'ca' ? volumFons : 100);
+		const silenci = mode === 'ca' && volumFons === 0;
+		if (player) {
+			if (silenci) player.mute();
+			else {
+				player.unMute();
+				player.setVolume(mode === 'ca' ? volumFons : 100);
+			}
+		} else if (videoEl) {
+			videoEl.muted = silenci;
+			videoEl.volume = mode === 'ca' ? volumFons / 100 : 1;
 		}
 	}
 
-	// La veu catalana segueix el rellotge del vídeo: si es desvia més d'un terç de
-	// segon (un salt, un tall de xarxa), es recol·loca.
+	// El rellotge és el del vídeo, sigui el de YouTube o el propi.
+	function tempsVideo(): number {
+		return player ? player.getCurrentTime() : (videoEl?.currentTime ?? 0);
+	}
+	function videoSona(): boolean {
+		if (player) {
+			const e = player.getPlayerState();
+			return e === REPRODUINT || e === CARREGANT; // carregant: no parem la veu
+		}
+		return !!videoEl && !videoEl.paused && !videoEl.ended;
+	}
+
+	function fesSonar() {
+		if (!audio) return;
+		audio.play().then(
+			() => {
+				avisAudio = false;
+				errorAudio = '';
+			},
+			(e: DOMException) => {
+				// NotAllowedError: el navegador vol un clic a la pàgina (un clic dins del
+				// reproductor de YouTube no compta a tots: Safari no). Qualsevol altre és
+				// un error de debò, i es diu tal qual en lloc de «bloquejat».
+				if (e.name === 'NotAllowedError') avisAudio = true;
+				else errorAudio = `${e.name}: ${e.message}`;
+			}
+		);
+	}
+
+	// La veu catalana segueix el rellotge del vídeo. Salta només si es desvia més
+	// d'un segon; per sota, s'accelera o s'alenteix una mica fins que l'atrapa.
 	function sincronitza() {
-		if (!player || !audio) return;
-		temps = player.getCurrentTime();
-		const sona = player.getPlayerState() === REPRODUINT && mode === 'ca';
-		if (!sona) {
+		if (!audio || (!player && !videoEl)) return;
+		temps = tempsVideo();
+		sonant = videoSona();
+		if (!sonant || mode !== 'ca') {
 			if (!audio.paused) audio.pause();
+			audio.playbackRate = 1;
 			return;
 		}
-		if (audio.paused || Math.abs(audio.currentTime - temps) > 0.35) audio.currentTime = temps;
-		if (audio.paused)
-			audio.play().then(
-				() => (avisAudio = false),
-				() => (avisAudio = true) // el navegador no deixa sonar sense un clic a la pàgina
-			);
+		if (audio.paused) {
+			if (Math.abs(audio.currentTime - temps) > 1) audio.currentTime = temps;
+			fesSonar();
+			return;
+		}
+		if (audio.seeking || audio.readyState < 3) return;
+		const deriva = audio.currentTime - temps;
+		if (Math.abs(deriva) > 1) {
+			audio.currentTime = temps;
+			audio.playbackRate = 1;
+		} else audio.playbackRate = Math.abs(deriva) > 0.15 ? (deriva > 0 ? 0.95 : 1.05) : 1;
 	}
 
 	function salta(t: number) {
 		if (player) {
 			player.seekTo(t, true);
 			player.playVideo();
+		} else if (videoEl) {
+			videoEl.currentTime = t;
+			videoEl.play();
 		} else if (audio) {
 			audio.currentTime = t;
 			audio.play();
 		}
+		if (audio && controlable) audio.currentTime = t;
 		temps = t;
 	}
 
+	// El botó propi: vídeo i veu amb el mateix clic, que és a la pàgina i no dins
+	// del reproductor, i per tant el navegador el compta per deixar sonar la veu.
 	function reprodueix() {
-		player?.playVideo();
-		if (audio && mode === 'ca') {
-			audio.currentTime = player?.getCurrentTime() ?? audio.currentTime;
-			audio.play().then(() => (avisAudio = false));
+		if (videoSona()) {
+			player?.pauseVideo();
+			videoEl?.pause();
+			audio?.pause();
+			sonant = false;
+			return;
 		}
+		if (player) player.playVideo();
+		else videoEl?.play();
+		if (audio && mode === 'ca') {
+			audio.currentTime = tempsVideo();
+			fesSonar();
+		}
+		sonant = true;
 	}
 
 	$effect(() => {
@@ -129,7 +202,15 @@
 				return;
 			}
 			v = data as VideoTraduccio;
-			if (v.plataforma !== 'youtube') return;
+			if (v.plataforma !== 'youtube') {
+				if (v.video_url) {
+					vttUrl = URL.createObjectURL(
+						new Blob([aVtt(v.segments ?? [])], { type: 'text/vtt' })
+					);
+					rellotge = setInterval(sincronitza, 250);
+				}
+				return;
+			}
 			const YT = await carregaApiYoutube();
 			if (mort || !contenidor) return;
 			player = new YT.Player(contenidor, {
@@ -143,6 +224,7 @@
 			mort = true;
 			clearInterval(rellotge);
 			player?.destroy();
+			if (vttUrl) URL.revokeObjectURL(vttUrl);
 		};
 	});
 </script>
@@ -178,8 +260,28 @@
 				<div class="aspect-video w-full overflow-hidden rounded-xl bg-black">
 					<div bind:this={contenidor} class="h-full w-full"></div>
 				</div>
+			{:else if teVideo}
+				<!-- svelte-ignore a11y_media_has_caption (els subtítols van a la pista WebVTT) -->
+				<video
+					bind:this={videoEl}
+					src={v.video_url}
+					controls
+					playsinline
+					preload="metadata"
+					class="max-h-[70vh] w-full rounded-xl bg-black"
+					onplay={() => {
+						aplicaVolum();
+						sincronitza();
+					}}
+					onpause={sincronitza}
+					onseeked={sincronitza}
+				>
+					{#if vttUrl}
+						<track kind="subtitles" srclang="ca" label="Català" src={vttUrl} default />
+					{/if}
+				</video>
 			{:else}
-				<!-- Instagram i Facebook no deixen controlar el reproductor incrustat: no es
+				<!-- Traduccions d'Instagram o Facebook d'abans de la 0025, sense còpia: no es
 				     pot sincronitzar. S'escolta la veu catalana amb el vídeo obert al costat. -->
 				<p class="mb-2 rounded-xl border border-slate-200 p-3 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
 					{v.plataforma === 'instagram' ? 'Instagram' : 'Facebook'} no deixa posar-hi la veu a
@@ -192,11 +294,11 @@
 				bind:this={audio}
 				src={v.audio_url}
 				preload="auto"
-				controls={!esYoutube}
+				controls={!controlable}
 				ontimeupdate={() => {
-					if (!esYoutube && audio) temps = audio.currentTime;
+					if (!controlable && audio) temps = audio.currentTime;
 				}}
-				class={esYoutube ? 'hidden' : 'w-full'}
+				class={controlable ? 'hidden' : 'w-full'}
 			></audio>
 
 			<p
@@ -206,8 +308,12 @@
 				{actual?.ca ?? ''}
 			</p>
 
-			{#if esYoutube}
+			{#if controlable}
 				<div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+					<button
+						class="rounded-sm bg-slate-900 px-4 py-1 font-medium text-white dark:bg-slate-100 dark:text-slate-900"
+						onclick={reprodueix}>{sonant ? '⏸ Pausa' : '▶ Reprodueix'}</button
+					>
 					<button
 						class="rounded-sm px-3 py-1 {mode === 'ca'
 							? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
@@ -227,10 +333,14 @@
 						</label>
 					{/if}
 				</div>
-				{#if avisAudio}
+				{#if errorAudio}
+					<p class="mt-2 text-sm text-red-700 dark:text-red-400">
+						No s'ha pogut reproduir la veu catalana ({errorAudio}).
+					</p>
+				{:else if avisAudio}
 					<p class="mt-2 text-sm text-amber-700 dark:text-amber-400">
-						El navegador ha bloquejat la veu catalana.
-						<button class="underline" onclick={reprodueix}>Prem aquí per sentir-la</button>.
+						El navegador no deixa sonar la veu si el vídeo s'engega des de dins del reproductor.
+						Fes-lo anar amb el botó <strong>▶ Reprodueix</strong> d'aquí sobre.
 					</p>
 				{/if}
 			{/if}
