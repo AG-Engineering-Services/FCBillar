@@ -1,0 +1,77 @@
+name: Traductor de vídeos
+
+# Buida la cua `fcbillar.video_traduccio` que omplen els usuaris des de la PWA
+# (Aprèn → Traductor): transcriu amb el Whisper de NVIDIA, tradueix al català
+# amb un LLM de NVIDIA, fa la veu en off amb Piper i penja l'mp3 al release
+# `traduccions`. Tot gratuït: el repositori és públic (minuts d'Actions sense
+# límit) i els assets d'un release no costen res. Vegeu
+# scripts/traductor/tradueix.py i la migració 0022.
+#
+# Quan no hi ha res pendent, la primera consulta ho diu i el job acaba en segons.
+#
+# RISC CONEGUT: YouTube de vegades demana «confirma que no ets un robot» a les IP
+# dels servidors de GitHub, i Instagram i Facebook sovint demanen sessió. Aquestes
+# peticions acaben 'error' amb el missatge de yt-dlp, que la PWA mostra.
+#
+# REQUISITS:
+#   - Secrets: NEON_DATA_API_URL, NEON_SERVICE_ROLE_TOKEN (els mateixos que la
+#     reingesta) i NVIDIA_API_KEY (build.nvidia.com, gratuïta).
+#   - El release `traduccions` es crea sol la primera vegada.
+
+on:
+  schedule:
+    # Cada quart d'hora, als minuts 7/22/37/52: GitHub encua tots els crons de :00
+    # alhora i és el primer que descarta quan va carregat (vegeu publish-live-opens.yml).
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: traductor
+  cancel-in-progress: false
+
+jobs:
+  tradueix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write          # per penjar els mp3 al release
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NEON_DATA_API_URL: ${{ secrets.NEON_DATA_API_URL }}
+      NEON_SERVICE_ROLE_TOKEN: ${{ secrets.NEON_SERVICE_ROLE_TOKEN }}
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      PIPER_MODELS: ${{ github.workspace }}/.piper
+      PYTHONIOENCODING: utf-8
+    steps:
+      - name: Hi ha feina?
+        id: cua
+        run: |
+          base="${NEON_DATA_API_URL%/}"; [[ "$base" == */rest/v1 ]] || base="$base/rest/v1"
+          n=$(curl -sf "$base/video_traduccio?select=id&estat=in.(pendent,processant)&limit=1" \
+                -H "Authorization: Bearer $NEON_SERVICE_ROLE_TOKEN" -H "Accept-Profile: fcbillar" \
+              | jq length)
+          echo "pendents=$n" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.cua.outputs.pendents != '0'
+
+      - uses: astral-sh/setup-uv@v6
+        if: steps.cua.outputs.pendents != '0'
+
+      - name: Veu catalana (Piper) en memòria cau
+        if: steps.cua.outputs.pendents != '0'
+        uses: actions/cache@v4
+        with:
+          path: .piper
+          key: piper-ca_ES-upc_ona-medium
+
+      - name: Release de les traduccions
+        if: steps.cua.outputs.pendents != '0'
+        run: |
+          gh release view traduccions >/dev/null 2>&1 || gh release create traduccions \
+            --prerelease --title "Traduccions de vídeos" \
+            --notes "Veus en off en català del traductor de la PWA. Les escriu el workflow traductor.yml; no editar a mà."
+
+      - name: Tradueix
+        if: steps.cua.outputs.pendents != '0'
+        run: uv run scripts/traductor/tradueix.py --max 3

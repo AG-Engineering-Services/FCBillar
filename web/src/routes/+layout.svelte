@@ -40,16 +40,11 @@
 		{ href: '/comparar', label: 'Comparar', match: (p: string) => p.startsWith('/comparar') },
 		{ href: '/records', label: 'Rècords', match: (p: string) => p.startsWith('/records') },
 		{ href: '/seguiment', label: '★ Seguits', match: (p: string) => p.startsWith('/seguiment') },
-		{ href: '/biblia', label: 'Bíblia', match: (p: string) => p.startsWith('/biblia') },
 		{
 			href: '/sistemes-coreans',
-			label: 'Sistemes Coreans',
-			match: (p: string) => p.startsWith('/sistemes-coreans')
-		},
-		{
-			href: '/sistemes-validats',
-			label: 'Sistemes Validats',
-			match: (p: string) => p.startsWith('/sistemes-validats')
+			label: 'Aprèn',
+			match: (p: string) =>
+				p.startsWith('/sistemes') || p.startsWith('/biblia') || p.startsWith('/traductor')
 		}
 	];
 	const path = $derived($page.url.pathname);
