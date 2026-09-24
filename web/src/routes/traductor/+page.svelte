@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { db } from '$lib/db';
-	import { IDIOMES, llegeixEnllac, mmss, type Idioma, type VideoTraduccio } from '$lib/traductor';
+	import {
+		IDIOMES,
+		ambReintentsCache,
+		llegeixEnllac,
+		mmss,
+		type Idioma,
+		type VideoTraduccio
+	} from '$lib/traductor';
 
 	let videos = $state<VideoTraduccio[]>([]);
 	let carregat = $state(false);
@@ -24,27 +31,31 @@
 		if (!e) return;
 		let vigent = true;
 		comprovant = true;
-		db.from('video_traduccio')
-			.select('id,url,plataforma,video_id,idioma,estat,titol,canal,durada,missatge,creat,processat')
-			.eq('plataforma', e.plataforma)
-			.eq('video_id', e.video_id)
-			.maybeSingle()
-			.then(({ data }) => {
-				if (!vigent) return; // l'usuari ja ha canviat l'enllaç
-				existent = (data as VideoTraduccio | null) ?? null;
-				comprovant = false;
-			});
+		ambReintentsCache(() =>
+			db
+				.from('video_traduccio')
+				.select('id,url,plataforma,video_id,idioma,estat,titol,canal,durada,missatge,creat,processat')
+				.eq('plataforma', e.plataforma)
+				.eq('video_id', e.video_id)
+				.maybeSingle()
+		).then(({ data }) => {
+			if (!vigent) return; // l'usuari ja ha canviat l'enllaç
+			existent = (data as VideoTraduccio | null) ?? null;
+			comprovant = false;
+		});
 		return () => {
 			vigent = false;
 		};
 	});
 
 	async function carrega() {
-		const { data } = await db
-			.from('video_traduccio')
-			.select('id,url,plataforma,video_id,idioma,estat,titol,canal,durada,missatge,creat,processat')
-			.order('creat', { ascending: false })
-			.range(0, 499);
+		const { data } = await ambReintentsCache(() =>
+			db
+				.from('video_traduccio')
+				.select('id,url,plataforma,video_id,idioma,estat,titol,canal,durada,missatge,creat,processat')
+				.order('creat', { ascending: false })
+				.range(0, 499)
+		);
 		videos = (data as VideoTraduccio[]) ?? [];
 		carregat = true;
 	}
@@ -67,9 +78,8 @@
 		if (existent || comprovant) return; // l'avís de sota el formulari ja ho diu
 		enviant = true;
 		msg = null;
-		const { error } = await db
-			.from('video_traduccio')
-			.insert({ url: url.trim(), plataforma: enllac.plataforma, video_id: enllac.video_id, idioma });
+		const fila = { url: url.trim(), plataforma: enllac.plataforma, video_id: enllac.video_id, idioma };
+		const { error } = await ambReintentsCache(() => db.from('video_traduccio').insert(fila));
 		enviant = false;
 		if (error) {
 			msg = {

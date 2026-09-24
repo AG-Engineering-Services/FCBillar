@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { llegeixEnllac, mmss, segmentA, type Segment } from './traductor';
+import { ambReintentsCache, llegeixEnllac, mmss, segmentA, type Segment } from './traductor';
 
 describe('llegeixEnllac', () => {
 	it.each([
@@ -45,4 +45,27 @@ describe('segmentA', () => {
 it('mmss', () => {
 	expect(mmss(0)).toBe('0:00');
 	expect(mmss(65.7)).toBe('1:05');
+});
+
+describe('ambReintentsCache', () => {
+	const falla = { data: null, error: { code: 'PGRST205' } };
+	const be = { data: [1], error: null };
+	it('torna a provar mentre la instància no veu la taula', async () => {
+		const respostes = [falla, falla, be];
+		let crides = 0;
+		const r = await ambReintentsCache(async () => respostes[crides++]);
+		expect(r).toBe(be);
+		expect(crides).toBe(3);
+	});
+	it('altres errors no es tornen a provar', async () => {
+		let crides = 0;
+		const altre = { data: null, error: { code: '23514' } };
+		expect(await ambReintentsCache(async () => (crides++, altre))).toBe(altre);
+		expect(crides).toBe(1);
+	});
+	it('es rendeix després dels intents', async () => {
+		let crides = 0;
+		expect(await ambReintentsCache(async () => (crides++, falla), 2)).toBe(falla);
+		expect(crides).toBe(2);
+	});
 });

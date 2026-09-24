@@ -67,6 +67,25 @@ export function segmentA(segments: Segment[], t: number): Segment | null {
 	return null;
 }
 
+/**
+ * El Data API de Neon corre en diverses instàncies, cada una amb la seva memòria
+ * cau d'esquemes. Després d'una migració, unes veuen la taula nova i d'altres
+ * responen PGRST205 («Could not find the table») durant molta estona: amb la
+ * 0022, quaranta minuts després, encara una petició de cada dues. Una consulta
+ * que cau en una d'aquestes es torna a fer.
+ */
+export async function ambReintentsCache<R extends { error: { code?: string } | null }>(
+	consulta: () => PromiseLike<R>,
+	intents = 6
+): Promise<R> {
+	let r = await consulta();
+	for (let i = 1; i < intents && r.error?.code === 'PGRST205'; i++) {
+		await new Promise((resol) => setTimeout(resol, 700));
+		r = await consulta();
+	}
+	return r;
+}
+
 export function mmss(segons: number): string {
 	const s = Math.max(0, Math.floor(segons));
 	return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
