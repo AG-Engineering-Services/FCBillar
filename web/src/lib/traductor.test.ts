@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	aVtt,
 	ambReintentsCache,
 	estimaCua,
 	llegeixEnllac,
@@ -177,4 +178,15 @@ it('quantFalta', () => {
 	expect(quantFalta(en(7), ara)).toBe('~7 min');
 	expect(quantFalta(en(80), ara)).toBe('~1 h 20 min');
 	expect(quantFalta(en(120), ara)).toBe('~2 h');
+});
+
+it('aVtt', () => {
+	const vtt = aVtt([
+		{ t0: 1.69, t1: 6.8925, orig: 'a', ca: 'Hola' },
+		{ t0: 7, t1: 8, orig: 'b', ca: '' },
+		{ t0: 3725.5, t1: 3727, orig: 'c', ca: 'Adéu --> fi' }
+	]);
+	expect(vtt).toBe(
+		'WEBVTT\n\n00:00:01.690 --> 00:00:06.893\nHola\n\n01:02:05.500 --> 01:02:07.000\nAdéu → fi\n'
+	);
 });
