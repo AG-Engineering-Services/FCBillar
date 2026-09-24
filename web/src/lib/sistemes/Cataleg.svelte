@@ -2,10 +2,20 @@
 	import sistemes from '$lib/sistemes/sistemes.json';
 	import { db } from '$lib/db';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import Explora from '$lib/sistemes/Explora.svelte';
 
-	// mode 'pendents' = encara no validats (per curar) · 'validats' = marcats com que funcionen
-	let { mode }: { mode: 'pendents' | 'validats' } = $props();
+	// L'estat de validacio es un filtre, no una pagina: ?estat=validats|pendents.
+	type Estat = 'tots' | 'validats' | 'pendents';
+	const ESTATS: { valor: Estat; label: string }[] = [
+		{ valor: 'tots', label: 'Tots' },
+		{ valor: 'validats', label: '✓ Validats' },
+		{ valor: 'pendents', label: 'Pendents' }
+	];
+	const estat = $derived.by<Estat>(() => {
+		const e = $page.url.searchParams.get('estat');
+		return e === 'validats' || e === 'pendents' ? e : 'tots';
+	});
 
 	interface Sistema {
 		id: string;
@@ -21,20 +31,27 @@
 	}
 	const totsSistemes = sistemes as Sistema[];
 
+	// Ordre de camí d'aprenentatge: primer la base, després les tirades
+	// d'una bola, les de diverses bandes i, al final, els sistemes de càlcul.
 	const ORDRE = [
+		'Tècnica bàsica',
+		'Sense efecte',
 		'Endavant',
 		'Endarrere',
 		'De costat',
-		'Tocar la bola fina',
-		'Gran rotació',
-		'Bricol',
-		'Doble banda',
 		'Travessa',
-		'Sense efecte',
+		'Doble banda',
+		'Bricol',
+		'Gran rotació',
+		'Tocar la bola fina',
 		'Sistemes de càlcul',
-		'Tècnica bàsica',
 		'Altres'
 	];
+	const NIVELLS = ['bàsic', 'mitjà', 'avançat'];
+	const rangNivell = (s: Sistema) => {
+		const i = NIVELLS.indexOf(s.explicacio?.nivell ?? '');
+		return i === -1 ? NIVELLS.length : i;
+	};
 
 	let categoriaActiva = $state<string | null>(null);
 	// Marks funciona/no-funciona (video_id → true | false | null), compartits via Supabase.
@@ -42,18 +59,19 @@
 	let esAdmin = $state(false);
 	let carregat = $state(false);
 
-	// Predicat de pertinença a aquesta pestanya segons el mark.
 	function pertany(id: string): boolean {
-		return mode === 'validats' ? marks[id] === true : marks[id] !== true;
+		if (estat === 'validats') return marks[id] === true;
+		if (estat === 'pendents') return marks[id] !== true;
+		return true;
 	}
 
 	const totsAmbFiltre = $derived(
 		totsSistemes
 			.filter((s) => pertany(s.id))
 			.filter((s) => (categoriaActiva ? s.categoria === categoriaActiva : true))
-			.sort((a, b) => b.visites - a.visites)
+			.sort((a, b) => rangNivell(a) - rangNivell(b) || b.visites - a.visites)
 	);
-	// Categories que tenen algun element EN AQUESTA pestanya (per als xips de filtre).
+	// Categories que tenen algun element amb aquest estat (per als xips de filtre).
 	const categories = $derived(
 		[...new Set(totsSistemes.filter((s) => pertany(s.id)).map((s) => s.categoria))].sort(
 			(a, b) => ORDRE.indexOf(a) - ORDRE.indexOf(b)
@@ -95,22 +113,31 @@
 </script>
 
 <div class="mb-4">
-	<h1 class="text-xl font-bold md:text-2xl">
-		{mode === 'validats' ? 'Sistemes Validats' : 'Sistemes Coreans'}
-	</h1>
+	<h1 class="text-xl font-bold md:text-2xl">Sistemes Coreans</h1>
 	<p class="text-sm text-slate-500 dark:text-slate-400">
-		{#if mode === 'validats'}
-			Sistemes coreans que has provat i validat com que funcionen a la taula.
-		{:else}
-			Sistemes i patrons de billar a tres bandes de canals coreans de YouTube, pendents de validar.
-			Obre'n un per llegir-ne l'explicació en català.
-		{/if}
+		Sistemes i patrons de billar a tres bandes de canals coreans de YouTube, ordenats de la base
+		als sistemes de càlcul i, dins de cada grup, de més fàcil a més difícil. Obre'n un per llegir-ne
+		l'explicació en català.
 	</p>
 </div>
 
-{#if mode === 'pendents' && esAdmin}
+{#if esAdmin}
 	<Explora />
 {/if}
+
+<div class="mb-3 flex flex-wrap items-center gap-2">
+	{#each ESTATS as e (e.valor)}
+		<a
+			href={e.valor === 'tots' ? '?' : `?estat=${e.valor}`}
+			data-sveltekit-replacestate
+			data-sveltekit-noscroll
+			class="rounded-sm border px-3 py-1 text-sm {estat === e.valor
+				? 'border-sky-600 text-sky-700 dark:border-sky-400 dark:text-sky-300'
+				: 'border-slate-200 text-slate-500 hover:text-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}"
+			>{e.label}</a
+		>
+	{/each}
+</div>
 
 <!-- Filtres per categoria -->
 {#if categories.length > 1}
@@ -194,15 +221,10 @@
 
 {#if !total}
 	<div class="py-10 text-center text-slate-500 dark:text-slate-400">
-		{#if mode === 'validats'}
-			<p>Encara no has validat cap sistema.</p>
-			<p class="mt-1 text-sm">
-				Ves a <a href="/sistemes-coreans" class="text-indigo-600 hover:underline dark:text-indigo-400"
-					>Sistemes Coreans</a
-				> i marca'n algun com a «✓ Funciona».
-			</p>
+		{#if estat === 'validats'}
+			<p>Encara no hi ha cap sistema validat.</p>
 		{:else}
-			<p>Cap sistema pendent amb aquests filtres.</p>
+			<p>Cap sistema amb aquests filtres.</p>
 		{/if}
 	</div>
 {/if}
