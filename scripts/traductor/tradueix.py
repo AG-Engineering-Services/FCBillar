@@ -172,6 +172,8 @@ class Cua:
             json={
                 "estat": "processant",
                 "intents": fila["intents"] + 1,
+                # `iniciat` és per a l'estimació de temps de la PWA (migració 0023).
+                "iniciat": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "processat": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             },
         )
@@ -454,7 +456,7 @@ def doblatge(veu: Veu, segments: list[dict], durada: float, desti: Path) -> None
 # --- una petició ----------------------------------------------------------------
 
 
-def processa(fila: dict, whisper: Whisper, veu: Veu, pujar: bool) -> dict:
+def processa(fila: dict, whisper: Whisper, veu: Veu, pujar: bool, cua: Cua | None = None) -> dict:
     with tempfile.TemporaryDirectory() as tmp:
         dir_ = Path(tmp)
         meta = metadades(fila["url"])
@@ -462,6 +464,14 @@ def processa(fila: dict, whisper: Whisper, veu: Veu, pujar: bool) -> dict:
         if durada > DURADA_MAX:
             raise ValueError(
                 f"El vídeo dura {durada / 60:.0f} min; el màxim són {DURADA_MAX // 60}."
+            )
+        if cua:
+            # La durada i el títol, de seguida: la PWA en treu l'estimació de temps.
+            cua.desa(
+                fila["id"],
+                titol=meta.get("title"),
+                canal=meta.get("channel") or meta.get("uploader"),
+                durada=durada or None,
             )
         wav = baixa_audio(fila["url"], dir_)
         if not durada:
@@ -527,7 +537,7 @@ def main() -> None:
         provades.add(fila["id"])
         print(f"#{fila['id']} {fila['plataforma']} {fila['video_id']} ({fila['idioma']})")
         try:
-            camps = processa(fila, whisper, veu, pujar=not args.sense_pujar)
+            camps = processa(fila, whisper, veu, pujar=not args.sense_pujar, cua=cua)
             cua.desa(fila["id"], **camps)
             print(f"  fet: {len(camps['segments'])} fragments")
         except Exception as e:  # l'error va a la fila, que és on el veu l'usuari
