@@ -4,6 +4,7 @@
 	import {
 		IDIOMES,
 		ambReintentsCache,
+		eliminaVideo,
 		estimaCua,
 		hora,
 		llegeixEnllac,
@@ -72,7 +73,19 @@
 		carregat = true;
 	}
 
+	// Admin: la mateixa marca que als sistemes. Només ensenya els botons; qui decideix
+	// és la clau que demana eliminaVideo.
+	let esAdmin = $state(false);
+	async function elimina(v: VideoTraduccio) {
+		if (await eliminaVideo((f, a) => db.rpc(f, a), v)) await carrega();
+	}
+
 	onMount(() => {
+		try {
+			esAdmin = localStorage.getItem('fcb_admin') === '1';
+		} catch {
+			esAdmin = false;
+		}
 		carrega();
 		// Mentre hi ha feina a la cua, l'estat canvia sol: el workflow passa cada quart d'hora.
 		const rellotge = setInterval(() => (ara = new Date()), 15_000);
@@ -215,6 +228,12 @@
 							{v.durada ? `${mmss(v.durada)} de vídeo · ` : ''}{previsio(v)}
 						</span>
 					{/if}
+					{#if esAdmin}
+						<button
+							class="text-xs text-red-700 hover:underline dark:text-red-400"
+							onclick={() => elimina(v)}>Elimina</button
+						>
+					{/if}
 					{#if v.estat === 'error' && v.missatge}
 						<span class="w-full text-xs text-slate-500 dark:text-slate-400">{v.missatge}</span>
 					{/if}
@@ -227,28 +246,35 @@
 {#if fets.length}
 	<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 		{#each fets as v (v.id)}
-			<a
-				href="/traductor/{v.id}"
+			<div
 				class="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white hover:border-sky-400 dark:border-slate-800 dark:bg-slate-900"
 			>
-				{#if miniatura(v)}
-					<img src={miniatura(v)} alt="" class="aspect-video w-full object-cover" loading="lazy" />
-				{:else}
-					<div
-						class="grid aspect-video w-full place-items-center bg-slate-100 text-sm capitalize text-slate-500 dark:bg-slate-800"
-					>
-						{v.plataforma}
+				<a href="/traductor/{v.id}" class="flex flex-1 flex-col">
+					{#if miniatura(v)}
+						<img src={miniatura(v)} alt="" class="aspect-video w-full object-cover" loading="lazy" />
+					{:else}
+						<div
+							class="grid aspect-video w-full place-items-center bg-slate-100 text-sm capitalize text-slate-500 dark:bg-slate-800"
+						>
+							{v.plataforma}
+						</div>
+					{/if}
+					<div class="flex flex-1 flex-col gap-1 p-3">
+						<span class="font-semibold leading-tight">{v.titol ?? v.video_id}</span>
+						<span class="text-xs text-slate-500 dark:text-slate-400">
+							{v.canal ?? ''}{v.canal ? ' · ' : ''}{nomIdioma(v.idioma)}{v.durada
+								? ` · ${mmss(v.durada)}`
+								: ''}
+						</span>
 					</div>
+				</a>
+				{#if esAdmin}
+					<button
+						class="border-t border-slate-100 px-3 py-1.5 text-left text-xs text-red-700 hover:bg-red-50 dark:border-slate-800 dark:text-red-400 dark:hover:bg-red-950"
+						onclick={() => elimina(v)}>Elimina</button
+					>
 				{/if}
-				<div class="flex flex-1 flex-col gap-1 p-3">
-					<span class="font-semibold leading-tight">{v.titol ?? v.video_id}</span>
-					<span class="text-xs text-slate-500 dark:text-slate-400">
-						{v.canal ?? ''}{v.canal ? ' · ' : ''}{nomIdioma(v.idioma)}{v.durada
-							? ` · ${mmss(v.durada)}`
-							: ''}
-					</span>
-				</div>
-			</a>
+			</div>
 		{/each}
 	</div>
 {:else if carregat && !cua.length}
