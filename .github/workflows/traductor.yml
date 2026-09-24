@@ -9,8 +9,10 @@ name: Traductor de vídeos
 #
 # Quan no hi ha res pendent, la primera consulta ho diu i el job acaba en segons.
 #
-# RISC CONEGUT: YouTube de vegades demana «confirma que no ets un robot» a les IP
-# dels servidors de GitHub, i Instagram i Facebook sovint demanen sessió. Aquestes
+# YouTube bloqueja les IP de GitHub («Sign in to confirm you're not a bot»): el
+# primer tret real va fallar així. Les descàrregues surten per Cloudflare WARP
+# (gratuït, sense compte) en mode proxy; provat el 24/09/2026, directe 0/2 i per
+# WARP 2/2. Instagram i Facebook poden demanar sessió igualment: aquestes
 # peticions acaben 'error' amb el missatge de yt-dlp, que la PWA mostra.
 #
 # REQUISITS:
@@ -42,6 +44,7 @@ jobs:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       PIPER_MODELS: ${{ github.workspace }}/.piper
       PYTHONIOENCODING: utf-8
+      YTDLP_PROXY: socks5://127.0.0.1:40000
     steps:
       - name: Hi ha feina?
         id: cua
@@ -71,6 +74,19 @@ jobs:
           gh release view traduccions >/dev/null 2>&1 || gh release create traduccions \
             --prerelease --title "Traduccions de vídeos" \
             --notes "Veus en off en català del traductor de la PWA. Les escriu el workflow traductor.yml; no editar a mà."
+
+      - name: Cloudflare WARP en mode proxy (per a yt-dlp)
+        if: steps.cua.outputs.pendents != '0'
+        run: |
+          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg             | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main"             | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq cloudflare-warp
+          sleep 3
+          warp-cli --accept-tos registration new
+          warp-cli --accept-tos mode proxy
+          warp-cli --accept-tos connect
+          sleep 5
+          curl -sf --socks5-hostname 127.0.0.1:40000 https://www.cloudflare.com/cdn-cgi/trace | grep '^warp=on'
 
       - name: Tradueix
         if: steps.cua.outputs.pendents != '0'
