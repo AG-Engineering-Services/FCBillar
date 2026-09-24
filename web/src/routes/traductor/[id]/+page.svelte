@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { db } from '$lib/db';
-	import { IDIOMES, mmss, segmentA, type Segment, type VideoTraduccio } from '$lib/traductor';
+	import { IDIOMES, ambReintentsCache, mmss, segmentA, type Segment, type VideoTraduccio } from '$lib/traductor';
 
 	// Reproductor de YouTube (IFrame API), només la part que fem servir.
 	interface YTPlayer {
@@ -105,12 +105,14 @@
 		let rellotge: ReturnType<typeof setInterval> | undefined;
 		let mort = false;
 		(async () => {
-			const { data } = await db
-				.from('video_traduccio')
-				.select('*')
-				.eq('id', Number($page.params.id))
-				.eq('estat', 'fet')
-				.maybeSingle();
+			const { data } = await ambReintentsCache(() =>
+				db
+					.from('video_traduccio')
+					.select('*')
+					.eq('id', Number($page.params.id))
+					.eq('estat', 'fet')
+					.maybeSingle()
+			);
 			if (!data) {
 				noTrobat = true;
 				return;

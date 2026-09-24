@@ -34,6 +34,8 @@ export interface VideoTraduccio {
 	missatge: string | null;
 	creat: string;
 	processat: string | null;
+	/** Quan el workflow va agafar la fila (migració 0023). */
+	iniciat: string | null;
 }
 
 /** Plataforma i identificador del vídeo, o null si l'enllaç no és de cap de les tres. */
@@ -41,15 +43,15 @@ export function llegeixEnllac(url: string): { plataforma: Plataforma; video_id: 
 	const s = url.trim();
 	let m: RegExpMatchArray | null;
 	if ((m = s.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/))([\w-]{11})/)))
-		return { plataforma: 'youtube', video_id: m[1] };
+		return { plataforma: 'youtube', video_id: m[1]! };
 	if ((m = s.match(/instagram\.com\/(?:[\w.]+\/)?(?:reel|reels|p|tv)\/([\w-]+)/)))
-		return { plataforma: 'instagram', video_id: m[1] };
+		return { plataforma: 'instagram', video_id: m[1]! };
 	if (
 		(m = s.match(
 			/(?:facebook\.com\/(?:reel|share\/[rv])\/|facebook\.com\/[^/]+\/videos\/(?:[^/]+\/)?|facebook\.com\/watch\/?\?v=|fb\.watch\/)([\w-]+)/
 		))
 	)
-		return { plataforma: 'facebook', video_id: m[1] };
+		return { plataforma: 'facebook', video_id: m[1]! };
 	return null;
 }
 
@@ -59,7 +61,7 @@ export function segmentA(segments: Segment[], t: number): Segment | null {
 	let hi = segments.length - 1;
 	while (lo <= hi) {
 		const mig = (lo + hi) >> 1;
-		const s = segments[mig];
+		const s = segments[mig]!;
 		if (t < s.t0) hi = mig - 1;
 		else if (t >= s.t1) lo = mig + 1;
 		else return s;
@@ -67,7 +69,135 @@ export function segmentA(segments: Segment[], t: number): Segment | null {
 	return null;
 }
 
+/**
+ * El Data API de Neon corre en diverses instàncies, cada una amb la seva memòria
+ * cau d'esquemes. Després d'una migració, unes veuen la taula nova i d'altres
+ * responen PGRST205 («Could not find the table») durant molta estona: amb la
+ * 0022, quaranta minuts després, encara una petició de cada dues. Una consulta
+ * que cau en una d'aquestes es torna a fer.
+ */
+export async function ambReintentsCache<R extends { error: { code?: string } | null }>(
+	consulta: () => PromiseLike<R>,
+	intents = 6
+): Promise<R> {
+	let r = await consulta();
+	for (let i = 1; i < intents && r.error?.code === 'PGRST205'; i++) {
+		await new Promise((resol) => setTimeout(resol, 700));
+		r = await consulta();
+	}
+	return r;
+}
+
 export function mmss(segons: number): string {
 	const s = Math.max(0, Math.floor(segons));
 	return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+// --- Estimació del temps que falta ---------------------------------------------
+//
+// Surt de com treballa el workflow traductor.yml, i s'ajusta sola amb els vídeos
+// ja fets:
+//  - GitHub l'engega als minuts 7, 22, 37 i 52 de cada hora (UTC; com que els
+//    fusos van per hores senceres, són els mateixos minuts a tot arreu), però
+//    sempre ho fa una mica tard;
+//  - cada tret prepara la màquina (~45 s el 24/09/2026) i tradueix com a molt
+//    TRET_MAX vídeos, l'un darrere l'altre; si un tret no s'ha acabat, el següent
+//    l'espera;
+//  - el que triga un vídeo és un fix més un ritme per segon de vídeo. El ritme
+//    es mesura dels vídeos ja fets amb `iniciat` → `processat`.
+
+const MINUTS_TRET = [7, 22, 37, 52];
+const RETARD_CRON_S = 5 * 60;
+const PREPARACIO_S = 60;
+const TRET_MAX = 3;
+const FIX_PER_VIDEO_S = 20;
+const RITME_PER_DEFECTE = 0.8; // segons de feina per segon de vídeo
+const DURADA_PER_DEFECTE_S = 5 * 60; // quan encara no se sap quant dura
+
+/** El proper minut de tret del workflow, estrictament després d'`ara`. */
+export function properTret(ara: Date): Date {
+	const t = new Date(ara);
+	t.setUTCSeconds(0, 0);
+	for (let i = 0; i < 4 * 24 + 1; i++) {
+		t.setUTCMinutes(t.getUTCMinutes() + 1);
+		if (MINUTS_TRET.includes(t.getUTCMinutes()) && t > ara) return t;
+	}
+	return t; // inabastable: sempre n'hi ha un dins l'hora
+}
+
+function mediana(xs: number[]): number | null {
+	if (!xs.length) return null;
+	const o = [...xs].sort((a, b) => a - b);
+	const m = o.length >> 1;
+	return o.length % 2 ? o[m]! : (o[m - 1]! + o[m]!) / 2;
+}
+
+export interface Estimacio {
+	comenca: Date;
+	acaba: Date;
+}
+
+/** Quan començarà i acabarà cada vídeo pendent o en curs. */
+export function estimaCua(videos: VideoTraduccio[], ara: Date): Map<number, Estimacio> {
+	const ms = (iso: string) => new Date(iso).getTime();
+	const fets = videos.filter((v) => v.estat === 'fet' && v.durada);
+	const ritme =
+		mediana(
+			fets
+				.filter((v) => v.iniciat && v.processat)
+				.map((v) => ((ms(v.processat!) - ms(v.iniciat!)) / 1000 - FIX_PER_VIDEO_S) / v.durada!)
+				.filter((r) => r > 0)
+		) ?? RITME_PER_DEFECTE;
+	const duradaTipica = mediana(fets.map((v) => v.durada!)) ?? DURADA_PER_DEFECTE_S;
+	const feina = (v: VideoTraduccio) =>
+		(FIX_PER_VIDEO_S + ritme * (v.durada ?? duradaTipica)) * 1000;
+
+	const res = new Map<number, Estimacio>();
+	const perData = (a: VideoTraduccio, b: VideoTraduccio) => ms(a.creat) - ms(b.creat);
+
+	// El que s'està traduint ara. Si ja passa de l'estimat, no l'acabem «fa estona».
+	let fi = ara.getTime();
+	const enCurs = videos.filter((v) => v.estat === 'processant').sort(perData);
+	for (const v of enCurs) {
+		const comenca = ms(v.iniciat ?? v.processat ?? v.creat);
+		const acaba = Math.max(comenca + feina(v), ara.getTime() + 30_000);
+		res.set(v.id, { comenca: new Date(comenca), acaba: new Date(acaba) });
+		fi = Math.max(fi, acaba);
+	}
+
+	const pendents = videos.filter((v) => v.estat === 'pendent').sort(perData);
+	let i = 0;
+	// El tret en curs encara en pot agafar fins a completar-ne TRET_MAX.
+	if (enCurs.length)
+		for (let lloc = enCurs.length; lloc < TRET_MAX && i < pendents.length; lloc++, i++) {
+			const v = pendents[i]!;
+			res.set(v.id, { comenca: new Date(fi), acaba: new Date(fi + feina(v)) });
+			fi += feina(v);
+		}
+	let tret = properTret(ara).getTime();
+	while (i < pendents.length) {
+		let t = Math.max(tret + (RETARD_CRON_S + PREPARACIO_S) * 1000, fi);
+		for (let n = 0; n < TRET_MAX && i < pendents.length; n++, i++) {
+			const v = pendents[i]!;
+			res.set(v.id, { comenca: new Date(t), acaba: new Date(t + feina(v)) });
+			t += feina(v);
+		}
+		fi = t;
+		tret += 15 * 60_000;
+	}
+	return res;
+}
+
+/** «menys d'un minut», «~7 min», «~1 h 20 min». */
+export function quantFalta(fins: Date, ara: Date): string {
+	const min = Math.round((fins.getTime() - ara.getTime()) / 60_000);
+	if (min < 1) return "menys d'un minut";
+	if (min < 60) return `~${min} min`;
+	const h = Math.floor(min / 60);
+	const m = min % 60;
+	return m ? `~${h} h ${m} min` : `~${h} h`;
+}
+
+export function hora(d: Date): string {
+	return d.toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' });
 }

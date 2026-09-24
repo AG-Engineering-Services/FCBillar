@@ -1,7 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { db } from '$lib/db';
-	import { IDIOMES, llegeixEnllac, mmss, type Idioma, type VideoTraduccio } from '$lib/traductor';
+	import {
+		IDIOMES,
+		ambReintentsCache,
+		estimaCua,
+		hora,
+		llegeixEnllac,
+		mmss,
+		quantFalta,
+		type Idioma,
+		type VideoTraduccio
+	} from '$lib/traductor';
 
 	let videos = $state<VideoTraduccio[]>([]);
 	let carregat = $state(false);
@@ -14,12 +24,50 @@
 	const cua = $derived(videos.filter((v) => v.estat !== 'fet'));
 	const enllac = $derived(url.trim() ? llegeixEnllac(url) : null);
 
+	// Quan estarà llest cada vídeo de la cua; es refà sol a mesura que passa el temps.
+	let ara = $state(new Date());
+	const estimacions = $derived(estimaCua(videos, ara));
+	function previsio(v: VideoTraduccio): string {
+		const e = estimacions.get(v.id);
+		if (!e) return '';
+		return `llest cap a les ${hora(e.acaba)} (${quantFalta(e.acaba, ara)})`;
+	}
+
+	// En enganxar un enllaç es mira de seguida si el vídeo ja hi és, a la base de
+	// dades i no a la llista carregada: la llista es talla a 500 i pot ser vella.
+	let existent = $state<VideoTraduccio | null>(null);
+	let comprovant = $state(false);
+	$effect(() => {
+		const e = enllac;
+		existent = null;
+		if (!e) return;
+		let vigent = true;
+		comprovant = true;
+		ambReintentsCache(() =>
+			db
+				.from('video_traduccio')
+				.select('id,url,plataforma,video_id,idioma,estat,titol,canal,durada,missatge,creat,processat,iniciat')
+				.eq('plataforma', e.plataforma)
+				.eq('video_id', e.video_id)
+				.maybeSingle()
+		).then(({ data }) => {
+			if (!vigent) return; // l'usuari ja ha canviat l'enllaç
+			existent = (data as VideoTraduccio | null) ?? null;
+			comprovant = false;
+		});
+		return () => {
+			vigent = false;
+		};
+	});
+
 	async function carrega() {
-		const { data } = await db
-			.from('video_traduccio')
-			.select('id,url,plataforma,video_id,idioma,estat,titol,canal,durada,missatge,creat,processat')
-			.order('creat', { ascending: false })
-			.range(0, 499);
+		const { data } = await ambReintentsCache(() =>
+			db
+				.from('video_traduccio')
+				.select('id,url,plataforma,video_id,idioma,estat,titol,canal,durada,missatge,creat,processat,iniciat')
+				.order('creat', { ascending: false })
+				.range(0, 499)
+		);
 		videos = (data as VideoTraduccio[]) ?? [];
 		carregat = true;
 	}
@@ -27,10 +75,14 @@
 	onMount(() => {
 		carrega();
 		// Mentre hi ha feina a la cua, l'estat canvia sol: el workflow passa cada quart d'hora.
+		const rellotge = setInterval(() => (ara = new Date()), 15_000);
 		const t = setInterval(() => {
 			if (cua.some((v) => v.estat === 'pendent' || v.estat === 'processant')) carrega();
-		}, 60_000);
-		return () => clearInterval(t);
+		}, 20_000);
+		return () => {
+			clearInterval(rellotge);
+			clearInterval(t);
+		};
 	});
 
 	async function envia(e: SubmitEvent) {
@@ -39,26 +91,11 @@
 			msg = { ok: false, text: 'Enganxa un enllaç de YouTube, Instagram o Facebook.' };
 			return;
 		}
-		const ja = videos.find(
-			(v) => v.plataforma === enllac.plataforma && v.video_id === enllac.video_id
-		);
-		if (ja) {
-			msg = {
-				ok: ja.estat !== 'error',
-				text:
-					ja.estat === 'fet'
-						? 'Aquest vídeo ja està traduït.'
-						: ja.estat === 'error'
-							? `Aquest vídeo ja es va provar i no es va poder traduir: ${ja.missatge ?? ''}`
-							: 'Aquest vídeo ja és a la cua.'
-			};
-			return;
-		}
+		if (existent || comprovant) return; // l'avís de sota el formulari ja ho diu
 		enviant = true;
 		msg = null;
-		const { error } = await db
-			.from('video_traduccio')
-			.insert({ url: url.trim(), plataforma: enllac.plataforma, video_id: enllac.video_id, idioma });
+		const fila = { url: url.trim(), plataforma: enllac.plataforma, video_id: enllac.video_id, idioma };
+		const { error } = await ambReintentsCache(() => db.from('video_traduccio').insert(fila));
 		enviant = false;
 		if (error) {
 			msg = {
@@ -70,9 +107,10 @@
 		url = '';
 		msg = {
 			ok: true,
-			text: "Afegit a la cua. Es tradueix en uns 15-30 minuts i quedarà aquí per a tothom."
+			text: 'Afegit a la cua. Quedarà aquí per a tothom.'
 		};
 		await carrega();
+		ara = new Date();
 	}
 
 	const miniatura = (v: VideoTraduccio) =>
@@ -111,12 +149,41 @@
 	</select>
 	<button
 		type="submit"
-		disabled={enviant || !url.trim()}
+		disabled={enviant || !url.trim() || comprovant || !!existent}
 		class="rounded-sm bg-sky-600 px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-sky-500 dark:text-slate-900"
 		>{enviant ? 'Enviant…' : 'Tradueix'}</button
 	>
 </form>
-{#if msg}
+{#if url.trim() && !enllac}
+	<p class="-mt-4 mb-6 text-sm text-slate-500 dark:text-slate-400">
+		Aquest enllaç no és de YouTube, Instagram ni Facebook.
+	</p>
+{:else if existent?.estat === 'fet'}
+	<a
+		href="/traductor/{existent.id}"
+		class="-mt-4 mb-6 flex items-center gap-3 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm hover:border-emerald-500 dark:border-emerald-800 dark:bg-emerald-950"
+	>
+		<span class="text-emerald-800 dark:text-emerald-300">
+			<strong>Ja està traduït:</strong>
+			{existent.titol ?? existent.video_id}
+		</span>
+		<span class="ml-auto shrink-0 font-medium text-emerald-800 dark:text-emerald-300">Mira'l →</span>
+	</a>
+{:else if existent?.estat === 'pendent' || existent?.estat === 'processant'}
+	<p class="-mt-4 mb-6 text-sm text-slate-600 dark:text-slate-300">
+		{existent.estat === 'processant' ? "S'està traduint ara mateix" : 'Ja és a la cua'}{previsio(
+			existent
+		)
+			? `: ${previsio(existent)}.`
+			: '.'}
+	</p>
+{:else if existent?.estat === 'error'}
+	<p class="-mt-4 mb-6 text-sm text-red-700 dark:text-red-400">
+		Aquest vídeo ja es va provar i no es va poder traduir{existent.missatge
+			? `: ${existent.missatge}`
+			: '.'}
+	</p>
+{:else if msg}
 	<p
 		class="-mt-4 mb-6 text-sm {msg.ok
 			? 'text-emerald-700 dark:text-emerald-400'
@@ -143,6 +210,11 @@
 						>{v.titol ?? v.url}</a
 					>
 					<span class="text-xs text-slate-400">{nomIdioma(v.idioma)}</span>
+					{#if previsio(v)}
+						<span class="w-full text-xs text-slate-500 dark:text-slate-400">
+							{v.durada ? `${mmss(v.durada)} de vídeo · ` : ''}{previsio(v)}
+						</span>
+					{/if}
 					{#if v.estat === 'error' && v.missatge}
 						<span class="w-full text-xs text-slate-500 dark:text-slate-400">{v.missatge}</span>
 					{/if}
