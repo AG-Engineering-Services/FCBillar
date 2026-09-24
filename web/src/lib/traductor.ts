@@ -99,9 +99,11 @@ export function mmss(segons: number): string {
 //
 // Surt de com treballa el workflow traductor.yml, i s'ajusta sola amb els vídeos
 // ja fets:
-//  - GitHub l'engega als minuts 7, 22, 37 i 52 de cada hora (UTC; com que els
-//    fusos van per hores senceres, són els mateixos minuts a tot arreu), però
-//    sempre ho fa una mica tard;
+//  - la PWA l'engega en el moment d'afegir un vídeo (routes/traductor/avisa), i
+//    comença a traduir al cap d'ARRENCADA_S. Si un pendent fa més d'AVIS_CADUCAT
+//    que espera, l'avís no ha funcionat i toca la programació: els minuts 7, 22,
+//    37 i 52 de cada hora (UTC; com que els fusos van per hores senceres, són els
+//    mateixos minuts a tot arreu), que GitHub dispara tard o gens;
 //  - cada tret prepara la màquina (~45 s el 24/09/2026) i tradueix com a molt
 //    TRET_MAX vídeos, l'un darrere l'altre; si un tret no s'ha acabat, el següent
 //    l'espera;
@@ -109,6 +111,10 @@ export function mmss(segons: number): string {
 //    es mesura dels vídeos ja fets amb `iniciat` → `processat`.
 
 const MINUTS_TRET = [7, 22, 37, 52];
+// Del clic al primer fragment: la cua de GitHub, la preparació de la màquina
+// (~45 s) i les dependències. Mesurat el 24/09/2026: ~60-75 s.
+const ARRENCADA_S = 75;
+const AVIS_CADUCAT_MS = 10 * 60_000;
 const RETARD_CRON_S = 5 * 60;
 const PREPARACIO_S = 60;
 const TRET_MAX = 3;
@@ -177,15 +183,27 @@ export function estimaCua(videos: VideoTraduccio[], ara: Date): Map<number, Esti
 			fi += feina(v);
 		}
 	let tret = properTret(ara).getTime();
+	let primerLot = true;
 	while (i < pendents.length) {
-		let t = Math.max(tret + (RETARD_CRON_S + PREPARACIO_S) * 1000, fi);
+		const primer = pendents[i]!;
+		const avisat = ara.getTime() - ms(primer.creat) < AVIS_CADUCAT_MS;
+		let t: number;
+		if (avisat) {
+			// L'avís ja ha engegat un tret; els lots següents van en el tret que
+			// GitHub deixa en espera, que arrenca quan acaba l'anterior.
+			const arrencada = primerLot ? ms(primer.creat) : fi;
+			t = Math.max(arrencada + ARRENCADA_S * 1000, ara.getTime() + 15_000, fi);
+		} else {
+			t = Math.max(tret + (RETARD_CRON_S + PREPARACIO_S) * 1000, fi);
+			tret += 15 * 60_000;
+		}
 		for (let n = 0; n < TRET_MAX && i < pendents.length; n++, i++) {
 			const v = pendents[i]!;
 			res.set(v.id, { comenca: new Date(t), acaba: new Date(t + feina(v)) });
 			t += feina(v);
 		}
 		fi = t;
-		tret += 15 * 60_000;
+		primerLot = false;
 	}
 	return res;
 }

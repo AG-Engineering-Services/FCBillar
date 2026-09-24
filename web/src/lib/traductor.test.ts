@@ -145,6 +145,25 @@ describe('estimaCua', () => {
 		expect(min(e.comenca)).toBeCloseTo(0.5);
 	});
 
+	it("un de pendent acabat d'afegir comença quan arrenca el tret que ha engegat la PWA", () => {
+		const p = video({ durada: 40, creat: '2026-09-24T09:59:30Z' });
+		const e = estimaCua([fet, p], ara).get(p.id)!;
+		expect(min(e.comenca)).toBeCloseTo(0.75); // 09:59:30 + 75 s
+		expect(min(e.acaba)).toBeCloseTo(1.75);
+	});
+
+	it("si l'arrencada ja hauria d'haver passat, comença d'aquí a poc", () => {
+		const p = video({ durada: 40, creat: '2026-09-24T09:55:00Z' });
+		expect(min(estimaCua([fet, p], ara).get(p.id)!.comenca)).toBeCloseTo(0.25);
+	});
+
+	it('amb avís, el quart pendent va al tret en espera, en acabar el primer', () => {
+		const ps = [1, 2, 3, 4].map((k) => video({ durada: 40, creat: `2026-09-24T09:59:0${k}Z` }));
+		const est = estimaCua([fet, ...ps], ara);
+		const fi3 = est.get(ps[2]!.id)!.acaba.getTime();
+		expect(est.get(ps[3]!.id)!.comenca.getTime()).toBe(fi3 + 75_000);
+	});
+
 	it("si en curs ja passa de l'estimat, no el dona per acabat", () => {
 		const enCurs = video({ estat: 'processant', durada: 10, iniciat: '2026-09-24T09:30:00Z' });
 		expect(estimaCua([fet, enCurs], ara).get(enCurs.id)!.acaba > ara).toBe(true);

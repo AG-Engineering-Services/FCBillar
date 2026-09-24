@@ -117,6 +117,8 @@
 			};
 			return;
 		}
+		// Engega el workflow ara, sense esperar la programació de GitHub (vegeu avisa/+server.ts).
+		fetch('/traductor/avisa', { method: 'POST' }).catch(() => {});
 		url = '';
 		msg = {
 			ok: true,
