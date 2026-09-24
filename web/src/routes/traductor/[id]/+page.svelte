@@ -10,6 +10,7 @@
 		eliminaVideo,
 		mmss,
 		segmentA,
+		urlServida,
 		type Segment,
 		type VideoTraduccio
 	} from '$lib/traductor';
@@ -264,7 +265,7 @@
 				<!-- svelte-ignore a11y_media_has_caption (els subtítols van a la pista WebVTT) -->
 				<video
 					bind:this={videoEl}
-					src={v.video_url}
+					src={urlServida(v.video_url, v.processat)}
 					controls
 					playsinline
 					preload="metadata"
@@ -292,7 +293,7 @@
 
 			<audio
 				bind:this={audio}
-				src={v.audio_url}
+				src={urlServida(v.audio_url, v.processat)}
 				preload="auto"
 				controls={!controlable}
 				ontimeupdate={() => {
