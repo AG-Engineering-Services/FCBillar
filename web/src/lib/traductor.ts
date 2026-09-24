@@ -92,6 +92,22 @@ export async function ambReintentsCache<R extends { error: { code?: string } | n
 	return r;
 }
 
+const RELEASE_TRADUCCIONS =
+	'https://github.com/AG-Engineering-Services/FCBillar/releases/download/traduccions/';
+
+/**
+ * L'enllaç amb què la pàgina reprodueix un mp3 o mp4 del release: a través de
+ * routes/traductor/fitxer, que el serveix amb el tipus correcte (Safari no
+ * reprodueix el que GitHub dona com a octet-stream). `versio` evita que la
+ * memòria cau serveixi el fitxer vell després d'un --retradueix.
+ */
+export function urlServida(url: string | null | undefined, versio?: string | null): string | null {
+	if (!url) return null;
+	if (!url.startsWith(RELEASE_TRADUCCIONS)) return url;
+	const nom = url.slice(RELEASE_TRADUCCIONS.length);
+	return `/traductor/fitxer/${nom}` + (versio ? `?v=${encodeURIComponent(versio)}` : '');
+}
+
 /** Els subtítols catalans en WebVTT, per a la pista del reproductor propi. */
 export function aVtt(segments: Segment[]): string {
 	const t = (x: number) => {

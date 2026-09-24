@@ -8,6 +8,7 @@ import {
 	properTret,
 	quantFalta,
 	segmentA,
+	urlServida,
 	type Segment,
 	type VideoTraduccio
 } from './traductor';
@@ -189,4 +190,14 @@ it('aVtt', () => {
 	expect(vtt).toBe(
 		'WEBVTT\n\n00:00:01.690 --> 00:00:06.893\nHola\n\n01:02:05.500 --> 01:02:07.000\nAdéu → fi\n'
 	);
+});
+
+it('urlServida', () => {
+	const r = 'https://github.com/AG-Engineering-Services/FCBillar/releases/download/traduccions/';
+	expect(urlServida(r + 'instagram-Ddp1xDMSQYC.mp4', '2026-09-24T19:10:00Z')).toBe(
+		'/traductor/fitxer/instagram-Ddp1xDMSQYC.mp4?v=2026-09-24T19%3A10%3A00Z'
+	);
+	expect(urlServida(r + 'youtube-abc.mp3')).toBe('/traductor/fitxer/youtube-abc.mp3');
+	expect(urlServida('https://altre.cat/x.mp3')).toBe('https://altre.cat/x.mp3');
+	expect(urlServida(null)).toBeNull();
 });
