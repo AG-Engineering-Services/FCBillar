@@ -67,6 +67,8 @@ IDIOMES = {"ko": "coreà", "vi": "vietnamita", "tr": "turc"}
 # «sentir» dues vegades 감사합니다 («gràcies»). Un fragment que és NOMÉS això és soroll.
 AL_LUCINACIONS = {
     "감사합니다",
+    "아멘",  # «amén»; el vídeo #2 (música, cap veu) el va «sentir» sis vegades
+    "끝",  # «fi»
     "시청해주셔서감사합니다",
     "구독과좋아요부탁드립니다",
     "cảmơncácbạnđãtheodõi",
@@ -74,6 +76,20 @@ AL_LUCINACIONS = {
     "izlediğiniziçinteşekkürler",
     "teşekkürler",
 }
+# Els crèdits de subtítols que Whisper s'inventa del seu entrenament: al vídeo #2
+# van sortir «한글자막 by …» i «자막 제공 …», i es van traduir i doblar com a
+# «Subtítols en coreà per …». 자막 = subtítols, 구독 = subscriu-te.
+PATRONS_SOROLL = re.compile(r"자막|구독|시청해\s*주|\bby\s+\S", re.I)
+
+# Castellanismes que el model ha deixat anar en traduccions reals (vídeo #6:
+# «esquina», «Así», «judgar»), i alguns de la mateixa família. Una frase que en
+# porta, o que conserva lletres coreanes, es torna a demanar.
+CASTELLANISMES = re.compile(
+    r"\b(esquina|así|pero|también|entonces|bueno|muy|hacia|luego|judgar|juzgar|cuando|"
+    r"donde|ahora|porque|tiene|puede|golpe|efecto|mesa)\b",
+    re.I,
+)
+ESCRIPTURES_ALIENES = re.compile(r"[\uac00-\ud7a3\u3131-\u318e\u4e00-\u9fff]")
 
 # El mateix vocabulari que fan servir els scripts de sistemes (explora.mjs).
 SISTEMA_TRADUCCIO = """Tradueixes al CATALÀ els subtítols d'un vídeo de billar a tres bandes, en {idioma}.
@@ -85,6 +101,9 @@ les MATEIXES claus i la traducció de cada fragment. Regles:
   tacada, retrocés, massé.
 - Si un fragment és soroll o no té sentit, retorna'l buit ("").
 - Números i xifres de rombes, tal qual.
+- Escriu NOMÉS en català. Cap paraula en castellà (esquina → cantonada, así → així, juzgar →
+  jutjar, mesa → taula, golpe → cop), ni en anglès, ni en l'idioma original. Si no saps un terme,
+  descriu-lo en català; no el deixis sense traduir.
 Glossari obligatori ({idioma} → català):
 {glossari}"""
 
@@ -98,7 +117,8 @@ GLOSSARIS = {
 큐 = tac · 스트로크 = tacada · 밀어치기 = seguir (endavant) · 끌어치기 = retrocés
 앞돌리기 = endavant · 뒤돌리기 = endarrere · 옆돌리기 = de costat · 대회전 = gran rotació
 비껴치기, 빗겨치기, 얇게 = tocar la bola fina · 더블쿠션 = doble banda · 횡단 = travessa
-뱅크샷, 뱅크 = bricol · 무회전 = sense efecte · 시스템 = sistema""",
+뱅크샷, 뱅크 = bricol · 무회전 = sense efecte · 시스템 = sistema
+코너, 모서리 = cantonada · 구석 = racó · 당구대, 테이블 = taula · 샷 = tir""",
     "vi": """độ dày = quantitat de bola · điểm đánh, phê, xoáy = efecte · bi cái = bola jugadora
 bi mục tiêu = bola objectiu · băng = banda · băng dài = banda llarga · băng ngắn = banda curta
 điểm, kim cương = rombe · cơ = tac · 3 băng = tres bandes · đánh nảy băng trước = bricol""",
@@ -177,6 +197,10 @@ class Cua:
                 "processat": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             },
         )
+        return r.json()[0] if r.json() else None
+
+    def llegeix(self, id_: int) -> dict | None:
+        r = self._crida("GET", "/video_traduccio", params={"id": f"eq.{id_}"})
         return r.json()[0] if r.json() else None
 
     def desa(self, id_: int, **camps) -> None:
@@ -335,10 +359,27 @@ def es_soroll(text: str) -> bool:
     """Al·lucinacions de Whisper: una frase de tancament sola, o una paraula en
     bucle (el mateix vídeo de prova va donar 이십 trenta-dues vegades seguides)."""
     net = re.sub(r"[\s.,!?…·\-]", "", text).lower()
-    if net in AL_LUCINACIONS:
+    # Interjeccions soltes (으, 아, 음): el vídeo #2 en va donar vint-i-dues.
+    if len(net) <= 2 or net in AL_LUCINACIONS or PATRONS_SOROLL.search(text):
         return True
     paraules = text.split()
     return len(paraules) >= 4 and max(map(paraules.count, paraules)) / len(paraules) > 0.5
+
+
+def sense_repeticions(segments: list[dict]) -> list[dict]:
+    """Treu els fragments que es repeteixen tres o més vegades al mateix vídeo: és
+    Whisper encallat en una al·lucinació, no algú que diu el mateix nou vegades."""
+    clau = [re.sub(r"\W", "", s["orig"]).lower() for s in segments]
+    return [s for s, k in zip(segments, clau, strict=True) if clau.count(k) < 3]
+
+
+def cal_revisar(ca: str) -> str | None:
+    """Per què una traducció no és catalana del tot, o None si ho sembla."""
+    if ESCRIPTURES_ALIENES.search(ca):
+        return "conserva text en l'idioma original"
+    if m := CASTELLANISMES.search(ca):
+        return f"porta el castellanisme «{m.group(0)}»"
+    return None
 
 
 def llm(sistema: str, usuari: str) -> str:
@@ -390,7 +431,19 @@ def tradueix(textos: list[str], idioma: str) -> list[str]:
                 valor = llm(sistema, json.dumps({"1": entrada[clau]}, ensure_ascii=False))
                 m = re.search(r"\{.*\}", valor, re.S)
                 valor = json.loads(m.group(0)).get("1", "") if m else ""
-            sortida[ini + int(clau) - 1] = valor.strip()
+            valor = valor.strip()
+            for _ in range(2):
+                motiu = cal_revisar(valor)
+                if not motiu:
+                    break
+                resposta = llm(
+                    sistema,
+                    json.dumps({"1": entrada[clau]}, ensure_ascii=False)
+                    + f"\n\nUna traducció anterior, «{valor}», {motiu}. Fes-la NOMÉS en català.",
+                )
+                m = re.search(r"\{.*\}", resposta, re.S)
+                valor = (json.loads(m.group(0)).get("1", "") if m else valor).strip()
+            sortida[ini + int(clau) - 1] = valor
     return sortida
 
 
@@ -483,15 +536,30 @@ def processa(fila: dict, whisper: Whisper, veu: Veu, pujar: bool, cua: Cua | Non
             text = whisper.transcriu(tros_wav(wav, t0, t1), fila["idioma"])
             if text and not es_soroll(text):
                 segments.append({"t0": round(t0, 2), "t1": round(t1, 2), "orig": text})
-        if not segments:
-            raise ValueError("No s'hi ha entès cap veu.")
-        for s, ca in zip(
-            segments, tradueix([s["orig"] for s in segments], fila["idioma"]), strict=True
-        ):
-            s["ca"] = ca
+        camps = tradueix_i_dobla(fila, segments, durada, veu, pujar)
+        return {
+            "titol": meta.get("title"),
+            "canal": meta.get("channel") or meta.get("uploader"),
+            "durada": durada,
+            **camps,
+        }
 
+
+def tradueix_i_dobla(
+    fila: dict, segments: list[dict], durada: float, veu: Veu, pujar: bool
+) -> dict:
+    """De la transcripció a l'mp3 penjat. La comparteixen una traducció nova i
+    `--retradueix`, que parteix de la transcripció ja desada."""
+    segments = sense_repeticions(segments)
+    if not segments:
+        raise ValueError("No s'hi ha sentit cap veu: sembla que només hi ha música.")
+    for s, ca in zip(
+        segments, tradueix([s["orig"] for s in segments], fila["idioma"]), strict=True
+    ):
+        s["ca"] = ca
+    with tempfile.TemporaryDirectory() as tmp:
         nom = f"{fila['plataforma']}-{re.sub(r'[^A-Za-z0-9_-]', '_', fila['video_id'])}.mp3"
-        mp3 = dir_ / nom
+        mp3 = Path(tmp) / nom
         doblatge(veu, segments, durada, mp3)
         audio_url = None
         if pujar:
@@ -504,16 +572,31 @@ def processa(fila: dict, whisper: Whisper, veu: Veu, pujar: bool, cua: Cua | Non
             desat.parent.mkdir(exist_ok=True)
             desat.write_bytes(mp3.read_bytes())
             print(f"  àudio a {desat}")
+    return {"estat": "fet", "segments": segments, "audio_url": audio_url, "missatge": None}
 
-        return {
-            "estat": "fet",
-            "titol": meta.get("title"),
-            "canal": meta.get("channel") or meta.get("uploader"),
-            "durada": durada,
-            "segments": segments,
-            "audio_url": audio_url,
-            "missatge": None,
-        }
+
+def retradueix(cua: Cua, ids: list[int], veu: Veu, pujar: bool) -> None:
+    """Torna a fer la traducció i la veu de vídeos ja fets, des de la transcripció
+    desada: no cal tornar-los a baixar. Per quan milloren el prompt o els filtres."""
+    for id_ in ids:
+        fila = cua.llegeix(id_)
+        if not fila or not fila.get("segments"):
+            print(f"#{id_}: no hi és o no té transcripció")
+            continue
+        print(f"#{id_} {fila['video_id']}: retradueixo {len(fila['segments'])} fragments")
+        originals = [
+            {"t0": s["t0"], "t1": s["t1"], "orig": s["orig"]}
+            for s in fila["segments"]
+            if not es_soroll(s["orig"])
+        ]
+        try:
+            camps = tradueix_i_dobla(fila, originals, float(fila["durada"] or 0), veu, pujar)
+            print(f"  fet: {len(camps['segments'])} fragments")
+        except ValueError as e:
+            # Tot era soroll: deixa de ser una traducció i l'mp3 el treu la neteja.
+            camps = {"estat": "error", "segments": None, "audio_url": None, "missatge": str(e)}
+            print(f"  error: {e}")
+        cua.desa(id_, **camps)
 
 
 def main() -> None:
@@ -522,9 +605,20 @@ def main() -> None:
     ap.add_argument(
         "--sense-pujar", action="store_true", help="deixa l'mp3 a ./traduccions i no el puja"
     )
+    ap.add_argument(
+        "--retradueix",
+        type=int,
+        nargs="+",
+        metavar="ID",
+        help="refà la traducció i la veu d'aquests vídeos des de la transcripció desada",
+    )
     args = ap.parse_args()
 
     cua = Cua()
+    if args.retradueix:
+        veu = Veu(Path(os.environ.get("PIPER_MODELS", Path.home() / ".cache" / "piper")))
+        retradueix(cua, args.retradueix, veu, pujar=not args.sense_pujar)
+        return
     cua.reprèn_encallades()
     fila = cua.agafa()
     if not fila:
