@@ -152,10 +152,16 @@ class Cua:
         """El Data API de Neon corre en diverses instàncies i cada una té la seva
         memòria cau d'esquemes: després d'una migració, unes veuen la taula i
         d'altres responen 404 PGRST205 durant una bona estona (el 24/09/2026, amb
-        la 0022 aplicada feia 13 minuts, 3 de cada 8 peticions). Es torna a provar."""
+        la 0022 aplicada feia 13 minuts, 3 de cada 8 peticions). Amb una columna nova
+        és el mateix però amb 400 PGRST204: vint minuts després de la 0025, cap de
+        vuit peticions no veia `video_url`, i `NOTIFY pgrst` no hi fa res. Es torna
+        a provar."""
         for intent in range(8):
             r = self.http.request(metode, ruta, **kw)
-            if r.status_code == 404 and "PGRST205" in r.text and intent < 7:
+            no_la_veu = (r.status_code == 404 and "PGRST205" in r.text) or (
+                r.status_code == 400 and "PGRST204" in r.text
+            )
+            if no_la_veu and intent < 7:
                 time.sleep(10)
                 continue
             r.raise_for_status()
@@ -205,7 +211,16 @@ class Cua:
 
     def desa(self, id_: int, **camps) -> None:
         camps["processat"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        self._crida("PATCH", "/video_traduccio", params={"id": f"eq.{id_}"}, json=camps)
+        try:
+            self._crida("PATCH", "/video_traduccio", params={"id": f"eq.{id_}"}, json=camps)
+        except httpx.HTTPStatusError as e:
+            # Si el Data API encara no veu `video_url` després dels reintents, val
+            # més desar la traducció sense l'enllaç que perdre-la sencera: el vídeo
+            # ja és al release, i `--retradueix` l'enllaçarà quan la vegi.
+            if "PGRST204" not in e.response.text or camps.pop("video_url", None) is None:
+                raise
+            print("  avís: el Data API encara no veu video_url; es desa sense")
+            self._crida("PATCH", "/video_traduccio", params={"id": f"eq.{id_}"}, json=camps)
 
 
 # --- àudio ------------------------------------------------------------------
