@@ -34,6 +34,16 @@ self.addEventListener('fetch', (event) => {
 	if (request.method !== 'GET') return;
 	const url = new URL(request.url);
 	if (url.origin !== self.location.origin) return; // Supabase i altres: sense tocar
+	// Àudio i vídeo (el traductor, /traductor/fitxer): sense tocar. Safari a
+	// l'iPhone els demana a trossos (Range → 206) i, quan passen pel service
+	// worker, no els reprodueix; Chrome sí, i per això no es veia a l'ordinador.
+	if (
+		url.pathname.startsWith('/traductor/fitxer/') ||
+		request.headers.has('range') ||
+		request.destination === 'audio' ||
+		request.destination === 'video'
+	)
+		return;
 
 	event.respondWith(
 		(async () => {
