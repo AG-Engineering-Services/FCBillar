@@ -145,6 +145,13 @@ export interface StandingRow {
   pc: number | null;
   /** Punts restats per sanció federativa (> 0). null = sense sanció. */
   penalitzacio?: number | null;
+  /** Punts parcials a favor i en contra (2 per partida guanyada, 1 per empatada). */
+  ppf?: number | null;
+  ppc?: number | null;
+  /** Caramboles fetes i rebudes, i entrades jugades, sumant totes les partides. */
+  car_f?: number | null;
+  car_c?: number | null;
+  entrades?: number | null;
 }
 
 export interface CopaGroup {
