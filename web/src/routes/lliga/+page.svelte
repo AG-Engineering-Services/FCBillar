@@ -594,32 +594,44 @@
 			</button>
 			{#if !collapsed.has(g.grup_id)}
 				{#if mode === 'equips'}
-					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
-						<span class="w-5 text-center">#</span>
-						<span class="flex-1">Equip</span>
-						<span class="w-7 text-center">PJ</span>
-						<span class="w-9 text-right">Pts</span>
+					<!-- Amb G-E-P, parcials, caramboles, entrades i mitjana ja no hi cap a
+					     l'amplada d'un mòbil: la taula fa el seu propi scroll horitzontal i
+					     el nom de l'equip queda fix a l'esquerra. -->
+					<div class="overflow-x-auto border-t border-slate-100 dark:border-slate-800">
+						<table class="w-full min-w-[34rem] text-sm tabular-nums">
+							<thead class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+								<tr class="border-b border-slate-100 dark:border-slate-800">
+									<th class="w-7 py-1.5 pl-3 text-center font-normal">#</th>
+									<th class="sticky left-0 bg-white py-1.5 pl-1 text-left font-normal dark:bg-slate-900">Equip</th>
+									<th class="w-8 py-1.5 text-center font-normal" title="Encontres jugats">PJ</th>
+									<th class="w-14 py-1.5 text-center font-normal" title="Guanyats - empatats - perduts">G-E-P</th>
+									<th class="w-14 py-1.5 text-center font-normal" title="Punts parcials a favor - en contra (2 per partida guanyada, 1 per empatada)">Parc.</th>
+									<th class="w-16 py-1.5 text-center font-normal" title="Caramboles fetes - rebudes">Car.</th>
+									<th class="w-11 py-1.5 text-right font-normal" title="Entrades jugades">Entr.</th>
+									<th class="w-12 py-1.5 text-right font-normal" title="Mitjana general de l'equip: caramboles fetes / entrades">Mitj.</th>
+									<th class="w-10 py-1.5 pr-3 text-right font-normal">Pts</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each teamRows(g.grup_id) as r (r.equip)}
+									<tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/60">
+										<td class="py-2 pl-3 text-center font-semibold {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</td>
+										<td class="sticky left-0 max-w-[11rem] bg-white py-2 pl-1 dark:bg-slate-900">
+											<button type="button" onclick={() => obreEquip(r)} class="block w-full truncate text-left font-medium leading-tight" title="Qui hi juga">{r.equip}</button>
+											{#if r.penalitzacio}<div class="text-[11px] font-medium text-red-500 dark:text-red-400" title="Sanció federativa: −{r.penalitzacio} {r.penalitzacio === 1 ? 'punt' : 'punts'}">−{r.penalitzacio} sanció</div>{/if}
+										</td>
+										<td class="py-2 text-center text-slate-500 dark:text-slate-400">{r.pj}</td>
+										<td class="py-2 text-center text-xs text-slate-500 dark:text-slate-400">{r.g}-{r.e}-{r.p}</td>
+										<td class="py-2 text-center text-xs text-slate-500 dark:text-slate-400">{r.ppf != null ? `${r.ppf}-${r.ppc}` : '—'}</td>
+										<td class="py-2 text-center text-xs text-slate-500 dark:text-slate-400">{r.car_f != null ? `${r.car_f}-${r.car_c}` : '—'}</td>
+										<td class="py-2 text-right text-xs text-slate-500 dark:text-slate-400">{r.entrades ?? '—'}</td>
+										<td class="py-2 text-right font-mono text-xs text-slate-600 dark:text-slate-300">{r.entrades && r.car_f != null ? (r.car_f / r.entrades).toFixed(3) : '—'}</td>
+										<td class="py-2 pr-3 text-right font-mono font-bold">{r.punts}</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
 					</div>
-					<ul>
-						{#each teamRows(g.grup_id) as r (r.equip)}
-							<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
-								<button
-									type="button"
-									onclick={() => obreEquip(r)}
-									class="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60"
-									title="Qui hi juga"
-								>
-									<span class="w-5 shrink-0 text-center text-sm font-semibold tabular-nums {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</span>
-									<div class="min-w-0 flex-1">
-										<div class="truncate text-sm font-medium leading-tight">{r.equip}</div>
-										<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.g}-{r.e}-{r.p}{#if r.penalitzacio}<span class="ml-1 font-medium text-red-500 dark:text-red-400" title="Sanció federativa: −{r.penalitzacio} {r.penalitzacio === 1 ? 'punt' : 'punts'}">· −{r.penalitzacio} sanció</span>{/if}</div>
-									</div>
-									<span class="w-7 shrink-0 text-center text-sm tabular-nums text-slate-500 dark:text-slate-400">{r.pj}</span>
-									<span class="w-9 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts}</span>
-								</button>
-							</li>
-						{/each}
-					</ul>
 				{:else}
 					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
 						<span class="w-5 text-center">#</span>

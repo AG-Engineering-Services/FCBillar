@@ -1316,6 +1316,62 @@ def _match_official_rows(off_rows, stats: dict, equips: dict, repo) -> dict:
     return matched
 
 
+def _caramboles_per_encontre(conn, lliga: int, season_id) -> dict[int, list[tuple[int, int, int]]]:
+    """Les partides de cada encontre com a (caramboles local, caramboles visitant, entrades).
+
+    Les mateixes dues fonts que `publish_lliga_encontres`, en el mateix ordre i
+    amb la mateixa dedup: primer `games`, que és l'oficial, i després l'acta
+    (`lliga_pending_partides`) del que el rànquing encara no ha publicat. Sense la
+    segona, la classificació diria zero caramboles fins al rànquing següent.
+
+    A `games` el jugador 1 és gairebé sempre el de casa, però no sempre: quan
+    `equip1_id` és l'equip visitant, la partida es gira. Si no porta equip es
+    pren com a local, que és com la publica `lliga_partides`.
+    """
+    from collections import defaultdict
+
+    per_enc: dict[int, list[tuple[int, int, int]]] = defaultdict(list)
+    vistes: dict[int, set[str]] = defaultdict(set)
+
+    def _afegeix(eid, j1, c1, j2, c2, ent, girada=False) -> None:
+        sig = _sig_partida_lliga(j1, c1, j2, c2, ent)
+        if sig in vistes[eid] or c1 is None or c2 is None or not ent:
+            return
+        vistes[eid].add(sig)
+        per_enc[eid].append((c2, c1, ent) if girada else (c1, c2, ent))
+
+    for r in conn.execute(
+        """
+        SELECT g.encontre_lliga_id AS eid, p1.nom AS j1, g.caramboles1 AS c1,
+               p2.nom AS j2, g.caramboles2 AS c2, g.entrades AS e,
+               COALESCE(g.equip1_id = en.equip_visitant_id, 0) AS girada
+        FROM games g JOIN encontres_lliga en ON en.id = g.encontre_lliga_id
+        JOIN players p1 ON p1.id = g.player1_id JOIN players p2 ON p2.id = g.player2_id
+        WHERE en.lliga_id = ? AND en.temporada_id = ?
+        """,
+        (lliga, season_id),
+    ):
+        _afegeix(r["eid"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"], bool(r["girada"]))
+
+    for r in conn.execute(
+        """
+        SELECT lp.encontre_lliga_id AS eid, lp.player1_nom AS j1, lp.caramboles1 AS c1,
+               lp.player2_nom AS j2, lp.caramboles2 AS c2, lp.entrades AS e
+        FROM lliga_pending_partides lp
+        JOIN encontres_lliga en ON en.id = lp.encontre_lliga_id
+        WHERE en.lliga_id = ? AND en.temporada_id = ?
+        """,
+        (lliga, season_id),
+    ):
+        _afegeix(r["eid"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"])
+    return per_enc
+
+
+#: Els camps de la classificació que van arribar amb la 0026. Si el Data API
+#: encara no els veu, la classificació es publica sense.
+_CAMPS_CLASSIFICACIO_0026 = ("ppf", "ppc", "car_f", "car_c", "entrades")
+
+
 def publish_lliga(
     db_path: Path | None = None,
     on_progress: Progress | None = None,
@@ -1406,6 +1462,7 @@ def publish_lliga(
 
     group_rows: list[dict] = []
     standing_rows: list[dict] = []
+    partides_de = _caramboles_per_encontre(conn, lliga, season_id)
     for grp in groups:
         div, gid = grp["divisio_id"], grp["grup_id"]
         group_rows.append(
@@ -1419,7 +1476,7 @@ def publish_lliga(
         )
         enc = conn.execute(
             """
-            SELECT equip_local_id AS loc, equip_visitant_id AS vis,
+            SELECT id, equip_local_id AS loc, equip_visitant_id AS vis,
                    p_match_local AS pml, p_match_visitant AS pmv,
                    p_parcials_local AS ppl, p_parcials_visitant AS ppv
             FROM encontres_lliga
@@ -1431,8 +1488,12 @@ def publish_lliga(
 
         def _s(eid):
             return stats.setdefault(
-                eid, {"pj": 0, "g": 0, "e": 0, "p": 0, "pf": 0, "pc": 0, "ppf": 0, "ppc": 0}
-            )
+                eid,
+                {
+                    "pj": 0, "g": 0, "e": 0, "p": 0, "pf": 0, "pc": 0, "ppf": 0, "ppc": 0,
+                    "car_f": 0, "car_c": 0, "entrades": 0,
+                },
+            )  # fmt: skip
 
         for r in enc:
             pml, pmv = r["pml"], r["pmv"]
@@ -1451,6 +1512,15 @@ def publish_lliga(
                 sl["ppc"] += ppv
                 sv["ppf"] += ppv
                 sv["ppc"] += ppl
+            # Les entrades d'una partida són les mateixes per als dos jugadors: cada
+            # equip les suma senceres, i la seva mitjana és caramboles / entrades.
+            for cl, cv, ent in partides_de.get(r["id"], ()):
+                sl["car_f"] += cl
+                sl["car_c"] += cv
+                sv["car_f"] += cv
+                sv["car_c"] += cl
+                sl["entrades"] += ent
+                sv["entrades"] += ent
             if pml > pmv:
                 sl["g"] += 1
                 sv["p"] += 1
@@ -1478,7 +1548,10 @@ def publish_lliga(
         for eid, off in matched.items():
             eid_per_oficial[id(off)] = eid
 
-        ZEROS = {"pj": 0, "g": 0, "e": 0, "p": 0, "pf": 0, "pc": 0, "ppf": 0, "ppc": 0}
+        ZEROS = {
+            "pj": 0, "g": 0, "e": 0, "p": 0, "pf": 0, "pc": 0, "ppf": 0, "ppc": 0,
+            "car_f": 0, "car_c": 0, "entrades": 0,
+        }  # fmt: skip
 
         # El grup entra per paràmetre i no des del bucle: una funció definida dins
         # d'un bucle que en llegeix les variables es queda amb l'última volta si
@@ -1499,6 +1572,11 @@ def publish_lliga(
                 "pf": s["pf"],
                 "pc": s["pc"],
                 "penalitzacio": penal,
+                "ppf": s["ppf"],
+                "ppc": s["ppc"],
+                "car_f": s["car_f"],
+                "car_c": s["car_c"],
+                "entrades": s["entrades"],
             }
 
         if off_rows:
@@ -1564,9 +1642,29 @@ def publish_lliga(
     counts["lliga_groups"] = _upsert(
         sb, "lliga_groups", group_rows, "lliga_id,divisio_id,grup_id", prog
     )
-    counts["lliga_standings"] = _upsert(
-        sb, "lliga_standings", standing_rows, "lliga_id,divisio_id,grup_id,equip", prog
-    )
+    try:
+        counts["lliga_standings"] = _upsert(
+            sb, "lliga_standings", standing_rows, "lliga_id,divisio_id,grup_id,equip", prog
+        )
+    except Exception as exc:
+        # Les columnes de la 0026 triguen mitja hora a ser visibles a totes les
+        # instàncies del Data API. Mentrestant, la classificació es publica sense:
+        # els punts i les posicions no poden quedar-se sense actualitzar per això.
+        if not esquema_encara_no_hi_es(exc):
+            raise
+        prog(
+            "warn",
+            "lliga_standings: el Data API encara no veu les columnes de la 0026 "
+            "(parcials, caramboles, entrades); es publica sense. Si dura més d'una "
+            "hora, la migració no s'ha aplicat.",
+        )
+        sense = [
+            {k: v for k, v in r.items() if k not in _CAMPS_CLASSIFICACIO_0026}
+            for r in standing_rows
+        ]
+        counts["lliga_standings"] = _upsert(
+            sb, "lliga_standings", sense, "lliga_id,divisio_id,grup_id,equip", prog
+        )
     # L'upsert no s'endú res: només escriu i sobreescriu. Aquestes dues taules
     # són «la temporada en curs», o sigui que tot el que hi quedi de més ho és
     # de sobres, i sobra en silenci —no es veu que hi sigui fins que apareix
@@ -2527,21 +2625,6 @@ def publish_lliga_encontres(
     # La dedup va per signatura (parella de noms normalitzats + caramboles +
     # entrades), la mateixa que fa servir `publish_pending_games`: quan el rànquing
     # publiqui la partida, la fila pendent deixa d'afegir-s'hi i no en surten dues.
-    def _sig_partida(na, ca, nb, cb, ent) -> str:
-        import unicodedata as _ud
-
-        def _nm(x):
-            x = "".join(c for c in _ud.normalize("NFD", x or "") if _ud.category(c) != "Mn")
-            return " ".join(x.strip().lower().split())
-
-        a, b = sorted(
-            [
-                f"{_nm(na)}:{ca if ca is not None else ''}",
-                f"{_nm(nb)}:{cb if cb is not None else ''}",
-            ]
-        )
-        return f"{a}|{b}|{ent if ent is not None else ''}"
-
     part_rows = []
     counter: dict = defaultdict(int)
     vistes: dict[int, set[str]] = defaultdict(set)
@@ -2549,7 +2632,7 @@ def publish_lliga_encontres(
     def _afegeix(eid, mod, j1, c1, j2, c2, ent) -> None:
         # `eid` ve de la base local; al núvol hi va la clau estable.
         eid = clau_de.get(eid, eid)
-        sig = _sig_partida(j1, c1, j2, c2, ent)
+        sig = _sig_partida_lliga(j1, c1, j2, c2, ent)
         if sig in vistes[eid]:
             return
         vistes[eid].add(sig)
