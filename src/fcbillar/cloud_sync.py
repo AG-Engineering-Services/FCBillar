@@ -4634,15 +4634,47 @@ def publish_player_clubs(
                 lliga[key] = (club, r["n"])
     except sqlite3.OperationalError:
         pass
+
+    # `lliga_player_clubs` l'omple un script que es va passar un sol cop sobre
+    # l'historial (`scripts/import_lliga_clubs.py`) i s'acaba a la 2024-2025: cap
+    # reingesta hi afegeix res. Qui una temporada només jugava la lliga s'hi
+    # quedava sense club: AMETLLER CONGOST, LLUIS no tenia fila de la 2025-2026
+    # havent-hi jugat catorze partides amb el C.B.BANYOLES, i com ell 173 més.
+    #
+    # Les partides de lliga sí que les porta cada reingesta, i amb l'equip de
+    # cadascú. Només omplen el que les altres dues fonts no saben: no en
+    # corregeixen cap.
+    partides: dict = {}  # (fcb, temp) -> (club, n)
+    for r in conn.execute(
+        """
+        SELECT p.fcb_id AS fcb, te.nom AS temp, c.nom AS club, COUNT(*) AS n
+        FROM (
+            SELECT player1_id AS player_id, equip1_id AS equip_id, temporada_id
+            FROM games WHERE encontre_lliga_id IS NOT NULL
+            UNION ALL
+            SELECT player2_id, equip2_id, temporada_id
+            FROM games WHERE encontre_lliga_id IS NOT NULL
+        ) g
+        JOIN players p ON p.id = g.player_id
+        JOIN temporades te ON te.id = g.temporada_id
+        JOIN equips e ON e.id = g.equip_id
+        JOIN clubs c ON c.id = e.club_id
+        WHERE p.fcb_id NOT LIKE 'name:%' AND TRIM(c.nom) <> ''
+        GROUP BY p.fcb_id, te.nom, c.nom
+        """
+    ):
+        key = (r["fcb"], r["temp"])
+        if key not in partides or r["n"] > partides[key][1]:
+            partides[key] = (r["club"], r["n"])
     conn.close()
 
     rows = [
         {
             "player_fcb_id": fcb,
             "temporada": temp,
-            "club": best[(fcb, temp)][0] if (fcb, temp) in best else lliga[(fcb, temp)][0],
+            "club": (best.get((fcb, temp)) or lliga.get((fcb, temp)) or partides[(fcb, temp)])[0],
         }
-        for (fcb, temp) in set(best) | set(lliga)
+        for (fcb, temp) in set(best) | set(lliga) | set(partides)
     ]
 
     # La temporada en curs mana des de `afiliacions`, que és l'única font que la
