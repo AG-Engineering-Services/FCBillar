@@ -4599,6 +4599,13 @@ def publish_player_clubs(
     conn.row_factory = sqlite3.Row
     sb = get_client()
 
+    # «Cap» i «Independent» no són cap club: la classificació d'un individual els
+    # escriu a qui s'hi inscriu sense, i al final es descarten. Si entressin a la
+    # tria hi guanyarien i s'endurien la fila sencera, encara que el jugador hagi
+    # jugat tota la lliga amb un equip: 14 partides en tenia GUTIÉRREZ CONTRERAS,
+    # ARNOLD la 2025-2026 i no sortia de cap club.
+    _noclub = {"CAP", "INDEPENDENT", "INDEPENDIENT", ""}
+
     best: dict = {}  # (fcb, temp) -> (club, n)
     for r in conn.execute(
         """
@@ -4611,6 +4618,8 @@ def publish_player_clubs(
         GROUP BY p.fcb_id, te.nom, tp.club_text
         """
     ):
+        if r["club"].strip().upper() in _noclub:
+            continue
         key = (r["fcb"], r["temp"])
         if key not in best or r["n"] > best[key][1]:
             best[key] = (r["club"], r["n"])
@@ -4643,7 +4652,7 @@ def publish_player_clubs(
     #
     # Les partides de lliga sí que les porta cada reingesta, i amb l'equip de
     # cadascú. Només omplen el que les altres dues fonts no saben: no en
-    # corregeixen cap.
+    # corregeixen cap. I la copa, més avall, només el que no sap ningú més.
     partides: dict = {}  # (fcb, temp) -> (club, n)
     for r in conn.execute(
         """
@@ -4666,15 +4675,75 @@ def publish_player_clubs(
         key = (r["fcb"], r["temp"])
         if key not in partides or r["n"] > partides[key][1]:
             partides[key] = (r["club"], r["n"])
+
+    # I la copa, per a qui una temporada no juga res més. Les seves partides de
+    # `games` no porten ni equip ni temporada; l'equip és a `copa_encontres`, i la
+    # temporada de cada edició surt de la data de les mateixes partides a `games`.
+    copa: dict = {}  # (fcb, temp) -> (club, n)
+    try:
+        temp_edicio: dict = {}  # edicio -> Counter(temporada)
+        for r in conn.execute(
+            """
+            SELECT ce.edicio_id AS edicio, g.data_partida AS data
+            FROM copa_partides cp
+            JOIN copa_encontres ce ON ce.id = cp.encontre_copa_id
+            JOIN players pl ON UPPER(pl.nom) = UPPER(cp.local_nom)
+            JOIN players pv ON UPPER(pv.nom) = UPPER(cp.visitant_nom)
+            JOIN competicions co ON co.nom = 'COPA'
+            JOIN games g ON g.competicio_id = co.id AND g.entrades = cp.entrades
+                AND ((g.player1_id = pl.id AND g.player2_id = pv.id
+                      AND g.caramboles1 = cp.local_caramboles)
+                  OR (g.player1_id = pv.id AND g.player2_id = pl.id
+                      AND g.caramboles2 = cp.local_caramboles))
+            """
+        ):
+            any_, mes = int(r["data"][:4]), int(r["data"][5:7])
+            # Com `pipeline._derive_temporada`: l'agost ja és temporada nova.
+            temp = f"{any_}-{any_ + 1}" if mes >= 8 else f"{any_ - 1}-{any_}"
+            temp_edicio.setdefault(r["edicio"], {}).setdefault(temp, 0)
+            temp_edicio[r["edicio"]][temp] += 1
+        vots: dict = {}  # (fcb, temp) -> {club: n}
+        for r in conn.execute(
+            """
+            SELECT ce.edicio_id AS edicio, p.fcb_id AS fcb, x.equip AS equip
+            FROM (
+                SELECT encontre_copa_id, local_nom AS nom, 1 AS local FROM copa_partides
+                UNION ALL
+                SELECT encontre_copa_id, visitant_nom, 0 FROM copa_partides
+            ) cp
+            JOIN copa_encontres ce ON ce.id = cp.encontre_copa_id
+            JOIN players p ON UPPER(p.nom) = UPPER(cp.nom)
+            JOIN (
+                SELECT id, 1 AS local, equip_local AS equip FROM copa_encontres
+                UNION ALL
+                SELECT id, 0, equip_visitant FROM copa_encontres
+            ) x ON x.id = ce.id AND x.local = cp.local
+            WHERE p.fcb_id NOT LIKE 'name:%' AND x.equip IS NOT NULL AND TRIM(x.equip) <> ''
+            """
+        ):
+            temps = temp_edicio.get(r["edicio"])
+            if not temps:
+                continue  # una edició sense cap partida datada: no se'n sap la temporada
+            clau = (r["fcb"], max(temps, key=temps.get))
+            vots.setdefault(clau, {}).setdefault(r["equip"], 0)
+            vots[clau][r["equip"]] += 1
+        copa = {clau: max(v.items(), key=lambda kv: kv[1]) for clau, v in vots.items()}
+    except sqlite3.OperationalError:
+        copa = {}
     conn.close()
 
     rows = [
         {
             "player_fcb_id": fcb,
             "temporada": temp,
-            "club": (best.get((fcb, temp)) or lliga.get((fcb, temp)) or partides[(fcb, temp)])[0],
+            "club": (
+                best.get((fcb, temp))
+                or lliga.get((fcb, temp))
+                or partides.get((fcb, temp))
+                or copa[(fcb, temp)]
+            )[0],
         }
-        for (fcb, temp) in set(best) | set(lliga) | set(partides)
+        for (fcb, temp) in set(best) | set(lliga) | set(partides) | set(copa)
     ]
 
     # La temporada en curs mana des de `afiliacions`, que és l'única font que la
@@ -4803,8 +4872,7 @@ def publish_player_clubs(
         mc = canon.get(_club_key(r["club"]), _clean_club(r["club"]))
         r["club"] = final.get(mc, _resolve(mc))
 
-    # Filtra els "no club" (Cap / Independent / buit).
-    _noclub = {"CAP", "INDEPENDENT", "INDEPENDIENT", ""}
+    # Filtra els "no club" (Cap / Independent / buit) que vinguin de les altres fonts.
     rows = [r for r in rows if (r["club"] or "").strip().upper() not in _noclub]
 
     n = _upsert(sb, "player_clubs", rows, "player_fcb_id,temporada", prog)
