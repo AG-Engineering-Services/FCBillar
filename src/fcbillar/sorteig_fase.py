@@ -384,8 +384,12 @@ _POSICIONS = {
 }
 
 #: «els dos primers de cada grup», «el primer de cada grup», «els primers de cada grup».
+#:
+#: L'article és opcional i pot venir mal escrit: el PDF de la prèvia de 1a de
+#: 2026-27 diu «e primer de cada grup». El que compta és el nombre, si n'hi ha, i
+#: «de cada grup».
 _RE_PER_GRUP = re.compile(
-    r"\b(?:els?|les)\s+(?:(\w+)\s+)?(primers?|segons?|tercers?)\s+de\s+cada\s+grup",
+    r"\b(?:(\w+)\s+)?(primers?|segons?|tercers?)\s+de\s+cada\s+grup",
     re.IGNORECASE,
 )
 
@@ -394,6 +398,9 @@ _RE_MILLORS = re.compile(
     r"\b(?:els?|les)\s+(\w+)\s+millors\s+(primers?|segons?|tercers?|quarts?)",
     re.IGNORECASE,
 )
+
+#: «el millor segon»: un de sol, en singular i sense nombre.
+_RE_EL_MILLOR = re.compile(r"\bel\s+millor\s+(primer|segon|tercer|quart)\b", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -437,14 +444,19 @@ def classificats(regla: str | None) -> Classificats | None:
     m = _RE_PER_GRUP.search(regla)
     if m is None:
         return None
+    # La paraula del davant només compta si és un nombre: «els dos primers» = dos
+    # de cada grup; «els primers», «el primer» o «e primer» = un de cada grup.
     quants = _NOMBRES.get((m.group(1) or "").lower(), 1) if m.group(1) else 1
-    # «els dos primers» = dos de cada grup. «els primers» = un de cada grup.
     per_grup = quants
     millors, posicio = 0, None
     mm = _RE_MILLORS.search(regla)
+    un = _RE_EL_MILLOR.search(regla)
     if mm is not None:
         millors = _NOMBRES.get(mm.group(1).lower(), 0)
         posicio = _POSICIONS.get(mm.group(2).lower())
+    elif un is not None:
+        millors = 1
+        posicio = _POSICIONS.get(un.group(1).lower())
     return Classificats(per_grup=per_grup, millors=millors, posicio_millors=posicio)
 
 
@@ -468,15 +480,21 @@ def casa_amb_fase(titol: str, divisio_nom: str, fase_nom: str) -> bool:
 
     Es demana que el títol contingui les dues coses. «Pre-Prèvies 3 bandes 1a
     Divisió» casa amb la divisió «1a DIVISIÓ» i la fase «PRE-PRÈVIA», i no amb la
-    fase «PRÈVIA» d'aquella mateixa divisió, perquè «PRE-PREVIA» i «PREVIA» es
-    comparen com a paraules senceres.
+    fase «PRÈVIA» d'aquella mateixa divisió.
+
+    Comparar paraules senceres no n'hi ha prou per a això últim, i durant un temps
+    es va creure que sí: «PRE-PRÈVIA» normalitzat és «PRE PREVIA», que conté la
+    paraula «PREVIA». El PDF de la pre-prèvia escrivia la seva regla també a la
+    prèvia, amb les places calculades amb els grups d'aquella: a la 1a de 2026-27
+    hi van quedar 13 places on n'hi ha 7. Per això el nom de la fase no pot venir
+    precedit d'un «PRE».
     """
     t = _norm_titol(titol)
     div = _norm_titol(divisio_nom).strip()
     fase = _norm_titol(fase_nom).strip()
     if not div or not fase:
         return False
-    return div in t and f" {fase} " in t
+    return div in t and re.search(rf"(?<!\bPRE) {re.escape(fase)} ", t) is not None
 
 
 # --------------------------- la regla, lligada a la seva fase ---------------------------
@@ -521,7 +539,6 @@ def desa_regles(conn, client=None, temporada: str | None = None) -> tuple[int, l
             regla_llegida = classificats(sorteig.regla)
             if regla_llegida is None:
                 avisos.append(f"{sorteig.titol}: la regla no encaixa amb cap patró conegut")
-                continue
 
             # Quina fase és: es comparen el títol del PDF amb la divisió i la fase.
             # Només les fases de la temporada en curs.
@@ -562,7 +579,13 @@ def desa_regles(conn, client=None, temporada: str | None = None) -> tuple[int, l
                 avisos.append(f"{sorteig.titol}: no sé a quina fase correspon")
                 continue
             for f in casades:
-                places = regla_llegida.places(f["grups"] or 0) if f["grups"] else None
+                # Una regla que no s'ha sabut llegir es desa igualment, sense
+                # places: així no hi queda un nombre d'una lectura anterior.
+                places = (
+                    regla_llegida.places(f["grups"] or 0)
+                    if regla_llegida is not None and f["grups"]
+                    else None
+                )
                 conn.execute(
                     "UPDATE torneig_fases SET regla = ?, places = ? WHERE id = ?",
                     (sorteig.regla, places, f["id"]),
