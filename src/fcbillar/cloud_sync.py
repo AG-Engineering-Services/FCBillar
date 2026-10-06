@@ -2128,6 +2128,7 @@ def publish_opens(
     # vegades a la temporada 2025-2026 a la web (ids 2831 i 2991). L'upsert sol
     # no ho pot veure: només escriu, no sap què ha desaparegut.
     counts["removed"] = _prune_orphan_opens(sb, {o["open_id"] for o in opens}, prog)
+    counts["classificacions_retirades"] = _retira_classificacions_que_sobren(sb, classifs, prog)
 
     # I fora la classificació que s'hagués publicat d'un torneig que encara es juga.
     if en_joc:
@@ -2185,6 +2186,42 @@ def _torneigs_en_joc(conn) -> set[int]:
         return set()
 
     return {r["tid"] for r in files if ronda_seguent(r["nom"] or "")}
+
+
+def _retira_classificacions_que_sobren(sb, classifs: list[dict], prog: Progress) -> int:
+    """Treu del núvol les files de classificació final que la base local ja no té.
+
+    `_prune_orphan_opens` s'endú la classificació d'un `open_id` que ha deixat
+    d'existir. Però quan dos torneigs s'intercanvien el número en reingerir-se,
+    cap dels dos deixa d'existir: la classificació de l'un es queda penjada de
+    l'altre. L'octubre del 2026 un jugador sortia sisè a l'Open de Banda sense
+    haver-hi jugat cap partida: era la seva fila de l'Open de Lliure, que abans
+    tenia aquell número.
+
+    La taula surt sencera de la base local, o sigui que es pot comparar amb el que
+    hi ha al núvol. Sense cap classificació local no es retira res: vol dir «no en
+    sé res», no «no n'hi ha cap».
+    """
+    if not classifs:
+        prog("warn", "cap classificació a la BD local: no en retiro cap del núvol")
+        return 0
+    vives = {(r["open_id"], r["player_fcb_id"]) for r in classifs}
+    try:
+        al_nuvol = _totes_les_files(sb, "open_classifications", "open_id,player_fcb_id")
+    except Exception as e:
+        prog("warn", f"open_classifications: no s'ha pogut llegir per retirar ({e})")
+        return 0
+    fora = [x for x in al_nuvol if (x["open_id"], x["player_fcb_id"]) not in vives]
+    for x in fora:
+        sb.table("open_classifications").delete().eq("open_id", x["open_id"]).eq(
+            "player_fcb_id", x["player_fcb_id"]
+        ).execute()
+    if fora:
+        prog(
+            "ok",
+            f"open_classifications: {len(fora)} files retirades (ja no són a la BD local)",
+        )
+    return len(fora)
 
 
 def _prune_orphan_opens(sb, local_ids: set[int], prog: Progress) -> int:
