@@ -3012,6 +3012,115 @@ def publish_open_fases(
     return counts
 
 
+def publish_open_grups(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Els grups de cada fase: quin dia es juguen, a quin club i qui hi ha.
+
+    És el que permet dir «quan jugues, on i contra qui» de la ronda que ve: la
+    federació publica els grups amb el sorteig, abans que es jugui res, i
+    `open_fase_ranquing` només porta qui ja té classificació.
+
+    Els jugadors van dins de la fila del grup, com una llista: sempre es llegeixen
+    junts i així no cal una segona taula. Hi surten tots, hagin jugat o no.
+
+    Es retira el que sobra, pel mateix motiu que a `publish_open_fases`:
+    l'`open_id` no és estable i un grup publicat amb el número vell es quedaria
+    penjat d'un altre torneig.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    by_norm = _players_by_norm(conn)
+
+    def _nm(nom: str) -> str:
+        import unicodedata as _ud
+
+        n = "".join(c for c in _ud.normalize("NFD", nom or "") if _ud.category(c) != "Mn")
+        return " ".join(n.strip().lower().split())
+
+    clubs: dict[str, str] = {}
+    try:
+        for r in conn.execute(
+            "SELECT jugador, club FROM afiliacions WHERE competicio = 'INDIVIDUAL'"
+        ):
+            clubs.setdefault(_nm(r["jugador"]), r["club"])
+    except sqlite3.OperationalError:
+        pass  # BD sense `afiliacions`: el club de cada jugador queda buit i prou
+
+    rows: list[dict] = []
+    try:
+        grups = conn.execute(
+            """
+            SELECT tf.id AS fid, tf.torneig_id AS open_id, tf.fase_id_extern,
+                   g.grup_nom, g.club_organitzador, g.data
+              FROM torneig_grups g
+              JOIN torneig_fases tf ON tf.id = g.fase_id
+             ORDER BY tf.torneig_id, tf.ordre, g.grup_nom
+            """
+        ).fetchall()
+    except sqlite3.OperationalError:
+        prog("warn", "no hi ha `torneig_grups` a la BD local")
+        conn.close()
+        return {"open_grups": 0}
+
+    for g in grups:
+        membres = conn.execute(
+            "SELECT jugador_nom FROM torneig_fase_grups "
+            "WHERE fase_id = ? AND grup_nom = ? ORDER BY ordre, jugador_nom",
+            (g["fid"], g["grup_nom"]),
+        ).fetchall()
+        jugadors = []
+        for m in membres:
+            hit = by_norm.get(_nm(m["jugador_nom"]))
+            jugadors.append(
+                {
+                    "jugador": _disp(m["jugador_nom"]),
+                    "player_fcb_id": hit[0] if hit else None,
+                    "club": clubs.get(_nm(m["jugador_nom"])),
+                }
+            )
+        rows.append(
+            {
+                "open_id": g["open_id"],
+                "fase_id": g["fase_id_extern"],
+                "grup_nom": g["grup_nom"],
+                "club_organitzador": g["club_organitzador"],
+                "data": g["data"],
+                "jugadors": jugadors,
+            }
+        )
+    conn.close()
+
+    # Cap grup a la base local vol dir «no en sé res», no «no n'hi ha cap».
+    if not rows:
+        prog("warn", "cap grup a la BD local: no publico ni retiro res")
+        return {"open_grups": 0}
+
+    n = _upsert(sb, "open_grups", rows, "open_id,fase_id,grup_nom", prog)
+
+    vius = {(r["open_id"], r["fase_id"], r["grup_nom"]) for r in rows}
+    retirats = 0
+    try:
+        al_nuvol = _totes_les_files(sb, "open_grups", "open_id,fase_id,grup_nom")
+    except Exception as e:
+        prog("warn", f"open_grups: no s'ha pogut llegir per retirar ({e})")
+        al_nuvol = []
+    for x in al_nuvol:
+        if (x["open_id"], x["fase_id"], x["grup_nom"]) in vius:
+            continue
+        sb.table("open_grups").delete().eq("open_id", x["open_id"]).eq("fase_id", x["fase_id"]).eq(
+            "grup_nom", x["grup_nom"]
+        ).execute()
+        retirats += 1
+    if retirats:
+        prog("ok", f"open_grups: {retirats} grups retirats (ja no són a la BD local)")
+    return {"open_grups": n, "open_grups_retirats": retirats}
+
+
 def _retira_fases_que_sobren(
     sb, fase_rows: list[dict], ranquing_rows: list[dict], prog: Progress
 ) -> dict[str, int]:

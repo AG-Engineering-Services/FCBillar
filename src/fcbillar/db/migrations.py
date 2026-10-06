@@ -70,6 +70,9 @@ Versions:
 - 28: `torneig_fases.regla` i `.places` (qui passa de ronda, tal com ho escriu
      el PDF del sorteig) i `torneig_ronda_projectada`, la ronda següent
      projectada mentre la federació no la publiqui. Es retira sola.
+- 29: `torneig_grups`, el dia i el club on es juga cada grup d'una fase
+     d'individual. La federació ho publica amb el sorteig, abans que es jugui res,
+     i fins ara es llegia i es llençava.
 - 27: `torneig_fase_grups.serie_major` — el quart criteri de desempat del
      rànquing d'una fase, després de la posició al grup, els punts i la mitjana.
      No surt a la taula de classificació del grup: es calcula de les partides.
@@ -93,7 +96,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 28
+SCHEMA_VERSION = 29
 
 
 def _read_schema_sql() -> str:

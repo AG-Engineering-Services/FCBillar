@@ -683,3 +683,21 @@ CREATE TABLE IF NOT EXISTS torneig_ronda_projectada (
 );
 CREATE INDEX IF NOT EXISTS ix_ronda_projectada_torneig
     ON torneig_ronda_projectada(torneig_id, ronda);
+
+-- Els grups d'una fase d'un torneig individual: quin dia es juguen i a quin club.
+--
+-- És el que la federació publica a la pàgina d'una fase, a la taula «GRUPS» (Grup,
+-- Club organitzador, Responsable, Data partits), i ho fa tan bon punt hi ha
+-- sorteig: abans que es jugui cap partida. Amb `torneig_fase_grups`, que diu qui
+-- hi ha a cada grup, és l'única manera de saber quan, on i contra qui juga algú
+-- la ronda que ve.
+--
+-- L'hora no hi és: la federació només l'escriu al PDF del sorteig.
+CREATE TABLE IF NOT EXISTS torneig_grups (
+    fase_id            INTEGER NOT NULL REFERENCES torneig_fases(id) ON DELETE CASCADE,
+    grup_nom           TEXT NOT NULL,          -- 'Grup A'
+    grup_id_extern     INTEGER,
+    club_organitzador  TEXT,                   -- 'C.B.BANYOLES', tal com l'escriu el portal
+    data               TEXT,                   -- ISO, el dia que es juga el grup
+    PRIMARY KEY (fase_id, grup_nom)
+);
