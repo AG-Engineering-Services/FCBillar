@@ -122,6 +122,20 @@ class Membre:
 
 
 @dataclass(frozen=True)
+class Grup:
+    """Un grup d'una fase: quin dia es juga i a quin club.
+
+    La federació ho publica amb el sorteig, abans que es jugui cap partida.
+    """
+
+    fase_id_extern: int
+    nom: str  # 'Grup A'
+    grup_id_extern: int | None = None
+    club_organitzador: str | None = None
+    data: date | None = None
+
+
+@dataclass(frozen=True)
 class Divisio:
     """Una divisió d'un torneig, amb tot el que se n'ha pogut llegir."""
 
@@ -131,6 +145,7 @@ class Divisio:
     fases: list[Fase] = field(default_factory=list)
     membres: list[Membre] = field(default_factory=list)
     partides: list[Partida] = field(default_factory=list)
+    grups: list[Grup] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -198,6 +213,7 @@ def llegeix(
         fases: list[Fase] = []
         membres: list[Membre] = []
         partides: list[Partida] = []
+        grups: list[Grup] = []
 
         enllacos = P.parse_individuals_fases(
             client.fetch_html(U.individuals_fases(torneig_id_extern, d), use_cache=use_cache)
@@ -223,6 +239,15 @@ def llegeix(
                     jugador=m.jugador_nom,
                 )
             for g in P.parse_individuals_grups(ghtml):
+                grups.append(
+                    Grup(
+                        fase_id_extern=f.fase_id_extern,
+                        nom=g.nom,
+                        grup_id_extern=g.grup_id_extern,
+                        club_organitzador=g.club_organitzador,
+                        data=g.data,
+                    )
+                )
                 url = U.individuals_partides_grup(
                     torneig_id_extern, d, f.fase_id_extern, g.grup_id_extern
                 )
@@ -282,6 +307,7 @@ def llegeix(
                 fases=fases,
                 membres=membres,
                 partides=partides,
+                grups=grups,
             )
         )
     return out
@@ -481,15 +507,20 @@ def desa(
 ) -> dict[str, int]:
     """Desa una divisió sencera. Reemplaça el que hi hagués d'aquesta divisió.
 
-    No es desa el buit: una divisió sense partides voldria dir que no hem sabut
-    llegir-la, i substituir un open sencer per un silenci és pitjor que deixar-hi
-    el que teníem.
+    No es desa el buit: una divisió sense partides ni grups voldria dir que no hem
+    sabut llegir-la, i substituir un open sencer per un silenci és pitjor que
+    deixar-hi el que teníem.
+
+    Una divisió amb grups i encara cap partida, en canvi, és un torneig sortejat
+    que no ha començat, i es desa: és just quan fa falta saber qui juga contra
+    qui. En aquest cas les partides que hi hagués no es toquen, per si el que ha
+    fallat és llegir-les.
     """
     from fcbillar.db.repository import Repository
 
-    if not divisio.partides:
+    if not divisio.partides and not divisio.membres:
         raise ValueError(
-            f"Cap partida a {divisio.nom} ({divisio.torneig_id_extern}/"
+            f"Cap partida ni cap grup a {divisio.nom} ({divisio.torneig_id_extern}/"
             f"{divisio.divisio_id_extern}). No esborro el que hi ha per posar-hi el buit."
         )
     repo = Repository(conn)
@@ -561,11 +592,33 @@ def desa(
         ],
     )
 
-    # Partides. Els punts de matx no els publica el web nou.
-    conn.execute(
-        "DELETE FROM torneig_partides WHERE torneig_id_extern = ? AND divisio_id_extern = ?",
-        (divisio.torneig_id_extern, divisio.divisio_id_extern),
+    # El dia i el club de cada grup. Es refà sencer, com la composició.
+    conn.executemany(
+        "DELETE FROM torneig_grups WHERE fase_id = ?",
+        [(fid,) for fid in fase_ids.values()],
     )
+    conn.executemany(
+        "INSERT OR REPLACE INTO torneig_grups (fase_id, grup_nom, grup_id_extern, "
+        "club_organitzador, data) VALUES (?, ?, ?, ?, ?)",
+        [
+            (
+                fase_ids[g.fase_id_extern],
+                g.nom,
+                g.grup_id_extern,
+                g.club_organitzador,
+                g.data.isoformat() if g.data else None,
+            )
+            for g in divisio.grups
+            if g.fase_id_extern in fase_ids
+        ],
+    )
+
+    # Partides. Els punts de matx no els publica el web nou.
+    if divisio.partides:
+        conn.execute(
+            "DELETE FROM torneig_partides WHERE torneig_id_extern = ? AND divisio_id_extern = ?",
+            (divisio.torneig_id_extern, divisio.divisio_id_extern),
+        )
     conn.executemany(
         "INSERT INTO torneig_partides (torneig_id_extern, divisio_id_extern, fase_id, "
         "grup_nom, data, player1_nom, caramboles1, serie1, punts1, player2_nom, "

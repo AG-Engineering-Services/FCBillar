@@ -1118,6 +1118,7 @@ def publish_cloud_cmd() -> None:
         publish_lliga_player_rankings,
         publish_lliga_standings_hist,
         publish_open_fases,
+        publish_open_grups,
         publish_open_partides,
         publish_open_ranking,
         publish_open_ranking_femeni,
@@ -1165,6 +1166,9 @@ def publish_cloud_cmd() -> None:
         # en comptes d'aturar la publicació sencera.
         counts.update(
             publica_si_hi_es("open_fases", lambda: publish_open_fases(on_progress=_prog), _prog)
+        )
+        counts.update(
+            publica_si_hi_es("open_grups", lambda: publish_open_grups(on_progress=_prog), _prog)
         )
         counts.update(publish_open_ranking(on_progress=_prog))
         counts.update(publish_open_ranking_femeni(on_progress=_prog))
