@@ -110,6 +110,51 @@ def test_sense_partides_ni_grups_segueix_sense_desar_se(conn) -> None:
         desa(conn, buida, "2026-2027")
 
 
+class NuvolSenseColumnesNoves(NuvolFals):
+    """Un núvol on encara no s'ha aplicat la migració: rebutja `places`."""
+
+    def table(self, nom: str):
+        taula = super().table(nom)
+        upsert = taula.upsert
+
+        def _upsert(files: list[dict], **k):
+            if nom == "open_fases" and files and "places" in files[0]:
+                raise RuntimeError("PGRST204: Could not find the 'places' column")
+            return upsert(files, **k)
+
+        taula.upsert = _upsert  # type: ignore[method-assign]
+        return taula
+
+
+def test_les_fases_porten_la_regla_i_les_places(conn, tmp_path, monkeypatch) -> None:
+    desa(conn, _sortejada(), "2026-2027")
+    conn.execute("UPDATE torneig_fases SET regla = 'el primer de cada grup', places = 2")
+    conn.commit()
+    conn.close()
+    magatzem: dict[str, list[dict]] = {}
+    monkeypatch.setattr(cloud_sync, "get_client", lambda: NuvolFals(magatzem))
+
+    cloud_sync.publish_open_fases(db_path=tmp_path / "t.db")
+
+    (fase,) = magatzem["open_fases"]
+    assert fase["places"] == 2
+    assert fase["regla"] == "el primer de cada grup"
+
+
+def test_si_el_nuvol_encara_no_te_les_columnes_les_fases_es_publiquen_igual(
+    conn, tmp_path, monkeypatch
+) -> None:
+    desa(conn, _sortejada(), "2026-2027")
+    conn.close()
+    magatzem: dict[str, list[dict]] = {}
+    monkeypatch.setattr(cloud_sync, "get_client", lambda: NuvolSenseColumnesNoves(magatzem))
+
+    counts = cloud_sync.publish_open_fases(db_path=tmp_path / "t.db")
+
+    assert counts["open_fases"] == 1
+    assert "places" not in magatzem["open_fases"][0]
+
+
 def test_es_publiquen_tots_els_del_grup_hagin_jugat_o_no(conn, tmp_path, monkeypatch) -> None:
     desa(conn, _sortejada(), "2026-2027")
     open_id = conn.execute("SELECT id FROM torneigs_individuals").fetchone()[0]

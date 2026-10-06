@@ -35,4 +35,14 @@ create policy "read open_grups" on fcbillar.open_grups for select to anon, authe
 grant select on fcbillar.open_grups to anon, authenticated;
 grant all on fcbillar.open_grups to service_role;
 
+-- Qui passa de ronda. La regla és al PDF del sorteig («el primer de cada grup i
+-- els quatre millors segons») i les places es calculen amb els grups que té la
+-- fase. Amb `open_fase_ranquing.posicio` n'hi ha prou per dir qui ha passat:
+-- els que queden dins de les places.
+--
+-- Són `null` quan no se sap: la final no té ronda següent, i una regla que no
+-- encaixa amb cap patró conegut no es converteix en un nombre inventat.
+alter table fcbillar.open_fases add column if not exists regla  text;
+alter table fcbillar.open_fases add column if not exists places integer;
+
 notify pgrst, 'reload schema';

@@ -2958,7 +2958,7 @@ def publish_open_fases(
     for f in conn.execute(
         """
         SELECT tf.id AS fid, tf.torneig_id AS open_id, tf.fase_id_extern, tf.nom,
-               tf.tipus, tf.ordre
+               tf.tipus, tf.ordre, tf.regla, tf.places
         FROM torneig_fases tf ORDER BY tf.torneig_id, tf.ordre
         """
     ):
@@ -2970,6 +2970,11 @@ def publish_open_fases(
                 "tipus": f["tipus"] or "",
                 "ordre": f["ordre"],
                 "data": None,
+                # Qui passa de ronda, tal com ho escriu el PDF del sorteig, i
+                # quantes places són amb els grups que té la fase. Amb la posició
+                # de `open_fase_ranquing` n'hi ha prou per dir qui ha passat.
+                "regla": f["regla"],
+                "places": f["places"],
             }
         )
         # L'ordre entre grups: posició al grup, punts, mitjana. El fa SQLite
@@ -3004,7 +3009,17 @@ def publish_open_fases(
     conn.close()
 
     counts = {}
-    counts["open_fases"] = _upsert(sb, "open_fases", fase_rows, "open_id,fase_id", prog)
+    try:
+        counts["open_fases"] = _upsert(sb, "open_fases", fase_rows, "open_id,fase_id", prog)
+    except Exception as e:
+        # `regla` i `places` són columnes noves (migració 0027). Si el núvol encara
+        # no les té, les fases s'han de seguir publicant igualment: quedar-se
+        # sense fases per dues columnes que encara no llegeix ningú seria pitjor.
+        if not esquema_encara_no_hi_es(e):
+            raise
+        prog("warn", "open_fases: el núvol encara no té `regla` ni `places`; publico sense")
+        sense = [{k: v for k, v in r.items() if k not in ("regla", "places")} for r in fase_rows]
+        counts["open_fases"] = _upsert(sb, "open_fases", sense, "open_id,fase_id", prog)
     counts["open_fase_ranquing"] = _upsert(
         sb, "open_fase_ranquing", ranquing_rows, "open_id,fase_id,jugador", prog
     )
