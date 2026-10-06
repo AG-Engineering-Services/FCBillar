@@ -3001,13 +3001,76 @@ def publish_open_fases(
                 }
             )
 
+    conn.close()
+
     counts = {}
     counts["open_fases"] = _upsert(sb, "open_fases", fase_rows, "open_id,fase_id", prog)
     counts["open_fase_ranquing"] = _upsert(
         sb, "open_fase_ranquing", ranquing_rows, "open_id,fase_id,jugador", prog
     )
-    conn.close()
+    counts.update(_retira_fases_que_sobren(sb, fase_rows, ranquing_rows, prog))
     return counts
+
+
+def _retira_fases_que_sobren(
+    sb, fase_rows: list[dict], ranquing_rows: list[dict], prog: Progress
+) -> dict[str, int]:
+    """Treu del núvol les fases i les files de rànquing que la base local ja no té.
+
+    Amb l'upsert sol no n'hi ha prou, i el que queda no és brossa innocent.
+    L'`open_id` és l'identificador intern del torneig i no és estable: quan un
+    torneig es torna a ingerir pot rebre'n un altre, i el que tenia abans passa a
+    ser d'un altre torneig. Les fases publicades amb el número vell s'hi queden, i
+    el web les ensenya com si fossin d'aquell altre: l'octubre del 2026 la
+    pre-prèvia de 1a sortia també dins de 2a, i la de 2a dins d'Honor.
+
+    Les dues taules surten senceres de la base local, o sigui que es poden
+    comparar amb el que hi ha al núvol i treure'n la diferència. Una fase
+    s'emporta el seu rànquing per la clau forana; a part es retiren les files de
+    rànquing d'una fase que segueix viva però on el jugador ja no hi és.
+
+    Sense cap fase a la base local no es retira res: vol dir «no en sé res», no
+    «no n'hi ha cap», igual que a `publish_ronda_projectada`.
+    """
+    if not fase_rows:
+        prog("warn", "cap fase a la BD local: no retiro res del núvol")
+        return {"open_fases_retirades": 0, "open_fase_ranquing_retirades": 0}
+
+    fases_vives = {(r["open_id"], r["fase_id"]) for r in fase_rows}
+    files_vives = {(r["open_id"], r["fase_id"], r["jugador"]) for r in ranquing_rows}
+
+    try:
+        fases_al_nuvol = _totes_les_files(sb, "open_fases", "open_id,fase_id")
+        files_al_nuvol = _totes_les_files(sb, "open_fase_ranquing", "open_id,fase_id,jugador")
+    except Exception as e:
+        prog("warn", f"open_fases: no s'ha pogut llegir per retirar ({e})")
+        return {"open_fases_retirades": 0, "open_fase_ranquing_retirades": 0}
+
+    fases_fora = sorted({(x["open_id"], x["fase_id"]) for x in fases_al_nuvol} - fases_vives)
+    for open_id, fase_id in fases_fora:
+        sb.table("open_fases").delete().eq("open_id", open_id).eq("fase_id", fase_id).execute()
+
+    files_fora = [
+        x
+        for x in files_al_nuvol
+        if (x["open_id"], x["fase_id"]) in fases_vives
+        and (x["open_id"], x["fase_id"], x["jugador"]) not in files_vives
+    ]
+    for x in files_fora:
+        sb.table("open_fase_ranquing").delete().eq("open_id", x["open_id"]).eq(
+            "fase_id", x["fase_id"]
+        ).eq("jugador", x["jugador"]).execute()
+
+    if fases_fora or files_fora:
+        prog(
+            "ok",
+            f"open_fases: {len(fases_fora)} fases i {len(files_fora)} files de rànquing "
+            "retirades (ja no són a la BD local)",
+        )
+    return {
+        "open_fases_retirades": len(fases_fora),
+        "open_fase_ranquing_retirades": len(files_fora),
+    }
 
 
 def publish_ronda_projectada(
@@ -3075,6 +3138,8 @@ def publish_ronda_projectada(
         prog("warn", "no hi ha `torneig_ronda_projectada` a la BD local")
         conn.close()
         return {"open_ronda_projectada": 0}
+
+    superades = _retira_projeccions_superades(sb, conn, prog)
     conn.close()
 
     # Cap projecció a la base local vol dir «no en sé res», no «no n'hi ha cap».
@@ -3090,8 +3155,8 @@ def publish_ronda_projectada(
     # És la mateixa regla que `publish_afiliacions`, i pel mateix motiu: una font
     # que falla no és una font que diu que no hi ha res.
     if not rows:
-        prog("warn", "cap ronda projectada a la BD local: no publico ni retiro res")
-        return {"open_ronda_projectada": 0}
+        prog("warn", "cap ronda projectada a la BD local: no publico ni retiro res més")
+        return {"open_ronda_projectada": 0, "ronda_projectada_retirades": superades}
 
     n = _upsert(sb, "open_ronda_projectada", rows, "open_id,ronda,jugador", prog)
 
@@ -3120,7 +3185,45 @@ def publish_ronda_projectada(
         retirades += 1
     if retirades:
         prog("ok", f"open_ronda_projectada: {retirades} files retirades (ja no es projecten)")
-    return {"open_ronda_projectada": n, "ronda_projectada_retirades": retirades}
+    return {"open_ronda_projectada": n, "ronda_projectada_retirades": retirades + superades}
+
+
+def _retira_projeccions_superades(sb, conn, prog: Progress) -> int:
+    """Treu del núvol les projeccions d'una ronda que la federació ja ha publicat.
+
+    La retirada general de `publish_ronda_projectada` no hi arriba en un cas, i és
+    just el que deixa la projecció penjada per sempre: quan la base local es queda
+    sense CAP projecció. Allà no es retira res, perquè una taula buida també pot
+    voler dir que no s'ha pogut calcular. Però aquí no es pregunta «què projecto
+    ara» sinó «aquesta ronda ja té grups de debò?», que la base local sap respondre
+    encara que no projecti res: si els té, la projecció sobra segur.
+
+    També s'endú les que han quedat sota l'`open_id` d'un altre torneig després
+    d'una renumeració, sempre que aquell torneig ja hagi jugat la ronda.
+    """
+    from fcbillar import projeccio_ronda
+
+    try:
+        al_nuvol = _totes_les_files(sb, "open_ronda_projectada", "open_id,ronda")
+    except Exception as e:
+        prog("warn", f"open_ronda_projectada: no s'ha pogut llegir per retirar ({e})")
+        return 0
+
+    retirades = 0
+    for open_id, ronda in sorted({(x["open_id"], x["ronda"]) for x in al_nuvol}):
+        if not projeccio_ronda.ja_publicada(conn, open_id, ronda):
+            continue
+        res = (
+            sb.table("open_ronda_projectada")
+            .delete()
+            .eq("open_id", open_id)
+            .eq("ronda", ronda)
+            .execute()
+        )
+        retirades += len(res.data or [])
+    if retirades:
+        prog("ok", f"open_ronda_projectada: {retirades} files retirades (ronda ja publicada)")
+    return retirades
 
 
 def _players_by_norm(conn) -> dict[str, tuple[str, str]]:
