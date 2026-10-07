@@ -565,3 +565,172 @@ def llegeix_classificacio_de_jugadors(cami: str | Path) -> list[JugadorClassific
     if not out:
         raise FormatDesconegut("El PDF no porta cap fila de la classificació de jugadors.")
     return out
+
+
+# --------------------------- desar ---------------------------
+
+#: Les divisions de la Lliga Nacional, tal com es desen.
+DIVISIONS = ("honor", "1", "2")
+
+
+def temporada_de(dia: date) -> str:
+    """La temporada d'un dia de joc: comença a l'agost. «2026-2027»."""
+    inici = dia.year if dia.month >= 8 else dia.year - 1
+    return f"{inici}-{inici + 1}"
+
+
+def desa_jornada(conn, jornada: Jornada, divisio: str, temporada: str | None = None) -> str:
+    """Desa una jornada sencera, reemplaçant el que hi hagués d'aquella jornada.
+
+    La temporada surt de la data de la jornada; es pot donar a mà per als PDF
+    que no en porten. Torna la temporada amb què s'ha desat.
+
+    Només s'escriu a les taules `nacional_*`. No es toca cap jugador, cap club
+    ni cap partida de la federació catalana: vegeu la capçalera del mòdul.
+    """
+    if divisio not in DIVISIONS:
+        raise ValueError(f"Divisió desconeguda: {divisio!r}. Ha de ser una de {DIVISIONS}.")
+    if temporada is None:
+        if jornada.data is None:
+            raise ValueError("La jornada no porta data: cal dir-ne la temporada.")
+        temporada = temporada_de(jornada.data)
+    quan = jornada.data.isoformat() if jornada.data else None
+    clau = (temporada, divisio, jornada.numero)
+
+    conn.execute(
+        "DELETE FROM nacional_partides WHERE temporada = ? AND divisio = ? AND jornada = ?", clau
+    )
+    conn.execute(
+        "DELETE FROM nacional_encontres WHERE temporada = ? AND divisio = ? AND jornada = ?", clau
+    )
+    conn.execute(
+        "DELETE FROM nacional_classificacio WHERE temporada = ? AND divisio = ? AND jornada = ?",
+        clau,
+    )
+    conn.execute(
+        "DELETE FROM nacional_millors_series WHERE temporada = ? AND divisio = ? AND jornada = ?",
+        clau,
+    )
+    for g in jornada.grups:
+        grup = g.grup or ""
+        conn.executemany(
+            "INSERT INTO nacional_classificacio (temporada, divisio, grup, jornada, posicio, "
+            "equip, jugats, guanyats, empatats, perduts, caramboles, entrades, mitjana, "
+            "parcials, punts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+                (
+                    temporada,
+                    divisio,
+                    grup,
+                    jornada.numero,
+                    f.posicio,
+                    f.equip,
+                    f.jugats,
+                    f.guanyats,
+                    f.empatats,
+                    f.perduts,
+                    f.caramboles,
+                    f.entrades,
+                    f.mitjana,
+                    f.parcials,
+                    f.punts,
+                )
+                for f in g.classificacio
+            ],
+        )
+        for ordre, e in enumerate(g.encontres, start=1):
+            conn.execute(
+                "INSERT INTO nacional_encontres (temporada, divisio, grup, jornada, ordre, data, "
+                "local, visitant, punts_local, punts_visitant, caramboles_local, "
+                "caramboles_visitant, entrades, mitjana_local, mitjana_visitant) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    temporada,
+                    divisio,
+                    grup,
+                    jornada.numero,
+                    ordre,
+                    quan,
+                    e.local,
+                    e.visitant,
+                    e.punts_local,
+                    e.punts_visitant,
+                    e.caramboles_local,
+                    e.caramboles_visitant,
+                    e.entrades,
+                    e.mitjana_local,
+                    e.mitjana_visitant,
+                ),
+            )
+            conn.executemany(
+                "INSERT INTO nacional_partides (temporada, divisio, grup, jornada, "
+                "ordre_encontre, ordre, jugador_local, caramboles_local, jugador_visitant, "
+                "caramboles_visitant, entrades) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    (
+                        temporada,
+                        divisio,
+                        grup,
+                        jornada.numero,
+                        ordre,
+                        p.ordre,
+                        p.jugador_local,
+                        p.caramboles_local,
+                        p.jugador_visitant,
+                        p.caramboles_visitant,
+                        p.entrades,
+                    )
+                    for p in e.partides
+                ],
+            )
+    conn.executemany(
+        "INSERT INTO nacional_millors_series (temporada, divisio, jornada, ordre, jugador, "
+        "equip, serie) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [
+            (temporada, divisio, jornada.numero, i, s.jugador, s.equip, s.serie)
+            for i, s in enumerate(jornada.millors_series, start=1)
+        ],
+    )
+    conn.commit()
+    return temporada
+
+
+def desa_classificacio_de_jugadors(
+    conn, jugadors: list[JugadorClassificat], divisio: str, temporada: str
+) -> int:
+    """Desa la classificació de jugadors d'una divisió, reemplaçant la que hi hagués.
+
+    És acumulada: cada PDF nou porta tota la temporada fins a aquell dia.
+    """
+    if divisio not in DIVISIONS:
+        raise ValueError(f"Divisió desconeguda: {divisio!r}. Ha de ser una de {DIVISIONS}.")
+    if not jugadors:
+        raise ValueError("Cap jugador: no esborro la classificació que hi ha per posar-hi el buit.")
+    conn.execute(
+        "DELETE FROM nacional_jugadors WHERE temporada = ? AND divisio = ?", (temporada, divisio)
+    )
+    conn.executemany(
+        "INSERT OR REPLACE INTO nacional_jugadors (temporada, divisio, posicio, jugador, equip, "
+        "jugades, guanyades, empatades, perdudes, caramboles, entrades, mitjana, punts) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+            (
+                temporada,
+                divisio,
+                j.posicio,
+                j.jugador,
+                j.equip,
+                j.jugades,
+                j.guanyades,
+                j.empatades,
+                j.perdudes,
+                j.caramboles,
+                j.entrades,
+                j.mitjana,
+                j.punts,
+            )
+            for j in jugadors
+        ],
+    )
+    conn.commit()
+    return len(jugadors)

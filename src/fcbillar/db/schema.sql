@@ -701,3 +701,102 @@ CREATE TABLE IF NOT EXISTS torneig_grups (
     data               TEXT,                   -- ISO, el dia que es juga el grup
     PRIMARY KEY (fase_id, grup_nom)
 );
+
+-- La Lliga Nacional de tres bandes de la RFEB, tal com surt dels seus PDF.
+--
+-- Són taules A PART de tot el que ve de la federació catalana, i ho han de
+-- seguir sent. Cap columna hi apunta a `players`, `clubs` ni a cap altra taula:
+-- la llicència espanyola i la catalana són independents -es pot jugar la lliga
+-- catalana amb un club i la nacional amb un altre-, i les partides d'aquí no
+-- compten per al rànquing català. Els noms de jugadors i d'equips són text, tal
+-- com els escriu la RFEB.
+--
+-- La divisió és 'honor', '1' o '2'. El grup és la lletra, o '' a les divisions
+-- d'un sol grup. La temporada va amb guió: '2026-2027'.
+
+-- Com queda cada equip després de cada jornada. Es guarden totes, i l'última és
+-- la classificació vigent.
+CREATE TABLE IF NOT EXISTS nacional_classificacio (
+    temporada   TEXT NOT NULL,
+    divisio     TEXT NOT NULL,
+    grup        TEXT NOT NULL DEFAULT '',
+    jornada     INTEGER NOT NULL,
+    posicio     INTEGER NOT NULL,
+    equip       TEXT NOT NULL,
+    jugats      INTEGER,
+    guanyats    INTEGER,
+    empatats    INTEGER,
+    perduts     INTEGER,
+    caramboles  INTEGER,
+    entrades    INTEGER,
+    mitjana     REAL,
+    parcials    INTEGER,                 -- partides guanyades, sumades
+    punts       INTEGER,
+    PRIMARY KEY (temporada, divisio, grup, jornada, equip)
+);
+
+CREATE TABLE IF NOT EXISTS nacional_encontres (
+    temporada           TEXT NOT NULL,
+    divisio             TEXT NOT NULL,
+    grup                TEXT NOT NULL DEFAULT '',
+    jornada             INTEGER NOT NULL,
+    ordre               INTEGER NOT NULL,   -- l'ordre dins del PDF
+    data                TEXT,               -- ISO, el dia de la jornada
+    local               TEXT NOT NULL,
+    visitant            TEXT NOT NULL,
+    punts_local         INTEGER,            -- 6-2, 4-4, 8-0
+    punts_visitant      INTEGER,
+    caramboles_local    INTEGER,
+    caramboles_visitant INTEGER,
+    entrades            INTEGER,
+    mitjana_local       REAL,
+    mitjana_visitant    REAL,
+    PRIMARY KEY (temporada, divisio, grup, jornada, ordre)
+);
+
+CREATE TABLE IF NOT EXISTS nacional_partides (
+    temporada           TEXT NOT NULL,
+    divisio             TEXT NOT NULL,
+    grup                TEXT NOT NULL DEFAULT '',
+    jornada             INTEGER NOT NULL,
+    ordre_encontre      INTEGER NOT NULL,
+    ordre               INTEGER NOT NULL,
+    jugador_local       TEXT NOT NULL,
+    caramboles_local    INTEGER,
+    jugador_visitant    TEXT NOT NULL,
+    caramboles_visitant INTEGER,
+    entrades            INTEGER,
+    PRIMARY KEY (temporada, divisio, grup, jornada, ordre_encontre, ordre),
+    FOREIGN KEY (temporada, divisio, grup, jornada, ordre_encontre)
+        REFERENCES nacional_encontres (temporada, divisio, grup, jornada, ordre) ON DELETE CASCADE
+);
+
+-- La classificació individual d'una divisió. La RFEB la publica en un PDF a
+-- part i ja ve sumada: es desa tal com ve, no es recalcula.
+CREATE TABLE IF NOT EXISTS nacional_jugadors (
+    temporada   TEXT NOT NULL,
+    divisio     TEXT NOT NULL,
+    posicio     INTEGER NOT NULL,
+    jugador     TEXT NOT NULL,
+    equip       TEXT NOT NULL,
+    jugades     INTEGER,
+    guanyades   INTEGER,
+    empatades   INTEGER,
+    perdudes    INTEGER,
+    caramboles  INTEGER,
+    entrades    INTEGER,
+    mitjana     REAL,
+    punts       INTEGER,
+    PRIMARY KEY (temporada, divisio, jugador, equip)
+);
+
+CREATE TABLE IF NOT EXISTS nacional_millors_series (
+    temporada   TEXT NOT NULL,
+    divisio     TEXT NOT NULL,
+    jornada     INTEGER NOT NULL,
+    ordre       INTEGER NOT NULL,
+    jugador     TEXT NOT NULL,
+    equip       TEXT NOT NULL,
+    serie       INTEGER NOT NULL,
+    PRIMARY KEY (temporada, divisio, jornada, ordre)
+);
