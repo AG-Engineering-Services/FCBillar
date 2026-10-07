@@ -1729,18 +1729,25 @@ def ingest_nacional_cmd(
 
     conn = ensure_schema(get_settings().db_path)
     de_jugadors: list[str] = []
+    calendaris: list[str] = []
     errors = 0
     for pdf in pdfs:
         try:
             jornada = LN.llegeix_jornada(pdf)
         except LN.FormatDesconegut as e_jornada:
-            # No és una jornada: potser és la classificació de jugadors, que no
-            # porta data i s'ha de desar quan ja se sap la temporada.
+            # No és una jornada: potser és la classificació de jugadors o el
+            # calendari, que no diuen de quina temporada són i s'han de desar
+            # quan ja se sap.
             try:
                 LN.llegeix_classificacio_de_jugadors(pdf)
             except LN.FormatDesconegut:
-                console.print(f"[red]{pdf}: no l'he pogut llegir[/] ({e_jornada})")
-                errors += 1
+                try:
+                    LN.llegeix_calendari(pdf)
+                except LN.FormatDesconegut:
+                    console.print(f"[red]{pdf}: no l'he pogut llegir[/] ({e_jornada})")
+                    errors += 1
+                    continue
+                calendaris.append(pdf)
                 continue
             de_jugadors.append(pdf)
             continue
@@ -1764,6 +1771,19 @@ def ingest_nacional_cmd(
             conn, LN.llegeix_classificacio_de_jugadors(pdf), divisio, temporada
         )
         console.print(f"  classificació de jugadors: {n} jugadors · {temporada}")
+
+    # El calendari, l'últim: només omple les jornades que no tenen resultat.
+    for pdf in calendaris:
+        del_calendari = LN.llegeix_calendari(pdf)
+        desada = temporada or next(
+            (LN.temporada_de(e.data) for e in del_calendari if e.data is not None), None
+        )
+        if desada is None:
+            console.print(f"[red]{pdf}: és un calendari i no sé de quina temporada.[/]")
+            errors += 1
+            continue
+        n = LN.desa_calendari(conn, del_calendari, divisio, desada)
+        console.print(f"  calendari: {n} encontres per jugar · {desada}")
     conn.close()
     if errors:
         raise typer.Exit(1)

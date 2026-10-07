@@ -875,3 +875,156 @@ def desa_alineacions(conn, alineacions: list[Alineacio], divisio: str, temporada
     )
     conn.commit()
     return len(alineacions)
+
+
+# --------------------------- calendari ---------------------------
+
+
+@dataclass(frozen=True)
+class EncontreDeCalendari:
+    """Un encontre del calendari de la temporada: encara sense resultat."""
+
+    jornada: int
+    data: date | None
+    grup: str
+    local: str
+    visitant: str
+
+
+_RE_DIA = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
+
+
+def _parella(paraules: list[_Paraula]) -> tuple[str, str] | None:
+    """Local i visitant d'un tros de línia amb un sol guió entre tots dos."""
+    guions = [i for i, p in enumerate(paraules) if p.text == "-"]
+    if len(guions) != 1:
+        return None
+    local, visitant = _text(paraules[: guions[0]]), _text(paraules[guions[0] + 1 :])
+    return (local, visitant) if local and visitant else None
+
+
+def _encontres_de_linia(linia: list[_Paraula]) -> list[tuple[str, str]]:
+    """Els dos encontres que el calendari escriu a cada línia, de costat.
+
+    Cada encontre va centrat al seu guió: el visitant del primer comença arran del
+    guió i el local del segon acaba arran del seu, o sigui que entre tots dos hi ha
+    el forat més gran de la línia. Partir pel text no val: quan els noms són
+    llargs s'enganxen («…Gandia 'B'Inviktcues…»).
+    """
+    guions = [i for i, p in enumerate(linia) if p.text == "-"]
+    if len(guions) == 1:
+        parella = _parella(linia)
+        return [parella] if parella else []
+    if len(guions) != 2:
+        return []
+    entremig = range(guions[0] + 1, guions[1] - 1)
+    if not entremig:
+        return []
+    tall = max(entremig, key=lambda i: linia[i + 1].x0 - linia[i].x1) + 1
+    parelles = [_parella(linia[:tall]), _parella(linia[tall:])]
+    return [p for p in parelles if p]
+
+
+def llegeix_calendari(cami: str | Path) -> list[EncontreDeCalendari]:
+    """Llegeix el calendari d'una divisió: totes les jornades, amb dia i grup.
+
+    Cada jornada són quatre línies d'encontres, dues per grup, amb la lletra del
+    grup al marge entre les seves dues i el número i el dia de la jornada entre
+    els dos grups. La lletra es busca per alçada, que és la que cau més a prop;
+    la jornada, per ordre: cada vegada que es torna al primer grup n'ha començat
+    una altra.
+    """
+    import pdfplumber
+
+    sortida: list[EncontreDeCalendari] = []
+    es_calendari = False
+    with pdfplumber.open(str(cami)) as pdf:
+        for pagina in pdf.pages:
+            linies = _linies(_paraules(pagina))
+            if any(_text(linia).upper() == "CALENDARIO" for linia in linies):
+                es_calendari = True
+            lletres = [
+                (linia[0].y, linia[0].text)
+                for linia in linies
+                if len(linia) == 1 and re.fullmatch(r"[A-Z]", linia[0].text)
+            ]
+            jornades: list[tuple[int, date | None]] = []
+            for linia in linies:
+                if len(linia) == 2 and _RE_ENTER.match(linia[0].text):
+                    dia = _RE_DIA.match(linia[1].text)
+                    if dia:
+                        d, m, a = (int(x) for x in dia.groups())
+                        jornades.append((int(linia[0].text), date(a, m, d)))
+            if not lletres or not jornades:
+                continue
+            primer = min(lletra for _, lletra in lletres)
+            quina = -1
+            anterior: str | None = None
+            for linia in linies:
+                parelles = _encontres_de_linia(linia)
+                if not parelles:
+                    continue
+                grup = min(lletres, key=lambda ll: abs(ll[0] - linia[0].y))[1]
+                if grup == primer and anterior != primer:
+                    quina += 1
+                anterior = grup
+                if not 0 <= quina < len(jornades):
+                    raise FormatDesconegut(
+                        "Al calendari hi ha més blocs d'encontres que jornades amb data."
+                    )
+                numero, quan = jornades[quina]
+                sortida.extend(
+                    EncontreDeCalendari(numero, quan, grup, local, visitant)
+                    for local, visitant in parelles
+                )
+    if not es_calendari or not sortida:
+        raise FormatDesconegut("No és un calendari de la Lliga Nacional.")
+    return sortida
+
+
+def desa_calendari(conn, encontres: list[EncontreDeCalendari], divisio: str, temporada: str) -> int:
+    """Desa els encontres del calendari de les jornades que encara no tenen resultat.
+
+    Van a `nacional_encontres` sense punts, que és com es reconeix un encontre per
+    jugar. Una jornada que ja té el seu PDF de resultats no es toca: allà mana el
+    resultat, i `desa_jornada` ja en reemplaça el que hi hagués del calendari.
+    Torna quants encontres ha desat.
+    """
+    if divisio not in DIVISIONS:
+        raise ValueError(f"Divisió desconeguda: {divisio!r}. Ha de ser una de {DIVISIONS}.")
+    jugades = {
+        fila[0]
+        for fila in conn.execute(
+            "SELECT DISTINCT jornada FROM nacional_encontres "
+            "WHERE temporada = ? AND divisio = ? AND punts_local IS NOT NULL",
+            (temporada, divisio),
+        )
+    }
+    desats = 0
+    for jornada in sorted({e.jornada for e in encontres} - jugades):
+        conn.execute(
+            "DELETE FROM nacional_encontres WHERE temporada = ? AND divisio = ? AND jornada = ?",
+            (temporada, divisio, jornada),
+        )
+        ordres: dict[str, int] = {}
+        for e in encontres:
+            if e.jornada != jornada:
+                continue
+            ordres[e.grup] = ordres.get(e.grup, 0) + 1
+            conn.execute(
+                "INSERT INTO nacional_encontres (temporada, divisio, grup, jornada, ordre, data, "
+                "local, visitant) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    temporada,
+                    divisio,
+                    e.grup,
+                    jornada,
+                    ordres[e.grup],
+                    e.data.isoformat() if e.data else None,
+                    e.local,
+                    e.visitant,
+                ),
+            )
+            desats += 1
+    conn.commit()
+    return desats

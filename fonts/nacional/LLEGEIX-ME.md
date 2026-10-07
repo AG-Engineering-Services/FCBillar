@@ -20,6 +20,13 @@ els publica. Per afegir una jornada n'hi ha prou amb pujar-ne el PDF.
 De moment només es llegeix la Primera Divisió: la Divisió d'Honor i la Segona
 tenen una altra disposició.
 
+## El calendari
+
+El calendari de la temporada (`calendari.pdf`) s'hi guarda com qualsevol altre
+PDF: no porta dades de ningú. Omple les jornades que encara no s'han jugat, amb
+el dia i els encontres de cada grup, i és el que deixa passar-les totes
+endavant i enrere. Quan arriba el PDF de resultats d'una jornada, mana aquell.
+
 ## Les alineacions
 
 L'«orden de fuerza» **no s'hi ha de guardar tal com arriba**: porta adreces,
