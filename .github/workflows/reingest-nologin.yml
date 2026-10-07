@@ -214,6 +214,13 @@ jobs:
           # és l'últim publicat ABANS de la primera jornada, i aquell ja no canvia.
           run "plantilles"           uv run --no-dev fcbillar plantilles
 
+          # La Lliga Nacional de la RFEB. No hi ha res a anar a buscar: la
+          # federació espanyola no publica la temporada en curs al seu web, i els
+          # PDF es guarden al repositori (`fonts/nacional/`). Es tornen a llegir
+          # tots cada nit, que és barat i fa que afegir-ne un sigui només pujar-lo.
+          # Va a taules a part: no toca jugadors, clubs ni rànquings catalans.
+          run "nacional"             uv run --no-dev fcbillar ingest-nacional-fonts
+
           # Publicació a Supabase (fcbillar publica tot des de la BD; els rànquings
           # coincideixen amb els que el PC ja va pujar al release → idempotent).
           run "publish-cloud"        uv run --no-dev fcbillar publish-cloud
