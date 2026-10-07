@@ -1114,6 +1114,7 @@ def publish_cloud_cmd() -> None:
         publish_copa_player_rankings,
         publish_games,
         publish_lliga,
+        publish_lliga_4m,
         publish_lliga_encontres,
         publish_lliga_player_rankings,
         publish_lliga_standings_hist,
@@ -1153,6 +1154,17 @@ def publish_cloud_cmd() -> None:
         counts.update(publish_lliga_player_rankings(on_progress=_prog))
         counts.update(publish_copa_player_rankings(on_progress=_prog))
         counts.update(publish_lliga_encontres(on_progress=_prog))
+        # La Lliga de 4 Modalitats, a les seves taules (`lliga4m_*`, migració
+        # 0030). Mentre el Data API no les conegui, avisa i no publica res. I
+        # qualsevol altra fallada es queda aquí: és una lliga a part, i que no
+        # surti no ha d'aturar la resta de la publicació.
+        try:
+            counts.update(
+                publica_si_hi_es("lliga4m", lambda: publish_lliga_4m(on_progress=_prog), _prog)
+            )
+        except Exception as exc:
+            console.print(f"[yellow]Lliga 4 Modalitats NO publicada: {exc}[/]")
+            counts["lliga4m"] = -1
         counts.update(publish_copa_encontres(on_progress=_prog))
         # Igual que les dues de sota: `open_partides` ha guanyat la columna
         # `grup_nom` i, fins que el Data API no la vegi, val més avisar que
