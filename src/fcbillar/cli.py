@@ -1769,6 +1769,36 @@ def ingest_nacional_cmd(
         raise typer.Exit(1)
 
 
+@app.command("ingest-nacional-fonts")
+def ingest_nacional_fonts_cmd(
+    arrel: str = typer.Argument("fonts/nacional", help="Carpeta amb <temporada>/<divisió>/*.pdf."),
+) -> None:
+    """Desa tots els PDF de la Lliga Nacional que hi ha al repositori.
+
+    Mentre la RFEB no els pengi al seu web, els PDF de la temporada en curs es
+    guarden a `fonts/nacional/<temporada>/<divisió>/` i el procés de cada nit els
+    torna a llegir tots. És idempotent: cada jornada reemplaça la seva.
+    """
+    from pathlib import Path as _Path
+
+    carpetes = sorted(p for p in _Path(arrel).glob("*/*") if p.is_dir())
+    if not carpetes:
+        console.print(f"[yellow]Cap carpeta de PDF a {arrel}[/]")
+        return
+    errors = 0
+    for carpeta in carpetes:
+        pdfs = sorted(str(p) for p in carpeta.glob("*.pdf"))
+        if not pdfs:
+            continue
+        console.print(f"[bold]{carpeta.parent.name} · divisió {carpeta.name}[/]")
+        try:
+            ingest_nacional_cmd(pdfs=pdfs, divisio=carpeta.name, temporada=carpeta.parent.name)
+        except typer.Exit:
+            errors += 1
+    if errors:
+        raise typer.Exit(1)
+
+
 @app.command("ingest-divisions-individual")
 def ingest_divisions_individual_cmd(
     pdf: str = typer.Argument(..., help="PDF de divisions del campionat individual."),
