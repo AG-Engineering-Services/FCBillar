@@ -1117,6 +1117,7 @@ def publish_cloud_cmd() -> None:
         publish_lliga_encontres,
         publish_lliga_player_rankings,
         publish_lliga_standings_hist,
+        publish_nacional,
         publish_open_fases,
         publish_open_grups,
         publish_open_partides,
@@ -1169,6 +1170,9 @@ def publish_cloud_cmd() -> None:
         )
         counts.update(
             publica_si_hi_es("open_grups", lambda: publish_open_grups(on_progress=_prog), _prog)
+        )
+        counts.update(
+            publica_si_hi_es("nacional", lambda: publish_nacional(on_progress=_prog), _prog)
         )
         counts.update(publish_open_ranking(on_progress=_prog))
         counts.update(publish_open_ranking_femeni(on_progress=_prog))
@@ -1702,6 +1706,67 @@ def open_import_inscrits_cmd(
         f"[green]OK '{open_name}': {proj['num_inscriptions']} inscrits "
         f"({n_linked} enllaçats a fitxa), estructura {struct} → projecció #{proj_id} desada.[/]"
     )
+
+
+@app.command("ingest-nacional")
+def ingest_nacional_cmd(
+    pdfs: list[str] = typer.Argument(..., help="PDF de jornada o de classificació de jugadors."),
+    divisio: str = typer.Option("1", "--divisio", help="honor, 1 o 2."),
+    temporada: str | None = typer.Option(
+        None, "--temporada", help="«2026-2027». Si no es diu, surt de la data de les jornades."
+    ),
+) -> None:
+    """Desa PDF de la Lliga Nacional de la RFEB.
+
+    La federació espanyola no té web de competició: penja un PDF per jornada i un
+    amb la classificació de jugadors. Se n'hi poden passar uns quants de cop, de
+    la mateixa divisió; cadascun es reconeix sol.
+
+    Si un PDF no es pot llegir, s'avisa i no se'n desa res d'aquell: els altres
+    segueixen. Tot va a les taules `nacional_*`, a part de la federació catalana.
+    """
+    from fcbillar import lliga_nacional as LN
+
+    conn = ensure_schema(get_settings().db_path)
+    de_jugadors: list[str] = []
+    errors = 0
+    for pdf in pdfs:
+        try:
+            jornada = LN.llegeix_jornada(pdf)
+        except LN.FormatDesconegut as e_jornada:
+            # No és una jornada: potser és la classificació de jugadors, que no
+            # porta data i s'ha de desar quan ja se sap la temporada.
+            try:
+                LN.llegeix_classificacio_de_jugadors(pdf)
+            except LN.FormatDesconegut:
+                console.print(f"[red]{pdf}: no l'he pogut llegir[/] ({e_jornada})")
+                errors += 1
+                continue
+            de_jugadors.append(pdf)
+            continue
+        desada = LN.desa_jornada(conn, jornada, divisio, temporada)
+        temporada = temporada or desada
+        encontres = sum(len(g.encontres) for g in jornada.grups)
+        console.print(
+            f"  jornada {jornada.numero} ({jornada.data or 'sense data'}): "
+            f"{len(jornada.grups)} grups, {encontres} encontres · {desada}"
+        )
+
+    for pdf in de_jugadors:
+        if temporada is None:
+            console.print(
+                f"[red]{pdf}: és una classificació de jugadors i no sé de quina temporada.[/] "
+                "Passa-la amb --temporada o juntament amb una jornada."
+            )
+            errors += 1
+            continue
+        n = LN.desa_classificacio_de_jugadors(
+            conn, LN.llegeix_classificacio_de_jugadors(pdf), divisio, temporada
+        )
+        console.print(f"  classificació de jugadors: {n} jugadors · {temporada}")
+    conn.close()
+    if errors:
+        raise typer.Exit(1)
 
 
 @app.command("ingest-divisions-individual")

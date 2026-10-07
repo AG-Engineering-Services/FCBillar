@@ -6215,6 +6215,59 @@ def _publica_reemplaçant(
     return n
 
 
+#: Les taules de la Lliga Nacional, amb la clau de cada fila. L'ordre importa: els
+#: encontres van abans que les partides, que hi apunten.
+_NACIONAL: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("nacional_classificacio", ("temporada", "divisio", "grup", "jornada", "equip")),
+    ("nacional_encontres", ("temporada", "divisio", "grup", "jornada", "ordre")),
+    (
+        "nacional_partides",
+        ("temporada", "divisio", "grup", "jornada", "ordre_encontre", "ordre"),
+    ),
+    ("nacional_jugadors", ("temporada", "divisio", "jugador", "equip")),
+    ("nacional_millors_series", ("temporada", "divisio", "jornada", "ordre")),
+)
+
+
+def publish_nacional(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Puja la Lliga Nacional de la RFEB, tal com s'ha llegit dels seus PDF.
+
+    Es reemplaça per temporada i divisió: una jornada que es torna a ingerir amb
+    una correcció no ha de deixar files de la versió anterior. Les temporades que
+    la base local no té no es toquen.
+
+    Són taules a part i s'hi han de quedar: res d'aquí entra a `games`,
+    `pending_games` ni a cap rànquing, i cap fila apunta a `players` o `clubs`.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    taules = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    counts: dict[str, int] = {}
+    for taula, clau in _NACIONAL:
+        if taula not in taules:
+            prog("warn", f"{taula}: no és a la BD local")
+            continue
+        files = [dict(r) for r in conn.execute(f"SELECT * FROM {taula}")]
+        if not files:
+            # Sense res a la base local no es publica ni es retira: vol dir «no en
+            # sé res», no «no n'hi ha cap».
+            continue
+        ambits = {(f["temporada"], f["divisio"]) for f in files}
+        counts[taula] = _publica_reemplaçant(
+            sb, taula, files, clau, ("temporada", "divisio"), prog, ambits
+        )
+    conn.close()
+    if not counts:
+        prog("warn", "lliga nacional: sense dades locals (executa `fcbillar ingest-nacional`)")
+    return counts
+
+
 def publish_calendari(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:

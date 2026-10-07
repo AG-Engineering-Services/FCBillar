@@ -73,6 +73,9 @@ Versions:
 - 29: `torneig_grups`, el dia i el club on es juga cada grup d'una fase
      d'individual. La federació ho publica amb el sorteig, abans que es jugui res,
      i fins ara es llegia i es llençava.
+- 30: les taules `nacional_*`, la Lliga Nacional de la RFEB llegida dels seus
+     PDF. Són a part de tot el que ve de la federació catalana i no apunten a cap
+     altra taula: llicències i rànquings no es barregen.
 - 27: `torneig_fase_grups.serie_major` — el quart criteri de desempat del
      rànquing d'una fase, després de la posició al grup, els punts i la mitjana.
      No surt a la taula de classificació del grup: es calcula de les partides.
@@ -96,7 +99,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 29
+SCHEMA_VERSION = 30
 
 
 def _read_schema_sql() -> str:
