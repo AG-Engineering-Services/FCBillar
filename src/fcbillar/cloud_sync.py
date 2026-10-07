@@ -18,6 +18,7 @@ import sqlite3
 from collections.abc import Callable, Iterable
 from datetime import UTC
 from pathlib import Path
+from typing import NamedTuple
 
 from fcbillar.config import PROJECT_ROOT, get_settings
 from fcbillar.opens_club import club_master, real_club
@@ -1195,6 +1196,35 @@ def publish_rating_buckets(
 #: divisions de Tres Bandes.
 LLIGA_3B_ID = 38
 
+#: Id de la Lliga Catalana de 4 Modalitats de la temporada en curs.
+#:
+#: Són els senars del mig dels de Tres Bandes: 35 va ser la 2024-25, 37 la
+#: 2025-26 i 39 la 2026-27. Igual que `LLIGA_3B_ID`, s'ha de canviar a mà cada
+#: any, i es troba de la mateixa manera: `fcbillar discover-lliga <id>` fins que
+#: en surtin Honor, 1a i 2a de 4 Modalitats.
+#:
+#: Es publica a les seves taules (`lliga4m_*`) i no a les de Tres Bandes: l'app
+#: del club i /lliga llegeixen aquelles sense filtrar per lliga, i una segona
+#: lliga a dins se'ls barrejaria amb la primera.
+LLIGA_4M_ID = 39
+
+
+class _TaulesLliga(NamedTuple):
+    """On es publica una lliga: les quatre taules que en porten la temporada."""
+
+    groups: str
+    standings: str
+    encontres: str
+    partides: str
+
+
+_TAULES_3B = _TaulesLliga("lliga_groups", "lliga_standings", "lliga_encontres", "lliga_partides")
+#: Les mateixes quatre, amb les mateixes columnes, per a la de 4 Modalitats
+#: (migració 0030).
+_TAULES_4M = _TaulesLliga(
+    "lliga4m_groups", "lliga4m_standings", "lliga4m_encontres", "lliga4m_partides"
+)
+
 
 def _fetch_official_lliga_standings(
     group_keys: list[tuple[int, int]], prog: Progress, lliga: int = LLIGA_3B_ID
@@ -1377,8 +1407,14 @@ def publish_lliga(
     on_progress: Progress | None = None,
     use_official: bool = True,
     lliga_id: int | None = None,
+    *,
+    taules: _TaulesLliga = _TAULES_3B,
+    temporada_id: int | None = None,
 ) -> dict[str, int]:
     """Calcula i puja les classificacions de la lliga 3 bandes (temporada actual).
+
+    `taules` i `temporada_id` hi són per a `publish_lliga_4m`, que publica una
+    altra lliga a unes altres taules; sense ells fa el de sempre.
 
     Les estadístiques de detall (PJ/G/E/P, parcials) es deriven dels encontres,
     però la POSICIÓ i els PUNTS són els de la classificació OFICIAL de la
@@ -1408,6 +1444,8 @@ def publish_lliga(
 
     tr = conn.execute("SELECT id FROM temporades ORDER BY nom DESC LIMIT 1").fetchone()
     season_id = tr["id"] if tr else None
+    if temporada_id is not None:
+        season_id = temporada_id
 
     noms = {
         (r["divisio_id"], r["grup_id"]): r["nom"]
@@ -1639,12 +1677,12 @@ def publish_lliga(
             standing_rows.append(_fila(pos, eid, s, 3 * s["g"] + s["e"], None))
 
     counts = {}
-    counts["lliga_groups"] = _upsert(
-        sb, "lliga_groups", group_rows, "lliga_id,divisio_id,grup_id", prog
+    counts[taules.groups] = _upsert(
+        sb, taules.groups, group_rows, "lliga_id,divisio_id,grup_id", prog
     )
     try:
-        counts["lliga_standings"] = _upsert(
-            sb, "lliga_standings", standing_rows, "lliga_id,divisio_id,grup_id,equip", prog
+        counts[taules.standings] = _upsert(
+            sb, taules.standings, standing_rows, "lliga_id,divisio_id,grup_id,equip", prog
         )
     except Exception as exc:
         # Les columnes de la 0026 triguen mitja hora a ser visibles a totes les
@@ -1654,7 +1692,7 @@ def publish_lliga(
             raise
         prog(
             "warn",
-            "lliga_standings: el Data API encara no veu les columnes de la 0026 "
+            f"{taules.standings}: el Data API encara no veu les columnes de la 0026 "
             "(parcials, caramboles, entrades); es publica sense. Si dura més d'una "
             "hora, la migració no s'ha aplicat.",
         )
@@ -1662,8 +1700,8 @@ def publish_lliga(
             {k: v for k, v in r.items() if k not in _CAMPS_CLASSIFICACIO_0026}
             for r in standing_rows
         ]
-        counts["lliga_standings"] = _upsert(
-            sb, "lliga_standings", sense, "lliga_id,divisio_id,grup_id,equip", prog
+        counts[taules.standings] = _upsert(
+            sb, taules.standings, sense, "lliga_id,divisio_id,grup_id,equip", prog
         )
     # L'upsert no s'endú res: només escriu i sobreescriu. Aquestes dues taules
     # són «la temporada en curs», o sigui que tot el que hi quedi de més ho és
@@ -1716,7 +1754,7 @@ def publish_lliga(
         # lliga_id: qui vulgui només la d'ara, que filtri, com fa /lliga.
         counts["retirades"] = _retira_sobrants(
             sb,
-            "lliga_standings",
+            taules.standings,
             lliga,
             {(r["divisio_id"], r["grup_id"], r["equip"]) for r in standing_rows},
             ("divisio_id", "grup_id", "equip"),
@@ -1727,7 +1765,7 @@ def publish_lliga(
         # es llegeixen els encontres de totes les temporades.
         counts["grups_retirats"] = _retira_sobrants(
             sb,
-            "lliga_groups",
+            taules.groups,
             lliga,
             {(r["divisio_id"], r["grup_id"]) for r in group_rows},
             ("divisio_id", "grup_id"),
@@ -2543,12 +2581,23 @@ def _agrupa_per_jornada(encs, eqname) -> dict[tuple, list]:
 
 
 def publish_lliga_encontres(
-    db_path: Path | None = None, on_progress: Progress | None = None
+    db_path: Path | None = None,
+    on_progress: Progress | None = None,
+    *,
+    lliga_id: int | None = None,
+    taules: _TaulesLliga = _TAULES_3B,
+    temporada_id: int | None = None,
 ) -> dict[str, int]:
-    """Encontres de lliga 3 bandes (per jornada) + les seves partides individuals."""
+    """Encontres de lliga 3 bandes (per jornada) + les seves partides individuals.
+
+    `lliga_id`, `taules` i `temporada_id` hi són per a `publish_lliga_4m`; sense
+    ells publica la de Tres Bandes de la temporada en curs, com sempre.
+    """
     from collections import defaultdict
 
     prog: Progress = on_progress or (lambda level, msg: None)
+    # Es llegeix aquí i no com a valor per defecte: la constant canvia cada any.
+    lliga = lliga_id if lliga_id is not None else LLIGA_3B_ID
     db_path = db_path or get_settings().db_path
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
@@ -2556,6 +2605,8 @@ def publish_lliga_encontres(
 
     tr = conn.execute("SELECT id FROM temporades ORDER BY nom DESC LIMIT 1").fetchone()
     season_id = tr["id"] if tr else None
+    if temporada_id is not None:
+        season_id = temporada_id
     equips = {
         r["id"]: (r["nom"], r["lletra"])
         for r in conn.execute(
@@ -2573,7 +2624,7 @@ def publish_lliga_encontres(
                equip_local_id, equip_visitant_id, p_match_local, p_match_visitant
         FROM encontres_lliga WHERE lliga_id = ? AND temporada_id = ?
         """,
-        (LLIGA_3B_ID, season_id),
+        (lliga, season_id),
     ).fetchall()
 
     # Ordre de jornada per grup: rang del jornada_id per data mínima.
@@ -2628,7 +2679,7 @@ def publish_lliga_encontres(
     clau_de: dict[int, int] = {e["id"]: _clau(e) for e in encs}
     repetides = len(clau_de) - len(set(clau_de.values()))
     if repetides:
-        prog("warn", f"lliga_encontres: {repetides} claus repetides; reviseu `_clau`")
+        prog("warn", f"{taules.encontres}: {repetides} claus repetides; reviseu `_clau`")
 
     enc_rows = [
         {
@@ -2697,7 +2748,7 @@ def publish_lliga_encontres(
         WHERE en.lliga_id = ? AND en.temporada_id = ?
         ORDER BY g.encontre_lliga_id, m.codi_fcb
         """,
-        (LLIGA_3B_ID, season_id),
+        (lliga, season_id),
     ):
         _afegeix(r["eid"], r["mod"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"])
 
@@ -2711,13 +2762,13 @@ def publish_lliga_encontres(
         WHERE en.lliga_id = ? AND en.temporada_id = ?
         ORDER BY lp.encontre_lliga_id, lp.rowid
         """,
-        (LLIGA_3B_ID, season_id),
+        (lliga, season_id),
     ):
         _afegeix(r["eid"], r["mod"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"])
 
     counts = {}
-    counts["lliga_encontres"] = _upsert(sb, "lliga_encontres", enc_rows, "encontre_id", prog)
-    counts["lliga_partides"] = _upsert(sb, "lliga_partides", part_rows, "encontre_id,ordre", prog)
+    counts[taules.encontres] = _upsert(sb, taules.encontres, enc_rows, "encontre_id", prog)
+    counts[taules.partides] = _upsert(sb, taules.partides, part_rows, "encontre_id,ordre", prog)
 
     # I ara es retira el que sobra, que sense això es veien encontres DUPLICATS:
     # el mateix enfrontament dues vegades, amb el mateix resultat i la mateixa
@@ -2747,16 +2798,19 @@ def publish_lliga_encontres(
 
     divisions = sorted({e["divisio_id"] for e in enc_rows})
     publicats = {e["encontre_id"] for e in enc_rows}
-    al_nuvol = _tots("lliga_encontres", "encontre_id", divisio_id=divisions) if divisions else []
+    al_nuvol = _tots(taules.encontres, "encontre_id", divisio_id=divisions) if divisions else []
     orfes = sorted({r["encontre_id"] for r in al_nuvol} - publicats)
     for i in range(0, len(orfes), 50):
         tram = orfes[i : i + 50]
         # Primer les partides: pengen de l'encontre.
-        sb.table("lliga_partides").delete().in_("encontre_id", tram).execute()
-        sb.table("lliga_encontres").delete().in_("encontre_id", tram).execute()
+        sb.table(taules.partides).delete().in_("encontre_id", tram).execute()
+        sb.table(taules.encontres).delete().in_("encontre_id", tram).execute()
     if orfes:
-        prog("ok", f"lliga_encontres: {len(orfes)} encontres orfes retirats (i les seves partides)")
-    counts["lliga_encontres_retirats"] = len(orfes)
+        prog(
+            "ok",
+            f"{taules.encontres}: {len(orfes)} encontres orfes retirats (i les seves partides)",
+        )
+    counts[f"{taules.encontres}_retirats"] = len(orfes)
 
     # I les partides que sobren d'un encontre que SÍ que hi és: si una acta passa de
     # quatre partides a tres, la quarta es quedava.
@@ -2771,7 +2825,7 @@ def publish_lliga_encontres(
         for i in range(0, len(eids), 50):
             tram = eids[i : i + 50]
             res = (
-                sb.table("lliga_partides")
+                sb.table(taules.partides)
                 .delete()
                 .in_("encontre_id", tram)
                 .gt("ordre", quantes)
@@ -2779,8 +2833,79 @@ def publish_lliga_encontres(
             )
             sobrants += len(res.data or [])
     if sobrants:
-        prog("ok", f"lliga_partides: {sobrants} partides retirades (ja no son a l'acta)")
-    counts["lliga_partides_retirades"] = sobrants
+        prog("ok", f"{taules.partides}: {sobrants} partides retirades (ja no son a l'acta)")
+    counts[f"{taules.partides}_retirades"] = sobrants
+    return counts
+
+
+def publish_lliga_4m(
+    db_path: Path | None = None,
+    on_progress: Progress | None = None,
+    use_official: bool = True,
+    lliga_id: int | None = None,
+) -> dict[str, int]:
+    """Puja la Lliga Catalana de 4 Modalitats a les seves taules (`lliga4m_*`).
+
+    Són les mateixes quatre taules que les de Tres Bandes, amb les mateixes
+    columnes, i les omplen les mateixes dues funcions: `publish_lliga` (grups i
+    classificació) i `publish_lliga_encontres` (encontres, jugats o no, i les
+    seves partides). L'única diferència que es veu és a `modalitat_codi`: aquí
+    cada partida d'un encontre és d'una modalitat diferent.
+
+    Van a part perquè qui llegeix les de Tres Bandes no filtra per lliga. Res
+    d'aquí escriu ni esborra a `lliga_*`.
+
+    La temporada surt de la LLIGA i no de la més nova de la taula, com a
+    `publish_lliga_player_rankings`: així `lliga_id` serveix per tornar a
+    publicar una temporada passada.
+
+    Si la base local no sap res d'aquesta lliga no es publica ni es retira res:
+    vol dir «no en sé res», no «no n'hi ha cap». I si el Data API no coneix
+    alguna de les quatre taules, l'error surt d'aquí ABANS d'haver escrit a cap,
+    perquè `publica_si_hi_es` pugui dir-ho i seguir.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    lliga = lliga_id if lliga_id is not None else LLIGA_4M_ID
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    try:
+        fila = conn.execute(
+            "SELECT temporada_id FROM encontres_lliga WHERE lliga_id = ? "
+            "AND temporada_id IS NOT NULL LIMIT 1",
+            (lliga,),
+        ).fetchone()
+        te_noms = conn.execute(
+            "SELECT 1 FROM lliga_noms WHERE lliga_id = ? LIMIT 1", (lliga,)
+        ).fetchone()
+    finally:
+        conn.close()
+    if fila is None and te_noms is None:
+        prog(
+            "warn",
+            f"lliga 4 modalitats: la BD local no sap res de la lliga {lliga} "
+            f"(executa `fcbillar ingest-lliga`); no publico ni retiro res.",
+        )
+        return {}
+
+    # Una lectura d'una fila a cada taula, i prou. Si en falta alguna peta aquí
+    # amb el PGRST205 de torn, i no després d'haver omplert les altres tres.
+    sb = get_client()
+    for taula in _TAULES_4M:
+        sb.table(taula).select("*").limit(1).execute()
+
+    temporada = fila[0] if fila is not None else None
+    counts = publish_lliga(
+        db_path, on_progress, use_official, lliga, taules=_TAULES_4M, temporada_id=temporada
+    )
+    # `publish_lliga` les diu «retirades» i «grups_retirats» sense cognom, i a
+    # `publish-cloud` es trepitjarien amb les de Tres Bandes.
+    counts[f"{_TAULES_4M.standings}_retirades"] = counts.pop("retirades", 0)
+    counts[f"{_TAULES_4M.groups}_retirats"] = counts.pop("grups_retirats", 0)
+    counts.update(
+        publish_lliga_encontres(
+            db_path, on_progress, lliga_id=lliga, taules=_TAULES_4M, temporada_id=temporada
+        )
+    )
     return counts
 
 
