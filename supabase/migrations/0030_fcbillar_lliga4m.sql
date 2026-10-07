@@ -65,22 +65,22 @@ create index if not exists idx_fcbillar_lliga4m_standings_grup
 -- No porta `lliga_id`, igual que `lliga_encontres`: la lliga surt de
 -- `lliga4m_groups` per `divisio_id`, que la federació no repeteix entre lligues.
 create table if not exists fcbillar.lliga4m_encontres (
-    encontre_id    bigint primary key,
+    encontre_id    integer primary key,
     divisio_id     integer not null,
     grup_id        integer not null,
     jornada        integer,             -- 1, 2, 3… dins del grup, per data
-    data           date,
+    data           text,                -- ISO «2026-10-11», com a `lliga_encontres`
     equip_local    text,
     equip_visitant text,
     gols_local     integer,             -- punts de matx; NULL = encara no jugat
     gols_visitant  integer
 );
 create index if not exists idx_fcbillar_lliga4m_encontres_grup
-    on fcbillar.lliga4m_encontres (divisio_id, grup_id);
+    on fcbillar.lliga4m_encontres (divisio_id, grup_id, jornada);
 
 -- Les partides de cada encontre: quatre, una de cada modalitat.
 create table if not exists fcbillar.lliga4m_partides (
-    encontre_id         bigint not null
+    encontre_id         integer not null
         references fcbillar.lliga4m_encontres (encontre_id) on delete cascade,
     ordre               integer not null,
     modalitat_codi      integer,        -- fcbillar.modalitats.codi_fcb
