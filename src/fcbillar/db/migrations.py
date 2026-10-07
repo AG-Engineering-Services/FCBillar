@@ -76,6 +76,8 @@ Versions:
 - 30: les taules `nacional_*`, la Lliga Nacional de la RFEB llegida dels seus
      PDF. Són a part de tot el que ve de la federació catalana i no apunten a cap
      altra taula: llicències i rànquings no es barregen.
+- 31: `nacional_alineacions`, qui té inscrit cada equip de la Lliga Nacional.
+     De l'«orden de fuerza» només se'n desa això: cap dada de contacte.
 - 27: `torneig_fase_grups.serie_major` — el quart criteri de desempat del
      rànquing d'una fase, després de la posició al grup, els punts i la mitjana.
      No surt a la taula de classificació del grup: es calcula de les partides.
@@ -99,7 +101,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 30
+SCHEMA_VERSION = 31
 
 
 def _read_schema_sql() -> str:

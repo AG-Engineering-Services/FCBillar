@@ -6226,6 +6226,7 @@ _NACIONAL: tuple[tuple[str, tuple[str, ...]], ...] = (
     ),
     ("nacional_jugadors", ("temporada", "divisio", "jugador", "equip")),
     ("nacional_millors_series", ("temporada", "divisio", "jornada", "ordre")),
+    ("nacional_alineacions", ("temporada", "divisio", "equip", "ordre")),
 )
 
 

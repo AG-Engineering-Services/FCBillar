@@ -20,5 +20,14 @@ els publica. Per afegir una jornada n'hi ha prou amb pujar-ne el PDF.
 De moment només es llegeix la Primera Divisió: la Divisió d'Honor i la Segona
 tenen una altra disposició.
 
-No s'hi ha de guardar l'«orden de fuerza» tal com arriba: porta telèfons i correus
-de directius.
+## Les alineacions
+
+L'«orden de fuerza» **no s'hi ha de guardar tal com arriba**: porta adreces,
+telèfons i correus de directius. Se'n treu un CSV net amb només el grup, l'equip,
+el número d'ordre i el jugador, i és aquell el que es guarda:
+
+    fcbillar nacional-alineacions "Orden de fuerza Primera.pdf"         fonts/nacional/2026-2027/1/alineacions.csv
+
+El procés de cada nit llegeix l'`alineacions.csv` de cada carpeta. És el que fa
+que d'un equip es puguin ensenyar tots els jugadors, i no només els que ja han
+jugat alguna partida.
