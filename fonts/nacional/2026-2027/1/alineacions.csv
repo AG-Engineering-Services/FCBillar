@@ -1,0 +1,190 @@
+grup,equip,ordre,jugador
+A,C.B. MIJAS,1,José Muñoz Muñoz
+A,C.B. MIJAS,7,José Antonio Stand Uribe
+A,C.B. MIJAS,2,Sebastián Castaño Ochoa
+A,C.B. MIJAS,8,Cristian David Ávila Perilla
+A,C.B. MIJAS,3,Ángel Fernández Muñoz
+A,C.B. MIJAS,9,Enrique Jesús Martín Reyes
+A,C.B. MIJAS,4,José M. Domingo Crespo
+A,C.B. MIJAS,10,Juan de Dios Cabrera
+A,C.B. MIJAS,5,Guillermo Fernández Muñoz
+A,C.B. MIJAS,6,Gregorio Moreno Ruiz
+A,C.B. MURCIA,1,Fernando Alonso López
+A,C.B. MURCIA,9,Luis Gallego Hernánez
+A,C.B. MURCIA,2,Bruno Martínez Castaño
+A,C.B. MURCIA,10,Juan Carlos Pérez Manzanera
+A,C.B. MURCIA,3,Jesús Jiménez Manresa
+A,C.B. MURCIA,11,Marco Gallo Pérez
+A,C.B. MURCIA,4,Ernesto Tovar Sáez
+A,C.B. MURCIA,12,Mariano Bo Alcaraz
+A,C.B. MURCIA,5,Blas Amante Balsalobre
+A,C.B. MURCIA,13,José J.Tovar Hernández
+A,C.B. MURCIA,6,Antonio Martínez Rubio
+A,C.B. MURCIA,14,Francisco J. Marco Cutillas
+A,C.B. MURCIA,7,Francisco M. Soler Ródenas
+A,C.B. MURCIA,15,Diego Martínez Martínez
+A,C.B. MURCIA,8,Blas Rosillo Martínez
+A,C.B.C. EXC. ELDENSE,1,Ramón López Martínez
+A,C.B.C. EXC. ELDENSE,7,José Bleda Inza
+A,C.B.C. EXC. ELDENSE,2,Salvador J. Ortells Fos
+A,C.B.C. EXC. ELDENSE,8,M. Ángel Albert Tornero
+A,C.B.C. EXC. ELDENSE,3,Germán Amorós Valdés
+A,C.B.C. EXC. ELDENSE,9,Pedro Almendros Payá
+A,C.B.C. EXC. ELDENSE,4,José Albert Tornero
+A,C.B.C. EXC. ELDENSE,10,Fco. Javier Sánchez Cuenca
+A,C.B.C. EXC. ELDENSE,5,Andrés F. Martín Restrepo
+A,C.B.C. EXC. ELDENSE,11,J. Alvaro Pernía Pernía
+A,C.B.C. EXC. ELDENSE,6,Juán García Duro
+A,C.B. MARACENA,1,Germán Núñez Pérez
+A,C.B. MARACENA,8,Almudena Amezcua Miranda
+A,C.B. MARACENA,2,Arturo D. Zotov Grima
+A,C.B. MARACENA,9,Julio Pérez Castro
+A,C.B. MARACENA,3,Per Kofoed
+A,C.B. MARACENA,10,Antonio Luis Sánchez Ramiro
+A,C.B. MARACENA,4,Fernando Ramos Blázquez
+A,C.B. MARACENA,11,Antonio López Tercero
+A,C.B. MARACENA,5,Francisco Tallón Taboada
+A,C.B. MARACENA,12,Ricardo Fernández Maiquez
+A,C.B. MARACENA,6,Francisco J. Ramírez Barroso
+A,C.B. MARACENA,13,Juan Carlos del Aguila Marín
+A,C.B. MARACENA,7,Tatiana Zotova
+A,C.B. MARACENA,14,Jose Antonio Fernández Maiquez
+A,C.B. SOLLER,1,Juan Antonio Jorquera Sorli
+A,C.B. SOLLER,9,Evangelos Koufakis
+A,C.B. SOLLER,2,Miguel Gelabert Escandell
+A,C.B. SOLLER,10,Bartolome Quetglas Mas
+A,C.B. SOLLER,3,Bartolome Morey Ramis
+A,C.B. SOLLER,11,Fernando Frau Vicens
+A,C.B. SOLLER,4,Alain Lagúe Roldan
+A,C.B. SOLLER,12,Alejandro J. Pomar Ventura
+A,C.B. SOLLER,5,Juan Vidal Triay
+A,C.B. SOLLER,13,Miguel Fullana Hijosa
+A,C.B. SOLLER,6,Andrés Forteza Piña
+A,C.B. SOLLER,14,Antonio Díaz García
+A,C.B. SOLLER,7,Bartolome Riera Roig
+A,C.B. SOLLER,15,Juan Marroig Mateu
+A,C.B. SOLLER,8,Pedro L. Paredes Martínez
+A,C.B.C. TOMELLOSO,1,José Ortiz Villalta
+A,C.B.C. TOMELLOSO,7,Emilio José Torres Pulido
+A,C.B.C. TOMELLOSO,2,José Mª Sánchez Lara
+A,C.B.C. TOMELLOSO,8,Juan J. Carnicer Alez
+A,C.B.C. TOMELLOSO,3,Ginés Marchante Moreno
+A,C.B.C. TOMELLOSO,4,Jesús García Andújar
+A,C.B.C. TOMELLOSO,5,José Ángel Muñoz Escudero
+A,C.B.C. TOMELLOSO,6,Cristobal García Martínez
+A,C.B. SEVILLA,1,Baldomero Mira Cantillo
+A,C.B. SEVILLA,7,Juan Contreras Romero
+A,C.B. SEVILLA,2,José R. González Calle
+A,C.B. SEVILLA,8,José Luis Ortiz Fernández
+A,C.B. SEVILLA,3,José Lazo Blanco
+A,C.B. SEVILLA,9,Alfonso Cordero Moreno
+A,C.B. SEVILLA,4,Pablo Cano López
+A,C.B. SEVILLA,10,Fernando Luis Irisarri Ruiz
+A,C.B. SEVILLA,5,Juan A. de los Reyes Jiménez
+A,C.B. SEVILLA,11,Sergio de la Huerga Menéndez
+A,C.B. SEVILLA,6,Francisco Sancho López
+A,C.B. SEVILLA,12,José María Bohórquez Vera
+A,C.B. AYAMONTE,1,Javier Díaz Rodríguez
+A,C.B. AYAMONTE,9,Juan García Carrillo
+A,C.B. AYAMONTE,2,Jaime Sánchez Faraco
+A,C.B. AYAMONTE,10,Severino Sequera Barrera
+A,C.B. AYAMONTE,3,Manuel Gónzalez Castrillo
+A,C.B. AYAMONTE,11,Domingo Ponce Ramos
+A,C.B. AYAMONTE,4,Pedro Miguel Marques Pais
+A,C.B. AYAMONTE,12,Manuel Díaz Martín
+A,C.B. AYAMONTE,5,Juan Leonel Correia
+A,C.B. AYAMONTE,13,Juan Rodríguez Vilan
+A,C.B. AYAMONTE,6,Miguel Angel Díaz Rodríguez
+A,C.B. AYAMONTE,14,José González Garces
+A,C.B. AYAMONTE,7,Antonio Corvo Lorenzo
+A,C.B. AYAMONTE,15,Pedro P. Hernández Hernández
+A,C.B. AYAMONTE,8,Francisco Gutierrez Silva
+B,C.B. KALIMA-RIVAS,1,Stef Van Hees
+B,C.B. KALIMA-RIVAS,7,Álvaro Schepers Bonet
+B,C.B. KALIMA-RIVAS,2,Jors Van T Zelfden
+B,C.B. KALIMA-RIVAS,8,Juan Gamero Benayas
+B,C.B. KALIMA-RIVAS,3,Mik Durwael
+B,C.B. KALIMA-RIVAS,9,Julián Ángel García Calvo
+B,C.B. KALIMA-RIVAS,4,Fernando Almeida Da Silva
+B,C.B. KALIMA-RIVAS,5,Miguel Tena López
+B,C.B. KALIMA-RIVAS,6,Eugenio Pozo Martín
+B,C.B. SANT ADRIÁ,1,Juan Carlos Jiménez Vasco
+B,C.B. SANT ADRIÁ,7,Francisco Hernández Hernández
+B,C.B. SANT ADRIÁ,2,Jesús Luque Martínez
+B,C.B. SANT ADRIÁ,8,Josep Pallisa González
+B,C.B. SANT ADRIÁ,3,Juan José Pineda Lafuente
+B,C.B. SANT ADRIÁ,9,Ramón Sala Camps
+B,C.B. SANT ADRIÁ,4,Miguel Ángel Guerrero González
+B,C.B. SANT ADRIÁ,5,Jonatan Hernández López
+B,C.B. SANT ADRIÁ,6,David Bosqued Toré
+B,C.B. NUMANCIA,1,César Martinicorena Aguiló
+B,C.B. NUMANCIA,8,Fernando Méndez Gutiérrez
+B,C.B. NUMANCIA,2,Carlos Cortés Gil
+B,C.B. NUMANCIA,9,Juan I. Osuna Pastora
+B,C.B. NUMANCIA,3,Pedro Camarero Prieto
+B,C.B. NUMANCIA,10,Fernando González Zamorano
+B,C.B. NUMANCIA,4,Eduardo Molina Martínez
+B,C.B. NUMANCIA,11,Juan Ig. Sanz Pérez
+B,C.B. NUMANCIA,5,Jerónimo Miguel Rollo
+B,C.B. NUMANCIA,12,Jesús Pérez Barquín
+B,C.B. NUMANCIA,6,Felician Farcas
+B,C.B. NUMANCIA,13,Pablo Martínez
+B,C.B. NUMANCIA,7,Javier J. Morales Méndez
+B,C.B. NUMANCIA,14,Luis I. Pardo Gonzalo
+B,EST. MIR. EL OLIVAR,1,Raúl Castán Burillo
+B,EST. MIR. EL OLIVAR,7,Javier sánchez García
+B,EST. MIR. EL OLIVAR,2,Nacho Fau Vidal
+B,EST. MIR. EL OLIVAR,8,Juan Carlos Vidal Ibáñez
+B,EST. MIR. EL OLIVAR,3,Alberto Frago Per
+B,EST. MIR. EL OLIVAR,9,Luis Pellejero Marco
+B,EST. MIR. EL OLIVAR,4,Fernando Morera Casas
+B,EST. MIR. EL OLIVAR,10,Pedro Alonso Horno
+B,EST. MIR. EL OLIVAR,5,Rafael Soto Segura
+B,EST. MIR. EL OLIVAR,11,Rafael Aguerri Campillo
+B,EST. MIR. EL OLIVAR,6,Ignacio Rós Cacho
+B,EST. MIR. EL OLIVAR,12,Anselmo Villellas Malo
+B,"INVIKTCUES GRANOLLERS ""B""",1,Juan C. Pareras Méndez
+B,"INVIKTCUES GRANOLLERS ""B""",7,Esteve Corominas Franch
+B,"INVIKTCUES GRANOLLERS ""B""",2,Antonio Hernández Parra
+B,"INVIKTCUES GRANOLLERS ""B""",8,Joan A. font Giménez
+B,"INVIKTCUES GRANOLLERS ""B""",3,Armando Moreno Cortés
+B,"INVIKTCUES GRANOLLERS ""B""",9,Juan A. Navarro Carmona
+B,"INVIKTCUES GRANOLLERS ""B""",4,Joan Espinasa Sánchez
+B,"INVIKTCUES GRANOLLERS ""B""",10,Joel Sánchez Gallego
+B,"INVIKTCUES GRANOLLERS ""B""",5,César Mas Canadell
+B,"INVIKTCUES GRANOLLERS ""B""",11,Josep Martín Vilchez
+B,"INVIKTCUES GRANOLLERS ""B""",6,John Jairo Zuleta Giraldo
+B,"INVIKTCUES GRANOLLERS ""B""",12,Jordi Gassó Chumillas
+B,C.B. GETAFE,1,Benito Plaza Bacete
+B,C.B. GETAFE,7,Martin Corvo Piriz
+B,C.B. GETAFE,2,Luis Manuel Sousa Pinto
+B,C.B. GETAFE,8,José Livino Pulpon
+B,C.B. GETAFE,3,Carlos Sánchez Flor
+B,C.B. GETAFE,4,Andrés Ospina Ocampo
+B,C.B. GETAFE,5,Julio alfonso Vicente
+B,C.B. GETAFE,6,Guillermo Leonel Spernanzoni
+B,C.B. PAIPORTA,1,Alejandro Pérez Andreu
+B,C.B. PAIPORTA,7,Antonio M. Segovia Martínez
+B,C.B. PAIPORTA,2,Francisco Unguetti Cano
+B,C.B. PAIPORTA,8,Jordi Alcantara Mateu
+B,C.B. PAIPORTA,3,Miguel Herrero Salvador
+B,C.B. PAIPORTA,9,Antonio Roldan Rivodigo
+B,C.B. PAIPORTA,4,Daniel Peña Fernández
+B,C.B. PAIPORTA,10,Francisco Ochoa Fanega
+B,C.B. PAIPORTA,5,Javier Ferrer Baviera
+B,C.B. PAIPORTA,11,Jaime A. Loaiza Sánchez
+B,C.B. PAIPORTA,6,Fernando Alabau Mas
+B,C.B. PAIPORTA,12,Paul R. Perdomo Bejatano
+B,"CHEF AMADEO GANDIA ""B""",1,José Luis Pascual Fuster
+B,"CHEF AMADEO GANDIA ""B""",8,Mario Richart Ripoll
+B,"CHEF AMADEO GANDIA ""B""",2,Francisco Estruch Romero
+B,"CHEF AMADEO GANDIA ""B""",9,José R. Fuster Just
+B,"CHEF AMADEO GANDIA ""B""",3,Ausias Fuster Blanes
+B,"CHEF AMADEO GANDIA ""B""",10,Lucas Molpeceres Fuentes
+B,"CHEF AMADEO GANDIA ""B""",4,Cándido Amador Gila
+B,"CHEF AMADEO GANDIA ""B""",11,Francisco Martínez Durá
+B,"CHEF AMADEO GANDIA ""B""",5,Xavier Pascual Nadal
+B,"CHEF AMADEO GANDIA ""B""",12,Javier Muñoz Bataller
+B,"CHEF AMADEO GANDIA ""B""",6,Salvador Verdú Sanchís
+B,"CHEF AMADEO GANDIA ""B""",13,Antonio Serralta Tent
+B,"CHEF AMADEO GANDIA ""B""",7,Salvador Bolo Esteve

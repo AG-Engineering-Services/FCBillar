@@ -800,3 +800,19 @@ CREATE TABLE IF NOT EXISTS nacional_millors_series (
     serie       INTEGER NOT NULL,
     PRIMARY KEY (temporada, divisio, jornada, ordre)
 );
+
+-- Qui té inscrit cada equip de la Lliga Nacional, per ordre de força.
+--
+-- Surt de l'«orden de fuerza» que la RFEB envia als clubs. D'aquell document
+-- només se n'agafa això: el grup, l'equip, el número d'ordre i el nom del
+-- jugador. Hi ha també adreces, telèfons i correus de directius, que no es
+-- llegeixen ni es desen enlloc.
+CREATE TABLE IF NOT EXISTS nacional_alineacions (
+    temporada   TEXT NOT NULL,
+    divisio     TEXT NOT NULL,
+    grup        TEXT NOT NULL DEFAULT '',
+    equip       TEXT NOT NULL,
+    ordre       INTEGER NOT NULL,
+    jugador     TEXT NOT NULL,
+    PRIMARY KEY (temporada, divisio, equip, ordre)
+);

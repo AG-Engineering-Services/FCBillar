@@ -1769,6 +1769,25 @@ def ingest_nacional_cmd(
         raise typer.Exit(1)
 
 
+@app.command("nacional-alineacions")
+def nacional_alineacions_cmd(
+    pdf: str = typer.Argument(..., help="L'«orden de fuerza» d'una divisió, en PDF."),
+    sortida: str = typer.Argument(..., help="On escriure el CSV net (alineacions.csv)."),
+) -> None:
+    """Treu les alineacions d'un «orden de fuerza» i les deixa en un CSV net.
+
+    El PDF porta adreces, telèfons i correus de directius, i per això no es pot
+    guardar al repositori. D'aquí en surt un CSV amb només grup, equip, ordre i
+    jugador, que sí que s'hi pot guardar: és el que llegeix el procés de cada nit.
+    """
+    from fcbillar import lliga_nacional as LN
+
+    alineacions = LN.llegeix_alineacions(pdf)
+    LN.escriu_alineacions_csv(alineacions, sortida)
+    equips = {(a.grup, a.equip) for a in alineacions}
+    console.print(f"  {len(alineacions)} jugadors de {len(equips)} equips → {sortida}")
+
+
 @app.command("ingest-nacional-fonts")
 def ingest_nacional_fonts_cmd(
     arrel: str = typer.Argument("fonts/nacional", help="Carpeta amb <temporada>/<divisió>/*.pdf."),
@@ -1788,13 +1807,28 @@ def ingest_nacional_fonts_cmd(
     errors = 0
     for carpeta in carpetes:
         pdfs = sorted(str(p) for p in carpeta.glob("*.pdf"))
-        if not pdfs:
+        if not pdfs and not (carpeta / "alineacions.csv").exists():
             continue
         console.print(f"[bold]{carpeta.parent.name} · divisió {carpeta.name}[/]")
         try:
             ingest_nacional_cmd(pdfs=pdfs, divisio=carpeta.name, temporada=carpeta.parent.name)
         except typer.Exit:
             errors += 1
+        # Les alineacions no venen del PDF sinó del CSV net que se n'ha tret:
+        # vegeu `nacional-alineacions`.
+        csv_alineacions = carpeta / "alineacions.csv"
+        if csv_alineacions.exists():
+            from fcbillar import lliga_nacional as LN
+
+            conn = ensure_schema(get_settings().db_path)
+            n = LN.desa_alineacions(
+                conn,
+                LN.llegeix_alineacions_csv(csv_alineacions),
+                carpeta.name,
+                carpeta.parent.name,
+            )
+            conn.close()
+            console.print(f"  alineacions: {n} jugadors")
     if errors:
         raise typer.Exit(1)
 

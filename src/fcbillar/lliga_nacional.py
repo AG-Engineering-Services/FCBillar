@@ -734,3 +734,144 @@ def desa_classificacio_de_jugadors(
     )
     conn.commit()
     return len(jugadors)
+
+
+# --------------------------- alineacions ---------------------------
+#
+# L'«orden de fuerza» és el document on cada club diu quins jugadors té inscrits,
+# per ordre. A més dels jugadors hi ha l'adreça del club i el nom, el telèfon i el
+# correu del president i del director esportiu.
+#
+# D'aquí NOMÉS en surten els jugadors. No és una qüestió de què es desa després:
+# les dades de contacte ni tan sols es llegeixen. Són a la banda esquerra de la
+# pàgina, i tot el que queda a l'esquerra de les columnes de jugadors es descarta
+# abans de mirar-ne el contingut. L'única cosa que s'agafa d'allà és el nom del
+# club, que és a la línia que acaba amb la província entre parèntesis.
+
+
+@dataclass(frozen=True)
+class Alineacio:
+    """Un jugador inscrit per un equip, amb el seu número d'ordre de força."""
+
+    grup: str
+    equip: str
+    ordre: int
+    jugador: str
+
+
+_RE_TITOL_GRUP = re.compile(r"^(?:HONOR|PRIMERA|SEGUNDA)(?:\s+([A-Z]))?$")
+
+
+def _alineacions_de_linies(linies: list[list[_Paraula]]) -> list[Alineacio]:
+    """Les alineacions d'unes línies ja agrupades. Separat de pdfplumber per provar-ho."""
+    # On comencen les columnes de jugadors: a la x del número més a l'esquerra que
+    # obre una fila de jugadors. Tot el que hi ha abans no es mira.
+    numeros = [p for linia in linies for p in linia if _RE_ENTER.match(p.text)]
+    if not numeros:
+        raise FormatDesconegut("No hi trobo cap número d'ordre de força.")
+    # Els números d'ordre fan dues columnes verticals: són les dues x on més es
+    # repeteixen els enters.
+    recompte: dict[int, int] = {}
+    for p in numeros:
+        recompte[round(p.x0 / 6)] = recompte.get(round(p.x0 / 6), 0) + 1
+    columnes = sorted(sorted(recompte, key=lambda k: -recompte[k])[:2])
+    if len(columnes) < 2:
+        raise FormatDesconegut("No distingeixo les dues columnes de jugadors.")
+    x_primera = columnes[0] * 6 - 6
+    x_segona = columnes[1] * 6 - 6
+
+    out: list[Alineacio] = []
+    grup = ""
+    equip: str | None = None
+    for linia in linies:
+        text = _text(linia)
+        titol = _RE_TITOL_GRUP.match(text)
+        if titol:
+            grup = titol.group(1) or ""
+            equip = None
+            continue
+        # La línia del club: «C.B. MIJAS      Mijas (MÁLAGA)». A l'esquerra hi va el
+        # nom, tot en majúscules, i a la dreta la població, que no interessa. No
+        # es pot reconèixer per la província entre parèntesis, perquè no sempre
+        # n'hi ha («C.B. SEVILLA      SEVILLA») i n'hi ha de dues paraules.
+        #
+        # Les línies de contacte que comparteixen aquella banda no hi encaixen
+        # mai: porten minúscules, dos punts, una arrova o xifres.
+        esquerra = [p for p in linia if p.x0 < x_primera]
+        nom = _text(esquerra)
+        if (
+            esquerra
+            and not _te_minuscules(nom)
+            and not any(c in nom for c in ":@")
+            and not any(_RE_ENTER.match(p.text) for p in linia)
+        ):
+            equip = nom
+            continue
+        if equip is None:
+            continue
+        # Només la banda dels jugadors. El que hi ha a l'esquerra no es toca.
+        for inici, fi in ((x_primera, x_segona), (x_segona, float("inf"))):
+            tram = [p for p in linia if inici <= p.x0 < fi]
+            if len(tram) < 2 or not _RE_ENTER.match(tram[0].text):
+                continue
+            out.append(
+                Alineacio(grup=grup, equip=equip, ordre=int(tram[0].text), jugador=_text(tram[1:]))
+            )
+    if not out:
+        raise FormatDesconegut("El document no porta cap alineació.")
+    return out
+
+
+def llegeix_alineacions(cami: str | Path) -> list[Alineacio]:
+    """Llegeix l'«orden de fuerza» d'una divisió. Només en treu els jugadors."""
+    import pdfplumber
+
+    linies: list[list[_Paraula]] = []
+    with pdfplumber.open(str(cami)) as pdf:
+        for pagina in pdf.pages:
+            linies += _linies(_paraules(pagina))
+    return _alineacions_de_linies(linies)
+
+
+def escriu_alineacions_csv(alineacions: list[Alineacio], cami: str | Path) -> None:
+    """Desa les alineacions en un CSV net, que és el que es pot guardar al repositori.
+
+    El PDF original no s'hi ha de guardar: porta telèfons i correus. El CSV només
+    té grup, equip, ordre i jugador.
+    """
+    import csv
+
+    with open(cami, "w", encoding="utf-8", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["grup", "equip", "ordre", "jugador"])
+        for a in alineacions:
+            w.writerow([a.grup, a.equip, a.ordre, a.jugador])
+
+
+def llegeix_alineacions_csv(cami: str | Path) -> list[Alineacio]:
+    import csv
+
+    with open(cami, encoding="utf-8", newline="") as f:
+        return [
+            Alineacio(grup=r["grup"], equip=r["equip"], ordre=int(r["ordre"]), jugador=r["jugador"])
+            for r in csv.DictReader(f)
+        ]
+
+
+def desa_alineacions(conn, alineacions: list[Alineacio], divisio: str, temporada: str) -> int:
+    """Desa les alineacions d'una divisió, reemplaçant les que hi hagués."""
+    if divisio not in DIVISIONS:
+        raise ValueError(f"Divisió desconeguda: {divisio!r}. Ha de ser una de {DIVISIONS}.")
+    if not alineacions:
+        raise ValueError("Cap alineació: no esborro les que hi ha per posar-hi el buit.")
+    conn.execute(
+        "DELETE FROM nacional_alineacions WHERE temporada = ? AND divisio = ?",
+        (temporada, divisio),
+    )
+    conn.executemany(
+        "INSERT OR REPLACE INTO nacional_alineacions (temporada, divisio, grup, equip, ordre, "
+        "jugador) VALUES (?, ?, ?, ?, ?, ?)",
+        [(temporada, divisio, a.grup, a.equip, a.ordre, a.jugador) for a in alineacions],
+    )
+    conn.commit()
+    return len(alineacions)
