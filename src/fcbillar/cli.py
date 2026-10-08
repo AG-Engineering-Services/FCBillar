@@ -1820,6 +1820,64 @@ def nacional_alineacions_cmd(
     console.print(f"  {len(alineacions)} jugadors de {len(equips)} equips → {sortida}")
 
 
+@app.command("nacional-puja")
+def nacional_puja_cmd(
+    pdf: str = typer.Argument(..., help="El PDF que algú ha pujat des de l'aplicació."),
+    divisio: str = typer.Option("1", "--divisio", help="honor, 1 o 2."),
+    arrel: str = typer.Option("fonts/nacional", "--arrel", help="On viuen les fonts."),
+    sortida: str | None = typer.Option(
+        None, "--sortida", help="Fitxer JSON on deixar què ha passat, per a l'aplicació."
+    ),
+) -> None:
+    """Reconeix un PDF de la Lliga Nacional i el deixa on el llegeix la ingesta.
+
+    És el primer pas del que passa quan un administrador puja un document des de
+    l'aplicació (vegeu `.github/workflows/nacional-puja.yml`). Si no és cap dels
+    documents que sabem llegir, no desa res i surt amb error. De l'«orden de
+    fuerza» només en queda el CSV net: vegeu `reconeix_i_desa`.
+    """
+    import json as _json
+
+    from fcbillar import lliga_nacional as LN
+
+    try:
+        r = LN.reconeix_i_desa(pdf, divisio, arrel)
+        estat = {
+            "estat": "reconegut",
+            "tipus": r.tipus,
+            "temporada": r.temporada,
+            "divisio": r.divisio,
+            "fitxer": r.fitxer,
+            "resum": r.resum,
+        }
+    except (LN.FormatDesconegut, ValueError) as e:
+        estat = {"estat": "error", "error": str(e)}
+    if sortida:
+        Path(sortida).write_text(_json.dumps(estat, ensure_ascii=False), encoding="utf-8")
+    if estat["estat"] == "error":
+        console.print(f"[red]No l'he pogut llegir:[/] {estat['error']}")
+        raise typer.Exit(1)
+    console.print(f"  {estat['resum']} → {estat['fitxer']}")
+
+
+@app.command("publish-nacional")
+def publish_nacional_cmd() -> None:
+    """Publica només la Lliga Nacional. La resta del núvol no es toca.
+
+    Per al procés curt que corre quan algú puja un PDF: tornar a publicar-ho tot
+    trigaria un quart d'hora per ensenyar una jornada.
+    """
+    from fcbillar.cloud_sync import publica_si_hi_es, publish_nacional
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
+
+    counts = publica_si_hi_es("nacional", lambda: publish_nacional(on_progress=_prog), _prog)
+    console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
+    if any(v < 0 for v in counts.values()):
+        raise typer.Exit(1)
+
+
 @app.command("ingest-nacional-fonts")
 def ingest_nacional_fonts_cmd(
     arrel: str = typer.Argument("fonts/nacional", help="Carpeta amb <temporada>/<divisió>/*.pdf."),

@@ -1028,3 +1028,125 @@ def desa_calendari(conn, encontres: list[EncontreDeCalendari], divisio: str, tem
             desats += 1
     conn.commit()
     return desats
+
+
+# --------------------------- pujada d'un PDF ---------------------------
+
+
+@dataclass(frozen=True)
+class PdfReconegut:
+    """Què és un PDF que algú ha pujat, i on ha quedat al repositori."""
+
+    #: «jornada», «jugadors», «calendari» o «alineacions».
+    tipus: str
+    temporada: str
+    divisio: str
+    #: El fitxer que s'ha escrit, relatiu a l'arrel de les fonts.
+    fitxer: str
+    #: Una frase per a qui l'ha pujat: «Jornada 3, 10 d'octubre de 2026».
+    resum: str
+
+
+def reconeix_i_desa(
+    cami: str | Path,
+    divisio: str,
+    arrel: str | Path = "fonts/nacional",
+    avui: date | None = None,
+) -> PdfReconegut:
+    """Mira què és un PDF de la Lliga Nacional i el deixa on el llegeix la ingesta.
+
+    És el que hi ha darrere del botó de pujar documents de l'aplicació. Qui puja
+    no ha de dir què és: una jornada porta el seu número i la seva data, la
+    classificació de jugadors i el calendari es reconeixen sols, i l'«orden de
+    fuerza» també.
+
+    Cada document va a `<arrel>/<temporada>/<divisió>/` amb un nom fix, de manera
+    que tornar a pujar el mateix el reemplaça en lloc d'acumular còpies.
+
+    L'«ORDEN DE FUERZA» NO ES DESA MAI TAL COM ARRIBA: porta adreces, telèfons i
+    correus de directius. Se'n treu el CSV net —grup, equip, ordre i jugador— i
+    l'original no es copia enlloc. Per això aquesta funció rep el camí d'un
+    fitxer de pas i no escriu res més que el que es pot guardar.
+
+    Llança `FormatDesconegut` si no és cap dels quatre: no es desa res.
+    """
+    if divisio not in DIVISIONS:
+        raise ValueError(f"Divisió desconeguda: {divisio!r}. Ha de ser una de {DIVISIONS}.")
+    avui = avui or date.today()
+    origen = Path(cami)
+
+    def desti(temporada: str, nom: str) -> Path:
+        carpeta = Path(arrel) / temporada / divisio
+        carpeta.mkdir(parents=True, exist_ok=True)
+        return carpeta / nom
+
+    def copia(temporada: str, nom: str) -> str:
+        cap_a = desti(temporada, nom)
+        cap_a.write_bytes(origen.read_bytes())
+        return f"{temporada}/{divisio}/{nom}"
+
+    try:
+        jornada = llegeix_jornada(origen)
+    except FormatDesconegut:
+        jornada = None
+    if jornada is not None:
+        temporada = temporada_de(jornada.data or avui)
+        quan = f", {jornada.data.isoformat()}" if jornada.data else ""
+        encontres = sum(len(g.encontres) for g in jornada.grups)
+        return PdfReconegut(
+            "jornada",
+            temporada,
+            divisio,
+            copia(temporada, f"liga_nal_{divisio}_j{jornada.numero}.pdf"),
+            f"Jornada {jornada.numero}{quan}: {encontres} encontres",
+        )
+
+    try:
+        jugadors = llegeix_classificacio_de_jugadors(origen)
+    except FormatDesconegut:
+        jugadors = None
+    if jugadors:
+        temporada = temporada_de(avui)
+        return PdfReconegut(
+            "jugadors",
+            temporada,
+            divisio,
+            copia(temporada, f"liga_nal_{divisio}_cjug.pdf"),
+            f"Classificació de jugadors: {len(jugadors)} jugadors",
+        )
+
+    try:
+        calendari = llegeix_calendari(origen)
+    except FormatDesconegut:
+        calendari = None
+    if calendari:
+        primer = min((e.data for e in calendari if e.data), default=avui)
+        temporada = temporada_de(primer)
+        jornades = len({e.jornada for e in calendari})
+        return PdfReconegut(
+            "calendari",
+            temporada,
+            divisio,
+            copia(temporada, "calendari.pdf"),
+            f"Calendari: {jornades} jornades, {len(calendari)} encontres",
+        )
+
+    # L'últim, i sense copiar-ne l'original: vegeu la capçalera.
+    try:
+        alineacions = llegeix_alineacions(origen)
+    except FormatDesconegut as e:
+        # El motiu de l'últim intent no diu res a qui ha pujat el fitxer.
+        raise FormatDesconegut(
+            "No és cap document de la Lliga Nacional que sapiguem llegir: una jornada, "
+            "la classificació de jugadors, el calendari o les alineacions de Primera Divisió."
+        ) from e
+    temporada = temporada_de(avui)
+    escriu_alineacions_csv(alineacions, desti(temporada, "alineacions.csv"))
+    equips = len({(a.grup, a.equip) for a in alineacions})
+    return PdfReconegut(
+        "alineacions",
+        temporada,
+        divisio,
+        f"{temporada}/{divisio}/alineacions.csv",
+        f"Alineacions: {len(alineacions)} jugadors de {equips} equips (l'original no es guarda)",
+    )
