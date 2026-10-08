@@ -55,3 +55,6 @@ data/*.ics
 
 # Restes de pytest (tmp_path) que de vegades queden a l arrel.
 pytest-of-*/
+
+# El que deixa `publish-cloud` per a `comprova-frescor`: es reescriu cada cop.
+data/darrera_publicacio.json

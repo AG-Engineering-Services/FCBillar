@@ -55,6 +55,29 @@ app = typer.Typer(
 )
 console = Console()
 
+_AJUDA_TEMPORADA = (
+    "Ex. 2026/2027. Per defecte, la de les lligues que la federació té obertes "
+    "(`ingest-lliga` en desa el llistat)."
+)
+
+
+def _temporada(conn, demanada: str | None) -> str:
+    """La temporada demanada o, si no n'hi ha, la que hi ha en curs («2026/2027»).
+
+    Sis comandes duien «2026/2027» per defecte i la reingesta nocturna les crida
+    sense arguments: el setembre de 2027 haurien seguit etiquetant-ho tot com a
+    2026/2027, o no haurien trobat res, i totes haurien sortit bé. Ara surt del
+    calendari de les lligues obertes (`fcbillar.en_curs`), i si no es pot saber
+    la comanda s'atura i ho diu.
+    """
+    from fcbillar.en_curs import NoDeterminat, temporada_o_en_curs
+
+    try:
+        return temporada_o_en_curs(conn, demanada)
+    except NoDeterminat as e:
+        console.print(f"[red]{e}[/]")
+        raise typer.Exit(1) from e
+
 
 def _setup_logging(verbose: bool = False) -> None:
     logging.basicConfig(
@@ -471,10 +494,19 @@ def ingest_lliga_cmd(
     duia `36` -la Tres Bandes de la 25/26- i quan va començar la temporada nova
     va continuar reingerint la vella cada nit, sense fallar mai i sense agafar
     ni una de les dades de la 26/27.
+
+    El llistat es desa (`lligues_obertes`): és d'on la publicació sap quina
+    lliga és la de Tres Bandes i quina la de 4 Modalitats d'enguany.
+
+    Surt amb 1 —després d'haver ingerit tot el que ha pogut— si el llistat porta
+    una fila que no s'ha sabut llegir, si algun grup ha petat o si una lliga de
+    la qual ja teníem encontres no en dona cap. Fins ara tot això eren línies
+    grogues enmig de dos mil, i el pas sortia bé.
     """
     settings = get_settings()
 
     if lliga_id is None:
+        from fcbillar.en_curs import desa_lligues_obertes, mena_de_lliga
         from fcbillar.inscrits_lliga import llegeix_lligues
 
         with ScraperClient(settings) as client:
@@ -486,21 +518,51 @@ def ingest_lliga_cmd(
             console.print("[red]El llistat de lligues no en dona cap d'oberta.[/]")
             raise typer.Exit(1)
         for linia in descartades:
-            console.print(f"  [yellow]fila del llistat sense interpretar:[/] {linia}")
+            console.print(f"  [red]fila del llistat sense interpretar:[/] {linia}")
         console.print(
             "[cyan]Lligues obertes: "
             + ", ".join(f"{ll.lliga_id} {ll.nom}" for ll in obertes)
             + "[/]"
         )
+        conn = ensure_schema(settings.db_path)
+        desa_lligues_obertes(conn, obertes)
+        conn.close()
         for ll in obertes:
-            ingest_lliga_cmd(
-                lliga_id=ll.lliga_id,
-                modalitat=modalitat,
-                create_missing_players=create_missing_players,
+            if mena_de_lliga(ll.nom, ll.modalitat) is None:
+                console.print(
+                    f"  [yellow]{ll.lliga_id} «{ll.nom}» ({ll.modalitat}): no és ni la de Tres "
+                    "Bandes ni la de 4 Modalitats. S'ingereix, però no es publica enlloc.[/]"
+                )
+        fallades = 0
+        for ll in obertes:
+            try:
+                ingest_lliga_cmd(
+                    lliga_id=ll.lliga_id,
+                    modalitat=modalitat,
+                    create_missing_players=create_missing_players,
+                )
+            except typer.Exit as surt:
+                # Una lliga que falla no ha d'aturar les altres: es compta i es
+                # diu al final.
+                fallades += 1 if surt.exit_code else 0
+        if descartades:
+            # Una fila sense llegir pot ser la lliga de la temporada nova. No
+            # s'ha ingerit ni s'ha desat, i la publicació seguiria amb la vella.
+            console.print(
+                f"[red]{len(descartades)} files del llistat de lligues sense interpretar: "
+                "pot ser una lliga nova que no s'està ingerint.[/]"
             )
+        if fallades or descartades:
+            raise typer.Exit(1)
         return
 
     tot_enc = tot_up = tot_skip = 0
+    grups_fallats = jornades_fallades = 0
+    ja_en_tenia = (
+        ensure_schema(settings.db_path)
+        .execute("SELECT COUNT(*) FROM encontres_lliga WHERE lliga_id = ?", (lliga_id,))
+        .fetchone()[0]
+    )
     with ScraperClient(settings) as client:
         tree = discover_lliga(client, lliga_id, depth=2)
         n_grups = sum(len(g) for g in tree.grups_by_div.values())
@@ -528,15 +590,38 @@ def ingest_lliga_cmd(
                     tot_enc += r.total_encontres
                     tot_up += r.total_games_upserted
                     tot_skip += r.total_games_skipped
+                    jornades_fallades += r.jornades_failed
                     console.print(
                         f"  {div.divisio_id}/{grup.grup_id} {grup.nom}: "
                         f"{r.jornades_processed} jorn, {r.total_encontres} enc, "
                         f"{r.total_games_upserted} desades, {r.total_games_skipped} pendents"
+                        + (
+                            f" [red]({r.jornades_failed} jornades fallades)[/]"
+                            if r.jornades_failed
+                            else ""
+                        )
                     )
                 except Exception as e:  # noqa: BLE001
+                    grups_fallats += 1
                     console.print(
-                        f"  [yellow]{div.divisio_id}/{grup.grup_id} {grup.nom}: ERROR {e}[/]"
+                        f"  [red]{div.divisio_id}/{grup.grup_id} {grup.nom}: ERROR {e}[/]"
                     )
+    if not tot_enc and ja_en_tenia:
+        # Una lliga de la qual ja teníem encontres i ara no en surt cap: o el
+        # portal no respon o ha canviat de forma. Abans sortia com un «OK lliga:
+        # 0 encontres». Si no n'havia tingut mai és una altra cosa —la federació
+        # obre la lliga setmanes abans de publicar-ne els grups— i no és cap error.
+        console.print(
+            f"[red]Lliga {lliga_id}: {n_grups} grups i cap encontre, i a la base de dades "
+            f"n'hi ha {ja_en_tenia}. La font ha desaparegut o ha canviat de forma.[/]"
+        )
+        raise typer.Exit(1)
+    if grups_fallats or jornades_fallades:
+        console.print(
+            f"[red]Lliga {lliga_id}: {grups_fallats} de {n_grups} grups i "
+            f"{jornades_fallades} jornades han fallat ({tot_enc} encontres de la resta).[/]"
+        )
+        raise typer.Exit(1)
     console.print(
         f"[green]OK lliga {lliga_id}: {tot_enc} encontres, {tot_up} desades, "
         f"{tot_skip} pendents/saltades.[/]"
@@ -1040,7 +1125,13 @@ def ingest_individuals_cmd(
     Sense arguments recorre el llistat de la temporada en curs i, a més, els
     torneigs de `pipeline.TORNEIGS_FORA_DEL_LLISTAT` que encara no tinguin
     participants. `--torneig` en força un de sol, hi sigui o no.
+
+    Surt amb 1 si el llistat no es pot llegir o si algun torneig ha fallat,
+    després d'haver desat tots els altres. Abans tot això sortia en groc i el
+    pas comptava com a bo.
     """
+    from fcbillar.pipeline import ErrorLlistat
+
     settings = get_settings()
     if torneig:
         from fcbillar.pipeline import ingest_torneig_per_id
@@ -1072,14 +1163,18 @@ def ingest_individuals_cmd(
             )
             scope = "totes les temporades"
         else:
-            result = ingest_individuals_temporada(
-                client,
-                temporada=None if temporada == "current" else temporada,
-                create_missing_players=True,
-                settings=settings,
-                use_cache=cache,
-            )
-            scope = f"temporada {temporada}"
+            try:
+                result = ingest_individuals_temporada(
+                    client,
+                    temporada=None if temporada == "current" else temporada,
+                    create_missing_players=True,
+                    settings=settings,
+                    use_cache=cache,
+                )
+            except ErrorLlistat as e:
+                console.print(f"[red]{e}[/]")
+                raise typer.Exit(1) from e
+            scope = "del llistat" if temporada == "current" else f"temporada {temporada}"
     # Zero partides no és cap èxit: vol dir que s'ha recorregut el web i no
     # se n'ha tret res. Abans això sortia com un OK i no es veia.
     color = "green" if result.total_partides else "yellow"
@@ -1097,6 +1192,12 @@ def ingest_individuals_cmd(
         console.print(
             f"[dim]  {result.fora_del_llistat} torneigs de fora del llistat ingerits pel seu id.[/]"
         )
+    if result.torneigs_failed:
+        console.print(
+            f"[red]{result.torneigs_failed} torneigs del llistat han fallat: mira'n el motiu "
+            "al registre (línies «FAIL torneig»).[/]"
+        )
+        raise typer.Exit(1)
 
 
 @app.command("link-individuals")
@@ -1177,6 +1278,15 @@ def clean_torneig_noms_cmd(
     conn.close()
 
 
+def _fitxer_de_publicacio() -> Path:
+    """On `publish-cloud` deixa els comptadors de l'última publicació.
+
+    Al costat de la base de dades. No és cap estat que s'hagi de conservar: es
+    reescriu a cada publicació i només el llegeix `comprova-frescor`.
+    """
+    return get_settings().db_path.with_name("darrera_publicacio.json")
+
+
 @app.command("publish-cloud")
 def publish_cloud_cmd() -> None:
     """Publica la BD local a **Neon** (esquema `fcbillar`) per al frontend de Vercel.
@@ -1189,6 +1299,15 @@ def publish_cloud_cmd() -> None:
 
     Cal `NEON_DATA_API_URL` i `NEON_SERVICE_ROLE_TOKEN` (al `.env` o a l'entorn).
     Idempotent: es pot reexecutar després de cada actualització.
+
+    La lliga de Tres Bandes i la de 4 Modalitats que es publiquen són les que la
+    federació té al seu llistat (`ingest-lliga` el desa). Per forçar-ne una:
+    `FCB_LLIGA_3B_ID=<id>` i `FCB_LLIGA_4M_ID=<id>`.
+
+    Surt amb 1 —després d'haver publicat tot el que ha pogut— si alguna part no
+    s'ha publicat: una lliga que no s'ha pogut determinar, una taula que el Data
+    API no coneix, o el PDF del rànquing d'opens que no s'ha trobat. Abans eren
+    avisos en groc i la publicació comptava com a bona.
     """
     from fcbillar.cloud_sync import (
         publica_si_hi_es,
@@ -1221,6 +1340,22 @@ def publish_cloud_cmd() -> None:
     def _prog(level: str, msg: str) -> None:
         console.print(f"[dim]  {msg}[/]" if level == "ok" else f"[yellow]{msg}[/]")
 
+    from fcbillar.en_curs import NoDeterminat
+
+    # El que no s'ha pogut publicar. No atura res: es diu al final i fa que la
+    # comanda surti amb error.
+    no_publicat: list[str] = []
+
+    def _de_lliga(nom: str, fn) -> dict[str, int]:
+        """Una part de la lliga. Si no se sap quina lliga és la d'enguany, no es
+        publica —es queda com estava al núvol—, s'apunta i se segueix amb la resta."""
+        try:
+            return fn()
+        except NoDeterminat as e:
+            console.print(f"[red]{nom} NO publicat: {e}[/]")
+            no_publicat.append(f"{nom}: no s'ha pogut determinar quina lliga és la d'enguany")
+            return {}
+
     try:
         counts = publish_rankings(on_progress=_prog)
         counts.update(publish_games(on_progress=_prog))
@@ -1232,13 +1367,19 @@ def publish_cloud_cmd() -> None:
             )
         )
         counts.update(publish_provisional_ranking(on_progress=_prog))
-        counts.update(publish_lliga(on_progress=_prog))
+        counts.update(_de_lliga("lliga", lambda: publish_lliga(on_progress=_prog)))
         counts.update(publish_lliga_standings_hist(on_progress=_prog))
         counts.update(publish_copa(on_progress=_prog))
         counts.update(publish_opens(on_progress=_prog))
-        counts.update(publish_lliga_player_rankings(on_progress=_prog))
+        counts.update(
+            _de_lliga(
+                "lliga_player_rankings", lambda: publish_lliga_player_rankings(on_progress=_prog)
+            )
+        )
         counts.update(publish_copa_player_rankings(on_progress=_prog))
-        counts.update(publish_lliga_encontres(on_progress=_prog))
+        counts.update(
+            _de_lliga("lliga_encontres", lambda: publish_lliga_encontres(on_progress=_prog))
+        )
         # La Lliga de 4 Modalitats, a les seves taules (`lliga4m_*`, migració
         # 0030). Mentre el Data API no les conegui, avisa i no publica res. I
         # qualsevol altra fallada es queda aquí: és una lliga a part, i que no
@@ -1339,6 +1480,30 @@ def publish_cloud_cmd() -> None:
         )
     except Exception as exc:  # noqa: BLE001
         console.print(f"[yellow]Avís: no s'ha pogut publicar la fitxa a Estadístiques: {exc}[/]")
+
+    # El -1 és el que deixa cada part que no s'ha publicat (`publica_si_hi_es`, la
+    # Lliga de 4 Modalitats) i el PDF del rànquing d'opens que no s'ha trobat.
+    # S'ha publicat tot el que es podia; ara es diu el que no.
+    #
+    # La ronda projectada no hi compta, encara que també deixi un -1: és una
+    # lectura nostra i no una dada de la federació, i que falli ja es va decidir
+    # que no havia d'aturar res ni fer fallar la publicació.
+    no_publicat += [nom for nom, n in counts.items() if n == -1 and nom != "open_ronda_projectada"]
+    # Per a `comprova-frescor`, que corre al final de la reingesta i no té cap
+    # altra manera de saber què ha passat aquí (el PDF del rànquing d'opens s'ha
+    # aplicat? quantes pendents hi ha?). No és cap estat: es reescriu cada cop.
+    import json
+
+    if get_settings().db_path.exists():
+        _fitxer_de_publicacio().write_text(
+            json.dumps({"counts": counts, "no_publicat": no_publicat}, ensure_ascii=False),
+            encoding="utf-8",
+        )
+    if no_publicat:
+        console.print("[red]Publicació incompleta. No s'ha publicat:[/]")
+        for nom in no_publicat:
+            console.print(f"  [red]{nom}[/]")
+        raise typer.Exit(1)
 
 
 @app.command("publish-estadistiques-computa")
@@ -1746,7 +1911,9 @@ def set_open_prize_ranking_cmd(
 
 @app.command("ingest-copa")
 def ingest_copa_cmd(
-    edicio: int = typer.Argument(..., help="ID d'edició de la Copa (ex: 7)"),
+    edicio: int = typer.Argument(
+        None, help="ID d'edició de la Copa (ex: 7). Sense id, les que la federació té obertes."
+    ),
     jornada: int | None = typer.Option(
         None, "--jornada", help="Limita a una jornada concreta (per defecte, totes)"
     ),
@@ -1754,12 +1921,83 @@ def ingest_copa_cmd(
         False, "--cache", help="Permet servir HTML de la cache (per defecte, fresc)"
     ),
 ) -> None:
-    """Ingest d'una edició de Copa: jornades, grups, encontres i partides."""
+    """Ingest d'una edició de Copa: jornades, grups, encontres i partides.
+
+    Sense id s'ingereixen les edicions del llistat de la federació
+    (`copa/llistat`), que és el que fa la reingesta nocturna. Fins a l'octubre de
+    2026 la nocturna duia l'edició escrita —la 7, de la 2025-26—: la tornava a
+    baixar sencera cada nit, vuitanta peticions per a una copa acabada, i el dia
+    que la federació n'obrís una de nova no l'hauria demanat ningú.
+
+    Si el llistat és buit no hi ha res a fer i surt bé: la Copa es juga al maig i
+    al juny, i la resta de l'any no n'hi ha cap d'oberta. Si la pàgina no porta
+    el llistat, o una fila no diu de quina edició és, surt amb 1.
+    """
     settings = get_settings()
+    if edicio is None:
+        from fcbillar.scraper import urls as U
+        from fcbillar.scraper.parsers import parse_copa_llistat
+
+        with ScraperClient(settings) as client:
+            llistat = parse_copa_llistat(client.fetch_html(U.copa_llistat(), use_cache=False))
+        if llistat is None:
+            console.print(
+                "[red]La pàgina de copes no porta el llistat (taula «Copa / Estat»): "
+                "ha canviat de forma. No sé si n'hi ha cap d'oberta.[/]"
+            )
+            raise typer.Exit(1)
+        obertes, descartades = llistat
+        darrera = (
+            ensure_schema(settings.db_path)
+            .execute("SELECT MAX(edicio_id) FROM copa_jornades")
+            .fetchone()[0]
+        )
+        if descartades:
+            console.print(
+                f"[red]{len(descartades)} copes al llistat sense id d'edició que sàpiga "
+                f"llegir ({', '.join(descartades)}). L'última que tenim és la {darrera}: "
+                "mira-ho al portal i passa-la a mà, `fcbillar ingest-copa <id>`.[/]"
+            )
+            raise typer.Exit(1)
+        if not obertes:
+            console.print(
+                f"[green]Cap copa oberta al llistat de la federació.[/] "
+                f"[dim]L'última ingerida és l'edició {darrera}; no es torna a baixar.[/]"
+            )
+            return
+        console.print(
+            "[cyan]Copes obertes: "
+            + ", ".join(f"{c.edicio_id} {c.nom} ({c.estat})" for c in obertes)
+            + "[/]"
+        )
+        fallades = 0
+        for c in obertes:
+            try:
+                ingest_copa_cmd(edicio=c.edicio_id, jornada=jornada, cache=cache)
+            except typer.Exit as surt:
+                fallades += 1 if surt.exit_code else 0
+        if fallades:
+            raise typer.Exit(1)
+        return
+
+    ja_en_tenia = (
+        ensure_schema(settings.db_path)
+        .execute("SELECT COUNT(*) FROM copa_jornades WHERE edicio_id = ?", (edicio,))
+        .fetchone()[0]
+    )
     with ScraperClient(settings) as client:
         result = ingest_copa_edicio(
             client, edicio, jornada=jornada, use_cache=cache, settings=settings
         )
+    if not result.jornades and ja_en_tenia and jornada is None:
+        # D'una edició que ja teníem no en surt ni una jornada: la pàgina ha
+        # canviat o el portal no respon. Una copa acabada d'obrir, sense
+        # jornades encara, no és cap error.
+        console.print(
+            f"[red]Copa edició {edicio}: cap jornada, i a la base de dades n'hi ha "
+            f"{ja_en_tenia}. La font ha desaparegut o ha canviat de forma.[/]"
+        )
+        raise typer.Exit(1)
     console.print(
         f"[green]OK copa edició {edicio}: {result.jornades} jornades, "
         f"{result.grups} grups, {result.encontres} encontres, "
@@ -2074,7 +2312,7 @@ def ingest_nacional_fonts_cmd(
 def ingest_divisions_individual_cmd(
     pdf: str = typer.Argument(..., help="PDF de divisions del campionat individual."),
     club: str = typer.Option("BANYOLES", "--club", help="Part del nom del club a seguir."),
-    temporada: str = typer.Option("2026/2027", "--temporada"),
+    temporada: str = typer.Option(None, "--temporada", help=_AJUDA_TEMPORADA),
 ) -> None:
     """Quan juga cada jugador del club el campionat individual.
 
@@ -2092,6 +2330,7 @@ def ingest_divisions_individual_cmd(
     from fcbillar.divisions_individual import desa, llegeix, per_club, traspassos
 
     conn = ensure_schema(get_settings().db_path)
+    temporada = _temporada(conn, temporada)
     # El `fcb_id` I el nom: no sempre són iguals -el Sant Adrià té el `fcb_id`
     # escurçat, «SANT ADRIÀ» per «C.B.SANT ADRIÀ»- i el tall del club es fa amb
     # la forma més llarga que casi. Amb només el `fcb_id`, el «C.B.» d'aquell
@@ -2158,7 +2397,11 @@ def ingest_calendari_lliga_cmd(
         None, help="Carpeta amb els PDF. Si no la poses, els busca al web de la federació."
     ),
     club: str = typer.Option("BANYOLES", "--club", help="Part del nom del club a seguir."),
-    temporada: str = typer.Option("2026/2027", "--temporada"),
+    temporada: str = typer.Option(
+        None,
+        "--temporada",
+        help="Ex. 2026/2027. Per defecte, la més nova que tingui calendaris al web.",
+    ),
     ics_a: str = typer.Option(
         None, "--ics", help="Desa també un .ics per importar a un calendari."
     ),
@@ -2184,10 +2427,16 @@ def ingest_calendari_lliga_cmd(
     Si algun grup surt amb forats no es desa res. Un calendari incomplet no
     s'assembla a un error: s'assembla a un calendari, i qui el mira no té cap
     manera de saber que li falta el seu encontre.
+
+    La temporada, si no es diu, és la més nova que tingui calendaris publicats.
+    I si al web hi ha documents que semblen calendaris de grup i no s'han sabut
+    reconèixer pel nom, es desa el que sí que s'ha llegit i se surt amb 1: és
+    la manera de veure que la federació els ha canviat de nom.
     """
     from pathlib import Path
 
     from fcbillar.calendari_lliga import (
+        calendaris_sense_llegir,
         dates_de_referencia,
         desa_grups,
         descobreix_grups,
@@ -2196,16 +2445,36 @@ def ingest_calendari_lliga_cmd(
         ingest,
         llegeix,
         problemes,
+        temporada_mes_nova,
     )
 
+    sense_llegir: list[str] = []
     if carpeta:
         origens = [(p.name, p) for p in sorted(Path(carpeta).glob("*.pdf"))]
+        temporada = _temporada(ensure_schema(get_settings().db_path), temporada)
     else:
         import httpx
 
-        publicats = descobreix_grups(temporada)
-        console.print(f"[bold]{len(publicats)}[/] calendaris de grup publicats al web")
-        with httpx.Client(follow_redirects=True, timeout=120.0) as client:
+        from fcbillar.scraper.client import USER_AGENT
+        from fcbillar.scraper.urls import web_sitemap_documents
+
+        with httpx.Client(
+            follow_redirects=True, timeout=120.0, headers={"User-Agent": USER_AGENT}
+        ) as client:
+            sitemap = client.get(web_sitemap_documents()).text
+            sense_llegir = calendaris_sense_llegir(sitemap)
+            temporada = temporada or temporada_mes_nova(sitemap)
+            if temporada is None:
+                console.print(
+                    "[red]Cap calendari de grup al sitemap de documents de la federació.[/]"
+                )
+                for slug in sense_llegir:
+                    console.print(f"  [red]no reconegut pel nom:[/] {slug}")
+                raise typer.Exit(1)
+            publicats = descobreix_grups(temporada, client=client)
+            console.print(
+                f"[bold]{len(publicats)}[/] calendaris de grup de la {temporada} publicats al web"
+            )
             origens = [(c.etiqueta, client.get(c.url).content) for c in publicats]
 
     calendaris = []
@@ -2256,6 +2525,15 @@ def ingest_calendari_lliga_cmd(
     if ics_a:
         Path(ics_a).write_text(ics(esmenats, club), encoding="utf-8")
         console.print(f"[green]{ics_a}[/] — importa'l al calendari que vulguis")
+
+    if sense_llegir:
+        console.print(
+            f"\n[red]{len(sense_llegir)} documents del web semblen calendaris de grup i no "
+            "els he reconegut pel nom[/] (la federació els deu haver reanomenat):"
+        )
+        for slug in sense_llegir:
+            console.print(f"  [red]{slug}[/]")
+        raise typer.Exit(1)
 
 
 @app.command("ingest-calendari")
@@ -2505,7 +2783,7 @@ def ingest_inscrits_lliga_cmd(
     lliga: int = typer.Option(
         0, "--lliga", help="Id de lliga de la federació. Per defecte, totes les obertes."
     ),
-    temporada: str = typer.Option("2026/2027", "--temporada"),
+    temporada: str = typer.Option(None, "--temporada", help=_AJUDA_TEMPORADA),
     ranking_id: int = typer.Option(
         0, "--ranking", help="Rànquing amb què contrastar les mitjanes. 0 = no contrastar."
     ),
@@ -2541,6 +2819,12 @@ def ingest_inscrits_lliga_cmd(
         if not obertes:
             console.print("[red]Cap lliga oberta al llistat de la federació.[/]")
             raise typer.Exit(1)
+        # El llistat que s'acaba de llegir és el que diu quina temporada és.
+        from fcbillar.en_curs import desa_lligues_obertes
+
+        desa_lligues_obertes(conn, obertes)
+        temporada = _temporada(conn, temporada)
+        console.print(f"[dim]Temporada {temporada}[/]")
 
         # Retirar el que ja no és al llistat només es pot fer si el llistat s'ha
         # entès SENCER. Una fila que no s'ha sabut llegir dona una llista curta
@@ -2630,7 +2914,9 @@ def ingest_inscrits_lliga_cmd(
 
 @app.command("plantilles")
 def plantilles_cmd(
-    temporada: str = typer.Option("2026/2027", "--temporada", help="La del llistat de divisions."),
+    temporada: str = typer.Option(
+        None, "--temporada", help="La del llistat de divisions. " + _AJUDA_TEMPORADA
+    ),
     ranking_id: int = typer.Option(
         0, "--ranking", help="Rànquing de referència. Per defecte, l'últim abans de la 1a jornada."
     ),
@@ -2648,6 +2934,7 @@ def plantilles_cmd(
     from fcbillar.plantilles import desa, plantilles
 
     conn = ensure_schema(get_settings().db_path)
+    temporada = _temporada(conn, temporada)
     if not ranking_id:
         fila = conn.execute(
             """
@@ -2676,7 +2963,7 @@ def plantilles_cmd(
 
 @app.command("afiliacions")
 def afiliacions_cmd(
-    temporada: str = typer.Option("2026/2027", "--temporada"),
+    temporada: str = typer.Option(None, "--temporada", help=_AJUDA_TEMPORADA),
     sense_xarxa: bool = typer.Option(
         False, "--sense-xarxa", help="Només refà la part de lliga, del que ja hi ha a la BD."
     ),
@@ -2700,6 +2987,7 @@ def afiliacions_cmd(
     from fcbillar.db.repository import Repository
 
     conn = ensure_schema(get_settings().db_path)
+    temporada = _temporada(conn, temporada)
     repo = Repository(conn)
     avisos: list[str] = []
 
@@ -2717,6 +3005,15 @@ def afiliacions_cmd(
             "`fcbillar ingest-inscrits-lliga`.[/]"
         )
 
+    # Si la base de dades ja té afiliacions de l'individual d'aquesta temporada,
+    # és que al web hi havia sortejos. Que ara no n'hi hagi cap no és «encara no
+    # n'han publicat»: és que han canviat de lloc o de nom.
+    tenia_individual = conn.execute(
+        "SELECT COUNT(*) FROM afiliacions WHERE temporada = ? AND competicio = 'INDIVIDUAL'",
+        (temporada,),
+    ).fetchone()[0]
+    sortejos_perduts = False
+
     if not sense_xarxa:
         from fcbillar.scraper.client import USER_AGENT
 
@@ -2725,6 +3022,7 @@ def afiliacions_cmd(
         ) as client:
             publicats = S.descobreix(client)
             console.print(f"  {len(publicats)} sortejos de fase publicats al web")
+            sortejos_perduts = bool(tenia_individual) and not publicats
             totes: list[A.Afiliacio] = []
             for pub in publicats:
                 desti = get_settings().cache_dir / pub.nom_fitxer
@@ -2773,11 +3071,19 @@ def afiliacions_cmd(
         for a in avisos:
             console.print(f"  [yellow]{a}[/]")
 
+    if sortejos_perduts:
+        console.print(
+            f"\n[red]Cap sorteig de fase al web, i la base de dades té {tenia_individual} "
+            f"afiliacions de l'individual de la {temporada} que en van sortir. La federació "
+            "els ha canviat de lloc o de nom (`sorteig_fase.descobreix`).[/]"
+        )
+        raise typer.Exit(1)
+
 
 @app.command("sql-categoria-federativa")
 def sql_categoria_federativa_cmd(
     club: str = typer.Option("C.B.BANYOLES", "--club", help="Club del qual generar-ho."),
-    temporada: str = typer.Option("2026/2027", "--temporada"),
+    temporada: str = typer.Option(None, "--temporada", help=_AJUDA_TEMPORADA),
     federacio: str = typer.Option("fcb", "--federacio", help="`federations.id` a NouProjecte."),
     surt: str = typer.Option("", "--surt", help="Fitxer on desar-ho."),
 ) -> None:
@@ -2798,6 +3104,7 @@ def sql_categoria_federativa_cmd(
     que és l'única cosa que pot fallar aquí i que no es veu.
     """
     conn = ensure_schema(get_settings().db_path)
+    temporada = _temporada(conn, temporada)
     files = conn.execute(
         """
         SELECT i.jugador, i.divisio, i.definitiva, p.fcb_id

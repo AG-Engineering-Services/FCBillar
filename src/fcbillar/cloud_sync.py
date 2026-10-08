@@ -1183,30 +1183,62 @@ def publish_rating_buckets(
     return {"player_rating_buckets": n, "player_rating_index": ni}
 
 
-# Lliga Catalana Tres Bandes = competició/portal lliga_id 36.
-#: Id de la Lliga Catalana de Tres Bandes de la temporada en curs.
+#: Per FORÇAR la lliga de Tres Bandes que es publica. `None`, que és el normal,
+#: vol dir «la que la federació té oberta», i es resol a `lliga_a_publicar`.
 #:
-#: La federació estrena id cada temporada i no segueix cap patró que es pugui
-#: calcular: 34 va ser la 2024-25, 36 la 2025-26 i 38 la 2026-27 (els senars del
-#: mig són les lligues de 4 Modalitats). O sigui que això s'ha de canviar a mà
-#: cada any, i mentre no es canviï la web segueix ensenyant la temporada passada
-#: com si fos la d'ara, que és exactament el que va passar el setembre de 2026.
+#: Fins a l'octubre de 2026 aquí hi deia `38`, i abans `36`. La federació estrena
+#: id cada temporada i no segueix cap patró que es pugui calcular (34 va ser la
+#: 2024-25, 36 la 2025-26, 38 la 2026-27; els senars del mig són les de 4
+#: Modalitats), o sigui que s'havia de canviar a mà cada any. I mentre no es
+#: canviava no fallava res: la ingesta ja seguia el llistat de la federació i
+#: portava la temporada nova, la publicació seguia amb el número vell, i el web
+#: ensenyava la temporada passada com si fos la d'ara. És exactament el que va
+#: passar el setembre de 2026.
 #:
-#: Per saber quin toca: `fcbillar discover-lliga <id>` fins que en surtin les
-#: divisions de Tres Bandes.
-LLIGA_3B_ID = 38
+#: Ara surt del mateix llistat que fa servir la ingesta (`fcbillar.en_curs`). El
+#: nom es queda per a qui en vulgui publicar una de concreta des d'un script o
+#: un test; des de la línia d'ordres, `FCB_LLIGA_3B_ID=<id>`.
+LLIGA_3B_ID: int | None = None
 
-#: Id de la Lliga Catalana de 4 Modalitats de la temporada en curs.
-#:
-#: Són els senars del mig dels de Tres Bandes: 35 va ser la 2024-25, 37 la
-#: 2025-26 i 39 la 2026-27. Igual que `LLIGA_3B_ID`, s'ha de canviar a mà cada
-#: any, i es troba de la mateixa manera: `fcbillar discover-lliga <id>` fins que
-#: en surtin Honor, 1a i 2a de 4 Modalitats.
+#: El mateix per a la Lliga Catalana de 4 Modalitats (`FCB_LLIGA_4M_ID`).
 #:
 #: Es publica a les seves taules (`lliga4m_*`) i no a les de Tres Bandes: l'app
 #: del club i /lliga llegeixen aquelles sense filtrar per lliga, i una segona
 #: lliga a dins se'ls barrejaria amb la primera.
-LLIGA_4M_ID = 39
+LLIGA_4M_ID: int | None = None
+
+
+def lliga_a_publicar(mena: str, lliga_id: int | None = None, db_path: Path | None = None) -> int:
+    """L'id de la lliga de Tres Bandes (`'3B'`) o de 4 Modalitats (`'4M'`) a publicar.
+
+    Mana, per ordre: el `lliga_id` que es passa a la funció de publicació (per
+    tornar a publicar una temporada passada), la constant de sobre si algú l'ha
+    posada, la variable d'entorn, i si no hi ha res de tot això —que és el cas
+    de cada nit— la que la federació té al seu llistat.
+
+    Si no se'n pot determinar cap, `en_curs.NoDeterminat`. A posta no hi ha cap
+    id de reserva: publicar una lliga vella sense dir-ho és pitjor que no
+    publicar-ne cap i que es vegi.
+    """
+    from fcbillar import en_curs
+
+    if lliga_id is not None:
+        return lliga_id
+    forcada = LLIGA_3B_ID if mena == en_curs.MENA_3B else LLIGA_4M_ID
+    if forcada is not None:
+        return forcada
+    db_path = Path(db_path or get_settings().db_path)
+    if not db_path.exists():
+        # `sqlite3.connect` la crearia buida, i una base buida que no hi era fa
+        # més mal que no tenir-ne: el següent que la troba es pensa que és la bona.
+        raise en_curs.NoDeterminat(
+            f"No hi ha base de dades a {db_path}: no puc saber quina lliga és la d'enguany."
+        )
+    conn = sqlite3.connect(str(db_path))
+    try:
+        return en_curs.lliga_en_curs(conn, mena)
+    finally:
+        conn.close()
 
 
 class _TaulesLliga(NamedTuple):
@@ -1227,7 +1259,7 @@ _TAULES_4M = _TaulesLliga(
 
 
 def _fetch_official_lliga_standings(
-    group_keys: list[tuple[int, int]], prog: Progress, lliga: int = LLIGA_3B_ID
+    group_keys: list[tuple[int, int]], prog: Progress, lliga: int
 ) -> dict[tuple[int, int], list]:
     """Scrapeja la classificació OFICIAL (live) de cada grup d'una lliga.
 
@@ -1432,8 +1464,8 @@ def publish_lliga(
     és d'un que encara no ha jugat.
     """
     prog: Progress = on_progress or (lambda level, msg: None)
-    lliga = lliga_id if lliga_id is not None else LLIGA_3B_ID
     db_path = db_path or get_settings().db_path
+    lliga = lliga_a_publicar("3B", lliga_id, db_path)
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     sb = get_client()
@@ -2342,8 +2374,8 @@ def publish_lliga_player_rankings(
     import json
 
     prog: Progress = on_progress or (lambda level, msg: None)
-    lliga = lliga_id if lliga_id is not None else LLIGA_3B_ID
     db_path = db_path or get_settings().db_path
+    lliga = lliga_a_publicar("3B", lliga_id, db_path)
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     sb = get_client()
@@ -2597,8 +2629,8 @@ def publish_lliga_encontres(
 
     prog: Progress = on_progress or (lambda level, msg: None)
     # Es llegeix aquí i no com a valor per defecte: la constant canvia cada any.
-    lliga = lliga_id if lliga_id is not None else LLIGA_3B_ID
     db_path = db_path or get_settings().db_path
+    lliga = lliga_a_publicar("3B", lliga_id, db_path)
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     sb = get_client()
@@ -2865,8 +2897,8 @@ def publish_lliga_4m(
     perquè `publica_si_hi_es` pugui dir-ho i seguir.
     """
     prog: Progress = on_progress or (lambda level, msg: None)
-    lliga = lliga_id if lliga_id is not None else LLIGA_4M_ID
     db_path = db_path or get_settings().db_path
+    lliga = lliga_a_publicar("4M", lliga_id, db_path)
     conn = sqlite3.connect(str(db_path))
     try:
         fila = conn.execute(
@@ -3797,6 +3829,10 @@ def publish_open_ranking(
     max_ronda = len(ordered)
     window = ordered[max(0, max_ronda - 5) : max_ronda]
     prov_latest = True
+    # Què ha passat amb el PDF oficial: 1 aplicat, 0 no toca encara (la federació
+    # no l'ha refrescat), -1 no s'ha pogut trobar o llegir. El -1 és el que la
+    # publicació compta com a fallada; els altres dos són l'estat normal.
+    pdf_oficial = 0
     try:
         import httpx
 
@@ -3946,6 +3982,7 @@ def publish_open_ranking(
             for posicio, r in enumerate(latest, start=1):
                 r["posicio"] = posicio
             prov_latest = False
+            pdf_oficial = 1
             prog(
                 "ok",
                 f"rànquing oficial aplicat: {n_hit}/{len(off.entries)} entrades PDF "
@@ -3957,6 +3994,13 @@ def publish_open_ranking(
         else:
             prog("ok", "ronda provisional: el rànquing oficial encara no inclou l'open més recent")
     except Exception as exc:
+        # No és el mateix que les dues branques de sobre. Allà el PDF hi és i
+        # encara no toca; aquí no s'ha trobat o no s'ha sabut llegir, que és el
+        # que passa quan la federació el canvia de lloc o de nom. Ha passat dues
+        # vegades, i totes dues la ronda es va quedar provisional setmanes amb
+        # la publicació sortint bé. Es publica igualment —provisional— i es
+        # torna -1 perquè `publish-cloud` acabi amb error.
+        pdf_oficial = -1
         prog("warn", f"penalitzacions: PDF no aplicat ({exc}); ronda marcada provisional")
 
     # Marca la ronda vigent com a PROVISIONAL (punts des de la classificació final,
@@ -3975,7 +4019,12 @@ def publish_open_ranking(
     fora = _retira_rondes_sobrants(sb, "general", max_ronda, prog)
     files_fora = _retira_files_sobrants(sb, "general", all_rows, prog)
     conn.close()
-    return {"open_ranking": n, "rondes_retirades": fora, "files_retirades": files_fora}
+    return {
+        "open_ranking": n,
+        "rondes_retirades": fora,
+        "files_retirades": files_fora,
+        "open_ranking_pdf_oficial": pdf_oficial,
+    }
 
 
 def _retira_rondes_sobrants(sb, genere: str, max_ronda: int, prog: Progress) -> int:

@@ -484,6 +484,51 @@ def slugs_de_grup(sitemap: str, temporada: str | None = None) -> list[tuple[str,
     return sorted(out)
 
 
+def es_calendari_de_grup(slug: str) -> bool:
+    """Si un document del sitemap és un calendari de grup dels que es llegeixen aquí."""
+    return _RE_SLUG_GRUP.search(slug) is not None
+
+
+def temporada_mes_nova(sitemap: str) -> str | None:
+    """La temporada més nova que tingui calendaris de grup publicats, o `None`.
+
+    És la que s'ingereix quan no se'n demana cap. Abans la comanda duia
+    «2026/2027» per defecte: el setembre de 2027 hauria seguit demanant els
+    calendaris de la temporada anterior —que encara són al sitemap— i hauria
+    sortit bé.
+    """
+    temporades = {temp for _, temp, _ in slugs_de_grup(sitemap)}
+    return max(temporades) if temporades else None
+
+
+#: Els calendaris de la Lliga de 4 Modalitats («calendari-lliga-4modalitats-…»).
+#: No es llegeixen a posta: les dates d'aquella lliga ja venen de la intranet.
+_RE_SLUG_4M = re.compile(r"4-?mod|quatre-?mod", re.IGNORECASE)
+
+
+def calendaris_sense_llegir(sitemap: str) -> list[str]:
+    """Documents que semblen calendaris de grup i que `_RE_SLUG_GRUP` no reconeix.
+
+    L'slug és un nom que posa algú a mà al WordPress, i un canvi petit
+    («…-3-bandes-…», «…-2027-2028-…» en un altre ordre) faria que no en casés
+    cap. Aleshores la comanda no en trobaria cap i, pitjor, si només en canviés
+    un, n'ingeriria onze i semblaria que tot va bé.
+
+    Això és el que ho fa visible: tot el que té «calendari» i «lliga» al nom, no
+    és de la de 4 Modalitats i no s'ha sabut llegir. Qui crida ha de fallar si
+    en torna algun.
+    """
+    out = []
+    for u in re.findall(r"<loc>([^<]+)</loc>", sitemap):
+        slug = u.rstrip("/").rsplit("/", 1)[-1].lower()
+        if "calendari" not in slug or "lliga" not in slug:
+            continue
+        if es_calendari_de_grup(slug) or _RE_SLUG_4M.search(slug):
+            continue
+        out.append(slug)
+    return sorted(out)
+
+
 def url_del_pdf(pagina: str) -> str | None:
     """L'enllaç directe al PDF dins una pàgina de document del WordPress."""
     m = _RE_DESCARREGA_GRUP.search(pagina)

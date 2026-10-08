@@ -831,3 +831,23 @@ CREATE TABLE IF NOT EXISTS nacional_alineacions (
     jugador     TEXT NOT NULL,
     PRIMARY KEY (temporada, divisio, equip, ordre)
 );
+
+-- El llistat de lligues de la intranet, tal com l'ha vist cada ingesta (v32).
+--
+-- És d'on la publicació treu QUINA lliga és la de Tres Bandes i quina la de 4
+-- Modalitats d'aquesta temporada. Abans eren dos números escrits al codi (38 i
+-- 39) que s'havien de canviar a mà cada any, i mentre no es canviaven el web
+-- ensenyava la temporada passada com si fos la d'ara.
+--
+-- No s'esborra res: una lliga que surt del llistat es queda aquí amb l'últim
+-- dia que s'hi va veure. Totes les files d'una mateixa lectura comparteixen
+-- `ultima_vista`, i «les de l'últim llistat» són les que tenen la més nova.
+CREATE TABLE IF NOT EXISTS lligues_obertes (
+    lliga_id      INTEGER PRIMARY KEY,       -- id de la federació
+    nom           TEXT NOT NULL,             -- 'Lliga Catalana Tres Bandes'
+    modalitat     TEXT NOT NULL DEFAULT '',  -- 'Tres bandes', '4 Modalitats'
+    estat         TEXT NOT NULL DEFAULT '',  -- 'Inscripció', 'Activa'
+    data_limit    TEXT,                      -- límit d'inscripció, ISO
+    primera_vista TEXT NOT NULL,
+    ultima_vista  TEXT NOT NULL
+);

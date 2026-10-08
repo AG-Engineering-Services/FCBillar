@@ -1711,8 +1711,8 @@ def ingest_torneig_per_id(
 
     El nom es llegeix de la pàgina del torneig. La temporada, si no es diu, és
     la que el torneig ja té a la base de dades —és part de la seva clau, i amb
-    una altra se'n crearia un de nou al costat— i, si no hi és, la que està en
-    curs.
+    una altra se'n crearia un de nou al costat— i, si no hi és, la del primer
+    dia que s'hi va jugar.
     """
     if temporada is None:
         fila = conn.execute(
@@ -1721,10 +1721,20 @@ def ingest_torneig_per_id(
             "WHERE ti.torneig_id_extern = ? LIMIT 1",
             (torneig_id_extern,),
         ).fetchone()
-        temporada = fila[0] if fila else _current_temporada_label()
+        temporada = fila[0] if fila else None
 
     resum = {"divisions": 0, "partides": 0, "participants": 0, "oficials": 0, "deduides": 0}
-    for div in llegeix_torneig(client, torneig_id_extern, None, use_cache=use_cache):
+    divisions = llegeix_torneig(client, torneig_id_extern, None, use_cache=use_cache)
+    if temporada is None:
+        # Un torneig que la base de dades no ha vist mai: la del primer dia que
+        # s'hi juga, i no la d'avui, que és quan s'ingereix i no quan es va jugar.
+        temporada = temporada_de_torneig(conn, torneig_id_extern, divisions)
+    if temporada is None:
+        raise ValueError(
+            f"No sé de quina temporada és el torneig {torneig_id_extern}: no és a la base "
+            "de dades i les seves pàgines no porten cap data. Digues-la amb --temporada."
+        )
+    for div in divisions:
         if not div.partides:
             log.info("  %s: sense partides publicades", div.nom)
             continue
@@ -1845,6 +1855,44 @@ def _ingereix_fora_del_llistat(
     return resum
 
 
+class ErrorLlistat(RuntimeError):
+    """El llistat d'individuals no s'ha pogut llegir: no respon o ha canviat de forma.
+
+    És un error i no una llista buida. Fins a l'octubre de 2026 una baixada
+    fallida tornava «0 torneigs, 0 partides» i la comanda sortia bé.
+    """
+
+
+def temporada_de_torneig(conn, torneig_id_extern: int, divisions) -> str | None:
+    """La temporada d'un torneig («2026-2027»), pel que en diu el mateix torneig.
+
+    Abans era «la del dia que s'ingereix», amb el tall a l'agost. A l'agost, un
+    torneig de la temporada vella que encara fos al llistat —l'Open de Mataró es
+    juga al juliol i la federació triga a treure'l— s'hauria desat com a nou a
+    la temporada següent, al costat del de debò: la temporada és part de la
+    seva clau.
+
+    Per ordre:
+
+    1. La que el torneig ja té a la base de dades. No canvia mai.
+    2. La del primer dia que s'hi juga: la data dels grups i de les partides.
+
+    `None` si no en té cap de les dues coses. Qui crida decideix què fer-ne;
+    aquí no es mira el calendari d'avui.
+    """
+    fila = conn.execute(
+        "SELECT te.nom FROM torneigs_individuals ti "
+        "JOIN temporades te ON te.id = ti.temporada_id "
+        "WHERE ti.torneig_id_extern = ? ORDER BY te.nom DESC LIMIT 1",
+        (torneig_id_extern,),
+    ).fetchone()
+    if fila:
+        return fila[0]
+    dies = [p.data for d in divisions for p in d.partides if p.data]
+    dies += [g.data for d in divisions for g in d.grups if g.data]
+    return _derive_temporada(min(dies)) if dies else None
+
+
 def _individuals_llistat_url(base_url: str, temporada: str | None) -> str:
     """Llistat de torneigs. Nomes la temporada en curs: l'historial per
     temporades va desapareixer amb el web nou i no te substitut."""
@@ -1864,14 +1912,25 @@ def ingest_individuals_temporada(
     settings: Settings | None = None,
     use_cache: bool = True,
 ) -> IngestIndividualsResult:
-    """Ingest dels torneigs individuals d'una temporada.
+    """Ingest dels torneigs individuals del llistat de la federació.
 
-    `temporada=None` o `'current'` → temporada actual (`/ca/individuals/llistat`).
-    Per cada torneig, descobreix divisions i ingest classificació final.
+    `temporada=None` o `'current'` → els del llistat (`individuals/llistat`), que
+    només porta els de la temporada en joc. Per cada torneig, descobreix
+    divisions i ingest classificació final.
+
+    La temporada amb què es desa cada torneig surt del mateix torneig
+    (`temporada_de_torneig`): la que ja té a la base de dades o la del primer
+    dia que s'hi juga. Si d'un torneig no se'n pot saber —té partides i cap
+    data— se li posa la dels altres del mateix llistat quan tots diuen la
+    mateixa, i si ni així, compta com a fallat i no es desa. `temporada` (ex.
+    '2025-2026') la força per a tots, que és el que fa `--temporada`.
 
     `use_cache=False` força fetch fresc — imprescindible per al re-scrape setmanal:
     detecta torneigs nous (apareixen amb ID més alt al llistat) i partides noves
     dins competicions encara obertes (no tancades fins a la classificació definitiva).
+
+    Llança `ErrorLlistat` si el llistat no es pot baixar o no porta la taula de
+    torneigs: no és el mateix que un llistat buit, i abans tornaven el mateix.
     """
     settings = settings or client.settings
     base = settings.base_url.rstrip("/")
@@ -1879,27 +1938,19 @@ def ingest_individuals_temporada(
     # connexió amb l'esquema garantit.
     conn = ensure_schema(settings.db_path)
 
-    # Si temporada no és string, deduïm de l'historial
-    temporada_nom = temporada
-    if temporada_nom is None:
-        # Per a "current", agafem la temporada actual del context (deriva de data avui).
-        from datetime import date as _date
-
-        today = _date.today()
-        if today.month >= 8:
-            temporada_nom = f"{today.year}-{today.year + 1}"
-        else:
-            temporada_nom = f"{today.year - 1}-{today.year}"
-
     # 1. Fetch llistat de torneigs
     url = _individuals_llistat_url(base, temporada)
     try:
         html = client.fetch_html(url, use_cache=use_cache)
     except Exception as e:
-        log.error("FAIL fetch individuals llistat: %s", e)
-        return IngestIndividualsResult(0, 0, 0)
+        raise ErrorLlistat(f"No he pogut baixar el llistat d'individuals ({url}): {e}") from e
+    if taula_amb(html, "Torneig") is None:
+        raise ErrorLlistat(
+            f"La pàgina {url} no porta la taula de torneigs: ha canviat de forma, o no és "
+            "el llistat."
+        )
     torneigs = parse_individuals_torneigs_list(html)
-    log.info("Individuals %s: %d torneigs descoberts", temporada_nom, len(torneigs))
+    log.info("Individuals: %d torneigs al llistat", len(torneigs))
 
     processed = 0
     failed = 0
@@ -1907,6 +1958,9 @@ def ingest_individuals_temporada(
     total_partides = 0
     oficials = 0
     deduides = 0
+    # Es llegeixen tots abans de desar-ne cap: la temporada d'un torneig sense
+    # dates surt dels altres del mateix llistat.
+    llegits: list[tuple] = []
     for torneig in torneigs:
         try:
             divisions = llegeix_torneig(
@@ -1917,8 +1971,21 @@ def ingest_individuals_temporada(
             failed += 1
             continue
         if not divisions:
-            log.info("  %s: sense divisions parsejables", torneig.nom)
-            failed += 1
+            # Un torneig que la federació acaba de donar d'alta pot no tenir
+            # encara cap divisió: no hi ha res a llegir i no és cap error. Si ja
+            # el teníem i ara no en surt cap, sí: la pàgina ha canviat.
+            conegut = conn.execute(
+                "SELECT 1 FROM torneigs_individuals WHERE torneig_id_extern = ? LIMIT 1",
+                (torneig.torneig_id_extern,),
+            ).fetchone()
+            if conegut:
+                log.warning(
+                    "FAIL torneig %s: ja el teníem i ara no en surt cap divisió", torneig.nom
+                )
+                failed += 1
+            else:
+                log.info("  %s: encara sense divisions publicades", torneig.nom)
+                processed += 1
             continue
 
         # Un torneig acabat de publicar encara no té cap partida jugada. No és
@@ -1931,6 +1998,37 @@ def ingest_individuals_temporada(
         if not amb_joc:
             processed += 1
             continue
+        llegits.append(
+            (
+                torneig,
+                amb_joc,
+                temporada or temporada_de_torneig(conn, torneig.torneig_id_extern, amb_joc),
+            )
+        )
+
+    sabudes = {t for _, _, t in llegits if t}
+    temporades_desades: set[str] = set()
+    for torneig, amb_joc, temporada_nom in llegits:
+        if temporada_nom is None and len(sabudes) == 1:
+            temporada_nom = next(iter(sabudes))
+            log.info(
+                "  %s: sense cap data; se li posa la temporada dels altres del llistat (%s)",
+                torneig.nom,
+                temporada_nom,
+            )
+        if temporada_nom is None:
+            log.error(
+                "FAIL torneig %s (%d): no en sé la temporada —ni és a la base de dades, ni "
+                "porta cap data, ni els altres del llistat es posen d'acord (%s)—. No el "
+                "deso: `fcbillar ingest-individuals --torneig %d --temporada AAAA-AAAA`.",
+                torneig.nom,
+                torneig.torneig_id_extern,
+                ", ".join(sorted(sabudes)) or "cap",
+                torneig.torneig_id_extern,
+            )
+            failed += 1
+            continue
+        temporades_desades.add(temporada_nom)
 
         for div in amb_joc:
             try:
@@ -1986,10 +2084,13 @@ def ingest_individuals_temporada(
         for avis in avisos_regles:
             log.warning("sorteig: %s", avis)
         log.info("Regles de classificació desades a %d fases", n_regles)
+        # Sense cap temporada desada en aquesta passada no hi ha res a projectar
+        # (i `IN ()` no és SQL): es demana una que no existeix.
+        marques = ",".join("?" * len(temporades_desades)) or "NULL"
         for r in conn.execute(
             "SELECT DISTINCT ti.id, ti.nom FROM torneigs_individuals ti "
-            "JOIN temporades te ON te.id = ti.temporada_id WHERE te.nom = ?",
-            (temporada_nom,),
+            f"JOIN temporades te ON te.id = ti.temporada_id WHERE te.nom IN ({marques})",
+            sorted(temporades_desades),
         ).fetchall():
             resum = projecta_ronda_seguent(conn, r[0])
             if resum.get("estat") == "projectada":
