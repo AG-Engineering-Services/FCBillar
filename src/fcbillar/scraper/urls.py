@@ -155,6 +155,16 @@ def individuals_partides_eliminatories(
     return _u(base, "frontend/individuals/partides-eliminatories", torneig, divisio, eliminatoria)
 
 
+def individuals_classificacio_final(torneig: int, divisio: int, base: str = INTRANET) -> str:
+    """La classificació final oficial d'una divisió, amb el club de cadascú.
+
+    El parell ha de ser el que dona la pàgina de divisions: el portal només mira
+    la divisió, i amb el torneig d'un altre respon igualment —amb la
+    classificació d'aquell altre.
+    """
+    return _u(base, "frontend/individuals/divisio-classificacio-final", torneig, divisio)
+
+
 def individuals_inscripcions(torneig: int, base: str = INTRANET) -> str:
     return _u(base, "frontend/individuals/inscripcions", torneig)
 

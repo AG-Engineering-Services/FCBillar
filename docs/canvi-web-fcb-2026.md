@@ -552,6 +552,38 @@ Un torneig publicat però sense cap partida jugada —el 216 i el 218 ara
 mateix— ja no compta com a fallada: no hi ha res a desar perquè encara no ha
 passat res, i la comanda ho diu.
 
+**I la classificació final ha tornat (octubre de 2026).** El que diu aquest
+apartat —«oficial ja no n'hi ha cap»— va deixar de ser cert: cada fila de
+`individuals/divisions/{torneig}` porta un botó «Classificació» cap a
+`individuals/divisio-classificacio-final/{torneig}/{divisio}`, amb posició,
+jugador, **club**, punts, partides, caramboles, entrades i les dues mitjanes. No
+porta la sèrie major. Una divisió que no en té respon igualment, amb una fila
+que diu «No s'ha creat la classificació».
+
+Comparada amb la deduïda no deia el mateix: 5 posicions de 24 a l'Open de Lliure
+del Punt d'Atac (217), 4 de 20 a l'Open de Banda de Granollers (219) i 2 de 8 a
+la 1a de Quadre 47/2 (218). Per això ara es demana sempre i, quan hi és,
+**mana**; la deducció es queda per a quan no n'hi ha
+(`individuals.desa_classificacio_oficial`). Dos detalls que no es veuen des de
+fora:
+
+- El portal només mira la divisió. Amb el torneig d'un altre respon igualment,
+  amb la classificació d'aquell altre: el parell s'ha d'agafar de la pàgina de
+  divisions i no muntar-lo a mà.
+- Que hi hagi classificació oficial desada es reconeix pel club: és l'única
+  pàgina del torneig que el porta, i la deduïda no en té mai.
+
+**Els torneigs que surten del llistat.** `individuals/llistat` només porta la
+temporada en curs, i un torneig que es tanca just abans que la federació el
+tregui queda com estava. L'Open de Mataró del juliol de 2026 (211/447) i el
+femení (195/430) tenien les partides i cap participant: la federació no en va
+crear la classificació. Les seves pàgines segueixen responent per id, i
+`pipeline.TORNEIGS_FORA_DEL_LLISTAT` diu quins són: la ingesta nocturna els
+baixa sencers **un cop** —mentre no tinguin participants— i després només en
+demana la pàgina de la classificació, que és l'única cosa d'un torneig acabat
+que encara pot canviar. `fcbillar ingest-individuals --torneig 211` en força un
+a mà.
+
 ## 3. Impacte mòdul a mòdul
 
 | Mòdul | Estat | Feina |
@@ -805,10 +837,14 @@ les tres columnes mortes.
   per sempre és l'àrbitre i l'assistència per partida: el web antic els donava i
   el nou no. L'única font que queda és el panell de jugador logat (§9), i només
   per a un jugador.
-- **El club de l'individual d'una modalitat que no sigui tres bandes.** Els PDF de
-  sorteig (§2.10) existeixen per categoria del gestor de fitxers, i de moment
-  només s'ha vist `individuals-tres-bandes`. Quan la federació pengi el sorteig
-  del quadre 47/2 (torneig 218) caldrà comprovar que la categoria s'hi diu igual.
+- ~~El club de l'individual d'una modalitat que no sigui tres bandes.~~ **Resolt**
+  l'octubre de 2026, i no s'hi deia igual: la categoria del quadre és
+  `individual-quadre-47-2`, sense la essa de `individuals-tres-bandes`, i la
+  cerca demanava la essa. Ara val de les dues maneres. De pas es van trobar fora
+  els PDF de les **finals**, que no es diuen «prèvia» ni «grups» i tenen un altre
+  format: un horari i una taula «Rànquing inicial» amb el club i el grup de cada
+  finalista (`sorteig_fase._llegeix_final`). I el club de l'individual també
+  surt ara de la classificació final oficial (§2.7), per a totes les modalitats.
 - **El seguiment en directe amb un open EN JOC** (§2.12). S'ha provat contra opens
   acabats, perquè el 8 d'octubre no se'n jugava cap; el pròxim de tres bandes és
   Sant Adrià, el 28 de novembre. El que només es pot veure aquell dia: si el

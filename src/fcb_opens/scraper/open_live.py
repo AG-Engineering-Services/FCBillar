@@ -619,7 +619,9 @@ def parse_has_final_classification(html: str) -> bool:
         raise EstructuraInesperada(
             "classificació final: no hi ha la taula de posicions"
         )
-    return any(fila.enter("Posició") is not None and fila["Jugador"] for fila in taula)
+    # Les files les llegeix el mateix lector que desa la classificació oficial
+    # a la ingesta nocturna: «tancat» aquí i «té classificació» allà són el mateix.
+    return bool(_portal.parse_individuals_classificacio_final(html))
 
 
 def parse_final_classification_id(html: str) -> int | None:

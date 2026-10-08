@@ -175,6 +175,78 @@ def ja_publicada(conn: sqlite3.Connection, torneig_id: int, nom_ronda: str) -> b
     return bool(fila and fila[0])
 
 
+#: El sorteig oficial d'una ronda, quan se sap per una altra via que els grups del
+#: portal. Avui n'hi ha una: el full de la final en PDF, que la federació penja
+#: dies abans de crear la fase a la intranet.
+#:
+#: Es crea aquí i no amb una migració perquè no canvia res del que ja hi ha: és
+#: una taula nova, petita i que es refà a cada ingesta. `schema.sql` la porta
+#: igual per a les bases noves.
+_DDL_SORTEIG_OFICIAL = """
+CREATE TABLE IF NOT EXISTS torneig_sorteig_oficial (
+    torneig_id   INTEGER NOT NULL REFERENCES torneigs_individuals(id) ON DELETE CASCADE,
+    ronda        TEXT NOT NULL,
+    jugador_nom  TEXT NOT NULL,
+    grup         TEXT NOT NULL,
+    club         TEXT,
+    font         TEXT NOT NULL,
+    PRIMARY KEY (torneig_id, ronda, jugador_nom)
+)
+"""
+
+
+def desa_sorteig_oficial(
+    conn: sqlite3.Connection,
+    torneig_id: int,
+    nom_ronda: str,
+    jugadors: list[tuple[str, str, str | None]],
+    font: str,
+) -> int:
+    """Desa el sorteig oficial d'una ronda: `(jugador, grup, club)`. Reemplaça el que hi hagués.
+
+    Una llista buida no esborra res: vol dir que no s'ha sabut llegir el full, i
+    un sorteig que ja coneixíem no deixa d'existir per això.
+    """
+    if not jugadors:
+        return 0
+    conn.execute(_DDL_SORTEIG_OFICIAL)
+    conn.execute(
+        "DELETE FROM torneig_sorteig_oficial WHERE torneig_id = ? AND ronda = ?",
+        (torneig_id, nom_ronda),
+    )
+    conn.executemany(
+        "INSERT OR REPLACE INTO torneig_sorteig_oficial "
+        "(torneig_id, ronda, jugador_nom, grup, club, font) VALUES (?, ?, ?, ?, ?, ?)",
+        [(torneig_id, nom_ronda, j, g, c, font) for j, g, c in jugadors],
+    )
+    conn.commit()
+    return len(jugadors)
+
+
+def ja_sortejada(conn: sqlite3.Connection, torneig_id: int, nom_ronda: str) -> bool:
+    """Aquesta ronda ja té sorteig oficial, pel portal o pel full en PDF?
+
+    És la pregunta que ha de fer qui projecta i qui publica la projecció, i no
+    `ja_publicada` tota sola. La federació penja el full de la final abans de
+    crear-ne la fase a la intranet, i durant aquells dies la projecció seguia
+    sortint al costat d'un sorteig que ja existia i que la contradeia: a les
+    finals de tres bandes de 2026-27, el grup projectat només coincidia amb el
+    de debò en 15 jugadors de 22. Una projecció que contradiu un sorteig fet és
+    pitjor que no ensenyar res.
+    """
+    if ja_publicada(conn, torneig_id, nom_ronda):
+        return True
+    try:
+        fila = conn.execute(
+            "SELECT 1 FROM torneig_sorteig_oficial "
+            "WHERE torneig_id = ? AND UPPER(ronda) = UPPER(?) LIMIT 1",
+            (torneig_id, nom_ronda),
+        ).fetchone()
+    except sqlite3.OperationalError:
+        return False  # una base on encara no s'ha llegit cap full
+    return fila is not None
+
+
 def desa(
     conn: sqlite3.Connection,
     torneig_id: int,

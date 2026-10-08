@@ -50,6 +50,14 @@ Cada PDF diu qui passa de ronda, i no sempre és el mateix:
 Es desa tal com està escrita i no s'interpreta. Interessa perquè «els set millors
 segons» vol dir que els segons s'han de poder comparar entre grups, que és el que
 fa `individuals.ranquing_fase`.
+
+## El full d'una final és un altre document
+
+No té grups amb els jugadors a sota ni cap regla, perquè d'una final no se'n
+classifica ningú: porta l'horari de les partides i una taula «Rànquing inicial»
+amb el club i el grup (A o B) dels vuit finalistes. Es llegeix a part
+(`_llegeix_final`) i es reconeix perquè la lectura de sempre no hi troba cap
+jugador. El club hi ve amb el prefix («C.B.MONFORTE»), no curt.
 """
 
 from __future__ import annotations
@@ -58,6 +66,7 @@ import re
 import unicodedata
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
+from itertools import pairwise
 from pathlib import Path
 
 #: Marge en punts per repartir les paraules entre cel·les. Ample: una paraula que
@@ -108,6 +117,9 @@ class SorteigFase:
     caramboles: int | None = None
     entrades: int | None = None
     jugadors: list[JugadorSortejat] = field(default_factory=list)
+    #: 'FINAL' quan el PDF és el full d'una final. Una final no classifica per a
+    #: res, o sigui que no porta regla i no se n'ha d'esperar cap.
+    ronda: str | None = None
 
     @property
     def grups(self) -> dict[str, list[JugadorSortejat]]:
@@ -191,8 +203,10 @@ def llegeix(pdf_path: str | Path) -> SorteigFase:
     import pdfplumber
 
     out = SorteigFase(titol="")
+    paraules_per_pagina: list[list[dict]] = []
     with pdfplumber.open(str(pdf_path)) as pdf:
         for i, page in enumerate(pdf.pages):
+            paraules_per_pagina.append(page.extract_words())
             files = _linies(page)
             if not files:
                 continue
@@ -206,7 +220,155 @@ def llegeix(pdf_path: str | Path) -> SorteigFase:
                     if m and out.caramboles is None:
                         out.caramboles, out.entrades = int(m.group(1)), int(m.group(2))
             out.jugadors.extend(_llegeix_pagina(files))
+    if not out.jugadors:
+        # Cap «Grup X (seu)» amb files a sota: no és el full d'una prèvia. El de
+        # una final és un altre document, i es llegeix d'una altra manera.
+        for paraules in paraules_per_pagina:
+            final = _llegeix_final(paraules)
+            if final is None:
+                continue
+            titol, out.jugadors = final
+            # És una final si el full en porta l'horari: «Semifinal A», «Final».
+            es_final = any(
+                _norm(w["text"]) in {"FINAL", "SEMIFINAL"}
+                for pagina in paraules_per_pagina
+                for w in pagina
+            )
+            out.titol = f"Final {titol}" if es_final else titol
+            out.ronda = "FINAL" if es_final else None
+            break
     return out
+
+
+# --------------------------- el full d'una final ---------------------------
+
+#: La capçalera de la taula de jugadors d'una final: «RÀNKING INICIAL QUADRE 47/2
+#: HONOR TEMPORADA 2026/27», «Rànquing inicial Campionat de Catalunya Tres Bandes
+#: 2a Divisió Temporada 2026/2027». La federació l'escriu de les dues maneres.
+_RE_RANQUING_INICIAL = re.compile(
+    r"^R[ÀA]N(?:K|QU)ING\s+INICIAL\s+(.*?)(?:\s+TEMPORADA\b.*)?$", re.IGNORECASE
+)
+
+#: El grup d'un finalista: «1-A» (primer cap de sèrie del grup A) o «A - 1».
+_RE_GRUP_FINAL = re.compile(r"^(?:\d+\s*-\s*([A-Z])|([A-Z])\s*-\s*\d+)$")
+
+
+def _centre_y(w: dict) -> float:
+    return (w["top"] + w["bottom"]) / 2
+
+
+def _llegeix_final(paraules: list[dict]) -> tuple[str, list[JugadorSortejat]] | None:
+    """Els jugadors d'una final, d'una pàgina. `None` si la pàgina no ho és.
+
+    El full d'una final no s'assembla al d'una prèvia. No hi ha «Grup X (seu)»
+    amb els jugadors a sota: hi ha un horari de partides («Grup B 2-3», «Grup A
+    Guany.») i, al final, una taula «Rànquing inicial» amb una fila per jugador:
+
+    ```
+    RÀNKING INICIAL            TRES BANDES HONOR             TEMPORADA 2026/27
+            Nom                          Club                           Grup
+     1  GARCÍA ALARCÓN, RICARDO          C.B.MONFORTE                   1-A
+     2  PARERAS MÉNDEZ, JOAN CARLES      C.B.GRANOLLERS                 1-B
+    ```
+
+    Tampoc no es pot llegir per línies. Les cel·les d'una mateixa fila no cauen
+    a la mateixa alçada —el nom i el club surten uns punts més amunt que el
+    número i el grup, i no sempre— o sigui que agrupant per `top` una fila es
+    parteix en dues: «GARCÍA ALARCÓN, RICARDO C.B.MONFORTE» i, a sota, «1 1-A».
+
+    El que sí que és fix és el **número d'ordre** de l'esquerra: n'hi ha un per
+    fila. Cada paraula va a la fila del número que té més a prop en vertical, i
+    dins de la fila es reparteix per `x`: el grup és el que hi ha a la dreta, el
+    club comença a la `x` que es repeteix a totes les files, i el nom és el que
+    queda entremig. Aquella `x` no s'escriu al codi perquè canvia de fitxer a
+    fitxer (436, 481, 506), igual que als fulls de les prèvies.
+
+    El club ve aquí amb el prefix («C.B.MONFORTE»), no curt com a les prèvies.
+    """
+    per_top: dict[int, list[dict]] = defaultdict(list)
+    for w in paraules:
+        per_top[round(w["top"])].append(w)
+    linies = [sorted(per_top[t], key=lambda w: w["x0"]) for t in sorted(per_top)]
+
+    titol = None
+    capcalera: list[dict] | None = None
+    for k, linia in enumerate(linies):
+        m = _RE_RANQUING_INICIAL.match(_text(linia))
+        if m is None:
+            continue
+        titol = m.group(1).strip()
+        # La capçalera de columnes és la línia següent que diu «Nom … Club … Grup».
+        for seguent in linies[k + 1 : k + 4]:
+            if {"NOM", "CLUB", "GRUP"} <= {_norm(w["text"]) for w in seguent}:
+                capcalera = seguent
+                break
+        break
+    if titol is None or capcalera is None:
+        return None
+
+    sota = max(w["bottom"] for w in capcalera)
+    cos = [w for w in paraules if w["top"] >= sota - 1]
+    numeros = [w for w in cos if re.fullmatch(r"\d{1,2}", w["text"])]
+    if not numeros:
+        return None
+    esquerra = min(w["x0"] for w in numeros)
+    ordres = sorted(
+        (w for w in numeros if w["x0"] - esquerra <= _MARGE_ANCORA),
+        key=_centre_y,
+    )
+    if len(ordres) < 2:
+        return None
+    salts = sorted(_centre_y(b) - _centre_y(a) for a, b in pairwise(ordres))
+    mig_salt = salts[len(salts) // 2] / 2
+
+    files: list[list[dict]] = [[] for _ in ordres]
+    for w in cos:
+        if any(w is o for o in ordres):
+            continue
+        k = min(range(len(ordres)), key=lambda i: abs(_centre_y(ordres[i]) - _centre_y(w)))
+        # El que hi ha massa lluny de qualsevol número no és de cap fila: el peu
+        # de pàgina, que també cau sota la capçalera.
+        if abs(_centre_y(ordres[k]) - _centre_y(w)) < mig_salt:
+            files[k].append(w)
+    files = [sorted(f, key=lambda w: w["x0"]) for f in files]
+
+    # El grup: les últimes paraules de la fila, fins a tres («A», «-», «1»).
+    partides: list[tuple[list[dict], str]] = []
+    for fila in files:
+        for n in (1, 2, 3):
+            m = _RE_GRUP_FINAL.match(_text(fila[-n:])) if len(fila) > n else None
+            if m is not None:
+                partides.append((fila[:-n], m.group(1) or m.group(2)))
+                break
+    if len(partides) < 2:
+        return None
+
+    # On comença el club: la `x` més a la dreta que es repeteix a gairebé totes
+    # les files. El nom també s'hi repeteix quan va alineat a l'esquerra, però
+    # sempre queda abans.
+    llindar = max(2, int(len(partides) * 0.6))
+    candidates = sorted({round(w["x0"]) for resta, _g in partides for w in resta})
+    x_club = max(
+        (
+            x
+            for x in candidates
+            if sum(any(abs(w["x0"] - x) <= _MARGE_ANCORA for w in resta) for resta, _g in partides)
+            >= llindar
+        ),
+        default=None,
+    )
+    if x_club is None:
+        return None
+
+    jugadors: list[JugadorSortejat] = []
+    for resta, grup in partides:
+        nom = _text([w for w in resta if w["x0"] < x_club - _MARGE_ANCORA])
+        club = _text([w for w in resta if w["x0"] >= x_club - _MARGE_ANCORA])
+        if nom and club:
+            jugadors.append(JugadorSortejat(jugador=nom, club=club, grup=grup.upper()))
+    if not jugadors:
+        return None
+    return titol, jugadors
 
 
 def _titols(fila: list[dict]) -> list[tuple[float, str, str | None]]:
@@ -283,22 +445,46 @@ WEB = "https://fcbillar.cat"
 #: Sitemap de Yoast amb una pàgina per document publicat.
 SITEMAP = f"{WEB}/wpfd_file-sitemap.xml"
 
-#: Els PDF del campionat individual viuen a una categoria `individuals-…` del
+#: Els PDF del campionat individual viuen a una categoria `individual…-` del
 #: gestor de fitxers; els dels opens, a `opens`. És l'única cosa que els
 #: distingeix de manera fiable: pel nom del fitxer no es pot, perquè n'hi ha que
 #: es diuen «grups-previa-open-…» i n'hi ha que es diuen «previes-3-bandes-…».
+#:
+#: Amb essa o sense: la de tres bandes es diu `individuals-tres-bandes` i la del
+#: quadre, `individual-quadre-47-2`. Demanant la essa, del quadre no se'n llegia
+#: cap document.
 _RE_PDF_INDIVIDUAL = re.compile(
-    r"https://fcbillar\.cat/download/\d+/(individuals-[a-z0-9-]+)/\d+/([^\"'<> ]+\.pdf)"
+    r"https://fcbillar\.cat/download/\d+/(individuals?-[a-z0-9-]+)/\d+/([^\"'<> ]+\.pdf)"
 )
 
-#: La modalitat, del nom de la categoria del gestor de fitxers.
+#: La modalitat, del nom de la categoria del gestor de fitxers sense el prefix.
 _MODALITAT_DE_CATEGORIA = {
-    "individuals-tres-bandes": "Tres bandes",
-    "individuals-lliure": "Lliure",
-    "individuals-banda": "Banda",
-    "individuals-quadre-47-2": "Quadre 47/2",
-    "individuals-quadre-71-2": "Quadre 71/2",
+    "tres-bandes": "Tres bandes",
+    "lliure": "Lliure",
+    "banda": "Banda",
+    "quadre-47-2": "Quadre 47/2",
+    "quadre-71-2": "Quadre 71/2",
 }
+
+#: Les pàgines del sitemap que poden portar un sorteig: les de les prèvies i les
+#: dels grups, i també les de les **finals**, que es deien «final-tres-bandes-…»
+#: i quedaven fora perquè només es mirava `previ|grups`.
+_RE_PAGINA_DE_SORTEIG = re.compile(r"previ|grups|final", re.IGNORECASE)
+
+#: I les que no en porten encara que parlin d'una final: la classificació final
+#: d'un campionat és a la mateixa categoria que els seus sortejos.
+_RE_PAGINA_QUE_NO_HO_ES = re.compile(r"classificacio", re.IGNORECASE)
+
+
+def modalitat_de_categoria(categoria: str) -> str:
+    """«individual-quadre-47-2» → «Quadre 47/2». Buit si no es coneix."""
+    return _MODALITAT_DE_CATEGORIA.get(re.sub(r"^individuals?-", "", categoria), "")
+
+
+def es_pagina_de_sorteig(url: str) -> bool:
+    """Aquesta pàgina del sitemap pot portar el sorteig d'una fase?"""
+    slug = url.rstrip("/").rsplit("/", 1)[-1]
+    return bool(_RE_PAGINA_DE_SORTEIG.search(slug)) and not _RE_PAGINA_QUE_NO_HO_ES.search(slug)
 
 
 @dataclass(frozen=True)
@@ -314,22 +500,23 @@ class SorteigPublicat:
 def descobreix(client=None) -> list[SorteigPublicat]:
     """Els PDF de sorteig de fase del campionat individual publicats al web.
 
-    Es va pel sitemap i s'entra a les pàgines que parlen de prèvies o de grups.
-    De cada pàgina s'agafen només els PDF d'una categoria `individuals-…`: la
-    pàgina també enllaça el calendari de la temporada des de la barra lateral, i
-    els sortejos dels opens són a la categoria `opens`.
+    Es va pel sitemap i s'entra a les pàgines que parlen de prèvies, de grups o
+    de finals (`es_pagina_de_sorteig`). De cada pàgina s'agafen només els PDF
+    d'una categoria `individual…-`: la pàgina també enllaça el calendari de la
+    temporada des de la barra lateral, i els sortejos dels opens són a la
+    categoria `opens`.
     """
     import httpx
 
+    from fcbillar.scraper.client import USER_AGENT
+
     propi = client is None
-    client = client or httpx.Client(follow_redirects=True, timeout=60.0)
+    client = client or httpx.Client(
+        follow_redirects=True, timeout=60.0, headers={"User-Agent": USER_AGENT}
+    )
     try:
         sitemap = client.get(SITEMAP).text
-        pagines = [
-            u
-            for u in re.findall(r"<loc>([^<]+)</loc>", sitemap)
-            if re.search(r"previ|grups", u, re.IGNORECASE)
-        ]
+        pagines = [u for u in re.findall(r"<loc>([^<]+)</loc>", sitemap) if es_pagina_de_sorteig(u)]
         vistos: dict[str, SorteigPublicat] = {}
         for pagina in pagines:
             for m in _RE_PDF_INDIVIDUAL.finditer(client.get(pagina).text):
@@ -338,7 +525,7 @@ def descobreix(client=None) -> list[SorteigPublicat]:
                     url=m.group(0),
                     nom_fitxer=m.group(2),
                     categoria=categoria,
-                    modalitat=_MODALITAT_DE_CATEGORIA.get(categoria, ""),
+                    modalitat=modalitat_de_categoria(categoria),
                 )
         return sorted(vistos.values(), key=lambda s: s.nom_fitxer)
     finally:
@@ -497,6 +684,55 @@ def casa_amb_fase(titol: str, divisio_nom: str, fase_nom: str) -> bool:
     return div in t and re.search(rf"(?<!\bPRE) {re.escape(fase)} ", t) is not None
 
 
+# --------------------------- el sorteig d'una final, lligat al seu torneig ---------------
+
+
+def _desa_sorteig_de_final(conn, sorteig: SorteigFase, temporada: str | None, nom_fitxer: str):
+    """Desa el sorteig d'una final al torneig que li toca. Torna un avís, o `None`.
+
+    El torneig es troba pels **jugadors** i no pel títol. El títol diu la divisió
+    i prou («Final TRES BANDES HONOR»), i «HONOR» n'hi ha a tres bandes i al
+    quadre; i la fase FINAL, que és amb el que es lliguen les prèvies, encara no
+    existeix al portal quan surt el full. Els finalistes, en canvi, venen tots de
+    la ronda anterior del seu torneig: és el torneig de la temporada on n'hi ha
+    més, i n'hi ha d'haver més de la meitat perquè es doni per bo. No hi són tots
+    perquè la final pot portar convidats del club que l'organitza.
+    """
+    from fcbillar import projeccio_ronda as PR
+
+    noms = {_norm(j.jugador) for j in sorteig.jugadors}
+    if not noms:
+        return f"{nom_fitxer}: és el full d'una final i no hi trobo cap jugador"
+    recompte: Counter = Counter()
+    for torneig_id, jugador in conn.execute(
+        """
+        SELECT ti.id, g.jugador_nom
+          FROM torneig_fase_grups g
+          JOIN torneig_fases f ON f.id = g.fase_id
+          JOIN torneigs_individuals ti ON ti.id = f.torneig_id
+          JOIN temporades te ON te.id = ti.temporada_id
+         WHERE te.nom = COALESCE(?, (SELECT nom FROM temporades ORDER BY nom DESC LIMIT 1))
+         GROUP BY ti.id, g.jugador_nom
+        """,
+        (temporada,),
+    ):
+        if _norm(jugador) in noms:
+            recompte[torneig_id] += 1
+    millors = recompte.most_common(2)
+    if not millors or millors[0][1] * 2 <= len(noms):
+        return f"{sorteig.titol}: no sé de quin torneig és aquesta final"
+    if len(millors) > 1 and millors[1][1] == millors[0][1]:
+        return f"{sorteig.titol}: aquesta final casa igual amb dos torneigs; no la lligo a cap"
+    PR.desa_sorteig_oficial(
+        conn,
+        millors[0][0],
+        "FINAL",
+        [(j.jugador, j.grup, j.club) for j in sorteig.jugadors],
+        font=nom_fitxer,
+    )
+    return None
+
+
 # --------------------------- la regla, lligada a la seva fase ---------------------------
 
 
@@ -519,8 +755,12 @@ def desa_regles(conn, client=None, temporada: str | None = None) -> tuple[int, l
     """
     import httpx
 
+    from fcbillar.scraper.client import USER_AGENT
+
     propi = client is None
-    client = client or httpx.Client(follow_redirects=True, timeout=60.0)
+    client = client or httpx.Client(
+        follow_redirects=True, timeout=60.0, headers={"User-Agent": USER_AGENT}
+    )
     avisos: list[str] = []
     n = 0
     try:
@@ -533,6 +773,15 @@ def desa_regles(conn, client=None, temporada: str | None = None) -> tuple[int, l
                 desti.parent.mkdir(parents=True, exist_ok=True)
                 desti.write_bytes(client.get(pub.url).content)
             sorteig = llegeix(desti)
+            if sorteig.ronda == "FINAL":
+                # Una final no classifica per a cap ronda: no porta regla i no
+                # n'hi ha d'haver. El que sí que porta és el sorteig, i es desa:
+                # mentre la fase no surti al portal és l'única cosa que diu que
+                # la final ja està sortejada, i la projecció s'ha de retirar.
+                avis = _desa_sorteig_de_final(conn, sorteig, temporada, pub.nom_fitxer)
+                if avis:
+                    avisos.append(avis)
+                continue
             if not sorteig.regla:
                 avisos.append(f"{pub.nom_fitxer}: no hi trobo la regla de classificació")
                 continue
