@@ -1,25 +1,29 @@
 name: Reingesta no-logada (núvol)
 
 # Reingesta DIÀRIA de les dades PÚBLIQUES de FCBillar (sense login federatiu):
-# lliga, copa i opens/individuals. L'estat (les dues BD SQLite) es guarda GRATIS
-# com a assets d'un GitHub Release (tag 'fcb-state'), no a cap servei extern.
+# rànquings de mitjana, lliga, copa i opens/individuals. L'estat (les dues BD
+# SQLite) es guarda GRATIS com a assets d'un GitHub Release (tag 'fcb-state'),
+# no a cap servei extern.
 # Incorpora les novetats de fcbillar.cat i publica a Supabase, d'on l'app web
 # (Vercel) llegeix en temps d'execució.
 #
 # Per què cal persistir la BD encara que sigui "no-logat":
 #   - publish-cloud publica des de data/fcbillar.db (cal el players master per
-#     enllaçar partides, i els rànquings que el PC hi ha deixat).
+#     enllaçar partides, i tot l'històric de rànquings i partides).
 #   - Des del canvi de web de la federació (agost de 2026) el ScraperClient és
 #     httpx pelat: ni Chromium, ni sessió, ni credencials. Tot el que ingerim és
 #     públic. Aquest job ja no és "el no-logat": és l'únic que hi ha.
 #
-# DIVISIÓ D'AMOS (evita clobbering PC↔núvol):
-#   - PC (weekly_reingest.ps1, LOGAT):  rànquings + games  → puja la BD al release
-#   - Núvol (aquest job, NO-LOGAT):     lliga + copa + opens
-#   El núvol baixa sempre la BD fresca del PC, així publish-cloud reescriu els
-#   mateixos rànquings (idempotent) i només canvia lliga/copa/opens. Els dos
-#   escriuen al mateix release (last-writer-wins); no coincideixen en el temps
-#   (PC ~06-07h UTC dissabte/diumenge, núvol 21h UTC cada dia).
+# UN SOL AMO: aquest job. Fins al juliol de 2026 n'hi havia dos -el PC
+#   (weekly_reingest.ps1, LOGAT) ingeria rànquings i partides i pujava la BD al
+#   release, i el núvol hi afegia lliga, copa i opens- perquè els rànquings
+#   demanaven login. Des de l'agost són públics i la tasca del PC està aturada
+#   (l'última passada bona és del 27 de juliol), però aquí ningú no els anava a
+#   buscar: es republicava cada nit el rànquing 124 «que el PC hi havia deixat»,
+#   i el 126, publicat el 2 d'octubre, no va entrar fins que algú el va trobar
+#   a faltar. Ara els ingereix el pas `ingest-ranquings`, el primer de tots.
+#   La tasca del PC no s'ha de tornar a engegar: pujaria al release una BD més
+#   vella que la d'aquí i la trepitjaria.
 #
 # Disparadors:
 #   - schedule:          cada dia 21:00 UTC (≈22:00 Barcelona a l'hivern, 23:00 a
@@ -137,6 +141,24 @@ jobs:
           NOK=0; NFAIL=0
           run() { local name="$1"; shift; echo "::group::$name"; "$@"; local rc=$?; echo "exit=$rc"; echo "::endgroup::"; if [ "$rc" -eq 0 ]; then NOK=$((NOK+1)); else NFAIL=$((NFAIL+1)); fi; }
 
+          # Els rànquings de mitjana de les cinc modalitats, i les partides que hi
+          # compten. Va PRIMER: és d'on surten els jugadors amb el seu id federatiu,
+          # i la resta de passos hi resolen els noms.
+          #
+          # Mira l'índex públic (`/frontend/rankings/llistat`): si hi ha un
+          # rànquing de número més alt que l'últim que tenim l'ingereix amb la
+          # seva data; si és el mateix el refresca, que la federació hi va afegint
+          # jugadors durant el mes. Quasi cada nit són sis peticions i prou. El dia
+          # que n'hi ha un de nou baixa a més una pàgina de partides per jugador
+          # -unes 1.250, a una per segon-, i d'aquí el límit: el que no hi càpiga
+          # continua la nit següent, i el job no es menja els 90 minuts.
+          #
+          # Surt amb 1 si un rànquing publicat no s'ha pogut desar. La federació
+          # ja ha canviat les columnes d'aquesta taula un cop sense avisar, i el
+          # que no volem és tornar a passar dos mesos publicant el rànquing vell
+          # amb el job en verd.
+          run "ingest-ranquings"     uv run --no-dev fcbillar ingest-ranquings --minuts 35
+
           # Pàgines públiques (Chromium amb sessió buida — n'hi ha prou)
           # Sense id: les lligues que la federació té obertes ARA. Fins al 7 de
           # setembre de 2026 hi deia `36`, la Tres Bandes de la 25/26, i quan va
@@ -221,8 +243,8 @@ jobs:
           # Va a taules a part: no toca jugadors, clubs ni rànquings catalans.
           run "nacional"             uv run --no-dev fcbillar ingest-nacional-fonts
 
-          # Publicació a Supabase (fcbillar publica tot des de la BD; els rànquings
-          # coincideixen amb els que el PC ja va pujar al release → idempotent).
+          # Publicació al núvol (fcbillar publica tot des de la BD, rànquings
+          # inclosos: són upserts per clau natural, o sigui que és idempotent).
           run "publish-cloud"        uv run --no-dev fcbillar publish-cloud
           run "supabase-sync"        uv run --no-dev python -m fcb_opens.cli supabase-sync
           run "encoding-scan"        uv run --no-dev python scripts/repair_supabase_encoding.py

@@ -3,7 +3,13 @@
     Reingesta setmanal completa de FCBillar (partides + rànquings) i publicació
     al núvol.
 
-    NOTA: aquest script fa la part LOGADA (rànquings + games, que necessiten login
+    OBSOLET des de l'agost de 2026: NO l'executis. Els rànquings i les partides
+    ja són públics i els ingereix cada nit el workflow reingest-nologin.yml (pas
+    `ingest-ranquings`), que és l'únic amo de les BD del release 'fcb-state'.
+    Aquest script acaba pujant-hi la BD del PC, que avui és més vella que la del
+    núvol i la trepitjaria. Es conserva com a registre de com es feia.
+
+    NOTA (històrica): aquest script feia la part LOGADA (rànquings + games, que necessiten login
     federatiu amb captcha) i és l'amo d'aquestes dades. La part NO-LOGADA (lliga,
     copa, opens) la fa ARA un workflow diari al núvol (.github/workflows/
     reingest-nologin.yml). Perquè el núvol no trepitgi els rànquings, aquest script

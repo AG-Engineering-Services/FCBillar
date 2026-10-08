@@ -39,6 +39,7 @@ from fcbillar.pipeline import (
     ingest_lliga_jornada,
     ingest_partides,
     ingest_ranking,
+    ingest_ranquings_vigents,
     reconcile_ranking_dates,
     run_status,
     set_follow,
@@ -230,6 +231,54 @@ def sync() -> None:
         console.print(
             f"[yellow]Tot al dia. Rànquings actuals: {[(r.num_seq, r.modalitat_codi_fcb) for r in result.discovered.rankings]}[/]"
         )
+
+
+@app.command("ingest-ranquings")
+def ingest_ranquings_cmd(
+    sense_partides: bool = typer.Option(
+        False, "--sense-partides", help="Només els rànquings, sense les partides de cada jugador"
+    ),
+    minuts: float = typer.Option(
+        40.0,
+        "--minuts",
+        help="Temps màxim de la passada. El que no hi càpiga queda per a la següent. 0 = sense límit",
+    ),
+) -> None:
+    """El rànquing vigent de cada modalitat i les partides que hi compten.
+
+    És el pas de la reingesta nocturna: descobreix a l'índex públic si la
+    federació ha publicat un rànquing nou, l'ingereix amb la seva data, refresca
+    el que ja és el vigent i baixa les partides dels jugadors que encara no en
+    tenen. Es pot repetir tantes vegades com calgui.
+
+    Surt amb 1 si algun rànquing publicat no s'ha pogut desar, perquè el resum
+    del job el compti com a pas fallat en comptes de passar per bo.
+    """
+    settings = get_settings()
+    with ScraperClient(settings) as client:
+        res = ingest_ranquings_vigents(
+            client,
+            settings=settings,
+            partides=not sense_partides,
+            pressupost_seg=minuts * 60 if minuts > 0 else None,
+        )
+    console.print(
+        f"[green]OK rànquings: {len(res.nous)} nous {res.nous}, "
+        f"{len(res.refrescats)} refrescats, {len(res.endarrerits)} sense canvis.[/]"
+    )
+    if not sense_partides:
+        console.print(
+            f"[green]OK partides: {res.jugadors_amb_partides} jugadors, "
+            f"{res.partides_noves} partides noves, {res.jugadors_fallats} jugadors fallats.[/]"
+        )
+    if res.jugadors_pendents:
+        console.print(
+            f"[yellow]S'ha acabat el temps: {res.jugadors_pendents} jugadors queden "
+            "per a la propera passada.[/]"
+        )
+    if res.fallats:
+        console.print(f"[red]Rànquings publicats que no s'han pogut desar: {res.fallats}[/]")
+        raise typer.Exit(1)
 
 
 @app.command("reconcile-ranking-dates")
