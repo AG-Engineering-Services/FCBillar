@@ -1268,6 +1268,21 @@ def publish_cloud_cmd() -> None:
         counts.update(
             publica_si_hi_es("open_grups", lambda: publish_open_grups(on_progress=_prog), _prog)
         )
+        # La ronda següent projectada. S'importava i no es cridava: la projecció
+        # es calculava cada nit i no arribava mai al núvol, que n'ensenyava una
+        # de vella. Va aïllada perquè és una lectura nostra, no una dada de la
+        # federació, i que falli no ha d'aturar el que ve darrere.
+        try:
+            counts.update(
+                publica_si_hi_es(
+                    "open_ronda_projectada",
+                    lambda: publish_ronda_projectada(on_progress=_prog),
+                    _prog,
+                )
+            )
+        except Exception as exc:  # noqa: BLE001
+            console.print(f"[yellow]Ronda projectada NO publicada: {exc}[/]")
+            counts["open_ronda_projectada"] = -1
         counts.update(
             publica_si_hi_es("nacional", lambda: publish_nacional(on_progress=_prog), _prog)
         )
