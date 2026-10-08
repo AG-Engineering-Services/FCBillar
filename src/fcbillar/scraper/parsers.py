@@ -97,6 +97,11 @@ class _SkipRow(Exception):
 # ======================================================================
 
 
+#: El mínim que ha de tenir una taula per ser un rànquing. Hi són les columnes
+#: de les quals depenem i cap de les que la federació ha tret o pot treure.
+COLUMNES_RANQUING = ("Jugador", "MJ", "Def")
+
+
 @dataclass
 class RankingParseResult:
     """Resultat de parsejar una pàgina de rànquing."""
@@ -110,14 +115,21 @@ class RankingParseResult:
 def parse_ranking(html: str, num_seq: int, modalitat_codi_fcb: int) -> RankingParseResult:
     """Parseja un rànquing (`llistat-dades` o `historial-dades`).
 
-    Columnes: `# | Jugador | MJ | MR | Rang | C | E | P / PT | Def | Partides`.
+    Columnes: `# | Jugador | MJ | [MR | Rang] | C | E | P / PT | Def | Partides`.
     L'fcb_id del jugador surt de l'enllaç «Partides» de la fila; sense ell la
     fila no ens serveix de res i la saltem.
 
     MJ és la mitjana del jugador i MR la dels contraris. El rànquing vigent
     publica cinc decimals i l'històric només tres.
+
+    `MR` i `Rang` són opcionals: la federació les va treure del rànquing vigent
+    entre el 30 d'agost i el 8 d'octubre de 2026 (l'històric encara les porta).
+    Mentre la taula es buscava per «Rang», el vigent no es trobava i el rànquing
+    126 —el primer publicat sense aquelles columnes— no es podia llegir. Ara es
+    busca per les columnes que sí que ens calen, i les que falten queden a
+    `None` als extres.
     """
-    taula = taula_amb(html, "Jugador", "MJ", "Rang")
+    taula = taula_amb(html, *COLUMNES_RANQUING)
     if taula is None:
         raise ValueError("No s'ha trobat la taula del rànquing")
 
@@ -171,6 +183,9 @@ class CurrentRankingInfo:
     modalitat_codi_fcb: int
     num_seq: int
     format_url: str  # 'llistat' (vigent) o 'historial'
+    #: Data de publicació de la SEVA fila de l'índex. Cal perquè la taula de
+    #: vigents pot tenir més d'una fila (vegeu `parse_home_current_rankings`).
+    data: date | None = None
 
 
 @dataclass(frozen=True)
@@ -228,7 +243,9 @@ def parse_rankings_index(html: str) -> RankingsIndex:
             if es_vigent:
                 data_vigent = data_vigent or data
                 vigents.extend(
-                    CurrentRankingInfo(modalitat_codi_fcb=mod, num_seq=num, format_url=vigencia)
+                    CurrentRankingInfo(
+                        modalitat_codi_fcb=mod, num_seq=num, format_url=vigencia, data=data
+                    )
                     for mod, (vigencia, num) in sorted(per_modalitat.items())
                 )
             elif data is not None:
@@ -238,9 +255,29 @@ def parse_rankings_index(html: str) -> RankingsIndex:
 
 
 def parse_home_current_rankings(html: str) -> HomeRankingsResult:
-    """Els rànquings vigents, tal com els demanava la portada del jugador."""
+    """El rànquing vigent de cada modalitat: el de `num_seq` més alt.
+
+    La taula de vigents no té per què tenir una sola fila. El 8 d'octubre de
+    2026 en tenia dues —el 126, del 2 d'octubre, i el 124, del 27 de juliol, que
+    la federació no ha passat a l'historial—, i tornar-les totes feia que qui
+    demanava «el vigent de tres bandes» depengués de l'ordre de les files, i que
+    tots dos rànquings compartissin la data del primer.
+
+    Aquí en surt un per modalitat, amb la data de la seva fila. `data_ranking`
+    és la del més nou.
+    """
     index = parse_rankings_index(html)
-    return HomeRankingsResult(data_ranking=index.data_vigent, rankings=index.vigents)
+    per_modalitat: dict[int, CurrentRankingInfo] = {}
+    for r in index.vigents:
+        actual = per_modalitat.get(r.modalitat_codi_fcb)
+        if actual is None or r.num_seq > actual.num_seq:
+            per_modalitat[r.modalitat_codi_fcb] = r
+    rankings = [per_modalitat[m] for m in sorted(per_modalitat)]
+    mes_nou = max(rankings, key=lambda r: r.num_seq, default=None)
+    return HomeRankingsResult(
+        data_ranking=mes_nou.data if mes_nou is not None else index.data_vigent,
+        rankings=rankings,
+    )
 
 
 def parse_ranking_historial(html: str) -> list[HistorialEntry]:

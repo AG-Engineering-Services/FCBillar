@@ -1,7 +1,13 @@
 """Derivació del mes/any que representa un rànquing a partir de la seva data
-de publicació real (la que dona `/ca/jugador/ranking/historial`).
+de publicació real: la de la seva fila a l'índex públic de rànquings
+(`intranet.fcbillar.cat/frontend/rankings/llistat`; abans de l'agost de 2026,
+`/ca/jugador/ranking/historial`).
 
-L'historial és l'única font autoritativa que lliga `num_seq` ↔ data exacta.
+L'índex és l'única font autoritativa que lliga `num_seq` ↔ data exacta.
+`num_seq` és l'`idranking` de la federació tal qual i pot fer salts: el 125 no
+s'ha publicat mai, i després del 124 (27-07-2026, agost) ve el 126 (02-10-2026,
+octubre). No s'han de renumerar ni omplir: qui llegeix ordena per `num_seq` i
+per `data_pub`, i tots dos segueixen creixent alhora.
 Aquesta funció converteix aquella data en l'etiqueta (any, mes) del rànquing,
 substituint la vella heurística monòtona ("un rànquing per mes, salta l'agost")
 que derivava la primera vegada que la federació es desviava de la cadència.

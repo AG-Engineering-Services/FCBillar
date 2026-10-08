@@ -111,6 +111,25 @@ Les columnes de la taula són idèntiques a les d'abans
 favor nostre: el rànquing vigent ara publica **5 decimals** (`1.63665`) mentre
 que l'històric en publica 3 (`1.633`).
 
+> **Actualització del 8 d'octubre de 2026.** Tres coses d'aquest apartat ja no
+> són com diu, i totes tres van fer que el rànquing 126 no es carregués:
+>
+> - El vigent ha **perdut les columnes `MR` i `Rang`**
+>   (`#, Jugador, MJ, C, E, P/PT, Def, Partides`); l'històric encara les porta.
+>   El parser buscava la taula per «Rang» i no la trobava. Ara la busca per
+>   `Jugador, MJ, Def`, i els dos extres queden a `None`.
+> - La taula de vigents té **dues files**: el 126 (2026-10-02) i el 124
+>   (2026-07-27), que no ha passat a l'historial (`historial-dades` del 124 dona
+>   500). «El vigent» d'una modalitat és el de `idranking` més alt, i cadascun
+>   porta la data de la seva fila.
+> - **No hi ha 125**: `llistat-dades` i `historial-dades` responen 500, i no és
+>   a l'índex. La numeració fa un salt i el setembre de 2026 no té rànquing. No
+>   s'omple ni es renumera.
+>
+> I la que ho explica tot: ningú no els anava a buscar. La tasca del PC que els
+> ingeria està aturada des de l'agost i la reingesta del núvol només
+> republicava els que hi havia. Ara ho fa `fcbillar ingest-ranquings`, cada nit.
+
 ### 2.2 Lliga — mateixa gramàtica, prefix nou
 
 | Què | Abans | Ara | Estat |
@@ -634,8 +653,9 @@ les tres columnes mortes.
    És la prova de regressió que ens regala la deduplicació per `id_natural`.
 8. Portar la ingesta sencera a GitHub Actions: ja no hi ha res que necessiti el
    PC de casa. **Pendent.**
-8b. Tornar a ingerir el rànquing vigent cada setmana mentre ho sigui, no només
-   el dia que apareix (§4.1). **Pendent.**
+8b. Tornar a ingerir el rànquing vigent mentre ho sigui, no només el dia que
+   apareix (§4.1). **Fet** (octubre de 2026): `ingest-ranquings` el refresca
+   cada nit i ingereix el nou quan surt, amb les partides de cada jugador.
 
 ### Fase 2 — Fonts noves i fonts perdudes
 9. Llistat de clubs des del WordPress, amb els camps de contacte nous.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
+import time
 from dataclasses import dataclass, replace
 from datetime import date
 
@@ -25,7 +26,9 @@ from fcbillar.models import (
 )
 from fcbillar.scraper.client import ScraperClient
 from fcbillar.scraper.parsers import (
+    COLUMNES_RANQUING,
     ClubOficial,
+    CurrentRankingInfo,
     HistorialEntry,
     HomeRankingsResult,
     IndividualDivisio,
@@ -119,7 +122,7 @@ def _looks_like_valid_ranking(html: str) -> bool:
         return False
     if "formLogin" in html:
         return False
-    return taula_amb(html, "Jugador", "MJ", "Rang") is not None
+    return taula_amb(html, *COLUMNES_RANQUING) is not None
 
 
 def ingest_ranking(
@@ -145,6 +148,18 @@ def ingest_ranking(
         return None
 
     parsed = parse_ranking(fetched.html, num_seq, modalitat_codi_fcb)
+    if not parsed.entries:
+        # Un rànquing sense cap fila no és un rànquing: és una pàgina que no hem
+        # sabut llegir. Desar-ne la capçalera el convertiria en «l'últim
+        # publicat», i tot el que mira l'últim -la projecció, la fitxa- es
+        # quedaria sense jugadors.
+        log.warning(
+            "Rànquing %s/%s sense cap fila llegible a %s: no es desa",
+            num_seq,
+            modalitat_codi_fcb,
+            fetched.url,
+        )
+        return None
 
     any_pub = mes_pub = None
     if data_pub is not None:
@@ -523,13 +538,173 @@ def sync_current_rankings(client: ScraperClient, *, settings: Settings | None = 
                 current.num_seq,
                 current.modalitat_codi_fcb,
                 settings=settings,
-                data_pub=home.data_ranking,
+                preferred_format=current.format_url,
+                data_pub=current.data or home.data_ranking,
             )
             if result is not None:
                 ingested.append((current.num_seq, current.modalitat_codi_fcb))
         else:
             skipped.append((current.num_seq, current.modalitat_codi_fcb))
     return SyncResult(discovered=home, ingested=ingested, skipped_existing=skipped)
+
+
+@dataclass
+class RanquingsVigentsResult:
+    """Què ha fet una passada d'`ingest_ranquings_vigents`."""
+
+    nous: list[tuple[int, int]]  # (num_seq, modalitat) que no teníem
+    refrescats: list[tuple[int, int]]  # el que ja teníem i s'ha tornat a llegir
+    fallats: list[tuple[int, int]]  # publicats i no s'han pogut desar
+    endarrerits: list[tuple[int, int]]  # l'índex en dona un de més vell que el nostre
+    jugadors_amb_partides: int = 0  # jugadors als quals s'han baixat les partides
+    partides_noves: int = 0
+    jugadors_pendents: int = 0  # s'han quedat per a la propera passada
+    jugadors_fallats: int = 0
+
+
+def _jugadors_sense_partides(conn, num_seq: int, modalitat_codi_fcb: int) -> list[tuple[str, bool]]:
+    """Jugadors d'un rànquing sense cap partida lligada, per posició: (fcb_id, seguit)."""
+    return [
+        (r[0], bool(r[1]))
+        for r in conn.execute(
+            """
+            SELECT p.fcb_id, p.seguiment
+            FROM ranking_entries e
+            JOIN players p ON p.id = e.player_id
+            JOIN rankings r ON r.id = e.ranking_id
+            JOIN modalitats m ON m.id = r.modalitat_id
+            WHERE r.num_seq = ? AND m.codi_fcb = ?
+              AND NOT EXISTS (
+                  SELECT 1 FROM ranking_game_links l
+                  WHERE l.ranking_id = e.ranking_id AND l.player_id_origen = e.player_id
+              )
+            ORDER BY e.posicio ASC NULLS LAST, p.fcb_id
+            """,
+            (num_seq, modalitat_codi_fcb),
+        )
+    ]
+
+
+def ingest_ranquings_vigents(
+    client: ScraperClient,
+    *,
+    settings: Settings | None = None,
+    partides: bool = True,
+    pressupost_seg: float | None = None,
+    rellotge=time.monotonic,
+) -> RanquingsVigentsResult:
+    """El rànquing vigent de cada modalitat, i les partides que hi compten.
+
+    És el pas de la reingesta nocturna. Fins al juliol de 2026 els rànquings
+    els ingeria la tasca logada del PC (`import-temporada` + `backfill`), que
+    es va quedar sense feina quan la federació va fer públiques aquelles
+    pàgines i ningú no la va substituir: el núvol seguia publicant els
+    rànquings «que el PC hi havia deixat», i el PC ja no n'hi deixava cap.
+
+    Per a cada modalitat mira l'índex públic i:
+
+    - si hi ha un `num_seq` més alt que l'últim que tenim, l'ingereix amb la
+      data de la seva fila —d'on surten `any_pub` i `mes_pub`, vegeu
+      `ranking_dates`—;
+    - si és el mateix, el torna a llegir: el vigent no està congelat, la
+      federació hi va afegint jugadors a mesura que renoven la llicència
+      (`docs/canvi-web-fcb-2026.md` §4.1), i una passada que s'hagués quedat a
+      mitges es completa sola;
+    - si és més vell, no toca res.
+
+    Mai no es renumera ni s'inventa res: `num_seq` és l'`idranking` de la
+    federació tal qual, salts inclosos (el 125 no s'ha publicat mai), i la clau
+    `(num_seq, modalitat)` fa que repetir la passada no dupliqui cap fila.
+
+    Després baixa les partides dels jugadors del vigent que encara no en tenen
+    cap de lligada. Sense elles el rànquing nou seria «l'últim» però sense
+    `ranking_game_links`, i la publicació en depèn: d'allà surten les partides
+    que computen a la fitxa (`current_game_ids`) i la mida de la finestra de
+    cada modalitat. És una pàgina per jugador —unes 1.250 el primer cop— i per
+    això porta `pressupost_seg`: quan s'acaba, la resta queda per a la passada
+    següent, que continua on s'havia quedat perquè només demana els qui falten.
+    """
+    settings = settings or client.settings
+    conn = ensure_schema(settings.db_path)
+    repo = Repository(conn)
+    inici = rellotge()
+    home = discover_current_rankings(client)
+    res = RanquingsVigentsResult(nous=[], refrescats=[], fallats=[], endarrerits=[])
+
+    al_dia: list[CurrentRankingInfo] = []
+    for current in home.rankings:
+        clau = (current.num_seq, current.modalitat_codi_fcb)
+        latest_db = repo.latest_ranking_num_seq(current.modalitat_codi_fcb) or 0
+        if current.num_seq < latest_db:
+            res.endarrerits.append(clau)
+            continue
+        es_nou = current.num_seq > latest_db
+        if es_nou and current.data is None:
+            # Sense data no hi ha mes ni any, i un rànquing sense etiqueta
+            # queda mal ordenat per sempre a tot arreu on es llegeix.
+            log.warning("Rànquing %s/%s sense data a l'índex: no s'ingereix", *clau)
+            res.fallats.append(clau)
+            continue
+        result = ingest_ranking(
+            client,
+            current.num_seq,
+            current.modalitat_codi_fcb,
+            settings=settings,
+            preferred_format=current.format_url,
+            data_pub=current.data,
+        )
+        if result is None:
+            res.fallats.append(clau)
+            # Si ja el teníem, les partides que hi faltin es poden baixar igual.
+            if not es_nou:
+                al_dia.append(current)
+            continue
+        (res.nous if es_nou else res.refrescats).append(clau)
+        al_dia.append(current)
+
+    if not partides:
+        return res
+
+    # Les partides, quan TOTS els rànquings ja hi són: els contraris es resolen
+    # per nom contra `players`, i un jugador pot ser només al rànquing d'una
+    # altra modalitat.
+    cua: list[tuple[CurrentRankingInfo, str, bool]] = [
+        (current, fcb_id, seguit)
+        for current in al_dia
+        for fcb_id, seguit in _jugadors_sense_partides(
+            conn, current.num_seq, current.modalitat_codi_fcb
+        )
+    ]
+    # Els jugadors seguits, primer i de totes les modalitats. Si el temps
+    # s'acaba a mitges, que no siguin ells els que es queden una nit sense les
+    # partides del rànquing nou: la fitxa d'Estadístiques marca «computa» a
+    # partir d'aquests lligams i, sense, les desmarca totes.
+    cua.sort(key=lambda x: not x[2])
+    for i, (current, fcb_id, _seguit) in enumerate(cua):
+        if pressupost_seg is not None and rellotge() - inici >= pressupost_seg:
+            res.jugadors_pendents = len(cua) - i
+            break
+        try:
+            r = ingest_partides(
+                client,
+                current.num_seq,
+                current.modalitat_codi_fcb,
+                fcb_id,
+                settings=settings,
+            )
+        except Exception as e:
+            log.warning(
+                "Partides de %s al rànquing %s/%s: %s",
+                fcb_id,
+                current.num_seq,
+                current.modalitat_codi_fcb,
+                e,
+            )
+            res.jugadors_fallats += 1
+            continue
+        res.jugadors_amb_partides += 1
+        res.partides_noves += r.games_new
+    return res
 
 
 @dataclass
