@@ -69,13 +69,36 @@ jobs:
         run: |
           END=$(( SECONDS + 18000 ))   # ~5 h: el bucle no acaba abans del següent tret (GitHub estrangula els crons; cancel-in-progress reinicia)
           i=0
+          # Publicacions fallides SEGUIDES. Fins a l'octubre de 2026 aquí hi deia
+          # `|| true`: el lector es va trencar amb el web nou de la federació i
+          # aquest job va estar setmanes en verd sense publicar res. Ara una
+          # passada que falla deixa una anotació, i cinc de seguides (uns deu
+          # minuts) fan fallar el job. Una de sola no: en ple open una pàgina que
+          # no respon un cop no ha d'aturar el seguiment.
+          FAILS=0
+          MAX_FAILS=5
           while [ "$SECONDS" -lt "$END" ]; do
             H=$((10#$(date -u +%H)))   # `10#` evita l'error d'octal amb 08/09
             if [ "$H" -ge 6 ] && [ "$H" -le 21 ]; then
               i=$(( i + 1 ))
               echo "::group::publicació #$i (t=${SECONDS}s, ${H}h UTC)"
-              uv run --no-dev fcbillar publish-live-opens || true
+              RC=0
+              uv run --no-dev fcbillar publish-live-opens || RC=$?
               echo "::endgroup::"
+              if [ "$RC" -eq 0 ]; then
+                FAILS=0
+              else
+                FAILS=$(( FAILS + 1 ))
+                if [ "$RC" -eq 3 ]; then
+                  echo "::error::publicació #$i: una pàgina de la federació no té la forma esperada (el web pot haver canviat). $FAILS de $MAX_FAILS seguides."
+                else
+                  echo "::warning::publicació #$i fallida (exit=$RC). $FAILS de $MAX_FAILS seguides."
+                fi
+                if [ "$FAILS" -ge "$MAX_FAILS" ]; then
+                  echo "::error::$MAX_FAILS publicacions fallides seguides: el seguiment d'opens en directe NO funciona."
+                  exit 1
+                fi
+              fi
               NAP=120
             else
               # Trets de matinada: mantenim viva l'execució per cobrir l'inici de

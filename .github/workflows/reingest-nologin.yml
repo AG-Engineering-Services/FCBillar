@@ -170,6 +170,16 @@ jobs:
           run "ingest-copa"          uv run --no-dev fcbillar ingest-copa "$COPA_EDICIO"
           run "ingest-individuals"   uv run --no-dev fcbillar ingest-individuals
           run "scrape-current-opens" uv run --no-dev python -m fcb_opens.cli scrape-current-opens
+
+          # Prova de fum del seguiment d'opens EN DIRECTE. No publica res
+          # (`--dry-run`): llegeix l'últim open del llistat, encara que estigui
+          # acabat, amb el mateix lector que farà servir el cap de setmana, i
+          # surt amb error si no en sap treure les fases. De l'agost a l'octubre
+          # de 2026 aquell lector va estar trencat pel canvi de web i ningú no ho
+          # va veure fins que es van haver jugat dos opens sense seguiment: només
+          # s'executava en cap de setmana i deia «0 opens, 0 errors». Així, el dia
+          # que el web torni a canviar es veurà una nit qualsevol.
+          run "opens-directe-prova"  uv run --no-dev fcbillar publish-live-opens --dry-run --inclou-tancats --max-opens 1
           # scrape-lliga: FORA des del 6 de setembre de 2026. Feia servir els camins
           # del WordPress vell (/ca/lligues/...), que van morir amb el canvi de web
           # de l'agost i responen 404, o sigui que fallava cada nit sense ingerir
