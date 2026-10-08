@@ -876,7 +876,7 @@ def projecta_ronda_seguent(conn: sqlite3.Connection, torneig_id: int) -> dict:
        projecció de la PRE-PRÈVIA, que es quedava per sempre al costat dels grups
        de debò.
     2. **Es projecta** la ronda següent de la darrera fase de grups jugada, si
-       porta la regla del PDF i si aquella ronda no és publicada.
+       porta la regla del PDF i si aquella ronda no té encara sorteig oficial.
 
     No fa cap endevinalla: una fase a mitges o sense regla no es projecta i es diu
     per què.
@@ -893,11 +893,13 @@ def projecta_ronda_seguent(conn: sqlite3.Connection, torneig_id: int) -> dict:
     retirades = 0
     for fase_id, nom_fase, _regla, _places in fases:
         ronda = PR.ronda_seguent(nom_fase or "")
-        if ronda and PR.ja_publicada(conn, torneig_id, ronda):
+        # «Publicat» vol dir amb sorteig oficial: els grups al portal, o el full
+        # de la final en PDF, que surt dies abans (`PR.ja_sortejada`).
+        if ronda and PR.ja_sortejada(conn, torneig_id, ronda):
             tretes = PR.retira(conn, torneig_id, ronda)
             if tretes:
                 log.info(
-                    "%s: la federació ja ha publicat la %s; retiro la projecció (%d files)",
+                    "%s: la federació ja ha sortejat la %s; retiro la projecció (%d files)",
                     nom_fase,
                     ronda,
                     tretes,
@@ -907,7 +909,7 @@ def projecta_ronda_seguent(conn: sqlite3.Connection, torneig_id: int) -> dict:
     # 2) I la projecció de la ronda que ve, si es pot.
     for fase_id, nom_fase, _regla, places in fases:
         ronda = PR.ronda_seguent(nom_fase or "")
-        if ronda is None or PR.ja_publicada(conn, torneig_id, ronda):
+        if ronda is None or PR.ja_sortejada(conn, torneig_id, ronda):
             continue
         membres = conn.execute(
             "SELECT jugador_nom, posicio_grup FROM torneig_fase_grups WHERE fase_id = ? "

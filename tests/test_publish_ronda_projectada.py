@@ -14,8 +14,9 @@ import sqlite3
 import pytest
 from typer.testing import CliRunner
 
-from fcbillar import cli, cloud_sync
+from fcbillar import cli, cloud_sync, projeccio_ronda
 from fcbillar.db.migrations import ensure_schema
+from fcbillar.individuals import projecta_ronda_seguent
 from tests.test_publish_lliga_retirada import ClientFals
 
 PRIMERA, SEGONA = 3161, 3162
@@ -87,6 +88,96 @@ def test_puja_la_projeccio_local_i_retira_la_vella(entorn) -> None:
     assert counts["open_ronda_projectada"] == 4
     # Les quatre de la PRÈVIA ja jugada i la del torneig que no existeix.
     assert counts["ronda_projectada_retirades"] == 5
+
+
+# ---------------- la projecció cedeix davant del sorteig oficial ----------------
+
+
+def _sorteja_la_final(db, torneig: int) -> None:
+    """Com quan la federació penja el full de la final abans de crear-ne la fase."""
+    conn = sqlite3.connect(db)
+    projeccio_ronda.desa_sorteig_oficial(
+        conn,
+        torneig,
+        "FINAL",
+        [("ROCA, ANNA", "B", "C.B.PROVA"), ("PUIG, BERNAT", "A", "C.B.PROVA")],
+        font="final-de-prova.pdf",
+    )
+    conn.close()
+
+
+def test_una_final_ja_sortejada_no_es_publica_projectada(entorn) -> None:
+    """El full de la final ja hi és: la projecció que el contradiu no ha de sortir."""
+    db, magatzem = entorn
+    _sorteja_la_final(db, PRIMERA)
+    # I ja s'havia publicat una nit abans, quan encara no hi havia full.
+    magatzem["open_ronda_projectada"] += [
+        {"open_id": PRIMERA, "ronda": "FINAL", "jugador": j, "bombo": 1}
+        for j in ("ROCA, ANNA", "PUIG, BERNAT")
+    ]
+
+    counts = cloud_sync.publish_ronda_projectada(db_path=db)
+
+    queden = {(f["open_id"], f["ronda"], f["jugador"]) for f in magatzem["open_ronda_projectada"]}
+    # Només la de 2a, que encara no té sorteig.
+    assert queden == {(SEGONA, "FINAL", "ROCA, ANNA"), (SEGONA, "FINAL", "PUIG, BERNAT")}
+    assert counts["open_ronda_projectada"] == 2
+    # Les quatre de la PRÈVIA jugada, les dues de la FINAL sortejada i l'òrfena.
+    assert counts["ronda_projectada_retirades"] == 7
+
+
+def test_amb_totes_les_finals_sortejades_no_queda_cap_projeccio(entorn) -> None:
+    """Sense res per publicar, el que hi havia d'una ronda sortejada se'n va igual."""
+    db, magatzem = entorn
+    for torneig in (PRIMERA, SEGONA):
+        _sorteja_la_final(db, torneig)
+    magatzem["open_ronda_projectada"] = [
+        {"open_id": tid, "ronda": "FINAL", "jugador": "ROCA, ANNA", "bombo": 1}
+        for tid in (PRIMERA, SEGONA)
+    ]
+
+    counts = cloud_sync.publish_ronda_projectada(db_path=db)
+
+    assert magatzem["open_ronda_projectada"] == []
+    assert counts["open_ronda_projectada"] == 0
+    assert counts["ronda_projectada_retirades"] == 2
+
+
+def _posa_la_regla(db) -> None:
+    conn = sqlite3.connect(db)
+    conn.execute("UPDATE torneig_fases SET regla = 'el primer de cada grup', places = 1")
+    conn.execute("DELETE FROM torneig_ronda_projectada")
+    conn.commit()
+    conn.close()
+
+
+def test_la_ingesta_no_projecta_una_final_ja_sortejada(entorn) -> None:
+    db, _ = entorn
+    _posa_la_regla(db)
+    _sorteja_la_final(db, PRIMERA)
+    conn = sqlite3.connect(db)
+
+    sortejada = projecta_ronda_seguent(conn, PRIMERA)
+    per_sortejar = projecta_ronda_seguent(conn, SEGONA)
+
+    assert sortejada["estat"] == "res a projectar"
+    assert (per_sortejar["estat"], per_sortejar["ronda"]) == ("projectada", "FINAL")
+    projectats = conn.execute("SELECT DISTINCT torneig_id FROM torneig_ronda_projectada").fetchall()
+    assert projectats == [(SEGONA,)]
+
+
+def test_la_ingesta_retira_la_projeccio_quan_arriba_el_full(entorn) -> None:
+    db, _ = entorn
+    _sorteja_la_final(db, PRIMERA)
+    conn = sqlite3.connect(db)
+
+    resum = projecta_ronda_seguent(conn, PRIMERA)
+
+    assert resum["retirades"] == 2
+    queden = conn.execute(
+        "SELECT COUNT(*) FROM torneig_ronda_projectada WHERE torneig_id = ?", (PRIMERA,)
+    ).fetchone()[0]
+    assert queden == 0
 
 
 # ---------------- i que `publish-cloud` la cridi ----------------

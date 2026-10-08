@@ -684,6 +684,55 @@ def casa_amb_fase(titol: str, divisio_nom: str, fase_nom: str) -> bool:
     return div in t and re.search(rf"(?<!\bPRE) {re.escape(fase)} ", t) is not None
 
 
+# --------------------------- el sorteig d'una final, lligat al seu torneig ---------------
+
+
+def _desa_sorteig_de_final(conn, sorteig: SorteigFase, temporada: str | None, nom_fitxer: str):
+    """Desa el sorteig d'una final al torneig que li toca. Torna un avís, o `None`.
+
+    El torneig es troba pels **jugadors** i no pel títol. El títol diu la divisió
+    i prou («Final TRES BANDES HONOR»), i «HONOR» n'hi ha a tres bandes i al
+    quadre; i la fase FINAL, que és amb el que es lliguen les prèvies, encara no
+    existeix al portal quan surt el full. Els finalistes, en canvi, venen tots de
+    la ronda anterior del seu torneig: és el torneig de la temporada on n'hi ha
+    més, i n'hi ha d'haver més de la meitat perquè es doni per bo. No hi són tots
+    perquè la final pot portar convidats del club que l'organitza.
+    """
+    from fcbillar import projeccio_ronda as PR
+
+    noms = {_norm(j.jugador) for j in sorteig.jugadors}
+    if not noms:
+        return f"{nom_fitxer}: és el full d'una final i no hi trobo cap jugador"
+    recompte: Counter = Counter()
+    for torneig_id, jugador in conn.execute(
+        """
+        SELECT ti.id, g.jugador_nom
+          FROM torneig_fase_grups g
+          JOIN torneig_fases f ON f.id = g.fase_id
+          JOIN torneigs_individuals ti ON ti.id = f.torneig_id
+          JOIN temporades te ON te.id = ti.temporada_id
+         WHERE te.nom = COALESCE(?, (SELECT nom FROM temporades ORDER BY nom DESC LIMIT 1))
+         GROUP BY ti.id, g.jugador_nom
+        """,
+        (temporada,),
+    ):
+        if _norm(jugador) in noms:
+            recompte[torneig_id] += 1
+    millors = recompte.most_common(2)
+    if not millors or millors[0][1] * 2 <= len(noms):
+        return f"{sorteig.titol}: no sé de quin torneig és aquesta final"
+    if len(millors) > 1 and millors[1][1] == millors[0][1]:
+        return f"{sorteig.titol}: aquesta final casa igual amb dos torneigs; no la lligo a cap"
+    PR.desa_sorteig_oficial(
+        conn,
+        millors[0][0],
+        "FINAL",
+        [(j.jugador, j.grup, j.club) for j in sorteig.jugadors],
+        font=nom_fitxer,
+    )
+    return None
+
+
 # --------------------------- la regla, lligada a la seva fase ---------------------------
 
 
@@ -726,7 +775,12 @@ def desa_regles(conn, client=None, temporada: str | None = None) -> tuple[int, l
             sorteig = llegeix(desti)
             if sorteig.ronda == "FINAL":
                 # Una final no classifica per a cap ronda: no porta regla i no
-                # n'hi ha d'haver. No és cap avís.
+                # n'hi ha d'haver. El que sí que porta és el sorteig, i es desa:
+                # mentre la fase no surti al portal és l'única cosa que diu que
+                # la final ja està sortejada, i la projecció s'ha de retirar.
+                avis = _desa_sorteig_de_final(conn, sorteig, temporada, pub.nom_fitxer)
+                if avis:
+                    avisos.append(avis)
                 continue
             if not sorteig.regla:
                 avisos.append(f"{pub.nom_fitxer}: no hi trobo la regla de classificació")

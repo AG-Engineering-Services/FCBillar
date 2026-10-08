@@ -20,6 +20,7 @@ from pathlib import Path
 
 import pytest
 
+from fcbillar import projeccio_ronda as PR
 from fcbillar import sorteig_fase as S
 from fcbillar.db.migrations import ensure_schema
 
@@ -195,15 +196,71 @@ def test_el_titol_d_una_final_casa_amb_la_seva_fase_i_no_amb_la_previa() -> None
     assert not S.casa_amb_fase(titol, "2A DIVISIÓ", "FINAL")
 
 
-def test_una_final_no_porta_regla_i_no_es_cap_avis(tmp_path, monkeypatch) -> None:
-    """Una final no classifica per a res: que no en tingui no s'ha de dir cada nit."""
+def _campionat(conn, torneig_id: int, divisio: int, nom: str, jugadors: list[str]) -> None:
+    """Un campionat de la temporada que ha jugat la prèvia amb aquests jugadors."""
+    conn.execute("INSERT OR IGNORE INTO temporades (id, nom) VALUES (1, '2026-2027')")
+    conn.execute(
+        "INSERT INTO torneigs_individuals (id, torneig_id_extern, divisio_id_extern, nom, "
+        "temporada_id) VALUES (?, 900, ?, ?, 1)",
+        (torneig_id, divisio, nom),
+    )
+    fase = conn.execute(
+        "INSERT INTO torneig_fases (torneig_id, fase_id_extern, nom, tipus, ordre) "
+        "VALUES (?, ?, 'PRÈVIA', 'grups', 1)",
+        (torneig_id, divisio),
+    ).lastrowid
+    conn.executemany(
+        "INSERT INTO torneig_fase_grups (fase_id, grup_nom, jugador_nom, posicio_grup) "
+        "VALUES (?, 'Grup A', ?, 1)",
+        [(fase, j) for j in jugadors],
+    )
+    conn.commit()
+
+
+def test_el_sorteig_d_una_final_es_desa_al_torneig_dels_seus_jugadors(
+    tmp_path, monkeypatch
+) -> None:
+    """I no pel títol: «HONOR» n'hi ha a tres bandes i al quadre."""
+    monkeypatch.setenv("FCB_CACHE_DIR", str(tmp_path / "cache"))
+    conn = ensure_schema(tmp_path / "t.db")
+    quadre = [j.jugador for j in S.llegeix(FINAL_QUADRE).jugadors]
+    tres_bandes = [j.jugador for j in S.llegeix(FINAL_3B_1A).jugadors]
+    _campionat(conn, 10, 462, "QUADRE 47/2 - HONOR", quadre)
+    # A la final de 1a hi ha un convidat del club organitzador que no ve de la prèvia.
+    _campionat(conn, 11, 455, "TRES BANDES INDIVIDUAL - 1A DIVISIÓ", tres_bandes[:7])
+    # I un altre «HONOR» de la temporada, on juga un dels finalistes del quadre.
+    _campionat(conn, 12, 454, "TRES BANDES INDIVIDUAL - HONOR", [quadre[3], "ALGÚ, ALTRE"])
+
+    n, avisos = S.desa_regles(conn, WebFals())
+
+    # Una final no porta regla, i això no és cap avís.
+    assert (n, avisos) == (0, [])
+    desats = {
+        tuple(f)
+        for f in conn.execute(
+            "SELECT torneig_id, ronda, COUNT(*) FROM torneig_sorteig_oficial GROUP BY 1, 2"
+        )
+    }
+    assert desats == {(10, "FINAL", 8), (11, "FINAL", 8)}
+    assert PR.ja_sortejada(conn, 10, "FINAL") and PR.ja_sortejada(conn, 11, "FINAL")
+    assert not PR.ja_sortejada(conn, 12, "FINAL")
+    assert not PR.ja_publicada(conn, 11, "FINAL")
+    grup = conn.execute(
+        "SELECT grup, club FROM torneig_sorteig_oficial WHERE jugador_nom = ?",
+        ("COROMINAS FRANCH, ESTEVE",),
+    ).fetchone()
+    assert tuple(grup) == ("A", "C.B.BANYOLES")
+
+
+def test_una_final_que_no_es_de_cap_torneig_s_avisa_i_no_es_desa(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("FCB_CACHE_DIR", str(tmp_path / "cache"))
     conn = ensure_schema(tmp_path / "t.db")
 
     n, avisos = S.desa_regles(conn, WebFals())
 
     assert n == 0
-    assert avisos == []
+    assert len(avisos) == 2 and all("no sé de quin torneig" in a for a in avisos)
+    assert not PR.ja_sortejada(conn, 10, "FINAL")
 
 
 # ---------------- el club d'una final, que ve amb prefix ----------------
