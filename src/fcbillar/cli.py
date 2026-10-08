@@ -1028,9 +1028,40 @@ def ingest_individuals_cmd(
         "--historical",
         help="Ingerir TOTES les temporades (actual + històric de /ca/historial), no només una",
     ),
+    torneig: int = typer.Option(
+        0,
+        "--torneig",
+        help="Ingereix NOMÉS aquest torneig, pel seu id del portal (ex: 211), encara que "
+        "ja no surti al llistat. La temporada és la que ja té a la BD, o --temporada.",
+    ),
 ) -> None:
-    """Ingest dels torneigs individuals (opens, catalans, etc.) per temporada."""
+    """Ingest dels torneigs individuals (opens, catalans, etc.) per temporada.
+
+    Sense arguments recorre el llistat de la temporada en curs i, a més, els
+    torneigs de `pipeline.TORNEIGS_FORA_DEL_LLISTAT` que encara no tinguin
+    participants. `--torneig` en força un de sol, hi sigui o no.
+    """
     settings = get_settings()
+    if torneig:
+        from fcbillar.pipeline import ingest_torneig_per_id
+
+        conn = ensure_schema(settings.db_path)
+        with ScraperClient(settings) as client:
+            n = ingest_torneig_per_id(
+                client,
+                conn,
+                torneig,
+                temporada=None if temporada == "current" else temporada,
+                use_cache=cache,
+            )
+        conn.close()
+        color = "green" if n["partides"] else "yellow"
+        console.print(
+            f"[{color}]OK torneig {torneig}: {n['divisions']} divisions, {n['partides']} partides, "
+            f"{n['participants']} participants ({n['oficials']} amb classificació oficial, "
+            f"{n['deduides']} deduïdes del quadre)[/]"
+        )
+        return
     with ScraperClient(settings) as client:
         if historical:
             result = ingest_individuals_all_temporades(
@@ -1058,9 +1089,14 @@ def ingest_individuals_cmd(
         f"{result.total_partides} partides, {result.total_participants} participants[/]"
     )
     console.print(
-        "[dim]  La posició de cada participant està DEDUÏDA del quadre: "
-        "la federació ja no publica cap classificació final.[/]"
+        f"[dim]  Classificació final: {result.classificacions_oficials} divisions amb "
+        f"l'oficial de la federació, {result.classificacions_deduides} amb la posició "
+        "DEDUÏDA del quadre (encara no n'hi ha d'oficial).[/]"
     )
+    if result.fora_del_llistat:
+        console.print(
+            f"[dim]  {result.fora_del_llistat} torneigs de fora del llistat ingerits pel seu id.[/]"
+        )
 
 
 @app.command("link-individuals")

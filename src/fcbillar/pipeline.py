@@ -1669,6 +1669,180 @@ class IngestIndividualsResult:
     torneigs_failed: int
     total_participants: int
     total_partides: int = 0
+    #: Divisions desades amb la classificació final de la federació, i divisions
+    #: on encara no n'hi ha i la posició s'ha deduït del quadre.
+    classificacions_oficials: int = 0
+    classificacions_deduides: int = 0
+    #: Torneigs de `TORNEIGS_FORA_DEL_LLISTAT` que s'han ingerit en aquesta passada.
+    fora_del_llistat: int = 0
+
+
+#: Torneigs que ja no surten a `individuals/llistat` i que no tenim sencers.
+#:
+#: La ingesta nocturna només recorre el llistat, i el llistat només porta la
+#: temporada en curs. Un torneig que es tanca just abans que la federació el
+#: tregui queda a mitges per sempre: l'Open de Mataró del juliol de 2026 té les
+#: 130 partides a la base i cap participant, perquè la classificació final no es
+#: va arribar a crear i quan la ingesta va aprendre a deduir-la ja no hi era.
+#:
+#: Les seves pàgines segueixen responent per id, i per això n'hi ha prou amb
+#: dir quins són. És una llista i no una cerca perquè del portal no es pot
+#: treure: no hi ha cap índex de temporades passades, i provar ids a cegues són
+#: centenars de peticions per trobar-ne dos.
+#:
+#: Cada entrada és `(torneig_id_extern, temporada)`. S'ingereixen UN cop: vegeu
+#: `_ingereix_fora_del_llistat`.
+TORNEIGS_FORA_DEL_LLISTAT: tuple[tuple[int, str], ...] = (
+    (211, "2025-2026"),  # OPEN TRES BANDES MATARO
+    (195, "2025-2026"),  # OPEN FEMENI TRES BANDES MATARO
+)
+
+
+def ingest_torneig_per_id(
+    client: ScraperClient,
+    conn,
+    torneig_id_extern: int,
+    *,
+    temporada: str | None = None,
+    create_missing_players: bool = True,
+    use_cache: bool = False,
+) -> dict[str, int]:
+    """Ingereix un torneig individual pel seu id, sigui o no al llistat.
+
+    El nom es llegeix de la pàgina del torneig. La temporada, si no es diu, és
+    la que el torneig ja té a la base de dades —és part de la seva clau, i amb
+    una altra se'n crearia un de nou al costat— i, si no hi és, la que està en
+    curs.
+    """
+    if temporada is None:
+        fila = conn.execute(
+            "SELECT te.nom FROM torneigs_individuals ti "
+            "JOIN temporades te ON te.id = ti.temporada_id "
+            "WHERE ti.torneig_id_extern = ? LIMIT 1",
+            (torneig_id_extern,),
+        ).fetchone()
+        temporada = fila[0] if fila else _current_temporada_label()
+
+    resum = {"divisions": 0, "partides": 0, "participants": 0, "oficials": 0, "deduides": 0}
+    for div in llegeix_torneig(client, torneig_id_extern, None, use_cache=use_cache):
+        if not div.partides:
+            log.info("  %s: sense partides publicades", div.nom)
+            continue
+        n = desa_torneig(conn, div, temporada, crea_jugadors=create_missing_players)
+        resum["divisions"] += 1
+        resum["partides"] += n["partides"]
+        resum["participants"] += n["participants"]
+        resum["oficials" if div.oficial else "deduides"] += 1
+        log.info(
+            "    %s (%s): %d partides, %d participants, classificació %s",
+            div.nom,
+            temporada,
+            n["partides"],
+            n["participants"],
+            "oficial" if div.oficial else "deduïda del quadre",
+        )
+    return resum
+
+
+def _ingereix_fora_del_llistat(
+    client: ScraperClient,
+    conn,
+    al_llistat: set[int],
+    *,
+    create_missing_players: bool = True,
+    use_cache: bool = False,
+) -> dict[str, int]:
+    """El que el llistat ja no porta: torneigs a mitges i classificacions pendents.
+
+    Dues coses, i cap de les dues torna a baixar cada nit el que no pot canviar:
+
+    1. Els de `TORNEIGS_FORA_DEL_LLISTAT` que encara no tenen cap participant
+       s'ingereixen sencers. Un cop en tenen, ja no es tornen a demanar: el
+       quadre d'un torneig acabat no es mou.
+    2. El que sí que pot canviar d'un torneig acabat és que la federació en creï
+       la classificació final. Per a cada divisió que la té deduïda i ja no és
+       al llistat es demana aquella pàgina —una petició— i, si hi és, mana. Val
+       per a Mataró i per a qualsevol torneig que surti del llistat abans que
+       la federació el classifiqui.
+
+    Cada torneig va aïllat: que un falli no ha d'aturar la ingesta nocturna.
+    """
+    from fcbillar.individuals import desa_classificacio_oficial, llegeix_classificacio_oficial
+
+    resum = {"torneigs": 0, "partides": 0, "participants": 0, "oficials": 0, "deduides": 0}
+    acabats_dingerir: set[int] = set()
+    for torneig_id_extern, temporada in TORNEIGS_FORA_DEL_LLISTAT:
+        if torneig_id_extern in al_llistat:
+            continue
+        ja_hi_es = conn.execute(
+            "SELECT 1 FROM torneig_participants tp "
+            "JOIN torneigs_individuals ti ON ti.id = tp.torneig_id "
+            "WHERE ti.torneig_id_extern = ? LIMIT 1",
+            (torneig_id_extern,),
+        ).fetchone()
+        if ja_hi_es:
+            continue
+        log.info(
+            "Torneig %d (%s): fora del llistat i sense participants", torneig_id_extern, temporada
+        )
+        try:
+            n = ingest_torneig_per_id(
+                client,
+                conn,
+                torneig_id_extern,
+                temporada=temporada,
+                create_missing_players=create_missing_players,
+                use_cache=use_cache,
+            )
+        except Exception as e:
+            log.warning("FAIL torneig %d fora del llistat: %s", torneig_id_extern, e)
+            continue
+        acabats_dingerir.add(torneig_id_extern)
+        resum["torneigs"] += 1
+        for clau in ("partides", "participants", "oficials", "deduides"):
+            resum[clau] += n[clau]
+
+    pendents = conn.execute(
+        """
+        SELECT ti.torneig_id_extern, ti.divisio_id_extern, ti.nom, te.nom
+          FROM torneigs_individuals ti
+          JOIN temporades te ON te.id = ti.temporada_id
+         WHERE EXISTS (SELECT 1 FROM torneig_fases f WHERE f.torneig_id = ti.id)
+           AND EXISTS (SELECT 1 FROM torneig_participants p WHERE p.torneig_id = ti.id)
+           AND NOT EXISTS (SELECT 1 FROM torneig_participants p
+                            WHERE p.torneig_id = ti.id
+                              AND TRIM(COALESCE(p.club_text, '')) <> '')
+         ORDER BY ti.torneig_id_extern, ti.divisio_id_extern
+        """
+    ).fetchall()
+    for torneig_id_extern, divisio_id_extern, nom, temporada in pendents:
+        if torneig_id_extern in al_llistat or torneig_id_extern in acabats_dingerir:
+            continue
+        oficial = llegeix_classificacio_oficial(
+            client, torneig_id_extern, divisio_id_extern, use_cache=use_cache
+        )
+        if not oficial:
+            continue
+        try:
+            n_part = desa_classificacio_oficial(
+                conn,
+                torneig_id_extern,
+                divisio_id_extern,
+                temporada,
+                oficial,
+                crea_jugadors=create_missing_players,
+            )
+        except Exception as e:
+            log.warning("FAIL classificació oficial de %s: %s", nom, e)
+            continue
+        resum["oficials"] += 1
+        log.info(
+            "  %s (%s): la federació n'ha creat la classificació final; %d participants",
+            nom,
+            temporada,
+            n_part,
+        )
+    return resum
 
 
 def _individuals_llistat_url(base_url: str, temporada: str | None) -> str:
@@ -1731,6 +1905,8 @@ def ingest_individuals_temporada(
     failed = 0
     total_part = 0
     total_partides = 0
+    oficials = 0
+    deduides = 0
     for torneig in torneigs:
         try:
             divisions = llegeix_torneig(
@@ -1764,15 +1940,40 @@ def ingest_individuals_temporada(
                 continue
             total_part += n["participants"]
             total_partides += n["partides"]
+            if div.oficial:
+                oficials += 1
+            else:
+                deduides += 1
             log.info(
-                "    %s: %d partides, %d participants (%d fases, %d grups)",
+                "    %s: %d partides, %d participants (%d fases, %d grups), classificació %s",
                 div.nom,
                 n["partides"],
                 n["participants"],
                 n["fases"],
                 n["grups"],
+                "oficial" if div.oficial else "deduïda del quadre",
             )
         processed += 1
+
+    # El que el llistat ja no porta. Va després del llistat i aïllat: és la part
+    # que menys canvia, i no ha de poder espatllar la que canvia cada nit.
+    n_fora = 0
+    try:
+        fora = _ingereix_fora_del_llistat(
+            client,
+            conn,
+            {t.torneig_id_extern for t in torneigs},
+            create_missing_players=create_missing_players,
+            use_cache=use_cache,
+        )
+        n_fora = fora["torneigs"]
+        total_part += fora["participants"]
+        total_partides += fora["partides"]
+        oficials += fora["oficials"]
+        deduides += fora["deduides"]
+    except Exception as e:
+        log.warning("No s'han pogut mirar els torneigs de fora del llistat: %s", e)
+
     # Les regles de classificació dels PDF de sorteig, i la projecció de la ronda
     # següent. Van aquí i no a una comanda a part perquè han de córrer soles: la
     # projecció serveix els dies que hi ha entre una ronda jugada i el sorteig de
@@ -1809,6 +2010,9 @@ def ingest_individuals_temporada(
         torneigs_failed=failed,
         total_participants=total_part,
         total_partides=total_partides,
+        classificacions_oficials=oficials,
+        classificacions_deduides=deduides,
+        fora_del_llistat=n_fora,
     )
 
 
@@ -1864,6 +2068,7 @@ def ingest_individuals_all_temporades(
     processed = 0
     failed = 0
     total_part = 0
+    total_partides = oficials = deduides = n_fora = 0
     for target in targets:
         label = target or "current"
         try:
@@ -1881,10 +2086,18 @@ def ingest_individuals_all_temporades(
         processed += res.torneigs_processed
         failed += res.torneigs_failed
         total_part += res.total_participants
+        total_partides += res.total_partides
+        oficials += res.classificacions_oficials
+        deduides += res.classificacions_deduides
+        n_fora += res.fora_del_llistat
     return IngestIndividualsResult(
         torneigs_processed=processed,
         torneigs_failed=failed,
         total_participants=total_part,
+        total_partides=total_partides,
+        classificacions_oficials=oficials,
+        classificacions_deduides=deduides,
+        fora_del_llistat=n_fora,
     )
 
 
