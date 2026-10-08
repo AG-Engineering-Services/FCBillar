@@ -518,6 +518,45 @@ d'Atac (217) 6 fases, 13 grups, 44 partides; Open Tres Bandes Mataró (211) 8
 fases, 33 grups, 130 partides, 16 reservats i 98 classificats. El que no s'ha
 pogut provar és a §8.
 
+### 2.13 Un job que sempre sortia verd, i els números escrits a mà
+
+Tot el d'aquest document té una cosa en comú: cada pèrdua va passar amb la
+reingesta en verd. Els passos van aïllats a posta —si un falla, la resta es
+publica igualment— i ningú no mirava si el que s'havia desat era d'avui o de
+feia deu setmanes. L'auditoria del 8 d'octubre de 2026 en va comptar vuit.
+
+Dues coses hi posen remei.
+
+**Cap valor «en curs» és al codi.** Quina lliga es publica, quina copa
+s'ingereix i quina temporada s'etiqueta surt dels llistats de la federació
+(`fcbillar.en_curs`): `ingest-lliga` desa el llistat de lligues a
+`lligues_obertes` i la publicació el llegeix, `ingest-copa` sense id llegeix
+`copa/llistat`, i la temporada surt de les dates del calendari. Si no es pot
+determinar, el pas falla i diu com es força (`FCB_LLIGA_3B_ID`,
+`FCB_LLIGA_4M_ID`, `FCB_TEMPORADA`, `--temporada`); no hi ha cap valor de
+reserva. El que NO s'ha pogut veure és un llistat de copes amb files: des del
+canvi de web sempre ha estat buit, i l'id de l'edició es llegeix del primer
+enllaç `copa/…/{id}` de la fila sense haver-ne vist mai cap.
+
+**La reingesta acaba en vermell quan s'ha perdut alguna cosa.** Al final de tot,
+`fcbillar comprova-frescor` compara el més nou que tenim de cada família amb el
+que publica la federació —l'índex de rànquings, els llistats de lligues,
+d'individuals i de copes, i el sitemap de documents: cinc peticions— i amb el
+calendari de cada competició, i en posa una taula al resum del job. Falla si hi
+ha un rànquing que no tenim, una jornada jugada sense cap resultat, un torneig
+amb partides i sense participants, un calendari publicat i no ingerit, una
+lliga que no és la que es publica, o si algun pas ha sortit amb error. No hi ha
+cap «a l'agost no hi ha lliga» escrit enlloc: el que s'espera surt de les dates
+que publica la mateixa federació. L'últim pas del workflow és l'únic que
+decideix, després de repujar la BD.
+
+I a sota de la taula, l'**inventari**: els documents del sitemap del WordPress
+que cap pas no reconeix. No fa fallar res. El dia que es va escriure n'hi havia
+20 de 84, i són exactament els que l'auditoria havia hagut de trobar a mà: les
+classificacions finals i les divisions del Quadre 47/2, els calendaris i els
+jugadors de la Lliga de 4 Modalitats, i els rànquings d'opens de les modalitats
+que no són tres bandes.
+
 ### 2.7 Els opens: de la classificació morta al quadre sencer
 
 La ingesta d'individuals demanava la classificació final de cada divisió i en

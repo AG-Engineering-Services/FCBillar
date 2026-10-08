@@ -57,6 +57,7 @@ _RE_IND_GRUPS = re.compile(r"individuals/grups/(\d+)/(\d+)/(\d+)")
 _RE_IND_KO = re.compile(r"individuals/partides-eliminatories/(\d+)/(\d+)/(\d+)")
 _RE_IND_PARTIDES_GRUP = re.compile(r"individuals/partides-grup/(\d+)/(\d+)/(\d+)/(\d+)")
 
+_RE_COPA_EDICIO = re.compile(r"copa/[a-z-]+/(\d+)")
 _RE_COPA_GRUPS = re.compile(r"copa/grups/(\d+)/(\d+)")
 _RE_COPA_ENCGRUP = re.compile(r"copa/encontres-grup/(\d+)/(\d+)/(\d+)")
 _RE_COPA_PARTIDES = re.compile(r"copa/partides-grup/(\d+)/(\d+)/(\d+)/(\d+)/(\d+)/(\d+)")
@@ -1319,6 +1320,46 @@ class CopaPartidaRow:
     entrades: int | None
     punts_local: int | None
     punts_visitant: int | None
+
+
+@dataclass(frozen=True)
+class CopaOberta:
+    """Una edició de la Copa del llistat de la federació."""
+
+    edicio_id: int
+    nom: str
+    estat: str
+
+
+def parse_copa_llistat(html: str) -> tuple[list[CopaOberta], list[str]] | None:
+    """Les copes del llistat i les files que no s'han sabut llegir; `None` si no hi ha taula.
+
+    Tres respostes que no s'han de confondre:
+
+    - `None`: la pàgina no porta la taula de copes. Ha canviat de forma o no és
+      la pàgina que demanàvem, i d'aquí no se'n pot treure res.
+    - `([], [])`: la taula hi és i és buida. És l'estat normal de mitja
+      temporada —la Copa es juga al maig i al juny—, i vol dir «no n'hi ha cap».
+    - una llista: les edicions que la federació té obertes.
+
+    L'id de l'edició surt del primer enllaç de la fila que apunti a `copa/…/{id}`.
+    No se sap quin serà: des del canvi de web el llistat sempre s'ha vist buit, i
+    l'única adreça de copa coneguda és `copa/fase-grups/{edicio}`. Per això
+    s'accepta qualsevol camí de `copa/` i, si una fila no en porta cap, es torna
+    com a descartada perquè qui crida falli en comptes de saltar-se-la.
+    """
+    taula = taula_amb(html, "Copa", "Estat")
+    if taula is None:
+        return None
+    out: list[CopaOberta] = []
+    descartades: list[str] = []
+    for fila in taula:
+        m = _primer(_RE_COPA_EDICIO, fila.enllacos())
+        if m is None:
+            descartades.append(fila["Copa"] or "(fila sense nom)")
+            continue
+        out.append(CopaOberta(edicio_id=int(m.group(1)), nom=fila["Copa"], estat=fila["Estat"]))
+    return out, descartades
 
 
 def parse_copa_jornades(html: str) -> list[CopaJornadaLink]:

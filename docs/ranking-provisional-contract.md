@@ -63,22 +63,32 @@ const { data } = await sb
 
 ## Taula `pending_games` — partides pendents (detall)
 
-Partides jugades en competicions en curs (copa, opens…) **encara no** al rànquing
-oficial. Una fila **per jugador i partida** (perspectiva del jugador). Ja venen
-deduplicades contra les partides oficials.
+Partides jugades en competicions en curs (copa, opens, campionats individuals,
+lliga) **encara no** al rànquing oficial. Una fila **per jugador i partida**
+(perspectiva del jugador). Ja venen deduplicades contra les partides oficials.
+
+Hi ha files de **totes les modalitats amb rànquing** (1, 2, 3, 4 i 6). Fins a
+l'octubre de 2026 només n'hi havia de tres bandes; la forma de la taula no ha
+canviat, i qui ja filtrava per `modalitat_codi` no ha de tocar res.
+
+Només hi surt qui té **llicència** (`player_fcb_id` numèric). Les partides d'algú
+que encara no té fitxa —acabat de federar, o amb fitxa de pedaç `name:…`— no
+tenen fila pròpia; el rival sí que la té, amb `opponent_nom` i sense
+`opponent_fcb_id`.
 
 | Columna | Tipus | Notes |
 |---|---|---|
 | `player_fcb_id` | text | Jugador (= `players.fcb_id`) |
 | `modalitat_codi` | int | Modalitat |
 | `signatura` | text | Clau de dedup (parella + caramboles + entrades) |
-| `competicio` | text | Nom de la competició (p. ex. `Copa`, `OPEN TRES BANDES COSTA DAURADA`) |
-| `font` | text | `open_live` \| `copa` \| `lliga` |
+| `competicio` | text | Nom de la competició (p. ex. `Copa`, `LLIGA`, `COSTA DAURADA`, `OPEN LLIURE PUNT D'ATAC`, `QUADRE 47/2 - HONOR`) |
+| `font` | text | `open_live` \| `open` (torneig individual ja ingerit) \| `copa` \| `lliga` |
 | `opponent_nom` | text | Nom del rival |
 | `opponent_fcb_id` | text \| null | ID del rival si està identificat |
 | `caramboles` / `caramboles_opp` | int | Caramboles del jugador / del rival |
 | `entrades` | int | Entrades |
 | `serie` | int \| null | Sèrie major del jugador |
+| `data` | date \| null | El dia que es va jugar (a la lliga, el de la jornada) |
 
 PK: `(player_fcb_id, modalitat_codi, signatura)`.
 
