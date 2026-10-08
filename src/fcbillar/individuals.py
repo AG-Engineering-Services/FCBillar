@@ -27,7 +27,20 @@ així que aquí es **dedueix del quadre**, que és el que el torneig demostra:
 
 No és cap invenció: és l'ordre que el reglament d'opens ja dona per bo quan
 puntua (les posicions 3 i 4 valen igual, i la 5 a la 8 formen una altra
-banda). Però tampoc no és la classificació oficial, perquè oficial no n'hi ha.
+banda). Però tampoc no és la classificació oficial.
+
+## I quan la federació publica la seva, mana la seva
+
+L'octubre de 2026 la classificació final va tornar al portal, en una altra
+adreça (`individuals/divisio-classificacio-final/{torneig}/{divisio}`), i
+comparada amb la deduïda no deia el mateix: 5 posicions de 24 a l'Open de Lliure
+del Punt d'Atac, 4 de 20 a l'Open de Banda de Granollers. A més porta el club de
+cadascú, que no és a cap altra pàgina del torneig.
+
+Per això es demana sempre, i quan hi és **substitueix** la deduïda
+(`desa_classificacio_oficial`). La deducció es queda per a quan no n'hi ha:
+mentre el torneig es juga, i per als torneigs que la federació tanca sense
+arribar-la a crear —l'Open de Mataró de 2025-26 n'és un.
 
 ## Què no es desa
 
@@ -146,6 +159,10 @@ class Divisio:
     membres: list[Membre] = field(default_factory=list)
     partides: list[Partida] = field(default_factory=list)
     grups: list[Grup] = field(default_factory=list)
+    #: La classificació final OFICIAL, si la federació l'ha creada. Buida vol dir
+    #: «encara no n'hi ha»; `None`, «no s'ha pogut demanar». No és el mateix, i
+    #: `desa` no fa el mateix amb cadascuna.
+    oficial: list[P.IndividualParticipant] | None = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -195,15 +212,44 @@ def _partida(p: P.IndividualPartidaRow, fase: int, grup: str | None, data: date 
     )
 
 
+def llegeix_classificacio_oficial(
+    client, torneig_id_extern: int, divisio_id_extern: int, *, use_cache: bool = False
+) -> list[P.IndividualParticipant] | None:
+    """La classificació final oficial d'una divisió. `[]` si no n'hi ha; `None` si falla.
+
+    Una pàgina que no respon no ha de fer perdre el torneig sencer, que ve
+    d'unes altres pàgines: s'avisa i es torna `None`, que vol dir «no ho sé».
+    """
+    url = U.individuals_classificacio_final(torneig_id_extern, divisio_id_extern)
+    try:
+        html = client.fetch_html(url, use_cache=use_cache)
+    except Exception as e:
+        log.warning(
+            "Classificació final de %d/%d: no s'ha pogut llegir (%s)",
+            torneig_id_extern,
+            divisio_id_extern,
+            e,
+        )
+        return None
+    return P.parse_individuals_classificacio_final(html)
+
+
 def llegeix(
-    client, torneig_id_extern: int, nom_torneig: str, *, use_cache: bool = False
+    client, torneig_id_extern: int, nom_torneig: str | None, *, use_cache: bool = False
 ) -> list[Divisio]:
-    """Un torneig sencer: divisions, fases, grups i totes les partides.
+    """Un torneig sencer: divisions, fases, grups, partides i classificació final.
 
     Es baixa una pàgina per fase i una més per grup. Un open petit com el de
     lliure del Punt d'Atac són quinze peticions; no és car i es fa un cop.
+
+    `nom_torneig` ve del llistat. Per a un torneig que ja no hi surt es passa
+    `None` i es llegeix del títol de la seva pàgina de divisions.
     """
     html = client.fetch_html(U.individuals_divisions(torneig_id_extern), use_cache=use_cache)
+    if nom_torneig is None:
+        nom_torneig = P.parse_individuals_torneig_nom(html)
+        if not nom_torneig:
+            raise ValueError(f"El torneig {torneig_id_extern} no diu com es diu")
     out: list[Divisio] = []
     for div in P.parse_individuals_divisions(html):
         d = div.divisio_id_extern
@@ -308,6 +354,9 @@ def llegeix(
                 membres=membres,
                 partides=partides,
                 grups=grups,
+                oficial=llegeix_classificacio_oficial(
+                    client, torneig_id_extern, d, use_cache=use_cache
+                ),
             )
         )
     return out
@@ -643,7 +692,39 @@ def desa(
         ],
     )
 
-    # Participants amb la posició deduïda.
+    # Participants. Si la federació ha publicat la classificació final, mana
+    # aquella; si no, la posició es dedueix del quadre.
+    if divisio.oficial:
+        n_part = desa_classificacio_oficial(
+            conn,
+            divisio.torneig_id_extern,
+            divisio.divisio_id_extern,
+            temporada,
+            divisio.oficial,
+            series={_norm(pos.jugador): pos.serie_max for pos in classificacio(divisio)},
+            crea_jugadors=crea_jugadors,
+        )
+    elif divisio.oficial is None and te_classificacio_oficial(conn, torneig_id):
+        # La pàgina de la classificació no ha respost i ja en teníem l'oficial:
+        # tornar a la deduïda per una nit seria canviar posicions bones per unes
+        # de pitjors. Es deixa com estava.
+        n_part = conn.execute(
+            "SELECT COUNT(*) FROM torneig_participants WHERE torneig_id = ?", (torneig_id,)
+        ).fetchone()[0]
+    else:
+        n_part = _desa_classificacio_deduida(repo, divisio, temporada, crea_jugadors)
+
+    conn.commit()
+    return {
+        "fases": len(divisio.fases),
+        "grups": len({(m.fase_id_extern, m.grup_nom) for m in divisio.membres}),
+        "partides": len(divisio.partides),
+        "participants": n_part,
+    }
+
+
+def _desa_classificacio_deduida(repo, divisio: Divisio, temporada: str, crea_jugadors: bool) -> int:
+    """Els participants amb la posició DEDUÏDA del quadre. Vegeu la capçalera."""
     n_part = 0
     for pos in classificacio(divisio):
         fcb_id = repo.get_player_fcb_id_by_nom(pos.jugador)
@@ -663,22 +744,120 @@ def desa(
                 mitjana_general=pos.mitjana_general,
                 serie_max=pos.serie_max,
                 # Els punts de la darrera ronda que va jugar, que és el que la
-                # federació publica: no n'hi ha de torneig sencer des que la
-                # classificació final va desaparèixer. Sense això la columna de
-                # punts sortia buida a tot el que s'ingereix del web nou.
+                # federació publica mentre no hi ha classificació final. Sense
+                # això la columna de punts sortia buida a tot el que s'ingereix
+                # del web nou.
                 punts=pos.punts_grup,
             ),
             temporada_nom=temporada,
         )
         n_part += 1
+    return n_part
 
+
+def te_classificacio_oficial(conn: sqlite3.Connection, torneig_id: int) -> bool:
+    """Aquest torneig ja té desada la classificació oficial?
+
+    Es reconeix pel **club**: no surt de cap altra pàgina del torneig, o sigui
+    que un participant amb club ve per força d'una classificació publicada per
+    la federació —la del portal nou o la del vell. La deduïda no en porta mai.
+    """
+    fila = conn.execute(
+        "SELECT 1 FROM torneig_participants "
+        "WHERE torneig_id = ? AND TRIM(COALESCE(club_text, '')) <> '' LIMIT 1",
+        (torneig_id,),
+    ).fetchone()
+    return fila is not None
+
+
+def desa_classificacio_oficial(
+    conn: sqlite3.Connection,
+    torneig_id_extern: int,
+    divisio_id_extern: int,
+    temporada: str,
+    oficial: list[P.IndividualParticipant],
+    *,
+    series: dict[str, int | None] | None = None,
+    crea_jugadors: bool = True,
+) -> int:
+    """Desa la classificació final oficial d'una divisió. Mana sobre la deduïda.
+
+    La deducció del quadre encerta el campió i el finalista i falla més avall,
+    on la federació desempata amb criteris que el quadre no ensenya: a l'Open de
+    Lliure del Punt d'Atac de 2026-27 en diferien 5 posicions de 24, i a l'Open
+    de Banda de Granollers, 4 de 20. I la posició és el que dona els punts del
+    rànquing d'opens.
+
+    De la pàgina oficial en surt tot menys la **sèrie major**, que no hi és: es
+    conserva la que s'ha calculat de les partides (`series`, per nom
+    normalitzat), o la que ja hi hagués desada.
+
+    Qui era a la deduïda i no és a l'oficial se'n va. Sol ser algú sortejat en
+    un grup que no s'hi va presentar: la deducció el posa últim del grup perquè
+    «hi era», i la federació no el classifica.
+
+    El torneig ja ha d'existir: aquí no es crea. Torna quants participants ha
+    desat.
+    """
+    from fcbillar.db.repository import Repository
+
+    if not oficial:
+        return 0
+    repo = Repository(conn)
+    series = series or {}
+    vius: set[int] = set()
+    for fila in oficial:
+        fcb_id = repo.get_player_fcb_id_by_nom(fila.jugador_nom)
+        if fcb_id is None:
+            if not crea_jugadors:
+                continue
+            fcb_id = repo.resolve_or_create_player_by_nom(fila.jugador_nom)
+        repo.upsert_torneig_participant(
+            TorneigParticipantRecord(
+                torneig_id_extern=torneig_id_extern,
+                divisio_id_extern=divisio_id_extern,
+                player_fcb_id=fcb_id,
+                posicio=fila.posicio,
+                partides_jugades=fila.partides_jugades,
+                punts=fila.punts,
+                caramboles=fila.caramboles,
+                entrades=fila.entrades,
+                mitjana_general=fila.mitjana_general,
+                mitjana_particular=fila.mitjana_particular,
+                serie_max=series.get(_norm(fila.jugador_nom)),
+                club_text=fila.club,
+            ),
+            temporada_nom=temporada,
+        )
+        player_id = repo.get_player_id_by_fcb_id(fcb_id)
+        if player_id is not None:
+            vius.add(player_id)
+
+    torneig_id = conn.execute(
+        "SELECT ti.id FROM torneigs_individuals ti JOIN temporades te ON te.id = ti.temporada_id "
+        "WHERE ti.torneig_id_extern = ? AND ti.divisio_id_extern = ? AND te.nom = ?",
+        (torneig_id_extern, divisio_id_extern, temporada),
+    ).fetchone()[0]
+    sobren = [
+        r[0]
+        for r in conn.execute(
+            "SELECT player_id FROM torneig_participants WHERE torneig_id = ?", (torneig_id,)
+        )
+        if r[0] not in vius
+    ]
+    conn.executemany(
+        "DELETE FROM torneig_participants WHERE torneig_id = ? AND player_id = ?",
+        [(torneig_id, pid) for pid in sobren],
+    )
+    if sobren:
+        log.info(
+            "%d/%d: %d participants de la classificació deduïda no són a l'oficial; es retiren",
+            torneig_id_extern,
+            divisio_id_extern,
+            len(sobren),
+        )
     conn.commit()
-    return {
-        "fases": len(divisio.fases),
-        "grups": len({(m.fase_id_extern, m.grup_nom) for m in divisio.membres}),
-        "partides": len(divisio.partides),
-        "participants": n_part,
-    }
+    return len(vius)
 
 
 # --------------------------- la ronda següent, projectada ---------------------------
