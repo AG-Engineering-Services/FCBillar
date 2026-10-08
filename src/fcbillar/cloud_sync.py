@@ -560,10 +560,16 @@ def publish_provisional_ranking(
     return {"ranking_provisional": total}
 
 
+#: Les modalitats de les quals la federació publica rànquing de mitjana, pel seu
+#: codi: tres bandes, lliure, quadre 47/2, banda i quadre 71/2. Són les que tenen
+#: fila a `ranking_provisional`, i per tant les que poden tenir partides pendents.
+MODALITATS_AMB_RANQUING: tuple[int, ...] = (1, 2, 3, 4, 6)
+
+
 def publish_pending_games(
     db_path: Path | None = None,
     on_progress: Progress | None = None,
-    modalitats: tuple[int, ...] = (1,),
+    modalitats: tuple[int, ...] = MODALITATS_AMB_RANQUING,
 ) -> dict[str, int]:
     """Publica `fcbillar.pending_games`: partides jugades en competicions EN CURS
     (copa via `copa_partides` local + opens via `open_live` a Supabase) encara NO
@@ -571,8 +577,38 @@ def publish_pending_games(
     `ranking_provisional`). Una fila per jugador i partida (perspectiva del jugador).
 
     Dedup per signatura (parella de noms normalitzats + caramboles + entrades)
-    contra `games`: quan la partida ja hi consta, deixa de ser pendent. Pilot: Tres
-    Bandes (la copa catalana és de 3 bandes; els opens es filtren per modalitat)."""
+    contra `games`: quan la partida ja hi consta, deixa de ser pendent.
+
+    **Totes les modalitats amb rànquing.** Fins a l'octubre de 2026 era un pilot
+    de tres bandes (`modalitats=(1,)`), i la resta es quedava a mig camí: les
+    partides de Lliure, Banda i Quadre de la temporada arribaven a `open_partides`
+    i a `lliga4m_partides`, però no a la fitxa del jugador ni al rànquing
+    provisional, que deia «0 amb partides noves» a quatre modalitats cada nit.
+    La taula ja portava `modalitat_codi` i tots els qui la llegeixen filtren per
+    ell, o sigui que no ha calgut canviar-ne la forma: per a tres bandes surten
+    les mateixes files d'abans, i les altres modalitats hi tenen les seves.
+
+    D'on surt cada modalitat:
+
+    - la **Copa** només a tres bandes, que és l'única que s'hi juga;
+    - els **torneigs individuals** de la temporada (opens i campionats), cadascun
+      a la modalitat que diu el seu nom;
+    - la **lliga**, per la modalitat de cada partida: la de 4 Modalitats en
+      porta una de cada a cada encontre;
+    - els **opens en directe**, per la modalitat de l'open.
+
+    **Qui no té fitxa no hi surt.** Una fila és d'un jugador, i ha de ser d'un amb
+    llicència: els noms que no casen amb cap fitxa (algú que s'acaba de federar i
+    encara no ha sortit a cap rànquing) i les fitxes de pedaç (`name:…`) es
+    queden fora, com abans. No és que no interessin: és que no hi ha on
+    penjar-les. `ranking_provisional` només té files dels jugadors del rànquing
+    vigent, l'app del club i c3b van per número de llicència, i una fitxa de
+    pedaç canvia d'identificador el dia que arriba la llicència —al núvol en
+    quedaria una de duplicada, que és un problema que ja coneixem
+    (`_avisa_de_pedacos`). El que sí que es fa ara és DIR-HO: quantes partides i
+    de quants jugadors s'han quedat fora, a cada modalitat. I la partida no es
+    perd per al rival, que la té a la seva fitxa amb el nom del contrari.
+    """
     import re as _re
     import unicodedata as _ud
 
@@ -617,6 +653,10 @@ def publish_pending_games(
     )
 
     total = 0
+    #: Cada fila que no s'ha pogut penjar de ningú, per dir-ne el recompte: la
+    #: competició, la font, el nom del rival i la signatura. Qui no té fitxa no
+    #: té cap identificador, i és el rival qui identifica la partida.
+    sense_fitxa: set[tuple[str, str, str, str]] = set()
     for mod in modalitats:
         mrow = conn.execute("SELECT id FROM modalitats WHERE codi_fcb = ?", (mod,)).fetchone()
         if mrow is None:
@@ -633,11 +673,13 @@ def publish_pending_games(
             game_sigs.add(_sig(r["n1"], r["c1"], r["n2"], r["c2"], r["e"]))
 
         out: dict[tuple[str, str], dict] = {}
+        ja_sense_fitxa = len(sense_fitxa)
 
         def _add(pf, opp_nom, opp_fcb, car, car_opp, ent, serie, comp, font, sig, cap, data=None):
-            # Només jugadors amb fcb_id federatiu real; els placeholders ("name:…")
-            # no tenen fitxa ni surten al rànquing, així que no aporten res.
+            # Només jugadors amb fcb_id federatiu real. Vegeu «Qui no té fitxa no
+            # hi surt» a la capçalera: es compten, que és el que no es feia.
             if pf is None or str(pf).startswith("name:"):
+                sense_fitxa.add((comp, font, _nm(opp_nom), sig))
                 return
             out.setdefault(
                 (pf, sig),
@@ -717,68 +759,74 @@ def publish_pending_games(
                     None,
                 )
 
-            # --- OPENS 3B de la temporada en curs (torneig_partides) ---
-            # Partides reals d'opens scrapejades per ingest_open_games, encara NO al
-            # rànquing oficial (dedup per signatura contra `games`). Cobreix l'OPEN ja
-            # acabat però no absorbit pel rànquing mensual (cas Costa Daurada): mentre
-            # open_live només té els opens EN DIRECTE, aquesta font manté la pendència
-            # fins que la ingesta oficial els incorpora a `games`. La modalitat de l'open
-            # viu al NOM (torneigs_individuals.modalitat_id és NULL), per això filtrem
-            # per "TRES BANDES" i temporada en curs (temporada_id=1, no femení).
-            for r in conn.execute(
-                """SELECT ti.nom comp, tp.player1_nom n1, tp.caramboles1 c1, tp.serie1 s1,
-                          tp.player2_nom n2, tp.caramboles2 c2, tp.serie2 s2, tp.entrades e,
-                          tp.data
-                   FROM torneig_partides tp
-                   JOIN torneigs_individuals ti
-                     ON ti.torneig_id_extern = tp.torneig_id_extern
-                        AND ti.divisio_id_extern = tp.divisio_id_extern
-                   WHERE ti.temporada_id = ?
-                     AND ti.nom LIKE '%TRES BANDES%' AND ti.nom NOT LIKE '%FEMENI%'""",
-                (temporada_actual,),
-            ):
-                if not r["e"] or r["e"] <= 0:
-                    continue
-                sig = _sig(r["n1"], r["c1"], r["n2"], r["c2"], r["e"])
-                if sig in game_sigs:
-                    continue
-                comp = (
-                    _re.sub(r"^OPEN\s+TRES BANDES\s+", "", r["comp"] or "", flags=_re.I).strip()
-                    or "Open"
-                )
-                lf = nom2fcb.get(_nm(r["n1"]))
-                vf = nom2fcb.get(_nm(r["n2"]))
-                _add(
-                    lf,
-                    r["n2"],
-                    vf,
-                    r["c1"],
-                    r["c2"],
-                    r["e"],
-                    r["s1"],
-                    comp,
-                    "open",
-                    sig,
-                    None,
-                    r["data"],
-                )
-                _add(
-                    vf,
-                    r["n1"],
-                    lf,
-                    r["c2"],
-                    r["c1"],
-                    r["e"],
-                    r["s2"],
-                    comp,
-                    "open",
-                    sig,
-                    None,
-                    r["data"],
-                )
+        # --- TORNEIGS INDIVIDUALS de la temporada en curs (torneig_partides) ---
+        # Partides reals d'opens i campionats, encara NO al rànquing oficial (dedup
+        # per signatura contra `games`). Cobreix l'OPEN ja acabat però no absorbit
+        # pel rànquing mensual (cas Costa Daurada): mentre open_live només té els
+        # opens EN DIRECTE, aquesta font manté la pendència fins que la ingesta
+        # oficial els incorpora a `games`.
+        #
+        # La modalitat de cada torneig viu al NOM (`torneigs_individuals.
+        # modalitat_id` és NULL als de la 2026-27), i es llegeix amb la mateixa
+        # funció que etiqueta els opens al web: «OPEN LLIURE PUNT D'ATAC» és
+        # Lliure, «QUADRE 47/2 - HONOR» és Quadre 47/2. Un nom que no en digui cap
+        # (BIATHLO, 5 QUILLES) no és de cap modalitat amb rànquing i no entra
+        # enlloc. Els femenins tampoc, com fins ara.
+        modname = _MODNM.get(mod)
+        for r in conn.execute(
+            """SELECT ti.nom comp, tp.player1_nom n1, tp.caramboles1 c1, tp.serie1 s1,
+                      tp.player2_nom n2, tp.caramboles2 c2, tp.serie2 s2, tp.entrades e,
+                      tp.data
+               FROM torneig_partides tp
+               JOIN torneigs_individuals ti
+                 ON ti.torneig_id_extern = tp.torneig_id_extern
+                    AND ti.divisio_id_extern = tp.divisio_id_extern
+               WHERE ti.temporada_id = ? AND ti.nom NOT LIKE '%FEMENI%'""",
+            (temporada_actual,),
+        ):
+            if _open_modality(r["comp"] or "") != modname:
+                continue
+            if not r["e"] or r["e"] <= 0:
+                continue
+            sig = _sig(r["n1"], r["c1"], r["n2"], r["c2"], r["e"])
+            if sig in game_sigs:
+                continue
+            comp = (
+                _re.sub(r"^OPEN\s+TRES BANDES\s+", "", r["comp"] or "", flags=_re.I).strip()
+                or "Open"
+            )
+            lf = nom2fcb.get(_nm(r["n1"]))
+            vf = nom2fcb.get(_nm(r["n2"]))
+            _add(
+                lf,
+                r["n2"],
+                vf,
+                r["c1"],
+                r["c2"],
+                r["e"],
+                r["s1"],
+                comp,
+                "open",
+                sig,
+                None,
+                r["data"],
+            )
+            _add(
+                vf,
+                r["n1"],
+                lf,
+                r["c2"],
+                r["c1"],
+                r["e"],
+                r["s2"],
+                comp,
+                "open",
+                sig,
+                None,
+                r["data"],
+            )
 
         # --- OPENS EN CURS (open_live) ---
-        modname = _MODNM.get(mod)
         for ol in live_rows:
             if (ol.get("modality") or "") != modname:
                 continue
@@ -866,9 +914,17 @@ def publish_pending_games(
             sb.table("pending_games").insert(chunk).execute()
         total += len(rows)
         prog("ok", f"pending_games[{mod}]: {len(rows)} files")
+        fora = len(sense_fitxa) - ja_sense_fitxa
+        if fora:
+            prog(
+                "warn",
+                f"pending_games[{mod}]: {fora} partides d'algú sense fitxa (acabat de "
+                f"federar o amb fitxa de pedaç) no tenen on penjar-se; el rival sí que "
+                f"la té a la seva.",
+            )
 
     conn.close()
-    return {"pending_games": total}
+    return {"pending_games": total, "pending_sense_fitxa": len(sense_fitxa)}
 
 
 def publish_games(
