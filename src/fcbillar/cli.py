@@ -1506,6 +1506,88 @@ def publish_cloud_cmd() -> None:
         raise typer.Exit(1)
 
 
+@app.command("comprova-frescor")
+def comprova_frescor_cmd(
+    passos: str = typer.Option(
+        None,
+        "--passos",
+        help="Fitxer amb el codi de sortida de cada pas de la reingesta (nom<TAB>codi). "
+        "L'escriu el workflow; sense ell només es miren les dades.",
+    ),
+    resum: str = typer.Option(
+        None,
+        "--resum",
+        help="On afegir l'informe en Markdown. Per defecte, $GITHUB_STEP_SUMMARY si existeix.",
+    ),
+) -> None:
+    """Diu, per a cada família de dades, si el que tenim és al dia.
+
+    Compara el més nou que hi ha a la base de dades amb el que publica la
+    federació —l'índex de rànquings, els llistats de lligues, d'individuals i de
+    copes, i el sitemap de documents: cinc peticions— i amb el calendari de cada
+    competició. En surt una taula, i la llista dels documents de la federació
+    que cap pas d'ingesta no reconeix.
+
+    Surt amb 1 si alguna comprovació falla. És el que fa que la reingesta
+    nocturna acabi en vermell quan s'ha perdut alguna cosa, en comptes de sortir
+    verda passi el que passi. Vegeu `fcbillar.frescor`.
+    """
+    import os
+
+    from fcbillar import frescor
+
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    linies = None
+    if passos is not None:
+        # Un fitxer que no hi és vol dir que la reingesta no ha arribat a
+        # escriure'l: és una llista buida, que l'informe compta com a fallada.
+        fitxer_passos = Path(passos)
+        linies = (
+            fitxer_passos.read_text(encoding="utf-8").splitlines() if fitxer_passos.exists() else []
+        )
+    # El que ha deixat l'última publicació, si és d'aquesta passada. Una de fa
+    # dies no diu res d'avui.
+    import json
+    import time
+
+    publicacio = None
+    fitxer = _fitxer_de_publicacio()
+    if fitxer.exists() and time.time() - fitxer.stat().st_mtime < 36 * 3600:
+        publicacio = json.loads(fitxer.read_text(encoding="utf-8")).get("counts")
+    with ScraperClient(settings) as client:
+        informe = frescor.comprova(
+            conn, frescor.llegeix_fonts(client), linies_passos=linies, publicacio=publicacio
+        )
+    conn.close()
+
+    colors = {frescor.OK: "green", frescor.AVIS: "yellow", frescor.FALLA: "red", frescor.NA: "dim"}
+    taula = Table(title="Frescor de les dades")
+    for columna in ("", "Família", "Tenim", "Hi hauria d'haver", "Detall"):
+        taula.add_column(columna, overflow="fold")
+    for f in informe.files:
+        taula.add_row(f"[{colors[f.estat]}]{f.estat}[/]", f.familia, f.nostre, f.esperat, f.detall)
+    console.print(taula)
+    nous = informe.nous()
+    console.print(
+        f"\n[bold]{len(nous)} de {len(informe.documents)} documents de la federació no els "
+        "llegeix cap pas[/] (informatiu):"
+    )
+    for d in nous:
+        console.print(f"  {d.modificat or '          '}  {d.slug}")
+
+    desti = resum or os.environ.get("GITHUB_STEP_SUMMARY")
+    if desti:
+        with Path(desti).open("a", encoding="utf-8") as f:
+            f.write(frescor.markdown(informe) + "\n")
+
+    if informe.falla:
+        fallen = [f.familia for f in informe.files if f.estat == frescor.FALLA]
+        console.print(f"\n[red]{len(fallen)} comprovacions fallen: {', '.join(fallen)}[/]")
+        raise typer.Exit(1)
+    console.print("\n[green]Tot al dia.[/]")
+
+
 @app.command("publish-estadistiques-computa")
 def publish_estadistiques_computa_cmd(
     dry_run: bool = typer.Option(False, "--dry-run", help="Només informa, no escriu."),
