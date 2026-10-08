@@ -857,6 +857,9 @@ class IndividualFaseLink:
     nom: str  # "PRÈVIA", "QUARTS", "FINAL", etc.
     tipus: str  # "grups" o "ko"
     href: str  # URL per descarregar les partides d'aquesta fase
+    #: El dia de la fase, de la columna «Data». Per a una eliminatòria és
+    #: l'única data que dona el portal: les seves partides no en porten cap.
+    data: date | None = None
 
 
 @dataclass(frozen=True)
@@ -946,6 +949,7 @@ def parse_individuals_fases(html: str) -> list[IndividualFaseLink]:
                     nom=fila[columna].upper(),
                     tipus=tipus,
                     href=href,
+                    data=fila.data("Data") if fila.te("Data") else None,
                 )
             )
     return out

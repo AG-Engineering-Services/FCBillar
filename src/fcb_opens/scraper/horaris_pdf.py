@@ -13,7 +13,8 @@ This lets us pin a real calendar slot (and, via the billar, the club's YouTube
 table channel) to each projected group — see ``projection_to_live_payload``.
 
 Layout — several stacked phase blocks per page. Each block has a date cell
-(``DD-MM-YY``), a HORA column and four BILLAR columns; each grid cell reads
+(``DD-MM-YY``, o des de la 2026-27 un tram de dies ``DD-DD/MM/YYYY`` quan el
+bloc s'allarga més d'un dia), a HORA column and four BILLAR columns; each grid cell reads
 ``"<GROUP> (<type>)"`` e.g. ``"AG (2-3)"``. The Fase Final blocks use numeric
 re-seed pairings (``"13 - 20"``) instead, so they never match the group-cell
 pattern and are skipped naturally.
@@ -36,7 +37,9 @@ from ..generator import _P_LABELS, _PP_LABELS, _PPP_LABELS
 # Every valid previa group label (PPP + PP + P). KO cells ("13 - 20") aren't here.
 _GROUP_LABELS = frozenset(_P_LABELS) | frozenset(_PP_LABELS) | frozenset(_PPP_LABELS)
 
-_DATE_RE = re.compile(r"^(\d{2})-(\d{2})-(\d{2})$")
+_DATE_RE = re.compile(r"^(\d{2})[-/](\d{2})[-/](\d{2}|\d{4})$")
+# Un bloc de més d'un dia: «04-05/09/2026» (divendres i dissabte).
+_DATE_RANGE_RE = re.compile(r"^(\d{2})-(\d{2})/(\d{2})/(\d{2}|\d{4})$")
 _TIME_RE = re.compile(r"^(\d{1,2}):(\d{2})$")
 _MATCH_RE = re.compile(r"^\((2-3|1-P|1-G)\)$")
 
@@ -68,7 +71,19 @@ def _iso_date(text: str) -> str | None:
     if not m:
         return None
     dd, mm, yy = m.groups()
-    return f"20{yy}-{mm}-{dd}"
+    return f"20{yy[-2:]}-{mm}-{dd}"
+
+
+def _date_range(text: str) -> tuple[str, int] | None:
+    """«04-05/09/2026» → («2026-09-04», 2): el primer dia i quants en dura el bloc."""
+    m = _DATE_RANGE_RE.match(text)
+    if not m:
+        return None
+    d1, d2, mm, yy = m.groups()
+    dies = int(d2) - int(d1) + 1
+    if dies < 1:
+        return None
+    return f"20{yy[-2:]}-{mm}-{d1}", dies
 
 
 def _cluster_columns(xs: list[float], *, gap: float = 30.0) -> list[float]:
@@ -117,8 +132,9 @@ def parse_horaris_pdf(path: str | Path) -> dict[str, dict]:
         mtype: str
 
     cells: list[_Cell] = []
-    # Per page: sorted (top, iso_date) date anchors and (top, x0, "HH:MM") times.
-    dates_by_page: dict[int, list[tuple[float, str]]] = defaultdict(list)
+    # Per page: sorted (top, iso_date, dies) date anchors and (top, x0, "HH:MM")
+    # times. `dies` és 1 tret dels blocs que porten un tram de dies.
+    dates_by_page: dict[int, list[tuple[float, str, int]]] = defaultdict(list)
     times_by_page: dict[int, list[tuple[float, float, str]]] = defaultdict(list)
 
     with pdfplumber.open(str(path)) as pdf:
@@ -128,7 +144,10 @@ def parse_horaris_pdf(path: str | Path) -> dict[str, dict]:
                 for w in row:
                     iso = _iso_date(w["text"])
                     if iso:
-                        dates_by_page[pi].append((w["top"], iso))
+                        dates_by_page[pi].append((w["top"], iso, 1))
+                    tram = _date_range(w["text"])
+                    if tram:
+                        dates_by_page[pi].append((w["top"], tram[0], tram[1]))
                     tm = _TIME_RE.match(w["text"])
                     if tm:
                         hhmm = f"{int(tm.group(1)):02d}:{tm.group(2)}"
@@ -154,8 +173,29 @@ def parse_horaris_pdf(path: str | Path) -> dict[str, dict]:
 
     def _date_for(page: int, top: float) -> str | None:
         # Nearest date anchor above this row on the same page.
-        anchors = [(t, d) for (t, d) in dates_by_page[page] if t <= top + _Y_TOL]
-        return max(anchors, key=lambda td: td[0])[1] if anchors else None
+        anchors = [a for a in dates_by_page[page] if a[0] <= top + _Y_TOL]
+        if not anchors:
+            return None
+        a_top, iso, dies = max(anchors, key=lambda a: a[0])
+        if dies <= 1:
+            return iso
+        # Bloc de més d'un dia. El PDF no escriu quin dia és cada fila, però les
+        # files van en ordre: quan l'hora de la columna HORA torna enrere
+        # (19:30 i a sota 9:30) ha començat el dia següent. Es compten les
+        # tornades enrere entre la data i aquesta fila.
+        from datetime import date, timedelta
+        from itertools import pairwise
+
+        hores: dict[int, tuple[float, str]] = {}
+        for t, x0, hhmm in times_by_page[page]:
+            if a_top - _Y_TOL <= t <= top + _Y_TOL:
+                fila = round(t / _Y_TOL)
+                if fila not in hores or x0 < hores[fila][0]:
+                    hores[fila] = (x0, hhmm)
+        seq = [hores[f][1] for f in sorted(hores)]
+        salts = sum(1 for a, b in pairwise(seq) if b < a)
+        dia = date.fromisoformat(iso) + timedelta(days=min(salts, dies - 1))
+        return dia.isoformat()
 
     def _time_for(page: int, top: float) -> str | None:
         # The HORA-column time on this row (leftmost time within y-tolerance).

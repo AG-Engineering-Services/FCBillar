@@ -3,25 +3,41 @@
 Unlike `classificacio.py` which scrapes the final classification once the
 Open is closed, this module walks the in-progress structure:
 
-    divisions/{div}                  → top-level Open page
-    fases/{div}/{phase}              → list of group-phases + KO rounds
-    grups/{div}/{phase}/{subphase}   → list of groups in a phase
-    partidesgrups/{div}/{phase}/{subphase}/{group_id}  → one group's standings + matches
-    partideseliminatoria/{div}/{phase}/{elim_id}       → one KO round's matches
+    divisions/{t}                          → top-level Open page
+    fases/{t}/{div}                        → list of group-phases + KO rounds
+    grups/{t}/{div}/{fase}                 → list of groups in a phase
+    partides-grup/{t}/{div}/{fase}/{grup}  → one group's standings + matches
+    partides-eliminatories/{t}/{div}/{ko}  → one KO round's matches
 
-The page markup is consistent across Opens. We reuse the shared HTTP cache
-from `scraper/http.py`, which means a full refresh is one HTTP round-trip
-per unique page (no re-parsing after the first scrape within the 1h TTL).
+Des de l'agost de 2026 la federació serveix tot això amb taules Bootstrap, i
+qui les llegeix és `fcbillar.scraper.parsers`, el mateix lector que fa servir
+la ingesta nocturna (`ingest-individuals`). Aquí només es tradueix el que en
+surt a les dataclasses d'aquest mòdul, que són les que entén tota la resta
+(classificats provisionals, quadre calculat, classificació de l'open).
+
+Fins a l'octubre de 2026 aquest mòdul encara buscava el marcatge antic
+(`a.button`, `div.row.padded`) i les rutes velles (`partidesgrups`,
+`partideseliminatoria`): no en treia ni el nom ni cap fase, i com que un open
+sense fases se saltava sense dir res, `publish-live-opens` va estar setmanes
+dient «live_opens=0, errors=0» amb el job en verd. Per això ara una pàgina que
+no té la forma esperada fa saltar `EstructuraInesperada` en comptes de tornar
+buit: «no hi ha res» i «no ho sé llegir» han deixat de ser el mateix.
+
+We reuse the shared HTTP cache from `scraper/http.py`.
 """
 
 from __future__ import annotations
 
 import re
 import unicodedata
+import zlib
 from collections.abc import Iterable
 from dataclasses import dataclass, field, replace
 
 from bs4 import BeautifulSoup
+
+from fcbillar.scraper import parsers as _portal
+from fcbillar.scraper.taules import Taula, normalitza, taula_amb, taules, taules_amb
 
 from .http import fetch, fetch_binary
 
@@ -33,14 +49,28 @@ from .http import fetch, fetch_binary
 # mesos sortint com a «en directe» a /opens, tapant el ranquing oficial.
 BASE = "https://intranet.fcbillar.cat/frontend"
 LLISTAT_URL = f"{BASE}/individuals/llistat"
-# Docs listing for the "Opens" subcategory of Carambola. The trailing segment
-# is the zero-based offset (20 per page). Season id 15 = 2025-26.
-DOCS_OPENS_BASE = f"{BASE}/docs/s/1/Carambola/c/68/15"
+# Els documents d'un open (rànquing inicial, horaris, grups de cada fase) ja no
+# pengen de cap llistat navegable: són al gestor de fitxers del WordPress i
+# l'únic índex que en queda és el sitemap. El llistat antic
+# (`…/docs/s/1/Carambola/c/68/15`) va morir amb el web vell.
+SITEMAP_DOCS = "https://fcbillar.cat/wpfd_file-sitemap.xml"
 
 # Live tournament data changes as matches are played. 60 s is a good trade-off
 # between "fresh" and "not hammering the FCB on every client poll". Static
 # metadata (division/fases layout, docs listings) keeps the default 1 h TTL.
 LIVE_TTL_S = 60
+
+
+class EstructuraInesperada(RuntimeError):
+    """Una pàgina de la federació no té la forma que aquest mòdul sap llegir.
+
+    No és «no hi ha dades»: una fase sense grups o un open sense sorteig tornen
+    buit i prou. Això salta quan falta la taula que hi hauria d'haver, o quan
+    una fila porta un enllaç que no es reconeix — que és el que passa el dia
+    que la federació torna a canviar el web. Qui publica ho ha de comptar com a
+    error i fer-ho visible; empassar-s'ho és el que va deixar el seguiment en
+    directe mort i en verd de l'agost a l'octubre de 2026.
+    """
 
 
 # --------------------------------------------------------------------------- #
@@ -50,144 +80,138 @@ LIVE_TTL_S = 60
 
 @dataclass(frozen=True)
 class PhaseRef:
-    """Reference to a group-phase (grups) or a KO round (partideseliminatoria)."""
+    """Reference to a group-phase (grups) or a KO round (partides-eliminatories)."""
 
     label: str                       # e.g. "PRÈVIA", "SETZENS"
     kind: str                        # "group" | "ko"
-    url: str                         # path after BASE, e.g. "/individuals/grups/206/443/785"
+    url: str                         # absolute URL of the phase page
     group_ids: tuple[int, ...] = ()  # populated for kind="group" after fetch_phase_detail
+    # Dia de la fase (ISO), de la columna «Data» de la pàgina de fases. Per a
+    # una eliminatòria és l'única data que publica el portal.
+    date: str | None = None
 
 
 @dataclass(frozen=True)
 class DocEntry:
-    """One document from the FCB 'Competició Opens' documents section.
+    """Un document de la categoria d'opens del gestor de fitxers de la federació.
 
-    Each entry has a title, publication date and a VIEW url (HTML page that
-    links to the actual PDF). We don't follow through to the PDF by default —
-    that's up to the frontend or a second-pass enrichment.
+    Abans sortien d'un llistat amb títol i data; ara només hi ha el sitemap, que
+    en dona l'adreça i la data de modificació. El «títol» és el nom de la pàgina
+    (el *slug*) amb espais: «HORARIS OPEN BANDA B C GRANOLLERS». La federació
+    no els posa nom de manera uniforme («2627-openlliurepuntatac-horaris»), i
+    per això casar un document amb un open es fa amb `filter_docs_for_division`
+    i no comparant títols a mà.
     """
 
-    doc_id: int
-    title: str
-    date: str       # "DD/MM/YYYY" as printed by FCB
-    view_url: str   # absolute URL of the view page
+    doc_id: int     # estable per a un mateix slug (crc32); el web nou no en dona cap
+    title: str      # slug amb espais i en majúscules
+    date: str       # "DD/MM/YYYY" (darrera modificació segons el sitemap)
+    view_url: str   # pàgina del document; a dins hi ha l'enllaç al PDF
+    slug: str = ""
 
 
-_DOC_VIEW_RE = re.compile(
-    r"/docs/view/s/1/Carambola/d/(\d+)/([^/]+)/c/\d+/\d+/\d+"
+_RE_SITEMAP_URL = re.compile(
+    r"<url>\s*<loc>\s*(https?://[^<\s]*/wpfd_file/([^/<\s]+)/?)\s*</loc>"
+    r"(?:\s*<lastmod>\s*(\d{4})-(\d{2})-(\d{2})[^<]*</lastmod>)?",
+    re.IGNORECASE,
 )
-_DOC_DATE_RE = re.compile(r"Data:\s*(\d{2}/\d{2}/\d{4})")
+# Documents que parlen d'opens en general i no d'UN open: els rànquings del
+# circuit i el reglament. Porten «open» al nom i no han d'entrar.
+_RE_DOC_GENERIC = re.compile(r"^(?:ranquing|ranking)-(?:catala|opens)|^reglament", re.IGNORECASE)
 
 
-def parse_opens_docs(html: str) -> tuple[DocEntry, ...]:
-    """Parse one page of the Opens documents listing."""
-    soup = BeautifulSoup(html, "lxml")
+def _aixafa(text: str) -> str:
+    """Sense accents, en majúscules i només lletres i xifres, tot enganxat.
+
+    «PUNT D'ATAC», «punt-datac» i «PuntAtac» no s'assemblen fins que se'ls
+    treu tot el que no és lletra; i ni així del tot, que és per això que els
+    documents es casen per paraules i no pel nom sencer.
+    """
+    s = unicodedata.normalize("NFD", text or "")
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return re.sub(r"[^A-Z0-9]", "", s.upper())
+
+
+def parse_opens_docs(xml: str) -> tuple[DocEntry, ...]:
+    """Els documents d'opens que llista el sitemap del gestor de fitxers."""
     out: list[DocEntry] = []
-    for block in soup.find_all("div", class_="row noticies"):
-        link = block.find("a")
-        if link is None:
+    vistos: set[str] = set()
+    for m in _RE_SITEMAP_URL.finditer(xml):
+        url, slug = m.group(1), m.group(2).lower()
+        if slug in vistos or "open" not in slug or _RE_DOC_GENERIC.search(slug):
             continue
-        href = link.get("href") or ""
-        m = _DOC_VIEW_RE.search(href)
-        if not m:
-            continue
-        doc_id = int(m.group(1))
-        title = link.get_text(strip=True)
-        # Date is in a sibling <p><span class='meta'>Data: DD/MM/YYYY</span>...
-        date_match = _DOC_DATE_RE.search(block.get_text())
-        date = date_match.group(1) if date_match else ""
+        vistos.add(slug)
+        data = f"{m.group(5)}/{m.group(4)}/{m.group(3)}" if m.group(3) else ""
         out.append(DocEntry(
-            doc_id=doc_id,
-            title=title,
-            date=date,
-            view_url=_abs(href),
+            doc_id=zlib.crc32(slug.encode("utf-8")),
+            title=slug.replace("-", " ").upper(),
+            date=data,
+            view_url=url,
+            slug=slug,
         ))
     return tuple(out)
 
 
 _DOC_PDF_RE = re.compile(
-    r"""href=['"]([^'"]*\.pdf)['"]""",
+    r"""https?://[^"'\s<>]*/download/\d+/([^/"'\s<>]*)/\d+/([^"'\s<>/]*\.pdf)""",
     re.IGNORECASE,
 )
 
 
-def doc_view_url(doc_id: int, slug: str = "x") -> str:
-    """Build the canonical view URL for a document id. The slug in the URL
-    is decorative — FCB ignores it as long as the doc id is correct."""
-    return f"{BASE}/docs/view/s/1/Carambola/d/{doc_id}/{slug}/c/68/15/0"
+def parse_doc_pdf_url(html: str, slug: str | None = None) -> str | None:
+    """L'adreça del PDF dins de la pàgina d'un document.
 
-
-def parse_doc_pdf_url(html: str) -> str | None:
-    """Extract the underlying PDF URL from a document's view page.
-
-    The view page has a link to `/media/.../<filename>.pdf`. There are many
-    other PDF links on the layout (calendar banner, etc.) so we take the
-    LAST one inside the main content area: the main PDF is rendered after
-    the page title, and the header/footer links appear before it.
+    La pàgina n'enllaça més d'un: el del document i el calendari de la
+    capçalera, que hi és a totes. El bo es diu com la pàgina (`{slug}.pdf`); si
+    cap no s'hi diu, el primer que no sigui de la categoria `calendari`.
     """
-    soup = BeautifulSoup(html, "lxml")
-    # Search the main section; fall back to whole document if not found.
-    section = soup.find("section", class_="three fourths padded") or soup
-    candidates: list[str] = []
-    for link in section.find_all("a"):
-        href = link.get("href") or ""
-        if href.lower().endswith(".pdf"):
-            candidates.append(href)
-    if not candidates:
+    candidats = [(m.group(0), m.group(1).lower(), m.group(2).lower()) for m in
+                 _DOC_PDF_RE.finditer(html)]
+    if not candidats:
         return None
-    # FCB stores doc PDFs under /media/{season}/COMPETICIO/OPENS/...
-    # Prefer any PDF under /COMPETICIO/OPENS/; otherwise take the last link
-    # (main content PDF, not header banners).
-    for url in candidates:
-        if "/COMPETICIO/OPENS/" in url.upper():
+    if slug:
+        for url, _categoria, fitxer in candidats:
+            if fitxer == f"{slug.lower()}.pdf":
+                return url
+    for url, categoria, _fitxer in candidats:
+        if categoria != "calendari":
             return url
-    return candidates[-1]
+    return None
 
 
-def fetch_doc_pdf(doc_id: int, *, force: bool = False) -> tuple[bytes, str]:
+def fetch_doc_pdf(doc: DocEntry | int, *, force: bool = False) -> tuple[bytes, str]:
     """Fetch a document's PDF as bytes + filename.
 
-    Two-step fetch: first the view page (cached), then the PDF itself
-    (cached separately as a .pdf file).
+    Two-step fetch: first the document page (cached), then the PDF itself
+    (cached separately as a .pdf file). `doc` pot ser l'entrada o el seu
+    `doc_id`, que es resol contra el sitemap.
     """
     from urllib.parse import unquote
 
-    html = fetch(doc_view_url(doc_id), force=force)
-    pdf_url = parse_doc_pdf_url(html)
+    if isinstance(doc, int):
+        trobat = next((d for d in fetch_opens_docs() if d.doc_id == doc), None)
+        if trobat is None:
+            raise ValueError(f"No hi ha cap document d'opens amb id {doc}")
+        doc = trobat
+    html = fetch(doc.view_url, force=force)
+    pdf_url = parse_doc_pdf_url(html, doc.slug)
     if pdf_url is None:
-        raise ValueError(f"No PDF link found in view page for doc {doc_id}")
-    # Derive a clean filename from the URL
+        raise ValueError(f"No PDF link found in view page for doc {doc.slug}")
     filename = unquote(pdf_url.rsplit("/", 1)[-1])
     pdf_bytes = fetch_binary(pdf_url, force=force, suffix=".pdf")
     return pdf_bytes, filename
 
 
 def fetch_opens_docs(*, pages: int = 3, force: bool = False) -> tuple[DocEntry, ...]:
-    """Fetch all pages of the Opens docs listing. `pages=3` covers up to 60
-    docs (current season tops at ~35). Each page is cached individually."""
-    collected: list[DocEntry] = []
-    seen_ids: set[int] = set()
-    for page in range(pages):
-        offset = page * 20
-        url = f"{DOCS_OPENS_BASE}/{offset}"
-        try:
-            html = fetch(url, force=force)
-        except Exception:  # noqa: BLE001
-            break
-        batch = parse_opens_docs(html)
-        if not batch:
-            break
-        new_this_page = 0
-        for doc in batch:
-            if doc.doc_id in seen_ids:
-                continue
-            seen_ids.add(doc.doc_id)
-            collected.append(doc)
-            new_this_page += 1
-        # If this page returned zero new entries, we've reached the end.
-        if new_this_page == 0:
-            break
-    return tuple(collected)
+    """Els documents d'opens publicats, pel sitemap del WordPress.
+
+    `pages` ja no vol dir res (el sitemap és una sola pàgina) i es manté perquè
+    qui el cridava no hagi de canviar. `force` tampoc no s'aplica: el seguiment
+    en directe el demana cada dos minuts, i un document de la federació no
+    canvia a aquell ritme. Es fia de la memòria cau d'una hora.
+    """
+    del pages, force
+    return parse_opens_docs(fetch(SITEMAP_DOCS))
 
 
 # --------------------------------------------------------------------------- #
@@ -207,35 +231,70 @@ OPEN_TITLE_ALIASES: dict[int, tuple[str, ...]] = {
     186: ("COSTA DAURADA",),
 }
 
+# Paraules del nom d'un open que no diuen QUIN open és.
+_PARAULES_GENERIQUES = frozenset({
+    "OPEN", "TRES", "BANDES", "BANDA", "LLIURE", "QUADRE", "FEMENI", "MEMORIAL",
+    "CLUB", "BILLAR", "TROFEU",
+})
+
+
+def _modalitat_del_text(aixafat: str) -> str:
+    """Modalitat que anomena un text ja passat per `_aixafa`, o "" si cap."""
+    if "3BANDES" in aixafat or "TRESBANDES" in aixafat:
+        return "3B"
+    if "QUADRE" in aixafat:
+        return "Q"
+    if "BANDA" in aixafat:
+        return "B"
+    if "LLIURE" in aixafat:
+        return "L"
+    return ""
+
+
+def _paraules_de_l_open(nom: str) -> list[str]:
+    """Les paraules que identifiquen un open: «OPEN LLIURE PUNT D'ATAC» → PUNT, ATAC."""
+    s = unicodedata.normalize("NFD", nom or "")
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn").upper()
+    return [
+        p for p in re.split(r"[^A-Z0-9]+", s)
+        if len(p) >= 4 and p not in _PARAULES_GENERIQUES
+    ]
+
+
+def doc_parla_de(doc: DocEntry, *paraules: str) -> bool:
+    """Si el nom d'un document porta alguna d'aquestes paraules.
+
+    Es compara tot aixafat perquè la federació tant escriu «ranking-inicial-…»
+    com «…-ranquinginicial».
+    """
+    nom = _aixafa(doc.slug or doc.title)
+    return any(_aixafa(p) in nom for p in paraules)
+
 
 def filter_docs_for_division(
     docs: Iterable[DocEntry],
     division_id: int,
     division_name: str,
 ) -> tuple[DocEntry, ...]:
-    """Return the subset of docs whose title matches the given Open.
+    """Return the subset of docs that belong to the given Open.
 
-    Matching is a case-insensitive substring check against either an entry in
-    OPEN_TITLE_ALIASES[division_id] or a key token of the division's name
-    (stripped of generic prefixes like 'OPEN TRES BANDES').
+    Un document és d'un open si el seu nom porta TOTES les paraules que
+    identifiquen l'open (o un dels àlies d'`OPEN_TITLE_ALIASES`) i no anomena
+    una altra modalitat. Totes i no alguna: «SANT ADRIA» i «SANTS» comparteixen
+    quatre lletres, i un club pot organitzar un open de banda i un de tres
+    bandes la mateixa temporada.
     """
-    aliases = set(OPEN_TITLE_ALIASES.get(division_id, ()))
-    # Derive a fallback alias from the division name.
-    cleaned = (
-        division_name.upper()
-        .replace("OPEN", "")
-        .replace("TRES BANDES", "")
-        .replace("FEMENI", "")
-        .strip()
-    )
-    if cleaned:
-        aliases.add(cleaned)
-
-    upper_aliases = {a.upper() for a in aliases if a}
+    paraules = _paraules_de_l_open(division_name)
+    alies = [_aixafa(a) for a in OPEN_TITLE_ALIASES.get(division_id, ()) if a]
+    modalitat = _modalitat_del_text(_aixafa(division_name))
     matched: list[DocEntry] = []
     for d in docs:
-        title_upper = d.title.upper()
-        if any(alias in title_upper for alias in upper_aliases):
+        nom = _aixafa(d.slug or d.title)
+        modalitat_doc = _modalitat_del_text(nom)
+        if modalitat and modalitat_doc and modalitat != modalitat_doc:
+            continue
+        casa = bool(paraules) and all(p in nom for p in paraules)
+        if casa or any(a in nom for a in alies):
             matched.append(d)
     return tuple(matched)
 
@@ -252,6 +311,8 @@ class CompetitionIndexEntry:
     division_id: int
     name: str
     index: int  # position in the list, 0 = most recent
+    # Columna «Estat» del llistat: «Inscripció» o «Activa». Buit si no hi és.
+    estat: str = ""
 
 
 _DIVISION_LINK_RE = re.compile(r"/individuals/divisions/(\d+)")
@@ -262,6 +323,16 @@ def parse_individuals_llistat(html: str) -> tuple[CompetitionIndexEntry, ...]:
     soup = BeautifulSoup(html, "lxml")
     out: list[CompetitionIndexEntry] = []
     seen: set[int] = set()
+
+    # L'estat de cada torneig, de la taula del web nou. Les pàgines velles no
+    # en tenen i es queden amb l'estat buit.
+    estats: dict[int, str] = {}
+    taula = taula_amb(html, "Torneig", "Estat")
+    for fila in taula or ():
+        for h in fila.enllacos():
+            m = _DIVISION_LINK_RE.search(h)
+            if m:
+                estats[int(m.group(1))] = fila["Estat"]
 
     # Qualsevol enllaç cap a una divisio, no nomes els que porten
     # class="button": al web nou el nom del torneig es un enllaç dins de la
@@ -280,13 +351,20 @@ def parse_individuals_llistat(html: str) -> tuple[CompetitionIndexEntry, ...]:
             division_id=div_id,
             name=name,
             index=len(out),
+            estat=estats.get(div_id, ""),
         ))
     return tuple(out)
 
 
 def fetch_individuals_llistat(*, force: bool = False) -> tuple[CompetitionIndexEntry, ...]:
     html = fetch(LLISTAT_URL, force=force)
-    return parse_individuals_llistat(html)
+    entries = parse_individuals_llistat(html)
+    # Un llistat buit pot ser veritat (l'agost, entre temporades) i llavors la
+    # taula hi és, sense files. Sense taula i sense cap torneig, el que ha
+    # canviat és la pàgina.
+    if not entries and taula_amb(html, "Torneig") is None:
+        raise EstructuraInesperada("llistat d'individuals: no hi ha la taula de torneigs")
+    return entries
 
 
 @dataclass(frozen=True)
@@ -340,11 +418,24 @@ class MatchResult:
     entrades: int | None
     arbitre: str | None
     # Free-text "Observacions" cell — typically used by FCB to record
-    # tie-break results in KO matches when the scoreboard ends 1-1.
+    # tie-break results in KO matches when the scoreboard ends 1-1. El web nou
+    # (agost de 2026) ja no la publica: sempre és None.
     observations: str | None = None
+    # Columna «Estat» del web nou: «Pendent» o «Finalitzada». None quan la
+    # partida no ve del portal (un quadre llegit d'un PDF, una de calculada).
+    estat: str | None = None
+
+    @property
+    def tancada(self) -> bool:
+        """El portal la dona per acabada, s'hagi jugat o no."""
+        return self.estat is not None and self.estat.strip().upper() == "FINALITZADA"
 
     @property
     def is_played(self) -> bool:
+        # Amb «Estat», una partida amb entrades que encara no és «Finalitzada»
+        # és un marcador a mitges i no un resultat.
+        if self.estat is not None and not self.tancada:
+            return False
         return self.entrades is not None and self.entrades > 0
 
 
@@ -357,6 +448,10 @@ class Group:
     venue: str | None = None
     standings: tuple[GroupStanding, ...] = ()
     matches: tuple[MatchResult, ...] = ()
+    # Dia del grup (ISO) segons la columna «Data partits» del portal. Compte: hi
+    # posa el dia que comença la FASE, i un grup de diumenge hi surt amb la data
+    # de dissabte. Ni hora ni billar: tot això només surt al PDF d'horaris.
+    date: str | None = None
 
 
 @dataclass(frozen=True)
@@ -395,6 +490,11 @@ class OpenLiveState:
     # mateix seeding que ordena els grups no jugats. L'usa la classificació per
     # ordenar el bloc de jugadors encara vius (els 16 primers llocs del quadre).
     seeding: dict[str, int] = field(default_factory=dict)
+    # Dia de l'última fase que té data (ISO). Serveix per deixar de donar per
+    # «en directe» un open que la federació no tanca mai: al web nou l'open
+    # s'acaba quan ella crea la classificació final, i la de Mataró del juliol
+    # de 2026 no la va crear.
+    last_date: str | None = None
     # Caps de sèrie (grup "JUGADORS RESERVATS"): entren directament al primer KO
     # sense jugar la prèvia. Es guarden a part dels grups regulars perquè no
     # comptin com a jugadors de la prèvia; ocupen els llocs 1..N de dalt del
@@ -418,42 +518,71 @@ def _abs(path: str) -> str:
         return path
     if path.startswith("ca/"):
         return f"https://www.fcbillar.cat/{path}"
+    if path.startswith("frontend/"):
+        return f"{BASE}/{path[len('frontend/'):]}"
     return f"{BASE}/{path}"
 
 
 # --------------------------------------------------------------------------- #
 # Parsers
 # --------------------------------------------------------------------------- #
+#
+# Les pàgines les llegeix `fcbillar.scraper.parsers`; aquí es tradueixen a les
+# dataclasses d'aquest mòdul i es comprova que la pàgina té la forma esperada.
 
 
-_PHASE_ID_RE = re.compile(r"/individuals/fases/\d+/(\d+)")
 _KO_LABELS = {
     "SETZENS", "VUITENS", "QUARTS", "SEMIFINALS", "FINAL",
     "32ENS", "16ENS",
 }
 
 
+def _enllacos_desconeguts(taula: Taula, regex: re.Pattern[str]) -> list[str]:
+    """Enllaços d'una taula que haurien de menar a algun lloc conegut i no ho fan.
+
+    Una fila sense enllaç no és cap problema (encara no hi ha res a ensenyar).
+    Una fila amb un enllaç que no es reconeix sí: és la federació canviant el
+    nom d'una ruta, que és exactament el que va trencar aquest mòdul.
+    """
+    return [
+        h for fila in taula for h in fila.enllacos()
+        if "/individuals/" in h and not regex.search(h)
+    ]
+
+
+_FINAL_CLF_RE = re.compile(r"individuals/divisio-classificacio-final/(\d+)/(\d+)")
+_DIVISIO_LINK_OK_RE = re.compile(
+    r"individuals/(?:fases|divisio-classificacio-final)/\d+/\d+"
+)
+
+
 def parse_division_page(html: str, division_id: int) -> OpenStructure:
-    """Parse the Open's landing page to extract name and the `fases` phase id."""
-    soup = BeautifulSoup(html, "lxml")
+    """Parse the Open's landing page to extract name and the `fases` phase id.
 
-    # The first h2 is the submenu label ("Competicions"). The real Open name
-    # is the first h2 WITHOUT class attributes, inside the main content section.
-    name = "UNKNOWN"
-    for h2 in soup.find_all("h2"):
-        if not h2.get("class"):
-            text = h2.get_text(strip=True)
-            if text:
-                name = text
-                break
+    El nom és el títol de la targeta que porta la taula de divisions. Un open té
+    una sola divisió («ÚNICA»), i el seu id és el que aquí es diu `phase_id`.
+    Sense la taula de divisions, o amb files que porten enllaços que no es
+    reconeixen, salta `EstructuraInesperada`: abans tornava «UNKNOWN» i cap
+    fase, i ningú no se n'assabentava.
+    """
+    taula = taula_amb(html, "Divisió")
+    if taula is None:
+        raise EstructuraInesperada(
+            f"divisions/{division_id}: no hi ha la taula de divisions"
+        )
+    name = (taula.titol or "").strip()
+    if not name:
+        raise EstructuraInesperada(
+            f"divisions/{division_id}: la taula de divisions no porta el nom del torneig"
+        )
+    desconeguts = _enllacos_desconeguts(taula, _DIVISIO_LINK_OK_RE)
+    if desconeguts:
+        raise EstructuraInesperada(
+            f"divisions/{division_id}: enllaç de divisió que no reconec ({desconeguts[0]})"
+        )
 
-    phase_id: int | None = None
-    for link in soup.find_all("a"):
-        href = link.get("href") or ""
-        m = _PHASE_ID_RE.search(href)
-        if m:
-            phase_id = int(m.group(1))
-            break
+    divisions = _portal.parse_individuals_divisions(html)
+    phase_id = divisions[0].divisio_id_extern if divisions else None
 
     return OpenStructure(
         division_id=division_id,
@@ -463,28 +592,56 @@ def parse_division_page(html: str, division_id: int) -> OpenStructure:
     )
 
 
+def parse_final_classification_url(html: str) -> str | None:
+    """Adreça de la classificació final, de la pàgina de divisions de l'open.
+
+    L'enllaç «Classificació» hi és SEMPRE, també abans que es jugui res: que hi
+    sigui ja no vol dir que l'open s'hagi acabat (al web vell sí). Cal entrar-hi
+    i mirar si té files — `parse_has_final_classification`.
+    """
+    m = re.search(r"""https?://[^"'\s<>]*""" + _FINAL_CLF_RE.pattern, html)
+    if m:
+        return m.group(0)
+    m = _FINAL_CLF_RE.search(html)
+    return _abs(m.group(0)) if m else None
+
+
 def parse_has_final_classification(html: str) -> bool:
-    """Check whether the division's landing page exposes a 'Classificació final'
-    link. The FCB adds this link only once the tournament has been completed
-    and a final ranking has been published. Detecting its presence is the
-    lightest possible signal for 'completed vs ongoing'."""
-    return "/individuals/classificaciofinal/" in html
+    """Si la pàgina de CLASSIFICACIÓ FINAL d'una divisió ja té la classificació.
 
-
-_FINAL_CLF_ID_RE = re.compile(r"/individuals/classificaciofinal/\d+/(\d+)")
+    Compte: l'argument és la pàgina `divisio-classificacio-final/{t}/{d}`, no la
+    de divisions. Mentre la federació no l'ha creada, la taula hi és amb una
+    sola fila que diu «No s'ha creat la classificació». Un open és tancat quan
+    hi ha almenys una fila amb posició.
+    """
+    taula = taula_amb(html, "Posició", "Jugador")
+    if taula is None:
+        raise EstructuraInesperada(
+            "classificació final: no hi ha la taula de posicions"
+        )
+    return any(fila.enter("Posició") is not None and fila["Jugador"] for fila in taula)
 
 
 def parse_final_classification_id(html: str) -> int | None:
-    """Extract the FCB classification id from the division's landing
-    page when a final ranking is published. Returns None if the link
-    isn't there yet."""
-    m = _FINAL_CLF_ID_RE.search(html)
+    """Id de la divisió que porta l'enllaç de classificació final, o None.
+
+    Es manté per a `scrape-current-opens`, que encara baixa la classificació
+    amb el lector del web vell (`classificacio.py`). Segueix buscant la ruta
+    antiga a posta: fer-lo casar amb la nova faria que aquella ordre demanés
+    cada nit una pàgina que no sap llegir. Portar-la al web nou és una altra
+    feina (la classificació oficial torna a existir i no la llegeix ningú).
+    """
+    m = re.search(r"/individuals/classificaciofinal/\d+/(\d+)", html)
     return int(m.group(1)) if m else None
 
 
 def fetch_has_final_classification(division_id: int, *, force: bool = False) -> bool:
+    """Si l'open ja té la classificació final publicada (és a dir, s'ha acabat)."""
     html = fetch(division_url(division_id), force=force)
-    return parse_has_final_classification(html)
+    url = parse_final_classification_url(html)
+    if url is None:
+        return False
+    return parse_has_final_classification(fetch(url, force=force, cache_ttl_s=LIVE_TTL_S))
 
 
 def fetch_final_classification_id(
@@ -494,66 +651,134 @@ def fetch_final_classification_id(
     return parse_final_classification_id(html)
 
 
+_FASE_LINK_OK_RE = re.compile(
+    r"individuals/(?:grups/\d+/\d+/\d+|partides-eliminatories/\d+/\d+/\d+)"
+)
+
+
 def parse_fases_page(html: str) -> tuple[PhaseRef, ...]:
-    """Parse the fases page to extract the ordered list of group and KO phases."""
-    soup = BeautifulSoup(html, "lxml")
-    phases: list[PhaseRef] = []
+    """Parse the fases page to extract the ordered list of group and KO phases.
 
-    for link in soup.find_all("a", class_="button"):
-        href = link.get("href") or ""
-        label = link.get_text(strip=True)
-        if not href or not label:
-            continue
-        if "/individuals/grups/" in href:
-            phases.append(PhaseRef(label=label, kind="group", url=_abs(href)))
-        elif "/individuals/partideseliminatoria/" in href:
-            phases.append(PhaseRef(label=label, kind="ko", url=_abs(href)))
+    La pàgina porta dues taules, «FASE GRUPS» i «ELIMINATÒRIES», que hi són
+    encara que estiguin buides (un open sense sorteig). Si no n'hi ha cap, o si
+    una fila enllaça a una ruta que no es reconeix, el web ha canviat.
+    """
+    de_fases = [
+        t for t in taules(html)
+        if {"fase", "eliminatoria"} & {normalitza(c) for c in t.capcaleres}
+    ]
+    if not de_fases:
+        raise EstructuraInesperada("fases: no hi ha ni la taula de fases ni la d'eliminatòries")
+    for t in de_fases:
+        desconeguts = _enllacos_desconeguts(t, _FASE_LINK_OK_RE)
+        if desconeguts:
+            raise EstructuraInesperada(
+                f"fases: enllaç de fase que no reconec ({desconeguts[0]})"
+            )
 
-    return tuple(phases)
+    return tuple(
+        PhaseRef(
+            label=f.nom,
+            kind="group" if f.tipus == "grups" else "ko",
+            url=_abs(f.href),
+            date=f.data.isoformat() if f.data else None,
+        )
+        for f in _portal.parse_individuals_fases(html)
+    )
 
 
-_GROUP_LINK_RE = re.compile(
-    r"/individuals/partidesgrups/\d+/\d+/\d+/(\d+)"
-)
-# El grup de caps de sèrie (jugadors reservats directament al primer KO) surt
-# etiquetat "JUGADORS RESERVATS" o, en altres opens, només "RESERVATS". Capturem
-# les dues formes i normalitzem l'etiqueta a "RESERVATS" (la resta del codi hi
-# compta amb `label.upper() == "RESERVATS"`).
-_GROUP_VENUE_RE = re.compile(
-    r"(Grup [A-Z]+|(?:JUGADORS\s+)?RESERVATS)(?:\s*\|\s*Es juga a:\s*(.+))?", re.I
-)
+_GROUP_LINK_OK_RE = re.compile(r"individuals/partides-grup/\d+/\d+/\d+/\d+")
+_GRUP_LABEL_RE = re.compile(r"(?:GRUP|Grup)\s+([A-Z]+)")
+
+
+def _etiqueta_de_grup(nom: str) -> str:
+    """«GRUP G» → «Grup G»; «JUGADORS RESERVATS» → «RESERVATS».
+
+    La federació escriu el mateix grup de les dues maneres segons l'open, i la
+    resta del codi compta amb «Grup X» (majúscules a la lletra) per saber que és
+    un grup de debò i amb «RESERVATS» per als caps de sèrie. Un grup fet a mà
+    amb la lletra en minúscules («Grup ww») es deixa com ve: no compta.
+    """
+    net = " ".join((nom or "").split())
+    if "RESERVAT" in net.upper():
+        return "RESERVATS"
+    m = _GRUP_LABEL_RE.fullmatch(net)
+    return f"Grup {m.group(1)}" if m else net
 
 
 def parse_grups_page(html: str) -> tuple[Group, ...]:
-    """Parse a /grups/{div}/{phase}/{subphase} page to extract group links + venues.
-    Returns Group objects with url + label + venue only (standings/matches empty).
+    """Parse a /grups/{t}/{div}/{fase} page: the groups of a phase.
+
+    De cada grup en surt l'etiqueta, l'adreça de les seves partides, la seu (el
+    club organitzador), el dia que es juga i qui hi juga, en l'ordre de la taula
+    de participants. Aquesta composició és l'única que hi ha fins que el grup
+    té classificació; `parse_group_page` la substitueix quan n'hi ha.
     """
-    soup = BeautifulSoup(html, "lxml")
+    taula = taula_amb(html, "Grup", "Data partits")
+    if taula is None:
+        raise EstructuraInesperada("grups: no hi ha la taula de grups de la fase")
+    desconeguts = _enllacos_desconeguts(taula, _GROUP_LINK_OK_RE)
+    if desconeguts:
+        raise EstructuraInesperada(
+            f"grups: enllaç de grup que no reconec ({desconeguts[0]})"
+        )
+
+    membres: dict[str, list[GroupStanding]] = {}
+    for m in _portal.parse_individuals_grups_membership(html):
+        membres.setdefault(_etiqueta_de_grup(m.grup_nom), []).append(
+            GroupStanding(player_name=m.jugador_nom, club="", punts=0, mitjana=0.0)
+        )
+
+    href_per_id = {
+        int(h.rstrip("/").rsplit("/", 1)[-1]): h
+        for fila in taula for h in fila.enllacos() if _GROUP_LINK_OK_RE.search(h)
+    }
     groups: list[Group] = []
-
-    for link in soup.find_all("a", class_="button"):
-        href = link.get("href") or ""
-        if not _GROUP_LINK_RE.search(href):
-            continue
-        text = link.get_text(strip=True)
-        m = _GROUP_VENUE_RE.match(text)
-        if not m:
-            continue
-        label = m.group(1)
-        if "RESERVAT" in label.upper():
-            label = "RESERVATS"  # normalitza "JUGADORS RESERVATS" → "RESERVATS"
-        venue = m.group(2).strip() if m.group(2) else None
-        groups.append(Group(label=label, url=_abs(href), venue=venue))
-
+    for g in _portal.parse_individuals_grups(html):
+        label = _etiqueta_de_grup(g.nom)
+        groups.append(Group(
+            label=label,
+            url=_abs(href_per_id[g.grup_id_extern]),
+            venue=g.club_organitzador,
+            standings=tuple(membres.get(label, ())),
+            date=g.data.isoformat() if g.data else None,
+        ))
     return tuple(groups)
 
 
-def parse_group_page(html: str, label: str, url: str, venue: str | None = None) -> Group:
-    """Parse a /partidesgrups page: standings + match results."""
-    soup = BeautifulSoup(html, "lxml")
+def parse_group_page(
+    html: str,
+    label: str,
+    url: str,
+    venue: str | None = None,
+    *,
+    date: str | None = None,
+    membres: tuple[GroupStanding, ...] = (),
+) -> Group:
+    """Parse a /partides-grup page: standings + match results.
 
-    standings = _parse_group_standings(soup)
-    matches = _parse_group_matches(soup)
+    `membres` és la composició del grup segons la pàgina de la fase; es fa
+    servir quan el grup encara no té classificació.
+    """
+    te_classificacio = taula_amb(html, "Jugador", "Punts") is not None
+    te_partides = taula_amb(html, "Local", "Visitant", "Entrades") is not None
+    if not te_classificacio and not te_partides:
+        raise EstructuraInesperada(
+            f"{label}: la pàgina del grup no té ni classificació ni partides"
+        )
+
+    standings = tuple(
+        GroupStanding(
+            player_name=r.jugador_nom,
+            # El web nou no escriu el club del jugador a cap pàgina del torneig.
+            club="",
+            punts=r.punts or 0,
+            mitjana=r.mitjana or 0.0,
+        )
+        for r in _portal.parse_individuals_grup_classificacio(html)
+    ) or membres
+    matches = _resultats(_portal.parse_individuals_partides(html))
+    matches = _reparteix_incompareixences(matches, standings)
 
     return Group(
         label=label,
@@ -561,185 +786,96 @@ def parse_group_page(html: str, label: str, url: str, venue: str | None = None) 
         venue=venue,
         standings=standings,
         matches=matches,
+        date=date,
     )
 
 
-def _parse_group_standings(soup: BeautifulSoup) -> tuple[GroupStanding, ...]:
-    """The standings are inside <div id="classificacio">, in 4 cells per row:
-    jugador | club | punts | mitjana."""
-    block = soup.find("div", id="classificacio")
-    if block is None:
-        return ()
+def _resultats(
+    partides: list[_portal.IndividualPartidaRow],
+    punts_oficials: dict[str, int] | None = None,
+) -> tuple[MatchResult, ...]:
+    """Les partides del portal, amb els punts de partida que el portal no escriu.
 
-    cells = [d.get_text(strip=True) for d in block.find_all("div")]
-    # Skip the header row (JUGADOR, CLUB, PUNTS, MITJANA)
-    rows: list[GroupStanding] = []
-    # Find the start by locating "JUGADOR" then advance past header cells
-    start = 0
-    for i, c in enumerate(cells):
-        if c.upper() == "JUGADOR":
-            start = i + 4
-            break
-
-    for i in range(start, len(cells) - 3, 4):
-        name = cells[i]
-        club = cells[i + 1]
-        punts_raw = cells[i + 2]
-        mitjana_raw = cells[i + 3]
-        if not name:
-            continue
-        try:
-            punts = int(punts_raw) if punts_raw else 0
-        except ValueError:
-            punts = 0
-        try:
-            mitjana = float(mitjana_raw) if mitjana_raw else 0.0
-        except ValueError:
-            mitjana = 0.0
-        rows.append(GroupStanding(
-            player_name=name,
-            club=club,
-            punts=punts,
-            mitjana=mitjana,
-        ))
-    return tuple(rows)
-
-
-_HEADER_COLS = ("PUNTS", "SÈRIE MAJOR", "CARAMBOLES")
-
-
-def _parse_group_matches(soup: BeautifulSoup) -> tuple[MatchResult, ...]:
-    """Parse the match rows of a group/KO page.
-
-    The FCB renders each match as a sequence of `<div class='row padded'>`
-    blocks under a `<div class='row box black'>` header:
-
-        [HEADER]    PUNTS  SÈRIE MAJOR  CARAMBOLES
-        [PADDED 1]  PLAYER_A_NAME  PUNTS  SM  CARAMBOLES         (4 cells)
-        [PADDED 2]  PLAYER_B_NAME  PUNTS  SM  CARAMBOLES         (4 cells)
-        [PADDED 3]  Àrbitre:NAME   Entrades:N                    (2 cells)
-
-    Older Opens shipped with a single fat `row padded` containing both
-    players (≥ 8 cells); we still accept that shape as a fallback so we
-    don't regress on cached pages.
+    La taula de partides porta sèrie major, caramboles, entrades, àrbitre i
+    estat, però no qui ha guanyat. Es dedueix: en una partida jugada guanya qui
+    fa més caramboles (2-0) i amb les mateixes és empat (1-1). A les
+    eliminatòries no hi ha empat —es desfà als penals, que no es publiquen—
+    però la mateixa pàgina porta una taula amb els punts de cada jugador, i és
+    la que mana (`punts_oficials`, per nom normalitzat).
     """
-    matches: list[MatchResult] = []
-    paddeds = soup.find_all("div", class_="row padded")
-    cell_lists: list[list[str]] = [
-        [d.get_text(strip=True) for d in p.find_all("div")] for p in paddeds
+    out: list[MatchResult] = []
+    for p in partides:
+        estat = p.estat or None
+        acabada = estat is None or normalitza(estat) == "finalitzada"
+        entrades = p.entrades or None
+        car_a, car_b = p.local_caramboles or 0, p.visitant_caramboles or 0
+        punts_a = punts_b = 0
+        if acabada and entrades:
+            if car_a > car_b:
+                punts_a = 2
+            elif car_b > car_a:
+                punts_b = 2
+            else:
+                punts_a = punts_b = 1
+        if punts_oficials is not None and acabada:
+            oa = punts_oficials.get(_norm_name(p.local_nom))
+            ob = punts_oficials.get(_norm_name(p.visitant_nom))
+            if oa is not None and ob is not None and (oa or ob):
+                punts_a, punts_b = oa, ob
+        out.append(MatchResult(
+            player_a=p.local_nom,
+            player_b=p.visitant_nom,
+            punts_a=punts_a,
+            punts_b=punts_b,
+            caramboles_a=car_a,
+            caramboles_b=car_b,
+            serie_major_a=p.local_serie_major or 0,
+            serie_major_b=p.visitant_serie_major or 0,
+            entrades=entrades,
+            arbitre=p.arbitre,
+            estat=estat,
+        ))
+    return tuple(out)
+
+
+def _reparteix_incompareixences(
+    matches: tuple[MatchResult, ...],
+    standings: tuple[GroupStanding, ...],
+) -> tuple[MatchResult, ...]:
+    """Dona els punts de les partides de grup tancades sense jugar-se.
+
+    Una incompareixença surt «Finalitzada» amb tot a zero: no diu qui l'ha
+    guanyada. La classificació del grup sí que ho sap, perquè hi compta els
+    punts. El que li sobra a cada jugador un cop descomptades les partides
+    jugades són els punts de les no jugades, i es reparteixen només quan no hi
+    ha dubte: un dels dos en té per cobrar i l'altre no. Si no es pot dir (dos
+    absents, o tots dos amb punts pendents), la partida es queda 0-0.
+    """
+    pendents = [
+        i for i, m in enumerate(matches)
+        if m.tancada and not m.is_played and m.punts_a == m.punts_b == 0
     ]
-
-    i = 0
-    while i < len(cell_lists):
-        cells = cell_lists[i]
-
-        # Single-block layout (legacy): all 8 player cells in one row.
-        if len(cells) >= 8 and not _looks_like_meta_row(cells):
-            try:
-                name_a = cells[0]
-                punts_a = int(cells[1]) if cells[1] else 0
-                sm_a = int(cells[2]) if cells[2] else 0
-                car_a = int(cells[3]) if cells[3] else 0
-                name_b = cells[4]
-                punts_b = int(cells[5]) if cells[5] else 0
-                sm_b = int(cells[6]) if cells[6] else 0
-                car_b = int(cells[7]) if cells[7] else 0
-            except (ValueError, IndexError):
-                i += 1
-                continue
-            arbitre, entrades, observations = _extract_meta(cells[8:])
-            if name_a and name_b:
-                matches.append(MatchResult(
-                    player_a=name_a, player_b=name_b,
-                    punts_a=punts_a, punts_b=punts_b,
-                    caramboles_a=car_a, caramboles_b=car_b,
-                    serie_major_a=sm_a, serie_major_b=sm_b,
-                    entrades=entrades, arbitre=arbitre,
-                    observations=observations,
-                ))
-            i += 1
-            continue
-
-        # Per-player layout (current): one row per player, 4 cells each.
-        if len(cells) == 4 and not _looks_like_meta_row(cells) and i + 1 < len(cell_lists):
-            next_cells = cell_lists[i + 1]
-            if len(next_cells) == 4 and not _looks_like_meta_row(next_cells):
-                try:
-                    name_a = cells[0]
-                    punts_a = int(cells[1]) if cells[1] else 0
-                    sm_a = int(cells[2]) if cells[2] else 0
-                    car_a = int(cells[3]) if cells[3] else 0
-                    name_b = next_cells[0]
-                    punts_b = int(next_cells[1]) if next_cells[1] else 0
-                    sm_b = int(next_cells[2]) if next_cells[2] else 0
-                    car_b = int(next_cells[3]) if next_cells[3] else 0
-                except (ValueError, IndexError):
-                    i += 1
-                    continue
-                # Optional third row with arbitre/entrades/observacions meta.
-                arbitre: str | None = None
-                entrades: int | None = None
-                observations: str | None = None
-                if i + 2 < len(cell_lists):
-                    third = cell_lists[i + 2]
-                    if _looks_like_meta_row(third):
-                        arbitre, entrades, observations = _extract_meta(third)
-                        i += 3
-                    else:
-                        i += 2
-                else:
-                    i += 2
-                if name_a and name_b:
-                    matches.append(MatchResult(
-                        player_a=name_a, player_b=name_b,
-                        punts_a=punts_a, punts_b=punts_b,
-                        caramboles_a=car_a, caramboles_b=car_b,
-                        serie_major_a=sm_a, serie_major_b=sm_b,
-                        entrades=entrades, arbitre=arbitre,
-                        observations=observations,
-                    ))
-                continue
-
-        i += 1
-
-    return tuple(matches)
-
-
-def _looks_like_meta_row(cells: list[str]) -> bool:
-    """A "meta" row is one that holds only Àrbitre / Entrades / Observacions
-    labels — i.e. its FIRST cell is one of those labels. The legacy single-
-    block layout has metadata cells appended after the 8 player cells; those
-    rows shouldn't be classified as meta because cells[0] is a name."""
-    if not cells:
-        return False
-    first = cells[0]
-    return (
-        "Àrbitre" in first
-        or "Arbitre" in first
-        or "Entrades" in first
-        or "Observacions" in first
-    )
-
-
-def _extract_meta(cells: list[str]) -> tuple[str | None, int | None, str | None]:
-    """Pull arbitre + entrades + observacions out of the metadata cells."""
-    arbitre: str | None = None
-    entrades: int | None = None
-    observations: str | None = None
-    for c in cells:
-        if "Àrbitre" in c or "Arbitre" in c:
-            if ":" in c:
-                arbitre = c.split(":", 1)[1].strip() or None
-        elif "Entrades" in c:
-            if ":" in c:
-                try:
-                    entrades = int(c.split(":", 1)[1].strip())
-                except ValueError:
-                    entrades = None
-        elif "Observacions" in c:
-            if ":" in c:
-                observations = c.split(":", 1)[1].strip() or None
-    return arbitre, entrades, observations
+    if not pendents:
+        return matches
+    sobren = {_norm_name(s.player_name): s.punts for s in standings}
+    for m in matches:
+        if m.is_played:
+            for nom, punts in ((m.player_a, m.punts_a), (m.player_b, m.punts_b)):
+                clau = _norm_name(nom)
+                if clau in sobren:
+                    sobren[clau] -= punts
+    out = list(matches)
+    for i in pendents:
+        m = out[i]
+        a, b = _norm_name(m.player_a), _norm_name(m.player_b)
+        sa, sb = sobren.get(a, 0), sobren.get(b, 0)
+        if sa >= 2 and sb < 2:
+            out[i] = replace(m, punts_a=2, punts_b=0)
+            sobren[a] = sa - 2
+        elif sb >= 2 and sa < 2:
+            out[i] = replace(m, punts_a=0, punts_b=2)
+            sobren[b] = sb - 2
+    return tuple(out)
 
 
 _KO_LABEL_TO_MATCHES = {
@@ -1032,8 +1168,9 @@ def _is_walkover(m: "MatchResult") -> bool:
 
 
 def _is_decided(m: "MatchResult") -> bool:
-    """La partida té resultat ferm: jugada o guanyada per incompareixença."""
-    return m.is_played or _is_walkover(m)
+    """La partida té resultat ferm: jugada, guanyada per incompareixença, o
+    tancada pel portal sense jugar-se (cap dels dos s'ha presentat)."""
+    return m.is_played or _is_walkover(m) or m.tancada
 
 
 def _walkover_absentee(m: "MatchResult") -> str | None:
@@ -2087,7 +2224,7 @@ _ROUND_EXCLUSIONS: dict[str, tuple[str, ...]] = {
 
 def _find_ko_doc_for_round(
     docs: Iterable[DocEntry],
-    aliases: set[str],
+    aliases: set[str] | None,
     round_label: str,
 ) -> int | None:
     """Return the doc id of a published KO-round PDF for this Open.
@@ -2104,14 +2241,18 @@ def _find_ko_doc_for_round(
     """
     label_upper = round_label.upper()
     exclusions = _ROUND_EXCLUSIONS.get(label_upper, ())
-    alias_upper = {a.upper() for a in aliases if a}
+    # `aliases=None`: els documents ja venen triats per a l'open
+    # (`filter_docs_for_division`) i només cal trobar-hi la ronda.
+    alias_upper = None if aliases is None else {a.upper() for a in aliases if a}
     for d in docs:
         title_upper = d.title.upper()
         if label_upper not in title_upper:
             continue
         if any(excl in title_upper for excl in exclusions):
             continue
-        if not any(alias in title_upper for alias in alias_upper):
+        if "FEMENI" in title_upper:
+            continue
+        if alias_upper is not None and not any(a in title_upper for a in alias_upper):
             continue
         return d.doc_id
     return None
@@ -2140,12 +2281,21 @@ def _dedupe_ko_matches(matches: tuple[MatchResult, ...]) -> tuple[MatchResult, .
 
 
 def parse_ko_page(html: str) -> tuple[MatchResult, ...]:
-    """Parse a KO round page. Same match-row structure as groups, without a
-    group-level standings block. Returns () if 'No hi ha registres disponibles'."""
-    if "No hi ha registres disponibles" in html:
-        return ()
-    soup = BeautifulSoup(html, "lxml")
-    return _dedupe_ko_matches(_parse_group_matches(soup))
+    """Parse a KO round page: the pairings of the round, played or not.
+
+    La pàgina porta dues taules: les partides i la «classificació de
+    l'eliminatòria», amb els punts de cada jugador. D'aquesta segona en surt
+    qui ha guanyat quan les caramboles no ho diuen: un empat desfet als penals
+    o una incompareixença. Torna () si la ronda encara no té emparellaments.
+    """
+    if not taules_amb(html, "Local", "Visitant", "Entrades"):
+        raise EstructuraInesperada("eliminatòria: no hi ha la taula de partides")
+    punts = {
+        _norm_name(r.jugador_nom): r.punts
+        for r in _portal.parse_individuals_grup_classificacio(html)
+        if r.punts is not None
+    }
+    return _dedupe_ko_matches(_resultats(_portal.parse_individuals_partides(html), punts))
 
 
 def _attach_ko_provisional_players(
@@ -2273,6 +2423,10 @@ def fetch_live_state(
     Returns:
         OpenLiveState with phases fully populated. KO rounds that haven't
         been played yet will have empty ko_matches.
+
+    Raises:
+        EstructuraInesperada: alguna pàgina no té la forma esperada. Un open
+            sense sorteig torna un estat sense fases, no una excepció.
     """
     # 1) Landing page → name + phase_id
     div_html = fetch(division_url(division_id), force=force)
@@ -2294,9 +2448,9 @@ def fetch_live_state(
     # 3) For each phase ref, fetch details. Use a short TTL for the match-
     #    level pages (group standings, KO pairings) since those change as
     #    matches are played. The phase list itself is stable during a day.
-    # KO rounds have TWO potential sources: the /partideseliminatoria HTML
-    # (filled in once matches are PLAYED) and a published PDF bracket
-    # (available days before match day). We prefer HTML; fall back to PDF.
+    # KO rounds have TWO potential sources: the /partides-eliminatories HTML
+    # and a published PDF bracket (available days before match day). We prefer
+    # HTML; fall back to PDF.
     ko_docs_cache: tuple[DocEntry, ...] | None = None
     details: list[PhaseDetail] = []
     reservats_standings: tuple[GroupStanding, ...] = ()
@@ -2308,7 +2462,12 @@ def fetch_live_state(
             for stub in group_stubs:
                 group_html = fetch(stub.url, force=force, cache_ttl_s=LIVE_TTL_S)
                 group = parse_group_page(
-                    group_html, label=stub.label, url=stub.url, venue=stub.venue
+                    group_html,
+                    label=stub.label,
+                    url=stub.url,
+                    venue=stub.venue,
+                    date=stub.date or ref.date,
+                    membres=stub.standings,
                 )
                 if group.label.upper() == "RESERVATS":
                     # Caps de sèrie: es guarden a part. NO entren als grups
@@ -2330,19 +2489,11 @@ def fetch_live_state(
                         ko_docs_cache = fetch_opens_docs(force=force)
                     except Exception:  # noqa: BLE001
                         ko_docs_cache = ()
-                aliases = set(OPEN_TITLE_ALIASES.get(division_id, ()))
-                # Also accept tokens from the division's own name (sans
-                # generic prefixes like 'OPEN TRES BANDES').
-                cleaned = (
-                    structure.name.upper()
-                    .replace("OPEN", "")
-                    .replace("TRES BANDES", "")
-                    .replace("FEMENI", "")
-                    .strip()
+                # Els documents d'AQUEST open, i d'entre ells el de la ronda.
+                open_docs = filter_docs_for_division(
+                    ko_docs_cache, division_id, structure.name
                 )
-                if cleaned:
-                    aliases.add(cleaned)
-                doc_id = _find_ko_doc_for_round(ko_docs_cache, aliases, ref.label)
+                doc_id = _find_ko_doc_for_round(open_docs, None, ref.label)
                 if doc_id is not None:
                     try:
                         pdf_bytes, _ = fetch_doc_pdf(doc_id, force=force)
@@ -2398,4 +2549,5 @@ def fetch_live_state(
         phases=final,
         seeding=dict(rank_by_name or {}),
         reservats=reservats_standings,
+        last_date=max((r.date for r in phase_refs if r.date), default=None),
     )

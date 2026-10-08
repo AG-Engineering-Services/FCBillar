@@ -111,6 +111,8 @@ def _match_payload(m) -> dict[str, Any]:
         "arbitre": m.arbitre,
         "observations": getattr(m, "observations", None),
         "is_played": m.is_played,
+        # «Pendent» / «Finalitzada» segons el portal; None si no en ve.
+        "estat": getattr(m, "estat", None),
     }
 
 
@@ -140,6 +142,9 @@ def _state_payload(
                     "label": g.label,
                     "url": g.url,
                     "venue": g.venue,
+                    # Dia del grup segons el portal (ISO), o None. És el dia que
+                    # comença la fase: orientatiu, no l'hora de ningú.
+                    "date": getattr(g, "date", None),
                     "standings": [
                         {
                             "player_name": s.player_name,

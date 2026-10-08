@@ -19,6 +19,22 @@ USER_AGENT = "fcb-opens/0.1 (+personal tool for billiards group management)"
 DEFAULT_TIMEOUT_S = 30.0
 DEFAULT_TTL_S = 3600  # 1 hour
 
+#: Temps mínim entre dues peticions que surten de debò a la xarxa. El seguiment
+#: en directe demana desenes de pàgines a cada passada (una per grup) i les
+#: demanava totes de cop; amb mig segon una passada d'un open gran triga uns vint
+#: segons més i la federació no rep una ràfega cada dos minuts.
+MIN_INTERVAL_S = 0.5
+_darrera_peticio = 0.0
+
+
+def _espera_torn() -> None:
+    """Frena fins que hagi passat `MIN_INTERVAL_S` des de l'última petició."""
+    global _darrera_peticio
+    falta = MIN_INTERVAL_S - (time.monotonic() - _darrera_peticio)
+    if falta > 0:
+        time.sleep(falta)
+    _darrera_peticio = time.monotonic()
+
 
 #: `www.fcbillar.cat` com a HOST i no com a principi d'un altre host.
 #:
@@ -79,6 +95,7 @@ def fetch_binary(
         if age_s < cache_ttl_s:
             return cache_file.read_bytes()
 
+    _espera_torn()
     response = httpx.get(
         url,
         headers={"User-Agent": USER_AGENT},
@@ -128,6 +145,7 @@ def fetch(
         if age_s < cache_ttl_s:
             return cache_file.read_text(encoding="utf-8")
 
+    _espera_torn()
     response = httpx.get(
         url,
         headers={"User-Agent": USER_AGENT},
