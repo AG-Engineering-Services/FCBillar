@@ -444,6 +444,80 @@ no repetir una pàgina dins d'una execució ni mentre s'hi treballa a sobre, i p
 poc per no tapar res a una tasca que corre cada nit. `0` la deixa sense caducitat,
 que és el que feia abans.
 
+### 2.12 Els opens en directe: dos mesos morts i en verd
+
+Revisió del **2026-10-08**. El seguiment d'opens en directe
+(`fcbillar publish-live-opens` → `fcbillar.open_live`) va canviar de domini amb
+el web nou però no de marcatge: `fcb_opens/scraper/open_live.py` seguia buscant
+`a.button`, `div.row.padded` i les rutes `partidesgrups` i
+`partideseliminatoria`. Contra el portal nou en treia nom «UNKNOWN» i zero
+fases, i com que un open sense fases se saltava sense dir res, la comanda deia
+**«live_opens=0, errors=0»** i sortia amb 0 —142 vegades en una sola execució de
+cap de setmana—, amb un `|| true` al workflow per si de cas. L'Open Lliure del
+Punt d'Atac i l'Open Banda de Granollers es van jugar sense seguiment. I com que
+la reingesta de cada hora del cap de setmana només corre si `open_live` té algun
+open, tampoc no corria.
+
+**Ara el llegeix el mateix lector que la ingesta nocturna**
+(`fcbillar.scraper.parsers`), i `open_live.py` només en tradueix el resultat a
+les seves dataclasses. Què dona el portal i què no:
+
+| Què | On | Notes |
+|---|---|---|
+| Nom de l'open | títol de la targeta de `divisions/{t}` | |
+| Estat del torneig | columna «Estat» de `llistat` | «Inscripció» o «Activa». «Activa» no vol dir «en joc»: el Punt d'Atac hi segueix un mes després d'acabar |
+| Fases i eliminatòries, amb el dia | `fases/{t}/{d}`, dues taules | Les taules hi són encara que estiguin buides |
+| Grups: seu, dia, qui hi juga | `grups/{t}/{d}/{f}` | La seu és el club organitzador. El dia és el de la FASE, no el del grup (vegeu sota) |
+| Classificació del grup | `partides-grup/…` | Jugador, punts, mitjana. **Sense club** |
+| Partides | `partides-grup/…`, `partides-eliminatories/…` | Sèrie major, caramboles, entrades, àrbitre i **estat** («Pendent» / «Finalitzada») |
+| Qui guanya una eliminatòria | segona taula de `partides-eliminatories/…` | Punts de cada jugador a la ronda |
+| Open acabat | `divisio-classificacio-final/{t}/{d}` | L'enllaç hi és sempre; el que compta és si la taula té files |
+| Rànquing inicial, horaris, grups | `fcbillar.cat/wpfd_file-sitemap.xml` | PDF del gestor de fitxers, sense cap llistat navegable |
+
+**El que el web vell donava i el nou no**, i per tant ja no publiquem:
+
+- **El club de cada jugador.** No surt a cap pàgina del torneig mentre es juga;
+  només a la classificació final, quan ja s'ha acabat. `club` viatja buit.
+- **Els punts de cada partida.** Es dedueixen: guanya qui fa més caramboles i amb
+  les mateixes és empat. A les eliminatòries mana la taula de punts de la ronda.
+- **Les observacions**, que és on s'escrivia qui guanyava un desempat. Les
+  substitueix aquella mateixa taula de punts.
+- **L'hora i el billar de cada partida.** No hi han estat mai, a l'HTML: sortien
+  i surten del PDF d'horaris. El que sí que hi ha de nou és el dia del grup
+  («Data partits»), però és el dia que comença la fase: a la prèvia del Punt
+  d'Atac deia 29 d'agost per a tres grups que el PDF posa el 30. Per això viatja
+  com a `date` del grup i **no** se'n fa un `schedule`.
+- **El canal de la retransmissió.** No hi ha estat mai: el resol l'aplicació a
+  partir de la seu i del billar.
+
+Tres coses que no s'han de perdre de vista:
+
+1. **Una incompareixença** surt «Finalitzada» amb tot a zero i sense dir qui
+   l'ha guanyada. En un grup es treu de la classificació, que sí que hi compta
+   els punts; si cap dels dos s'hi va presentar es queda 0-0, però tancada.
+2. **La federació no sempre crea la classificació final** (Mataró, juliol de
+   2026, encara no en té). Un open sense classificació deixa de donar-se per en
+   directe tres dies després de la seva última fase.
+3. **Els PDF d'horaris de la 2026-27** escriuen un tram («04-05/09/2026») als
+   blocs de dos dies. El dia de cada fila es dedueix de l'hora: quan torna
+   enrere (19:30 i a sota 9:30) és l'endemà.
+
+I la part que importa més: **«no hi ha res» i «no ho sé llegir» ja no són el
+mateix.** Si falta la taula que hi hauria d'haver, o una fila enllaça a una ruta
+que no es reconeix, salta `EstructuraInesperada`; la publicació ho compta
+(`errors_estructura`), la comanda surt amb 3 (amb 1 per qualsevol altre error) i
+el workflow falla quan n'hi ha cinc de seguides. A més, la reingesta de cada nit
+fa una prova de fum (`publish-live-opens --dry-run --inclou-tancats --max-opens
+1`): llegeix l'últim open del llistat, encara que estigui acabat, sense publicar
+res. Així el pròxim canvi de web es veurà una nit qualsevol i no el cap de
+setmana de l'open.
+
+Comprovat contra el portal el 8 d'octubre de 2026, sense escriure res al núvol:
+Open Banda Granollers (219) 5 fases, 7 grups, 28 partides; Open Lliure Punt
+d'Atac (217) 6 fases, 13 grups, 44 partides; Open Tres Bandes Mataró (211) 8
+fases, 33 grups, 130 partides, 16 reservats i 98 classificats. El que no s'ha
+pogut provar és a §8.
+
 ### 2.7 Els opens: de la classificació morta al quadre sencer
 
 La ingesta d'individuals demanava la classificació final de cada divisió i en
@@ -524,6 +598,7 @@ a mà.
 | [cloud_sync.py](../src/fcbillar/cloud_sync.py) | ✅ **Fet** | La classificació surt del cens oficial (§2.8c) i s'hi afegeixen `publish_open_fases` i `publish_afiliacions` |
 | [calendari_fed.py](../src/fcbillar/calendari_fed.py) | 🟠 Descoberta | Regex `/media/` → WPFD |
 | `fcb_opens/scraper/` (4.695 l.) | 🔴 Trencat | 8 mòduls amb `www.fcbillar.cat` a dins |
+| `fcb_opens/scraper/open_live.py` | ✅ **Fet** (octubre) | El seguiment en directe llegeix el portal nou amb `fcbillar.scraper.parsers` (§2.12) |
 | `fcb_opens/lliga/parser.py` | 🔴 Trencat | Marcatge antic |
 | [scripts/weekly_reingest.ps1](../scripts/weekly_reingest.ps1) | 🔴 Trencat | Tots els passos d'ingesta |
 | `web/` (SvelteKit → Neon) | 🟢 **Intacte** | No toca la FCB; segueix servint |
@@ -770,6 +845,16 @@ les tres columnes mortes.
   format: un horari i una taula «Rànquing inicial» amb el club i el grup de cada
   finalista (`sorteig_fase._llegeix_final`). I el club de l'individual també
   surt ara de la classificació final oficial (§2.7), per a totes les modalitats.
+- **El seguiment en directe amb un open EN JOC** (§2.12). S'ha provat contra opens
+  acabats, perquè el 8 d'octubre no se'n jugava cap; el pròxim de tres bandes és
+  Sant Adrià, el 28 de novembre. El que només es pot veure aquell dia: si el
+  portal ensenya el marcador d'una partida mentre es juga i amb quin «Estat»
+  (només s'han vist «Pendent» i «Finalitzada»); si el quadre d'una eliminatòria
+  es publica abans de jugar-se o cal anar a buscar-lo al PDF, i amb quina forma
+  ve aquell PDF; i com es diran els seus documents (rànquing inicial, horaris),
+  que és el que decideix si es troben sols. Els PDF de rànquing inicial dels dos
+  opens de la 2026-27 (lliure i banda) **no es llegeixen**: el lector està fet
+  per als de tres bandes i encara no n'hi ha cap de nou per comprovar-ho.
 - Les subrutes de copa amb una edició en joc (l'edició 7 es comporta bé, però
   està tancada).
 - Si la federació manté una còpia dels PDF de `/media/**` en algun lloc, o si

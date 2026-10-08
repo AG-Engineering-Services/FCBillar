@@ -1411,7 +1411,19 @@ def publish_estadistiques_partides_cmd(
 
 
 @app.command("publish-live-opens")
-def publish_live_opens_cmd() -> None:
+def publish_live_opens_cmd(
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Ho llegeix tot i no escriu ni esborra res al núvol."
+    ),
+    inclou_tancats: bool = typer.Option(
+        False,
+        "--inclou-tancats",
+        help="També els opens ja acabats. Només amb --dry-run: és per provar el lector.",
+    ),
+    max_opens: int | None = typer.Option(
+        None, "--max-opens", help="Atura't quan n'hagis llegit tants amb fases."
+    ),
+) -> None:
     """Bolca l'estat EN VIU dels Opens en curs a Neon (taula `open_live`).
 
     Raspa la federació en directe (pàgines públiques, sense login) i puja l'estat
@@ -1419,19 +1431,54 @@ def publish_live_opens_cmd() -> None:
     Totes les modalitats; s'exclouen els femenins i els ja tancats. Idempotent —
     pensat per executar-se sovint des d'un job programat (p.ex. GitHub Action).
     Cal NEON_DATA_API_URL i NEON_SERVICE_ROLE_TOKEN (al .env o a l'entorn).
+
+    Surt amb 3 si alguna pàgina de la federació no té la forma esperada (el web
+    ha canviat i el lector s'ha de refer) i amb 1 per qualsevol altre error. Que
+    no hi hagi cap open en joc no és cap error: surt amb 0 i `live_opens=0`.
+
+    `--dry-run --inclou-tancats --max-opens 1` és la prova de fum: llegeix
+    l'últim open del llistat, encara que estigui acabat, i falla si no en sap
+    treure les fases. És el que corre cada nit, perquè el dia que el web canviï
+    se sàpiga abans del cap de setmana de l'open i no després.
     """
     from fcbillar.cloud_sync import publish_live_opens
+
+    if inclou_tancats and not dry_run:
+        console.print("[red]--inclou-tancats només es pot fer servir amb --dry-run.[/]")
+        raise typer.Exit(code=2)
 
     def _prog(level: str, msg: str) -> None:
         console.print(f"[dim]  {msg}[/]" if level == "ok" else f"[yellow]{msg}[/]")
 
     try:
-        counts = publish_live_opens(on_progress=_prog)
+        counts = publish_live_opens(
+            on_progress=_prog,
+            dry_run=dry_run,
+            include_closed=inclou_tancats,
+            max_opens=max_opens,
+        )
     except Exception as exc:  # noqa: BLE001
         console.print(f"[red]Error publicant els opens en directe: {exc}[/]")
         raise typer.Exit(code=1) from exc
     total = ", ".join(f"{k}={v}" for k, v in counts.items())
-    console.print(f"[green]OK opens en directe publicats: {total}[/]")
+    if counts.get("errors_estructura"):
+        console.print(
+            f"[red]ERROR opens en directe: {total}. Alguna pàgina de la federació no té "
+            f"la forma esperada: el lector (fcb_opens/scraper/open_live.py) s'ha de revisar.[/]"
+        )
+        raise typer.Exit(code=3)
+    if counts.get("errors"):
+        console.print(f"[red]ERROR opens en directe: {total}[/]")
+        raise typer.Exit(code=1)
+    if inclou_tancats and not counts.get("live_opens"):
+        # La prova de fum no ha trobat cap open amb fases per llegir. Passa a
+        # principi de temporada i no és cap error, però no ha provat res.
+        console.print(
+            f"[yellow]Cap open amb fases al llistat: no s'ha pogut provar res ({total})[/]"
+        )
+        return
+    pref = "[DRY-RUN] " if dry_run else ""
+    console.print(f"[green]{pref}OK opens en directe publicats: {total}[/]")
 
 
 @app.command("project-open-ranking")

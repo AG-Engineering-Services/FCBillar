@@ -5553,7 +5553,8 @@ def _autobuild_projection_payload(
 ) -> dict | None:
     """Construeix la projecció d'un open des dels PDFs PÚBLICS de la federació.
 
-    Sense que l'usuari pugi res: localitza a la secció Documents d'Opens el PDF
+    Sense que l'usuari pugi res: localitza entre els documents d'opens del web
+    de la federació (pel sitemap del gestor de fitxers) el PDF
     'RÀNQUING INICIAL' de l'open (i 'HORARIS' si hi és), en genera el quadre
     projectat (sembra Art. XVIII + fases del reglament) i el torna en forma de
     payload d'open_live per fondre'l com a fases projectades. Retorna None si no
@@ -5570,6 +5571,7 @@ def _autobuild_projection_payload(
         projection_to_live_payload,
     )
     from fcb_opens.scraper.open_live import (
+        doc_parla_de,
         fetch_doc_pdf,
         fetch_opens_docs,
         filter_docs_for_division,
@@ -5579,9 +5581,11 @@ def _autobuild_projection_payload(
     def _n(t: str) -> str:
         return unicodedata.normalize("NFD", t or "").encode("ascii", "ignore").decode().upper()
 
-    def _pdf_tempfile(doc_id: int) -> str | None:
+    def _pdf_tempfile(doc) -> str | None:
+        # Sense `force`: això es crida cada dos minuts durant un open i un PDF
+        # de la federació no canvia a aquell ritme. Val la memòria cau d'una hora.
         try:
-            data, _fn = fetch_doc_pdf(doc_id, force=force)
+            data, _fn = fetch_doc_pdf(doc)
         except Exception:
             return None
         fd, path = tempfile.mkstemp(suffix=".pdf")
@@ -5598,14 +5602,10 @@ def _autobuild_projection_payload(
         for d in filter_docs_for_division(docs, division_id, division_name)
         if "FEMENI" not in _n(d.title)
     ]
-    rank_docs = [
-        d
-        for d in open_docs
-        if "RANQUING INICIAL" in _n(d.title) or "RANKING INICIAL" in _n(d.title)
-    ]
+    rank_docs = [d for d in open_docs if doc_parla_de(d, "RANQUING INICIAL", "RANKING INICIAL")]
     if not rank_docs:
         return None
-    rpath = _pdf_tempfile(rank_docs[0].doc_id)
+    rpath = _pdf_tempfile(rank_docs[0])
     if rpath is None:
         return None
     try:
@@ -5622,9 +5622,9 @@ def _autobuild_projection_payload(
 
     # Horaris (opcional): enganxa dia/billar/hores a cada grup projectat.
     sched = None
-    hor_docs = [d for d in open_docs if "HORARIS" in _n(d.title)]
+    hor_docs = [d for d in open_docs if doc_parla_de(d, "HORARIS")]
     if hor_docs:
-        hpath = _pdf_tempfile(hor_docs[0].doc_id)
+        hpath = _pdf_tempfile(hor_docs[0])
         if hpath is not None:
             try:
                 from fcb_opens.scraper.horaris_pdf import parse_horaris_pdf
@@ -5710,7 +5710,7 @@ def _open_schedule_by_group(
     if not hor:
         return None
     try:
-        data, _fn = fetch_doc_pdf(hor[0].doc_id, force=force)
+        data, _fn = fetch_doc_pdf(hor[0])  # sense `force`: vegeu `_pdf_tempfile`
     except Exception:
         return None
     fd, path = tempfile.mkstemp(suffix=".pdf")
@@ -5820,7 +5820,11 @@ def _reservat_match_key(name: str, club: str) -> tuple[str, str, str]:
     El PDF de vegades ABREUJA el 2n cognom ("HERNÁNDEZ HDEZ" vs "HERNÁNDEZ
     HERNÁNDEZ") o s'oblida l'espai després de la coma ("GARCIA ALARCÓN,RICARDO"),
     així que casar per nom sencer normalitzat falla i afegiria duplicats. El 1r
-    cognom + inicial + club és estable entre les dues fonts."""
+    cognom + inicial + club és estable entre les dues fonts.
+
+    Des del web nou (agost de 2026) el viu ja no porta el club de ningú. Qui
+    compara ha de passar `club=""` als dos costats quan el viu no en té: si no,
+    cap clau no casaria i els setze caps de sèrie s'afegirien per duplicat."""
     import re
     import unicodedata
 
@@ -5860,10 +5864,15 @@ def _complete_first_ko_reservats(state, proj_phases: list[dict]) -> int:
     ]
     if not proj_reservats:
         return 0
-    have = {_reservat_match_key(s.player_name, s.club) for s in state.reservats}
+    # Si el viu ve sense clubs (el portal nou no els publica), es compara sense
+    # club a tots dos costats.
+    sense_club = any(not s.club for s in state.reservats)
+    have = {
+        _reservat_match_key(s.player_name, "" if sense_club else s.club) for s in state.reservats
+    }
     extra: list[GroupStanding] = []
     for p in proj_reservats:
-        key = _reservat_match_key(p.get("name") or "", p.get("club") or "")
+        key = _reservat_match_key(p.get("name") or "", "" if sense_club else p.get("club") or "")
         if key in have:
             continue
         have.add(key)
@@ -5910,13 +5919,18 @@ def _seed_first_ko_by_projection(state, proj_phases: list[dict]) -> bool:
     if not proj_reservats:
         return False
     # Posició (1..16) per cap de sèrie, casada de forma robusta amb el viu.
+    # Sense clubs al viu (portal nou), es compara sense club a tots dos costats.
+    sense_club = any(not s.club for s in state.reservats)
     pos_by_key: dict[tuple[str, str, str], int] = {}
     for idx, p in enumerate(proj_reservats, 1):
-        pos_by_key.setdefault(_reservat_match_key(p.get("name") or "", p.get("club") or ""), idx)
+        pos_by_key.setdefault(
+            _reservat_match_key(p.get("name") or "", "" if sense_club else p.get("club") or ""),
+            idx,
+        )
     seeding = dict(state.seeding or {})  # rànquing viu com a fallback
     reseeded = False
     for s in state.reservats:
-        pos = pos_by_key.get(_reservat_match_key(s.player_name, s.club))
+        pos = pos_by_key.get(_reservat_match_key(s.player_name, "" if sense_club else s.club))
         if pos is not None:
             seeding[_norm_name(s.player_name)] = pos
             reseeded = True
@@ -6173,19 +6187,59 @@ def set_open_prize_num_seq(division_id: int, num_seq: int | None) -> None:
     )
 
 
+#: Dies que un open segueix «en directe» després de la seva última fase si la
+#: federació no en crea la classificació final. Al web nou un open es tanca quan
+#: ella la crea, i n'hi ha que no la crea mai (Mataró, juliol de 2026).
+DIES_DE_GRACIA_OPEN = 3
+
+
+def _open_caducat(state, avui) -> bool:
+    """Si l'última fase de l'open és de fa més de `DIES_DE_GRACIA_OPEN` dies."""
+    from datetime import date
+
+    if not state.last_date:
+        return False
+    try:
+        ultima = date.fromisoformat(state.last_date)
+    except ValueError:
+        return False
+    return (avui - ultima).days > DIES_DE_GRACIA_OPEN
+
+
 def publish_live_opens(
-    on_progress: Progress | None = None, *, force: bool = True
+    on_progress: Progress | None = None,
+    *,
+    force: bool = True,
+    dry_run: bool = False,
+    include_closed: bool = False,
+    max_opens: int | None = None,
 ) -> dict[str, int]:
     """Bolca l'estat en viu de TOTS els Opens en curs a `fcbillar.open_live`.
 
     Inclou totes les modalitats (Tres Bandes, Quadre, Banda, Lliure); només
     s'exclouen els Opens femenins (format diferent) i els ja tancats. Idempotent:
     upsert per `fcb_division_id` i esborrat de les files d'Opens que ja no
-    estiguin en curs. Retorna comptadors {live_opens, removed, errors}.
+    estiguin en curs.
+
+    Retorna comptadors {live_opens, removed, superseded, sense_fases, errors,
+    errors_estructura}. `errors_estructura` (inclòs dins d'`errors`) compta les
+    pàgines que no tenen la forma esperada: és el senyal que la federació ha
+    canviat el web, i qui crida ha de fallar fort. De l'agost a l'octubre de
+    2026 aquesta funció va dir «live_opens=0, errors=0» cada cap de setmana amb
+    el lector trencat, perquè un open del qual no es treia cap fase se saltava
+    sense dir res.
+
+    `dry_run` ho llegeix i ho calcula tot sense escriure ni esborrar res al
+    núvol. `include_closed` hi posa també els opens ja tancats: és per provar el
+    lector contra un open acabat quan no n'hi ha cap en joc, i només té sentit
+    amb `dry_run`. `max_opens` atura la passada quan ja se n'han llegit tants amb
+    fases (el llistat va del més nou al més vell): la prova de cada nit en té
+    prou amb un.
     """
     from datetime import datetime
 
     from fcb_opens.scraper.open_live import (
+        EstructuraInesperada,
         fetch_has_final_classification,
         fetch_individuals_llistat,
         fetch_live_state,
@@ -6224,12 +6278,42 @@ def publish_live_opens(
         entries = fetch_individuals_llistat(force=force)
     except Exception as exc:
         prog("warn", f"no s'ha pogut llegir el llistat d'individuals: {exc}")
-        return {"live_opens": 0, "removed": 0, "errors": 1}
+        return {
+            "live_opens": 0,
+            "removed": 0,
+            "superseded": 0,
+            "sense_fases": 0,
+            "errors": 1,
+            "errors_estructura": int(isinstance(exc, EstructuraInesperada)),
+        }
 
     rows: list[dict] = []
     active_ids: list[int] = []
+    # Opens que no s'han pogut llegir. No s'han de retirar: «no l'he pogut
+    # llegir» no vol dir «s'ha acabat», i una pàgina que falla un cop no ha de
+    # fer desaparèixer l'open de l'aplicació fins a la tanda següent.
+    keep_ids: list[int] = []
     errors = 0
+    errors_estructura = 0
+    sense_fases = 0
+    avui = datetime.now(UTC).date()
+
+    def _error(e, exc: Exception, que: str) -> None:
+        nonlocal errors, errors_estructura
+        errors += 1
+        if isinstance(exc, EstructuraInesperada):
+            errors_estructura += 1
+            prog(
+                "warn",
+                f"#{e.division_id} {e.name}: {que}: LA PÀGINA NO TÉ LA FORMA ESPERADA "
+                f"({exc}). La federació pot haver canviat el web.",
+            )
+        else:
+            prog("warn", f"#{e.division_id} {e.name}: {que}: {exc}")
+
     for e in entries:
+        if max_opens is not None and len(rows) >= max_opens:
+            break
         name_upper = e.name.upper()
         if "OPEN" not in name_upper:
             continue
@@ -6237,20 +6321,43 @@ def publish_live_opens(
             # Els Opens femenins tenen un format propi que no seguim en directe.
             continue
         # Saltar els ja tancats (classificació final publicada): aquests
-        # pertanyen a l'històric, no al directe.
+        # pertanyen a l'històric, no al directe. Si no es pot saber, es compta
+        # l'error i es continua com si fos viu: abans s'empassava en silenci.
         try:
-            if fetch_has_final_classification(e.division_id, force=force):
-                continue
-        except Exception:
-            pass
+            tancat = fetch_has_final_classification(e.division_id, force=force)
+        except Exception as exc:
+            _error(e, exc, "no s'ha pogut saber si ja té classificació final")
+            tancat = False
+        if tancat and not include_closed:
+            continue
         try:
             state = fetch_live_state(e.division_id, force=force, rank_by_name=rank_by_name)
         except Exception as exc:
-            prog("warn", f"#{e.division_id} {e.name}: {exc}")
-            errors += 1
+            _error(e, exc, "no s'ha pogut llegir l'estat en viu")
+            keep_ids.append(e.division_id)
             continue
-        # Sense fases publicades encara (sorteig no penjat): res a mostrar.
+        # Sense fases publicades encara (sorteig no penjat): res a mostrar. La
+        # pàgina de fases s'ha llegit bé i és buida de debò —si no tingués la
+        # forma esperada hauria saltat `EstructuraInesperada` més amunt—, però
+        # si el llistat ja el dona per actiu es diu, que no passi per alt.
         if not state.phases:
+            if e.estat.strip().upper() == "ACTIVA":
+                sense_fases += 1
+                prog(
+                    "warn",
+                    f"#{e.division_id} {e.name}: el llistat el dona per «Activa» i "
+                    f"encara no té cap fase publicada",
+                )
+            continue
+        # La federació no sempre crea la classificació final. Sense això, un
+        # open acabat es quedaria «en directe» mentre fos al llistat —i amb ell
+        # la reingesta de cada hora del cap de setmana, que mira aquesta taula.
+        if not include_closed and _open_caducat(state, avui):
+            prog(
+                "ok",
+                f"#{e.division_id} {state.structure.name}: última fase el {state.last_date} "
+                f"i sense classificació final; ja no es dona per en directe",
+            )
             continue
 
         # AUTO-construeix la projecció (RÀNQUING INICIAL + HORARIS), amb la RONDA
@@ -6289,6 +6396,10 @@ def publish_live_opens(
             payload["phases"],
             _open_schedule_by_group(e.division_id, state.structure.name, force=force),
         )
+        # El dia que el portal dona a cada grup («Data partits») viatja al
+        # payload com a `date`, però NO se'n fa un `schedule`: és el dia que
+        # comença la fase, no el del grup. A l'Open Lliure del Punt d'Atac deia
+        # 29 d'agost per a tres grups que el PDF d'horaris posava el 30.
 
         if auto_phases:
             _enrich_real_groups_with_projection(payload["phases"], auto_phases)
@@ -6313,7 +6424,27 @@ def publish_live_opens(
             }
         )
         active_ids.append(e.division_id)
-        prog("ok", f"#{e.division_id} {state.structure.name} ({len(state.phases)} fases)")
+        n_grups = sum(len(ph.groups) for ph in state.phases)
+        n_partides = sum(len(g.matches) for ph in state.phases for g in ph.groups) + sum(
+            len(ph.ko_matches) for ph in state.phases
+        )
+        prog(
+            "ok",
+            f"#{e.division_id} {state.structure.name} ({len(state.phases)} fases, "
+            f"{n_grups} grups, {n_partides} partides)",
+        )
+
+    comptadors = {
+        "live_opens": len(rows),
+        "removed": 0,
+        "superseded": 0,
+        "sense_fases": sense_fases,
+        "errors": errors,
+        "errors_estructura": errors_estructura,
+    }
+    if dry_run:
+        prog("ok", f"[dry-run] es publicarien {len(rows)} opens; no s'escriu ni s'esborra res")
+        return comptadors
 
     if rows:
         _upsert(sb, "open_live", rows, "fcb_division_id", prog)
@@ -6329,7 +6460,7 @@ def publish_live_opens(
             sb.table("open_live")
             .delete()
             .gt("fcb_division_id", 0)
-            .not_.in_("fcb_division_id", active_ids or [-1])
+            .not_.in_("fcb_division_id", (active_ids + keep_ids) or [-1])
             .execute()
         )
         removed = len(res.data or [])
@@ -6362,12 +6493,9 @@ def publish_live_opens(
     except Exception as exc:
         prog("warn", f"no s'han pogut retirar projeccions superades: {exc}")
 
-    return {
-        "live_opens": len(rows),
-        "removed": removed,
-        "superseded": superseded,
-        "errors": errors,
-    }
+    comptadors["removed"] = removed
+    comptadors["superseded"] = superseded
+    return comptadors
 
 
 def _publica_reemplaçant(
