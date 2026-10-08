@@ -3890,10 +3890,16 @@ def publish_open_ranking(
                     n_pdf_only += 1
 
             n_hit = 0
+            # El lloc que el PDF dona a cadascú. Entre dos jugadors amb els
+            # mateixos punts, l'ordre bo és el de la federació (Art. XVIII.5: el
+            # rànquing de mitjana vigent el dia de la convocatòria), que des
+            # d'aquí no es pot refer: la mitjana que tenim és la d'avui.
+            lloc_pdf: dict = {}
             for row, e in pending:
                 if row is None:
                     continue
                 n_hit += 1
+                lloc_pdf[row["player_fcb_id"]] = e.position
                 ppo = tuple(e.points_per_open)
                 for i, d in enumerate(row["detall"]):
                     pts = ppo[i] if i < len(ppo) else None
@@ -3908,7 +3914,12 @@ def publish_open_ranking(
                 row["punts"] = e.total_points
                 row["opens_jugats"] = sum(1 for v in ppo if v is not None and v > 0)
             latest.sort(
-                key=lambda r: (-r["punts"], -mitj.get(r["player_fcb_id"], 0.0), r["jugador"] or "")
+                key=lambda r: (
+                    -r["punts"],
+                    lloc_pdf.get(r["player_fcb_id"], float("inf")),
+                    -mitj.get(r["player_fcb_id"], 0.0),
+                    r["jugador"] or "",
+                )
             )
             for posicio, r in enumerate(latest, start=1):
                 r["posicio"] = posicio
@@ -3940,8 +3951,9 @@ def publish_open_ranking(
 
     n = _upsert(sb, "open_ranking", all_rows, "genere,ronda,player_fcb_id", prog)
     fora = _retira_rondes_sobrants(sb, "general", max_ronda, prog)
+    files_fora = _retira_files_sobrants(sb, "general", all_rows, prog)
     conn.close()
-    return {"open_ranking": n, "rondes_retirades": fora}
+    return {"open_ranking": n, "rondes_retirades": fora, "files_retirades": files_fora}
 
 
 def _retira_rondes_sobrants(sb, genere: str, max_ronda: int, prog: Progress) -> int:
@@ -3987,6 +3999,55 @@ def _retira_rondes_sobrants(sb, genere: str, max_ronda: int, prog: Progress) -> 
     return len(sobrants)
 
 
+def _retira_files_sobrants(sb, genere: str, rows: list[dict], prog: Progress) -> int:
+    """Esborra, de les rondes que s'acaben de publicar, els jugadors que ja no hi són.
+
+    `_retira_rondes_sobrants` treu les rondes senceres que sobren; això treu les
+    files que sobren DINS d'una ronda que segueix existint. L'upsert va per
+    `(genere, ronda, jugador)`: si la ronda 58 d'avui no és la mateixa prova que
+    la ronda 58 d'una publicació anterior —perquè ha canviat quins torneigs
+    compten, o perquè una fitxa de pedaç ha passat a tenir llicència—, els
+    jugadors de l'antiga que no són a la nova s'hi queden, amb els punts, el lloc
+    i fins i tot el nom de prova d'aquella altra.
+
+    El dia que es va mirar (2026-10-08) n'hi havia 1.779 de 10.567, i 33 eren a
+    la ronda vigent: gent que no és al rànquing de la federació sortia al web
+    barrejada amb la que sí, en llocs que ja eren d'un altre.
+
+    Només es toquen les rondes que aquesta publicació ha escrit, i si no es pot
+    llegir què hi ha al núvol no s'esborra res.
+    """
+    vives = {(r["ronda"], r["player_fcb_id"]) for r in rows}
+    rondes = {r["ronda"] for r in rows}
+    if not vives:
+        return 0
+    try:
+        al_nuvol = _totes_amb(
+            lambda: sb.table("open_ranking").select("ronda,player_fcb_id").eq("genere", genere)
+        )
+    except Exception as e:  # sense saber què hi ha, no s'esborra
+        prog("warn", f"open_ranking[{genere}]: no s'ha pogut llegir per retirar files ({e})")
+        return 0
+    sobrants = sorted(
+        {
+            (x["ronda"], x["player_fcb_id"])
+            for x in al_nuvol
+            if x["ronda"] in rondes and (x["ronda"], x["player_fcb_id"]) not in vives
+        }
+    )
+    for ronda, fcb in sobrants:
+        sb.table("open_ranking").delete().eq("genere", genere).eq("ronda", ronda).eq(
+            "player_fcb_id", fcb
+        ).execute()
+    if sobrants:
+        prog(
+            "ok",
+            f"open_ranking[{genere}]: {len(sobrants)} files retirades de "
+            f"{len({r for r, _ in sobrants})} rondes (jugadors que ja no hi són)",
+        )
+    return len(sobrants)
+
+
 def publish_open_ranking_femeni(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
@@ -4014,7 +4075,12 @@ def publish_open_ranking_femeni(
     # El mateix que al general: la web ensenya la ronda de número més alt, o sigui
     # que una ronda passada que hi quedi tapa la bona.
     fora = _retira_rondes_sobrants(sb, "femeni", max(r["ronda"] for r in rows), prog)
-    return {"open_ranking_femeni": n, "rondes_femeni_retirades": fora}
+    files_fora = _retira_files_sobrants(sb, "femeni", rows, prog)
+    return {
+        "open_ranking_femeni": n,
+        "rondes_femeni_retirades": fora,
+        "files_femeni_retirades": files_fora,
+    }
 
 
 def _date_dist(a: str | None, b: str | None) -> int:

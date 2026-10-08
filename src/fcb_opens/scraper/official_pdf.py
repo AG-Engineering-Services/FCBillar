@@ -15,17 +15,44 @@ from .http import DEFAULT_CACHE_DIR, DEFAULT_TIMEOUT_S, DEFAULT_TTL_S, USER_AGEN
 #: en queda —el mateix camí que fa servir `fcbillar.calendari_fed`.
 FCB_SITEMAP_DOCS = "https://fcbillar.cat/wpfd_file-sitemap.xml"
 
-#: Les pàgines de document que porten el rànquing d'opens de tres bandes. El
-#: femení i les altres modalitats tenen la seva i no han d'entrar aquí.
-_RE_PAGINA_RANQUING = re.compile(
-    r"https?://[^<\s]*/wpfd_file/ranquing-opens-3-bandes-[^<\s]*", re.IGNORECASE
+#: Les pàgines de document del sitemap, i els enllaços de descàrrega que hi ha a
+#: dins. Quina és la del rànquing d'opens de tres bandes ho diu
+#: `_es_ranquing_opens_3_bandes`, pel nom. L'identificador del mig de la
+#: descàrrega canvia a cada versió que publiquen, o sigui que no es pot escriure
+#: a mà.
+_RE_PAGINA_DOCUMENT = re.compile(r"https?://[^<\s]*/wpfd_file/([^/<\s]+)/?", re.IGNORECASE)
+_RE_DESCARREGA_PDF = re.compile(
+    r"https?://[^\"'\s<>]*/download/\d+/[^/]*/\d+/([^\"'\s<>/]*\.pdf)", re.IGNORECASE
 )
-#: L'enllaç de descàrrega dins d'aquella pàgina. L'identificador del mig canvia
-#: a cada versió que publiquen, o sigui que no es pot escriure a mà.
-_RE_DESCARREGA_RANQUING = re.compile(
-    r"https?://[^\"'\s<>]*/download/\d+/[^/]*/\d+/([^\"'\s<>]*ranquing-opens-3-bandes[^\"'\s<>]*\.pdf)",
-    re.IGNORECASE,
-)
+_RE_TEMPORADA_AL_NOM = re.compile(r"(\d{2})-(\d{2})(?:\.pdf)?$", re.IGNORECASE)
+
+
+def _es_ranquing_opens_3_bandes(nom: str) -> bool:
+    """Si un nom de document és el del rànquing d'opens de tres bandes.
+
+    Es mira per paraules i no per un prefix fix, perquè la federació reanomena
+    els documents: «ranquing-opens-3-bandes-25-26» va passar a dir-se
+    «ranquing-catala-opens-3-bandes-25-26» el setembre de 2026, el prefix escrit
+    aquí va deixar de casar i el rànquing oficial es va quedar sense aplicar un
+    altre cop —i com que qui el demana ho encaixa marcant la ronda provisional,
+    l'últim open valia zero punts per a tothom.
+
+    El femení («ranquing-opens-circuit-catala-femeni-3-bandes-…») i les altres
+    modalitats tenen el seu document i no han d'entrar aquí.
+    """
+    n = nom.lower()
+    return (
+        "ranquing" in n
+        and "opens" in n
+        and ("3-bandes" in n or "tres-bandes" in n)
+        and "femeni" not in n
+    )
+
+
+def _temporada_del_nom(nom: str) -> tuple[int, int]:
+    """La temporada que porta el nom («…-25-26.pdf» → (25, 26)); (0, 0) si no en porta."""
+    m = _RE_TEMPORADA_AL_NOM.search(nom)
+    return (int(m.group(1)), int(m.group(2))) if m else (0, 0)
 
 
 def descobreix_ranquing_oficial(timeout_s: float = 60.0) -> str:
@@ -45,19 +72,28 @@ def descobreix_ranquing_oficial(timeout_s: float = 60.0) -> str:
 
     with httpx.Client(follow_redirects=True, timeout=timeout_s) as client:
         sitemap = client.get(FCB_SITEMAP_DOCS, headers={"User-Agent": USER_AGENT}).text
+        pagines = dict.fromkeys(
+            m.group(0)
+            for m in _RE_PAGINA_DOCUMENT.finditer(sitemap)
+            if _es_ranquing_opens_3_bandes(m.group(1))
+        )
         trobats: dict[str, str] = {}
-        for pagina in dict.fromkeys(_RE_PAGINA_RANQUING.findall(sitemap)):
+        for pagina in pagines:
             html = client.get(pagina, headers={"User-Agent": USER_AGENT}).text
-            for m in _RE_DESCARREGA_RANQUING.finditer(html):
-                trobats[m.group(0)] = m.group(1).lower()
+            # La pàgina d'un document també enllaça altres PDF (el calendari, a
+            # la capçalera): només val el que es diu com el rànquing.
+            for m in _RE_DESCARREGA_PDF.finditer(html):
+                if _es_ranquing_opens_3_bandes(m.group(1)):
+                    trobats[m.group(0)] = m.group(1).lower()
     if not trobats:
         raise LookupError(
             f"No he trobat cap PDF de rànquing d'opens de tres bandes a {FCB_SITEMAP_DOCS}. "
             f"O la federació l'ha tret, o ha canviat com publica els documents."
         )
-    # El nom porta la temporada («...-25-26.pdf»), i ordenar-los per nom deixa
-    # la més nova al final.
-    return max(trobats, key=lambda u: trobats[u])
+    # El nom porta la temporada («...-25-26.pdf»): es tria la més nova. Es
+    # compara la temporada i no el nom sencer, perquè d'una temporada a l'altra
+    # el nom pot canviar i l'ordre alfabètic ja no diria res.
+    return max(trobats, key=lambda u: (_temporada_del_nom(trobats[u]), trobats[u]))
 
 
 _OPEN_LABEL_RE = re.compile(r"(\d+\s*[EeÈèºo]?\s*OPEN)", re.IGNORECASE)
