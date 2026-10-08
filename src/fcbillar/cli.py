@@ -2671,7 +2671,11 @@ def afiliacions_cmd(
         )
 
     if not sense_xarxa:
-        with httpx.Client(follow_redirects=True, timeout=60.0) as client:
+        from fcbillar.scraper.client import USER_AGENT
+
+        with httpx.Client(
+            follow_redirects=True, timeout=60.0, headers={"User-Agent": USER_AGENT}
+        ) as client:
             publicats = S.descobreix(client)
             console.print(f"  {len(publicats)} sortejos de fase publicats al web")
             totes: list[A.Afiliacio] = []

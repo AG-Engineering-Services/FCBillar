@@ -143,15 +143,27 @@ def resol_club(repo, nom: str, cens: list[str]) -> str | None:
     Si el sufix casa amb més d'un club, no es tria: el web té «BC OLESA» i
     «C.B.OLESA» com a dos clubs diferents, i endevinar quin és seria escriure una
     dada que ningú no podria comprovar després.
+
+    I encara un tercer intent, amb el mateix sufix **sense el prefix**. Els fulls
+    de les finals escriuen el club sencer, i no sempre amb el prefix del cens: el
+    de la final d'Honor de tres bandes de 2026-27 diu «C.B.GRANOLLERS» d'un club
+    que es diu «B.C.GRANOLLERS». Val la mateixa regla: si en surt més d'un, cap.
     """
     cid = repo.resolve_club_id_by_nom(nom)
     if cid is not None:
         fila = repo.conn.execute("SELECT nom FROM clubs WHERE id = ?", (cid,)).fetchone()
         if fila:
             return fila[0]
-    clau = _norm(nom)
-    candidats = sorted({c for c in cens if _norm(c).endswith(clau)})
-    return candidats[0] if len(candidats) == 1 else None
+    # El prefix és el que hi ha fins a l'últim punt: «C.B.», «S.B.F.», «B.C.».
+    for clau in (_norm(nom), _norm(nom.rsplit(".", 1)[-1])):
+        if not clau:
+            continue
+        candidats = sorted({c for c in cens if _norm(c).endswith(clau)})
+        if len(candidats) == 1:
+            return candidats[0]
+        if candidats:
+            return None
+    return None
 
 
 def del_sorteig(repo, sorteig, temporada: str, modalitat: str) -> tuple[list[Afiliacio], list[str]]:
