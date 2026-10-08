@@ -2995,9 +2995,16 @@ def publish_open_partides(
     #
     # Manda l'extern, que és l'identificador que la federació dona a la fase i el
     # que `open_fases` i `open_fase_ranquing` ja fan servir.
+    #
+    # Es tradueix NOMÉS dins del seu torneig. Les partides dels torneigs antics
+    # porten a `fase_id` un número del web vell que no és a `torneig_fases`, i
+    # buscant-lo sense mirar de qui és casava amb l'id intern d'una fase d'un
+    # altre torneig: en ingerir les 8 fases de l'Open de Mataró, 58 partides de
+    # quatre torneigs de 2016 i 2023 canviaven de fase al núvol sense que ningú
+    # les hagués tocat.
     fase_extern = {
-        r["id"]: r["fase_id_extern"]
-        for r in conn.execute("SELECT id, fase_id_extern FROM torneig_fases")
+        (r["torneig_id"], r["id"]): r["fase_id_extern"]
+        for r in conn.execute("SELECT id, torneig_id, fase_id_extern FROM torneig_fases")
     }
     counter: dict = defaultdict(int)
     rows = []
@@ -3005,7 +3012,7 @@ def publish_open_partides(
         oid = idmap.get((r["torneig_id_extern"], r["divisio_id_extern"]))
         if oid is None:
             continue
-        fid = fase_extern.get(r["fase_id"], r["fase_id"])
+        fid = fase_extern.get((oid, r["fase_id"]), r["fase_id"])
         key = (oid, fid)
         counter[key] += 1
         rows.append(
@@ -3396,7 +3403,10 @@ def publish_ronda_projectada(
     except sqlite3.OperationalError:
         pass
 
+    from fcbillar import projeccio_ronda
+
     rows: list[dict] = []
+    sortejades = 0
     try:
         for r in conn.execute(
             """
@@ -3406,6 +3416,12 @@ def publish_ronda_projectada(
              ORDER BY p.torneig_id, p.ronda, p.posicio
             """
         ):
+            # Una ronda que ja té sorteig oficial no es publica projectada, encara
+            # que la base local en conservi la projecció: la ingesta la retira,
+            # però el que surt al núvol no pot dependre que hagi corregut abans.
+            if projeccio_ronda.ja_sortejada(conn, r["open_id"], r["ronda"]):
+                sortejades += 1
+                continue
             hit = by_norm.get(_nm(r["jugador_nom"]))
             rows.append(
                 {
@@ -3425,6 +3441,8 @@ def publish_ronda_projectada(
         conn.close()
         return {"open_ronda_projectada": 0}
 
+    if sortejades:
+        prog("ok", f"{sortejades} files projectades no es publiquen: la ronda ja té sorteig")
     superades = _retira_projeccions_superades(sb, conn, prog)
     conn.close()
 
@@ -3475,7 +3493,11 @@ def publish_ronda_projectada(
 
 
 def _retira_projeccions_superades(sb, conn, prog: Progress) -> int:
-    """Treu del núvol les projeccions d'una ronda que la federació ja ha publicat.
+    """Treu del núvol les projeccions d'una ronda que la federació ja ha sortejat.
+
+    «Sortejat» és tenir els grups al portal o el full de la final en PDF
+    (`projeccio_ronda.ja_sortejada`): el full surt dies abans que la fase, i una
+    projecció que contradiu un sorteig que ja existeix és pitjor que cap.
 
     La retirada general de `publish_ronda_projectada` no hi arriba en un cas, i és
     just el que deixa la projecció penjada per sempre: quan la base local es queda
@@ -3497,7 +3519,7 @@ def _retira_projeccions_superades(sb, conn, prog: Progress) -> int:
 
     retirades = 0
     for open_id, ronda in sorted({(x["open_id"], x["ronda"]) for x in al_nuvol}):
-        if not projeccio_ronda.ja_publicada(conn, open_id, ronda):
+        if not projeccio_ronda.ja_sortejada(conn, open_id, ronda):
             continue
         res = (
             sb.table("open_ronda_projectada")
@@ -3508,7 +3530,7 @@ def _retira_projeccions_superades(sb, conn, prog: Progress) -> int:
         )
         retirades += len(res.data or [])
     if retirades:
-        prog("ok", f"open_ronda_projectada: {retirades} files retirades (ronda ja publicada)")
+        prog("ok", f"open_ronda_projectada: {retirades} files retirades (ronda ja sortejada)")
     return retirades
 
 

@@ -897,11 +897,24 @@ def parse_individuals_torneigs_list(html: str) -> list[TorneigIndividual]:
     return out
 
 
+def parse_individuals_torneig_nom(html: str) -> str | None:
+    """Com es diu un torneig, llegit de la seva pàgina de divisions.
+
+    El nom ve normalment del llistat, però un torneig d'una temporada tancada ja
+    no hi surt i la seva pàgina segueix responent per id. El títol de la
+    targeta de la taula de divisions és el nom del torneig.
+    """
+    taula = taula_amb(html, "Divisió")
+    if taula is None or not taula.titol:
+        return None
+    return taula.titol.upper()
+
+
 def parse_individuals_divisions(html: str) -> list[IndividualDivisio]:
     """Divisions (o categories) d'un torneig individual.
 
-    `classif_href` es queda buit: la classificació final va desaparèixer amb
-    el canvi de web i ja no hi ha cap enllaç que hi porti.
+    `classif_href` es queda buit: l'adreça de la classificació final es
+    construeix amb els dos ids (`urls.individuals_classificacio_final`).
     """
     taula = taula_amb(html, "Divisió")
     if taula is None:
@@ -1121,13 +1134,59 @@ def parse_individuals_grup_classificacio(html: str) -> list[IndividualGrupClassi
     return out
 
 
+def parse_individuals_classificacio_final(html: str) -> list[IndividualParticipant]:
+    """La classificació final OFICIAL d'una divisió, del portal nou.
+
+    `individuals/divisio-classificacio-final/{torneig}/{divisio}`. Amb el canvi
+    de web de l'agost de 2026 va desaparèixer, i a l'octubre hi tornava a ser:
+    cada fila de la pàgina de divisions porta un botó «Classificació».
+
+    Es llegeix per nom de columna i no per posició, perquè l'ordre no és el de
+    la pàgina vella (ara «Punts» va abans de «Partides») i la sèrie major ja no
+    hi és. El que sí que hi és, i enlloc més del portal, és el **club** amb què
+    cadascú ha jugat el torneig.
+
+    Una divisió sense classificació no dona error: la taula hi és, amb una sola
+    fila que diu «No s'ha creat la classificació». D'aquí en surt una llista
+    buida, i qui la demana ha de saber que vol dir «encara no n'hi ha».
+    """
+    taula = taula_amb(html, "Posició", "Jugador", "Club")
+    if taula is None:
+        return []
+    out: list[IndividualParticipant] = []
+    for fila in taula:
+        posicio = fila.enter("Posició")
+        nom = fila["Jugador"]
+        if posicio is None or not nom:
+            continue
+        out.append(
+            IndividualParticipant(
+                posicio=posicio,
+                jugador_nom=nom,
+                club=fila["Club"] or None,
+                partides_jugades=fila.enter("Partides") if fila.te("Partides") else None,
+                punts=fila.enter("Punts") if fila.te("Punts") else None,
+                caramboles=fila.enter("Caramboles") if fila.te("Caramboles") else None,
+                entrades=fila.enter("Entrades total") if fila.te("Entrades total") else None,
+                mitjana_general=fila.decimal("Mitjana general")
+                if fila.te("Mitjana general")
+                else None,
+                mitjana_particular=fila.decimal("Mitjana particular")
+                if fila.te("Mitjana particular")
+                else None,
+                serie_max=None,
+            )
+        )
+    return out
+
+
 def parse_individuals_classificaciofinal(html: str) -> list[IndividualParticipant]:
-    """Classificació final d'un torneig individual.
+    """Classificació final d'un torneig individual, de la pàgina del web VELL.
 
     OBSOLET: `/ca/individuals/classificaciofinal/…` va desaparèixer amb el web
-    nou i no té substitut. Es manté per poder rellegir l'HTML que ja tenim
-    arxivat, i per si la federació la torna a publicar. La classificació de la
-    temporada en curs s'ha de calcular a partir dels grups i les eliminatòries.
+    nou. Es manté per poder rellegir l'HTML que ja tenim arxivat. La del portal
+    nou és una altra pàgina amb unes altres columnes: vegeu
+    `parse_individuals_classificacio_final`.
     """
     taula = taula_amb(html, "Jugador")
     if taula is None:

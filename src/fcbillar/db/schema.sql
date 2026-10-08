@@ -684,6 +684,21 @@ CREATE TABLE IF NOT EXISTS torneig_ronda_projectada (
 CREATE INDEX IF NOT EXISTS ix_ronda_projectada_torneig
     ON torneig_ronda_projectada(torneig_id, ronda);
 
+-- El sorteig oficial d'una ronda quan se sap per una altra via que els grups del
+-- portal: avui, el full de la final en PDF, que la federació penja dies abans de
+-- crear la fase a la intranet. Mentre hi sigui, la ronda no es projecta
+-- (`projeccio_ronda.ja_sortejada`). A les bases que ja existien la crea
+-- `projeccio_ronda.desa_sorteig_oficial`, sense migració.
+CREATE TABLE IF NOT EXISTS torneig_sorteig_oficial (
+    torneig_id   INTEGER NOT NULL REFERENCES torneigs_individuals(id) ON DELETE CASCADE,
+    ronda        TEXT NOT NULL,
+    jugador_nom  TEXT NOT NULL,
+    grup         TEXT NOT NULL,
+    club         TEXT,
+    font         TEXT NOT NULL,          -- el nom del fitxer d'on surt
+    PRIMARY KEY (torneig_id, ronda, jugador_nom)
+);
+
 -- Els grups d'una fase d'un torneig individual: quin dia es juguen i a quin club.
 --
 -- És el que la federació publica a la pàgina d'una fase, a la taula «GRUPS» (Grup,
