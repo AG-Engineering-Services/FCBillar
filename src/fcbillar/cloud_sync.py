@@ -2995,9 +2995,16 @@ def publish_open_partides(
     #
     # Manda l'extern, que és l'identificador que la federació dona a la fase i el
     # que `open_fases` i `open_fase_ranquing` ja fan servir.
+    #
+    # Es tradueix NOMÉS dins del seu torneig. Les partides dels torneigs antics
+    # porten a `fase_id` un número del web vell que no és a `torneig_fases`, i
+    # buscant-lo sense mirar de qui és casava amb l'id intern d'una fase d'un
+    # altre torneig: en ingerir les 8 fases de l'Open de Mataró, 58 partides de
+    # quatre torneigs de 2016 i 2023 canviaven de fase al núvol sense que ningú
+    # les hagués tocat.
     fase_extern = {
-        r["id"]: r["fase_id_extern"]
-        for r in conn.execute("SELECT id, fase_id_extern FROM torneig_fases")
+        (r["torneig_id"], r["id"]): r["fase_id_extern"]
+        for r in conn.execute("SELECT id, torneig_id, fase_id_extern FROM torneig_fases")
     }
     counter: dict = defaultdict(int)
     rows = []
@@ -3005,7 +3012,7 @@ def publish_open_partides(
         oid = idmap.get((r["torneig_id_extern"], r["divisio_id_extern"]))
         if oid is None:
             continue
-        fid = fase_extern.get(r["fase_id"], r["fase_id"])
+        fid = fase_extern.get((oid, r["fase_id"]), r["fase_id"])
         key = (oid, fid)
         counter[key] += 1
         rows.append(
