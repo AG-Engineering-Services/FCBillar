@@ -20,6 +20,15 @@ els publica. Per afegir una jornada n'hi ha prou amb pujar-ne el PDF.
 De moment només es llegeix la Primera Divisió: la Divisió d'Honor i la Segona
 tenen una altra disposició.
 
+## Pujar-los des de l'aplicació
+
+Un administrador d'un club que juga la lliga pot pujar el PDF des de la seva
+aplicació (Admin → Lliga Nacional). El document va a un magatzem de pas, i el
+procés `nacional-puja` (`.github/workflows/nacional-puja.yml`) el reconeix
+(`fcbillar nacional-puja`), el deixa en aquesta carpeta amb el seu nom, el desa
+al repositori i publica només la Lliga Nacional. Si no és cap dels documents que
+sabem llegir, no en queda res enlloc i l'aplicació ho diu.
+
 ## El calendari
 
 El calendari de la temporada (`calendari.pdf`) s'hi guarda com qualsevol altre

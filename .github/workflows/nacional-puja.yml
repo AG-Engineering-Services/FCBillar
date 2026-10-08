@@ -1,0 +1,156 @@
+name: nacional-puja
+
+# Un administrador d'un club ha pujat un PDF de la Lliga Nacional des de la seva
+# aplicació (Admin → Lliga Nacional). L'aplicació el deixa en un magatzem de pas
+# (Cloudflare R2) i engega aquest procés, que:
+#
+#   1. el baixa i el reconeix (jornada, classificació de jugadors, calendari o
+#      alineacions): `fcbillar nacional-puja`;
+#   2. si és bo, el desa a `fonts/nacional/…` i en fa un commit, perquè la càrrega
+#      de cada nit el torni a tenir;
+#   3. ingereix les fonts i publica NOMÉS la Lliga Nacional;
+#   4. deixa al magatzem un fitxer d'estat que l'aplicació llegeix, i n'esborra
+#      el PDF.
+#
+# PER QUÈ UN MAGATZEM DE PAS I NO UN COMMIT DIRECTE DES DE L'APLICACIÓ: l'«orden
+# de fuerza» porta adreces, telèfons i correus de directius i no pot entrar al
+# repositori ni un moment. Aquí se'n treu el CSV net i l'original s'esborra.
+#
+# No puja la base al release: la de cada nit torna a llegir totes les fonts, que
+# és d'on surt tot això, o sigui que no hi ha res a conservar.
+#
+# REQUISITS (secrets del repositori): els de sempre de Neon, i els del magatzem
+# —R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET—.
+
+on:
+  workflow_dispatch:
+    inputs:
+      clau:
+        description: "On és el PDF al magatzem: nacional-pujades/<club>/<id>.pdf"
+        required: true
+      divisio:
+        description: "honor, 1 o 2"
+        required: false
+        default: "1"
+
+# El mateix grup que la càrrega de cada nit: totes dues publiquen la Lliga
+# Nacional i totes dues baixen la base, i no s'han de trepitjar.
+concurrency:
+  group: reingest
+  cancel-in-progress: false
+
+jobs:
+  nacional-puja:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NEON_DATA_API_URL: ${{ secrets.NEON_DATA_API_URL }}
+      NEON_SERVICE_ROLE_TOKEN: ${{ secrets.NEON_SERVICE_ROLE_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      AWS_EC2_METADATA_DISABLED: "true"
+      R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      CLAU: ${{ github.event.inputs.clau }}
+      DIVISIO: ${{ github.event.inputs.divisio || '1' }}
+      STATE_TAG: fcb-state
+    steps:
+      # Res del que ve de fora no es fa servir sense mirar-ho: la clau només pot
+      # ser un PDF del prefix de pas, i la divisió una de les tres.
+      - name: Comprova el que es demana
+        run: |
+          if ! [[ "$CLAU" =~ ^nacional-pujades/[a-z0-9-]+/[a-z0-9-]+\.pdf$ ]]; then
+            echo "Clau no vàlida."; exit 1
+          fi
+          if ! [[ "$DIVISIO" =~ ^(honor|1|2)$ ]]; then
+            echo "Divisió no vàlida."; exit 1
+          fi
+          echo "ESTAT_KEY=${CLAU%.pdf}.estat.json" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Baixa el PDF del magatzem de pas
+        run: |
+          mkdir -p "$RUNNER_TEMP/pas"
+          aws s3 cp "s3://$R2_BUCKET/$CLAU" "$RUNNER_TEMP/pas/pujat.pdf" \
+            --endpoint-url "$R2_ENDPOINT" --only-show-errors
+
+      - name: Reconeix el document
+        id: reconeix
+        run: |
+          set +e
+          uv run --no-dev fcbillar nacional-puja "$RUNNER_TEMP/pas/pujat.pdf" \
+            --divisio "$DIVISIO" --sortida "$RUNNER_TEMP/estat.json"
+          echo "rc=$?" >> "$GITHUB_OUTPUT"
+          # L'original no ha de sobreviure a aquest pas, passi el que passi.
+          rm -f "$RUNNER_TEMP/pas/pujat.pdf"
+
+      - name: Desa la font al repositori
+        if: steps.reconeix.outputs.rc == '0'
+        run: |
+          git config user.name "fcbillar-bot"
+          git config user.email "fcbillar-bot@users.noreply.github.com"
+          git add fonts/nacional
+          if git diff --cached --quiet; then
+            echo "El document ja hi era, idèntic."
+          else
+            git commit -m "Lliga Nacional: document pujat des de l'aplicació" \
+              -m "$(python3 -c "import json,os;print(json.load(open(os.environ['RUNNER_TEMP']+'/estat.json'))['resum'])")"
+            git push
+          fi
+
+      - name: Baixa l'estat del release (BD)
+        if: steps.reconeix.outputs.rc == '0'
+        run: |
+          gh release download "$STATE_TAG" --dir data --pattern 'fcbillar.db' --clobber
+
+      - name: Ingereix i publica la Lliga Nacional
+        id: publica
+        if: steps.reconeix.outputs.rc == '0'
+        run: |
+          set +e
+          uv run --no-dev fcbillar ingest-nacional-fonts && uv run --no-dev fcbillar publish-nacional
+          echo "rc=$?" >> "$GITHUB_OUTPUT"
+
+      # L'aplicació només sap què ha passat per aquest fitxer.
+      - name: Deixa l'estat per a l'aplicació i esborra el PDF de pas
+        if: always()
+        env:
+          RC_RECONEIX: ${{ steps.reconeix.outputs.rc }}
+          RC_PUBLICA: ${{ steps.publica.outputs.rc }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime
+          cami = os.path.join(os.environ["RUNNER_TEMP"], "estat.json")
+          try:
+              estat = json.load(open(cami, encoding="utf-8"))
+          except Exception:
+              estat = {"estat": "error", "error": "El procés no ha arribat a llegir el document."}
+          if estat.get("estat") == "reconegut":
+              if os.environ.get("RC_PUBLICA") == "0":
+                  estat["estat"] = "publicat"
+              else:
+                  estat["estat"] = "error"
+                  estat["error"] = (
+                      "El document s'ha llegit i desat, però no s'ha pogut publicar. "
+                      "Entrarà amb la càrrega d'aquesta nit."
+                  )
+          estat["acabat"] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+          estat["run"] = os.environ.get("RUN_URL", "")
+          json.dump(estat, open(cami, "w", encoding="utf-8"), ensure_ascii=False)
+          PY
+          if [ -n "$ESTAT_KEY" ]; then
+            aws s3 cp "$RUNNER_TEMP/estat.json" "s3://$R2_BUCKET/$ESTAT_KEY" \
+              --endpoint-url "$R2_ENDPOINT" --content-type application/json --only-show-errors
+            aws s3 rm "s3://$R2_BUCKET/$CLAU" --endpoint-url "$R2_ENDPOINT" --only-show-errors || true
+          fi
