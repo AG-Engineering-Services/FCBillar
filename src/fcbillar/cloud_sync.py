@@ -2854,9 +2854,16 @@ def publish_lliga_encontres(
     ):
         _afegeix(r["eid"], r["mod"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"])
 
+    # Les actes mal picades que algú ha apuntat a mà: vegeu `fcbillar.correccions`.
+    from fcbillar import correccions as _correccions
+
+    corregides = _correccions.aplica_a_partides(part_rows, _correccions.llegeix(), prog)
+
     counts = {}
     counts[taules.encontres] = _upsert(sb, taules.encontres, enc_rows, "encontre_id", prog)
     counts[taules.partides] = _upsert(sb, taules.partides, part_rows, "encontre_id,ordre", prog)
+    if corregides:
+        counts[f"{taules.partides}_corregides"] = corregides
 
     # I ara es retira el que sobra, que sense això es veien encontres DUPLICATS:
     # el mateix enfrontament dues vegades, amb el mateix resultat i la mateixa
