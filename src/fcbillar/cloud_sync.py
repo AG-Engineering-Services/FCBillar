@@ -910,6 +910,11 @@ def publish_pending_games(
 
         sb.table("pending_games").delete().eq("modalitat_codi", mod).execute()
         rows = list(out.values())
+        # Les actes mal picades apuntades a mà: vegeu `fcbillar.correccions`. Va
+        # aquí perquè el rànquing provisional es calcula d'aquestes mateixes files.
+        from fcbillar import correccions as _correccions
+
+        _correccions.aplica_a_pendents(rows, _correccions.llegeix(), prog)
         for chunk in _chunks(rows):
             sb.table("pending_games").insert(chunk).execute()
         total += len(rows)

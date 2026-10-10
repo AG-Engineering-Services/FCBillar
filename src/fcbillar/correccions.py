@@ -49,6 +49,9 @@ class Correccio:
     valor_federacio: int
     valor_correcte: int
     motiu: str
+    #: El dia de la jornada, en ISO. Cal per corregir també les partides
+    #: pendents, que no porten l'encontre: sense data no s'hi aplica.
+    data: str = ""
 
 
 def _net(text: str | None) -> str:
@@ -78,6 +81,7 @@ def llegeix(cami: str | Path = FITXER_LLIGA) -> list[Correccio]:
                     valor_federacio=int(fila["valor_federacio"]),
                     valor_correcte=int(fila["valor_correcte"]),
                     motiu=(fila.get("motiu") or "").strip(),
+                    data=(fila.get("data") or "").strip(),
                 )
             )
     return out
@@ -137,4 +141,41 @@ def aplica_a_partides(
                 f"federació ara diu {c.camp}={actual}, ni {c.valor_federacio} ni "
                 f"{c.valor_correcte}. Mana la federació; reviseu la correcció.",
             )
+    return aplicades
+
+
+def aplica_a_pendents(
+    files: list[dict], correccions: list[Correccio], prog: Progress | None = None
+) -> int:
+    """El mateix per a `pending_games`: la partida vista des de cada jugador.
+
+    Aquestes files alimenten la fitxa i el rànquing provisional, i no porten
+    l'encontre: una partida s'hi reconeix pel nom del jugador dins de la
+    signatura, pel dia de la jornada i pel valor mal picat. Per això només s'hi
+    apliquen les correccions d'`entrades` que porten `data` —les caramboles hi
+    van per jugador i no per local i visitant— i només a les partides de lliga.
+
+    La signatura no es toca: és la que casa la partida amb la de `games` el dia
+    que la federació la compti al rànquing, i allà hi haurà el valor de l'acta.
+
+    Aquí no s'avisa quan no es troba res: la partida deixa de ser pendent quan
+    entra a `games`, i això és el final normal d'una correcció, no un error.
+    """
+    avisa: Progress = prog or (lambda _nivell, _missatge: None)
+    aplicades = 0
+    for c in correccions:
+        if c.camp != "entrades" or not c.data:
+            continue
+        clau = _net(c.jugador).lower()
+        for fila in files:
+            if (
+                fila.get("font") == "lliga"
+                and fila.get("data") == c.data
+                and fila.get("entrades") == c.valor_federacio
+                and clau in (fila.get("signatura") or "")
+            ):
+                fila["entrades"] = c.valor_correcte
+                aplicades += 1
+    if aplicades:
+        avisa("info", f"correccions aplicades a les partides pendents: {aplicades} files")
     return aplicades
