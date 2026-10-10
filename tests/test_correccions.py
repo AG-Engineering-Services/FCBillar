@@ -101,3 +101,12 @@ def test_llegeix_el_fitxer_i_rebutja_un_camp_que_no_existeix(tmp_path):
 def test_el_fitxer_del_repositori_es_llegeix():
     # Si algú hi afegeix una fila mal escrita, que peti aquí i no a la nit.
     C.llegeix()
+
+
+def test_un_encontre_que_no_es_en_aquesta_tanda_no_fa_soroll():
+    # La lliga de 4 Modalitats es publica a part: la correcció d'un encontre de
+    # Tres Bandes no hi ha de dir res.
+    altres = [dict(f, encontre_id=99999) for f in _partides(9)]
+    avisos: list[tuple[str, str]] = []
+    assert C.aplica_a_partides(altres, [CORRECCIO], lambda n, m: avisos.append((n, m))) == 0
+    assert avisos == []

@@ -93,7 +93,13 @@ def aplica_a_partides(
     """
     avisa: Progress = prog or (lambda _nivell, _missatge: None)
     aplicades = 0
+    encontres = {f.get("encontre_id") for f in files}
     for c in correccions:
+        # El mateix fitxer serveix per a la lliga de Tres Bandes i la de 4
+        # Modalitats, que es publiquen per separat: un encontre que no és en
+        # aquesta tanda és de l'altra lliga, no una correcció perduda.
+        if c.encontre_id not in encontres:
+            continue
         clau = _net(c.jugador)
         candidates = [
             f
