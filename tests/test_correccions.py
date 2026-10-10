@@ -110,3 +110,53 @@ def test_un_encontre_que_no_es_en_aquesta_tanda_no_fa_soroll():
     avisos: list[tuple[str, str]] = []
     assert C.aplica_a_partides(altres, [CORRECCIO], lambda n, m: avisos.append((n, m))) == 0
     assert avisos == []
+
+
+def _pendents(entrades: int) -> list[dict]:
+    sig = "davila silva, henry:9|restrepo hernandez, carlos:30|9"
+    comu = {"modalitat_codi": 1, "signatura": sig, "font": "lliga", "data": "2026-10-10"}
+    return [
+        {
+            **comu,
+            "player_fcb_id": "2369",
+            "caramboles": 30,
+            "caramboles_opp": 9,
+            "entrades": entrades,
+        },
+        {
+            **comu,
+            "player_fcb_id": "73",
+            "caramboles": 9,
+            "caramboles_opp": 30,
+            "entrades": entrades,
+        },
+        # Una altra partida seva, un altre dia, que també va durar 9 entrades.
+        {
+            **comu,
+            "signatura": "altre, rival:30|restrepo hernandez, carlos:2|9",
+            "data": "2026-09-26",
+            "player_fcb_id": "2369",
+            "entrades": 9,
+        },
+        # I una d'un open el mateix dia: no és de lliga.
+        {**comu, "font": "open", "player_fcb_id": "2369", "entrades": 9},
+    ]
+
+
+AMB_DATA = C.Correccio(11885, "Restrepo", "entrades", 9, 32, "acta mal picada", "2026-10-10")
+
+
+def test_les_pendents_es_corregeixen_per_als_dos_jugadors_i_nomes_la_d_aquell_dia():
+    files = _pendents(9)
+    assert C.aplica_a_pendents(files, [AMB_DATA]) == 2
+    assert [f["entrades"] for f in files] == [32, 32, 9, 9]
+    # La signatura és la de l'acta: és la que la casarà amb `games`.
+    assert files[0]["signatura"].endswith("|9")
+
+
+def test_sense_data_o_si_la_federacio_ja_ho_ha_canviat_les_pendents_no_es_toquen():
+    files = _pendents(9)
+    assert C.aplica_a_pendents(files, [CORRECCIO]) == 0
+    ja_be = _pendents(32)
+    assert C.aplica_a_pendents(ja_be, [AMB_DATA]) == 0
+    assert [f["entrades"] for f in ja_be[:2]] == [32, 32]
