@@ -20,11 +20,22 @@ from datetime import UTC
 from pathlib import Path
 from typing import NamedTuple
 
+from postgrest import CountMethod, ReturnMethod
+
 from fcbillar.config import PROJECT_ROOT, get_settings
 from fcbillar.opens_club import club_master, real_club
 
 SCHEMA = "fcbillar"
 Progress = Callable[[str, str], None]
+
+# Per defecte PostgREST torna sencera cada fila escrita o esborrada, i Neon ho
+# compta com a transferència de sortida (5 GB al mes al pla Free; a l'octubre de
+# 2026 se n'havia gastat el 82% a mig mes). El bucle d'opens en directe es
+# retornava així els propis payloads cada dos minuts. Cap escriptura d'aquí no
+# necessita les files de tornada; on cal saber quantes n'han caigut, es demana
+# el recompte.
+_MINIMAL = ReturnMethod.minimal
+_EXACTE = CountMethod.exact
 
 # --- App germana "Estadístiques" (schema public, mateix projecte Supabase) ---
 # Mapatge entre el seu món i el federatiu, per marcar `public.partides.computa`.
@@ -119,7 +130,7 @@ def _chunks(rows: list[dict], n: int = 500) -> Iterable[list[dict]]:
 def _upsert(sb, table: str, rows: list[dict], on_conflict: str, prog: Progress) -> int:
     total = 0
     for chunk in _chunks(rows):
-        sb.table(table).upsert(chunk, on_conflict=on_conflict).execute()
+        sb.table(table).upsert(chunk, on_conflict=on_conflict, returning=_MINIMAL).execute()
         total += len(chunk)
     prog("ok", f"{table}: {total} files")
     return total
@@ -523,7 +534,9 @@ def publish_provisional_ranking(
             )
         )
         active = [c for c in computed if c["n"] > 0]
-        sb.table("ranking_provisional").delete().eq("modalitat_codi", mod).execute()
+        sb.table("ranking_provisional").delete(returning=_MINIMAL).eq(
+            "modalitat_codi", mod
+        ).execute()
         # Publiquem sempre, encara que ningú tingui partides noves: la fitxa de
         # jugador llegeix `current_game_ids` d'aquí per marcar quines partides
         # computen a la mitjana del rànquing vigent. Sense projecció, els camps
@@ -549,7 +562,7 @@ def publish_provisional_ranking(
             for i, c in enumerate(computed, start=1)
         ]
         for chunk in _chunks(rows):
-            sb.table("ranking_provisional").insert(chunk).execute()
+            sb.table("ranking_provisional").insert(chunk, returning=_MINIMAL).execute()
         total += len(rows)
         prog(
             "ok",
@@ -908,7 +921,7 @@ def publish_pending_games(
                 r["data"],
             )
 
-        sb.table("pending_games").delete().eq("modalitat_codi", mod).execute()
+        sb.table("pending_games").delete(returning=_MINIMAL).eq("modalitat_codi", mod).execute()
         rows = list(out.values())
         # Les actes mal picades apuntades a mà: vegeu `fcbillar.correccions`. Va
         # aquí perquè el rànquing provisional es calcula d'aquestes mateixes files.
@@ -916,7 +929,7 @@ def publish_pending_games(
 
         _correccions.aplica_a_pendents(rows, _correccions.llegeix(), prog)
         for chunk in _chunks(rows):
-            sb.table("pending_games").insert(chunk).execute()
+            sb.table("pending_games").insert(chunk, returning=_MINIMAL).execute()
         total += len(rows)
         prog("ok", f"pending_games[{mod}]: {len(rows)} files")
         fora = len(sense_fitxa) - ja_sense_fitxa
@@ -1235,11 +1248,11 @@ def publish_rating_buckets(
     sb = get_client()
     # Recalcul complet: esborrem totes les files (totes les modalitats) abans
     # d'inserir perquè l'upsert no deixi franges/índexs orfes.
-    sb.table("player_rating_buckets").delete().gt("modalitat_codi", 0).execute()
+    sb.table("player_rating_buckets").delete(returning=_MINIMAL).gt("modalitat_codi", 0).execute()
     n = _upsert(
         sb, "player_rating_buckets", bucket_rows, "player_fcb_id,modalitat_codi,bucket", prog
     )
-    sb.table("player_rating_index").delete().gt("modalitat_codi", 0).execute()
+    sb.table("player_rating_index").delete(returning=_MINIMAL).gt("modalitat_codi", 0).execute()
     ni = _upsert(sb, "player_rating_index", index_rows, "player_fcb_id,modalitat_codi", prog)
     return {"player_rating_buckets": n, "player_rating_index": ni}
 
@@ -1989,7 +2002,7 @@ def _retira_clubs_fusionats(sb, vius: set[str], prog) -> int:
     if not lliures:
         return 0
 
-    sb.table("clubs").delete().in_("fcb_id", lliures).execute()
+    sb.table("clubs").delete(returning=_MINIMAL).in_("fcb_id", lliures).execute()
     prog("ok", f"clubs: {len(lliures)} retirats (ja no són al cens)")
     return len(lliures)
 
@@ -2017,14 +2030,14 @@ def _retira_sobrants(
         if fila["lliga_id"] != lliga:
             if not altres_lligues:
                 continue
-            q = sb.table(taula).delete().eq("lliga_id", fila["lliga_id"])
+            q = sb.table(taula).delete(returning=_MINIMAL).eq("lliga_id", fila["lliga_id"])
             for c in claus:
                 q = q.eq(c, fila[c])
             q.execute()
             fora += 1
             continue
         if tuple(fila[c] for c in claus) not in vius:
-            q = sb.table(taula).delete().eq("lliga_id", lliga)
+            q = sb.table(taula).delete(returning=_MINIMAL).eq("lliga_id", lliga)
             for c in claus:
                 q = q.eq(c, fila[c])
             q.execute()
@@ -2266,8 +2279,13 @@ def publish_opens(
         tretes = 0
         for i in range(0, len(en_joc), 50):
             tram = sorted(en_joc)[i : i + 50]
-            res = sb.table("open_classifications").delete().in_("open_id", tram).execute()
-            tretes += len(res.data or [])
+            res = (
+                sb.table("open_classifications")
+                .delete(count=_EXACTE, returning=_MINIMAL)
+                .in_("open_id", tram)
+                .execute()
+            )
+            tretes += res.count or 0
         if tretes:
             prog(
                 "ok", f"open_classifications: {tretes} files retirades (el torneig encara es juga)"
@@ -2344,7 +2362,7 @@ def _retira_classificacions_que_sobren(sb, classifs: list[dict], prog: Progress)
         return 0
     fora = [x for x in al_nuvol if (x["open_id"], x["player_fcb_id"]) not in vives]
     for x in fora:
-        sb.table("open_classifications").delete().eq("open_id", x["open_id"]).eq(
+        sb.table("open_classifications").delete(returning=_MINIMAL).eq("open_id", x["open_id"]).eq(
             "player_fcb_id", x["player_fcb_id"]
         ).execute()
     if fora:
@@ -2369,8 +2387,8 @@ def _prune_orphan_opens(sb, local_ids: set[int], prog: Progress) -> int:
         if not ghosts:
             return 0
         # Primer les classificacions (referencien l'open), després l'open.
-        sb.table("open_classifications").delete().in_("open_id", ghosts).execute()
-        sb.table("opens").delete().in_("open_id", ghosts).execute()
+        sb.table("open_classifications").delete(returning=_MINIMAL).in_("open_id", ghosts).execute()
+        sb.table("opens").delete(returning=_MINIMAL).in_("open_id", ghosts).execute()
         prog("ok", f"opens: {len(ghosts)} retirats (ja no són a la BD local)")
         return len(ghosts)
     except Exception as exc:
@@ -2903,8 +2921,8 @@ def publish_lliga_encontres(
     for i in range(0, len(orfes), 50):
         tram = orfes[i : i + 50]
         # Primer les partides: pengen de l'encontre.
-        sb.table(taules.partides).delete().in_("encontre_id", tram).execute()
-        sb.table(taules.encontres).delete().in_("encontre_id", tram).execute()
+        sb.table(taules.partides).delete(returning=_MINIMAL).in_("encontre_id", tram).execute()
+        sb.table(taules.encontres).delete(returning=_MINIMAL).in_("encontre_id", tram).execute()
     if orfes:
         prog(
             "ok",
@@ -2926,12 +2944,12 @@ def publish_lliga_encontres(
             tram = eids[i : i + 50]
             res = (
                 sb.table(taules.partides)
-                .delete()
+                .delete(count=_EXACTE, returning=_MINIMAL)
                 .in_("encontre_id", tram)
                 .gt("ordre", quantes)
                 .execute()
             )
-            sobrants += len(res.data or [])
+            sobrants += res.count or 0
     if sobrants:
         prog("ok", f"{taules.partides}: {sobrants} partides retirades (ja no son a l'acta)")
     counts[f"{taules.partides}_retirades"] = sobrants
@@ -3162,9 +3180,9 @@ def publish_open_partides(
             (x["fase_id"], x["ordre"]) for x in actuals if (x["fase_id"], x["ordre"]) not in claus
         ]
         for fase_id, ordre in sobren:
-            sb.table("open_partides").delete().eq("open_id", oid).eq("fase_id", fase_id).eq(
-                "ordre", ordre
-            ).execute()
+            sb.table("open_partides").delete(returning=_MINIMAL).eq("open_id", oid).eq(
+                "fase_id", fase_id
+            ).eq("ordre", ordre).execute()
             retirades += 1
     if retirades:
         prog("ok", f"open_partides: {retirades} files retirades (ja no hi són)")
@@ -3396,9 +3414,9 @@ def publish_open_grups(
     for x in al_nuvol:
         if (x["open_id"], x["fase_id"], x["grup_nom"]) in vius:
             continue
-        sb.table("open_grups").delete().eq("open_id", x["open_id"]).eq("fase_id", x["fase_id"]).eq(
-            "grup_nom", x["grup_nom"]
-        ).execute()
+        sb.table("open_grups").delete(returning=_MINIMAL).eq("open_id", x["open_id"]).eq(
+            "fase_id", x["fase_id"]
+        ).eq("grup_nom", x["grup_nom"]).execute()
         retirats += 1
     if retirats:
         prog("ok", f"open_grups: {retirats} grups retirats (ja no són a la BD local)")
@@ -3441,7 +3459,9 @@ def _retira_fases_que_sobren(
 
     fases_fora = sorted({(x["open_id"], x["fase_id"]) for x in fases_al_nuvol} - fases_vives)
     for open_id, fase_id in fases_fora:
-        sb.table("open_fases").delete().eq("open_id", open_id).eq("fase_id", fase_id).execute()
+        sb.table("open_fases").delete(returning=_MINIMAL).eq("open_id", open_id).eq(
+            "fase_id", fase_id
+        ).execute()
 
     files_fora = [
         x
@@ -3450,7 +3470,7 @@ def _retira_fases_que_sobren(
         and (x["open_id"], x["fase_id"], x["jugador"]) not in files_vives
     ]
     for x in files_fora:
-        sb.table("open_fase_ranquing").delete().eq("open_id", x["open_id"]).eq(
+        sb.table("open_fase_ranquing").delete(returning=_MINIMAL).eq("open_id", x["open_id"]).eq(
             "fase_id", x["fase_id"]
         ).eq("jugador", x["jugador"]).execute()
 
@@ -3583,7 +3603,7 @@ def publish_ronda_projectada(
         clau = (x["open_id"], x["ronda"], x["jugador"])
         if clau in vives:
             continue
-        sb.table("open_ronda_projectada").delete().eq("open_id", x["open_id"]).eq(
+        sb.table("open_ronda_projectada").delete(returning=_MINIMAL).eq("open_id", x["open_id"]).eq(
             "ronda", x["ronda"]
         ).eq("jugador", x["jugador"]).execute()
         retirades += 1
@@ -3623,12 +3643,12 @@ def _retira_projeccions_superades(sb, conn, prog: Progress) -> int:
             continue
         res = (
             sb.table("open_ronda_projectada")
-            .delete()
+            .delete(count=_EXACTE, returning=_MINIMAL)
             .eq("open_id", open_id)
             .eq("ronda", ronda)
             .execute()
         )
-        retirades += len(res.data or [])
+        retirades += res.count or 0
     if retirades:
         prog("ok", f"open_ronda_projectada: {retirades} files retirades (ronda ja sortejada)")
     return retirades
@@ -4128,7 +4148,9 @@ def _retira_rondes_sobrants(sb, genere: str, max_ronda: int, prog: Progress) -> 
         )
     }
     for ronda in sorted(sobrants):
-        sb.table("open_ranking").delete().eq("genere", genere).eq("ronda", ronda).execute()
+        sb.table("open_ranking").delete(returning=_MINIMAL).eq("genere", genere).eq(
+            "ronda", ronda
+        ).execute()
     if sobrants:
         prog(
             "ok",
@@ -4175,9 +4197,9 @@ def _retira_files_sobrants(sb, genere: str, rows: list[dict], prog: Progress) ->
         }
     )
     for ronda, fcb in sobrants:
-        sb.table("open_ranking").delete().eq("genere", genere).eq("ronda", ronda).eq(
-            "player_fcb_id", fcb
-        ).execute()
+        sb.table("open_ranking").delete(returning=_MINIMAL).eq("genere", genere).eq(
+            "ronda", ronda
+        ).eq("player_fcb_id", fcb).execute()
     if sobrants:
         prog(
             "ok",
@@ -6374,22 +6396,56 @@ def publish_live_opens(
     # FCB) amb les reals: la projecció desada (id negatiu) i, si ja s'ha plegat i
     # esborrat, el payload REAL previ (que les arrossega). Vegeu
     # `_merge_projected_phases`.
+    #
+    # Les projeccions es llegeixen senceres (calen per fondre), però dels opens
+    # reals només l'empremta i si porten fases projectades: el payload previ
+    # només cal quan no hi ha cap projecció i n'hi portava, i es baixa aleshores
+    # (`_prev_real`). Aquesta funció corre cada dos minuts tot el cap de setmana
+    # i cada byte que surt de Neon compta.
     try:
-        _live_rows = (
+        proj_full = (
             sb.table("open_live")
             .select("fcb_division_id,name,modality,payload_json")
+            .lt("fcb_division_id", 0)
             .execute()
             .data
             or []
         )
     except Exception:
-        _live_rows = []
-    proj_full = [r for r in _live_rows if (r.get("fcb_division_id") or 0) < 0]
-    prev_real = {
-        r["fcb_division_id"]: r.get("payload_json")
-        for r in _live_rows
-        if (r.get("fcb_division_id") or 0) > 0
-    }
+        proj_full = []
+    try:
+        previes = (
+            sb.table("open_live")
+            .select(
+                f"fcb_division_id,hash:payload_json->>{_CAMP_EMPREMTA},"
+                f"proj:payload_json->>{_CAMP_TE_PROJECTADES}"
+            )
+            .gt("fcb_division_id", 0)
+            .execute()
+            .data
+            or []
+        )
+    except Exception:
+        previes = []
+    empremta_previa = {r["fcb_division_id"]: r.get("hash") for r in previes}
+    # Sense l'indicador (files d'abans que existís) no se sap: es baixa.
+    te_projectades = {r["fcb_division_id"] for r in previes if r.get("proj") != "false"}
+
+    def _prev_real(division_id: int) -> dict:
+        if division_id not in te_projectades:
+            return {}
+        try:
+            fila = (
+                sb.table("open_live")
+                .select("payload_json")
+                .eq("fcb_division_id", division_id)
+                .execute()
+                .data
+                or []
+            )
+        except Exception:
+            return {}
+        return (fila[0].get("payload_json") if fila else None) or {}
 
     try:
         entries = fetch_individuals_llistat(force=force)
@@ -6525,7 +6581,7 @@ def publish_live_opens(
             template = _matching_projection_payload(state.structure.name, modality, proj_full)
             template_phases = (template or {}).get("phases")
             if not template_phases:
-                prev_phases = (prev_real.get(e.division_id) or {}).get("phases") or []
+                prev_phases = _prev_real(e.division_id).get("phases") or []
                 if any(p.get("projected") for p in prev_phases):
                     template_phases = prev_phases
             if template_phases:
@@ -6563,8 +6619,27 @@ def publish_live_opens(
         prog("ok", f"[dry-run] es publicarien {len(rows)} opens; no s'escriu ni s'esborra res")
         return comptadors
 
-    if rows:
-        _upsert(sb, "open_live", rows, "fcb_division_id", prog)
+    # Un open sense canvis no es torna a pujar: només se'n refresca l'hora, que és
+    # el que fan servir la web («actualitzat fa…», el punt vermell) i la reingesta
+    # per saber que segueix en joc.
+    canviades: list[dict] = []
+    iguals: list[int] = []
+    for r in rows:
+        payload = r["payload_json"]
+        payload[_CAMP_TE_PROJECTADES] = any(p.get("projected") for p in payload.get("phases") or [])
+        empremta = _empremta_payload(payload)
+        payload[_CAMP_EMPREMTA] = empremta
+        if empremta_previa.get(r["fcb_division_id"]) == empremta:
+            iguals.append(r["fcb_division_id"])
+        else:
+            canviades.append(r)
+    if canviades:
+        _upsert(sb, "open_live", canviades, "fcb_division_id", prog)
+    if iguals:
+        sb.table("open_live").update(
+            {"captured_at": fetched_at, "updated_at": fetched_at}, returning=_MINIMAL
+        ).in_("fcb_division_id", iguals).execute()
+        prog("ok", f"open_live: {len(iguals)} opens sense canvis (només l'hora)")
 
     # Treu els Opens REALS que ja no són en curs (acabats o desapareguts del
     # llistat). Només toca ids POSITIUS: les projeccions (id sintètic negatiu,
@@ -6575,12 +6650,12 @@ def publish_live_opens(
     try:
         res = (
             sb.table("open_live")
-            .delete()
+            .delete(count=_EXACTE, returning=_MINIMAL)
             .gt("fcb_division_id", 0)
             .not_.in_("fcb_division_id", (active_ids + keep_ids) or [-1])
             .execute()
         )
-        removed = len(res.data or [])
+        removed = res.count or 0
         if removed:
             prog("ok", f"open_live: {removed} files retirades (ja no en curs)")
     except Exception as exc:
@@ -6604,7 +6679,7 @@ def publish_live_opens(
         active = [(set(_open_match_key(r["name"]).split()), r.get("modality") or "") for r in rows]
         stale = [p["fcb_division_id"] for p in proj_rows if _projection_superseded_by(p, active)]
         if stale:
-            sb.table("open_live").delete().in_("fcb_division_id", stale).execute()
+            sb.table("open_live").delete(returning=_MINIMAL).in_("fcb_division_id", stale).execute()
             superseded = len(stale)
             prog("ok", f"open_live: {superseded} projeccions retirades (sorteig real ja publicat)")
     except Exception as exc:
@@ -6613,6 +6688,26 @@ def publish_live_opens(
     comptadors["removed"] = removed
     comptadors["superseded"] = superseded
     return comptadors
+
+
+#: On viatja, dins del payload d'`open_live`, l'empremta del contingut.
+_CAMP_EMPREMTA = "content_hash"
+#: I si porta fases projectades, perquè la passada següent sàpiga si val la pena
+#: baixar-lo sencer per fondre-les (vegeu `publish_live_opens`).
+_CAMP_TE_PROJECTADES = "has_projected_phases"
+
+
+def _empremta_payload(payload: dict) -> str:
+    """Empremta del que ensenya un payload d'`open_live`.
+
+    Deixa fora `fetched_at` (canvia a cada passada) i l'empremta mateixa.
+    """
+    import hashlib
+    import json
+
+    contingut = {k: v for k, v in payload.items() if k not in ("fetched_at", _CAMP_EMPREMTA)}
+    text = json.dumps(contingut, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(text.encode()).hexdigest()
 
 
 def _publica_reemplaçant(
@@ -6663,7 +6758,7 @@ def _publica_reemplaçant(
         for fila in _totes_amb(consulta(valors)):
             if tuple(str(fila[c]) for c in clau) in vius:
                 continue
-            d = sb.table(taula).delete()
+            d = sb.table(taula).delete(returning=_MINIMAL)
             for camp in clau:
                 d = d.eq(camp, fila[camp])
             d.execute()

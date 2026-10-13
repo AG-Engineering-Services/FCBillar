@@ -20,6 +20,8 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Any, Iterable
 
+from postgrest import ReturnMethod
+
 from supabase import Client, create_client
 
 SCHEMA = "fcb_opens"
@@ -63,7 +65,7 @@ def _insert_in_chunks(sb: Client, table: str, rows: list[dict]) -> None:
     if not rows:
         return
     for chunk in _chunked(rows):
-        _table(sb, table).insert(chunk).execute()
+        _table(sb, table).insert(chunk, returning=ReturnMethod.minimal).execute()
 
 
 @dataclass
@@ -116,7 +118,7 @@ def _sync_players(
     ]
     for chunk in _chunked(payload):
         _table(sb, "players").upsert(
-            chunk, on_conflict="normalized_name"
+            chunk, on_conflict="normalized_name", returning=ReturnMethod.minimal
         ).execute()
 
     # Read back to discover remote ids.
@@ -152,7 +154,7 @@ def _sync_monthly_rankings(
         return (0, 0)
 
     # Wipe — ON DELETE CASCADE cleans up entries.
-    _table(sb, "monthly_rankings").delete().neq("id", -1).execute()
+    _table(sb, "monthly_rankings").delete(returning=ReturnMethod.minimal).neq("id", -1).execute()
 
     # Build payload and insert; capture remote ids in order.
     inserted = (
@@ -238,7 +240,7 @@ def _sync_opens(
     if not local_opens:
         return (0, 0)
 
-    _table(sb, "opens").delete().neq("id", -1).execute()
+    _table(sb, "opens").delete(returning=ReturnMethod.minimal).neq("id", -1).execute()
 
     inserted = (
         _table(sb, "opens")
@@ -333,7 +335,7 @@ def _sync_leagues(
         return
 
     # ON DELETE CASCADE handles divisions/groups/jornades/encontres/partides.
-    _table(sb, "leagues").delete().neq("id", -1).execute()
+    _table(sb, "leagues").delete(returning=ReturnMethod.minimal).neq("id", -1).execute()
 
     inserted_leagues = (
         _table(sb, "leagues")

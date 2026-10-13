@@ -393,6 +393,9 @@ export interface OpenLivePayload {
   classification: OpenLiveClassRow[];
   classification_is_provisional: boolean;
   fetched_at: string;
+  // Empremta del contingut (sense `fetched_at`), la posa `publish-live-opens`.
+  // Si no ha canviat, la pàgina en directe no torna a baixar el payload.
+  content_hash?: string;
   player_ids?: Record<string, string>;
   // num_seq del rànquing 3B amb què s'han calculat rank3b/prize (el de la
   // convocatòria si està fixat; si no, el darrer). El selector hi ancora el valor per defecte.

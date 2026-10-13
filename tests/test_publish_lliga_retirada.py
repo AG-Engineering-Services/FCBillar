@@ -57,8 +57,9 @@ class TaulaFalsa:
         self._files = files
         return self
 
-    def delete(self) -> TaulaFalsa:
+    def delete(self, **k: Any) -> TaulaFalsa:
         self._accio = "delete"
+        self._minimal = str(k.get("returning", "")).endswith("minimal")
         return self
 
     def eq(self, camp: str, valor: Any) -> TaulaFalsa:
@@ -87,12 +88,13 @@ class TaulaFalsa:
         if self._accio == "upsert":
             files.extend(self._files)
         elif self._accio == "delete":
-            # Un `delete` s'endu les files que compleixen TOTS els filtres, i
-            # retorna les que s'ha endut: es el que fa supabase-py, que demana la
-            # representacio, i hi ha codi que les compta.
+            # Un `delete` s'endu les files que compleixen TOTS els filtres. Com
+            # PostgREST: amb `returning=minimal` no en torna cap i qui les vol
+            # comptar ho ha de fer amb el recompte.
             fora = [f for f in files if all(p(f) for p in self._filtres)]
             self._m[self._nom] = [f for f in files if f not in fora]
-            return type("Res", (), {"data": fora, "count": len(fora)})()
+            dades = [] if self._minimal else fora
+            return type("Res", (), {"data": dades, "count": len(fora)})()
         # Un `select` respon NOMES el que passa els filtres, com PostgREST: hi ha
         # retirades que es limiten a un abast i sense aixo no es poden provar.
         dades = [f for f in self._m.get(self._nom, []) if all(p(f) for p in self._filtres)]

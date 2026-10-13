@@ -29,6 +29,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
+from postgrest import ReturnMethod
+
 from supabase import Client, create_client
 
 from .reglament.puntuacio import points_for_position
@@ -391,7 +393,9 @@ def snapshot_all_live_opens(
 
     if rows:
         on_progress("phase", f"insert {len(rows)} snapshots")
-        sb.schema(SCHEMA).table("open_live_snapshots").insert(rows).execute()
+        sb.schema(SCHEMA).table("open_live_snapshots").insert(
+            rows, returning=ReturnMethod.minimal
+        ).execute()
         counters.snapshots_written = len(rows)
 
     return counters

@@ -24,7 +24,51 @@ from tests.test_publish_lliga_retirada import ClientFals, TaulaFalsa
 
 
 class Taula(TaulaFalsa):
-    """La taula falsa de sempre, amb els tres filtres que fa servir aquest camí."""
+    """La taula falsa de sempre, amb el que fa servir aquest camí.
+
+    Llegeix els àlies de camp JSON (`hash:payload_json->>content_hash`) i sap fer
+    l'`update` i el recompte de peticions, per veure què es torna a pujar.
+    """
+
+    def select(self, *columnes, **_k) -> Taula:
+        self._columnes = ",".join(columnes)
+        return super().select()
+
+    def upsert(self, files, **_k) -> Taula:
+        self._m.setdefault("_pujades", []).extend(f["fcb_division_id"] for f in files)
+        # Com PostgREST, per la clau de conflicte: la fila nova substitueix la vella.
+        claus = {f["fcb_division_id"] for f in files}
+        self._m[self._nom] = [
+            f for f in self._m.get(self._nom, []) if f.get("fcb_division_id") not in claus
+        ]
+        return super().upsert(files)
+
+    def update(self, canvis: dict, **_k) -> Taula:
+        self._accio = "update"
+        self._canvis = canvis
+        return self
+
+    def execute(self):
+        if self._accio == "update":
+            for f in self._m.get(self._nom, []):
+                if all(p(f) for p in self._filtres):
+                    f.update(self._canvis)
+            return type("Res", (), {"data": [], "count": 0})()
+        res = super().execute()
+        if self._accio == "select" and "->>" in getattr(self, "_columnes", ""):
+            # Com PostgREST, `->>` torna el valor com a text.
+            def camp(f: dict, cami: str):
+                columna, clau = cami.split("->>")
+                valor = (f.get(columna) or {}).get(clau)
+                return str(valor).lower() if isinstance(valor, bool) else valor
+
+            parells = [c.split(":") for c in self._columnes.split(",")[1:]]
+            res.data = [
+                {"fcb_division_id": f["fcb_division_id"]}
+                | {alies: camp(f, cami) for alies, cami in parells}
+                for f in res.data
+            ]
+        return res
 
     def order(self, *_a, **_k) -> Taula:
         return self
@@ -87,7 +131,9 @@ def entorn(monkeypatch):
         "players": [{"nom": "ESPINASA SÁNCHEZ, JOAN", "fcb_id": "211"}],
     }
     monkeypatch.setattr(cloud_sync, "get_client", lambda: Client(magatzem))
-    return type("Entorn", (), {"magatzem": magatzem, "canvis": canvis})()
+    return type(
+        "Entorn", (), {"magatzem": magatzem, "canvis": canvis, "monkeypatch": monkeypatch}
+    )()
 
 
 def test_un_open_en_joc_es_publica_amb_les_seves_fases(entorn) -> None:
@@ -291,3 +337,44 @@ def test_inclou_tancats_nomes_amb_dry_run(monkeypatch) -> None:
     res = CliRunner().invoke(app, ["publish-live-opens", "--inclou-tancats"])
     assert res.exit_code == 2
     assert cridat == []
+
+
+def test_un_open_sense_canvis_no_es_torna_a_pujar(entorn) -> None:
+    """Cada dos minuts tot el cap de setmana: pujar-lo sencer es menjava la quota de Neon."""
+    cloud_sync.publish_live_opens()
+    entorn.magatzem["open_live"][0]["captured_at"] = "2000-01-01T00:00:00+00:00"
+    assert entorn.magatzem["_pujades"] == [219]
+
+    res = cloud_sync.publish_live_opens()
+
+    assert res["live_opens"] == 1
+    assert entorn.magatzem["_pujades"] == [219], "el payload no s'ha tornat a pujar"
+    (fila,) = entorn.magatzem["open_live"]
+    assert fila["captured_at"] > "2000-01-01T00:00:00+00:00", "però l'hora sí que es refresca"
+    assert fila["payload_json"]["phases"], "i el payload d'abans hi és sencer"
+
+
+def test_un_open_que_canvia_es_torna_a_pujar(entorn) -> None:
+    cloud_sync.publish_live_opens()
+    entorn.magatzem["open_live"][0]["payload_json"]["content_hash"] = "una altra"
+
+    cloud_sync.publish_live_opens()
+
+    assert entorn.magatzem["_pujades"] == [219, 219]
+
+
+def test_sense_fases_projectades_el_payload_previ_no_es_baixa(entorn) -> None:
+    """Sense projecció, el payload previ només es llegeix si n'arrossegava de projectades."""
+    cloud_sync.publish_live_opens()
+    assert entorn.magatzem["open_live"][0]["payload_json"]["has_projected_phases"] is False
+    lectures: list[str] = []
+    select = Taula.select
+
+    def espia(self, *columnes, **k):
+        lectures.append(",".join(columnes))
+        return select(self, *columnes, **k)
+
+    entorn.monkeypatch.setattr(Taula, "select", espia)
+    cloud_sync.publish_live_opens()
+
+    assert "payload_json" not in lectures

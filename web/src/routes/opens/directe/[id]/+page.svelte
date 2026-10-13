@@ -227,7 +227,31 @@
 			.then(({ data }) => (scores = (data ?? []) as OpenLiveScore[]));
 	}
 
+	// Si el payload no ha canviat des de l'última lectura (mateixa empremta), no
+	// es torna a baixar: només se'n refresca l'hora. El payload pesa i aquesta
+	// pàgina pregunta cada 90 s per cada persona que la té oberta; tot el que surt
+	// de Neon compta contra la quota mensual de transferència.
+	async function unchanged(): Promise<boolean> {
+		const hash = row?.fcb_division_id === divisionId ? row.payload_json?.content_hash : undefined;
+		if (!hash) return false;
+		const { data } = await db
+			.from('open_live')
+			.select('captured_at,hash:payload_json->>content_hash')
+			.eq('fcb_division_id', divisionId)
+			.maybeSingle();
+		const d = data as { captured_at: string; hash: string | null } | null;
+		if (!d || d.hash !== hash || !row) return false;
+		row = { ...row, captured_at: d.captured_at };
+		rowCache.set(divisionId, row);
+		return true;
+	}
+
 	async function load() {
+		if (await unchanged()) {
+			loadScores();
+			loading = false;
+			return;
+		}
 		const { data, error: e } = await db
 			.from('open_live')
 			.select('*')
