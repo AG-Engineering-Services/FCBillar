@@ -39,7 +39,7 @@ class TaulaFalsa:
         self._clau = tuple((k.get("on_conflict") or "").split(","))
         return self
 
-    def delete(self) -> TaulaFalsa:
+    def delete(self, **_k: Any) -> TaulaFalsa:
         self._accio = "delete"
         return self
 

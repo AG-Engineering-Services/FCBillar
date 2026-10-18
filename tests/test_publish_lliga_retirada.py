@@ -57,7 +57,7 @@ class TaulaFalsa:
         self._files = files
         return self
 
-    def delete(self) -> TaulaFalsa:
+    def delete(self, **_k: Any) -> TaulaFalsa:
         self._accio = "delete"
         return self
 

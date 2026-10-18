@@ -1288,7 +1288,14 @@ def _fitxer_de_publicacio() -> Path:
 
 
 @app.command("publish-cloud")
-def publish_cloud_cmd() -> None:
+def publish_cloud_cmd(
+    lleuger: bool = typer.Option(
+        False,
+        "--lleuger",
+        help="Només el que es mou durant un cap de setmana de joc (lliga, copa, opens, "
+        "partides pendents). Sense rànquings, partides, afiliacions ni Estadístiques.",
+    ),
+) -> None:
     """Publica la BD local a **Neon** (esquema `fcbillar`) per al frontend de Vercel.
 
     A Neon i no a Supabase: la migració es va tancar el 16/08/2026 i la còpia de
@@ -1308,6 +1315,12 @@ def publish_cloud_cmd() -> None:
     s'ha publicat: una lliga que no s'ha pogut determinar, una taula que el Data
     API no coneix, o el PDF del rànquing d'opens que no s'ha trobat. Abans eren
     avisos en groc i la publicació comptava com a bona.
+
+    `--lleuger` és per a les passades horàries de cap de setmana. Les taules
+    grosses (`ranking_entries`, `games`, els rànquings d'opens, les afiliacions)
+    només canvien amb la reingesta de la nit, i tornar-les a pujar cada hora era
+    el que esgotava els 5 GB de transferència del pla gratuït de Neon
+    (octubre de 2026). La passada diària les continua publicant senceres.
     """
     from fcbillar.cloud_sync import (
         publica_si_hi_es,
@@ -1357,8 +1370,10 @@ def publish_cloud_cmd() -> None:
             return {}
 
     try:
-        counts = publish_rankings(on_progress=_prog)
-        counts.update(publish_games(on_progress=_prog))
+        counts: dict[str, int] = {}
+        if not lleuger:
+            counts.update(publish_rankings(on_progress=_prog))
+            counts.update(publish_games(on_progress=_prog))
         # `pending_games` ha guanyat la columna `data`: mentre el Data API no la
         # vegi, avisa i segueix en comptes d'aturar la publicació sencera.
         counts.update(
@@ -1427,59 +1442,70 @@ def publish_cloud_cmd() -> None:
         counts.update(
             publica_si_hi_es("nacional", lambda: publish_nacional(on_progress=_prog), _prog)
         )
-        counts.update(publish_open_ranking(on_progress=_prog))
-        counts.update(publish_open_ranking_femeni(on_progress=_prog))
-        counts.update(publish_player_clubs(on_progress=_prog))
-        counts.update(
-            publica_si_hi_es("afiliacions", lambda: publish_afiliacions(on_progress=_prog), _prog)
-        )
-        counts.update(publish_rating_buckets(on_progress=_prog))
-        counts.update(publish_calendari(on_progress=_prog))
+        if not lleuger:
+            counts.update(publish_open_ranking(on_progress=_prog))
+            counts.update(publish_open_ranking_femeni(on_progress=_prog))
+            counts.update(publish_player_clubs(on_progress=_prog))
+            counts.update(
+                publica_si_hi_es(
+                    "afiliacions", lambda: publish_afiliacions(on_progress=_prog), _prog
+                )
+            )
+            counts.update(publish_rating_buckets(on_progress=_prog))
+            counts.update(publish_calendari(on_progress=_prog))
     except Exception as exc:  # noqa: BLE001
         console.print(f"[red]Error publicant al núvol: {exc}[/]")
         raise typer.Exit(code=1) from exc
     total = ", ".join(f"{k}={v}" for k, v in counts.items())
     console.print(f"[green]OK publicat a Neon (esquema fcbillar): {total}[/]")
 
-    # App germana "Estadístiques": alimenta public.partides amb els games oficials i
-    # pendents de FCBillar (adapta les del jugador i completa el que hi manqui; evita
-    # duplicats). No fatal. Abans de computa perquè aquest usi les dades reconciliades.
-    try:
-        from fcbillar.cloud_sync import publish_estadistiques_partides
+    # Les Estadístiques (c3b) es refan amb la passada de la nit.
+    if not lleuger:
+        # App germana "Estadístiques": alimenta public.partides amb els games oficials i
+        # pendents de FCBillar (adapta les del jugador i completa el que hi manqui; evita
+        # duplicats). No fatal. Abans de computa perquè aquest usi les dades reconciliades.
+        try:
+            from fcbillar.cloud_sync import publish_estadistiques_partides
 
-        c1 = publish_estadistiques_partides(on_progress=_prog)
-        console.print(
-            "[green]OK Estadístiques partides: "
-            + ", ".join(f"{k}={v}" for k, v in c1.items())
-            + "[/]"
-        )
-    except Exception as exc:  # noqa: BLE001
-        console.print(f"[yellow]Avís: no s'ha pogut alimentar partides a Estadístiques: {exc}[/]")
+            c1 = publish_estadistiques_partides(on_progress=_prog)
+            console.print(
+                "[green]OK Estadístiques partides: "
+                + ", ".join(f"{k}={v}" for k, v in c1.items())
+                + "[/]"
+            )
+        except Exception as exc:  # noqa: BLE001
+            console.print(
+                f"[yellow]Avís: no s'ha pogut alimentar partides a Estadístiques: {exc}[/]"
+            )
 
-    # App germana "Estadístiques" (schema public): marca computa. No fatal.
-    try:
-        from fcbillar.cloud_sync import publish_estadistiques_computa
+        # App germana "Estadístiques" (schema public): marca computa. No fatal.
+        try:
+            from fcbillar.cloud_sync import publish_estadistiques_computa
 
-        c2 = publish_estadistiques_computa(on_progress=_prog)
-        console.print(
-            "[green]OK Estadístiques computa: "
-            + ", ".join(f"{k}={v}" for k, v in c2.items())
-            + "[/]"
-        )
-    except Exception as exc:  # noqa: BLE001
-        console.print(f"[yellow]Avís: no s'ha pogut marcar computa a Estadístiques: {exc}[/]")
+            c2 = publish_estadistiques_computa(on_progress=_prog)
+            console.print(
+                "[green]OK Estadístiques computa: "
+                + ", ".join(f"{k}={v}" for k, v in c2.items())
+                + "[/]"
+            )
+        except Exception as exc:  # noqa: BLE001
+            console.print(f"[yellow]Avís: no s'ha pogut marcar computa a Estadístiques: {exc}[/]")
 
-    # App germana "Estadístiques": resum de la fitxa federativa (rànquing, opens,
-    # radar, palmarès). No fatal.
-    try:
-        from fcbillar.cloud_sync import publish_estadistiques_fitxa
+        # App germana "Estadístiques": resum de la fitxa federativa (rànquing, opens,
+        # radar, palmarès). No fatal.
+        try:
+            from fcbillar.cloud_sync import publish_estadistiques_fitxa
 
-        c3 = publish_estadistiques_fitxa(on_progress=_prog)
-        console.print(
-            "[green]OK Estadístiques fitxa: " + ", ".join(f"{k}={v}" for k, v in c3.items()) + "[/]"
-        )
-    except Exception as exc:  # noqa: BLE001
-        console.print(f"[yellow]Avís: no s'ha pogut publicar la fitxa a Estadístiques: {exc}[/]")
+            c3 = publish_estadistiques_fitxa(on_progress=_prog)
+            console.print(
+                "[green]OK Estadístiques fitxa: "
+                + ", ".join(f"{k}={v}" for k, v in c3.items())
+                + "[/]"
+            )
+        except Exception as exc:  # noqa: BLE001
+            console.print(
+                f"[yellow]Avís: no s'ha pogut publicar la fitxa a Estadístiques: {exc}[/]"
+            )
 
     # El -1 és el que deixa cada part que no s'ha publicat (`publica_si_hi_es`, la
     # Lliga de 4 Modalitats) i el PDF del rànquing d'opens que no s'ha trobat.
