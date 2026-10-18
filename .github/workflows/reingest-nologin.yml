@@ -129,6 +129,9 @@ jobs:
               -H "Authorization: Bearer $NEON_SERVICE_ROLE_TOKEN" \
               -H "Accept-Profile: fcbillar" \
               "$NEON_DATA_API_URL/rest/v1/open_live?select=fcb_division_id&fcb_division_id=gt.0&limit=1")
+            # Un tret horari que segueix publica en lleuger: vegeu el pas
+            # `publish-cloud`.
+            echo "lleuger=--lleuger" >> "$GITHUB_OUTPUT"
             if [ -n "$LIVE" ] && [ "$LIVE" != "[]" ]; then
               echo "Opens en directe detectats → segueixo."
               echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
@@ -177,6 +180,8 @@ jobs:
 
       - name: Reingesta no-logada (passos aïllats, continua si un falla)
         if: steps.gate.outputs.skip != 'true'
+        env:
+          LLEUGER: ${{ steps.gate.outputs.lleuger }}
         run: |
           set +e
           NOK=0; NFAIL=0
@@ -303,9 +308,26 @@ jobs:
 
           # Publicació al núvol (fcbillar publica tot des de la BD, rànquings
           # inclosos: són upserts per clau natural, o sigui que és idempotent).
-          run "publish-cloud"        uv run --no-dev fcbillar publish-cloud
-          run "supabase-sync"        uv run --no-dev python -m fcb_opens.cli supabase-sync
-          run "encoding-scan"        uv run --no-dev python scripts/repair_supabase_encoding.py
+          #
+          # Als trets horaris de cap de setmana, `$LLEUGER` val `--lleuger`: no
+          # torna a pujar les taules grosses (rànquings, partides, rànquings
+          # d'opens, afiliacions), que només canvien amb la passada de la nit.
+          # L'octubre de 2026 cada passada sencera eren uns 100 MB de
+          # transferència, se'n feien fins a 15 per dia de cap de setmana, i es
+          # van esgotar els 5 GB del pla gratuït de Neon. Va sense cometes a
+          # posta: buit no ha de ser un argument.
+          run "publish-cloud"        uv run --no-dev fcbillar publish-cloud $LLEUGER
+
+          # FORA de la passada diària des de l'octubre de 2026, per la mateixa
+          # transferència:
+          #  - `supabase-sync` esborrava i tornava a omplir sencer l'esquema
+          #    `fcb_opens` del núvol, que no llegeix cap projecte (vegeu el
+          #    comentari de `scrape-lliga`, més amunt).
+          #  - `encoding-scan` rellegia cada nit taules senceres (unes 25 MB)
+          #    buscant textos mal codificats, i fa temps que no en troba cap.
+          # Si mai calen, es llancen a mà:
+          #   uv run python -m fcb_opens.cli supabase-sync
+          #   uv run python scripts/repair_supabase_encoding.py
 
           echo "N_OK=$NOK"     >> "$GITHUB_ENV"
           echo "N_FAIL=$NFAIL" >> "$GITHUB_ENV"
