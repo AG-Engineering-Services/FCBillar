@@ -5,7 +5,6 @@ import {
 	estimaCua,
 	llegeixEnllac,
 	mmss,
-	properTret,
 	quantFalta,
 	segmentA,
 	urlServida,
@@ -82,14 +81,6 @@ describe('ambReintentsCache', () => {
 	});
 });
 
-describe('properTret', () => {
-	it('és el proper minut 7, 22, 37 o 52', () => {
-		expect(properTret(new Date('2026-09-24T10:00:00Z')).toISOString()).toBe('2026-09-24T10:07:00.000Z');
-		expect(properTret(new Date('2026-09-24T10:07:00Z')).toISOString()).toBe('2026-09-24T10:22:00.000Z');
-		expect(properTret(new Date('2026-09-24T10:53:10Z')).toISOString()).toBe('2026-09-24T11:07:00.000Z');
-	});
-});
-
 describe('estimaCua', () => {
 	const ara = new Date('2026-09-24T10:00:00Z');
 	let n = 0;
@@ -126,18 +117,12 @@ describe('estimaCua', () => {
 		expect(min(e.acaba)).toBeCloseTo(4); // començat fa 1 min, 20 + 280 s de feina
 	});
 
-	it('un de pendent espera el proper tret, el retard de GitHub i la preparació', () => {
-		const p = video({ durada: 40 });
-		const e = estimaCua([fet, p], ara).get(p.id)!;
-		expect(min(e.comenca)).toBeCloseTo(7 + 5 + 1);
-		expect(min(e.acaba)).toBeCloseTo(14);
-	});
-
-	it('cada tret en fa tres, i el quart va al següent', () => {
+	it('cada tret en fa tres, i el quart va al que encadena en acabar', () => {
+		// Afegits fa estona: el primer comença d'aquí a poc, i cada un és 20 + 40 s.
 		const ps = [1, 2, 3, 4].map(() => video({ durada: 40 }));
 		const est = estimaCua([fet, ...ps], ara);
-		expect(min(est.get(ps[2]!.id)!.acaba)).toBeCloseTo(16);
-		expect(min(est.get(ps[3]!.id)!.comenca)).toBeCloseTo(22 + 5 + 1);
+		expect(min(est.get(ps[2]!.id)!.acaba)).toBeCloseTo(0.25 + 3);
+		expect(min(est.get(ps[3]!.id)!.comenca)).toBeCloseTo(0.25 + 3 + 1.25);
 	});
 
 	it('el tret en curs encara agafa pendents', () => {

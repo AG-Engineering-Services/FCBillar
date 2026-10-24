@@ -215,6 +215,60 @@ def test_la_prova_de_fum_llegeix_un_open_acabat(entorn) -> None:
     assert entorn.magatzem["open_live"] == []
 
 
+class ClientIntocable:
+    """Un núvol que no s'ha de tocar: cada consulta desperta el còmput de Neon."""
+
+    def table(self, nom: str):
+        raise AssertionError(f"s'ha tocat Neon ({nom}) sense cap open en directe")
+
+
+def test_sense_opens_en_joc_es_neteja_un_cop_i_es_deixa_la_marca(entorn, tmp_path) -> None:
+    del entorn.canvis["individuals_divisio_classificacio_final_219_461.html"]
+    entorn.magatzem["open_live"].append({"fcb_division_id": 219, "name": "OPEN BANDA GRANOLLERS"})
+    marca = tmp_path / "net"
+
+    res = cloud_sync.publish_live_opens(marca_net=marca)
+
+    assert res["removed"] == 1
+    assert entorn.magatzem["open_live"] == []
+    assert marca.exists()
+
+
+def test_amb_la_marca_i_cap_open_en_joc_no_es_toca_neon(entorn, tmp_path, monkeypatch) -> None:
+    """El bucle del cap de setmana: cada dues minuts, quinze hores, i res en joc."""
+    del entorn.canvis["individuals_divisio_classificacio_final_219_461.html"]
+    marca = tmp_path / "net"
+    marca.touch()
+    monkeypatch.setattr(cloud_sync, "get_client", ClientIntocable)
+
+    res = cloud_sync.publish_live_opens(marca_net=marca)
+
+    assert (res["live_opens"], res["errors"]) == (0, 0)
+    assert marca.exists()
+
+
+def test_un_open_que_comenca_es_publica_encara_que_hi_hagi_la_marca(entorn, tmp_path) -> None:
+    marca = tmp_path / "net"
+    marca.touch()
+
+    res = cloud_sync.publish_live_opens(marca_net=marca)
+
+    assert res["live_opens"] == 1
+    assert [f["fcb_division_id"] for f in entorn.magatzem["open_live"]] == [219]
+    assert not marca.exists(), "quan s'acabi l'open s'ha de tornar a netejar"
+
+
+def test_un_open_illegible_no_deixa_la_marca(entorn, tmp_path) -> None:
+    """La fila es conserva, i la volta següent ha de tornar a mirar el núvol."""
+    entorn.canvis["individuals_fases_219_461.html"] = "<html></html>"
+    marca = tmp_path / "net"
+
+    res = cloud_sync.publish_live_opens(marca_net=marca)
+
+    assert res["errors"] == 1
+    assert not marca.exists()
+
+
 def test_un_open_que_la_federacio_no_tanca_mai_caduca() -> None:
     """Mataró, juliol de 2026: final jugada el 26 i la classificació no s'ha creat mai."""
     from datetime import date

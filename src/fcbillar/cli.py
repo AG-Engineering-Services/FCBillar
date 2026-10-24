@@ -1696,6 +1696,12 @@ def publish_live_opens_cmd(
     max_opens: int | None = typer.Option(
         None, "--max-opens", help="Atura't quan n'hagis llegit tants amb fases."
     ),
+    marca_net: Path | None = typer.Option(
+        None,
+        "--marca-net",
+        help="Fitxer que recorda que el núvol ja és net: si hi és i no hi ha res en "
+        "directe, no es toca Neon. És per al bucle del cap de setmana.",
+    ),
 ) -> None:
     """Bolca l'estat EN VIU dels Opens en curs a Neon (taula `open_live`).
 
@@ -1729,6 +1735,7 @@ def publish_live_opens_cmd(
             dry_run=dry_run,
             include_closed=inclou_tancats,
             max_opens=max_opens,
+            marca_net=marca_net,
         )
     except Exception as exc:  # noqa: BLE001
         console.print(f"[red]Error publicant els opens en directe: {exc}[/]")
