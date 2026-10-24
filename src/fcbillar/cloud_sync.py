@@ -6344,6 +6344,7 @@ def publish_live_opens(
     dry_run: bool = False,
     include_closed: bool = False,
     max_opens: int | None = None,
+    marca_net: Path | None = None,
 ) -> dict[str, int]:
     """Bolca l'estat en viu de TOTS els Opens en curs a `fcbillar.open_live`.
 
@@ -6366,6 +6367,16 @@ def publish_live_opens(
     amb `dry_run`. `max_opens` atura la passada quan ja se n'han llegit tants amb
     fases (el llistat va del més nou al més vell): la prova de cada nit en té
     prou amb un.
+
+    `marca_net` és un fitxer que diu «a la passada anterior no hi havia res en
+    directe i el núvol ja en va quedar net». Si hi és i ara tampoc no hi ha res
+    a publicar ni a conservar, la passada no toca Neon: el bucle del cap de
+    setmana corre cada dos minuts durant quinze hores, i fins a l'octubre de
+    2026 cada volta despertava el còmput encara que no hi hagués cap open en
+    joc, que és la majoria de caps de setmana. Sense la marca (la primera volta
+    de cada execució) es fa la neteja sencera, i la marca es posa o es treu
+    segons el resultat. Pel mateix motiu el rànquing d'Opens i les files ja
+    publicades es llegeixen només quan hi ha un open per llegir.
     """
     from datetime import datetime
 
@@ -6380,30 +6391,32 @@ def publish_live_opens(
     prog: Progress = on_progress or (lambda level, msg: None)
     sb = get_client()
     fetched_at = datetime.now(UTC).isoformat()
-    # Ordre de sorteig dels grups encara no jugats = ordre del rànquing d'Opens
-    # (`get_client()` ja està lligat a l'esquema `fcbillar`, on viu `open_ranking`).
-    rank_by_name = opens_ranking_by_name(sb)
+    cache: dict[str, object] = {}
 
-    # Fonts per fondre les fases PROJECTADES (encara no penjades al web per la
-    # FCB) amb les reals: la projecció desada (id negatiu) i, si ja s'ha plegat i
-    # esborrat, el payload REAL previ (que les arrossega). Vegeu
-    # `_merge_projected_phases`.
-    try:
-        _live_rows = (
-            sb.table("open_live")
-            .select("fcb_division_id,name,modality,payload_json")
-            .execute()
-            .data
-            or []
-        )
-    except Exception:
-        _live_rows = []
-    proj_full = [r for r in _live_rows if (r.get("fcb_division_id") or 0) < 0]
-    prev_real = {
-        r["fcb_division_id"]: r.get("payload_json")
-        for r in _live_rows
-        if (r.get("fcb_division_id") or 0) > 0
-    }
+    def rank_by_name() -> dict[str, int]:
+        # Ordre de sorteig dels grups encara no jugats = ordre del rànquing d'Opens
+        # (`get_client()` ja està lligat a l'esquema `fcbillar`, on viu `open_ranking`).
+        if "rank" not in cache:
+            cache["rank"] = opens_ranking_by_name(sb)
+        return cache["rank"]  # type: ignore[return-value]
+
+    def live_rows() -> list[dict]:
+        # Fonts per fondre les fases PROJECTADES (encara no penjades al web per la
+        # FCB) amb les reals: la projecció desada (id negatiu) i, si ja s'ha plegat i
+        # esborrat, el payload REAL previ (que les arrossega). Vegeu
+        # `_merge_projected_phases`.
+        if "live" not in cache:
+            try:
+                cache["live"] = (
+                    sb.table("open_live")
+                    .select("fcb_division_id,name,modality,payload_json")
+                    .execute()
+                    .data
+                    or []
+                )
+            except Exception:
+                cache["live"] = []
+        return cache["live"]  # type: ignore[return-value]
 
     try:
         entries = fetch_individuals_llistat(force=force)
@@ -6462,7 +6475,7 @@ def publish_live_opens(
         if tancat and not include_closed:
             continue
         try:
-            state = fetch_live_state(e.division_id, force=force, rank_by_name=rank_by_name)
+            state = fetch_live_state(e.division_id, force=force, rank_by_name=rank_by_name())
         except Exception as exc:
             _error(e, exc, "no s'ha pogut llegir l'estat en viu")
             keep_ids.append(e.division_id)
@@ -6536,10 +6549,19 @@ def publish_live_opens(
             _enrich_real_groups_with_projection(payload["phases"], auto_phases)
             payload["phases"] = _merge_projected_phases(payload["phases"], auto_phases)
         else:
+            proj_full = [r for r in live_rows() if (r.get("fcb_division_id") or 0) < 0]
             template = _matching_projection_payload(state.structure.name, modality, proj_full)
             template_phases = (template or {}).get("phases")
             if not template_phases:
-                prev_phases = (prev_real.get(e.division_id) or {}).get("phases") or []
+                prev_real = next(
+                    (
+                        r.get("payload_json")
+                        for r in live_rows()
+                        if r.get("fcb_division_id") == e.division_id
+                    ),
+                    None,
+                )
+                prev_phases = (prev_real or {}).get("phases") or []
                 if any(p.get("projected") for p in prev_phases):
                     template_phases = prev_phases
             if template_phases:
@@ -6577,6 +6599,12 @@ def publish_live_opens(
         prog("ok", f"[dry-run] es publicarien {len(rows)} opens; no s'escriu ni s'esborra res")
         return comptadors
 
+    if not rows and not keep_ids and marca_net is not None and marca_net.exists():
+        prog("ok", "cap open en directe, i el núvol ja era net: no es toca Neon")
+        return comptadors
+    if marca_net is not None:
+        marca_net.unlink(missing_ok=True)
+
     if rows:
         _upsert(sb, "open_live", rows, "fcb_division_id", prog)
 
@@ -6597,32 +6625,44 @@ def publish_live_opens(
         removed = len(res.data or [])
         if removed:
             prog("ok", f"open_live: {removed} files retirades (ja no en curs)")
+        if not rows and not keep_ids and marca_net is not None:
+            marca_net.touch()
     except Exception as exc:
         prog("warn", f"no s'han pogut retirar files antigues: {exc}")
 
     # Retira les PROJECCIONS (id negatiu) que ja tenen l'open real en curs: quan
     # la federació publica el sorteig, el seguiment real (id positiu) substitueix
     # la projecció (casant pel nom d'open, no per l'id, que la federació assigna
-    # de nou cada edició).
+    # de nou cada edició). Sense cap open real no n'hi ha cap a retirar.
     superseded = 0
-    try:
-        proj_rows = (
-            sb.table("open_live")
-            .select("fcb_division_id,name,modality")
-            .lt("fcb_division_id", 0)
-            .execute()
-            .data
-            or []
-        )
-        # Cada open REAL actiu, reduït a (tokens de la clau estable, modalitat).
-        active = [(set(_open_match_key(r["name"]).split()), r.get("modality") or "") for r in rows]
-        stale = [p["fcb_division_id"] for p in proj_rows if _projection_superseded_by(p, active)]
-        if stale:
-            sb.table("open_live").delete(returning=_MINIM).in_("fcb_division_id", stale).execute()
-            superseded = len(stale)
-            prog("ok", f"open_live: {superseded} projeccions retirades (sorteig real ja publicat)")
-    except Exception as exc:
-        prog("warn", f"no s'han pogut retirar projeccions superades: {exc}")
+    if rows:
+        try:
+            proj_rows = (
+                sb.table("open_live")
+                .select("fcb_division_id,name,modality")
+                .lt("fcb_division_id", 0)
+                .execute()
+                .data
+                or []
+            )
+            # Cada open REAL actiu, reduït a (tokens de la clau estable, modalitat).
+            active = [
+                (set(_open_match_key(r["name"]).split()), r.get("modality") or "") for r in rows
+            ]
+            stale = [
+                p["fcb_division_id"] for p in proj_rows if _projection_superseded_by(p, active)
+            ]
+            if stale:
+                sb.table("open_live").delete(returning=_MINIM).in_(
+                    "fcb_division_id", stale
+                ).execute()
+                superseded = len(stale)
+                prog(
+                    "ok",
+                    f"open_live: {superseded} projeccions retirades (sorteig real ja publicat)",
+                )
+        except Exception as exc:
+            prog("warn", f"no s'han pogut retirar projeccions superades: {exc}")
 
     comptadors["removed"] = removed
     comptadors["superseded"] = superseded

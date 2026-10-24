@@ -3,7 +3,8 @@
 // La programació de GitHub no serveix per a això: el 24/09/2026, el primer dia
 // del traductor, no va disparar cap dels trets de quart d'hora, i la reingesta
 // diària d'aquest mateix repositori arrenca amb fins a dues hores de retard.
-// La programació queda de reserva.
+// Des de l'octubre de 2026 és l'única manera d'engegar-lo: no té cap
+// programació de reserva, que despertava Neon cada quart d'hora per no res.
 //
 // El token (GITHUB_DISPATCH_TOKEN, a les variables privades de Vercel) és
 // fine-grained, només d'aquest repositori i només amb «Actions: read and write»:

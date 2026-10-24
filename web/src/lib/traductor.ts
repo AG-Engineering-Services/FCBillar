@@ -134,38 +134,21 @@ export function mmss(segons: number): string {
 // Surt de com treballa el workflow traductor.yml, i s'ajusta sola amb els vídeos
 // ja fets:
 //  - la PWA l'engega en el moment d'afegir un vídeo (routes/traductor/avisa), i
-//    comença a traduir al cap d'ARRENCADA_S. Si un pendent fa més d'AVIS_CADUCAT
-//    que espera, l'avís no ha funcionat i toca la programació: els minuts 7, 22,
-//    37 i 52 de cada hora (UTC; com que els fusos van per hores senceres, són els
-//    mateixos minuts a tot arreu), que GitHub dispara tard o gens;
+//    comença a traduir al cap d'ARRENCADA_S. No hi ha programació de reserva
+//    (fins a l'octubre de 2026 n'hi havia, i cada tret despertava Neon);
 //  - cada tret prepara la màquina (~45 s el 24/09/2026) i tradueix com a molt
-//    TRET_MAX vídeos, l'un darrere l'altre; si un tret no s'ha acabat, el següent
-//    l'espera;
+//    TRET_MAX vídeos, l'un darrere l'altre; si en queden, n'encadena un altre en
+//    acabar;
 //  - el que triga un vídeo és un fix més un ritme per segon de vídeo. El ritme
 //    es mesura dels vídeos ja fets amb `iniciat` → `processat`.
 
-const MINUTS_TRET = [7, 22, 37, 52];
 // Del clic al primer fragment: la cua de GitHub, la preparació de la màquina
 // (~45 s) i les dependències. Mesurat el 24/09/2026: ~60-75 s.
 const ARRENCADA_S = 75;
-const AVIS_CADUCAT_MS = 10 * 60_000;
-const RETARD_CRON_S = 5 * 60;
-const PREPARACIO_S = 60;
 const TRET_MAX = 3;
 const FIX_PER_VIDEO_S = 20;
 const RITME_PER_DEFECTE = 0.8; // segons de feina per segon de vídeo
 const DURADA_PER_DEFECTE_S = 5 * 60; // quan encara no se sap quant dura
-
-/** El proper minut de tret del workflow, estrictament després d'`ara`. */
-export function properTret(ara: Date): Date {
-	const t = new Date(ara);
-	t.setUTCSeconds(0, 0);
-	for (let i = 0; i < 4 * 24 + 1; i++) {
-		t.setUTCMinutes(t.getUTCMinutes() + 1);
-		if (MINUTS_TRET.includes(t.getUTCMinutes()) && t > ara) return t;
-	}
-	return t; // inabastable: sempre n'hi ha un dins l'hora
-}
 
 function mediana(xs: number[]): number | null {
 	if (!xs.length) return null;
@@ -216,21 +199,12 @@ export function estimaCua(videos: VideoTraduccio[], ara: Date): Map<number, Esti
 			res.set(v.id, { comenca: new Date(fi), acaba: new Date(fi + feina(v)) });
 			fi += feina(v);
 		}
-	let tret = properTret(ara).getTime();
 	let primerLot = true;
 	while (i < pendents.length) {
-		const primer = pendents[i]!;
-		const avisat = ara.getTime() - ms(primer.creat) < AVIS_CADUCAT_MS;
-		let t: number;
-		if (avisat) {
-			// L'avís ja ha engegat un tret; els lots següents van en el tret que
-			// GitHub deixa en espera, que arrenca quan acaba l'anterior.
-			const arrencada = primerLot ? ms(primer.creat) : fi;
-			t = Math.max(arrencada + ARRENCADA_S * 1000, ara.getTime() + 15_000, fi);
-		} else {
-			t = Math.max(tret + (RETARD_CRON_S + PREPARACIO_S) * 1000, fi);
-			tret += 15 * 60_000;
-		}
+		// El primer lot arrenca amb el tret que ha engegat la PWA en afegir-lo;
+		// els següents, amb el que encadena l'anterior en acabar.
+		const arrencada = primerLot ? ms(pendents[i]!.creat) : fi;
+		let t = Math.max(arrencada + ARRENCADA_S * 1000, ara.getTime() + 15_000, fi);
 		for (let n = 0; n < TRET_MAX && i < pendents.length; n++, i++) {
 			const v = pendents[i]!;
 			res.set(v.id, { comenca: new Date(t), acaba: new Date(t + feina(v)) });

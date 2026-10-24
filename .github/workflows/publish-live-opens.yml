@@ -83,7 +83,9 @@ jobs:
               i=$(( i + 1 ))
               echo "::group::publicació #$i (t=${SECONDS}s, ${H}h UTC)"
               RC=0
-              uv run --no-dev fcbillar publish-live-opens || RC=$?
+              # La marca evita despertar Neon a cada volta quan no hi ha cap open
+              # en joc: vegeu `publish_live_opens` (cloud_sync.py).
+              uv run --no-dev fcbillar publish-live-opens --marca-net "$RUNNER_TEMP/open_live_net" || RC=$?
               echo "::endgroup::"
               if [ "$RC" -eq 0 ]; then
                 FAILS=0
