@@ -101,7 +101,13 @@ jobs:
       - name: Baixa l'estat del release (BD)
         if: steps.reconeix.outputs.bons != '0'
         run: |
-          gh release download "$STATE_TAG" --dir data --pattern 'fcbillar.db' --clobber
+          gh release download "$STATE_TAG" --dir data --pattern 'fcbillar.db' --clobber || true
+          # Si falta la principal, l'anterior que hi deixa la reingesta.
+          if [ ! -f data/fcbillar.db ]; then
+            echo "::warning title=Sense fcbillar.db::Al release no hi ha fcbillar.db; es fa servir fcbillar-anterior.db."
+            gh release download "$STATE_TAG" --dir data --pattern 'fcbillar-anterior.db' --clobber
+            mv data/fcbillar-anterior.db data/fcbillar.db
+          fi
 
       - name: Ingereix i publica la Lliga Nacional
         id: publica

@@ -182,8 +182,18 @@ jobs:
         if: steps.gate.outputs.skip != 'true'
         run: |
           gh release download "$STATE_TAG" --dir data \
-            --pattern 'fcbillar.db' --pattern 'fcb_opens.db' --clobber
+            --pattern 'fcbillar.db' --pattern 'fcb_opens.db' --clobber || true
+          # Si falta la principal, la que es va desar com a anterior (vegeu el pas
+          # de repujar). El 24/10/2026 un 502 de GitHub la va fer desaparèixer.
+          if [ ! -f data/fcbillar.db ]; then
+            echo "::warning title=Sense fcbillar.db::Al release no hi ha fcbillar.db; es fa servir fcbillar-anterior.db."
+            gh release download "$STATE_TAG" --dir data --pattern 'fcbillar-anterior.db' --clobber
+            mv data/fcbillar-anterior.db data/fcbillar.db
+          fi
           ls -lh data/fcbillar.db data/fcb_opens.db
+          # La base tal com ha arribat és l'última bona: es guarda per pujar-la com
+          # a anterior abans de substituir-la (vegeu el pas de repujar).
+          cp data/fcbillar.db "$RUNNER_TEMP/fcbillar-anterior.db"
 
       - name: Reingesta no-logada (passos aïllats, continua si un falla)
         if: steps.gate.outputs.skip != 'true'
@@ -381,10 +391,27 @@ jobs:
 
       # Repuja les BD al release encara que algun pas hagi fallat (upserts parcials
       # però vàlids); mai sobre una execució saltada per l'aturada d'estiu.
+      #
+      # `--clobber` esborra l'asset abans de pujar el nou, i si la pujada falla el
+      # release es queda sense: el 24/10/2026 un 502 de GitHub el va deixar sense
+      # fcbillar.db. Per això primer es puja la base com era en començar
+      # (fcbillar-anterior.db, l'última bona) i després la nova, i cada pujada es
+      # torna a provar.
       - name: Repuja l'estat (BD) al release
         if: always() && steps.gate.outputs.skip != 'true'
         run: |
-          gh release upload "$STATE_TAG" data/fcbillar.db data/fcb_opens.db --clobber
+          puja() {
+            for intent in 1 2 3 4 5; do
+              gh release upload "$STATE_TAG" "$@" --clobber && return 0
+              echo "::warning::La pujada de $* ha fallat (intent $intent); es torna a provar."
+              sleep $((intent * 20))
+            done
+            return 1
+          }
+          if [ -f "$RUNNER_TEMP/fcbillar-anterior.db" ]; then
+            puja "$RUNNER_TEMP/fcbillar-anterior.db"
+          fi
+          puja data/fcbillar.db data/fcb_opens.db
 
       # L'últim, i l'únic que pot fer fallar el job: tot el d'abans ja ha corregut
       # i la BD ja és al release. Vermell si algun pas ha sortit amb error o si la
