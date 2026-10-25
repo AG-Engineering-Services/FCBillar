@@ -11,7 +11,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@neondatabase/postgrest-js": "^0.2.0-beta"
+    "@neondatabase/postgrest-js": "^0.2.0-beta",
+    "@vercel/analytics": "^2.0.1"
   },
   "devDependencies": {
     "@sveltejs/adapter-vercel": "^5.4.0",
