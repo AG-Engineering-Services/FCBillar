@@ -30,3 +30,27 @@ pytest tests/
 
 Actiu. Migrat a Neon (vegeu `MIGRACIO-NEON.md`). Es un **actiu de dades**:
 alimenta NouProjecte amb fitxes i ranquings federatius.
+
+<!-- antislop:start -->
+## antislop
+
+Per a feina d'interfície, textos, accessibilitat, disposició mòbil o comentaris
+de codi, carrega la skill `antislop` (el nucli) i després la del tema:
+
+- Interfície i aspecte visual: `antislop-ui`
+- Textos i redacció: `antislop-copywriting`
+- Persones (contrast, teclat, focus, estats): `antislop-human`
+- Mòbil i disposició adaptable: `antislop-layoutmobile`
+- Comentaris de codi: `antislop-code`
+
+**Mode en aquest projecte: `during`**, triat per l'usuari el 2026-10-25 (després
+d'una auditoria inicial del que ja existia). Compta com a instrucció explícita per
+a cada sessió; si l'usuari en tria un altre durant la sessió, mana el de la sessió.
+Anuncia `antislop active: during (instrucció del projecte).` una sola vegada, abans
+de la primera edició.
+
+La direcció de disseny (R-37) no és en cap `DESIGN.md`: si una tasca d'interfície
+la necessita i no hi és, pregunta-la abans de construir.
+
+Per actualitzar-la: `npx skills update -g`.
+<!-- antislop:end -->
