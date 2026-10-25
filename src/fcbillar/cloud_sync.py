@@ -1537,9 +1537,10 @@ def publish_lliga(
     prog: Progress = on_progress or (lambda level, msg: None)
     db_path = db_path or get_settings().db_path
     lliga = lliga_a_publicar("3B", lliga_id, db_path)
+    sb = get_client()
+    arxivades = arxiva_lligues_passades(sb, Path(db_path), lliga, prog, taules=taules)
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
-    sb = get_client()
 
     from fcbillar.db.repository import Repository
 
@@ -1779,7 +1780,7 @@ def publish_lliga(
         for pos, (eid, s) in enumerate(ranked, start=1):
             standing_rows.append(_fila(pos, eid, s, 3 * s["g"] + s["e"], None))
 
-    counts = {}
+    counts = {f"{taules.standings}_arxivades": arxivades}
     counts[taules.groups] = _upsert(
         sb, taules.groups, group_rows, "lliga_id,divisio_id,grup_id", prog
     )
@@ -2099,6 +2100,146 @@ def publish_lliga_standings_hist(
     )
     conn.close()
     return {"lliga_standings_hist": n}
+
+
+#: Com es diu cada lliga a l'històric, que és com l'hi va posar l'importador.
+NOM_A_L_HISTORIC = {
+    _TAULES_3B.standings: "LLIGA CATALANA TRES BANDES",
+    _TAULES_4M.standings: "LLIGA CATALANA 4 MODALITATS",
+}
+
+
+def taules_de_lliga(nom: str) -> _TaulesLliga:
+    """Les taules en viu d'una lliga, pel nom que porta a l'històric."""
+    return _TAULES_4M if nom == NOM_A_L_HISTORIC[_TAULES_4M.standings] else _TAULES_3B
+
+
+class ArxiuImpossible(RuntimeError):
+    """Una classificació en viu que no es pot passar a l'històric tal com és."""
+
+
+def _crea_historic(conn: sqlite3.Connection) -> None:
+    # El mateix esquema que `scripts/import_lliga_standings.py`; la BD del
+    # release pot no tenir la taula si mai no s'hi ha passat l'importador.
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS lliga_standings_hist "
+        "(temporada TEXT, lliga TEXT, divisio TEXT, grup TEXT, posicio INTEGER, "
+        "equip TEXT, pm INTEGER, pp INTEGER, "
+        "PRIMARY KEY (temporada, lliga, divisio, grup, equip))"
+    )
+
+
+def ja_arxivada(conn: sqlite3.Connection, sb, temporada: str, lliga: str) -> bool:
+    """Si l'històric, el local o el del núvol, ja té aquella temporada."""
+    _crea_historic(conn)
+    if conn.execute(
+        "SELECT 1 FROM lliga_standings_hist WHERE temporada = ? AND lliga = ? LIMIT 1",
+        (temporada, lliga),
+    ).fetchone():
+        return True
+    # Les del núvol que no són a la BD local (importades des d'un altre PC) no
+    # s'han de trepitjar amb el que queda a les taules en viu.
+    res = (
+        sb.table("lliga_standings_hist")
+        .select("temporada")
+        .eq("temporada", temporada)
+        .eq("lliga", lliga)
+        .limit(1)
+        .execute()
+    )
+    return bool(res.data)
+
+
+def files_per_arxivar(
+    conn: sqlite3.Connection, sb, lliga_id: int, temporada: str, *, taules: _TaulesLliga
+) -> list[tuple]:
+    """La classificació PUBLICADA d'una lliga, en files de `lliga_standings_hist`.
+
+    S'arxiva el que hi ha al núvol i no una classificació recalculada: les
+    posicions oficials i les penalitzacions, tal com les ensenyava el web.
+    """
+    lliga = NOM_A_L_HISTORIC[taules.standings]
+    grups = {
+        (g["divisio_id"], g["grup_id"]): (g["divisio_nom"], g["grup_nom"])
+        for g in (sb.table(taules.groups).select("*").eq("lliga_id", lliga_id).execute().data or [])
+    }
+    # Les promocions es van publicar sense nom; els noms locals són més nous, i
+    # el nom és clau primària a l'històric.
+    locals_ = {
+        (d, g): n
+        for d, g, n in conn.execute(
+            "SELECT divisio_id, grup_id, nom FROM lliga_noms WHERE lliga_id = ? AND grup_id <> 0",
+            (lliga_id,),
+        )
+    }
+    files = sb.table(taules.standings).select("*").eq("lliga_id", lliga_id).execute().data or []
+    rows = []
+    for r in files:
+        clau = (r["divisio_id"], r["grup_id"])
+        divisio, grup = grups.get(clau, (None, None))
+        grup = grup or locals_.get(clau)
+        if not divisio or not grup:
+            raise ArxiuImpossible(
+                f"lliga {lliga_id}: no sé com es diu el grup {clau[0]}/{clau[1]} "
+                f"(divisió={divisio!r}, grup={grup!r}). Prova `fcbillar discover-lliga-noms`."
+            )
+        rows.append(
+            (temporada, lliga, divisio, grup, r["posicio"], r["equip"], r["punts"], r["pf"])
+        )
+    return rows
+
+
+def desa_a_l_historic(conn: sqlite3.Connection, rows: list[tuple]) -> None:
+    _crea_historic(conn)
+    conn.executemany(
+        "INSERT INTO lliga_standings_hist "
+        "(temporada, lliga, divisio, grup, posicio, equip, pm, pp) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        rows,
+    )
+    conn.commit()
+
+
+def arxiva_lligues_passades(
+    sb, db_path: Path, lliga_en_curs: int, prog: Progress, *, taules: _TaulesLliga
+) -> int:
+    """Passa a l'històric les lligues de temporades passades que encara no hi són.
+
+    Les taules en viu es guarden totes les temporades (cada fila amb el seu
+    lliga_id), però l'històric, que és d'on beuen el palmarès i el selector de
+    temporades, només s'omplia a mà. Ara, cada publicació hi passa les que
+    falten. Una que no es pot arxivar no atura res: segueix al núvol i es torna
+    a provar la nit següent.
+    """
+    from fcbillar import en_curs
+
+    vives = sb.table(taules.standings).select("lliga_id").execute().data or []
+    passades = sorted({r["lliga_id"] for r in vives} - {lliga_en_curs})
+    if not passades:
+        return 0
+    lliga = NOM_A_L_HISTORIC[taules.standings]
+    conn = sqlite3.connect(str(db_path))
+    arxivades = 0
+    try:
+        for lliga_id in passades:
+            any_inici = en_curs.any_d_inici_de_lliga_id(conn, lliga_id)
+            if any_inici is None:
+                prog("warn", f"lliga {lliga_id}: no sé de quina temporada és; no l'arxivo.")
+                continue
+            temporada = en_curs.amb_guio(any_inici)
+            if ja_arxivada(conn, sb, temporada, lliga):
+                continue
+            try:
+                rows = files_per_arxivar(conn, sb, lliga_id, temporada, taules=taules)
+            except ArxiuImpossible as exc:
+                prog("warn", f"{exc} No l'arxivo.")
+                continue
+            desa_a_l_historic(conn, rows)
+            arxivades += len(rows)
+            prog("ok", f"{lliga} {temporada}: {len(rows)} files passades a l'històric")
+    finally:
+        conn.close()
+    return arxivades
 
 
 def publish_copa(

@@ -1383,7 +1383,6 @@ def publish_cloud_cmd(
         )
         counts.update(publish_provisional_ranking(on_progress=_prog))
         counts.update(_de_lliga("lliga", lambda: publish_lliga(on_progress=_prog)))
-        counts.update(publish_lliga_standings_hist(on_progress=_prog))
         counts.update(publish_copa(on_progress=_prog))
         counts.update(publish_opens(on_progress=_prog))
         counts.update(
@@ -1406,6 +1405,8 @@ def publish_cloud_cmd(
         except Exception as exc:
             console.print(f"[yellow]Lliga 4 Modalitats NO publicada: {exc}[/]")
             counts["lliga4m"] = -1
+        # Després de les dues lligues, que hi arxiven les temporades passades.
+        counts.update(publish_lliga_standings_hist(on_progress=_prog))
         counts.update(publish_copa_encontres(on_progress=_prog))
         # Igual que les dues de sota: `open_partides` ha guanyat la columna
         # `grup_nom` i, fins que el Data API no la vegi, val més avisar que
@@ -2797,74 +2798,73 @@ def ingest_calendari_cmd(
 def arxiva_lliga_en_viu_cmd(
     temporada: str = typer.Option(..., "--temporada", help="La que s'arxiva, ex. 2025-2026."),
     lliga: str = typer.Option("LLIGA CATALANA TRES BANDES", "--lliga"),
+    lliga_id: int = typer.Option(
+        0, "--lliga-id", help="L'id de la federació. Per defecte, el de la temporada."
+    ),
     aplica: bool = typer.Option(False, "--aplica", help="Fes-ho. Sense això només ho ensenya."),
 ) -> None:
-    """Passa la classificació en viu a l'històric abans de rellevar-la.
+    """Passa una classificació en viu a l'històric, que és d'on beu el selector de temporades.
 
-    `publish_lliga` reescriu `lliga_standings` amb la temporada en curs. La
-    temporada que hi havia no es mou a cap altra banda: si es publica la nova
-    sense arxivar l'anterior, l'anterior desapareix del web i no queda enlloc.
-    Aquesta comanda la copia a `lliga_standings_hist`, que és d'on beu el
-    selector de temporades.
-
-    S'arxiva el que hi ha PUBLICAT, no una classificació recalculada: així el
-    que queda a l'històric és exactament el que ensenyava el web, amb les
-    posicions oficials i les penalitzacions federatives tal com hi eren.
+    `publish_lliga` ja ho fa sol amb les temporades passades que encara no hi
+    són; aquesta comanda és per veure-ho abans o per forçar-ne una.
 
     L'importador històric (`scripts/import_lliga_standings.py`) fa una altra
     cosa i ara mateix no serveix per a això: llegeix les pàgines d'historial del
     web vell, que ja no existeixen.
     """
-    from fcbillar.cloud_sync import get_client
+    from fcbillar import en_curs
+    from fcbillar.cloud_sync import (
+        NOM_A_L_HISTORIC,
+        ArxiuImpossible,
+        desa_a_l_historic,
+        files_per_arxivar,
+        get_client,
+        ja_arxivada,
+        taules_de_lliga,
+    )
 
+    if lliga not in NOM_A_L_HISTORIC.values():
+        console.print(
+            f"[red]No conec la lliga {lliga!r}.[/] Són: {sorted(NOM_A_L_HISTORIC.values())}"
+        )
+        raise typer.Exit(1)
+    taules = taules_de_lliga(lliga)
     conn = ensure_schema(get_settings().db_path)
     sb = get_client()
-    grups = {
-        (g["divisio_id"], g["grup_id"]): (g["divisio_nom"], g["grup_nom"])
-        for g in (sb.table("lliga_groups").select("*").execute().data or [])
-    }
-    # El nom del grup pot faltar al que hi ha publicat: les promocions es van
-    # descobrir després de publicar-les i van pujar sense nom. Els noms locals
-    # són més recents, i el nom és clau primària a l'històric —arxivar-lo sense
-    # nom seria perdre'l.
-    locals_ = {
-        (d, g): n
-        for d, g, n in conn.execute(
-            "SELECT divisio_id, grup_id, nom FROM lliga_noms WHERE grup_id <> 0"
-        )
-    }
-    for clau, (dn, gn) in list(grups.items()):
-        if not gn:
-            grups[clau] = (dn, locals_.get(clau))
-    files = sb.table("lliga_standings").select("*").execute().data or []
-    if not files:
-        console.print("[red]No hi ha cap classificació en viu per arxivar.[/]")
-        raise typer.Exit(1)
 
-    ja = conn.execute(
-        "SELECT COUNT(*) FROM lliga_standings_hist WHERE temporada = ? AND lliga = ?",
-        (temporada, lliga),
-    ).fetchone()[0]
-    if ja:
-        console.print(
-            f"[yellow]La temporada {temporada} ja té {ja} files a l'històric.[/] "
-            f"No la torno a escriure: si l'has de refer, esborra-les abans."
-        )
-        raise typer.Exit(1)
-
-    rows = []
-    for r in files:
-        divisio, grup = grups.get((r["divisio_id"], r["grup_id"]), (None, None))
-        if not divisio or not grup:
+    if not lliga_id:
+        vives = {
+            r["lliga_id"]
+            for r in sb.table(taules.standings).select("lliga_id").execute().data or []
+        }
+        de_la_temporada = [
+            i
+            for i in sorted(vives)
+            if (a := en_curs.any_d_inici_de_lliga_id(conn, i)) is not None
+            and en_curs.amb_guio(a) == temporada
+        ]
+        if len(de_la_temporada) != 1:
             console.print(
-                f"[red]No sé com es diu el grup {r['divisio_id']}/{r['grup_id']} "
-                f"(divisió={divisio!r}, grup={grup!r}) i no l'arxivo sense nom: el nom "
-                f"és clau a l'històric.[/] Prova `fcbillar discover-lliga-noms`."
+                f"[red]A {taules.standings} hi ha les lligues {sorted(vives)} i "
+                f"{len(de_la_temporada)} són de la {temporada}.[/] Digues quina amb --lliga-id."
             )
             raise typer.Exit(1)
-        rows.append(
-            (temporada, lliga, divisio, grup, r["posicio"], r["equip"], r["punts"], r["pf"])
+        lliga_id = de_la_temporada[0]
+
+    if ja_arxivada(conn, sb, temporada, lliga):
+        console.print(
+            f"[yellow]La temporada {temporada} ja és a l'històric.[/] "
+            f"No la torno a escriure: si l'has de refer, esborra-la abans."
         )
+        raise typer.Exit(1)
+    try:
+        rows = files_per_arxivar(conn, sb, lliga_id, temporada, taules=taules)
+    except ArxiuImpossible as exc:
+        console.print(f"[red]{exc}[/]")
+        raise typer.Exit(1) from exc
+    if not rows:
+        console.print(f"[red]La lliga {lliga_id} no té cap classificació en viu per arxivar.[/]")
+        raise typer.Exit(1)
 
     table = Table(title=f"{temporada} cap a l'històric" + ("" if aplica else " (assaig en sec)"))
     table.add_column("Divisió")
@@ -2880,13 +2880,7 @@ def arxiva_lliga_en_viu_cmd(
     if not aplica:
         console.print(f"[yellow]{len(rows)} files. Torna-hi amb --aplica.[/]")
         return
-    conn.executemany(
-        "INSERT INTO lliga_standings_hist "
-        "(temporada, lliga, divisio, grup, posicio, equip, pm, pp) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        rows,
-    )
-    conn.commit()
+    desa_a_l_historic(conn, rows)
     console.print(
         f"[green]OK {len(rows)} files desades a l'històric local.[/] "
         f"Ara `fcbillar publish --lliga-hist` per pujar-les."
