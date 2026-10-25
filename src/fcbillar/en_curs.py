@@ -243,6 +243,12 @@ def _any_d_inici_de_lliga(conn: sqlite3.Connection, vista: LligaVista) -> int | 
     return None
 
 
+def any_d_inici_de_lliga_id(conn: sqlite3.Connection, lliga_id: int) -> int | None:
+    """El mateix per a una lliga que potser ja no surt al llistat (les passades)."""
+    vista = next((v for v in lligues_vistes(conn) if v.lliga_id == lliga_id), None)
+    return _any_d_inici_de_lliga(conn, vista or LligaVista(lliga_id, "", "", "", None, ""))
+
+
 def temporada_en_curs(conn: sqlite3.Connection) -> int:
     """L'any d'inici de la temporada en curs, segons les lligues de la federació.
 
