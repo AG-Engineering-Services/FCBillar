@@ -389,20 +389,20 @@
 		<div class="flex items-center justify-between gap-2 text-sm">
 			{#if m.player_a}{@render player(m.player_a, 'min-w-0 flex-1 truncate ' + aCls)}{:else}<span class="min-w-0 flex-1 truncate text-slate-500 dark:text-slate-400">—</span>{/if}
 			{#if wo}
-				<span class="shrink-0 font-mono text-[10px] font-semibold uppercase text-slate-500 dark:text-slate-400">w.o.</span>
+				<span class="shrink-0 font-mono text-2xs font-semibold uppercase text-slate-500 dark:text-slate-400">w.o.</span>
 			{:else if m.is_played}
 				<span class="shrink-0 font-mono text-xs">{m.caramboles_a}–{m.caramboles_b}</span>
 			{:else}
-				<span class="shrink-0 font-mono text-xs text-slate-300 dark:text-slate-600">vs</span>
+				<span class="shrink-0 font-mono text-xs text-slate-500 dark:text-slate-400">vs</span>
 			{/if}
 			{#if m.player_b}{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right ' + bCls)}{:else}<span class="min-w-0 flex-1 truncate text-right text-slate-500 dark:text-slate-400">—</span>{/if}
 		</div>
 		{#if wo}
-			<div class="mt-0.5 text-center text-[10px] text-slate-500 dark:text-slate-400">no presentat · passa de ronda sense jugar</div>
+			<div class="mt-0.5 text-center text-2xs text-slate-500 dark:text-slate-400">no presentat · passa de ronda sense jugar</div>
 		{:else if m.is_played}
-			<div class="mt-0.5 text-center text-[10px] text-slate-500 dark:text-slate-400">{m.entrades} ent.</div>
+			<div class="mt-0.5 text-center text-2xs text-slate-500 dark:text-slate-400">{m.entrades} ent.</div>
 		{:else}
-			<div class="mt-0.5 text-center text-[10px] {calc ? 'text-sky-600 dark:text-sky-400' : 'text-amber-600 dark:text-amber-400'}">{calc ? 'calculat' : 'pendent'}</div>
+			<div class="mt-0.5 text-center text-2xs {calc ? 'text-sky-600 dark:text-sky-400' : 'text-amber-600 dark:text-amber-400'}">{calc ? 'calculat' : 'pendent'}</div>
 		{/if}
 	</li>
 {/snippet}
@@ -418,12 +418,12 @@
 		<div class="flex flex-wrap items-center gap-2">
 			<h1 class="text-lg font-bold leading-tight">{payload.name}</h1>
 			{#if row.modality}
-				<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">{row.modality}</span>
+				<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-2xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">{row.modality}</span>
 			{/if}
 			{#if projected}
-				<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Projecció · no oficial</span>
+				<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 text-2xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Projecció · no oficial</span>
 			{:else}
-				<span class="shrink-0 rounded bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">En directe</span>
+				<span class="shrink-0 rounded bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-2xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">En directe</span>
 			{/if}
 		</div>
 		<p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
@@ -457,14 +457,14 @@
 		</div>
 	{/if}
 
-	<!-- Selector de fases -->
 	<div class="mb-3 flex flex-wrap gap-1.5">
 		{#each phases as p, i}
 			{@const st = phaseStatus(p)}
 			<button
+				type="button"
 				onclick={() => { selectedPhase = i; showClassif = false; }}
-				title={p.projected ? 'Fase projectada des del rànquing inicial: encara no publicada al web de la FCB' : ''}
-				class="rounded-lg border px-2.5 py-1 text-xs font-medium {selectedPhase === i && !showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600' : ''} {p.projected
+				aria-pressed={selectedPhase === i && !showClassif}
+				class="min-h-11 rounded-lg border px-2.5 py-1 text-xs font-medium {selectedPhase === i && !showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600' : ''} {p.projected
 					? 'border-dashed border-amber-400 dark:border-amber-700 bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400'
 					: st === 'done'
 						? 'border-emerald-300 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
@@ -478,8 +478,10 @@
 		{/each}
 		{#if classByRound.length}
 			<button
+				type="button"
 				onclick={() => (showClassif = true)}
-				class="rounded-lg border px-2.5 py-1 text-xs font-medium {showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600 ' : ''}border-violet-300 dark:border-violet-900/50 bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300"
+				aria-pressed={showClassif}
+				class="min-h-11 rounded-lg border px-2.5 py-1 text-xs font-medium {showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600 ' : ''}border-violet-300 dark:border-violet-900/50 bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300"
 			>
 				Classificació
 			</button>
@@ -492,7 +494,7 @@
 		{@const phase = phases[selectedPhase]}
 		{#if phase.projected}
 			<div class="mb-3 flex items-start gap-2 rounded-lg border border-dashed border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
-				<span class="mt-0.5 shrink-0">⚠</span>
+				<span class="mt-0.5 shrink-0" aria-hidden="true">⚠</span>
 				<span>Fase <strong>projectada</strong> des del rànquing inicial (sembra de l'Art. XVIII, amb els horaris oficials). La federació encara no l'ha publicada al seu web en directe; quan ho faci, aquí es veuran els grups i els resultats reals.</span>
 			</div>
 		{/if}
@@ -509,11 +511,11 @@
 							Classificats per a la següent ronda ({quals.length}){#if nSeconds} · 1rs + {nSeconds} {nSeconds === 1 ? 'millor 2n' : 'millors 2ns'}{/if}
 						</span>
 						{#if !phaseComplete}
-							<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Provisional</span>
+							<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Provisional</span>
 						{/if}
 					</div>
 					<!-- Capçalera de columnes (només PC/tablet) -->
-					<div class="hidden items-center gap-2 border-b border-emerald-200/70 dark:border-emerald-900/50 px-1 pb-1 text-[9px] font-semibold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-300 md:flex">
+					<div class="hidden items-center gap-2 border-b border-emerald-200/70 dark:border-emerald-900/50 px-1 pb-1 text-2xs font-semibold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-300 md:flex">
 						<span class="w-4 text-right">#</span>
 						<span class="w-6">Gr</span>
 						<span class="flex-1">Jugador</span>
@@ -529,10 +531,10 @@
 							{@const sure = q.position_in_group > 1 || (!!grp && groupClosed(grp))}
 							<li class="flex items-center gap-2 text-sm {q.position_in_group > 1 ? '-mx-1 rounded bg-amber-50/70 dark:bg-amber-950/40 px-1' : ''}">
 								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{i + 1}</span>
-								<span class="w-6 shrink-0 rounded bg-white/70 dark:bg-slate-900/70 text-center font-mono text-[10px] text-slate-500 dark:text-slate-400">{q.group_label.replace('Grup ', '')}</span>
+								<span class="w-6 shrink-0 rounded bg-white/70 dark:bg-slate-900/70 text-center font-mono text-2xs text-slate-500 dark:text-slate-400">{q.group_label.replace('Grup ', '')}</span>
 								<span class="flex min-w-0 flex-1 items-center gap-1">
 									{@render player(q.player_name, 'truncate ' + (sure ? 'font-bold' : ''))}
-									{#if q.position_in_group > 1}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1 text-[9px] font-semibold uppercase text-amber-700 dark:text-amber-300" title="Millor 2n: classificat per omplir la següent ronda">2n</span>{/if}{#if sure}<span class="shrink-0 text-emerald-600 dark:text-emerald-400" title={q.position_in_group > 1 ? 'Classificat (millor 2n, col·locat per la federació)' : 'Classificació assegurada (grup acabat)'}>✓</span>{/if}
+									{#if q.position_in_group > 1}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1 text-2xs font-semibold uppercase text-amber-700 dark:text-amber-300" title="Millor 2n: classificat per omplir la següent ronda">2n</span>{/if}{#if sure}<span class="shrink-0 text-emerald-600 dark:text-emerald-400" title={q.position_in_group > 1 ? 'Classificat (millor 2n, col·locat per la federació)' : 'Classificació assegurada (grup acabat)'}>✓</span>{/if}
 								</span>
 								<!-- Estadístiques completes: només PC/tablet -->
 								<span class="hidden w-8 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 md:inline">{q.pj ?? 0}</span>
@@ -543,14 +545,14 @@
 							</li>
 						{/each}
 					</ol>
-					<p class="mt-1.5 text-[10px] text-slate-500 dark:text-slate-400">Tots els 1rs de grup + els millors 2ns que calguin per omplir la següent ronda. ✓ = plaça assegurada.</p>
+					<p class="mt-1.5 text-2xs text-slate-500 dark:text-slate-400">Tots els 1rs de grup + els millors 2ns que calguin per omplir la següent ronda. ✓ = plaça assegurada. 2n = millor segon. SM = sèrie major (desempat a igualtat de mitjana).</p>
 				</div>
 			{/if}
 			{@const liveNow = liveScores.map((sc) => ({ sc, grp: sc.group_label || '—' }))}
 			{#if liveNow.length}
 				<div class="mb-3 rounded-xl bg-red-50 p-3 ring-1 ring-red-200 dark:bg-red-950/40 dark:ring-red-900/50">
 					<div class="mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-red-700 dark:text-red-400">
-						<span class="relative inline-flex h-1.5 w-1.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span></span>
+						<span class="relative inline-flex h-1.5 w-1.5" aria-hidden="true"><span class="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 motion-safe:animate-ping"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span></span>
 						En joc ara ({liveNow.length})
 					</div>
 					<ul class="space-y-1">
@@ -559,16 +561,16 @@
 							{@const bW = (sc.car_b ?? 0) > (sc.car_a ?? 0)}
 							{@const warm = sc.car_a == null && sc.car_b == null}
 							<li class="flex items-center gap-2 text-xs">
-								<span class="w-6 shrink-0 rounded bg-white/70 text-center font-mono text-[10px] text-slate-500 dark:bg-slate-800 dark:text-slate-400">{grp.replace('Grup ', '')}</span>
+								<span class="w-6 shrink-0 rounded bg-white/70 text-center font-mono text-2xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">{grp.replace('Grup ', '')}</span>
 								{@render playerShort(sc.player_a ?? '—', 'min-w-0 flex-1 truncate font-bold ' + (aW ? 'text-emerald-600 dark:text-emerald-400' : bW ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'))}
-								{#if warm}<span class="shrink-0 rounded bg-amber-100 px-1.5 text-[9px] font-semibold uppercase text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">escalfament</span>{:else}<span class="shrink-0 font-mono font-bold text-slate-700 dark:text-slate-200">{sc.car_a}–{sc.car_b}</span>{/if}
+								{#if warm}<span class="shrink-0 rounded bg-amber-100 px-1.5 text-2xs font-semibold uppercase text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">escalfament</span>{:else}<span class="shrink-0 font-mono font-bold text-slate-700 dark:text-slate-200">{sc.car_a}–{sc.car_b}</span>{/if}
 								{@render playerShort(sc.player_b ?? '—', 'min-w-0 flex-1 truncate text-right font-bold ' + (bW ? 'text-emerald-600 dark:text-emerald-400' : aW ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'))}
-								{#if sc.entrades}<span class="shrink-0 font-mono text-[10px] text-slate-500 dark:text-slate-400">{sc.entrades}e</span>{/if}
+								{#if sc.entrades}<span class="shrink-0 font-mono text-2xs text-slate-500 dark:text-slate-400">{sc.entrades}e</span>{/if}
 								<a href="https://www.youtube.com/watch?v={sc.video_id}" target="_blank" rel="noopener" title="Veure a YouTube" class="shrink-0 text-red-600 hover:opacity-80 dark:text-red-400"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.11-2.12C21.5 3.55 12 3.55 12 3.55s-9.5 0-11.39.53A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.11 2.12C4.5 20.45 12 20.45 12 20.45s9.5 0 11.39-.53A3 3 0 0 0 23.5 17.8 31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.55 15.57V8.43L15.82 12z"/></svg></a>
 							</li>
 						{/each}
 					</ul>
-					<p class="mt-1.5 text-[10px] leading-tight text-red-700/70 dark:text-red-400/70">Lectura automàtica del marcador (OCR): pot portar un cert retard i tenir errors puntuals respecte al resultat real.</p>
+					<p class="mt-1.5 text-2xs leading-tight text-red-700/70 dark:text-red-400/70">Lectura automàtica del marcador (OCR): pot portar un cert retard i tenir errors puntuals respecte al resultat real.</p>
 				</div>
 			{/if}
 			<div class="grid gap-2.5 sm:grid-cols-2">
@@ -581,14 +583,14 @@
 							<span class="text-[11px] {done ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}">{g.n_matches_played}/{done ? g.n_matches_played : g.n_matches_total}</span>
 						</div>
 						{#if g.schedule}
-							<div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 px-3 pt-1 text-[10px] text-slate-500 dark:text-slate-400">
+							<div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 px-3 pt-1 text-2xs text-slate-500 dark:text-slate-400">
 								{#if g.schedule.date}<span class="font-semibold">{fmtGroupDay(g.schedule.date)}</span>{/if}
 								{#if g.schedule.billar}<span class="rounded bg-slate-100 dark:bg-slate-800 px-1 font-medium">Billar {g.schedule.billar}</span>{/if}
 								{#each g.schedule.matches as m}
 									<span class="tabular-nums"><span class="text-slate-500 dark:text-slate-400">{matchTypeLabel(m.type)}</span> {m.time}</span>
 								{/each}
 							</div>
-						{:else if g.venue}<div class="px-3 pt-1 text-[10px] text-slate-500 dark:text-slate-400">{g.venue}</div>{/if}
+						{:else if g.venue}<div class="px-3 pt-1 text-2xs text-slate-500 dark:text-slate-400">{g.venue}</div>{/if}
 						{#if g.standings.length}
 							<ol class="px-2 py-1">
 								{#each g.standings as s, idx}
@@ -597,21 +599,26 @@
 										<span class="w-4 text-center text-xs font-mono {pos === 1 ? 'text-emerald-600 dark:text-emerald-400' : pos >= 2 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}">{pos === 1 ? '▸' : idx + 1}</span>
 										<span class="flex min-w-0 flex-1 items-center gap-1">
 											{@render player(s.player_name, 'truncate text-sm' + (s.incoming ? ' text-sky-700 dark:text-sky-300' : ''))}
-											{#if s.incoming}<span class="shrink-0 rounded bg-sky-100 dark:bg-sky-900/40 px-1 text-[9px] font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300" title="{s.seed_rank ? s.seed_rank + 'è ' : ''}classificat de la ronda anterior{s.from_group ? ' (de ' + s.from_group.replace('Grup ', '') + ')' : ''} — la FCB encara no l'ha col·locat oficialment">▸ {s.seed_rank ? s.seed_rank + 'è cl.' : 'class.'}</span>{/if}
+											{#if s.incoming}<span class="shrink-0 rounded bg-sky-100 dark:bg-sky-900/40 px-1 text-2xs font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300" title="{s.seed_rank ? s.seed_rank + 'è ' : ''}classificat de la ronda anterior{s.from_group ? ' (de ' + s.from_group.replace('Grup ', '') + ')' : ''}: la FCB encara no l'ha col·locat oficialment">▸ {s.seed_rank ? s.seed_rank + 'è cl.' : 'class.'}</span>{/if}
 										</span>
 										<span class="shrink-0 font-mono text-[11px] text-slate-500 dark:text-slate-400">{s.mitjana.toFixed(3)}</span>
 										<span class="w-5 shrink-0 text-right font-mono text-sm font-semibold">{s.punts}</span>
 									</li>
 								{/each}
 							</ol>
+							{#if g.standings.some((s) => s.incoming)}
+								<p class="px-3 pb-2 text-2xs leading-tight text-slate-500 dark:text-slate-400">
+									▸ = classificat de la ronda anterior que la FCB encara no ha col·locat oficialment.
+								</p>
+							{/if}
 						{:else}
 							<p class="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">Sense classificació encara.</p>
 						{/if}
 						{#if liveForGroup(g.label).length}
 								<div class="border-t border-red-100 dark:border-red-900/50 px-3 py-2">
-									<div class="mb-1 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">
-										<span class="relative inline-flex h-1.5 w-1.5">
-											<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
+									<div class="mb-1 flex items-center gap-1 text-2xs font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">
+										<span class="relative inline-flex h-1.5 w-1.5" aria-hidden="true">
+											<span class="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 motion-safe:animate-ping"></span>
 											<span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span>
 										</span>
 										En joc ara
@@ -626,7 +633,7 @@
 													<span class="shrink-0 font-mono font-bold text-slate-700 dark:text-slate-200">{sc.car_a}–{sc.car_b}</span>
 													{@render playerShort(sc.player_b ?? '—', 'min-w-0 flex-1 truncate text-right font-bold ' + (bW ? 'text-emerald-600 dark:text-emerald-400' : aW ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'))}
 												</div>
-												<div class="mt-0.5 flex items-center justify-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+												<div class="mt-0.5 flex items-center justify-center gap-2 text-2xs text-slate-500 dark:text-slate-400">
 													{#if sc.entrades}<span>{sc.entrades} ent.</span>{/if}
 													<a href="https://www.youtube.com/watch?v={sc.video_id}" target="_blank" rel="noopener" title="Veure a YouTube" class="inline-flex items-center gap-0.5 font-semibold text-red-600 hover:underline active:underline dark:text-red-400">
 														<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.11-2.12C21.5 3.55 12 3.55 12 3.55s-9.5 0-11.39.53A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.11 2.12C4.5 20.45 12 20.45 12 20.45s9.5 0 11.39-.53A3 3 0 0 0 23.5 17.8 31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.55 15.57V8.43L15.82 12z"/></svg>
@@ -640,7 +647,7 @@
 							{/if}
 							{#if played.length}
 							<div class="border-t border-slate-100 dark:border-slate-800 px-3 py-2">
-								<div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+								<div class="mb-1 text-2xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 									Partides disputades
 								</div>
 								<ul class="space-y-1.5">
@@ -653,7 +660,7 @@
 												<span class="shrink-0 font-mono font-bold text-slate-700 dark:text-slate-200">{m.caramboles_a}–{m.caramboles_b}</span>
 												{@render player(m.player_b, 'min-w-0 flex-1 truncate text-right font-bold ' + (bWin ? 'text-emerald-600 dark:text-emerald-400' : aWin ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'))}
 											</div>
-											{#if m.entrades}<div class="text-center text-[10px] text-slate-500 dark:text-slate-400">{m.entrades} ent.</div>{/if}
+											{#if m.entrades}<div class="text-center text-2xs text-slate-500 dark:text-slate-400">{m.entrades} ent.</div>{/if}
 										</li>
 									{/each}
 								</ul>
@@ -678,7 +685,7 @@
 				<div class="mb-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 p-3 ring-1 ring-sky-200 dark:ring-sky-900/50">
 					<div class="mb-1.5 flex items-center gap-2">
 						<span class="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">Classificats per a la següent ronda ({seeds.length}{#if esperats > seeds.length}/{esperats}{/if})</span>
-						{#if (next?.ko_matches?.length ?? 0) === 0}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Provisional</span>{/if}
+						{#if (next?.ko_matches?.length ?? 0) === 0}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Provisional</span>{/if}
 					</div>
 					<ol class="space-y-0.5">
 						{#each seeds as s, i}
@@ -686,15 +693,15 @@
 								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{i + 1}</span>
 								<span class="flex min-w-0 flex-1 items-center gap-1">
 									{@render player(s.name, 'truncate')}
-									{#if s.source === 'reservat'}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Cap de sèrie reservat (no juga la prèvia)">res</span>{/if}
-									{#if s.source === 'walkover'}<span class="shrink-0 rounded bg-slate-200 dark:bg-slate-700 px-1 text-[9px] font-semibold uppercase text-slate-600 dark:text-slate-300" title="Ha passat per incompareixença del rival: sense mitjana, manté la posició que tenia a la ronda anterior">w.o.</span>{/if}
+									{#if s.source === 'reservat'}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-2xs font-semibold uppercase text-violet-700 dark:text-violet-300" title="Cap de sèrie reservat (no juga la prèvia)">res</span>{/if}
+									{#if s.source === 'walkover'}<span class="shrink-0 rounded bg-slate-200 dark:bg-slate-700 px-1 text-2xs font-semibold uppercase text-slate-600 dark:text-slate-300" title="Ha passat per incompareixença del rival: sense mitjana, manté la posició que tenia a la ronda anterior">w.o.</span>{/if}
 								</span>
 								{#if s.serie_major}<span class="hidden w-10 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline" title="Sèrie major">{s.serie_major}</span>{/if}
 								<span class="w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400" title="Mitjana amb què entra a la ronda següent">{s.mitjana ? s.mitjana.toFixed(3) : '—'}</span>
 							</li>
 						{/each}
 					</ol>
-					<p class="mt-1.5 text-[10px] leading-tight text-slate-500 dark:text-slate-400">Ordre per la mitjana d'<strong>aquesta</strong> ronda (sèrie major com a desempat). Fixa l'aparellament 1-N de <strong>{next?.label?.toLowerCase() ?? 'la ronda següent'}</strong>.</p>
+					<p class="mt-1.5 text-2xs leading-tight text-slate-500 dark:text-slate-400">Ordre per la mitjana d'<strong>aquesta</strong> ronda (sèrie major com a desempat). Fixa l'aparellament 1-N de <strong>{next?.label?.toLowerCase() ?? 'la ronda següent'}</strong>. <em>res</em> = cap de sèrie reservat (no juga la prèvia). <em>w.o.</em> = ha passat per incompareixença del rival: sense mitjana, manté la posició de la ronda anterior.</p>
 				</div>
 			{/if}
 
@@ -702,7 +709,7 @@
 				<p class="py-4 text-center text-sm text-slate-500 dark:text-slate-400">Encara no hi ha emparellaments d'aquesta ronda.</p>
 			{:else}
 				{#if calc.length}
-					<p class="mb-1.5 text-[10px] text-sky-600 dark:text-sky-400">{official.length ? 'Oficials + calculats (mentre la federació no publiqui la resta).' : 'Emparellaments calculats: la federació encara no els ha publicat.'}</p>
+					<p class="mb-1.5 text-2xs text-sky-600 dark:text-sky-400">{official.length ? 'Oficials + calculats (mentre la federació no publiqui la resta).' : 'Emparellaments calculats: la federació encara no els ha publicat.'}</p>
 				{/if}
 				<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 					{#each official as m}{@render koMatch(m, false)}{/each}
@@ -718,7 +725,7 @@
 	<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 		<div class="mb-2">
 			<h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Classificació provisional</h2>
-			<p class="mt-0.5 text-[10px] leading-tight text-slate-500 dark:text-slate-400">A dalt, els jugadors encara EN JOC: primer els caps de sèrie (reservats) pel rànquing d'opens, després els classificats de la prèvia per ordre de classificació. A sota, els ja eliminats per la ronda on cauen. Tot és provisional (*) fins a la classificació definitiva.</p>
+			<p class="mt-0.5 text-2xs leading-tight text-slate-500 dark:text-slate-400">A dalt, els jugadors encara EN JOC: primer els caps de sèrie (reservats) pel rànquing d'opens, després els classificats de la prèvia per ordre de classificació. A sota, els ja eliminats per la ronda on cauen. Tot és provisional (*) fins a la classificació definitiva.</p>
 		</div>
 		{#if is3b && rankSeqs.length}
 			<div class="mb-2 flex flex-wrap items-center gap-2 text-[11px]">
@@ -745,19 +752,19 @@
 					<div class="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider {alive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}">
 						<span>{alive ? 'Encara en competició' : tier.round}</span>
 						<span class="font-mono font-normal text-slate-500 dark:text-slate-400">llocs {lo === hi ? lo : `${lo}–${hi}`}</span>
-						{#if alive}<span class="rounded bg-amber-100 dark:bg-amber-900/40 px-1 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">provisional</span>{/if}
+						{#if alive}<span class="rounded bg-amber-100 dark:bg-amber-900/40 px-1 text-2xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">provisional</span>{/if}
 					</div>
 					<ol class="space-y-0.5">
 						{#each tier.rows as r (r.player_name)}
 							{@const ec = effClass(r)}
 							<li class="flex items-center gap-2 text-sm">
-								<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{r.position}{#if r.is_provisional_position}<span class="text-amber-500" title="Posició provisional">*</span>{/if}</span>
+								<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{r.position}{#if r.is_provisional_position}<span class="text-amber-500 dark:text-amber-400" title="Posició provisional">*</span>{/if}</span>
 								<span class="flex min-w-0 flex-1 items-baseline gap-1 truncate">
 									{@render player(r.player_name, (!alive && r.position <= 8 ? 'font-semibold ' : '') + 'truncate')}
-									{#if ec.rank3b}<span class="shrink-0 font-mono text-[10px] text-slate-500 dark:text-slate-400" title="Posició al rànquing de 3 bandes">({ec.rank3b})</span>{/if}
+									{#if ec.rank3b}<span class="shrink-0 font-mono text-2xs text-slate-500 dark:text-slate-400" title="Posició al rànquing de 3 bandes">({ec.rank3b})</span>{/if}
 								</span>
-								{#if ec.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-[9px] font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial (opens 3 bandes): millor classificat de la seva banda del rànquing">{ec.prize}</span>{/if}
-								{#if !alive && r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-[9px] font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
+								{#if ec.prize}<span class="shrink-0 rounded bg-violet-100 dark:bg-violet-900/40 px-1 text-2xs font-semibold uppercase text-violet-700 dark:text-violet-300" title="Premi especial (opens 3 bandes): millor classificat de la seva banda del rànquing">{ec.prize}</span>{/if}
+								{#if !alive && r.position <= 8}<span class="shrink-0 rounded bg-yellow-100 dark:bg-yellow-900/40 px-1 text-2xs font-semibold uppercase text-yellow-700 dark:text-yellow-300" title="Premi: {r.position === 1 ? '1r' : r.position === 2 ? '2n' : r.position <= 4 ? '3r-4t' : '5è-8è'} classificat">premi</span>{/if}
 								<span
 								class="hidden w-14 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline"
 								title={r.entrades
@@ -765,7 +772,7 @@
 									: "Mitjana de l'open"}
 							>{r.mitjana ? r.mitjana.toFixed(3) : '—'}</span>
 							{#if r.partides}
-								<span class="hidden w-7 shrink-0 text-right font-mono text-[10px] text-slate-500 dark:text-slate-400 sm:inline" title="Partides jugades a l'open">{r.partides}pj</span>
+								<span class="hidden w-7 shrink-0 text-right font-mono text-2xs text-slate-500 dark:text-slate-400 sm:inline" title="Partides jugades a l'open">{r.partides}pj</span>
 							{/if}
 								<span class="w-10 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title={alive ? 'Punts pendents: encara en competició' : 'Punts de rànquing segons el lloc (reglament dels opens)'}>{alive ? '—' : r.open_points}</span>
 							</li>
@@ -774,6 +781,6 @@
 				</div>
 			{/each}
 		</div>
-		<p class="mt-2 text-[10px] leading-tight text-slate-500 dark:text-slate-400"><span class="text-amber-500">*</span> provisional · (n) = rànquing 3B · <span class="text-violet-600 dark:text-violet-300">premi</span> per posició (1-8) o per banda de rànquing. Punts segons el reglament. La mitjana és la de <strong>tot l'open</strong> (totes les partides jugades) i <em>pj</em> les partides.</p>
+		<p class="mt-2 text-2xs leading-tight text-slate-500 dark:text-slate-400"><span class="text-amber-500 dark:text-amber-400">*</span> provisional · (n) = rànquing 3B · <span class="text-violet-600 dark:text-violet-300">premi</span> per posició (1-8) o per banda de rànquing. Punts segons el reglament. La mitjana és la de <strong>tot l'open</strong> (totes les partides jugades) i <em>pj</em> les partides.</p>
 	</div>
 {/snippet}

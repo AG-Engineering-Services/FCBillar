@@ -301,7 +301,6 @@
 		<text class="num-punt" x={p.px} y={p.py + 3}>{i + 1}</text>
 	{/each}
 
-	<!-- Boles -->
 	{#each boles3 as b (b.id)}
 		<circle
 			class="bola"
@@ -312,7 +311,6 @@
 			fill={b.color}
 			onpointerdown={(ev) => iniciaArrossega(ev, 'bola', b.id)}
 		/>
-		<!-- Brillantor gloss -->
 		<circle
 			class="bola-brill"
 			cx={b.pos.px}
@@ -325,6 +323,7 @@
 </svg>
 
 <style>
+	/* Colors fixos: són el drap i les bandes d'un billar dibuixat, no part del tema. */
 	.billar {
 		display: block;
 		width: 100%;

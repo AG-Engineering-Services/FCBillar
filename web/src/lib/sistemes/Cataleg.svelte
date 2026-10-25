@@ -54,7 +54,7 @@
 	};
 
 	let categoriaActiva = $state<string | null>(null);
-	// Marks funciona/no-funciona (video_id → true | false | null), compartits via Supabase.
+	// Marks funciona/no-funciona (video_id → true | false | null), compartits via Neon.
 	let marks = $state<Record<string, boolean | null>>({});
 	let esAdmin = $state(false);
 	let carregat = $state(false);
@@ -143,14 +143,18 @@
 {#if categories.length > 1}
 	<div class="mb-4 flex flex-wrap items-center gap-2">
 		<button
-			class="rounded-sm px-3 py-1 text-sm {categoriaActiva === null
+			type="button"
+			aria-pressed={categoriaActiva === null}
+			class="min-h-11 rounded-sm px-3 py-1 text-sm {categoriaActiva === null
 				? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 				: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}"
 			onclick={() => (categoriaActiva = null)}>Totes</button
 		>
 		{#each categories as cat (cat)}
 			<button
-				class="rounded-sm px-3 py-1 text-sm {categoriaActiva === cat
+				type="button"
+				aria-pressed={categoriaActiva === cat}
+				class="min-h-11 rounded-sm px-3 py-1 text-sm {categoriaActiva === cat
 					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}"
 				onclick={() => (categoriaActiva = cat)}>{cat}</button
@@ -194,7 +198,7 @@
 						<a
 							href={detall(s.id)}
 							class="mt-1 inline-block text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-							>{s.explicacio ? '📖 Llegir explicació →' : 'Veure detall →'}</a
+							>{s.explicacio ? 'Llegeix l’explicació →' : 'Mira el detall →'}</a
 						>
 						{#if esAdmin}
 							<div class="mt-2 flex gap-2 border-t border-slate-100 pt-2 dark:border-slate-800">

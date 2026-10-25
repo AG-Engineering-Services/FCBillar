@@ -3,6 +3,7 @@
 	import { db } from '$lib/db';
 	import { follows, toggleFollow, clubFollows, toggleClubFollow } from '$lib/follows';
 	import { theme } from '$lib/theme';
+	import AvisError from '$lib/components/AvisError.svelte';
 
 	// Colors dels gràfics SVG reactius al tema (clar/fosc).
 	const cGrid = $derived($theme === 'dark' ? '#1e293b' : '#eef2f7');
@@ -33,6 +34,7 @@
 	let latestRankSeq = $state<number | null>(null);
 	let series = $state<Serie[]>([]);
 	let loading = $state(true);
+	let error = $state<string | null>(null);
 	let clubQ = $state('');
 	let collapsedClubs = $state(new Set<string>());
 	function toggleClubCollapse(id: string) {
@@ -42,22 +44,29 @@
 	}
 
 	onMount(async () => {
-		const [{ data: pl }, { data: cl }, { data: maxR }] = await Promise.all([
+		const [{ data: pl, error: ep }, { data: cl, error: ec }, { data: maxR, error: er }] = await Promise.all([
 			db.from('players').select('fcb_id, nom, club_fcb_id'),
 			db.from('clubs').select('fcb_id, nom').order('nom'),
 			db.from('rankings').select('num_seq').eq('modalitat_codi', 1).order('num_seq', { ascending: false }).limit(1)
 		]);
+		const e0 = ep ?? ec ?? er;
+		if (e0) {
+			error = e0.message;
+			loading = false;
+			return;
+		}
 		allPlayers = pl ?? [];
 		allClubs = cl ?? [];
 		clubsMap = new Map((cl ?? []).map((c) => [c.fcb_id, c.nom]));
 		const latest = maxR?.[0]?.num_seq;
 		latestRankSeq = latest ?? null;
 		if (latest != null) {
-			const { data: re } = await db
+			const { data: re, error: ee } = await db
 				.from('ranking_entries')
 				.select('player_fcb_id, posicio, mitjana_general')
 				.eq('modalitat_codi', 1)
 				.eq('num_seq', latest);
+			if (ee) error = ee.message;
 			rankMap = new Map((re ?? []).map((r) => [r.player_fcb_id, { posicio: r.posicio, mitjana: r.mitjana_general }]));
 		}
 		loading = false;
@@ -199,7 +208,7 @@
 			series = [];
 			return;
 		}
-		const [{ data: pl }, { data: cl }, { data: re }] = await Promise.all([
+		const [{ data: pl, error: ep }, { data: cl, error: ec }, { data: re, error: er }] = await Promise.all([
 			db.from('players').select('fcb_id, nom, club_fcb_id').in('fcb_id', ids),
 			db.from('clubs').select('fcb_id, nom'),
 			db
@@ -209,6 +218,11 @@
 				.in('player_fcb_id', ids)
 				.order('num_seq')
 		]);
+		const e0 = ep ?? ec ?? er;
+		if (e0) {
+			error = e0.message;
+			return;
+		}
 		const pmap = new Map((pl ?? []).map((p) => [p.fcb_id, p]));
 		const cmap = new Map((cl ?? []).map((c) => [c.fcb_id, c.nom]));
 		const byPlayer = new Map<string, Pt[]>();
@@ -325,38 +339,43 @@
 
 {#if loading}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
+{:else if error}
+	<AvisError missatge="No s'han pogut carregar els seguits." detall={error} onretry={() => location.reload()} />
 {:else}
-	<!-- CLUBS seguits -->
 	<h2 class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Clubs</h2>
 	<input
 		bind:value={clubQ}
 		placeholder="Afegeix un club…"
+		aria-label="Afegeix un club"
 		class="mb-2 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm"
 	/>
 	{#if clubMatches.length}
 		<ul class="mb-3 overflow-hidden rounded-lg bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			{#each clubMatches as c (c.fcb_id)}
-				<button
-					onclick={() => {
-						toggleClubFollow(c.fcb_id);
-						clubQ = '';
-					}}
-					class="flex w-full items-center justify-between border-b border-slate-100 dark:border-slate-800 px-3 py-2 text-left text-sm last:border-0 active:bg-slate-50 dark:active:bg-slate-800/50"
-				>
-					<span class="truncate">{c.nom}</span><span class="text-slate-900 dark:text-slate-100">+ seguir</span>
-				</button>
+				<li class="border-b border-slate-100 last:border-0 dark:border-slate-800">
+					<button
+						type="button"
+						onclick={() => {
+							toggleClubFollow(c.fcb_id);
+							clubQ = '';
+						}}
+						class="flex min-h-11 w-full items-center justify-between px-3 py-2 text-left text-sm active:bg-slate-50 dark:active:bg-slate-800/50"
+					>
+						<span class="truncate">{c.nom}</span><span class="text-slate-900 dark:text-slate-100">+ seguir</span>
+					</button>
+				</li>
 			{/each}
 		</ul>
 	{/if}
 	{#each $clubFollows as clubId (clubId)}
 		<section class="mb-3 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			<header class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2">
-				<button onclick={() => toggleClubCollapse(clubId)} class="flex min-w-0 flex-1 items-center gap-2 text-left">
-					<span class="text-slate-500 dark:text-slate-400 transition-transform {collapsedClubs.has(clubId) ? '' : 'rotate-90'}">›</span>
+				<button type="button" onclick={() => toggleClubCollapse(clubId)} aria-expanded={!collapsedClubs.has(clubId)} class="flex min-h-11 min-w-0 flex-1 items-center gap-2 text-left">
+					<span aria-hidden="true" class="text-slate-500 dark:text-slate-400 transition-transform {collapsedClubs.has(clubId) ? '' : 'rotate-90'}">›</span>
 					<span class="truncate text-sm font-bold">{clubsMap.get(clubId) ?? clubId}</span>
 					<span class="shrink-0 text-[11px] font-normal text-slate-500 dark:text-slate-400">{clubPlayers(clubId).length}</span>
 				</button>
-				<button onclick={() => toggleClubFollow(clubId)} class="shrink-0 text-xs text-amber-600 dark:text-amber-400">★ treure</button>
+				<button type="button" onclick={() => toggleClubFollow(clubId)} aria-label="Deixa de seguir {clubsMap.get(clubId) ?? 'el club'}" class="min-h-11 shrink-0 px-2 text-xs text-amber-600 dark:text-amber-400">★ treure</button>
 			</header>
 			{#if !collapsedClubs.has(clubId)}
 				<ul>
@@ -382,7 +401,6 @@
 		<p class="mb-4 text-[11px] text-slate-500 dark:text-slate-400">Cap club seguit. Cerca'n un a dalt.</p>
 	{/if}
 
-	<!-- JUGADORS seguits -->
 	<h2 class="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Jugadors</h2>
 	{#if series.length === 0}
 		<div class="rounded-xl bg-white dark:bg-slate-900 p-5 text-center text-sm text-slate-500 dark:text-slate-400 ring-1 ring-slate-200 dark:ring-slate-800">
@@ -391,6 +409,20 @@
 	{:else}
 		{#if hasHist}
 			<div class="mb-3 space-y-3">
+				<!-- Equivalent de teclat del clic sobre els gràfics -->
+				<label class="block text-xs text-slate-500 dark:text-slate-400">
+					<span class="sr-only">Rànquing a comparar</span>
+					<input
+						type="range"
+						min="0"
+						max={allSeq.length - 1}
+						step="1"
+						value={selSeq != null ? allSeq.indexOf(selSeq) : allSeq.length - 1}
+						oninput={(e) => (selSeq = allSeq[+(e.currentTarget as HTMLInputElement).value])}
+						aria-valuetext={selSeq != null ? dateFromSeq(selSeq) : undefined}
+						class="ag-range"
+					/>
+				</label>
 				{#if selSeq != null}
 					<div class="rounded-lg bg-slate-900 dark:bg-slate-700 px-3 py-2 text-xs text-white">
 						<div class="mb-1 font-semibold">{dateFromSeq(selSeq)}</div>
@@ -415,7 +447,7 @@
 					<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 						<div class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{title}</div>
 						<div class="flex gap-1">
-							<div class="flex w-9 flex-col justify-between py-0.5 text-right text-[9px] tabular-nums text-slate-500 dark:text-slate-400">
+							<div class="flex w-9 flex-col justify-between py-0.5 text-right text-2xs tabular-nums text-slate-500 dark:text-slate-400">
 								<span>{inv ? '#' + Math.round(yTop) : yTop.toFixed(2)}</span>
 								<span>{inv ? '#' + Math.round(yBot) : yBot.toFixed(2)}</span>
 							</div>
@@ -438,7 +470,7 @@
 								{/if}
 							</svg>
 						</div>
-						<div class="flex justify-between pl-10 text-[9px] tabular-nums text-slate-500 dark:text-slate-400">
+						<div class="flex justify-between pl-10 text-2xs tabular-nums text-slate-500 dark:text-slate-400">
 							{#each xTicksSeg as seq}<span>{dateShort(seq)}</span>{/each}
 						</div>
 					</div>
@@ -456,10 +488,10 @@
 					{#if s.posicio != null}
 						<div class="shrink-0 text-right">
 							<div class="font-mono text-sm font-bold tabular-nums">#{s.posicio}</div>
-							<div class="text-[10px] text-slate-500 dark:text-slate-400">{s.mitjana?.toFixed(3) ?? ''}</div>
+							<div class="text-2xs text-slate-500 dark:text-slate-400">{s.mitjana?.toFixed(3) ?? ''}</div>
 						</div>
 					{/if}
-					<button onclick={() => toggleFollow(s.fcb_id)} class="shrink-0 rounded-sm px-2 py-1 text-xs text-amber-600 dark:text-amber-400" aria-label="treure">★</button>
+					<button type="button" onclick={() => toggleFollow(s.fcb_id)} class="min-h-11 min-w-11 shrink-0 rounded-sm px-2 py-1 text-xs text-amber-600 dark:text-amber-400" aria-label="Deixa de seguir {s.nom}">★</button>
 				</li>
 			{/each}
 		</ul>

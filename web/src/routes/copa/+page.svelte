@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import AvisError from '$lib/components/AvisError.svelte';
 	import {
 		db,
 		type CopaGroup,
@@ -96,6 +97,7 @@
 	// Resultats (encontres) per grup
 	let encontres = $state<any[]>([]);
 	let partidesCache = $state<Record<number, any[]>>({});
+	let partidesError = $state<Record<number, boolean>>({});
 	let expandedEnc = $state(new Set<number>());
 	function encOf(gid: number): any[] {
 		return encontres.filter((e) => e.jornada === selJornada && e.grup_id === gid);
@@ -109,33 +111,46 @@
 		}
 		s.add(encId);
 		expandedEnc = s;
-		if (!partidesCache[encId]) {
-			const { data } = await db
-				.from('copa_partides')
-				.select('*')
-				.eq('encontre_id', encId)
-				.order('ordre');
-			partidesCache = { ...partidesCache, [encId]: data ?? [] };
+		if (!partidesCache[encId]) await carregaPartides(encId);
+	}
+	async function carregaPartides(encId: number) {
+		partidesError = { ...partidesError, [encId]: false };
+		const { data, error: e } = await db
+			.from('copa_partides')
+			.select('*')
+			.eq('encontre_id', encId)
+			.order('ordre');
+		if (e) {
+			partidesError = { ...partidesError, [encId]: true };
+			return;
 		}
+		partidesCache = { ...partidesCache, [encId]: data ?? [] };
 	}
 </script>
 
 {#if error}
-	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
+	<AvisError
+		missatge="No s'han pogut carregar les classificacions de la copa."
+		detall={error}
+		onretry={() => location.reload()}
+	/>
 {:else if loading}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if phases.length === 0}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Sense classificacions de copa.</p>
 {:else}
-	<!-- Toggle Equips / Jugadors -->
 	<div class="mb-3 inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 text-sm">
 		<button
+			type="button"
 			onclick={() => (mode = 'equips')}
-			class="rounded-md px-3 py-1 font-medium {mode === 'equips' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
+			aria-pressed={mode === 'equips'}
+			class="min-h-11 rounded-md px-3 py-1 font-medium {mode === 'equips' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 			>Equips</button>
 		<button
+			type="button"
 			onclick={() => (mode = 'jugadors')}
-			class="rounded-md px-3 py-1 font-medium {mode === 'jugadors' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
+			aria-pressed={mode === 'jugadors'}
+			class="min-h-11 rounded-md px-3 py-1 font-medium {mode === 'jugadors' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 			>Jugadors</button>
 	</div>
 
@@ -143,6 +158,7 @@
 		bind:value={q}
 		inputmode="search"
 		placeholder={mode === 'equips' ? 'Filtra equip…' : 'Filtra jugador…'}
+		aria-label={mode === 'equips' ? 'Filtra equip' : 'Filtra jugador'}
 		class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm"
 	/>
 
@@ -152,7 +168,7 @@
 			<header class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				Rànquing de la Copa · {compPlayers.length} jugadors
 			</header>
-			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				<span class="w-6 text-center">#</span>
 				<span class="flex-1">Jugador</span>
 				<span class="w-6 text-center">PJ</span>
@@ -172,12 +188,13 @@
 			</ul>
 		</section>
 	{:else}
-		<!-- Fases: xips (només equips) -->
 		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
 			{#each phases as f}
 				<button
+					type="button"
 					onclick={() => (selJornada = f.jornada)}
-					class="shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium {f.jornada === selJornada
+					aria-pressed={f.jornada === selJornada}
+					class="min-h-11 shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium {f.jornada === selJornada
 						? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 						: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}">{f.nom}</button>
 			{/each}
@@ -186,16 +203,18 @@
 		{#each phaseGroups as g (g.grup_id)}
 		<section class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			<button
+				type="button"
 				onclick={() => toggle(g.grup_id)}
-				class="flex w-full items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+				aria-expanded={!collapsed.has(g.grup_id)}
+				class="flex min-h-11 w-full items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
 			>
 				<span class="flex-1">{g.grup_nom ?? 'Grup'}</span>
 				<span class="font-normal normal-case text-slate-500 dark:text-slate-400">{count(g.grup_id)} {mode}</span>
-				<span class="text-slate-500 dark:text-slate-400 transition-transform {collapsed.has(g.grup_id) ? '' : 'rotate-90'}">›</span>
+				<span aria-hidden="true" class="text-slate-500 dark:text-slate-400 transition-transform {collapsed.has(g.grup_id) ? '' : 'rotate-90'}">›</span>
 			</button>
 			{#if !collapsed.has(g.grup_id)}
 				{#if mode === 'equips'}
-					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 						<span class="w-5 text-center">#</span>
 						<span class="flex-1">Equip</span>
 						<span class="w-12 text-right">Mitj.</span>
@@ -212,7 +231,7 @@
 						{/each}
 					</ul>
 				{:else}
-					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 						<span class="w-5 text-center">#</span>
 						<span class="flex-1">Jugador</span>
 						<span class="w-12 text-right">Mitj.</span>
@@ -236,13 +255,23 @@
 						<ul class="space-y-1">
 							{#each encOf(g.grup_id) as e (e.encontre_id)}
 								<li class="overflow-hidden rounded-lg bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-									<button onclick={() => toggleEnc(e.encontre_id)} class="flex w-full items-center gap-2 px-2 py-1.5 text-xs">
+									<button type="button" onclick={() => toggleEnc(e.encontre_id)} aria-expanded={expandedEnc.has(e.encontre_id)} class="flex min-h-11 w-full items-center gap-2 px-2 py-1.5 text-xs">
 										<span class="flex-1 truncate text-left font-medium">{e.equip_local}</span>
 										<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 font-mono font-bold tabular-nums">{e.gols_local}–{e.gols_visitant}</span>
 										<span class="flex-1 truncate text-right font-medium">{e.equip_visitant}</span>
 									</button>
 									{#if expandedEnc.has(e.encontre_id)}
 										<div class="border-t border-slate-100 dark:border-slate-800 px-2 py-1">
+											{#if partidesError[e.encontre_id]}
+												<p class="py-1 text-[11px] text-red-800 dark:text-red-300">
+													No s'han pogut carregar les partides.
+													<button type="button" onclick={() => carregaPartides(e.encontre_id)} class="min-h-11 font-semibold underline">Torna-ho a provar</button>
+												</p>
+											{:else if !partidesCache[e.encontre_id]}
+												<p class="py-1 text-[11px] text-slate-500 dark:text-slate-400">Carregant partides…</p>
+											{:else if partidesCache[e.encontre_id].length === 0}
+												<p class="py-1 text-[11px] text-slate-500 dark:text-slate-400">La federació encara no ha publicat el detall d'aquest encontre.</p>
+											{/if}
 											{#each partidesCache[e.encontre_id] ?? [] as p}
 												<div class="flex items-center gap-2 py-0.5 text-[11px]">
 													<span class="flex-1 truncate text-left">{p.jugador_local}</span>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { db } from '$lib/db';
+	import AvisError from '$lib/components/AvisError.svelte';
 
 	type GameDetail = {
 		kind?: 'game';
@@ -24,17 +25,22 @@
 	type Rec = { categoria: string; ordre: number; player_fcb_id: string | null; jugador: string; valor: string; detall: string | null };
 	let recs = $state<Rec[]>([]);
 	let loading = $state(true);
+	let error = $state<string | null>(null);
 	let selMod = $state('');
 
-	onMount(async () => {
-		const { data } = await db
+	async function carrega() {
+		loading = true;
+		error = null;
+		const { data, error: e } = await db
 			.from('records')
 			.select('categoria, ordre, player_fcb_id, jugador, valor, detall')
 			.order('categoria')
 			.order('ordre');
-		recs = (data ?? []) as Rec[];
+		if (e) error = e.message;
+		else recs = (data ?? []) as Rec[];
 		loading = false;
-	});
+	}
+	onMount(carrega);
 
 	const ORDER = ['Tres Bandes', 'Lliure', 'Banda', 'Quadre 47/2', 'Quadre 71/2'];
 	const mods = $derived(
@@ -71,12 +77,18 @@
 
 {#if loading}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
+{:else if error}
+	<AvisError missatge="No s'han pogut carregar els rècords." detall={error} onretry={carrega} />
+{:else if recs.length === 0}
+	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Encara no hi ha rècords calculats.</p>
 {:else}
 	<div class="-mx-3 mb-3 flex gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
 		{#each mods as m}
 			<button
+				type="button"
 				onclick={() => (selMod = m)}
-				class="shrink-0 rounded-sm px-3 py-1.5 text-sm font-medium {selMod === m
+				aria-pressed={selMod === m}
+				class="min-h-11 shrink-0 rounded-sm px-3 py-1.5 text-sm font-medium {selMod === m
 					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{m}</button>
 		{/each}
@@ -97,9 +109,9 @@
 								<a href={playerHref(r.player_fcb_id, d)} class="min-w-0 flex-1 active:underline">
 									<div class="truncate text-sm font-medium leading-tight">{r.jugador}</div>
 									{#if d?.kind === 'ranking'}
-										<div class="truncate text-[10px] text-slate-500 dark:text-slate-400">{fmtRanking(d)}</div>
+										<div class="truncate text-2xs text-slate-500 dark:text-slate-400">{fmtRanking(d)}</div>
 									{:else if d}
-										<div class="truncate text-[10px] text-slate-500 dark:text-slate-400">{fmtDate(d.data)} · vs {d.rival} · {d.caramboles}–{d.caramboles_rival} / {d.entrades} ent.</div>
+										<div class="truncate text-2xs text-slate-500 dark:text-slate-400">{fmtDate(d.data)} · vs {d.rival} · {d.caramboles}–{d.caramboles_rival} / {d.entrades} ent.</div>
 									{/if}
 								</a>
 							{:else}

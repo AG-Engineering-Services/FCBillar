@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
+	import AvisError from '$lib/components/AvisError.svelte';
 	import {
 		db,
 		type LligaGroup,
@@ -302,8 +303,18 @@
 	const titularsDeLEquip = $derived(
 		equipObert ? titulars(equipObert.equip, jugadorsDeLEquip) : new Set<string>()
 	);
-	function obreEquip(r: StandingRow) {
+	// <dialog> natiu: tanca amb Escape i deixa inert la pàgina del darrere.
+	let dlgEquip = $state<HTMLDialogElement>();
+	let obridorEquip: HTMLElement | null = null;
+	async function obreEquip(r: StandingRow, ev: MouseEvent) {
+		obridorEquip = ev.currentTarget as HTMLElement;
 		equipObert = r;
+		await tick();
+		dlgEquip?.showModal();
+	}
+	function tancaEquip() {
+		equipObert = null;
+		obridorEquip?.focus();
 	}
 
 	let collapsed = $state(new Set<number>());
@@ -363,6 +374,7 @@
 	);
 	let jornadaSel = $state<Record<number, number>>({});
 	let partidesCache = $state<Record<number, any[]>>({});
+	let partidesError = $state<Record<number, boolean>>({});
 	let expandedEnc = $state(new Set<number>());
 
 	function gJornades(gid: number): number[] {
@@ -455,22 +467,32 @@
 		}
 		s.add(encId);
 		expandedEnc = s;
-		if (!partidesCache[encId]) {
-			const { data } = await db
-				.from('lliga_partides')
-				.select('*')
-				.eq('encontre_id', encId)
-				.order('ordre');
-			partidesCache = { ...partidesCache, [encId]: data ?? [] };
+		if (!partidesCache[encId]) await carregaPartides(encId);
+	}
+	async function carregaPartides(encId: number) {
+		partidesError = { ...partidesError, [encId]: false };
+		const { data, error: e } = await db
+			.from('lliga_partides')
+			.select('*')
+			.eq('encontre_id', encId)
+			.order('ordre');
+		if (e) {
+			partidesError = { ...partidesError, [encId]: true };
+			return;
 		}
+		partidesCache = { ...partidesCache, [encId]: data ?? [] };
 	}
 </script>
 
 {#if error}
-	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
+	<AvisError
+		missatge="No s'han pogut carregar les classificacions de la lliga."
+		detall={error}
+		onretry={() => location.reload()}
+	/>
 {:else}
 	{#if histSeasons.length}
-		<select bind:value={season} class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm">
+		<select bind:value={season} aria-label="Temporada" class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm">
 			<option value={currentSeason}>Temporada {currentSeason} (actual)</option>
 			{#each histSeasons as s}<option value={s}>Temporada {s}</option>{/each}
 		</select>
@@ -482,7 +504,7 @@
 		{#each histGroups as grp}
 			<section class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 				<header class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400">{grp.lliga} · {grp.divisio} · {grp.grup}</header>
-				<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+				<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					<span class="w-5 text-center">#</span><span class="flex-1">Equip</span><span class="w-8 text-right">PM</span><span class="w-8 text-right">PP</span>
 				</div>
 				<ul>
@@ -502,26 +524,30 @@
 	{:else if divisions.length === 0}
 		<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Sense classificacions.</p>
 	{:else}
-		<!-- Divisions: xips -->
 	<div class="-mx-3 mb-2 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
 		{#each divisions as d}
 			<button
+				type="button"
 				onclick={() => (selDiv = d.id)}
-				class="shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium {d.id === selDiv
+				aria-pressed={d.id === selDiv}
+				class="min-h-11 shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium {d.id === selDiv
 					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}">{d.nom}</button>
 		{/each}
 	</div>
 
-	<!-- Toggle Equips / Jugadors -->
 	<div class="mb-3 inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 text-sm">
 		<button
+			type="button"
 			onclick={() => (mode = 'equips')}
-			class="rounded-md px-3 py-1 font-medium {mode === 'equips' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
+			aria-pressed={mode === 'equips'}
+			class="min-h-11 rounded-md px-3 py-1 font-medium {mode === 'equips' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 			>Equips</button>
 		<button
+			type="button"
 			onclick={() => (mode = 'jugadors')}
-			class="rounded-md px-3 py-1 font-medium {mode === 'jugadors' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
+			aria-pressed={mode === 'jugadors'}
+			class="min-h-11 rounded-md px-3 py-1 font-medium {mode === 'jugadors' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 			>Jugadors</button>
 	</div>
 
@@ -529,18 +555,23 @@
 		bind:value={q}
 		inputmode="search"
 		placeholder={mode === 'equips' ? 'Filtra equip…' : 'Filtra jugador…'}
+		aria-label={mode === 'equips' ? 'Filtra equip' : 'Filtra jugador'}
 		class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm"
 	/>
 
 	{#if mode === 'jugadors'}
 		<div class="mb-3 ml-2 inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 text-xs">
 			<button
+				type="button"
 				onclick={() => (scope = 'grup')}
-				class="rounded-md px-2.5 py-1 font-medium {scope === 'grup' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
+				aria-pressed={scope === 'grup'}
+				class="min-h-11 rounded-md px-2.5 py-1 font-medium {scope === 'grup' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 				>Per grup</button>
 			<button
+				type="button"
 				onclick={() => (scope = 'categoria')}
-				class="rounded-md px-2.5 py-1 font-medium {scope === 'categoria' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
+				aria-pressed={scope === 'categoria'}
+				class="min-h-11 rounded-md px-2.5 py-1 font-medium {scope === 'categoria' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 				>Tota la categoria</button>
 		</div>
 	{/if}
@@ -550,7 +581,7 @@
 			<header class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				Categoria sencera · {divPlayers.length} jugadors
 			</header>
-			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				<span class="w-6 text-center">#</span>
 				<span class="flex-1">Jugador</span>
 				<span class="w-6 text-center">PJ</span>
@@ -576,30 +607,38 @@
 		{#each divGroups as g (g.grup_id)}
 		<section class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			<button
+				type="button"
 				onclick={() => toggle(g.grup_id)}
-				class="flex w-full items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+				aria-expanded={!collapsed.has(g.grup_id)}
+				class="flex min-h-11 w-full items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
 			>
 				<span class="flex-1">
 					{g.grup_nom ?? 'Grup'}
 					{#if g.grup_id < 0}
 						<span
-							class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+							class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-2xs font-semibold normal-case tracking-normal text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
 							title="Del PDF del calendari: la federació encara no ha publicat aquest grup. Les dates i els emparellaments poden canviar."
 							>provisional</span
 						>
 					{/if}
 				</span>
 				<span class="font-normal normal-case text-slate-500 dark:text-slate-400">{count(g.grup_id)} {mode}</span>
-				<span class="text-slate-500 dark:text-slate-400 transition-transform {collapsed.has(g.grup_id) ? '' : 'rotate-90'}">›</span>
+				<span aria-hidden="true" class="text-slate-500 dark:text-slate-400 transition-transform {collapsed.has(g.grup_id) ? '' : 'rotate-90'}">›</span>
 			</button>
 			{#if !collapsed.has(g.grup_id)}
+				{#if g.grup_id < 0}
+					<p class="border-t border-slate-100 bg-amber-50 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:border-slate-800 dark:bg-amber-950/40 dark:text-amber-300">
+						Provisional: surt del PDF del calendari perquè la federació encara no ha publicat aquest
+						grup. Les dates i els emparellaments poden canviar.
+					</p>
+				{/if}
 				{#if mode === 'equips'}
 					<!-- Amb G-E-P, parcials, caramboles, entrades i mitjana ja no hi cap a
 					     l'amplada d'un mòbil: la taula fa el seu propi scroll horitzontal i
 					     el nom de l'equip queda fix a l'esquerra. -->
 					<div class="overflow-x-auto border-t border-slate-100 dark:border-slate-800">
 						<table class="w-full min-w-[34rem] text-sm tabular-nums">
-							<thead class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+							<thead class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 								<tr class="border-b border-slate-100 dark:border-slate-800">
 									<th class="w-7 py-1.5 pl-3 text-center font-normal">#</th>
 									<th class="sticky left-0 bg-white py-1.5 pl-1 text-left font-normal dark:bg-slate-900">Equip</th>
@@ -617,7 +656,7 @@
 									<tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/60">
 										<td class="py-2 pl-3 text-center font-semibold {r.posicio === 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{r.posicio}</td>
 										<td class="sticky left-0 max-w-[11rem] bg-white py-2 pl-1 dark:bg-slate-900">
-											<button type="button" onclick={() => obreEquip(r)} class="block w-full truncate text-left font-medium leading-tight" title="Qui hi juga">{r.equip}</button>
+											<button type="button" onclick={(ev) => obreEquip(r, ev)} class="block min-h-11 w-full truncate text-left font-medium leading-tight" title="Qui hi juga">{r.equip}</button>
 											{#if r.penalitzacio}<div class="text-[11px] font-medium text-red-500 dark:text-red-400" title="Sanció federativa: −{r.penalitzacio} {r.penalitzacio === 1 ? 'punt' : 'punts'}">−{r.penalitzacio} sanció</div>{/if}
 										</td>
 										<td class="py-2 text-center text-slate-500 dark:text-slate-400">{r.pj}</td>
@@ -632,8 +671,13 @@
 							</tbody>
 						</table>
 					</div>
+					<p class="border-t border-slate-100 px-3 py-2 text-[11px] leading-snug text-slate-500 dark:border-slate-800 dark:text-slate-400">
+						PJ: encontres jugats · G-E-P: guanyats, empatats i perduts · Parc.: punts parcials a favor i
+						en contra (2 per partida guanyada, 1 per empatada) · Car.: caramboles fetes i rebudes ·
+						Entr.: entrades · Mitj.: caramboles fetes per entrada. Toca un equip per veure qui hi juga.
+					</p>
 				{:else}
-					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+					<div class="flex items-center gap-2 border-y border-slate-100 dark:border-slate-800 px-3 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 						<span class="w-5 text-center">#</span>
 						<span class="flex-1">Jugador</span>
 						<span class="w-6 text-center">PJ</span> <span class="w-11 text-right">Mitj.</span>
@@ -658,16 +702,16 @@
 				{#if gJornades(g.grup_id).length}
 					<div class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 p-2">
 						<div class="mb-2 flex items-center justify-between">
-							<button onclick={() => stepJornada(g.grup_id, -1)} class="rounded-md px-3 py-1 text-base text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-700" aria-label="anterior">‹</button>
+							<button type="button" onclick={() => stepJornada(g.grup_id, -1)} class="min-h-11 min-w-11 rounded-md px-3 py-1 text-base text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-700" aria-label="Jornada anterior">‹</button>
 							<span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Jornada {curJornada(g.grup_id)}</span>
-							<button onclick={() => stepJornada(g.grup_id, 1)} class="rounded-md px-3 py-1 text-base text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-700" aria-label="seguent">›</button>
+							<button type="button" onclick={() => stepJornada(g.grup_id, 1)} class="min-h-11 min-w-11 rounded-md px-3 py-1 text-base text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-700" aria-label="Jornada següent">›</button>
 						</div>
 						<ul class="space-y-1">
 							{#each encOf(g.grup_id) as e (e.encontre_id)}
 								<li class="overflow-hidden rounded-lg bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-									<button onclick={() => toggleEnc(e.encontre_id)} class="flex w-full items-center gap-2 px-2 py-1.5 text-xs">
+									<button type="button" onclick={() => toggleEnc(e.encontre_id)} aria-expanded={expandedEnc.has(e.encontre_id)} class="flex min-h-11 w-full items-center gap-2 px-2 py-1.5 text-xs">
 										<span class="flex-1 truncate text-left font-medium">{e.equip_local}</span>
-										<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 font-mono tabular-nums {e.gols_local == null ? 'text-[10px] font-normal text-slate-500 dark:text-slate-400' : 'font-bold'}"
+										<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 font-mono tabular-nums {e.gols_local == null ? 'text-2xs font-normal text-slate-500 dark:text-slate-400' : 'font-bold'}"
 											>{e.gols_local == null
 												? (e.data ?? 'per jugar')
 												: `${e.gols_local}–${e.gols_visitant}`}</span
@@ -676,6 +720,16 @@
 									</button>
 									{#if expandedEnc.has(e.encontre_id)}
 										<div class="border-t border-slate-100 dark:border-slate-800 px-2 py-1">
+											{#if partidesError[e.encontre_id]}
+												<p class="py-1 text-[11px] text-red-800 dark:text-red-300">
+													No s'han pogut carregar les partides.
+													<button type="button" onclick={() => carregaPartides(e.encontre_id)} class="min-h-11 font-semibold underline">Torna-ho a provar</button>
+												</p>
+											{:else if !partidesCache[e.encontre_id]}
+												<p class="py-1 text-[11px] text-slate-500 dark:text-slate-400">Carregant partides…</p>
+											{:else if partidesCache[e.encontre_id].length === 0}
+												<p class="py-1 text-[11px] text-slate-500 dark:text-slate-400">La federació encara no ha publicat el detall d'aquest encontre.</p>
+											{/if}
 											{#each partidesCache[e.encontre_id] ?? [] as p}
 												<div class="flex items-center gap-2 py-0.5 text-[11px]">
 													<span class="flex-1 truncate text-left">{p.jugador_local}</span>
@@ -704,22 +758,14 @@
 	amb dos equips al mateix grup els ensenya tots junts.
 -->
 {#if equipObert}
-	<div
-		class="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4"
-		role="button"
-		tabindex="-1"
-		onclick={() => (equipObert = null)}
-		onkeydown={(e) => e.key === 'Escape' && (equipObert = null)}
+	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+	<dialog
+		bind:this={dlgEquip}
+		aria-label="Jugadors de {equipObert.equip}"
+		onclose={tancaEquip}
+		onclick={(e) => e.target === e.currentTarget && dlgEquip?.close()}
+		class="mx-auto mb-0 mt-auto max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white p-0 text-slate-900 backdrop:bg-slate-900/50 dark:bg-slate-900 dark:text-slate-100 sm:m-auto sm:rounded-2xl"
 	>
-		<div
-			class="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white shadow-xl dark:bg-slate-900 sm:rounded-2xl"
-			role="dialog"
-			aria-modal="true"
-			aria-label="Jugadors de {equipObert.equip}"
-			tabindex="-1"
-			onclick={(e) => e.stopPropagation()}
-			onkeydown={(e) => e.stopPropagation()}
-		>
 			<header
 				class="sticky top-0 flex items-start justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
 			>
@@ -734,8 +780,8 @@
 				</div>
 				<button
 					type="button"
-					onclick={() => (equipObert = null)}
-					class="shrink-0 rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+					onclick={() => dlgEquip?.close()}
+					class="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
 					aria-label="Tanca">✕</button
 				>
 			</header>
@@ -746,7 +792,7 @@
 				</p>
 			{:else}
 				<div
-					class="flex items-center gap-2 border-b border-slate-100 px-4 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400"
+					class="flex items-center gap-2 border-b border-slate-100 px-4 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400"
 				>
 					<span class="w-5 text-center">#</span>
 					<span class="flex-1">Jugador</span>
@@ -761,15 +807,15 @@
 								? 'bg-emerald-50 font-medium dark:bg-emerald-950/20'
 								: ''}"
 						>
-							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-400"
+							<span class="w-5 shrink-0 text-center text-xs font-semibold tabular-nums text-slate-500 dark:text-slate-400"
 								>{p.posicio}</span
 							>
 							<span class="min-w-0 flex-1 truncate text-sm">
 								{p.jugador}
 								{#if p.fitxatge}
 									<span
-										class="ml-1 text-[10px] font-normal uppercase tracking-wide text-sky-700 dark:text-sky-400"
-										title="Ve d'un altre club: la federació el llista als dos.">fitxatge</span
+										class="ml-1 text-2xs font-normal uppercase tracking-wide text-sky-700 dark:text-sky-400"
+										>fitxatge</span
 									>
 								{/if}
 							</span>
@@ -787,6 +833,5 @@
 					surt, que la lliga la juga amb ells; el salt a la numeració és seu.
 				</p>
 			{/if}
-		</div>
-	</div>
+	</dialog>
 {/if}

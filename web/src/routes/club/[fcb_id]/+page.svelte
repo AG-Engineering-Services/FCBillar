@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { db } from '$lib/db';
 	import { clubFollows, toggleClubFollow } from '$lib/follows';
+	import AvisError from '$lib/components/AvisError.svelte';
 
 	// La ruta és `club/[fcb_id]`: si s'hi arriba, el paràmetre hi és. Els altres
 	// camins amb paràmetre del web ho diuen igual.
@@ -11,6 +12,7 @@
 		{ fcb_id: string; nom: string; rank: { posicio: number; mitjana: number } | null }[]
 	>([]);
 	let loading = $state(true);
+	let error = $state<string | null>(null);
 
 	$effect(() => {
 		if (fcbId) load(fcbId);
@@ -18,7 +20,8 @@
 
 	async function load(id: string) {
 		loading = true;
-		const [{ data: c }, { data: pl }, { data: maxR }] = await Promise.all([
+		error = null;
+		const [{ data: c, error: ec }, { data: pl, error: ep }, { data: maxR, error: er }] = await Promise.all([
 			db.from('clubs').select('nom').eq('fcb_id', id).maybeSingle(),
 			db.from('players').select('fcb_id, nom').eq('club_fcb_id', id),
 			db
@@ -28,17 +31,28 @@
 				.order('num_seq', { ascending: false })
 				.limit(1)
 		]);
+		const e0 = ec ?? ep ?? er;
+		if (e0) {
+			error = e0.message;
+			loading = false;
+			return;
+		}
 		clubNom = c?.nom ?? id;
 		const ids = (pl ?? []).map((p) => p.fcb_id);
 		const latest = maxR?.[0]?.num_seq;
 		const rankMap = new Map<string, { posicio: number; mitjana: number }>();
 		if (latest != null && ids.length) {
-			const { data: re } = await db
+			const { data: re, error: ee } = await db
 				.from('ranking_entries')
 				.select('player_fcb_id, posicio, mitjana_general')
 				.eq('modalitat_codi', 1)
 				.eq('num_seq', latest)
 				.in('player_fcb_id', ids);
+			if (ee) {
+				error = ee.message;
+				loading = false;
+				return;
+			}
 			for (const r of re ?? [])
 				rankMap.set(r.player_fcb_id, { posicio: r.posicio, mitjana: r.mitjana_general });
 		}
@@ -60,7 +74,7 @@
 	}
 </script>
 
-<button onclick={back} class="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
+<button type="button" onclick={back} class="mb-2 inline-flex min-h-11 items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
 	<span aria-hidden="true">←</span> Enrere
 </button>
 
@@ -70,8 +84,10 @@
 		<p class="text-sm text-slate-500 dark:text-slate-400">{players.length} jugadors · {ranked.length} al rànquing</p>
 	</div>
 	<button
+		type="button"
 		onclick={() => toggleClubFollow(fcbId)}
-		class="shrink-0 rounded-sm px-3 py-1.5 text-sm font-medium {$clubFollows.includes(fcbId)
+		aria-pressed={$clubFollows.includes(fcbId)}
+		class="min-h-11 shrink-0 rounded-sm px-3 py-1.5 text-sm font-medium {$clubFollows.includes(fcbId)
 			? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 ring-1 ring-amber-300 dark:ring-amber-900/50'
 			: 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'}"
 	>
@@ -81,10 +97,12 @@
 
 {#if loading}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
+{:else if error}
+	<AvisError missatge="No s'han pogut carregar les dades del club." detall={error} onretry={() => load(fcbId)} />
 {:else if players.length === 0}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Cap jugador en aquest club.</p>
 {:else}
-	<div class="mb-1 px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+	<div class="mb-1 px-0.5 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 		Al rànquing (3 bandes) · per mitjana
 	</div>
 	<ul class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
@@ -98,13 +116,13 @@
 					>{p.nom}</a>
 				<div class="shrink-0 text-right">
 					<div class="font-mono text-sm font-bold tabular-nums">{p.rank?.mitjana?.toFixed(3)}</div>
-					<div class="text-[10px] text-slate-500 dark:text-slate-400">#{p.rank?.posicio}</div>
+					<div class="text-2xs text-slate-500 dark:text-slate-400">#{p.rank?.posicio}</div>
 				</div>
 			</li>
 		{/each}
 	</ul>
 	{#if unranked.length}
-		<div class="mb-1 px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+		<div class="mb-1 px-0.5 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 			Altres jugadors ({unranked.length})
 		</div>
 		<ul class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">

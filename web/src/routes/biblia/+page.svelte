@@ -160,8 +160,8 @@
 		display: inline-block;
 		font-size: 0.72rem;
 		padding: 0.02rem 0.35rem;
-		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.14);
+		border-radius: var(--radi);
+		background: var(--fons-3);
 		margin-left: 0.15rem;
 	}
 	.filtres {
@@ -208,11 +208,9 @@
 		border-radius: var(--radi);
 		overflow: hidden;
 		color: var(--text);
-		transition: border-color 0.12s ease, transform 0.12s ease;
 	}
 	.carta:hover {
 		border-color: var(--accent);
-		transform: translateY(-2px);
 		text-decoration: none;
 	}
 	.mini {
@@ -236,18 +234,18 @@
 	.tag {
 		font-size: 0.68rem;
 		padding: 0.05rem 0.35rem;
-		border-radius: 5px;
+		border-radius: var(--radi);
 		background: var(--fons-3);
 		color: var(--text-suau);
 		border: 1px solid var(--vora);
 	}
 	.tag.analisi {
-		background: #123;
+		background: var(--accent-suau);
 		color: var(--accent);
-		border-color: #235;
+		border-color: var(--vora-forta);
 	}
 	.tag.video {
-		color: #ff6b6b;
+		color: var(--perill);
 	}
 	.buit {
 		color: var(--text-suau);

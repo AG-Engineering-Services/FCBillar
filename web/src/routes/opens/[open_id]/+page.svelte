@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AvisError from '$lib/components/AvisError.svelte';
 	import { page } from '$app/stores';
 	import {
 		db,
@@ -133,7 +134,7 @@
 </a>
 
 {#if error}
-	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
+	<AvisError missatge="No s'ha pogut carregar l'open." detall={error} onretry={() => location.reload()} />
 {:else}
 	<h1 class="mb-1 text-base font-bold leading-tight">
 		{open ? open.nom.replace(/\s*-\s*[ÚU]NICA\s*$/i, '').trim() : '…'}
@@ -169,7 +170,7 @@
 					class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800"
 				>
 					<div
-						class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400"
+						class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400"
 					>
 						<span class="w-5 text-center">#</span>
 						<span class="flex-1">Jugador</span>
@@ -181,7 +182,7 @@
 						{#each ranquingDeLaFase as r, i (r.jugador)}
 							{#if primerDelSeuLloc(r, i) && i > 0}
 								<li
-									class="border-y border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400"
+									class="border-y border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-3 py-1 text-2xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400"
 								>
 									{r.posicio_grup}a posició de grup
 								</li>
@@ -196,7 +197,7 @@
 									{:else}
 										<span class="block truncate text-sm font-medium leading-tight">{r.jugador}</span>
 									{/if}
-									{#if r.club}<span class="block truncate text-[10px] text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
+									{#if r.club}<span class="block truncate text-2xs text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
 								</div>
 								<span class="w-14 shrink-0 text-center text-[11px] text-slate-500 dark:text-slate-400">{r.grup_nom ?? '—'}</span>
 								<span class="w-8 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts ?? 0}</span>
@@ -223,11 +224,12 @@
 				bind:value={q}
 				inputmode="search"
 				placeholder="Cerca jugador…"
+				aria-label="Cerca jugador"
 				class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm"
 			/>
 		{/if}
 		<div class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				<span class="w-5 text-center">#</span>
 				<span class="flex-1">Jugador</span>
 				<span class="w-7 text-center">PJ</span>

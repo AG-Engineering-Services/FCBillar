@@ -220,8 +220,8 @@
 		gap: 0.6rem;
 	}
 	.rodo {
-		width: 2.2rem;
-		height: 2.2rem;
+		width: 2.75rem;
+		height: 2.75rem;
 		padding: 0;
 		border-radius: 50%;
 		display: flex;

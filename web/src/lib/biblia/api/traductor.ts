@@ -27,9 +27,7 @@ function modelNvidia(): string {
 	return env.NVIDIA_MODEL?.trim() || 'meta/llama-3.3-70b-instruct';
 }
 
-// ---------------------------------------------------------------------------
 // Glossari de billar
-// ---------------------------------------------------------------------------
 
 const GLOSSARI: Array<[string, string]> = [
 	['키스', 'retruc'],
@@ -67,9 +65,7 @@ function correccions(text: string): string {
 	return t;
 }
 
-// ---------------------------------------------------------------------------
 // Cache
-// ---------------------------------------------------------------------------
 
 function carrega(): Record<string, string> {
 	if (!memoria) memoria = { ...(traduccionsBase as Record<string, string>) };
@@ -101,9 +97,7 @@ function bundlePerText(): Map<string, string> {
 	return perText;
 }
 
-// ---------------------------------------------------------------------------
 // Motor NVIDIA (LLM)
-// ---------------------------------------------------------------------------
 
 const SISTEMA =
 	"Ets un traductor expert de billar a tres bandes (carambola). Tradueixes el text " +
@@ -154,9 +148,7 @@ async function tradueixNvidia(
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Motor Google Translate (alternativa)
-// ---------------------------------------------------------------------------
 
 function posaMarcadors(textKo: string): { marcat: string; mapa: Map<string, string> } {
 	let t = textKo;
@@ -184,9 +176,7 @@ async function tradueixGoogle(fetch: typeof globalThis.fetch, text: string): Pro
 	return correccions(out);
 }
 
-// ---------------------------------------------------------------------------
 // API pública
-// ---------------------------------------------------------------------------
 
 /** Tradueix un text coreà al català. Retorna l'original si la traducció falla. */
 export async function tradueixKoCa(fetch: typeof globalThis.fetch, text: string): Promise<string> {

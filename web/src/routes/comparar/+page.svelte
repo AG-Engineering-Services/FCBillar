@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { db, type GameRow } from '$lib/db';
 	import { theme } from '$lib/theme';
+	import AvisError from '$lib/components/AvisError.svelte';
 
 	// Graella del gràfic SVG reactiva al tema (clar/fosc).
 	const cGrid = $derived($theme === 'dark' ? '#1e293b' : '#eef2f7');
@@ -24,6 +25,7 @@
 
 	let allPlayers = $state<{ fcb_id: string; nom: string }[]>([]);
 	let q = $state('');
+	let error = $state<string | null>(null);
 	let sel = $state<Sel[]>([]);
 	let selMod = $state(1);
 	const modalitats = $derived(
@@ -40,7 +42,11 @@
 	}
 
 	onMount(async () => {
-		const { data } = await db.from('players').select('fcb_id, nom');
+		const { data, error: e } = await db.from('players').select('fcb_id, nom');
+		if (e) {
+			error = e.message;
+			return;
+		}
 		allPlayers = (data ?? []).filter((p) => !p.fcb_id.startsWith('name:'));
 	});
 
@@ -187,19 +193,22 @@
 
 <h1 class="mb-3 text-lg font-bold">Comparador de jugadors</h1>
 
-{#if sel.length < 4}
+{#if error}
+	<AvisError missatge="No s'ha pogut carregar la llista de jugadors." detall={error} onretry={() => location.reload()} />
+{:else if sel.length < 4}
 	<div class="relative mb-3">
 		<input
 			bind:value={q}
 			inputmode="search"
 			placeholder="Afegeix jugador…"
+			aria-label="Afegeix jugador"
 			class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 px-3 text-sm shadow-sm"
 		/>
 		{#if matches.length}
 			<ul class="absolute z-10 mt-1 w-full overflow-hidden rounded-lg bg-white dark:bg-slate-900 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800">
 				{#each matches as p (p.fcb_id)}
 					<li>
-						<button onclick={() => add(p)} class="block w-full truncate px-3 py-2 text-left text-sm active:bg-slate-50 dark:active:bg-slate-800/50">{p.nom}</button>
+						<button type="button" onclick={() => add(p)} class="block min-h-11 w-full truncate px-3 py-2 text-left text-sm active:bg-slate-50 dark:active:bg-slate-800/50">{p.nom}</button>
 					</li>
 				{/each}
 			</ul>
@@ -212,7 +221,7 @@
 		{#each sel as s (s.fcb_id)}
 			<span class="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs font-medium text-white" style:background-color={s.color}>
 				{s.nom}
-				<button onclick={() => remove(s.fcb_id)} aria-label="treure">✕</button>
+				<button type="button" onclick={() => remove(s.fcb_id)} aria-label="Deixa de comparar {s.nom}" class="-my-2 -mr-2 min-h-11 min-w-11">✕</button>
 			</span>
 		{/each}
 	</div>
@@ -224,7 +233,7 @@
 	<!-- Mitjana de joc per modalitat (cadascuna per separat) -->
 	{#if modMitjanes.length}
 		<div class="mb-4 overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+			<div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				Mitjana de joc per modalitat
 			</div>
 			{#each modMitjanes as row}
@@ -243,8 +252,10 @@
 		<div class="mb-2 flex flex-wrap gap-1">
 			{#each modalitats as m}
 				<button
+					type="button"
 					onclick={() => (selMod = m)}
-					class="rounded-sm px-2.5 py-1 text-xs font-medium {selMod === m
+					aria-pressed={selMod === m}
+					class="min-h-11 rounded-sm px-2.5 py-1 text-xs font-medium {selMod === m
 						? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 						: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{MODNOM[m] ?? m}</button>
 			{/each}
@@ -266,7 +277,7 @@
 	<!-- Cara a cara directe -->
 	{#if h2h.length}
 		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Cara a cara directe</div>
+			<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Cara a cara directe</div>
 			{#each h2h as m}
 				<div class="flex items-center justify-between gap-2 py-1 text-sm">
 					<span class="min-w-0 flex-1 truncate text-right">{m.a}</span>
@@ -281,8 +292,8 @@
 	{#if hasChart}
 		<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 			<div class="mb-1 flex items-end justify-between">
-				<span class="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Evolució mitjana rànquing · {MODNOM[selMod] ?? selMod}</span>
-				<span class="text-[9px] tabular-nums text-slate-500 dark:text-slate-400">{mitRange[1].toFixed(2)} ↕ {mitRange[0].toFixed(2)}</span>
+				<span class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Evolució mitjana rànquing · {MODNOM[selMod] ?? selMod}</span>
+				<span class="text-2xs tabular-nums text-slate-500 dark:text-slate-400">{mitRange[1].toFixed(2)} ↕ {mitRange[0].toFixed(2)}</span>
 			</div>
 			<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" class="h-28 w-full">
 				{#each [0, 0.25, 0.5, 0.75, 1] as f}

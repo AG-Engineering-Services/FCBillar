@@ -372,7 +372,7 @@
 		padding: 0.6rem;
 		background: var(--fons-3);
 		border: 2px solid var(--vora);
-		border-radius: 10px;
+		border-radius: var(--radi);
 		cursor: pointer;
 	}
 	.opcio:hover:not(:disabled) {
@@ -382,12 +382,12 @@
 		cursor: default;
 	}
 	.opcio.correcta {
-		border-color: #2fbf5b;
-		background: #10301c;
+		border-color: var(--be);
+		background: var(--be-fons);
 	}
 	.opcio.erronia {
 		border-color: var(--perill);
-		background: #331416;
+		background: var(--perill-fons);
 	}
 	.cara-gran {
 		width: 100%;
@@ -397,7 +397,7 @@
 	.seguent {
 		background: var(--accent-fosc);
 		border-color: var(--accent-fosc);
-		color: #fff;
+		color: var(--accent-tinta);
 		font-weight: 600;
 	}
 	input[type='range'] {
@@ -419,7 +419,7 @@
 		color: var(--perill);
 	}
 	.verdicte.be {
-		color: #2fbf5b;
+		color: var(--be);
 	}
 	.comparativa {
 		width: 100%;

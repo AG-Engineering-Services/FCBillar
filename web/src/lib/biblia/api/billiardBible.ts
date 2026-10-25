@@ -17,9 +17,7 @@ function capsaleres(): Record<string, string> {
 	};
 }
 
-// ---------------------------------------------------------------------------
 // Jugadors
-// ---------------------------------------------------------------------------
 
 export interface Jugador {
 	id: number;
@@ -64,9 +62,7 @@ export async function fetchJugadors(fetch: Fetch): Promise<Jugador[]> {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Llista de tirades
-// ---------------------------------------------------------------------------
 
 export interface FiltresLlista {
 	esAnalisi: boolean;
@@ -154,9 +150,7 @@ export async function fetchComptador(fetch: Fetch, f: FiltresLlista): Promise<nu
 	return total;
 }
 
-// ---------------------------------------------------------------------------
 // Detall d'una tirada
-// ---------------------------------------------------------------------------
 
 export interface Video {
 	id: string;

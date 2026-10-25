@@ -281,7 +281,7 @@
 	.tag {
 		font-size: 0.72rem;
 		padding: 0.1rem 0.45rem;
-		border-radius: 5px;
+		border-radius: var(--radi);
 		background: var(--fons-3);
 		border: 1px solid var(--vora);
 		color: var(--text-suau);

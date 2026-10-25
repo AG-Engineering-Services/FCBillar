@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { db, tipusOf, isDecided, type Open, type OpenLiveRow } from '$lib/db';
+	import { ADMIN_EMAIL, esAdminLocal, marcaAdmin } from '$lib/admin';
+	import AvisError from '$lib/components/AvisError.svelte';
 
 	let opens = $state<Open[]>([]);
 	let liveOpens = $state<OpenLiveRow[]>([]);
@@ -21,14 +24,19 @@
 
 	let expandedPlayer = $state<string | null>(null);
 
-	// --- Admin: generar un open PROJECTAT des del rànquing inicial ------------
+	// Admin: generar un open PROJECTAT des del rànquing inicial.
 	// Puja el PDF 'RÀNQUING INICIAL' a la cua (fcbillar.open_projection_requests);
 	// el watcher del PC el genera i el publica a open_live com a open projectat.
-	// Soft-gate pel correu autoritzat (validat també per RLS al servidor), mateix
-	// patró que el botó "↻ Reingesta" de la fitxa.
-	const ADMIN_EMAIL = 'algoam@gmail.com';
+	// Només s'ensenya amb la marca d'admin (vegeu $lib/admin) i demana el correu
+	// autoritzat, que també valida la RLS al servidor.
+	let esAdmin = $state(false);
+	$effect(() => {
+		esAdmin = esAdminLocal($page.url);
+	});
 	let showAdmin = $state(false);
 	let adminSeason = $state('');
+	let adminCorreu = $state('');
+	let adminFiles = $state<FileList | undefined>();
 	let uploadState = $state<'idle' | 'sending' | 'ok' | 'denied' | 'error'>('idle');
 	let uploadMsg = $state('');
 
@@ -41,18 +49,16 @@
 		});
 	}
 
-	async function submitProjection(ev: Event) {
-		const input = ev.target as HTMLInputElement;
-		const file = input.files?.[0];
+	async function submitProjection(ev: SubmitEvent) {
+		ev.preventDefault();
+		const file = adminFiles?.[0];
 		if (!file) return;
-		const email = prompt('Correu autoritzat per generar la projecció:');
-		input.value = ''; // permet re-triar el mateix fitxer
-		if (email === null) return;
-		if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
+		if (adminCorreu.trim().toLowerCase() !== ADMIN_EMAIL) {
 			uploadState = 'denied';
 			uploadMsg = 'Correu no autoritzat.';
 			return;
 		}
+		marcaAdmin();
 		uploadState = 'sending';
 		uploadMsg = '';
 		try {
@@ -339,8 +345,8 @@
 {#if liveOpens.length}
 	<section class="mb-4">
 		<div class="mb-1.5 flex items-center gap-1.5">
-			<span class="relative flex h-2 w-2">
-				<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+			<span class="relative flex h-2 w-2" aria-hidden="true">
+				<span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping"></span>
 				<span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
 			</span>
 			<h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">En directe</h2>
@@ -355,10 +361,10 @@
 						<div class="min-w-0 text-sm font-semibold leading-tight">{r.name}</div>
 						<div class="flex shrink-0 items-center gap-1">
 							{#if r.payload_json?.projected}
-								<span class="rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">projecció</span>
+								<span class="rounded bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">projecció</span>
 							{/if}
 							{#if r.modality}
-								<span class="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{r.modality}</span>
+								<span class="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{r.modality}</span>
 							{/if}
 						</div>
 					</div>
@@ -369,21 +375,25 @@
 	</section>
 {/if}
 
-<!-- Toggle Opens / Campionats de Catalunya -->
 <div class="mb-3 inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 text-sm">
 	<button
+		type="button"
 		onclick={() => (cat = 'opens')}
-		class="rounded-md px-3 py-1 font-medium {cat === 'opens' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
+		aria-pressed={cat === 'opens'}
+		class="min-h-11 rounded-md px-3 py-1 font-medium {cat === 'opens' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 		>Opens</button>
 	<button
+		type="button"
 		onclick={() => (cat = 'ranking')}
-		class="rounded-md px-3 py-1 font-medium {cat === 'ranking' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
+		aria-pressed={cat === 'ranking'}
+		class="min-h-11 rounded-md px-3 py-1 font-medium {cat === 'ranking' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}"
 		>Rànquing</button>
 </div>
 
 {#if cat === 'opens' && seasons.length > 1}
 	<select
 		bind:value={season}
+		aria-label="Temporada"
 		class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 px-3 text-sm shadow-sm"
 	>
 		{#each seasons as s}<option value={s}>Temporada {s}</option>{/each}
@@ -394,11 +404,12 @@
 	bind:value={q}
 	inputmode="search"
 	placeholder="Cerca…"
+	aria-label={cat === 'opens' ? 'Cerca open' : 'Cerca jugador'}
 	class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 px-3 text-sm shadow-sm"
 />
 
 {#if error}
-	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
+	<AvisError missatge="No s'han pogut carregar els opens." detall={error} onretry={() => location.reload()} />
 {:else if loading}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if cat === 'ranking'}
@@ -407,32 +418,32 @@
 	{:else}
 		{#if isCalc}
 				<div class="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
-					<span class="mt-0.5 shrink-0">⚠</span>
+					<span class="mt-0.5 shrink-0" aria-hidden="true">⚠</span>
 					<span>
 						Rànquing <strong>calculat</strong>, <strong>no oficial</strong>: inclou <strong>{liveCD?.name}</strong> en directe amb els punts de la classificació provisional (els qui encara juguen, segons l'ordre de la darrera fase acabada). Els qui no el disputen hi tenen 0. Pot contenir errors fins que l'open sigui definitiu.
 					</span>
 				</div>
 			{:else if rondaProvisional}
 				<div class="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
-					<span class="mt-0.5 shrink-0">⚠</span>
+					<span class="mt-0.5 shrink-0" aria-hidden="true">⚠</span>
 					<span>
 						Rànquing <strong>provisional</strong>: inclou <strong>{rondaInfo?.ronda_nom}</strong> amb els punts de la seva <strong>classificació final</strong>. La federació encara no n'ha actualitzat el rànquing oficial; subjecte a canvis (penalitzacions per incompareixença, desempats) quan es publiqui.
 					</span>
 				</div>
 			{/if}
 			<div class="mb-3 flex items-center justify-between gap-2 rounded-lg {amber ? 'bg-amber-600 dark:bg-amber-700' : 'bg-slate-900 dark:bg-slate-700'} px-2 py-2 text-white">
-			<button onclick={() => stepRonda(-1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="anterior">‹</button>
+			<button type="button" onclick={() => stepRonda(-1)} class="min-h-11 min-w-11 rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="Ronda anterior">‹</button>
 			<div class="min-w-0 text-center">
 				<div class="flex items-center justify-center gap-1.5 text-xs font-semibold">
 						<span class="truncate">Fins a {isCalc ? (liveCD?.name ?? '') : (rondaInfo?.ronda_nom ?? '')}</span>
-						{#if isCalc}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider">calculat</span>{:else if rondaProvisional}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider">provisional</span>{/if}
+						{#if isCalc}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-2xs font-bold uppercase tracking-wider">calculat</span>{:else if rondaProvisional}<span class="shrink-0 rounded bg-white/25 px-1 py-0.5 text-2xs font-bold uppercase tracking-wider">provisional</span>{/if}
 					</div>
-				<div class="text-[10px] {amber ? 'text-amber-100' : 'text-slate-300 dark:text-slate-600'}">{isCalc ? 'en directe · calculat' : `${rondaInfo?.ronda_temp ?? ''} · ronda ${ronda}/${rondes.length}${rondaProvisional ? ' · provisional' : ''}`}</div>
+				<div class="text-2xs {amber ? 'text-amber-100' : 'text-slate-300'}">{isCalc ? 'en directe · calculat' : `${rondaInfo?.ronda_temp ?? ''} · ronda ${ronda}/${rondes.length}${rondaProvisional ? ' · provisional' : ''}`}</div>
 			</div>
-			<button onclick={() => stepRonda(1)} class="rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="següent">›</button>
+			<button type="button" onclick={() => stepRonda(1)} class="min-h-11 min-w-11 rounded px-3 py-1 text-lg active:bg-slate-700" aria-label="Ronda següent">›</button>
 		</div>
 		<div class="overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+			<div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				<span class="w-6 text-center">#</span>
 				<span class="flex-1">Jugador</span>
 				<span class="w-7 text-center">Op.</span>
@@ -455,15 +466,18 @@
 							>
 								<div class="font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">{mitjanaOf(r.player_fcb_id)}</div>
 								{#if posicio3bOf(r.player_fcb_id)}
-									<div class="font-mono text-[10px] tabular-nums text-slate-500 dark:text-slate-400">{posicio3bOf(r.player_fcb_id)}</div>
+									<div class="font-mono text-2xs tabular-nums text-slate-500 dark:text-slate-400">{posicio3bOf(r.player_fcb_id)}</div>
 								{/if}
 							</div>
 							<button
+								type="button"
 								onclick={() => (expandedPlayer = expandedPlayer === r.player_fcb_id ? null : r.player_fcb_id)}
-								class="flex w-12 shrink-0 items-center justify-end gap-0.5 font-mono text-sm font-bold tabular-nums"
+								aria-expanded={expandedPlayer === r.player_fcb_id}
+								aria-label="{r.punts} punts: detall per open"
+								class="flex min-h-11 w-12 shrink-0 items-center justify-end gap-0.5 font-mono text-sm font-bold tabular-nums"
 							>
 								{r.punts}
-								<span class="text-[9px] text-slate-500 dark:text-slate-400">{expandedPlayer === r.player_fcb_id ? '▴' : '▾'}</span>
+								<span aria-hidden="true" class="text-2xs text-slate-500 dark:text-slate-400">{expandedPlayer === r.player_fcb_id ? '▴' : '▾'}</span>
 							</button>
 						</div>
 						{#if expandedPlayer === r.player_fcb_id && r.detall?.length}
@@ -490,7 +504,7 @@
 				{/each}
 			</ul>
 		</div>
-		<p class="px-1 py-2 text-center text-[10px] text-slate-500 dark:text-slate-400">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII). <strong>3B</strong> = mitjana general i posició al rànquing vigent de 3 bandes{rank3bLabel ? ` (${rank3bLabel})` : ''}.{isCalc ? ' Ronda CALCULADA: els 4 darrers opens acabats + l’open en curs amb punts provisionals en directe.' : rondaProvisional ? ' Ronda PROVISIONAL: punts de la classificació final del darrer open, pendent que la federació actualitzi el rànquing oficial.' : ''}</p>
+		<p class="px-1 py-2 text-center text-2xs text-slate-500 dark:text-slate-400">Rànquing Català d'Opens 3 Bandes · suma dels 5 darrers opens (Art. XVIII). <strong>Op.</strong> = opens jugats. <strong>3B</strong> = mitjana general i posició al rànquing vigent de 3 bandes{rank3bLabel ? ` (${rank3bLabel})` : ''}.{isCalc ? ' Ronda CALCULADA: els 4 darrers opens acabats + l’open en curs amb punts provisionals en directe.' : rondaProvisional ? ' Ronda PROVISIONAL: punts de la classificació final del darrer open, pendent que la federació actualitzi el rànquing oficial.' : ''}</p>
 	{/if}
 {:else if filtered.length === 0}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Cap open.</p>
@@ -500,7 +514,7 @@
 			<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
 				<a href="/opens/{o.open_id}" class="flex items-center gap-3 px-3 py-1.5 active:bg-slate-50 dark:active:bg-slate-800/50">
 					<div class="min-w-0 flex-1 truncate text-sm font-medium leading-tight">{clean(o.nom)}</div>
-					<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
+					<span class="shrink-0 text-slate-300 dark:text-slate-600" aria-hidden="true">›</span>
 				</a>
 			</li>
 		{/each}
@@ -510,44 +524,68 @@
 	</p>
 {/if}
 
-<!-- Admin: generar un open EN CURS projectat des del rànquing inicial -->
+{#if esAdmin}
 <section class="mt-8 border-t border-slate-100 dark:border-slate-800 pt-3">
 	<button
+		type="button"
 		onclick={() => (showAdmin = !showAdmin)}
-		class="text-[11px] text-slate-500 dark:text-slate-400 active:underline"
+		aria-expanded={showAdmin}
+		class="min-h-11 text-[11px] text-slate-500 dark:text-slate-400 active:underline"
 	>
-		{showAdmin ? '▾' : '▸'} Admin · generar open des del rànquing inicial
+		<span aria-hidden="true">{showAdmin ? '▾' : '▸'}</span> Admin · generar open des del rànquing inicial
 	</button>
 	{#if showAdmin}
-		<div class="mt-2 rounded-xl bg-slate-50 dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-			<p class="mb-2 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
+		<form
+			onsubmit={submitProjection}
+			class="mt-2 space-y-3 rounded-xl bg-slate-50 dark:bg-slate-900 p-3 text-sm ring-1 ring-slate-200 dark:ring-slate-800"
+		>
+			<p class="text-[11px] leading-snug text-slate-500 dark:text-slate-400">
 				Puja el PDF <strong>«RÀNQUING INICIAL»</strong> d'un open. Es generaran
 				automàticament els grups de totes les fases i apareixerà a
 				<strong>«En directe»</strong> com a <em>projecció</em> (no oficial) fins que
 				la federació publiqui el sorteig real.
 			</p>
-			<div class="flex flex-wrap items-center gap-2">
+			<label class="block text-xs text-slate-600 dark:text-slate-300">
+				Temporada
 				<input
 					bind:value={adminSeason}
-					placeholder="Temporada (ex: 2025-2026)"
-					class="w-44 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 px-3 text-sm shadow-sm"
+					placeholder="2025-2026"
+					class="mt-1 block w-44 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 px-3 text-sm shadow-sm"
 				/>
-				<label class="cursor-pointer rounded-lg bg-slate-900 dark:bg-slate-700 px-3 py-2 text-sm font-medium text-white {uploadState === 'sending' ? 'opacity-50' : ''}">
-					{uploadState === 'sending' ? 'Enviant…' : '📄 Tria PDF i genera'}
-					<input
-						type="file"
-						accept="application/pdf,.pdf"
-						class="hidden"
-						disabled={uploadState === 'sending'}
-						onchange={submitProjection}
-					/>
-				</label>
-			</div>
+			</label>
+			<label class="block text-xs text-slate-600 dark:text-slate-300">
+				PDF del rànquing inicial
+				<input
+					type="file"
+					accept="application/pdf,.pdf"
+					required
+					bind:files={adminFiles}
+					class="mt-1 block w-full text-sm"
+				/>
+			</label>
+			<label class="block text-xs text-slate-600 dark:text-slate-300">
+				Correu autoritzat
+				<input
+					type="email"
+					required
+					autocomplete="email"
+					bind:value={adminCorreu}
+					class="mt-1 block w-full max-w-xs rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 px-3 text-sm shadow-sm"
+				/>
+			</label>
+			<button
+				type="submit"
+				disabled={uploadState === 'sending'}
+				class="min-h-11 rounded-lg bg-slate-900 dark:bg-slate-700 px-3 text-sm font-medium text-white disabled:opacity-50"
+			>
+				{uploadState === 'sending' ? 'Enviant…' : 'Genera la projecció'}
+			</button>
 			{#if uploadMsg}
-				<p class="mt-2 text-[11px] {uploadState === 'ok' ? 'text-emerald-600 dark:text-emerald-400' : uploadState === 'sending' ? 'text-slate-500 dark:text-slate-400' : 'text-red-600 dark:text-red-400'}">
+				<p role="status" class="text-[11px] {uploadState === 'ok' ? 'text-emerald-600 dark:text-emerald-400' : uploadState === 'sending' ? 'text-slate-500 dark:text-slate-400' : 'text-red-600 dark:text-red-400'}">
 					{uploadMsg}
 				</p>
 			{/if}
-		</div>
+		</form>
 	{/if}
 </section>
+{/if}

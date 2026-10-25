@@ -184,7 +184,7 @@
 		gap: 0.25rem;
 		padding: 0.6rem 0.4rem;
 		background: var(--fons-3);
-		border-radius: 8px;
+		border-radius: var(--radi);
 	}
 	.bloc svg {
 		width: 100%;
