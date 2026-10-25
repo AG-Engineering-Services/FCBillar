@@ -45,7 +45,12 @@ export const GET: RequestHandler = async ({ params, url, fetch }) => {
 	}
 
 	const r = await fetch(`${base}/${params.taula}?${consulta}`, { headers: capçaleres });
-	const resposta = new Headers({ 'Cache-Control': r.ok ? CAU : 'no-store' });
+	// Obert a qualsevol origen: les aplicacions dels clubs (NouProjecte) també
+	// hi llegeixen, i són les mateixes dades públiques que dona el JWT anònim.
+	const resposta = new Headers({
+		'Cache-Control': r.ok ? CAU : 'no-store',
+		'Access-Control-Allow-Origin': '*'
+	});
 	for (const nom of ['Content-Type', 'Content-Range']) {
 		const valor = r.headers.get(nom);
 		if (valor) resposta.set(nom, valor);
