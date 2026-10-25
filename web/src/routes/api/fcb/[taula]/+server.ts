@@ -18,6 +18,10 @@
 import { env } from '$env/dynamic/public';
 import type { RequestHandler } from './$types';
 
+// A Frankfurt, al costat de Neon (eu-central-1): per defecte Vercel la posava a
+// Virgínia, i cada consulta que no trobava la còpia creuava l'Atlàntic.
+export const config = { regions: ['fra1'] };
+
 const CAU = 'public, max-age=0, s-maxage=300, stale-while-revalidate=86400';
 
 export const GET: RequestHandler = async ({ params, url, fetch }) => {
