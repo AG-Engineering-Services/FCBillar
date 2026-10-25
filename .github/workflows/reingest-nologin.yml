@@ -71,6 +71,8 @@ on:
     # cap de les dues coses, per no fer feina pesada en va.
     # Minut 26 (mai :00): GitHub encua tots els crons de :00 alhora i és el
     # primer que descarta quan va carregat — vegeu publish-live-opens.yml.
+    # La porta (pas `gate`) reconeix aquest tret per aquest text exacte: si es
+    # canvia aquí, s'ha de canviar també allà.
     - cron: '26 7-20 * * 6,0'
   workflow_dispatch:
     inputs:
@@ -112,6 +114,7 @@ jobs:
       - id: gate
         env:
           EVENT: ${{ github.event_name }}
+          CRON: ${{ github.event.schedule }}
         run: |
           if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           M=$(date -u +%m); D=$(date -u +%d)
@@ -119,11 +122,15 @@ jobs:
             echo "Aturada d'estiu (1-24 d'agost): ometo la reingesta."
             echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          # Trets HORARIS de cap de setmana (07-20 UTC): NOMÉS si hi ha algun open
-          # en directe (id positiu a open_live) o lliga pendent. El tret diari i els
-          # manuals (workflow_dispatch) corren sempre. `10#` evita l'error d'octal.
+          # Trets HORARIS de cap de setmana: NOMÉS si hi ha algun open en directe
+          # (id positiu a open_live) o lliga pendent. El tret diari i els manuals
+          # (workflow_dispatch) corren sempre. Quin tret és es mira pel cron que
+          # l'ha disparat, no per l'hora: fins a l'octubre de 2026 es mirava l'hora,
+          # i GitHub els endarrereix tant que un horari de les 20:26 arrencava a
+          # les 21:41, passava per diari i feia una passada sencera de més (el
+          # 24/10, dues en una nit). `10#` evita l'error d'octal.
           H=$((10#$(date -u +%H)))
-          if [ "$EVENT" = "schedule" ] && [ "$H" -ge 7 ] && [ "$H" -le 20 ]; then
+          if [ "$EVENT" = "schedule" ] && [ "$CRON" = "26 7-20 * * 6,0" ]; then
             LIVE=$(curl -s \
               -H "apikey: $NEON_SERVICE_ROLE_TOKEN" \
               -H "Authorization: Bearer $NEON_SERVICE_ROLE_TOKEN" \
