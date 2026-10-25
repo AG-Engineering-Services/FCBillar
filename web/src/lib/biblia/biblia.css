@@ -1,24 +1,27 @@
 /* Estils de la secció Bíblia del Billar, dins l'embolcall .biblia perquè no
-   afectin la resta de FCBillar (que fa servir Tailwind). */
+   afectin la resta de FCBillar (que fa servir Tailwind). Les variables locals
+   apunten als tokens --ag-*, o sigui que la secció segueix el tema del web.
+   L'únic fosc fix és el drap del billar, que és un dibuix (Billar.svelte). */
 
 .biblia {
-	--fons: #14171c;
-	--fons-2: #1c2128;
-	--fons-3: #262d36;
-	--vora: #333c47;
-	--text: #e7ecf2;
-	--text-suau: #9aa7b4;
-	--accent: #4dd2ff;
-	--accent-fosc: #1a7a49;
-	--perill: #d02b1f;
-	--radi: 10px;
-	--ombra: 0 2px 12px rgba(0, 0, 0, 0.35);
+	--fons: var(--ag-ground);
+	--fons-2: var(--ag-surface);
+	--fons-3: var(--ag-raised);
+	--vora: var(--ag-rule);
+	--vora-forta: var(--ag-rule-strong);
+	--text: var(--ag-ink);
+	--text-suau: var(--ag-ink-soft);
+	--accent: var(--ag-accent);
+	--accent-fosc: var(--ag-accent);
+	--accent-tinta: var(--ag-accent-ink);
+	--accent-suau: var(--ag-accent-soft);
+	--be: var(--ag-bo-text);
+	--be-fons: var(--ag-bo-bg);
+	--perill: var(--ag-critic-text);
+	--perill-fons: var(--ag-critic-bg);
+	--radi: var(--ag-radius);
 
-	background: var(--fons);
 	color: var(--text);
-	font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-	line-height: 1.5;
-	min-height: 100vh;
 }
 
 .biblia a {
@@ -31,21 +34,21 @@
 
 .biblia button {
 	font: inherit;
+	min-height: 2.75rem;
 	color: var(--text);
 	background: var(--fons-3);
 	border: 1px solid var(--vora);
-	border-radius: 8px;
+	border-radius: var(--radi);
 	padding: 0.45rem 0.85rem;
 	cursor: pointer;
-	transition: background 0.12s ease, border-color 0.12s ease;
 }
 .biblia button:hover {
-	background: #2f3742;
+	border-color: var(--vora-forta);
 }
 .biblia button.actiu {
 	background: var(--accent-fosc);
 	border-color: var(--accent-fosc);
-	color: #fff;
+	color: var(--accent-tinta);
 }
 
 .biblia input,
@@ -55,42 +58,44 @@
 	color: var(--text);
 	background: var(--fons-2);
 	border: 1px solid var(--vora);
-	border-radius: 8px;
+	border-radius: var(--radi);
 	padding: 0.45rem 0.6rem;
 }
 
 .biblia .contenidor {
 	max-width: 1100px;
 	margin: 0 auto;
-	padding: 1.5rem 1.25rem 4rem;
+	padding: 1rem 0 2rem;
 }
 
 .biblia .targeta {
 	background: var(--fons-2);
 	border: 1px solid var(--vora);
 	border-radius: var(--radi);
-	box-shadow: var(--ombra);
 }
 
 .biblia-nav {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.5rem;
+	gap: 0 1rem;
 	align-items: center;
-	padding: 0.7rem 1.25rem;
 	border-bottom: 1px solid var(--vora);
-	background: var(--fons-2);
 }
 .biblia-nav a {
-	padding: 0.3rem 0.7rem;
-	border: 1px solid var(--vora);
-	border-radius: 999px;
-	color: var(--text);
+	display: inline-flex;
+	align-items: center;
+	min-height: 2.75rem;
+	margin-bottom: -1px;
+	border-bottom: 2px solid transparent;
+	color: var(--text-suau);
 }
 .biblia-nav a:hover {
-	border-color: var(--accent);
-	color: var(--accent);
+	color: var(--text);
 	text-decoration: none;
+}
+.biblia-nav a[aria-current='page'] {
+	border-bottom-color: var(--accent);
+	color: var(--accent);
 }
 .biblia-nav .nota {
 	margin-left: auto;

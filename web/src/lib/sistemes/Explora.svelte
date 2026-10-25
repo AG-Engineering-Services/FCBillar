@@ -3,7 +3,7 @@
 	import sistemes from '$lib/sistemes/sistemes.json';
 	import { onMount } from 'svelte';
 
-	// Explorador (admin): enganxa un enllaç → va a una cua a Supabase que el
+	// Explorador (admin): enganxa un enllaç → va a una cua a Neon que el
 	// processador local (explora.mjs) tradueix i afegeix a Sistemes Coreans.
 	const catIds = new Set((sistemes as { id: string }[]).map((s) => s.id));
 
@@ -58,11 +58,11 @@
 		if (!u) return;
 		const { video_id, plataforma } = extreu(u);
 		if (video_id && plataforma === 'youtube' && catIds.has(video_id)) {
-			msg = '⚠ Aquest vídeo ja és al catàleg.';
+			msg = 'Aquest vídeo ja és al catàleg.';
 			return;
 		}
 		if (historial.some((h) => h.url === u || (video_id && h.video_id === video_id))) {
-			msg = '⚠ Aquest enllaç ja s’ha explorat abans.';
+			msg = 'Aquest enllaç ja s’ha explorat abans.';
 			return;
 		}
 		enviant = true;
@@ -74,10 +74,10 @@
 			if (error) throw error;
 			url = '';
 			validar = false;
-			msg = '✓ Afegit a la cua. Es processarà i apareixerà a Sistemes Coreans.';
+			msg = 'Afegit a la cua. Es processarà i apareixerà a Sistemes Coreans.';
 			await carregaHistorial();
 		} catch {
-			msg = '✗ Error desant la petició.';
+			msg = "No s'ha pogut desar la petició.";
 		}
 		enviant = false;
 	}
@@ -94,7 +94,7 @@
 
 <details class="mb-5 rounded-xl border border-indigo-200 bg-indigo-50/50 p-3 dark:border-indigo-900 dark:bg-indigo-950/20">
 	<summary class="cursor-pointer text-sm font-semibold text-indigo-700 dark:text-indigo-300">
-		➕ Explora un vídeo nou (enganxa un enllaç)
+		Explora un vídeo nou (enganxa un enllaç)
 	</summary>
 	<div class="mt-3">
 		<p class="mb-2 text-xs text-slate-500 dark:text-slate-400">
@@ -106,20 +106,22 @@
 				type="url"
 				bind:value={url}
 				placeholder="https://…"
+				aria-label="Enllaç del vídeo"
 				class="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
 			/>
 			<button
+				type="button"
 				onclick={envia}
 				disabled={enviant || !url.trim()}
-				class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-				>{enviant ? 'Enviant…' : 'Explora'}</button
+				class="min-h-11 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+				>{enviant ? 'Enviant…' : 'Afegeix a la cua'}</button
 			>
 		</div>
 		<label class="mt-2 flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
 			<input type="checkbox" bind:checked={validar} class="accent-emerald-500" />
 			Ja el valido com que funciona (anirà directe a Validats)
 		</label>
-		{#if msg}<p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{msg}</p>{/if}
+		{#if msg}<p role="status" class="mt-2 text-sm text-slate-600 dark:text-slate-300">{msg}</p>{/if}
 
 		{#if historial.length}
 			<div class="mt-4">

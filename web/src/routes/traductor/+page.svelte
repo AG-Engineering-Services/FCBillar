@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { db } from '$lib/db';
+	import AvisError from '$lib/components/AvisError.svelte';
 	import {
 		IDIOMES,
 		ambReintentsCache,
@@ -16,6 +17,7 @@
 
 	let videos = $state<VideoTraduccio[]>([]);
 	let carregat = $state(false);
+	let errorCarrega = $state<string | null>(null);
 	let url = $state('');
 	let idioma = $state<Idioma>('ko');
 	let enviant = $state(false);
@@ -62,14 +64,15 @@
 	});
 
 	async function carrega() {
-		const { data } = await ambReintentsCache(() =>
+		const { data, error } = await ambReintentsCache(() =>
 			db
 				.from('video_traduccio')
 				.select('id,url,plataforma,video_id,idioma,estat,titol,canal,durada,missatge,creat,processat,iniciat')
 				.order('creat', { ascending: false })
 				.range(0, 499)
 		);
-		videos = (data as VideoTraduccio[]) ?? [];
+		errorCarrega = error ? error.message : null;
+		if (!error) videos = (data as VideoTraduccio[]) ?? [];
 		carregat = true;
 	}
 
@@ -224,7 +227,7 @@
 					<a href={v.url} target="_blank" rel="noopener" class="min-w-0 flex-1 truncate hover:underline"
 						>{v.titol ?? v.url}</a
 					>
-					<span class="text-xs text-slate-400">{nomIdioma(v.idioma)}</span>
+					<span class="text-xs text-slate-500 dark:text-slate-400">{nomIdioma(v.idioma)}</span>
 					{#if previsio(v)}
 						<span class="w-full text-xs text-slate-500 dark:text-slate-400">
 							{v.durada ? `${mmss(v.durada)} de vídeo · ` : ''}{previsio(v)}
@@ -243,6 +246,14 @@
 			{/each}
 		</ul>
 	</section>
+{/if}
+
+{#if errorCarrega}
+	<div class="mb-6">
+		<AvisError missatge="No s'ha pogut carregar la llista de vídeos." detall={errorCarrega} onretry={carrega} />
+	</div>
+{:else if !carregat}
+	<p class="py-10 text-center text-slate-500 dark:text-slate-400">Carregant…</p>
 {/if}
 
 {#if fets.length}
@@ -279,7 +290,7 @@
 			</div>
 		{/each}
 	</div>
-{:else if carregat && !cua.length}
+{:else if carregat && !errorCarrega && !cua.length}
 	<p class="py-10 text-center text-slate-500 dark:text-slate-400">
 		Encara no hi ha cap vídeo traduït. Enganxa'n el primer.
 	</p>

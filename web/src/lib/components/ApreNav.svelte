@@ -11,11 +11,12 @@
 	const path = $derived($page.url.pathname);
 </script>
 
-<nav class="mb-4 flex flex-wrap gap-2">
+<nav aria-label="Aprèn" class="mb-4 flex flex-wrap gap-2">
 	{#each seccions as s (s.href)}
 		<a
 			href={s.href}
-			class="rounded-sm px-3 py-1 text-sm {s.match(path)
+			aria-current={s.match(path) ? 'page' : undefined}
+			class="inline-flex min-h-11 items-center rounded-sm px-3 py-1 text-sm {s.match(path)
 				? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 				: 'bg-slate-100 text-slate-600 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-white'}"
 			>{s.label}</a

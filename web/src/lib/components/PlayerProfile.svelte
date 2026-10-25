@@ -9,38 +9,37 @@
 	import { follows, toggleFollow } from '$lib/follows';
 	import RadarChart from '$lib/components/RadarChart.svelte';
 	import { theme } from '$lib/theme';
+	import { ADMIN_EMAIL, esAdminLocal, marcaAdmin } from '$lib/admin';
+	import AvisError from '$lib/components/AvisError.svelte';
 
 	// Reutilitzable: la pàgina normal passa kiosk=false; la vista aïllada /fitxa passa
 	// kiosk=true (sense botons de navegació ni enllaços que surtin de la vista).
 	let { fcbId, kiosk = false }: { fcbId: string; kiosk?: boolean } = $props();
 
-	// --- Botó de reingesta manual (NOMÉS a la fitxa de l'Albert Gómez) --------
-	// Dispara la reingesta de la federació, que ARA corre al núvol (GitHub Actions).
-	// El botó només encua una petició a Supabase (taula reingest_requests); el
-	// workflow reingest-dispatch.yml la consulta cada pocs minuts i dispara la
-	// reingesta al núvol. Gate: cal el correu autoritzat (validat també per RLS al
-	// servidor).
+	// Botó de reingesta manual: només a la fitxa de l'Albert Gómez i només amb la
+	// marca d'admin (vegeu $lib/admin). Encua una petició a Neon (taula
+	// reingest_requests); el workflow reingest-dispatch.yml la consulta cada pocs
+	// minuts i llança la reingesta al núvol. El correu el torna a validar la RLS.
 	const ADMIN_FCB_ID = '278';
-	const ADMIN_EMAIL = 'algoam@gmail.com';
-	const isAdmin = $derived(fcbId === ADMIN_FCB_ID);
+	let isAdmin = $state(false);
+	$effect(() => {
+		isAdmin = fcbId === ADMIN_FCB_ID && esAdminLocal($page.url);
+	});
+	let formReingesta = $state(false);
+	let correuReingesta = $state('');
 	let reingestState = $state<'idle' | 'sending' | 'ok' | 'denied' | 'error'>('idle');
 	let reingestMsg = $state('');
 
-	async function requestReingest() {
-		const email = prompt('Correu autoritzat per llançar la reingesta de la federació:');
-		if (email === null) return; // cancel·lat
-		if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
+	async function requestReingest(ev: SubmitEvent) {
+		ev.preventDefault();
+		if (correuReingesta.trim().toLowerCase() !== ADMIN_EMAIL) {
 			reingestState = 'denied';
 			reingestMsg = 'Correu no autoritzat.';
 			return;
 		}
-		// Marca aquest dispositiu com a admin perquè el layout mostri l'avís de
-		// sessió caducada (cloud_status.session_ok=false) només a qui pot actuar-hi.
-		try {
-			localStorage.setItem('fcb_admin', '1');
-		} catch {
-			/* localStorage no disponible: no és crític */
-		}
+		// Aquest dispositiu queda marcat: la Cataleg, el Traductor i aquest botó
+		// s'hi ensenyaran sense el `?admin`.
+		marcaAdmin();
 		reingestState = 'sending';
 		reingestMsg = '';
 		const { error: e } = await db
@@ -52,6 +51,7 @@
 		} else {
 			reingestState = 'ok';
 			reingestMsg = "Petició enviada. La reingesta s'executarà al núvol en pocs minuts.";
+			formReingesta = false;
 		}
 	}
 
@@ -990,13 +990,13 @@
 </script>
 
 {#if !kiosk}
-	<button onclick={back} class="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 print:hidden">
-		<span aria-hidden="true">←</span> Rànquings
+	<button type="button" onclick={back} class="mb-2 inline-flex min-h-11 items-center gap-1 text-sm text-slate-500 dark:text-slate-400 print:hidden">
+		<span aria-hidden="true">←</span> Torna
 	</button>
 {/if}
 
 {#if error}
-	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
+	<AvisError missatge="No s'ha pogut carregar la fitxa del jugador." detall={error} onretry={() => location.reload()} />
 {:else}
 	<div class="mb-3 flex items-start justify-between gap-3">
 		<div class="min-w-0">
@@ -1009,18 +1009,21 @@
 		<div class="flex shrink-0 items-center gap-2 print:hidden">
 			{#if isAdmin}
 				<button
-					onclick={requestReingest}
+					type="button"
+					onclick={() => (formReingesta = !formReingesta)}
+					aria-expanded={formReingesta}
 					disabled={reingestState === 'sending'}
-					title="Reingesta del web de la federació (detecta partides noves)"
-					class="rounded-sm bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-emerald-500"
+					class="min-h-11 rounded-sm bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
 				>
 					{reingestState === 'sending' ? 'Enviant…' : '↻ Reingesta'}
 				</button>
 			{/if}
 			{#if !kiosk}
 				<button
+					type="button"
 					onclick={() => toggleFollow(fcbId)}
-					class="rounded-sm px-3 py-1.5 text-sm font-medium {$follows.includes(fcbId)
+					aria-pressed={$follows.includes(fcbId)}
+					class="min-h-11 rounded-sm px-3 py-1.5 text-sm font-medium {$follows.includes(fcbId)
 						? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 ring-1 ring-slate-300 dark:ring-slate-600'
 						: 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'}"
 				>
@@ -1029,6 +1032,27 @@
 			{/if}
 		</div>
 	</div>
+
+	{#if isAdmin && formReingesta}
+		<form onsubmit={requestReingest} class="mb-3 flex flex-wrap items-end gap-2 print:hidden">
+			<label class="flex min-w-0 flex-1 flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+				Correu autoritzat per llançar la reingesta de la federació
+				<input
+					type="email"
+					required
+					autocomplete="email"
+					bind:value={correuReingesta}
+					class="rounded-sm border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+				/>
+			</label>
+			<button
+				type="submit"
+				disabled={reingestState === 'sending'}
+				class="min-h-11 rounded-sm bg-emerald-600 px-3 text-sm font-medium text-white disabled:opacity-50"
+				>Llança la reingesta</button
+			>
+		</form>
+	{/if}
 
 	{#if isAdmin && reingestState !== 'idle'}
 		<div
@@ -1046,11 +1070,13 @@
 		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] print:hidden">
 			{#each modalitats as m}
 				<button
+					type="button"
 					onclick={() => {
 						selMod = m.codi;
 						shown = 60;
 					}}
-					class="shrink-0 rounded-sm px-3 py-1 text-sm font-medium {m.codi === selMod
+					aria-pressed={m.codi === selMod}
+					class="min-h-11 shrink-0 rounded-sm px-3 py-1 text-sm font-medium {m.codi === selMod
 						? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 						: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 				>{m.nom}</button>
@@ -1066,26 +1092,33 @@
 	{:else}
 		<div class="profile-root lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start print:block">
 			<div class="min-w-0">
-			<!-- KPIs -->
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Històric</div>
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Històric</div>
 				<div class="grid grid-cols-5 gap-2">
 					{#each [['Partides', kpi.n, ''], ['Mitjana', kpi.mitjana.toFixed(3), ''], ['Sèrie màx', kpi.sm, 'sm'], ['% vict.', kpi.pct + '%', ''], [kpi.bestN > 1 ? `Millor mitj. ×${kpi.bestN}` : 'Millor mitj.', kpi.best != null ? kpi.best.toFixed(3) : '—', '']] as [label, val, key]}
-						<button onclick={() => { if (key === 'sm') serieFilter = !serieFilter; }} class="rounded-lg py-0.5 text-center {key === 'sm' && serieFilter ? 'ring-2 ring-blue-500' : ''}">
-							<div class="font-mono text-base font-bold tabular-nums">{val}</div>
-							<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
-						</button>
+						{#if key === 'sm'}
+							<!-- L'única xifra que fa alguna cosa: filtra les partides amb la sèrie màxima -->
+							<button type="button" onclick={() => (serieFilter = !serieFilter)} aria-pressed={serieFilter} class="min-h-11 rounded-lg py-0.5 text-center underline decoration-dotted underline-offset-4 {serieFilter ? 'ring-2 ring-blue-500' : ''}">
+								<div class="font-mono text-base font-bold tabular-nums">{val}</div>
+								<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
+							</button>
+						{:else}
+							<div class="py-0.5 text-center">
+								<div class="font-mono text-base font-bold tabular-nums">{val}</div>
+								<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
+							</div>
+						{/if}
 					{/each}
 				</div>
 				<p class="mt-2 px-1 text-[11px] text-slate-500 dark:text-slate-400">{kpi.w} G · {kpi.l} P{kpi.t ? ` · ${kpi.t} E` : ''}</p>
 			</div>
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Temporada actual</div>
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Temporada actual</div>
 				<div class="grid grid-cols-4 gap-2">
 					{#each [['Partides', seasonKpi.n], ['Mitjana', seasonKpi.mitjana.toFixed(3)], ['Sèrie màx', seasonKpi.sm], ['% vict.', seasonKpi.pct + '%']] as [label, val]}
 						<div class="text-center">
 							<div class="font-mono text-base font-bold tabular-nums">{val}</div>
-							<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
+							<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
 						</div>
 					{/each}
 				</div>
@@ -1093,12 +1126,12 @@
 			</div>
 			{#if prevSeasonKpi.n}
 				<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-					<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Temporada anterior</div>
+					<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Temporada anterior</div>
 					<div class="grid grid-cols-4 gap-2">
 						{#each [['Partides', prevSeasonKpi.n], ['Mitjana', prevSeasonKpi.mitjana.toFixed(3)], ['Sèrie màx', prevSeasonKpi.sm], ['% vict.', prevSeasonKpi.pct + '%']] as [label, val]}
 							<div class="text-center">
 								<div class="font-mono text-base font-bold tabular-nums">{val}</div>
-								<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
+								<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
 							</div>
 						{/each}
 					</div>
@@ -1114,31 +1147,31 @@
 				<!-- La finestra no és 15 a totes les modalitats (tres bandes 15, la resta
 				     10) i els no definitius en tenen menys: el nombre surt de les
 				     partides realment marcades. -->
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rànquing actual{currentIds.size ? ` · ${currentIds.size} ${currentIds.size === 1 ? 'partida' : 'partides'}` : ''}</div>
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rànquing actual{currentIds.size ? ` · ${currentIds.size} ${currentIds.size === 1 ? 'partida' : 'partides'}` : ''}</div>
 				<div class="grid grid-cols-3 gap-2">
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums">#{currentPos}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">posició</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">posició</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums">{lastMitjana != null ? lastMitjana.toFixed(3) : '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">mitjana</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">mitjana</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums">{currentRank15.sm || '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">S.M.</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">S.M.</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums text-slate-900 dark:text-slate-100">#{bestPos ?? '—'}</div>
-						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-400">millor pos. rànquing</div>
+						<div class="text-2xs uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-400">millor pos. rànquing</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{bestMitjana != null ? bestMitjana.toFixed(3) : '—'}</div>
-						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-400">millor mitjana rànquing</div>
+						<div class="text-2xs uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-400">millor mitjana rànquing</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums {rank15.hasChanges && lastMitjana != null && rank15.mitjana != null && rank15.mitjana > lastMitjana ? 'text-emerald-600 dark:text-emerald-400' : rank15.hasChanges && lastMitjana != null && rank15.mitjana != null && rank15.mitjana < lastMitjana ? 'text-red-500 dark:text-red-400' : ''}">{rank15.mitjana != null ? rank15.mitjana.toFixed(3) : '—'}</div>
-						<div class="text-[10px] uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-400">mitjana proper rànq.</div>
+						<div class="text-2xs uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-400">mitjana proper rànq.</div>
 						{#if rank15.hasChanges && rank15.posicio != null}
 							{@const dp = (currentPos ?? 0) - rank15.posicio}
 							<div class="mt-0.5 text-[11px] font-bold tabular-nums {dp > 0 ? 'text-emerald-600 dark:text-emerald-400' : dp < 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'}">#{rank15.posicio}{dp > 0 ? ` ▲${dp}` : dp < 0 ? ` ▼${-dp}` : ''}</div>
@@ -1178,12 +1211,12 @@
 
 		{#if compBuckets.length}
 			<div class="mb-4 space-y-1.5 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Efectivitat per competició</div>
+				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Efectivitat per competició</div>
 				{#each compBuckets as c}
 					<div class="flex items-center gap-2 text-sm">
 						<span class="shrink-0 text-slate-600 dark:text-slate-300">{c.tipus}</span>
 						<span class="min-w-0 flex-1 text-right font-mono text-[11px] tabular-nums">
-							<span class="text-emerald-600 dark:text-emerald-400">{c.w}</span><span class="text-slate-300 dark:text-slate-600">-</span><span class="text-amber-600 dark:text-amber-400">{c.e}</span><span class="text-slate-300 dark:text-slate-600">-</span><span class="text-red-500 dark:text-red-400">{c.l}</span>
+							<span class="text-emerald-600 dark:text-emerald-400">{c.w}</span><span class="text-slate-500 dark:text-slate-400">-</span><span class="text-amber-600 dark:text-amber-400">{c.e}</span><span class="text-slate-500 dark:text-slate-400">-</span><span class="text-red-500 dark:text-red-400">{c.l}</span>
 						</span>
 						<span class="w-11 shrink-0 text-right font-mono font-bold tabular-nums">{c.pct}%</span>
 					</div>
@@ -1193,23 +1226,23 @@
 
 		{#if openRank.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rànquing d'Opens 3 Bandes</div>
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rànquing d'Opens 3 Bandes</div>
 				<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums">#{openCur?.posicio ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">posició actual</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">posició actual</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums text-emerald-600 dark:text-emerald-400">#{openBest ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">millor posició</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">millor posició</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums text-slate-900 dark:text-slate-100">#{openBestResult ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">millor en un open</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">millor en un open</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums">{openCur?.punts ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">punts</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">punts</div>
 					</div>
 				</div>
 			</div>
@@ -1217,25 +1250,25 @@
 
 		{#if openRankFem.length}
 			<div class="mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 p-3 ring-1 ring-rose-200 dark:ring-rose-900/50">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-rose-400 dark:text-rose-400">
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-rose-400 dark:text-rose-400">
 					Rànquing Circuit Català Tres Bandes Femení
 				</div>
 				<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums">#{openFemCur?.posicio ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">posició actual</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">posició actual</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums text-emerald-600 dark:text-emerald-400">#{openFemBest ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">millor posició</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">millor posició</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums text-slate-900 dark:text-slate-100">#{openFemBestResult ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">millor en una prova</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">millor en una prova</div>
 					</div>
 					<div class="text-center">
 						<div class="font-mono text-lg font-bold tabular-nums">{openFemCur?.punts ?? '—'}</div>
-						<div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">punts</div>
+						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">punts</div>
 					</div>
 				</div>
 			</div>
@@ -1243,7 +1276,7 @@
 
 		{#if palmaresBySeason.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Palmarès individual</div>
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Palmarès individual</div>
 				<div class="space-y-3">
 					{#each palmaresBySeason as season}
 						<div>
@@ -1254,13 +1287,13 @@
 										<span class="w-6 shrink-0 text-center font-mono font-bold {p.posicio <= 3 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'}">{ordinal(p.posicio)}</span>
 										<div class="min-w-0 flex-1">
 											<div class="mb-0.5 flex items-center gap-1.5">
-												<span class="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide {p.tipus === 'campionat' ? 'bg-blue-600 text-white' : p.tipus === 'open' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{p.tipus === 'campionat' ? 'Camp. Catalunya' : p.tipus === 'open' ? 'Open' : 'Torneig'}</span>
+												<span class="shrink-0 rounded px-1 py-0.5 text-2xs font-bold uppercase tracking-wide {p.tipus === 'campionat' ? 'bg-blue-600 text-white' : p.tipus === 'open' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{p.tipus === 'campionat' ? 'Camp. Catalunya' : p.tipus === 'open' ? 'Open' : 'Torneig'}</span>
 												{#if kiosk}<span class="min-w-0 truncate font-medium">{p.nom}</span>
 												{:else}<a href="/opens/{p.openId}" class="min-w-0 truncate font-medium active:underline">{p.nom}</a>{/if}
 											</div>
-											{#if p.categoria}<div class="truncate text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria · {p.categoria}</div>{/if}
+											{#if p.categoria}<div class="truncate text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria · {p.categoria}</div>{/if}
 										</div>
-										{#if p.club}<span class="max-w-24 shrink-0 truncate text-[10px] text-slate-500 dark:text-slate-400">{p.club}</span>{/if}
+										{#if p.club}<span class="max-w-24 shrink-0 truncate text-2xs text-slate-500 dark:text-slate-400">{p.club}</span>{/if}
 									</li>
 								{/each}
 							</ul>
@@ -1272,7 +1305,7 @@
 
 		{#if h2h.played.length || h2h.won.length || h2h.lost.length}
 			<div class="mb-4 space-y-2 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rivals destacats (històric)</div>
+				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rivals destacats (històric)</div>
 				{#each [['played', 'Rivals habituals'], ['won', 'Més victòries'], ['lost', 'Més derrotes']] as [k, title]}
 					{@const list = h2h[k as 'played' | 'won' | 'lost']}
 					{#if list.length}
@@ -1282,7 +1315,7 @@
 								{#each list as e}
 									<div class="truncate">
 										{#if kiosk}<span>{e.nom}</span>{:else}<a href="/jugador/{e.id}" class="active:underline">{e.nom}</a>{/if}
-										<span class="font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{#if k === 'played'}({e.total} / <span class="text-emerald-600 dark:text-emerald-400">{e.won}</span>-<span class="text-amber-600 dark:text-amber-400">{e.draws}</span>-<span class="text-red-500 dark:text-red-400">{e.lost}</span>){:else if k === 'won'}(<span class="text-emerald-600 dark:text-emerald-400">{e.won}V</span>){:else}(<span class="text-red-500 dark:text-red-400">{e.lost}D</span>){/if}</span>
+										<span class="font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{#if k === 'played'}({e.total} / <span class="text-emerald-600 dark:text-emerald-400">{e.won}</span>-<span class="text-amber-600 dark:text-amber-400">{e.draws}</span>-<span class="text-red-500 dark:text-red-400">{e.lost}</span>){:else if k === 'won'}(<span class="text-emerald-600 dark:text-emerald-400">{e.won}G</span>){:else}(<span class="text-red-500 dark:text-red-400">{e.lost}P</span>){/if}</span>
 									</div>
 								{/each}
 							</div>
@@ -1292,22 +1325,21 @@
 			</div>
 		{/if}
 
-		<!-- Millor partida (per mitjana) -->
 		{#if kpi.best != null && bestGames.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					Millor partida{bestGames.length > 1 ? ` · ${bestGames.length}` : ''} · mitjana {kpi.best.toFixed(3)}
 				</div>
 				<div class="divide-y divide-slate-100 dark:divide-slate-800">
 					{#each bestGames as g}
 						<div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 py-1.5 text-sm">
 							<span
-								class="rounded px-1 py-0.5 text-[10px] font-semibold {g.won
+								class="rounded px-1 py-0.5 text-2xs font-semibold {g.won
 									? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
 									: g.tie
 										? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
 										: 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400'}"
-								>{g.won ? 'V' : g.tie ? 'E' : 'D'}</span
+								>{g.won ? 'G' : g.tie ? 'E' : 'P'}</span
 							>
 							{#if g.oppId && !kiosk}
 								<a href="/jugador/{g.oppId}" class="font-medium active:underline">{g.opp}</a>
@@ -1328,16 +1360,20 @@
 		{#if selMod != null && ratingBuckets.some((b) => b.wins + b.losses > 0)}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-center justify-between">
-					<div class="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+					<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 						Rendiment per nivell d'oponent
 					</div>
-					<div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-700 text-[10px] print:hidden">
+					<div class="inline-flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-700 text-2xs print:hidden">
 						<button
-							class="px-2 py-0.5 {radarMode === 'abs' ? 'bg-sky-600 text-white' : 'text-slate-600 dark:text-slate-300'}"
+							type="button"
+							aria-pressed={radarMode === 'abs'}
+							class="min-h-11 min-w-11 px-2 py-0.5 {radarMode === 'abs' ? 'bg-sky-600 text-white' : 'text-slate-600 dark:text-slate-300'}"
 							onclick={() => (radarMode = 'abs')}>Absolut</button
 						>
 						<button
-							class="px-2 py-0.5 {radarMode === 'pct' ? 'bg-sky-600 text-white' : 'text-slate-600 dark:text-slate-300'}"
+							type="button"
+							aria-pressed={radarMode === 'pct'}
+							class="min-h-11 min-w-11 px-2 py-0.5 {radarMode === 'pct' ? 'bg-sky-600 text-white' : 'text-slate-600 dark:text-slate-300'}"
 							onclick={() => (radarMode = 'pct')}>%</button
 						>
 					</div>
@@ -1361,7 +1397,7 @@
 							<div class="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-2">
 								<div class="flex items-baseline gap-2">
 									<span class="font-mono text-lg font-bold tabular-nums"
-										>{ratingCrossover.toFixed(2).replace('.', ',')}</span
+										>{ratingCrossover.toFixed(2)}</span
 									>
 									<span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Nivell de competitivitat</span>
 								</div>
@@ -1376,7 +1412,6 @@
 			</div>
 		{/if}
 
-		<!-- Evolució al rànquing -->
 		{#if mitjanaChart}
 			{#if selIdx != null && rankHist[selIdx]}
 				<div class="mb-2 flex items-center justify-center gap-3 rounded-lg bg-slate-900 dark:bg-slate-700 px-3 py-1.5 text-xs text-white">
@@ -1385,10 +1420,24 @@
 					<span>posició <span class="font-mono font-bold">#{rankHist[selIdx].posicio ?? '—'}</span></span>
 				</div>
 			{:else}
-				<p class="mb-2 text-center text-[11px] text-slate-500 dark:text-slate-400 print:hidden">Toca un gràfic per veure els valors d'un rànquing</p>
+				<p class="mb-2 text-center text-[11px] text-slate-500 dark:text-slate-400 print:hidden">Toca un gràfic o mou el lliscador per veure els valors d'un rànquing</p>
+			{/if}
+			{#if rankHist.length > 1}
+				<label class="block print:hidden">
+					<span class="sr-only">Rànquing a consultar</span>
+					<input
+						type="range"
+						min="0"
+						max={rankHist.length - 1}
+						step="1"
+						value={selIdx ?? rankHist.length - 1}
+						oninput={(e) => (selIdx = +(e.currentTarget as HTMLInputElement).value)}
+						aria-valuetext={selIdx != null && rankHist[selIdx] ? dateFromSeq(rankHist[selIdx].num_seq) : undefined}
+						class="ag-range"
+					/>
+				</label>
 			{/if}
 			<div class="mb-4 space-y-3">
-				<!-- Mitjana -->
 				<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 					<div class="mb-2 flex items-end justify-between">
 						<span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
@@ -1398,13 +1447,13 @@
 								<div class="font-mono text-base font-bold leading-none tabular-nums">
 									{lastMitjana != null ? lastMitjana.toFixed(3) : '—'}
 								</div>
-								<div class="text-[10px] text-slate-500 dark:text-slate-400">actual</div>
+								<div class="text-2xs text-slate-500 dark:text-slate-400">actual</div>
 							</div>
 							<div>
 								<div class="font-mono text-base font-bold leading-none tabular-nums text-emerald-600 dark:text-emerald-400">
 									{mitjanaChart.hi.toFixed(3)}
 								</div>
-								<div class="text-[10px] text-slate-500 dark:text-slate-400">millor</div>
+								<div class="text-2xs text-slate-500 dark:text-slate-400">millor</div>
 							</div>
 						</div>
 					</div>
@@ -1429,11 +1478,10 @@
 								<circle cx={mitjanaChart.pts[selIdx].x} cy={mitjanaChart.pts[selIdx].y} r="4" fill={cInk} stroke={cHalo} stroke-width="1.5" />
 							{/if}
 					</svg>
-					<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300 dark:text-slate-600">
+					<div class="flex justify-between px-0.5 text-2xs tabular-nums text-slate-500 dark:text-slate-400">
 						{#each xTicks as t}<span>{t.label}</span>{/each}
 					</div>
 				</div>
-				<!-- Posició -->
 				<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 					<div class="mb-2 flex items-end justify-between">
 						<span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
@@ -1443,13 +1491,13 @@
 								<div class="font-mono text-base font-bold leading-none tabular-nums">
 									#{currentPos ?? '—'}
 								</div>
-								<div class="text-[10px] text-slate-500 dark:text-slate-400">actual</div>
+								<div class="text-2xs text-slate-500 dark:text-slate-400">actual</div>
 							</div>
 							<div>
 								<div class="font-mono text-base font-bold leading-none tabular-nums text-slate-900 dark:text-slate-100">
 									#{bestPos ?? '—'}
 								</div>
-								<div class="text-[10px] text-slate-500 dark:text-slate-400">millor</div>
+								<div class="text-2xs text-slate-500 dark:text-slate-400">millor</div>
 							</div>
 						</div>
 					</div>
@@ -1475,10 +1523,10 @@
 									<circle cx={posChart.pts[selIdx].x} cy={posChart.pts[selIdx].y} r="4" fill="#f59e0b" stroke={cHalo} stroke-width="1.5" />
 								{/if}
 						</svg>
-						<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300 dark:text-slate-600">
+						<div class="flex justify-between px-0.5 text-2xs tabular-nums text-slate-500 dark:text-slate-400">
 							{#each xTicks as t}<span>{t.label}</span>{/each}
 						</div>
-						<p class="mt-1 text-right text-[10px] text-slate-300 dark:text-slate-600">{posChart.n} rànquings · amunt = millor</p>
+						<p class="mt-1 text-right text-2xs text-slate-500 dark:text-slate-400">{posChart.n} rànquings · amunt = millor</p>
 					{/if}
 				</div>
 			</div>
@@ -1487,11 +1535,11 @@
 		{#if rollChart && roll15.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-end justify-between">
-					<span class="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Mitjana mòbil · 15 partides</span>
+					<span class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Mitjana mòbil · 15 partides</span>
 					{#if rollSel != null && roll15[rollSel]}
 						<div class="text-right">
 							<div class="font-mono text-base font-bold leading-none tabular-nums text-blue-600 dark:text-blue-400">{roll15[rollSel].avg.toFixed(3)}</div>
-							<div class="text-[9px] text-slate-500 dark:text-slate-400">{fmtDate(roll15[rollSel].from)} – {fmtDate(roll15[rollSel].to)}</div>
+							<div class="text-2xs text-slate-500 dark:text-slate-400">{fmtDate(roll15[rollSel].from)} – {fmtDate(roll15[rollSel].to)}</div>
 						</div>
 					{/if}
 				</div>
@@ -1499,7 +1547,7 @@
 					<div class="mb-1 flex items-center justify-between gap-2 rounded-lg bg-slate-900 dark:bg-slate-700 px-2 py-1 text-[11px] text-white">
 						<span class="min-w-0 truncate">
 							{#if roll15[rollSel].oppId && !kiosk}<a href="/jugador/{roll15[rollSel].oppId}" class="font-medium active:underline">{roll15[rollSel].opp}</a>{:else}<span class="font-medium">{roll15[rollSel].opp}</span>{/if}
-							<span class="text-slate-300 dark:text-slate-600">· {fmtDate(roll15[rollSel].date)}</span>
+							<span class="text-slate-300">· {fmtDate(roll15[rollSel].date)}</span>
 						</span>
 						<span class="shrink-0">partida <span class="font-mono font-bold">{roll15[rollSel].g.toFixed(3)}</span></span>
 					</div>
@@ -1520,13 +1568,13 @@
 						<circle cx={rollChart.gpts[li].x} cy={rollChart.gpts[li].y} r="3.5" fill="#475569" stroke={cHalo} stroke-width="1.5" />
 					{/if}
 				</svg>
-				<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-500 dark:text-slate-400">
+				<div class="flex justify-between px-0.5 text-2xs tabular-nums text-slate-500 dark:text-slate-400">
 					<span>mín {rollChart.lo.toFixed(3)}</span>
 					<span>màx {rollChart.hi.toFixed(3)}</span>
 				</div>
 				{#if roll15.length > 1}
-					<input type="range" min="0" max={roll15.length - 1} step="1" bind:value={rollSel} class="thin-range mt-2 w-full print:hidden" />
-					<p class="text-center text-[10px] text-slate-500 dark:text-slate-400 print:hidden">punt {(rollSel ?? 0) + 1} de {roll15.length} · finestra {rollStart + 1}–{Math.min(rollStart + WIN, roll15.length)}</p>
+					<input type="range" min="0" max={roll15.length - 1} step="1" bind:value={rollSel} aria-label="Partida de la mitjana mòbil" class="ag-range mt-2 print:hidden" />
+					<p class="text-center text-2xs text-slate-500 dark:text-slate-400 print:hidden">punt {(rollSel ?? 0) + 1} de {roll15.length} · finestra {rollStart + 1}–{Math.min(rollStart + WIN, roll15.length)}</p>
 				{/if}
 			</div>
 		{/if}
@@ -1535,14 +1583,15 @@
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-end justify-between">
 					<div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-						<span class="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Distribució de la mitjana · per partida</span>
+						<span class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Distribució de la mitjana · per partida</span>
 						{#if histoHasSeason}
 							<div class="flex shrink-0 items-center gap-1 print:hidden">
 								{#each [['tot', 'Tot'], ['temporada', 'Temporada']] as [val, label]}
 									<button
 										type="button"
 										onclick={() => (histoScope = val as HistoScope)}
-										class="rounded-sm px-2 py-0.5 text-[10px] font-medium transition-colors {histoScope === val
+										aria-pressed={histoScope === val}
+										class="min-h-11 rounded-sm px-2 py-0.5 text-2xs font-medium transition-colors {histoScope === val
 											? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 											: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}"
 									>{label}</button>
@@ -1556,7 +1605,7 @@
 							<span class="font-mono text-base font-bold leading-none tabular-nums">{histo.mitjana.toFixed(3)}</span>
 						</div>
 						<div class="flex items-baseline gap-1">
-							<span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">σ</span>
+							<span class="text-2xs font-semibold text-slate-500 dark:text-slate-400">σ</span>
 							<span class="font-mono text-sm font-bold leading-none tabular-nums">{histo.sd.toFixed(3)}</span>
 						</div>
 					</div>
@@ -1568,8 +1617,21 @@
 						<span class="font-mono font-bold">{b.count} {b.count === 1 ? 'partida' : 'partides'} · {Math.round((100 * b.count) / histo.n)}%</span>
 					</div>
 				{:else}
-					<p class="mb-1 text-center text-[11px] text-slate-500 dark:text-slate-400 print:hidden">Toca una barra per veure el detall</p>
+					<p class="mb-1 text-center text-[11px] text-slate-500 dark:text-slate-400 print:hidden">Toca una barra o mou el lliscador per veure el detall</p>
 				{/if}
+				<label class="block print:hidden">
+					<span class="sr-only">Franja de mitjana</span>
+					<input
+						type="range"
+						min="0"
+						max={histo.bins.length - 1}
+						step="1"
+						value={histoSel ?? 0}
+						oninput={(e) => (histoSel = +(e.currentTarget as HTMLInputElement).value)}
+						aria-valuetext={histoSel != null && histo.bins[histoSel] ? `${fmtAvg(histo.bins[histoSel].x0, histo.step)} a ${fmtAvg(histo.bins[histoSel].x1, histo.step)}: ${histo.bins[histoSel].count} partides` : undefined}
+						class="ag-range"
+					/>
+				</label>
 				<svg viewBox="0 0 {VBW} {VBH}" preserveAspectRatio="none" onclick={pickHisto} role="presentation" class="h-24 w-full cursor-pointer print:h-16">
 					{#each [0, 0.25, 0.5, 0.75, 1] as f}
 						<line x1="0" y1={PAD + f * (VBH - 2 * PAD)} x2={VBW} y2={PAD + f * (VBH - 2 * PAD)} stroke={cGrid} stroke-width="1" vector-effect="non-scaling-stroke" />
@@ -1586,16 +1648,16 @@
 						<line x1={histoMeanX} y1="2" x2={histoMeanX} y2={VBH - 2} stroke="#10b981" stroke-width="1.5" stroke-dasharray="3 2" vector-effect="non-scaling-stroke" />
 					{/if}
 				</svg>
-				<div class="flex justify-between px-0.5 text-[9px] tabular-nums text-slate-300 dark:text-slate-600">
+				<div class="flex justify-between px-0.5 text-2xs tabular-nums text-slate-500 dark:text-slate-400">
 					{#each histoTicks as t}<span>{t}</span>{/each}
 				</div>
-				<p class="mt-1 text-right text-[10px] text-slate-300 dark:text-slate-600">{histo.n} partides{histoScope === 'temporada' ? ' de la temporada' : ''} · línia = mitjana · franja = ±1σ</p>
+				<p class="mt-1 text-right text-2xs text-slate-500 dark:text-slate-400">{histo.n} partides{histoScope === 'temporada' ? ' de la temporada' : ''} · línia = mitjana · franja = ±1σ</p>
 			</div>
 		{/if}
 
 		{#if clubGroups.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Clubs</div>
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Clubs</div>
 				<div class="flex flex-wrap gap-1.5">
 					{#each clubGroups as g}
 						<div class="rounded-lg bg-slate-50 dark:bg-slate-800/50 px-2 py-1 text-[11px] ring-1 ring-slate-200 dark:ring-slate-800">
@@ -1609,10 +1671,9 @@
 
 			</div>
 			<div class="min-w-0">
-			<!-- Partides recents -->
 			{#if copaPend.length}
 				<div class="mb-3 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 p-3">
-					<div class="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300">
+					<div class="mb-1.5 text-2xs font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300">
 						{copaPend.length} {copaPend.length === 1 ? 'partida pendent' : 'partides pendents'} · incloses a la previsió del proper rànquing
 					</div>
 					<ul class="space-y-1.5">
@@ -1621,7 +1682,7 @@
 								<span class="w-5 shrink-0 text-center text-xs font-bold {cp.myCar > cp.oppCar ? 'text-emerald-600 dark:text-emerald-400' : cp.myCar < cp.oppCar ? 'text-red-500 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'}">{cp.myCar > cp.oppCar ? 'G' : cp.myCar < cp.oppCar ? 'P' : 'E'}</span>
 								<div class="min-w-0 flex-1">
 									<div class="truncate leading-tight">{cp.opp}</div>
-									<div class="truncate text-[10px] uppercase tracking-wide text-blue-600 dark:text-blue-400">{cp.grup}</div>
+									<div class="truncate text-2xs uppercase tracking-wide text-blue-600 dark:text-blue-400">{cp.grup}</div>
 								</div>
 								<div class="shrink-0 text-right">
 									<div class="font-mono text-sm tabular-nums">{cp.myCar}–{cp.oppCar}</div>
@@ -1650,7 +1711,7 @@
 			{/if}
 		<div class="games-wrap overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			<table class="w-full text-sm">
-				<thead class="print-only bg-slate-50 text-left text-[10px] uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+				<thead class="print-only bg-slate-50 text-left text-2xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
 					<tr>
 						<th class="px-3 py-1.5 font-medium">Res.</th>
 						<th class="px-3 py-1.5 font-medium">Rival · Competició</th>
@@ -1690,7 +1751,7 @@
 										<div class="truncate text-sm leading-tight">{p.opp}</div>
 									{/if}
 									<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
-										{#if inCur}<span class="mr-1 rounded bg-slate-200 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-slate-700 dark:bg-slate-700 dark:text-slate-200" title="Computa a la mitjana del rànquing vigent">rànquing</span>{:else if inNext}<span class="mr-1 rounded bg-sky-100 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-sky-700 dark:bg-sky-900/60 dark:text-sky-300" title="Entrarà al proper rànquing">proper</span>{/if}{fmtDate(p.date)}{#if p.comp} · {p.comp}{/if}{#if p.mySerie} · S.M. {p.mySerie}{/if}
+										{#if inCur}<span class="mr-1 rounded bg-slate-200 px-1 py-px text-2xs font-bold uppercase tracking-wide text-slate-700 dark:bg-slate-700 dark:text-slate-200" title="Computa a la mitjana del rànquing vigent">rànquing</span>{:else if inNext}<span class="mr-1 rounded bg-sky-100 px-1 py-px text-2xs font-bold uppercase tracking-wide text-sky-700 dark:bg-sky-900/60 dark:text-sky-300" title="Entrarà al proper rànquing">proper</span>{/if}{fmtDate(p.date)}{#if p.comp} · {p.comp}{/if}{#if p.mySerie} · S.M. {p.mySerie}{/if}
 									</div>
 								</td>
 								<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{p.myCar}–{p.oppCar}</td>
@@ -1704,8 +1765,9 @@
 			</div>
 		{#if !serieFilter && modGames.length > shown}
 			<button
+				type="button"
 				onclick={() => (shown += 60)}
-				class="mt-2 w-full rounded-lg bg-white dark:bg-slate-900 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800 active:bg-slate-50 dark:active:bg-slate-800/50 print:hidden"
+				class="mt-2 min-h-11 w-full rounded-lg bg-white dark:bg-slate-900 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800 active:bg-slate-50 dark:active:bg-slate-800/50 print:hidden"
 			>
 				Carregar més ({shown} de {modGames.length})
 			</button>
@@ -1718,37 +1780,15 @@
 {/if}
 
 <style>
-	.thin-range {
-		-webkit-appearance: none;
-		appearance: none;
-		height: 2px;
-		border-radius: 9999px;
-		background: #e2e8f0;
-		cursor: pointer;
-	}
-	:global(html.dark) .thin-range {
-		background: #334155; /* slate-700 */
-	}
-	.thin-range::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 11px;
-		height: 11px;
-		border-radius: 9999px;
-		background: #2563eb;
-		cursor: pointer;
-	}
-	.thin-range::-moz-range-thumb {
-		width: 11px;
-		height: 11px;
-		border: none;
-		border-radius: 9999px;
-		background: #2563eb;
-		cursor: pointer;
-	}
-
+	/* A pantalla la capçalera no es veu, però el lector de pantalla hi troba els
+	   noms de les columnes. */
 	.print-only {
-		display: none;
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
 	}
 
 	@media print {
@@ -1772,6 +1812,12 @@
 			page-break-inside: avoid;
 		}
 		.print-only {
+			position: static;
+			width: auto;
+			height: auto;
+			overflow: visible;
+			clip: auto;
+			white-space: normal;
 			display: table-header-group !important;
 		}
 		.print-only tr {

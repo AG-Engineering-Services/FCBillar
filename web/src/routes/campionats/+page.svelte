@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AvisError from '$lib/components/AvisError.svelte';
 	import { onMount } from 'svelte';
 	import { db, tipusOf, type Open } from '$lib/db';
 
@@ -79,11 +80,12 @@
 	bind:value={q}
 	inputmode="search"
 	placeholder="Cerca…"
+	aria-label="Cerca campionat"
 	class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 px-3 text-sm shadow-sm"
 />
 
 {#if error}
-	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
+	<AvisError missatge="No s'han pogut carregar els campionats." detall={error} onretry={() => location.reload()} />
 {:else if loading}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant…</p>
 {:else if total === 0}
@@ -99,7 +101,7 @@
 					<li class="border-b border-slate-100 dark:border-slate-800 last:border-0">
 						<a href="/campionats/{o.open_id}" class="flex items-center gap-3 px-3 py-1.5 active:bg-slate-50 dark:active:bg-slate-800/50">
 							<div class="min-w-0 flex-1 truncate text-sm font-medium leading-tight">{clean(o.nom)}</div>
-							<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
+							<span class="shrink-0 text-slate-300 dark:text-slate-600" aria-hidden="true">›</span>
 						</a>
 					</li>
 				{/each}

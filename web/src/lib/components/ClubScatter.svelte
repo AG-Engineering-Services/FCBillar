@@ -67,22 +67,18 @@
 
 <div class="w-full">
 	<svg viewBox="0 0 {W} {H}" class="w-full" role="img" aria-label="Mapa de clubs: profunditat contra potència">
-		<!-- graella X -->
 		{#each xTicks as t}
 			<line x1={px(t)} y1={M.t} x2={px(t)} y2={M.t + ih} stroke={cGrid} stroke-width="1" />
-			<text x={px(t)} y={M.t + ih + 16} text-anchor="middle" class="fill-slate-400 dark:fill-slate-500" style="font-size:10px">{t}</text>
+			<text x={px(t)} y={M.t + ih + 16} text-anchor="middle" class="fill-slate-500 dark:fill-slate-400" style="font-size:10px">{t}</text>
 		{/each}
-		<!-- graella Y -->
 		{#each yTicks as t}
 			<line x1={M.l} y1={py(t)} x2={M.l + iw} y2={py(t)} stroke={cGrid} stroke-width="1" />
-			<text x={M.l - 6} y={py(t)} text-anchor="end" dominant-baseline="middle" class="fill-slate-400 dark:fill-slate-500" style="font-size:10px">{t}</text>
+			<text x={M.l - 6} y={py(t)} text-anchor="end" dominant-baseline="middle" class="fill-slate-500 dark:fill-slate-400" style="font-size:10px">{t}</text>
 		{/each}
 
-		<!-- títols d'eixos -->
 		<text x={M.l + iw / 2} y={H - 4} text-anchor="middle" class="fill-slate-500 dark:fill-slate-400" style="font-size:11px;font-weight:600">Profunditat →</text>
 		<text x={14} y={M.t + ih / 2} text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 14 {M.t + ih / 2})" class="fill-slate-500 dark:fill-slate-400" style="font-size:11px;font-weight:600">Potència (top-K) ↑</text>
 
-		<!-- bombolles -->
 		{#each clubs as c (c.club)}
 			{@const sel = c.club === selected}
 			<g

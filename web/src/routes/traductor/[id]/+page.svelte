@@ -312,17 +312,22 @@
 			{#if controlable}
 				<div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
 					<button
-						class="rounded-sm bg-slate-900 px-4 py-1 font-medium text-white dark:bg-slate-100 dark:text-slate-900"
+						type="button"
+						class="min-h-11 rounded-sm bg-slate-900 px-4 py-1 font-medium text-white dark:bg-slate-100 dark:text-slate-900"
 						onclick={reprodueix}>{sonant ? '⏸ Pausa' : '▶ Reprodueix'}</button
 					>
 					<button
-						class="rounded-sm px-3 py-1 {mode === 'ca'
+						type="button"
+						aria-pressed={mode === 'ca'}
+						class="min-h-11 rounded-sm px-3 py-1 {mode === 'ca'
 							? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 							: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}"
 						onclick={() => (mode = 'ca')}>Veu en català</button
 					>
 					<button
-						class="rounded-sm px-3 py-1 {mode === 'orig'
+						type="button"
+						aria-pressed={mode === 'orig'}
+						class="min-h-11 rounded-sm px-3 py-1 {mode === 'orig'
 							? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 							: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}"
 						onclick={() => (mode = 'orig')}>So original</button
@@ -365,7 +370,7 @@
 								: 'hover:bg-slate-50 dark:hover:bg-slate-800/60'}"
 							onclick={() => salta(s.t0)}
 						>
-							<span class="mr-2 font-mono text-xs text-slate-400">{mmss(s.t0)}</span>
+							<span class="mr-2 font-mono text-xs text-slate-500 dark:text-slate-400">{mmss(s.t0)}</span>
 							<span>{s.ca || '—'}</span>
 							{#if ambOriginal}
 								<span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">{s.orig}</span>

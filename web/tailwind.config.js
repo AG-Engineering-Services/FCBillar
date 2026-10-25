@@ -27,8 +27,11 @@ const bitum = {
 	100: '#E8EBE8',
 	200: '#D6DAD6',
 	300: '#B8BEB9',
-	400: '#939A94',
-	500: '#6E756F',
+	// 400 i 500 són més foscos/clars que als tokens: 400 és tinta del fosc i
+	// ha d'aguantar 4,5:1 sobre slate-700; 500 és la tinta secundària del clar i
+	// ha d'aguantar 4,5:1 sobre els fons tenyits (slate-100, blue-50, amber-50).
+	400: '#A0A7A1',
+	500: '#5E655F',
 	600: '#4E544F',
 	700: '#333833',
 	800: '#212523',
@@ -43,7 +46,9 @@ const accent = {
 	200: '#AFCDE2',
 	300: '#6BA9D6',
 	400: '#4A90C4',
-	500: '#2E7BB0',
+	// El xip actiu del fosc és `dark:bg-sky-500 dark:text-slate-900`: amb el
+	// #2E7BB0 dels tokens feia 3,86:1, i amb aquest fa 5,13:1.
+	500: '#4A90C4',
 	600: '#1A5C8A',
 	700: '#123F61',
 	800: '#0D2E48',
@@ -58,8 +63,10 @@ const bo = {
 	200: '#A6DCBE',
 	300: '#4FC088',
 	400: '#2FA96C',
-	500: '#1F9A5F',
-	600: '#157A4A',
+	// Un pas més foscos que als tokens: 500 porta text blanc (4,78:1) i 600 és
+	// tinta sobre emerald-50 (5,39:1).
+	500: '#17834F',
+	600: '#126C42',
 	700: '#0E5533',
 	800: '#0A3F26',
 	900: '#0A3F26',
@@ -73,9 +80,12 @@ const avis = {
 	200: '#EBD5A6',
 	300: '#D2A050',
 	400: '#B8811F',
-	500: '#C08018',
-	600: '#C08018',
-	700: '#A16900',
+	// L'ambre dels tokens (#C08018) és un color de marca, no de text: feia
+	// 3,31:1 sobre blanc. Aquí 500-600 ja són tinta (4,68:1 sobre slate-100) i
+	// 700 aguanta sobre amber-100 i amber-200.
+	500: '#8F5D00',
+	600: '#8F5D00',
+	700: '#7A4F00',
 	800: '#7A5000',
 	900: '#7A5000',
 	950: '#2A2113'
@@ -87,8 +97,10 @@ const greu = {
 	50: '#F7E4DE',
 	100: '#F7E4DE',
 	200: '#DFA08E',
-	300: '#D86749',
-	400: '#CB5C3E',
+	// 300-400 són tinta del fosc: més clars que als tokens perquè aguantin
+	// 4,5:1 sobre slate-800.
+	300: '#E89580',
+	400: '#E0775A',
 	500: '#B0432A',
 	600: '#B0432A',
 	700: '#A81E12',
@@ -102,8 +114,8 @@ const cat5 = {
 	50: '#EFEAF6',
 	100: '#E3DBF0',
 	200: '#C9BCE0',
-	300: '#A98CD0',
-	400: '#8F68BE',
+	300: '#BEA6DE',
+	400: '#A485CC',
 	500: '#7A4FA8',
 	600: '#7A4FA8',
 	700: '#5E3B83',
@@ -129,7 +141,10 @@ export default {
 			},
 			fontSize: {
 				// Verdana és ampla: la base va a 15px i no a 16.
-				base: ['0.9375rem', { lineHeight: '1.5' }]
+				base: ['0.9375rem', { lineHeight: '1.5' }],
+				// El pas més petit del web (11px amb la base de 15px): les etiquetes de
+				// 8 a 10px escrites a mà no es llegien.
+				'2xs': ['0.7334rem', { lineHeight: '1rem' }]
 			},
 			borderRadius: {
 				// Convencions de plànol: cantonades vives. 2px és el màxim.

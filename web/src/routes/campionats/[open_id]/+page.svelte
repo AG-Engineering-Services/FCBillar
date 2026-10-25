@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AvisError from '$lib/components/AvisError.svelte';
 	// Un campionat de Catalunya, llegit com es llegeix un campionat.
 	//
 	// I per això té la seva pàgina i no la dels opens. Un campionat NO és un open:
@@ -156,7 +157,7 @@
 </a>
 
 {#if error}
-	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
+	<AvisError missatge="No s'ha pogut carregar el campionat." detall={error} onretry={() => location.reload()} />
 {:else}
 	<h1 class="mb-0.5 text-base font-bold leading-tight">{nom || '…'}</h1>
 	{#if open?.temporada}
@@ -206,7 +207,7 @@
 									{:else}
 										<span class="block truncate text-sm leading-tight">{r.jugador}</span>
 									{/if}
-									{#if r.club}<span class="block truncate text-[10px] text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
+									{#if r.club}<span class="block truncate text-2xs text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
 								</div>
 								<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts ?? 0}</span>
 								<span class="w-14 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{mitj(r.mitjana)}</span>
@@ -223,7 +224,7 @@
 								{#if jugada(p)}
 									<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 font-mono font-bold tabular-nums">{p.caramboles_local}–{p.caramboles_visitant}</span>
 								{:else}
-									<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 text-[10px] text-slate-500 dark:text-slate-400">per jugar</span>
+									<span class="shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1.5 text-2xs text-slate-500 dark:text-slate-400">per jugar</span>
 								{/if}
 								<span class="flex-1 truncate">{p.jugador_visitant}</span>
 								<span class="w-12 shrink-0 text-right text-slate-500 dark:text-slate-400">{p.entrades ?? '—'} ent</span>
@@ -265,8 +266,8 @@
 					<strong>bombo</strong> va són exactes: surten de la regla del PDF de la
 					federació («{placesText}») i de la classificació publicada. El <strong
 						>grup</strong
-					> no: el seu sorteig és geogràfic —la seu de cada grup hi posa jugadors de
-					casa i no separa clubs— i les seus no es publiquen fins que surt. Quan la
+					> no: el seu sorteig és geogràfic (la seu de cada grup hi posa jugadors de
+					casa i no separa clubs) i les seus no es publiquen fins que surt. Quan la
 					federació el publiqui, això desapareixerà i hi haurà els grups de debò.
 				</div>
 				<div class="grid gap-2 sm:grid-cols-2">
@@ -282,14 +283,14 @@
 							<ul>
 								{#each g.files as r (r.jugador)}
 									<li class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-3 py-1.5 last:border-0">
-										<span class="w-11 shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1 text-center text-[10px] text-slate-600 dark:text-slate-300">B{r.bombo}</span>
+										<span class="w-11 shrink-0 rounded bg-slate-100 dark:bg-slate-800 px-1 text-center text-2xs text-slate-600 dark:text-slate-300">B{r.bombo}</span>
 										<div class="min-w-0 flex-1">
 											{#if r.player_fcb_id}
 												<a href="/jugador/{r.player_fcb_id}" class="block truncate text-sm leading-tight underline decoration-slate-300 dark:decoration-slate-600">{r.jugador}</a>
 											{:else}
 												<span class="block truncate text-sm leading-tight">{r.jugador}</span>
 											{/if}
-											{#if r.club}<span class="block truncate text-[10px] text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
+											{#if r.club}<span class="block truncate text-2xs text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
 										</div>
 										<span class="w-7 shrink-0 text-right font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">#{r.posicio}</span>
 									</li>
@@ -315,7 +316,7 @@
 					<ul>
 						{#each rankFase as r, i (r.jugador)}
 							{#if trenca(i)}
-								<li class="border-y border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+								<li class="border-y border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-3 py-1 text-2xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
 									{r.posicio_grup}a posició de grup
 								</li>
 							{/if}
@@ -330,7 +331,7 @@
 									<!-- El club de l'INDIVIDUAL, que no és sempre el de la lliga. No
 									     entra a l'ordre: la federació ordena per posició al grup,
 									     punts i mitjana. -->
-									{#if r.club}<span class="block truncate text-[10px] text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
+									{#if r.club}<span class="block truncate text-2xs text-slate-500 dark:text-slate-400">{r.club}</span>{/if}
 								</div>
 								<span class="w-14 shrink-0 text-center text-[11px] text-slate-500 dark:text-slate-400">{r.grup_nom ?? '—'}</span>
 								<span class="w-7 shrink-0 text-right font-mono text-sm font-bold tabular-nums">{r.punts ?? 0}</span>

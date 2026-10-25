@@ -31,6 +31,10 @@
 	// En canviar de pàgina, torna a dalt. EXCEPCIÓ: en navegacions enrere/endavant
 	// (popstate) deixem que SvelteKit restauri la posició d'scroll on era l'usuari.
 	afterNavigate((nav) => {
+		// Al mòbil la fila de pestanyes es desplaça: que la secció actual hi sigui visible.
+		document
+			.querySelector('nav [aria-current="page"]')
+			?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 		if (nav.type === 'popstate') return;
 		if (typeof window !== 'undefined') window.scrollTo({ top: 0, left: 0 });
 	});
@@ -77,8 +81,8 @@
 	<header
 		class="ag-marca sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95"
 	>
-		<div class="flex items-center gap-2 px-4 pt-2 md:px-6 md:pt-3">
-			<svg viewBox="0 0 40 40" class="h-7 w-7 shrink-0 md:h-9 md:w-9" aria-hidden="true">
+		<div class="flex items-center gap-2 px-4 md:px-6 md:pt-1">
+			<svg viewBox="0 0 40 40" class="h-6 w-6 shrink-0 md:h-9 md:w-9" aria-hidden="true">
 				<rect width="40" height="40" rx="10" fill="#0b3d2e" />
 				<circle cx="20" cy="13.5" r="7" fill="#e0322a" />
 				<circle cx="13.5" cy="24.5" r="7" fill="#f7f7f5" />
@@ -94,7 +98,7 @@
 			<button
 				type="button"
 				onclick={toggleTheme}
-				class="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-sm text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+				class="-mr-2 ml-auto grid h-11 w-11 shrink-0 place-items-center rounded-sm text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
 				aria-label={$theme === 'dark' ? 'Mode clar' : 'Mode fosc'}
 				title={$theme === 'dark' ? 'Mode clar' : 'Mode fosc'}
 			>
@@ -112,18 +116,22 @@
 				{/if}
 			</button>
 		</div>
-		<nav class="flex flex-wrap gap-x-0 gap-y-0 px-3 pt-1 md:px-5">
+		<!-- Al mòbil, una sola fila que llisca: amb flex-wrap les 12 pestanyes feien
+		     tres files i la capçalera enganxada es menjava la pantalla. -->
+		<nav aria-label="Seccions" class="flex overflow-x-auto px-3 md:flex-wrap md:overflow-visible md:px-5">
 			{#each tabs as t}
 				<a
 					href={t.href}
-					class="ag-et -mb-px px-2.5 py-1.5 md:px-3 {t.match(path)
+					aria-current={t.match(path) ? 'page' : undefined}
+					class="ag-et -mb-px flex min-h-11 shrink-0 items-center whitespace-nowrap px-2.5 md:px-3 {t.match(path)
 						? 'border-b-2 border-sky-600 text-sky-700 dark:border-sky-400 dark:text-sky-300'
 						: 'border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'}"
 					>{t.label}{#if t.href === '/opens' && liveCount > 0}<span
 							class="relative ml-1 inline-flex h-2 w-2 align-middle"
-							title="Opens en directe ara"
-							><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"
-							></span><span class="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span></span>{/if}</a
+							aria-hidden="true"
+							><span class="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 motion-safe:animate-ping"
+							></span><span class="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span></span
+						><span class="sr-only"> (en directe ara)</span>{/if}</a
 					>
 			{/each}
 		</nav>
@@ -140,7 +148,7 @@
 			<span class="ag-et text-slate-500 dark:text-slate-400">Albert Gómez</span>
 		</div>
 		<p>© Albert Gómez. No se'n permet la distribució no autoritzada.</p>
-		<p class="text-slate-300 dark:text-slate-600">Dades de la Federació Catalana de Billar · ús personal</p>
+		<p>Dades de la Federació Catalana de Billar · ús personal</p>
 	</footer>
 </div>
 

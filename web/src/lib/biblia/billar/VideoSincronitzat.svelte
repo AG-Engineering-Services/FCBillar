@@ -152,6 +152,7 @@
 		aspect-ratio: 16 / 9;
 		border-radius: var(--radi);
 		overflow: hidden;
+		/* Negre fix: és el fons del vídeo mentre carrega, igual en clar que en fosc. */
 		background: #000;
 		border: 1px solid var(--vora);
 	}

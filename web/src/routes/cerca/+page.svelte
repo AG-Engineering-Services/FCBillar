@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AvisError from '$lib/components/AvisError.svelte';
 	import { onMount } from 'svelte';
 	import { db } from '$lib/db';
 
@@ -48,11 +49,12 @@
 	inputmode="search"
 	autofocus
 	placeholder="Cerca qualsevol jugador…"
+	aria-label="Cerca qualsevol jugador"
 	class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 px-3 text-sm shadow-sm"
 />
 
 {#if error}
-	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{error}</div>
+	<AvisError missatge="No s'ha pogut carregar la llista de jugadors." detall={error} onretry={() => location.reload()} />
 {:else if loading}
 	<p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Carregant jugadors…</p>
 {:else if !q.trim()}
@@ -70,7 +72,7 @@
 						<div class="truncate text-sm font-medium leading-tight">{p.nom}</div>
 						{#if p.club}<div class="truncate text-xs text-slate-500 dark:text-slate-400">{p.club}</div>{/if}
 					</div>
-					<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
+					<span class="shrink-0 text-slate-300 dark:text-slate-600" aria-hidden="true">›</span>
 				</a>
 			</li>
 		{/each}

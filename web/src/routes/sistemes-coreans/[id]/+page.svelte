@@ -117,7 +117,6 @@
 	</header>
 
 	<div class="grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_1fr]">
-		<!-- Vídeo -->
 		<div>
 			<div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
 				{#if s.plataforma && s.plataforma !== 'youtube'}
@@ -182,7 +181,6 @@
 			{/if}
 		</div>
 
-		<!-- Explicació -->
 		<div>
 			{#if s.explicacio}
 				<section class="space-y-4">

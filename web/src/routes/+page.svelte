@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AvisError from '$lib/components/AvisError.svelte';
 	import { onMount } from 'svelte';
 	import {
 		db,
@@ -220,17 +221,20 @@
 </script>
 
 {#if error}
-	<div class="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">
-		{error}
-	</div>
+	<AvisError
+		missatge="No s'han pogut carregar els rànquings."
+		detall={error}
+		onretry={() => location.reload()}
+	/>
 {/if}
 
-<!-- Modalitats: xips amb scroll horitzontal -->
 <div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
 	{#each modalitats as m}
 		<button
+			type="button"
 			onclick={() => pickMod(m.codi_fcb)}
-			class="shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium transition-colors {m.codi_fcb ===
+			aria-pressed={m.codi_fcb === selMod}
+			class="min-h-11 shrink-0 rounded-sm px-3.5 py-1.5 text-sm font-medium transition-colors {m.codi_fcb ===
 			selMod
 				? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 				: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
@@ -257,10 +261,10 @@
 		>
 			{#if isProvView}
 				<p class="truncate text-sm font-semibold text-amber-800 dark:text-amber-300">Provisional calculat</p>
-				<p class="text-[10px] uppercase tracking-wide text-amber-600 dark:text-amber-400">estimació · pot tenir errors</p>
+				<p class="text-2xs uppercase tracking-wide text-amber-600 dark:text-amber-400">estimació · pot tenir errors</p>
 			{:else}
 				<p class="truncate text-sm font-semibold">{currentLabel}</p>
-				<p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+				<p class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					{isLatestOfficial ? 'Oficial vigent' : `${snapshots.length - officialIndex} de ${snapshots.length} · oficial`}
 				</p>
 			{/if}
@@ -279,6 +283,7 @@
 		bind:value={search}
 		inputmode="search"
 		placeholder="Cerca jugador o club…"
+		aria-label="Cerca jugador o club"
 		class="mb-3 w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm shadow-sm"
 	/>
 {/if}
@@ -291,7 +296,8 @@
 			<button
 				type="button"
 				onclick={() => (scope = s.val)}
-				class="rounded-sm px-2.5 py-1 font-medium transition-colors {scope === s.val
+				aria-pressed={scope === s.val}
+				class="min-h-11 rounded-sm px-2.5 py-1 font-medium transition-colors {scope === s.val
 					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 			>
@@ -303,7 +309,7 @@
 
 {#if isProvView}
 	<div class="mb-2 flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
-		<span class="mt-0.5 shrink-0">⚠</span>
+		<span class="mt-0.5 shrink-0" aria-hidden="true">⚠</span>
 		<span>
 			Rànquing <strong>provisional</strong>, <strong>no oficial</strong>: el darrer oficial ({latestOfficialLabel})
 			recalculat amb les partides de competicions en curs. Són càlculs automàtics i poden contenir errors.
@@ -313,24 +319,26 @@
 	<p class="mb-2 px-1 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
 		A la dreta, <span class="font-semibold">projecció del proper rànquing</span> (mitjana i posició
 		amb les partides de competicions en curs): <span class="font-semibold text-emerald-600 dark:text-emerald-400">verd</span>
-		puja, <span class="font-semibold text-red-500 dark:text-red-400">vermell</span> baixa. Llisca a la dreta («Provisional calculat») per veure el rànquing sencer recalculat.
+		puja, <span class="font-semibold text-red-500 dark:text-red-400">vermell</span> baixa. Prem › fins a «Provisional calculat» per veure el rànquing sencer recalculat.
 	</p>
 {/if}
 
-<!-- Ordena per posició oficial o per promig (no sempre coincideixen) -->
+<!-- Posició oficial i promig no sempre coincideixen -->
 <div class="mb-2 flex items-center gap-1.5 px-0.5 text-xs">
 	<span class="text-slate-500 dark:text-slate-400">Ordena per:</span>
 	<button
 		type="button"
 		onclick={() => (sortBy = 'posicio')}
-		class="rounded-sm px-2.5 py-1 font-medium transition-colors {sortBy === 'posicio'
+		aria-pressed={sortBy === 'posicio'}
+		class="min-h-11 rounded-sm px-2.5 py-1 font-medium transition-colors {sortBy === 'posicio'
 			? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 			: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 	>Posició</button>
 	<button
 		type="button"
 		onclick={() => (sortBy = 'mitjana')}
-		class="rounded-sm px-2.5 py-1 font-medium transition-colors {sortBy === 'mitjana'
+		aria-pressed={sortBy === 'mitjana'}
+		class="min-h-11 rounded-sm px-2.5 py-1 font-medium transition-colors {sortBy === 'mitjana'
 			? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 			: 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800'}"
 	>Promig</button>
@@ -361,7 +369,7 @@
 						<div class="truncate text-sm font-medium leading-tight">{r.jugador}</div>
 						{#if r.club}<div class="truncate text-xs text-slate-500 dark:text-slate-400">{r.club}</div>{/if}
 						{#if isProvView && (r.partidesNoves ?? 0) > 0}
-							<div class="text-[10px] font-medium text-amber-600 dark:text-amber-400">
+							<div class="text-2xs font-medium text-amber-600 dark:text-amber-400">
 								+{r.partidesNoves} {r.partidesNoves === 1 ? 'partida nova' : 'partides noves'}
 							</div>
 						{/if}
@@ -383,7 +391,7 @@
 										: 'text-slate-500 dark:text-slate-400'}"
 								>{mUp ? `+${dm.toFixed(3)}` : mDown ? dm.toFixed(3) : '='}</span>
 							<span
-								class="block text-[10px] font-bold tabular-nums {dp > 0
+								class="block text-2xs font-bold tabular-nums {dp > 0
 									? 'text-emerald-600 dark:text-emerald-400'
 									: dp < 0
 										? 'text-red-500 dark:text-red-400'
@@ -404,7 +412,7 @@
 										: 'text-slate-500 dark:text-slate-400'}"
 								>{mUp ? `+${dm.toFixed(3)}` : mDown ? dm.toFixed(3) : '='}</span>
 							<span
-								class="block text-[10px] font-bold tabular-nums {dp > 0
+								class="block text-2xs font-bold tabular-nums {dp > 0
 									? 'text-emerald-600 dark:text-emerald-400'
 									: dp < 0
 										? 'text-red-500 dark:text-red-400'
@@ -414,7 +422,7 @@
 					{:else if provActive}
 						<span class="w-16 shrink-0"></span>
 					{/if}
-					<span class="shrink-0 text-slate-300 dark:text-slate-600">›</span>
+					<span class="shrink-0 text-slate-300 dark:text-slate-600" aria-hidden="true">›</span>
 				</a>
 			</li>
 		{/each}

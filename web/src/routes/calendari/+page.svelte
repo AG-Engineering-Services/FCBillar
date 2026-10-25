@@ -229,6 +229,20 @@
 	// per competició) i el detall va a sota, en tocar el dia. A partir de `md` sí
 	// que hi cap una línia de títol dins la cel·la.
 	const DIES_CURT = ['dl', 'dt', 'dc', 'dj', 'dv', 'ds', 'dg'];
+	const DIES_LLARG = ['dilluns', 'dimarts', 'dimecres', 'dijous', 'divendres', 'dissabte', 'diumenge'];
+	// El que diu el lector de pantalla d'una cel·la: el número sol no diu de quin
+	// mes és, i al mòbil el tipus de competició només és el color del punt.
+	function etiquetaDia(iso: string, items: CalendariEvent[]): string {
+		const dt = d(iso);
+		const mes = MESOS[dt.getMonth()];
+		const data = `${DIES_LLARG[(dt.getDay() + 6) % 7]} ${dt.getDate()} ${/^[aeiou]/.test(mes) ? "d'" : 'de '}${mes}`;
+		if (!items.length) return data;
+		const llista = actes(items);
+		const eq = llista.filter((a) => a.tipus === 'equips').length;
+		const ind = llista.filter((a) => a.tipus === 'individual').length;
+		const parts = [eq && `${eq} per equips`, ind && `${ind} individual${ind === 1 ? '' : 's'}`].filter(Boolean);
+		return `${data}, ${llista.length} ${llista.length === 1 ? 'competició' : 'competicions'}${parts.length ? ` (${parts.join(', ')})` : ''}`;
+	}
 
 	function isoDe(any: number, mes: number, dia: number): string {
 		const p = (n: number) => String(n).padStart(2, '0');
@@ -451,7 +465,8 @@
 			<button
 				type="button"
 				onclick={() => (vista = v as 'llista' | 'mes')}
-				class="rounded-md px-3 py-1 text-xs font-semibold {vista === v
+				aria-pressed={vista === v}
+				class="min-h-11 rounded-md px-3 py-1 text-xs font-semibold {vista === v
 					? 'bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-900'
 					: 'text-slate-500 dark:text-slate-400'}">{lbl}</button
 			>
@@ -472,7 +487,7 @@
 						type="button"
 						disabled={mesIdx <= 0}
 						onclick={() => (mesSel = mesos[mesIdx - 1])}
-						class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 disabled:opacity-25 dark:text-slate-400"
+						class="grid h-11 w-11 place-items-center rounded-lg text-slate-500 disabled:opacity-25 dark:text-slate-400"
 						aria-label="Mes anterior">‹</button
 					>
 					<h2 class="text-sm font-semibold capitalize">{mesTitol(mesSel + '-01')}</h2>
@@ -480,14 +495,14 @@
 						type="button"
 						disabled={mesIdx >= mesos.length - 1}
 						onclick={() => (mesSel = mesos[mesIdx + 1])}
-						class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 disabled:opacity-25 dark:text-slate-400"
+						class="grid h-11 w-11 place-items-center rounded-lg text-slate-500 disabled:opacity-25 dark:text-slate-400"
 						aria-label="Mes següent">›</button
 					>
 				</div>
 
 				<div class="grid grid-cols-7 gap-px text-center">
 					{#each DIES_CURT as dia (dia)}
-						<div class="pb-1 text-[10px] uppercase text-slate-500 dark:text-slate-400">{dia}</div>
+						<div class="pb-1 text-2xs uppercase text-slate-500 dark:text-slate-400">{dia}</div>
 					{/each}
 				</div>
 				<div class="grid grid-cols-7 gap-px overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800">
@@ -497,6 +512,8 @@
 								type="button"
 								disabled={!c.items.length}
 								onclick={() => (diaSel = diaSel === c.iso ? null : c.iso)}
+								aria-label={etiquetaDia(c.iso, c.items)}
+								aria-pressed={c.items.length ? diaSel === c.iso : undefined}
 								class="flex min-h-[3.25rem] flex-col items-stretch gap-0.5 p-1 text-left md:min-h-[4.75rem] {c.dinsMes
 									? 'bg-white dark:bg-slate-900'
 									: 'bg-slate-50 dark:bg-slate-950'} {diaSel === c.iso
@@ -507,21 +524,21 @@
 									class="text-[11px] leading-none {c.iso === avuiIso
 										? 'font-bold text-red-600 dark:text-red-400'
 										: c.dinsMes
-											? 'text-slate-600 dark:text-slate-300'
-											: 'text-slate-300 dark:text-slate-600'}">{c.dia}</span
+											? 'font-semibold text-slate-800 dark:text-slate-200'
+											: 'text-slate-500 dark:text-slate-400'}">{c.dia}</span
 								>
 								{#if c.items.length}
 									{@const dia = actes(c.items)}
 									<!-- Mòbil: punts. Des de `md`, també el títol retallat. -->
-									<span class="flex flex-wrap gap-0.5 md:hidden">
+									<span class="flex flex-wrap gap-0.5 md:hidden" aria-hidden="true">
 										{#each dia.slice(0, 4) as a, i (a.titol + i)}
 											<span class="h-1.5 w-1.5 rounded-full {PUNT[a.tipus] ?? 'bg-slate-400'}"></span>
 										{/each}
 									</span>
-									<span class="hidden flex-col gap-0.5 md:flex">
+									<span class="hidden flex-col gap-0.5 md:flex" aria-hidden="true">
 										{#each dia.slice(0, 2) as a, i (a.titol + i)}
 											<span
-												class="truncate rounded px-1 text-[9px] leading-tight {a.tipus === 'equips'
+												class="truncate rounded px-1 text-2xs leading-tight {a.tipus === 'equips'
 													? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300'
 													: a.tipus === 'individual'
 														? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
@@ -530,7 +547,7 @@
 											>
 										{/each}
 										{#if dia.length > 2}
-											<span class="px-1 text-[9px] text-slate-500 dark:text-slate-400"
+											<span class="px-1 text-2xs text-slate-500 dark:text-slate-400"
 												>+{dia.length - 2}</span
 											>
 										{/if}
@@ -553,12 +570,12 @@
 						{@render blocs(itemsDiaSel)}
 					</div>
 				{:else if totalMes}
-					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-500 dark:text-slate-400 dark:border-slate-800 dark:text-slate-500">
+					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-500 dark:border-slate-800 dark:text-slate-400">
 						{totalMes}
 						{totalMes === 1 ? 'dia' : 'dies'} amb competició. Toca un dia per veure'n el detall.
 					</p>
 				{:else}
-					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-500 dark:text-slate-400 dark:border-slate-800 dark:text-slate-500">
+					<p class="mt-3 border-t border-slate-100 pt-3 text-center text-[11px] text-slate-500 dark:border-slate-800 dark:text-slate-400">
 						Cap competició aquest mes amb aquests filtres.
 					</p>
 				{/if}
@@ -587,11 +604,11 @@
 				<span class="text-sm font-semibold">{fmtRang(s.inici, s.fi)}</span>
 				{#if s.setmana === avui}
 					<span
-						class="text-[10px] font-bold uppercase tracking-wide text-slate-900 dark:text-slate-100"
+						class="text-2xs font-bold uppercase tracking-wide text-slate-900 dark:text-slate-100"
 						>aquesta setmana</span
 					>
 				{:else if s.setmana < avui}
-					<span class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400"
+					<span class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400"
 						>jugat</span
 					>
 				{/if}
@@ -634,7 +651,7 @@
 									>{fmtCurt(c.setmana)}</span
 								>
 								<span
-									class="rounded px-1.5 py-0.5 text-[10px] font-bold uppercase {c.tipus_canvi ===
+									class="rounded px-1.5 py-0.5 text-2xs font-bold uppercase {c.tipus_canvi ===
 									'alta'
 										? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
 										: c.tipus_canvi === 'baixa'
@@ -685,14 +702,14 @@
 				<div class="flex w-[84px] shrink-0 flex-col gap-1 pt-0.5">
 					{#if e.tipus}
 						<span
-							class="rounded px-1.5 py-0.5 text-center text-[10px] font-bold uppercase tracking-wide ring-1 {BADGE_TIPUS[
+							class="rounded px-1.5 py-0.5 text-center text-2xs font-bold uppercase tracking-wide ring-1 {BADGE_TIPUS[
 								e.tipus
 							]}">{ETIQUETA_TIPUS[e.tipus]}</span
 						>
 					{/if}
 					{#if e.ambit !== 'tot'}
 						<span
-							class="text-center text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400"
+							class="text-center text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400"
 							>{ETIQUETA_AMBIT[e.ambit] ?? e.ambit}</span
 						>
 					{/if}
@@ -703,7 +720,7 @@
 							<div>
 								{titol}
 								{#if i === 0 && !nomesCarambola && e.disciplina !== 'carambola'}
-									<span class="ml-1 text-[10px] uppercase text-slate-500 dark:text-slate-400"
+									<span class="ml-1 text-2xs uppercase text-slate-500 dark:text-slate-400"
 										>{ETIQUETA_DISC[e.disciplina] ?? e.disciplina}</span
 									>
 								{/if}
@@ -713,7 +730,7 @@
 					{#if e.dissabte || e.diumenge}
 						<div class="text-xs text-slate-500 dark:text-slate-400">
 							{#if e.dissabte}<span>ds: {e.dissabte}</span>{/if}{#if e.dissabte && e.diumenge}<span
-									class="mx-1 text-slate-300 dark:text-slate-600">·</span
+									class="mx-1 text-slate-300 dark:text-slate-600" aria-hidden="true">·</span
 								>{/if}{#if e.diumenge}<span>dg: {e.diumenge}</span>{/if}
 						</div>
 					{/if}

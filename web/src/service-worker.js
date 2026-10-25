@@ -2,7 +2,7 @@
 // Service worker: força que les versions instal·lades (PWA) s'actualitzin.
 // La `version` canvia a cada build → nou SW → skipWaiting + claim + neteja
 // de caches velles. Network-first per a HTML; cache-first per als assets
-// versionats. Les crides a orígens externs (Supabase) passen sense tocar.
+// versionats. Les crides a orígens externs (la Data API de Neon) passen sense tocar.
 
 import { build, files, version } from '$service-worker';
 
@@ -33,7 +33,7 @@ self.addEventListener('fetch', (event) => {
 	const { request } = event;
 	if (request.method !== 'GET') return;
 	const url = new URL(request.url);
-	if (url.origin !== self.location.origin) return; // Supabase i altres: sense tocar
+	if (url.origin !== self.location.origin) return; // Neon i altres: sense tocar
 	// Àudio i vídeo (el traductor, /traductor/fitxer): sense tocar. Safari a
 	// l'iPhone els demana a trossos (Range → 206) i, quan passen pel service
 	// worker, no els reprodueix; Chrome sí, i per això no es veia a l'ordinador.
