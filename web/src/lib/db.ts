@@ -33,12 +33,50 @@ if (!PUBLIC_NEON_DATA_API_URL)
   throw new Error("Falta PUBLIC_NEON_DATA_API_URL");
 if (!PUBLIC_NEON_ANON_TOKEN) throw new Error("Falta PUBLIC_NEON_ANON_TOKEN");
 
+// Taules que s'han de llegir fresques: el directe dels opens i el que escriuen
+// els usuaris. La resta només canvia amb la reingesta i es llegeix a través de
+// la memòria cau de Vercel (routes/api/fcb), perquè cada visita no desperti Neon.
+const FRESQUES = new Set([
+  "open_live",
+  "open_live_scores",
+  "video_traduccio",
+  "sistema_marca",
+  "sistema_peticio",
+  "reingest_requests",
+  "open_projection_requests",
+  "cloud_status",
+]);
+
+/** Les lectures de taules que no han de ser fresques, cap a la ruta amb memòria cau. */
+export function viaCau(url: string, init?: RequestInit): string | null {
+  const metode = (init?.method ?? "GET").toUpperCase();
+  const base = `${PUBLIC_NEON_DATA_API_URL}/`;
+  if (metode !== "GET" || !url.startsWith(base)) return null;
+  const [taula, consulta = ""] = url.slice(base.length).split("?", 2);
+  if (!/^[a-z0-9_]+$/.test(taula) || FRESQUES.has(taula)) return null;
+  const params = new URLSearchParams(consulta);
+  const capçaleres = new Headers(init?.headers);
+  const accept = capçaleres.get("Accept");
+  const prefer = capçaleres.get("Prefer");
+  if (accept && accept !== "application/json") params.set("__accept", accept);
+  if (prefer) params.set("__prefer", prefer);
+  return `/api/fcb/${taula}?${params}`;
+}
+
+const fetchAmbCau: typeof fetch = (input, init) => {
+  const desviada =
+    typeof window !== "undefined" && typeof input === "string"
+      ? viaCau(input, init)
+      : null;
+  return desviada ? fetch(desviada, { signal: init?.signal }) : fetch(input, init);
+};
+
 export const db = new NeonPostgrestClient({
   dataApiUrl: PUBLIC_NEON_DATA_API_URL,
   options: {
     db: { schema: "fcbillar" },
     global: {
-      fetch,
+      fetch: fetchAmbCau,
       headers: { Authorization: `Bearer ${PUBLIC_NEON_ANON_TOKEN}` },
     },
   },

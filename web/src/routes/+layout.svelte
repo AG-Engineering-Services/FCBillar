@@ -11,8 +11,15 @@
 	// activa ara mateix. Ho lliguem a la frescor de open_live: el cron només
 	// refresca l'estat durant les finestres de competició (dv/ds/dg), així que
 	// si el snapshot més recent és d'aquesta darrera hora i mitja, s'està jugant.
+	// Fora de la finestra del workflow (ds i dg, de 06 a 21 UTC, més l'hora i
+	// mitja de marge) no es pregunta: la resposta seria zero i la consulta
+	// despertaria Neon a cada visita.
 	let liveCount = $state(0);
 	onMount(async () => {
+		const ara = new Date();
+		const dia = ara.getUTCDay();
+		const hora = ara.getUTCHours();
+		if ((dia !== 0 && dia !== 6) || hora < 6 || hora > 22) return;
 		const since = new Date(Date.now() - 90 * 60 * 1000).toISOString();
 		const { count } = await db
 			.from('open_live')
