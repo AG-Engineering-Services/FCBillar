@@ -6,7 +6,10 @@
 	const seccions = [
 		{ href: '/sistemes-coreans', label: 'Sistemes', match: (p: string) => p.startsWith('/sistemes') },
 		{ href: '/biblia', label: 'Bíblia', match: (p: string) => p.startsWith('/biblia') },
-		{ href: '/traductor', label: 'Traductor', match: (p: string) => p.startsWith('/traductor') }
+		// El Traductor està aturat (workflow `traductor.yml` desactivat a GitHub des
+		// del 25/10/2026): sense el procés, un vídeo nou quedaria a la cua per
+		// sempre. Les rutes hi són; quan es torni a activar, es torna a posar aquí.
+		// { href: '/traductor', label: 'Traductor', match: (p: string) => p.startsWith('/traductor') }
 	];
 	const path = $derived($page.url.pathname);
 </script>
