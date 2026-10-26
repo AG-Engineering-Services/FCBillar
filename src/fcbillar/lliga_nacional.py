@@ -32,9 +32,30 @@ seves partides PER ORDRE, no per alçada.
 No s'endevina res: si un encontre no té tants jugadors com partides, o li falten
 números, es diu amb un error en lloc de tornar una cosa plausible.
 
-Només la PRIMERA DIVISIÓ, de moment. La Divisió d'Honor i la Segona es publiquen
-amb una altra disposició —pàgina vertical, un encontre per fila— i aquí donen
-`FormatDesconegut`.
+Això és la PRIMERA DIVISIÓ, que va en pàgina apaïsada. La DIVISIÓ D'HONOR i la
+SEGONA van en pàgina vertical, amb un encontre a sota de l'altre, i el que les
+distingeix és on posen els números:
+
+    Honor:   EQUIP LOCAL          2   6   EQUIP VISITANT
+             jugador local       38  40   jugador visitant      en 35
+             0,985               128 152  1,169                    130
+
+    Segona:  EQUIP LOCAL                  EQUIP VISITANT
+             jugador local       26  50  36   jugador visitant
+           0 jugador local       24  50  35   jugador visitant        8
+             0,465               93 200 118   0,590
+
+A Honor el resultat va a la línia dels equips i les entrades al final, darrere
+d'«en». A Segona les tres columnes són com a Primera, i el resultat va als dos
+marges, a l'alçada d'una de les partides. Honor posa la classificació en una
+pàgina a part; Segona, a sota dels encontres de cada grup. Els totals de cada
+encontre s'han de correspondre amb la suma de les partides: si no hi quadren,
+error.
+
+La Segona té quatre grups i la RFEB en fa dos PDF per jornada: el del grup A
+(`liga_nal_2a_j3.pdf`), que té set equips i més jornades, i el dels grups B, C i
+D (`liga_nal_2_j3.pdf`). Els dos porten el mateix número de jornada, i per això
+el que es desa d'una jornada es reemplaça grup per grup.
 
 Dues coses que aquest mòdul NO ha de fer mai, i que valen per a tot el que es
 construeixi a sobre:
@@ -53,6 +74,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from datetime import date
+from itertools import pairwise
 from pathlib import Path
 
 _MESOS = {
@@ -86,6 +108,9 @@ _RE_ENTER = re.compile(r"^\d+$")
 _RE_DECIMAL = re.compile(r"^\d+,\d+$")
 _RE_DATA = re.compile(r"(\d{1,2})\s+de\s+([a-zñ]+)\s+de\s+(\d{4})", re.IGNORECASE)
 _RE_JORNADA = re.compile(r"JORNADA\s+(\d+)", re.IGNORECASE)
+_RE_DATA_NUMERICA = re.compile(r"(\d{1,2})/(\d{1,2})/(\d{4})")
+#: La posició a la classificació: «1», «1º» o «6ª».
+_RE_POSICIO = re.compile(r"^(\d+)[ºª]?$")
 
 
 class FormatDesconegut(ValueError):
@@ -128,15 +153,17 @@ class EncontreNacional:
 
     local: str
     visitant: str
-    #: Partides guanyades per cada equip: 6-2, 4-4, 8-0.
-    punts_local: int
-    punts_visitant: int
-    caramboles_local: int
-    caramboles_visitant: int
-    entrades: int
+    #: Partides guanyades per cada equip: 6-2, 4-4, 8-0. `None` si no s'ha jugat.
+    punts_local: int | None
+    punts_visitant: int | None
+    caramboles_local: int | None
+    caramboles_visitant: int | None
+    entrades: int | None
     mitjana_local: float | None
     mitjana_visitant: float | None
     partides: list[PartidaNacional] = field(default_factory=list)
+    #: El PDF el dona per «SUSPENDIDO»: hi és, però sense resultat ni partides.
+    suspes: bool = False
 
 
 @dataclass(frozen=True)
@@ -178,7 +205,8 @@ class JugadorClassificat:
     caramboles: int
     entrades: int
     mitjana: float
-    punts: int
+    #: La Segona no en publica: `None`.
+    punts: int | None
 
 
 # --------------------------- paraules i línies ---------------------------
@@ -230,7 +258,10 @@ def _te_minuscules(text: str) -> bool:
 
 
 def _capcalera(linies: list[list[_Paraula]]) -> tuple[int, date | None] | None:
-    """El número de jornada i la data, de la línia «JORNADA 1ª - 12 de … de 2026»."""
+    """El número de jornada i la data, de la línia «JORNADA 1ª - 12 de … de 2026».
+
+    Honor escriu la data amb xifres: «JORNADA 1ª - 13/09/2025».
+    """
     for linia in linies[:4]:
         text = _text(linia)
         m = _RE_JORNADA.search(text)
@@ -238,8 +269,11 @@ def _capcalera(linies: list[list[_Paraula]]) -> tuple[int, date | None] | None:
             continue
         quan = None
         d = _RE_DATA.search(text)
+        n = _RE_DATA_NUMERICA.search(text)
         if d and d.group(2).lower() in _MESOS:
             quan = date(int(d.group(3)), _MESOS[d.group(2).lower()], int(d.group(1)))
+        elif n:
+            quan = date(int(n.group(3)), int(n.group(2)), int(n.group(1)))
         return int(m.group(1)), quan
     return None
 
@@ -463,7 +497,15 @@ def _millors_series(paraules: list[_Paraula], amplada: float) -> list[MillorSeri
     titol = next((p for p in paraules if p.text == "MEJORES"), None)
     if titol is None:
         return []
-    esquerra = [p for p in paraules if p.centre < amplada / 2 and p.y > titol.y + _TOLERANCIA_Y]
+    # A Honor i a Segona, a sota hi va la jornada que ve.
+    fi = min((p.y for p in paraules if p.text == "PRÓXIMA" and p.y > titol.y), default=None)
+    esquerra = [
+        p
+        for p in paraules
+        if p.centre < amplada / 2
+        and p.y > titol.y + _TOLERANCIA_Y
+        and (fi is None or p.y < fi - _TOLERANCIA_Y)
+    ]
     out: list[MillorSerie] = []
     pendent: list[_Paraula] = []
     for linia in _linies(esquerra):
@@ -485,6 +527,267 @@ def _millors_series(paraules: list[_Paraula], amplada: float) -> list[MillorSeri
     return out
 
 
+# --------------------------- Honor i Segona ---------------------------
+
+
+def _es_enter(p: _Paraula) -> bool:
+    return bool(_RE_ENTER.match(p.text))
+
+
+def _comenca(linia: list[_Paraula], *inicis: str) -> bool:
+    return _text(linia).upper().startswith(inicis)
+
+
+def _equips_de_capcalera(linia: list[_Paraula], on: str) -> tuple[str, str, tuple[int, int] | None]:
+    """Local, visitant i, a Honor, el resultat que hi ha entre tots dos."""
+    enters = [p for p in linia if _es_enter(p)]
+    if enters:
+        if len(enters) != 2:
+            raise FormatDesconegut(f"{on}: la línia dels equips no porta un resultat clar.")
+        local = [p for p in linia if p.x1 <= enters[0].x0]
+        visitant = [p for p in linia if p.x0 >= enters[1].x1]
+        resultat: tuple[int, int] | None = (int(enters[0].text), int(enters[1].text))
+    else:
+        # Els dos noms, separats pel forat més gran de la línia.
+        tall = max(range(1, len(linia)), key=lambda i: linia[i].x0 - linia[i - 1].x1, default=0)
+        local, visitant, resultat = linia[:tall], linia[tall:], None
+    if not local or not visitant:
+        raise FormatDesconegut(f"{on}: falta el nom d'un dels dos equips ({_text(linia)!r}).")
+    return _text(local), _text(visitant), resultat
+
+
+@dataclass(frozen=True)
+class _FilaVertical:
+    """Una partida tal com surt a Honor o a Segona, abans de saber-ne l'ordre."""
+
+    local: str
+    visitant: str
+    #: Honor: caramboles del local i del visitant. Segona: local, entrades, visitant.
+    numeros: list[int]
+    #: Honor: les entrades, darrere d'«en».
+    entrades: int | None
+    #: Segona: el resultat de l'encontre, si cau als marges d'aquesta fila.
+    marge_esquerre: int | None
+    marge_dret: int | None
+
+
+def _fila_vertical(linia: list[_Paraula]) -> _FilaVertical | None:
+    """Una fila de partida. `None` si no porta cap jugador (encontre suspès)."""
+    resta = list(linia)
+    entrades = None
+    if len(resta) >= 2 and resta[-2].text == "en" and _es_enter(resta[-1]):
+        entrades = int(resta[-1].text)
+        resta = resta[:-2]
+    esquerre = dret = None
+    if resta and _es_enter(resta[0]):
+        esquerre = int(resta.pop(0).text)
+    if resta and _es_enter(resta[-1]):
+        dret = int(resta.pop().text)
+    if not resta:
+        return None
+    posicions = [i for i, p in enumerate(resta) if _es_enter(p)]
+    if not posicions or posicions != list(range(posicions[0], posicions[-1] + 1)):
+        raise FormatDesconegut(f"Fila de partida que no s'entén: {_text(linia)!r}.")
+    return _FilaVertical(
+        local=_text(resta[: posicions[0]]),
+        visitant=_text(resta[posicions[-1] + 1 :]),
+        numeros=[int(resta[i].text) for i in posicions],
+        entrades=entrades,
+        marge_esquerre=esquerre,
+        marge_dret=dret,
+    )
+
+
+def _encontre_vertical(bloc: list[list[_Paraula]], on: str) -> EncontreNacional:
+    """Un encontre d'Honor o de Segona: equips, partides i totals, de dalt a baix."""
+    capcalera, *files, totals = bloc
+    local, visitant, resultat = _equips_de_capcalera(capcalera, on)
+    on = f"{on} ({local} - {visitant})"
+    if any(_text(f) == "SUSPENDIDO" for f in files):
+        return EncontreNacional(
+            local=local,
+            visitant=visitant,
+            punts_local=None,
+            punts_visitant=None,
+            caramboles_local=None,
+            caramboles_visitant=None,
+            entrades=None,
+            mitjana_local=None,
+            mitjana_visitant=None,
+            suspes=True,
+        )
+    llegides = [_fila_vertical(f) for f in files]
+    if not llegides or any(f is None or not f.local or not f.visitant for f in llegides):
+        raise FormatDesconegut(f"{on}: hi ha partides sense els dos jugadors.")
+    fileres = [f for f in llegides if f is not None]
+    honor = resultat is not None
+    partides: list[PartidaNacional] = []
+    for i, f in enumerate(fileres):
+        if honor and len(f.numeros) == 2 and f.entrades is not None:
+            car_local, car_visitant = f.numeros
+            entrades = f.entrades
+        elif not honor and len(f.numeros) == 3 and f.entrades is None:
+            car_local, entrades, car_visitant = f.numeros
+        else:
+            raise FormatDesconegut(f"{on}: la partida {i + 1} no porta els números esperats.")
+        partides.append(
+            PartidaNacional(
+                ordre=i + 1,
+                jugador_local=f.local,
+                caramboles_local=car_local,
+                jugador_visitant=f.visitant,
+                caramboles_visitant=car_visitant,
+                entrades=entrades,
+            )
+        )
+    if resultat is None:
+        esquerres = [f.marge_esquerre for f in fileres if f.marge_esquerre is not None]
+        drets = [f.marge_dret for f in fileres if f.marge_dret is not None]
+        if len(esquerres) != 1 or len(drets) != 1:
+            raise FormatDesconegut(f"{on}: no trobo el resultat de l'encontre als marges.")
+        resultat = (esquerres[0], drets[0])
+    elif any(f.marge_esquerre is not None or f.marge_dret is not None for f in fileres):
+        raise FormatDesconegut(f"{on}: hi ha números de més als marges.")
+
+    mitjanes = sorted((p for p in totals if _RE_DECIMAL.match(p.text)), key=lambda p: p.x0)
+    enters = [int(p.text) for p in sorted(totals, key=lambda p: p.x0) if _es_enter(p)]
+    if len(enters) != 3 or len(mitjanes) != 2:
+        raise FormatDesconegut(f"{on}: la fila de totals no té la forma esperada.")
+    if honor:
+        car_local, car_visitant, entrades = enters
+    else:
+        car_local, entrades, car_visitant = enters
+    if (
+        car_local != sum(p.caramboles_local for p in partides)
+        or car_visitant != sum(p.caramboles_visitant for p in partides)
+        or entrades != sum(p.entrades for p in partides)
+    ):
+        raise FormatDesconegut(f"{on}: els totals no quadren amb la suma de les partides.")
+    return EncontreNacional(
+        local=local,
+        visitant=visitant,
+        punts_local=resultat[0],
+        punts_visitant=resultat[1],
+        caramboles_local=car_local,
+        caramboles_visitant=car_visitant,
+        entrades=entrades,
+        mitjana_local=_decimal(mitjanes[0].text),
+        mitjana_visitant=_decimal(mitjanes[1].text),
+        partides=partides,
+    )
+
+
+def _encontres_verticals(linies: list[list[_Paraula]], on: str) -> list[EncontreNacional]:
+    """Els encontres d'una pàgina vertical, ja sense capçalera ni classificació.
+
+    Cada encontre comença a la línia dels equips i s'acaba a la dels totals, que
+    és l'única que només porta números. L'equip que descansa va a sota de
+    «DESCANSA» i no és cap encontre.
+    """
+    out: list[EncontreNacional] = []
+    bloc: list[list[_Paraula]] = []
+    descansa = False
+    for linia in linies:
+        text = _text(linia)
+        if re.fullmatch(r"GRUPO [A-Z]", text):
+            continue
+        if text == "DESCANSA":
+            descansa = True
+            continue
+        if descansa:
+            descansa = False
+            continue
+        bloc.append(linia)
+        if all(_es_enter(p) or _RE_DECIMAL.match(p.text) for p in linia):
+            if len(bloc) < 2:
+                raise FormatDesconegut(f"{on}: una fila de totals sense encontre.")
+            out.append(_encontre_vertical(bloc, f"{on}, encontre {len(out) + 1}"))
+            bloc = []
+    if bloc:
+        raise FormatDesconegut(f"{on}: l'últim encontre no té fila de totals.")
+    return out
+
+
+def _classificacio_vertical(linies: list[list[_Paraula]], on: str) -> list[FilaDeClassificacio]:
+    """La classificació d'equips d'Honor o de Segona: «Clas. Equipo J G E P …»."""
+    cap = next((li for li in linies if {"J", "G", "E", "P"} <= {p.text for p in li}), None)
+    if cap is None:
+        raise FormatDesconegut(f"{on}: no trobo la capçalera de la classificació.")
+    x_numeros = next(p.x0 for p in cap if p.text == "J") - 6
+    files: list[FilaDeClassificacio] = []
+    for linia in linies:
+        if linia[0].y <= cap[0].y:
+            continue
+        numeros = [p for p in linia if p.x0 >= x_numeros]
+        nom = [p for p in linia if p.x0 < x_numeros]
+        if (
+            len(numeros) != 9
+            or not all(_es_enter(p) or _RE_DECIMAL.match(p.text) for p in numeros)
+            or len(nom) < 2
+            or not _RE_POSICIO.match(nom[0].text)
+        ):
+            break
+        j, g, e, per, car, ent, mit, parc, pts = (p.text for p in numeros)
+        files.append(
+            FilaDeClassificacio(
+                posicio=int(_RE_POSICIO.match(nom[0].text).group(1)),
+                equip=_text(nom[1:]),
+                jugats=int(j),
+                guanyats=int(g),
+                empatats=int(e),
+                perduts=int(per),
+                caramboles=int(car),
+                entrades=int(ent),
+                mitjana=_decimal(mit),
+                parcials=int(parc),
+                punts=int(pts),
+            )
+        )
+    if not files:
+        raise FormatDesconegut(f"{on}: la classificació no té cap fila.")
+    return files
+
+
+def _pagina_vertical(
+    linies: list[list[_Paraula]], on: str
+) -> tuple[str | None, list[FilaDeClassificacio], list[EncontreNacional]]:
+    """Una pàgina d'Honor o de Segona: el grup, la classificació i els encontres.
+
+    Pot portar només encontres (Honor, primera pàgina), només la classificació
+    (Honor, segona), les dues coses (Segona) o cap (la de les millors sèries).
+    """
+    if any(_comenca(li, "CLASIFICACIÓN DE JUGADORES") for li in linies):
+        raise FormatDesconegut("És la classificació de jugadors, no una jornada.")
+    grup = next(
+        (m.group(1) for li in linies if (m := re.fullmatch(r"GRUPO ([A-Z])", _text(li)))),
+        None,
+    )
+    fi_encontres = next(
+        (li[0].y for li in linies if _comenca(li, "CLASIFICACI", "MEJORES", "PRÓXIMA")),
+        float("inf"),
+    )
+    inici = next(
+        (li[0].y for li in linies if li[0].y < fi_encontres and _RE_JORNADA.search(_text(li))),
+        None,
+    )
+    encontres: list[EncontreNacional] = []
+    if inici is not None:
+        cos = [li for li in linies if inici < li[0].y < fi_encontres]
+        encontres = _encontres_verticals(cos, on)
+
+    classificacio: list[FilaDeClassificacio] = []
+    titol = next((li for li in linies if _comenca(li, "CLASIFICACI")), None)
+    if titol is not None:
+        fi = next(
+            (li[0].y for li in linies if li[0].y > titol[0].y and _comenca(li, "MEJORES")),
+            float("inf"),
+        )
+        classificacio = _classificacio_vertical(
+            [li for li in linies if titol[0].y < li[0].y < fi], on
+        )
+    return grup, classificacio, encontres
+
+
 # --------------------------- entrades públiques ---------------------------
 
 
@@ -502,6 +805,22 @@ def llegeix_jornada(cami: str | Path) -> Jornada:
                 continue
             linies = _linies(paraules)
             capcalera = capcalera or _capcalera(linies)
+            if float(pagina.width) < float(pagina.height):
+                # Honor i Segona: la pàgina és vertical.
+                series = _millors_series(paraules, float(pagina.width)) or series
+                grup, files, encontres = _pagina_vertical(linies, f"pàgina {num}")
+                if not files and not encontres:
+                    continue
+                anterior = next((g for g in grups if g.grup == grup), None)
+                if anterior is None:
+                    grups.append(GrupDeJornada(grup=grup, classificacio=files, encontres=encontres))
+                elif files and anterior.classificacio:
+                    raise FormatDesconegut(f"pàgina {num}: el grup {grup} surt dues vegades.")
+                else:
+                    # Honor: els encontres en una pàgina i la classificació en una altra.
+                    anterior.classificacio.extend(files)
+                    anterior.encontres.extend(encontres)
+                continue
             if any(p.text == "MEJORES" for p in paraules):
                 series = _millors_series(paraules, float(pagina.width))
                 continue
@@ -527,19 +846,23 @@ def llegeix_classificacio_de_jugadors(cami: str | Path) -> list[JugadorClassific
     out: list[JugadorClassificat] = []
     with pdfplumber.open(str(cami)) as pdf:
         x_equip = x_numeros = None
+        amb_punts = True
         for pagina in pdf.pages:
             for linia in _linies(_paraules(pagina)):
                 textos = {p.text for p in linia}
                 if {"JUGADOR", "EQUIPO"} <= textos:
                     x_equip = next(p.x0 for p in linia if p.text == "EQUIPO") - 3
                     x_numeros = next(p.x0 for p in linia if p.text == "J") - 6
+                    # La de Segona no porta la columna dels punts.
+                    amb_punts = "PTOS." in textos
                     continue
                 if x_equip is None or x_numeros is None:
                     continue
                 numeros = [p for p in linia if p.x0 >= x_numeros]
-                if len(numeros) != 8 or not _RE_ENTER.match(linia[0].text):
+                if len(numeros) != (8 if amb_punts else 7) or not _RE_ENTER.match(linia[0].text):
                     continue
-                j, g, e, per, car, ent, mit, pts = (p.text for p in numeros)
+                j, g, e, per, car, ent, mit = (p.text for p in numeros[:7])
+                pts = numeros[7].text if amb_punts else None
                 # La capçalera «EQUIPO» va centrada sobre la columna i no diu on
                 # comença: el nom de l'equip arrenca més a l'esquerra. El que separa
                 # el jugador de l'equip és el salt més gros entre dues paraules.
@@ -559,7 +882,7 @@ def llegeix_classificacio_de_jugadors(cami: str | Path) -> list[JugadorClassific
                         caramboles=int(car),
                         entrades=int(ent),
                         mitjana=_decimal(mit),
-                        punts=int(pts),
+                        punts=int(pts) if pts is not None else None,
                     )
                 )
     if not out:
@@ -595,21 +918,25 @@ def desa_jornada(conn, jornada: Jornada, divisio: str, temporada: str | None = N
             raise ValueError("La jornada no porta data: cal dir-ne la temporada.")
         temporada = temporada_de(jornada.data)
     quan = jornada.data.isoformat() if jornada.data else None
-    clau = (temporada, divisio, jornada.numero)
 
+    # Només els grups que porta el PDF: la Segona en fa dos per jornada.
+    for g in jornada.grups:
+        clau = (temporada, divisio, jornada.numero, g.grup or "")
+        for taula in ("nacional_partides", "nacional_encontres", "nacional_classificacio"):
+            conn.execute(
+                f"DELETE FROM {taula} "
+                "WHERE temporada = ? AND divisio = ? AND jornada = ? AND grup = ?",
+                clau,
+            )
+    # Les millors sèries no tenen grup. Perquè els dos PDF de la Segona no
+    # s'esborrin l'un a l'altre, cada PDF numera les seves a partir d'una base:
+    # 0 si comença pel grup A o no en té, 100 si comença pel B, i així.
+    lletres = sorted(g.grup for g in jornada.grups if g.grup)
+    base = 100 * (ord(lletres[0]) - ord("A")) if lletres else 0
     conn.execute(
-        "DELETE FROM nacional_partides WHERE temporada = ? AND divisio = ? AND jornada = ?", clau
-    )
-    conn.execute(
-        "DELETE FROM nacional_encontres WHERE temporada = ? AND divisio = ? AND jornada = ?", clau
-    )
-    conn.execute(
-        "DELETE FROM nacional_classificacio WHERE temporada = ? AND divisio = ? AND jornada = ?",
-        clau,
-    )
-    conn.execute(
-        "DELETE FROM nacional_millors_series WHERE temporada = ? AND divisio = ? AND jornada = ?",
-        clau,
+        "DELETE FROM nacional_millors_series WHERE temporada = ? AND divisio = ? AND jornada = ? "
+        "AND ordre > ? AND ordre <= ?",
+        (temporada, divisio, jornada.numero, base, base + 100),
     )
     for g in jornada.grups:
         grup = g.grup or ""
@@ -687,7 +1014,7 @@ def desa_jornada(conn, jornada: Jornada, divisio: str, temporada: str | None = N
         "INSERT INTO nacional_millors_series (temporada, divisio, jornada, ordre, jugador, "
         "equip, serie) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [
-            (temporada, divisio, jornada.numero, i, s.jugador, s.equip, s.serie)
+            (temporada, divisio, jornada.numero, base + i, s.jugador, s.equip, s.serie)
             for i, s in enumerate(jornada.millors_series, start=1)
         ],
     )
@@ -925,58 +1252,219 @@ def _encontres_de_linia(linia: list[_Paraula]) -> list[tuple[str, str]]:
     return [p for p in parelles if p]
 
 
+def _clau_de_caracter(c: dict) -> tuple[str, float, float]:
+    return c["text"], round(float(c["x0"]), 1), round(float(c["top"]), 1)
+
+
+def _solapaments(caracters: list[dict]) -> int:
+    """Quantes lletres en trepitgen una altra de diferent."""
+    per_alcada: dict[int, list[dict]] = {}
+    for c in caracters:
+        if c["text"].strip():
+            per_alcada.setdefault(round(float(c["top"])), []).append(c)
+    n = 0
+    for c in caracters:
+        if not c["text"].strip():
+            continue
+        alcada = round(float(c["top"]))
+        for d in (d for t in (alcada - 1, alcada, alcada + 1) for d in per_alcada.get(t, [])):
+            if d is c or abs(float(d["top"]) - float(c["top"])) >= 2:
+                continue
+            if d["text"] == c["text"] and abs(float(d["x0"]) - float(c["x0"])) < 0.5:
+                continue
+            comu = min(c["x1"], d["x1"]) - max(c["x0"], d["x0"])
+            if comu > 0.5 * min(c["x1"] - c["x0"], d["x1"] - d["x0"]):
+                n += 1
+    return n
+
+
+def _sense_files_repetides(pagina, claus_de_la_primera: set):
+    """La pàgina sense les files que repeteix de la primera, si en repeteix.
+
+    El calendari d'Honor de la 2025-26 té el títol i la primera jornada marcats
+    per repetir-se a cada pàgina, i a la segona s'escriuen a sota de la jornada
+    10: les dues es trepitgen. Les files repetides són les primeres que es
+    dibuixen i són idèntiques, lletra per lletra, a les de la primera pàgina. Es
+    treuen només si hi ha lletres trepitjades, i si un cop tretes en queda
+    alguna, error.
+    """
+    caracters = pagina.chars
+    if not _solapaments(caracters):
+        return pagina
+    n = 0
+    while n < len(caracters) and _clau_de_caracter(caracters[n]) in claus_de_la_primera:
+        n += 1
+    fora = {id(c) for c in caracters[:n]}
+    neta = pagina.filter(lambda o: id(o) not in fora).dedupe_chars()
+    if _solapaments(neta.chars):
+        raise FormatDesconegut("Hi ha text trepitjat al calendari i no sé quin és el bo.")
+    return neta
+
+
+def _es_capcalera_de_taula(linia: list[_Paraula]) -> bool:
+    """«JOR. FECHA ENFRENTAMIENTOS» (Honor) o «J. FECHA ENFRENTAMIENTOS» (Segona)."""
+    return {"FECHA", "ENFRENTAMIENTOS"} <= {p.text for p in linia}
+
+
+def _es_fila_de_taula(linia: list[_Paraula]) -> bool:
+    """Número, dia i encontres a la mateixa línia. A Primera, el número i el dia van sols."""
+    return (
+        len(linia) > 2
+        and bool(_RE_ENTER.match(linia[0].text))
+        and bool(_RE_DIA.match(linia[1].text))
+        and any(p.text == "-" for p in linia[2:])
+    )
+
+
+def _parelles_en_fila(linia: list[_Paraula], amb_descans: bool, on: str) -> list[tuple[str, str]]:
+    """Tots els encontres d'una fila del calendari en taula, d'esquerra a dreta.
+
+    Entre dos guions hi ha el visitant d'un encontre i el local del següent, i
+    el que els separa és el forat més gran. Si la taula té la columna
+    «DESCANSA», l'equip que descansa va darrere de l'últim visitant, també
+    separat pel forat més gran.
+    """
+    guions = [i for i, p in enumerate(linia) if p.text == "-"]
+    if not guions:
+        return []
+
+    def forat(de: int, fins: int) -> int:
+        if fins - de < 2:
+            raise FormatDesconegut(f"{on}: dos encontres enganxats ({_text(linia)!r}).")
+        return max(range(de + 1, fins), key=lambda i: linia[i].x0 - linia[i - 1].x1)
+
+    talls = [0] + [forat(a + 1, b) for a, b in pairwise(guions)]
+    talls.append(forat(guions[-1] + 1, len(linia)) if amb_descans else len(linia))
+    parelles = []
+    for de, fins in pairwise(talls):
+        tros = linia[de:fins]
+        guio = next(i for i, p in enumerate(tros) if p.text == "-")
+        local, visitant = _text(tros[:guio]), _text(tros[guio + 1 :])
+        if not local or not visitant:
+            raise FormatDesconegut(f"{on}: un encontre sense equip ({_text(linia)!r}).")
+        parelles.append((local, visitant))
+    return parelles
+
+
+def _calendari_en_taula(pagines: list[list[list[_Paraula]]]) -> list[EncontreDeCalendari]:
+    """El calendari d'Honor o de Segona: una taula amb jornada, dia i encontres.
+
+    Honor escriu cada jornada en tres línies, amb el número i el dia a la del
+    mig; Segona, en una sola, grup per grup sota «CALENDARIO GRUPO X». Cada línia
+    d'encontres va a la jornada que té més a prop, dins del mateix grup.
+    """
+    sortida: list[EncontreDeCalendari] = []
+    for num, linies in enumerate(pagines, start=1):
+        on = f"pàgina {num}"
+        grup = ""
+        amb_descans = False
+        seccio = 0
+        jornades: list[tuple[int, float, int, date]] = []
+        fileres: list[tuple[int, str, bool, list[_Paraula]]] = []
+        for linia in linies:
+            m = re.fullmatch(r"CALENDARIO GRUPO ([A-Z])", _text(linia))
+            if m:
+                grup, seccio = m.group(1), seccio + 1
+                continue
+            if _es_capcalera_de_taula(linia):
+                amb_descans = any(p.text == "DESCANSA" for p in linia)
+                continue
+            resta = linia
+            dia = _RE_DIA.match(linia[1].text) if len(linia) >= 2 else None
+            if dia and _RE_ENTER.match(linia[0].text):
+                d, mes, a = (int(x) for x in dia.groups())
+                jornades.append((seccio, linia[0].y, int(linia[0].text), date(a, mes, d)))
+                resta = linia[2:]
+            if any(p.text == "-" for p in resta):
+                fileres.append((seccio, grup, amb_descans, resta))
+        for seccio_de, grup_de, descans, resta in fileres:
+            properes = [j for j in jornades if j[0] == seccio_de]
+            if not properes:
+                raise FormatDesconegut(f"{on}: encontres sense cap jornada al costat.")
+            _, _, numero, quan = min(properes, key=lambda j: abs(j[1] - resta[0].y))
+            sortida.extend(
+                EncontreDeCalendari(numero, quan, grup_de, local, visitant)
+                for local, visitant in _parelles_en_fila(resta, descans, on)
+            )
+    if not sortida:
+        raise FormatDesconegut("No és un calendari de la Lliga Nacional.")
+    # Cada grup té els mateixos encontres a totes les jornades, i cap equip no
+    # hi pot sortir dues vegades el mateix dia.
+    per_jornada: dict[tuple[str, int], list[EncontreDeCalendari]] = {}
+    for e in sortida:
+        per_jornada.setdefault((e.grup, e.jornada), []).append(e)
+    for (grup, jornada), encontres in per_jornada.items():
+        equips = [nom for e in encontres for nom in (e.local, e.visitant)]
+        if len(set(equips)) != len(equips):
+            raise FormatDesconegut(f"Jornada {jornada}: un equip hi surt dues vegades.")
+        if len({len(v) for (g, _), v in per_jornada.items() if g == grup}) != 1:
+            raise FormatDesconegut(
+                f"Grup {grup or 'únic'}: les jornades no tenen totes els mateixos encontres."
+            )
+    return sortida
+
+
 def llegeix_calendari(cami: str | Path) -> list[EncontreDeCalendari]:
     """Llegeix el calendari d'una divisió: totes les jornades, amb dia i grup.
 
-    Cada jornada són quatre línies d'encontres, dues per grup, amb la lletra del
-    grup al marge entre les seves dues i el número i el dia de la jornada entre
-    els dos grups. La lletra es busca per alçada, que és la que cau més a prop;
-    la jornada, per ordre: cada vegada que es torna al primer grup n'ha començat
+    Honor i Segona el fan en taula, amb el número i el dia a la mateixa línia
+    que els encontres: vegeu `_calendari_en_taula`. A Primera, cada jornada
+    són quatre línies d'encontres, dues per grup, amb la lletra del grup al
+    marge entre les seves dues i el número i el dia de la jornada entre els dos
+    grups. La lletra es busca per alçada, que és la que cau més a prop; la
+    jornada, per ordre: cada vegada que es torna al primer grup n'ha començat
     una altra.
     """
     import pdfplumber
 
+    with pdfplumber.open(str(cami)) as pdf:
+        claus = {_clau_de_caracter(c) for c in pdf.pages[0].chars} if pdf.pages else set()
+        pagines = [
+            _linies(_paraules(_sense_files_repetides(p, claus) if i else p))
+            for i, p in enumerate(pdf.pages)
+        ]
+    if any(_es_fila_de_taula(li) for linies in pagines for li in linies):
+        return _calendari_en_taula(pagines)
+
     sortida: list[EncontreDeCalendari] = []
     es_calendari = False
-    with pdfplumber.open(str(cami)) as pdf:
-        for pagina in pdf.pages:
-            linies = _linies(_paraules(pagina))
-            if any(_text(linia).upper() == "CALENDARIO" for linia in linies):
-                es_calendari = True
-            lletres = [
-                (linia[0].y, linia[0].text)
-                for linia in linies
-                if len(linia) == 1 and re.fullmatch(r"[A-Z]", linia[0].text)
-            ]
-            jornades: list[tuple[int, date | None]] = []
-            for linia in linies:
-                if len(linia) == 2 and _RE_ENTER.match(linia[0].text):
-                    dia = _RE_DIA.match(linia[1].text)
-                    if dia:
-                        d, m, a = (int(x) for x in dia.groups())
-                        jornades.append((int(linia[0].text), date(a, m, d)))
-            if not lletres or not jornades:
+    for linies in pagines:
+        if any(_text(linia).upper() == "CALENDARIO" for linia in linies):
+            es_calendari = True
+        lletres = [
+            (linia[0].y, linia[0].text)
+            for linia in linies
+            if len(linia) == 1 and re.fullmatch(r"[A-Z]", linia[0].text)
+        ]
+        jornades: list[tuple[int, date | None]] = []
+        for linia in linies:
+            if len(linia) == 2 and _RE_ENTER.match(linia[0].text):
+                dia = _RE_DIA.match(linia[1].text)
+                if dia:
+                    d, m, a = (int(x) for x in dia.groups())
+                    jornades.append((int(linia[0].text), date(a, m, d)))
+        if not lletres or not jornades:
+            continue
+        primer = min(lletra for _, lletra in lletres)
+        quina = -1
+        anterior: str | None = None
+        for linia in linies:
+            parelles = _encontres_de_linia(linia)
+            if not parelles:
                 continue
-            primer = min(lletra for _, lletra in lletres)
-            quina = -1
-            anterior: str | None = None
-            for linia in linies:
-                parelles = _encontres_de_linia(linia)
-                if not parelles:
-                    continue
-                grup = min(lletres, key=lambda ll: abs(ll[0] - linia[0].y))[1]
-                if grup == primer and anterior != primer:
-                    quina += 1
-                anterior = grup
-                if not 0 <= quina < len(jornades):
-                    raise FormatDesconegut(
-                        "Al calendari hi ha més blocs d'encontres que jornades amb data."
-                    )
-                numero, quan = jornades[quina]
-                sortida.extend(
-                    EncontreDeCalendari(numero, quan, grup, local, visitant)
-                    for local, visitant in parelles
+            grup = min(lletres, key=lambda ll: abs(ll[0] - linia[0].y))[1]
+            if grup == primer and anterior != primer:
+                quina += 1
+            anterior = grup
+            if not 0 <= quina < len(jornades):
+                raise FormatDesconegut(
+                    "Al calendari hi ha més blocs d'encontres que jornades amb data."
                 )
+            numero, quan = jornades[quina]
+            sortida.extend(
+                EncontreDeCalendari(numero, quan, grup, local, visitant)
+                for local, visitant in parelles
+            )
     if not es_calendari or not sortida:
         raise FormatDesconegut("No és un calendari de la Lliga Nacional.")
     return sortida
@@ -986,31 +1474,35 @@ def desa_calendari(conn, encontres: list[EncontreDeCalendari], divisio: str, tem
     """Desa els encontres del calendari de les jornades que encara no tenen resultat.
 
     Van a `nacional_encontres` sense punts, que és com es reconeix un encontre per
-    jugar. Una jornada que ja té el seu PDF de resultats no es toca: allà mana el
-    resultat, i `desa_jornada` ja en reemplaça el que hi hagués del calendari.
+    jugar. Un grup d'una jornada que ja té el seu PDF de resultats no es toca:
+    allà mana el resultat, i `desa_jornada` ja en reemplaça el que hi hagués del
+    calendari.
     Torna quants encontres ha desat.
     """
     if divisio not in DIVISIONS:
         raise ValueError(f"Divisió desconeguda: {divisio!r}. Ha de ser una de {DIVISIONS}.")
+    # Jornada a jornada i grup a grup: a Segona, el grup A té el seu calendari i
+    # la mateixa jornada no cau el mateix dia que als altres grups.
     jugades = {
-        fila[0]
+        (fila[0], fila[1])
         for fila in conn.execute(
-            "SELECT DISTINCT jornada FROM nacional_encontres "
+            "SELECT DISTINCT jornada, grup FROM nacional_encontres "
             "WHERE temporada = ? AND divisio = ? AND punts_local IS NOT NULL",
             (temporada, divisio),
         )
     }
     desats = 0
-    for jornada in sorted({e.jornada for e in encontres} - jugades):
+    for jornada, grup in sorted({(e.jornada, e.grup) for e in encontres} - jugades):
         conn.execute(
-            "DELETE FROM nacional_encontres WHERE temporada = ? AND divisio = ? AND jornada = ?",
-            (temporada, divisio, jornada),
+            "DELETE FROM nacional_encontres "
+            "WHERE temporada = ? AND divisio = ? AND jornada = ? AND grup = ?",
+            (temporada, divisio, jornada, grup),
         )
-        ordres: dict[str, int] = {}
+        ordre = 0
         for e in encontres:
-            if e.jornada != jornada:
+            if (e.jornada, e.grup) != (jornada, grup):
                 continue
-            ordres[e.grup] = ordres.get(e.grup, 0) + 1
+            ordre += 1
             conn.execute(
                 "INSERT INTO nacional_encontres (temporada, divisio, grup, jornada, ordre, data, "
                 "local, visitant) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -1019,7 +1511,7 @@ def desa_calendari(conn, encontres: list[EncontreDeCalendari], divisio: str, tem
                     divisio,
                     e.grup,
                     jornada,
-                    ordres[e.grup],
+                    ordre,
                     e.data.isoformat() if e.data else None,
                     e.local,
                     e.visitant,
@@ -1093,11 +1585,16 @@ def reconeix_i_desa(
         temporada = temporada_de(jornada.data or avui)
         quan = f", {jornada.data.isoformat()}" if jornada.data else ""
         encontres = sum(len(g.encontres) for g in jornada.grups)
+        nom = f"liga_nal_{divisio}_j{jornada.numero}"
+        if divisio == "2":
+            # Dos PDF per jornada, el del grup A i el dels altres: el nom porta
+            # els grups perquè l'un no trepitgi l'altre.
+            nom += "_" + "".join(sorted(g.grup or "" for g in jornada.grups))
         return PdfReconegut(
             "jornada",
             temporada,
             divisio,
-            copia(temporada, f"liga_nal_{divisio}_j{jornada.numero}.pdf"),
+            copia(temporada, f"{nom}.pdf"),
             f"Jornada {jornada.numero}{quan}: {encontres} encontres",
         )
 
