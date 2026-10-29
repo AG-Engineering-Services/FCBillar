@@ -104,7 +104,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 32
+SCHEMA_VERSION = 33
 
 
 def _read_schema_sql() -> str:
@@ -595,6 +595,30 @@ def _migrate_to_v27(conn: sqlite3.Connection) -> None:
         log.info("→v27: afegida columna torneig_fase_grups.serie_major")
 
 
+def _migrate_to_v33(conn: sqlite3.Connection) -> None:
+    """Els encontres desats amb tot a zero tornen a no tenir resultat.
+
+    Des de l'octubre de 2026 la federació posa enllaç i «0 / 0» als encontres
+    que encara no s'han jugat, i el lector, que feia servir l'enllaç com a
+    senyal de resultat, els va desar com a 0–0. L'upsert fa `COALESCE` amb el
+    que ja hi ha, o sigui que tornar a ingerir no els netejava. Tot a zero
+    —matx i parcials— no és mai un resultat.
+    """
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(encontres_lliga)").fetchall()}
+    if not {"p_match_local", "p_parcials_local"} <= cols:
+        return
+    n = conn.execute(
+        """
+        UPDATE encontres_lliga
+        SET p_match_local = NULL, p_match_visitant = NULL,
+            p_parcials_local = NULL, p_parcials_visitant = NULL
+        WHERE p_match_local = 0 AND p_match_visitant = 0
+          AND COALESCE(p_parcials_local, 0) = 0 AND COALESCE(p_parcials_visitant, 0) = 0
+        """
+    ).rowcount
+    log.info("→v33: %d encontres sense jugar ja no porten 0–0", n)
+
+
 def _migrate_to_v28(conn: sqlite3.Connection) -> None:
     """La regla de classificació d'una fase, i la ronda següent projectada.
 
@@ -664,6 +688,9 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v28: la regla de classificació d'una fase i la ronda projectada.
     if 1 <= version < 28:
         _migrate_to_v28(conn)
+    # → v33: un encontre no jugat no té resultat, ni que la federació hi posi 0 / 0.
+    if 1 <= version < 33:
+        _migrate_to_v33(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

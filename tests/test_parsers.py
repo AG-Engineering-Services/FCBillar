@@ -212,6 +212,18 @@ def test_lliga_encontres_parteix_els_equips() -> None:
     assert (primer.p_match_local, primer.p_match_visitant) == (3, 0)
 
 
+def test_lliga_encontre_amb_enllac_i_tot_a_zero_no_te_resultat() -> None:
+    # Des de l'octubre de 2026 la federació enllaça també els no jugats, amb 0 / 0.
+    html = fixture("lligues_encontres_36_148_316_2593")
+    html = html.replace("<td>5 / 3</td>", "<td>0 / 0</td>", 1).replace(
+        "<td>3 / 0</td>", "<td>0 / 0</td>", 1
+    )
+    primer = parse_lliga_encontres(html)[0]
+    assert primer.encontre_id == 10939
+    assert (primer.p_parcials_local, primer.p_parcials_visitant) == (None, None)
+    assert (primer.p_match_local, primer.p_match_visitant) == (None, None)
+
+
 def test_lliga_classificacio() -> None:
     files = parse_lliga_classificacio(fixture("lligues_classificacio_36_148_316"))
     assert len(files) == 8

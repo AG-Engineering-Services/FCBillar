@@ -537,6 +537,13 @@ def parse_lliga_encontres(
             encontre_id: int | None = int(m.group(5))
             pp_local, pp_visitant = fila.parell("Punts Parcials")
             pm_local, pm_visitant = fila.parell("Punts de Match")
+            # Des de l'octubre de 2026 la federació posa l'enllaç també als
+            # encontres que encara no s'han jugat, amb «0 / 0» a les dues
+            # columnes. Tot a zero no és cap resultat: és el mateix forat de més
+            # avall. Si ja hi ha parcials, l'encontre s'ha jugat i es deixa estar
+            # (el 0 / 0 de matx d'un encontre obert ja el tracta qui el llegeix).
+            if (pm_local, pm_visitant, pp_local, pp_visitant) == (0, 0, 0, 0):
+                pp_local = pp_visitant = pm_local = pm_visitant = None
         else:
             claus = (lliga_id, divisio_id, grup_id, jornada_id)
             encontre_id = None
