@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { db } from '$lib/db';
+	import { datesRanquing, ymDelRanquing, type DatesRanquing } from '$lib/dataRanquing';
 	import { follows, toggleFollow, clubFollows, toggleClubFollow } from '$lib/follows';
 	import { theme } from '$lib/theme';
 	import AvisError from '$lib/components/AvisError.svelte';
@@ -32,6 +33,7 @@
 	let rankMap = $state<Map<string, { posicio: number; mitjana: number }>>(new Map());
 	let projectedMap = $state<Map<string, number>>(new Map());
 	let latestRankSeq = $state<number | null>(null);
+	let dates = $state<DatesRanquing>(new Map());
 	let series = $state<Serie[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
@@ -47,7 +49,7 @@
 		const [{ data: pl, error: ep }, { data: cl, error: ec }, { data: maxR, error: er }] = await Promise.all([
 			db.from('players').select('fcb_id, nom, club_fcb_id'),
 			db.from('clubs').select('fcb_id, nom').order('nom'),
-			db.from('rankings').select('num_seq').eq('modalitat_codi', 1).order('num_seq', { ascending: false }).limit(1)
+			db.from('rankings').select('num_seq, any_pub, mes_pub').eq('modalitat_codi', 1).order('num_seq', { ascending: false })
 		]);
 		const e0 = ep ?? ec ?? er;
 		if (e0) {
@@ -58,6 +60,7 @@
 		allPlayers = pl ?? [];
 		allClubs = cl ?? [];
 		clubsMap = new Map((cl ?? []).map((c) => [c.fcb_id, c.nom]));
+		dates = datesRanquing(maxR ?? []);
 		const latest = maxR?.[0]?.num_seq;
 		latestRankSeq = latest ?? null;
 		if (latest != null) {
@@ -290,13 +293,8 @@
 	}
 	const hasHist = $derived(series.some((s) => s.pts.length >= 2));
 
-	// Dates (122 = juny 2026, mensual saltant agost)
 	const MESOS_NOM = ['Gener', 'Febrer', 'Març', 'Abril', 'Maig', 'Juny', 'Juliol', 'Agost', 'Setembre', 'Octubre', 'Novembre', 'Desembre'];
-	function ymFromSeq(seq: number): [number, number] {
-		let y = 2026, m = 6;
-		for (let i = 0; i < 122 - seq; i++) { m--; if (m === 0) { y--; m = 12; } if (m === 8) m = 7; }
-		return [y, m];
-	}
+	const ymFromSeq = (seq: number) => ymDelRanquing(seq, dates);
 	function nextRankingMonth(year: number, month: number): [number, number] {
 		let y = year, m = month + 1;
 		if (m === 8) m = 9;

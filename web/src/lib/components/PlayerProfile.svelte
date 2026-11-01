@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { datesRanquing, ymDelRanquing, type DatesRanquing } from '$lib/dataRanquing';
 	import {
 		db,
 		type GameRow,
@@ -522,6 +523,7 @@
 
 	// Evolució al rànquing (per la modalitat seleccionada): mitjana i posició.
 	let rankHist = $state<{ num_seq: number; posicio: number | null; mitjana: number | null }[]>([]);
+	let dates = $state<DatesRanquing>(new Map());
 	$effect(() => {
 		const id = fcbId;
 		const mod = selMod;
@@ -529,12 +531,16 @@
 		else rankHist = [];
 	});
 	async function loadRankHist(id: string, mod: number) {
-		const { data } = await db
-			.from('ranking_entries')
-			.select('num_seq, posicio, mitjana_general')
-			.eq('player_fcb_id', id)
-			.eq('modalitat_codi', mod)
-			.order('num_seq', { ascending: true });
+		const [{ data }, { data: publicats }] = await Promise.all([
+			db
+				.from('ranking_entries')
+				.select('num_seq, posicio, mitjana_general')
+				.eq('player_fcb_id', id)
+				.eq('modalitat_codi', mod)
+				.order('num_seq', { ascending: true }),
+			db.from('rankings').select('num_seq, any_pub, mes_pub').eq('modalitat_codi', mod)
+		]);
+		dates = datesRanquing(publicats ?? []);
 		rankHist = (data ?? []).map((r) => ({
 			num_seq: r.num_seq,
 			posicio: r.posicio,
@@ -944,23 +950,12 @@
 		selIdx = Math.max(0, Math.min(n - 1, Math.round(frac * (n - 1))));
 	}
 
-	// Data de publicació d'un rànquing (122 = juny 2026, mensual saltant agost).
 	const MESOS_NOM = [
 		'Gener', 'Febrer', 'Març', 'Abril', 'Maig', 'Juny',
 		'Juliol', 'Agost', 'Setembre', 'Octubre', 'Novembre', 'Desembre'
 	];
 	function ymFromSeq(seq: number): [number, number] {
-		let y = 2026,
-			m = 6;
-		for (let i = 0; i < 122 - seq; i++) {
-			m--;
-			if (m === 0) {
-				y--;
-				m = 12;
-			}
-			if (m === 8) m = 7;
-		}
-		return [y, m];
+		return ymDelRanquing(seq, dates);
 	}
 	function monthOffset(year: number, month: number, offset: number): string {
 		const d = new Date(Date.UTC(year, month - 1 + offset, 1));
