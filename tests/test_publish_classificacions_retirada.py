@@ -12,7 +12,7 @@ from __future__ import annotations
 from fcbillar import cloud_sync
 from fcbillar.db.migrations import ensure_schema
 from tests.test_publish_lliga_retirada import ClientFals
-from tests.test_publish_opens_en_joc import _torneig
+from tests.test_publish_opens_en_joc import _partida, _torneig
 
 BANDA, LLIURE = 3159, 3160
 
@@ -24,6 +24,8 @@ def _base(tmp_path):
     c.execute("INSERT INTO temporades (id, nom) VALUES (2, '2026-2027')")
     _torneig(c, BANDA, "OPEN BANDA GRANOLLERS", 2, [(1, "PRÈVIA"), (2, "FASE FINAL")])
     _torneig(c, LLIURE, "OPEN LLIURE PUNT D'ATAC", 2, [(1, "PRÈVIA"), (2, "FASE FINAL")])
+    _partida(c, BANDA, "FASE FINAL")
+    _partida(c, LLIURE, "FASE FINAL")
     c.execute("INSERT INTO players (id, fcb_id, nom) VALUES (1, '424', 'PALLISA, JOSEP')")
     c.execute("INSERT INTO players (id, fcb_id, nom) VALUES (2, '900', 'ALTRE, PERE')")
     c.execute(
