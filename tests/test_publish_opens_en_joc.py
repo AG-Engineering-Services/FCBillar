@@ -34,6 +34,14 @@ def _torneig(conn, tid: int, nom: str, temporada_id: int, fases: list[tuple[int,
         )
 
 
+def _partida(conn, tid: int, fase: str) -> None:
+    conn.execute(
+        "INSERT INTO torneig_partides (torneig_id_extern, divisio_id_extern, fase_id, entrades) "
+        "SELECT ?, ?, id, 30 FROM torneig_fases WHERE torneig_id = ? AND nom = ?",
+        (tid, tid, tid, fase),
+    )
+
+
 @pytest.fixture
 def conn(tmp_path):
     """Quatre torneigs: dos d'ara (un a mitges, un acabat) i dos de la temporada passada."""
@@ -45,6 +53,10 @@ def conn(tmp_path):
     _torneig(c, 100, "TRES BANDES INDIVIDUAL - 1A DIVISIÓ", 2, [(1, "PRE-PRÈVIA")])
     # Ara: acabat, amb el nom que la federació posa a l'última ronda.
     _torneig(c, 101, "OPEN LLIURE PUNT D'ATAC", 2, [(1, "PRÈVIA"), (2, "FASE FINAL")])
+    _partida(c, 101, "FASE FINAL")
+    # Ara: la federació ja ha creat la final, però encara no s'ha jugat.
+    _torneig(c, 102, "TRES BANDES INDIVIDUAL - HONOR", 2, [(1, "SEMIFINALS"), (2, "FINAL")])
+    _partida(c, 102, "SEMIFINALS")
     # La temporada passada: acabat, i l'última fase no és cap ronda de la seqüència.
     _torneig(c, 10, "TRES BANDES - 3A DIVISIÓ", 1, [(1, "PRÈVIA"), (2, "QUALIFICACIÓ")])
     # La temporada passada: només se'n van ingerir les fases de grups.
@@ -54,7 +66,14 @@ def conn(tmp_path):
 
 
 def test_nomes_el_de_la_temporada_en_curs_a_mitges(conn) -> None:
-    assert cloud_sync._torneigs_en_joc(conn) == {100}
+    assert cloud_sync._torneigs_en_joc(conn) == {100, 102}
+
+
+def test_una_final_creada_i_sense_jugar_no_tanca_el_torneig(conn) -> None:
+    """La divisió d'honor tenia campió l'1/11/2026 sense haver-se jugat la final."""
+    assert 102 in cloud_sync._torneigs_en_joc(conn)
+    _partida(conn, 102, "FINAL")
+    assert 102 not in cloud_sync._torneigs_en_joc(conn)
 
 
 def test_l_ultima_fase_manda_i_no_el_conjunt(conn) -> None:
