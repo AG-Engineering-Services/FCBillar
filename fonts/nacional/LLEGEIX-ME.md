@@ -17,8 +17,17 @@ Aquí es guarden els que encara no són enlloc més, un cop per temporada i divi
 El procés de cada nit (`fcbillar ingest-nacional-fonts`) els torna a llegir tots i
 els publica. Per afegir una jornada n'hi ha prou amb pujar-ne el PDF.
 
-De moment només es llegeix la Primera Divisió: la Divisió d'Honor i la Segona
-tenen una altra disposició.
+Es llegeixen les tres divisions: Honor, Primera i Segona. De cadascuna, les
+jornades, la classificació de jugadors i el calendari.
+
+La Segona té quatre grups i la RFEB en fa dos PDF per jornada: un del grup A
+(`liga_nal_2a_j3.pdf`) i un dels grups B, C i D (`liga_nal_2_j3.pdf`). Tots dos
+van a la mateixa carpeta, `2`, i cal guardar-los tots dos: porten el mateix
+número de jornada, però cadascun només reemplaça els seus grups. Quan es pugen
+des de l'aplicació queden com a `liga_nal_2_j3_A.pdf` i `liga_nal_2_j3_BCD.pdf`.
+
+Un encontre que el PDF dona per «SUSPENDIDO» es desa com si encara s'hagués de
+jugar: sense resultat ni partides.
 
 ## Pujar-los des de l'aplicació
 
