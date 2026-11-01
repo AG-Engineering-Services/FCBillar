@@ -2435,6 +2435,10 @@ def _torneigs_en_joc(conn) -> set[int]:
     Es mira l'ÚLTIMA fase de cada torneig -la de més `ordre`- i es pregunta si la
     seqüència de rondes en té cap després. Si en té i no hi és, el torneig es juga.
 
+    També es juga si aquella fase no té cap partida jugada: la federació crea les
+    semifinals i la final abans de jugar-les. L'1/11/2026 el palmarès deia que en
+    Ricardo García havia guanyat la divisió d'honor sense haver-se jugat la final.
+
     Ha de ser l'última fase i no el conjunt, i el que ho decideix és la temporada
     2025-26: els campionats de tres bandes acabats hi tenen «PRÈVIA / QUALIFICACIÓ»,
     o sigui que la PRÈVIA hi és i la FINAL no, i mirant el conjunt sortirien «en
@@ -2455,7 +2459,12 @@ def _torneigs_en_joc(conn) -> set[int]:
     try:
         files = conn.execute(
             """
-            SELECT f.torneig_id AS tid, f.nom
+            SELECT f.torneig_id AS tid, f.nom,
+                   EXISTS (SELECT 1 FROM torneig_partides tp
+                            WHERE tp.torneig_id_extern = ti.torneig_id_extern
+                              AND tp.divisio_id_extern = ti.divisio_id_extern
+                              AND tp.fase_id = f.id
+                              AND tp.entrades > 0) AS jugada
               FROM torneig_fases f
               JOIN (SELECT torneig_id, MAX(ordre) AS ultim
                       FROM torneig_fases GROUP BY torneig_id) u
@@ -2467,7 +2476,7 @@ def _torneigs_en_joc(conn) -> set[int]:
     except sqlite3.OperationalError:
         return set()
 
-    return {r["tid"] for r in files if ronda_seguent(r["nom"] or "")}
+    return {r["tid"] for r in files if ronda_seguent(r["nom"] or "") or not r["jugada"]}
 
 
 def _retira_classificacions_que_sobren(sb, classifs: list[dict], prog: Progress) -> int:
