@@ -362,6 +362,39 @@ def test_fcb_ingest_idempotent(tmp_path):
     )
 
 
+def test_fcb_registrat_pero_no_ingerit_s_ingereix(tmp_path):
+    """`registra_fcb` apunta la revisió nova amb `n_events = 0` abans que passi
+    la ingesta. Aquella fila no pot fer creure que ja hi és: la V-3 de la 26/27
+    va quedar així deu dies, i el web seguia ensenyant la V-2."""
+    import hashlib
+
+    from fcbillar.db.migrations import ensure_schema
+
+    db = tmp_path / "test.db"
+    pdf = FIXTURE_FCB.read_bytes()
+    conn = ensure_schema(db)
+    conn.execute(
+        "INSERT INTO calendari_versions (font, temporada, versio, sha256, n_events, n_canvis) "
+        "VALUES ('FCB', '2026/2027', 'V-3', ?, 0, 0)",
+        (hashlib.sha256(pdf).hexdigest(),),
+    )
+    conn.commit()
+    conn.close()
+
+    r = ingest_calendari(db, pdf_bytes=pdf, font="FCB")
+    assert r["estat"] == "actualitzat"
+    assert r["n_events"] > 50
+
+    import sqlite3
+
+    fila = (
+        sqlite3.connect(str(db))
+        .execute("SELECT versio, n_events FROM calendari_versions WHERE font = 'FCB'")
+        .fetchall()
+    )
+    assert fila == [("V-3", r["n_events"])]
+
+
 def test_fcb_i_rfeb_conviuen(tmp_path):
     """Les dues fonts comparteixen taula i temporada: cap de les dues no ha de
     trepitjar l'altra ni sortir al diff de l'altra."""

@@ -1199,8 +1199,11 @@ def ingest_calendari(
         etag = last_mod = None
 
     cal = parse_calendari(pdf_bytes, font=font, versio=versio)
+    # `n_events > 0`: `registra_fcb` hi deixa la revisió apuntada sense
+    # esdeveniments, i aquella fila sola no vol dir que ja s'hagi ingerit.
     ja_hi_es = conn.execute(
-        "SELECT id FROM calendari_versions WHERE font = ? AND temporada = ? AND sha256 = ?",
+        "SELECT id FROM calendari_versions WHERE font = ? AND temporada = ? AND sha256 = ? "
+        "AND n_events > 0",
         (font, cal.temporada, cal.sha256),
     ).fetchone()
     if ja_hi_es and not force:
@@ -1219,7 +1222,7 @@ def ingest_calendari(
         }
 
     canvis = diff(_llegeix_events(conn, font, cal.temporada), cal.esdeveniments)
-    cur = conn.execute(
+    conn.execute(
         "INSERT INTO calendari_versions "
         "(font, temporada, versio, data_versio, sha256, etag, last_modified, url, "
         " n_events, n_canvis) VALUES (?,?,?,?,?,?,?,?,?,?) "
@@ -1250,13 +1253,12 @@ def ingest_calendari(
             len(canvis),
         ),
     )
-    versio_id = (
-        cur.lastrowid
-        or conn.execute(
-            "SELECT id FROM calendari_versions WHERE font = ? AND temporada = ? AND sha256 = ?",
-            (font, cal.temporada, cal.sha256),
-        ).fetchone()[0]
-    )
+    # Sense `lastrowid`: quan el conflicte acaba en UPDATE (la revisió que
+    # `registra_fcb` ja havia apuntat), SQLite no el toca i podria ser d'una altra fila.
+    versio_id = conn.execute(
+        "SELECT id FROM calendari_versions WHERE font = ? AND temporada = ? AND sha256 = ?",
+        (font, cal.temporada, cal.sha256),
+    ).fetchone()[0]
     conn.execute("DELETE FROM calendari_canvis WHERE versio_id = ?", (versio_id,))
     conn.executemany(
         "INSERT INTO calendari_canvis (versio_id, tipus_canvi, setmana, disciplina, "
