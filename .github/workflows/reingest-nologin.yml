@@ -181,6 +181,8 @@ jobs:
       - name: Baixa l'estat del release (BD)
         if: steps.gate.outputs.skip != 'true'
         run: |
+          # Per tancar, en acabar, les peticions de la PWA encuades abans d'ara.
+          echo "INICI=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
           gh release download "$STATE_TAG" --dir data \
             --pattern 'fcbillar.db' --pattern 'fcb_opens.db' --clobber || true
           # Si falta la principal, la que es va desar com a anterior (vegeu el pas
@@ -412,6 +414,23 @@ jobs:
             puja "$RUNNER_TEMP/fcbillar-anterior.db"
           fi
           puja data/fcbillar.db data/fcb_opens.db
+
+      # Tanca les peticions del botó de la fitxa (fcbillar.reingest_requests)
+      # encuades abans que comencés aquesta passada: la PWA les engega via
+      # routes/reingesta/avisa, i qualsevol passada les satisfà, també la del
+      # cron. Sense això es quedaven 'pending' per sempre. No fa fallar res.
+      - name: Tanca les peticions de la PWA
+        if: always() && steps.gate.outputs.skip != 'true' && env.INICI != ''
+        run: |
+          base="${NEON_DATA_API_URL%/}"; [[ "$base" == */rest/v1 ]] || base="$base/rest/v1"
+          if [ "${N_FAIL:-1}" = "0" ]; then ESTAT=done; else ESTAT=error; fi
+          ARA=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          curl -s -o /dev/null -w "reingest_requests: HTTP %{http_code}\n" -X PATCH \
+            "$base/reingest_requests?status=eq.pending&requested_at=lte.$INICI" \
+            -H "Authorization: Bearer $NEON_SERVICE_ROLE_TOKEN" \
+            -H "Content-Profile: fcbillar" -H "Content-Type: application/json" \
+            -d "{\"status\":\"$ESTAT\",\"started_at\":\"$INICI\",\"finished_at\":\"$ARA\",\"n_ok\":${N_OK:-null},\"n_fail\":${N_FAIL:-null},\"message\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}" \
+            || true
 
       # L'últim, i l'únic que pot fer fallar el job: tot el d'abans ja ha corregut
       # i la BD ja és al release. Vermell si algun pas ha sortit amb error o si la

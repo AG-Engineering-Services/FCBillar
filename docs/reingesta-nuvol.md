@@ -25,9 +25,13 @@ són les **edicions curades** opcionals de la base de dades.
 
 - **R2** guarda la còpia **canònica** de les dues bases de dades. S'hi tria R2
   perquè no cobra egress i aguanta fitxers grans.
-- El **botó "↻ Reingesta"** del PWA encua una fila a `fcbillar.reingest_requests`;
-  [reingest-dispatch.yml](../.github/workflows/reingest-dispatch.yml) la veu (cada 15
-  min) i dispara `reingest.yml`. Substitueix el watcher local.
+- El **botó "↻ Reingesta"** de la fitxa de l'Albert (278) encua una fila a
+  `fcbillar.reingest_requests` i crida `/reingesta/avisa` (Vercel), que engega
+  [reingest-nologin.yml](../.github/workflows/reingest-nologin.yml) amb el
+  `GITHUB_DISPATCH_TOKEN` del Traductor. En acabar, el workflow tanca les peticions
+  pendents (`done`/`error`, amb l'enllaç a l'execució). El `reingest-dispatch.yml`
+  que les recollia cada 15 minuts es va retirar el 29/06/2026, i fins al 07/11 les
+  peticions es quedaven `pending` sense que ningú les mirés.
 - Ja no hi ha cap pas que depengui d'una sessió, així que `cloud_status.session_ok`
   és sempre cert i el banner de «sessió caducada» del PWA no s'encén mai. La
   columna es manté perquè el web la llegeix.

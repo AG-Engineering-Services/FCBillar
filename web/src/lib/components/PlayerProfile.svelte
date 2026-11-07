@@ -19,8 +19,8 @@
 
 	// Botó de reingesta manual: només a la fitxa de l'Albert Gómez i només amb la
 	// marca d'admin (vegeu $lib/admin). Encua una petició a Neon (taula
-	// reingest_requests); el workflow reingest-dispatch.yml la consulta cada pocs
-	// minuts i llança la reingesta al núvol. El correu el torna a validar la RLS.
+	// reingest_requests) i crida /reingesta/avisa, que engega reingest-nologin.yml.
+	// El correu el torna a validar la RLS.
 	const ADMIN_FCB_ID = '278';
 	let isAdmin = $state(false);
 	$effect(() => {
@@ -49,10 +49,26 @@
 		if (e) {
 			reingestState = 'error';
 			reingestMsg = `No s'ha pogut encuar: ${e.message}`;
-		} else {
+			return;
+		}
+		let avisat = false;
+		let motiu = '';
+		try {
+			const r = await fetch('/reingesta/avisa', { method: 'POST' });
+			({ avisat, motiu = '' } = await r.json());
+		} catch (err) {
+			motiu = err instanceof Error ? err.message : String(err);
+		}
+		formReingesta = false;
+		if (avisat) {
 			reingestState = 'ok';
-			reingestMsg = "Petició enviada. La reingesta s'executarà al núvol en pocs minuts.";
-			formReingesta = false;
+			reingestMsg = 'Reingesta engegada a GitHub Actions. Tarda uns 25 minuts.';
+		} else if (motiu === 'massa aviat') {
+			reingestState = 'ok';
+			reingestMsg = "Ja se n'ha engegat una fa menys d'un minut.";
+		} else {
+			reingestState = 'error';
+			reingestMsg = `Petició desada, però la reingesta no s'ha engegat (${motiu || 'sense resposta'}). Llança-la des de GitHub Actions.`;
 		}
 	}
 
