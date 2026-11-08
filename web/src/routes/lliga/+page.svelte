@@ -32,23 +32,40 @@
 
 	onMount(async () => {
 		try {
+			// Primer els grups, que és el diccionari petit, i d'ells la lliga d'ara
+			// (la federació estrena id cada temporada i sempre creix). Les taules en
+			// viu guarden també les temporades passades -des del novembre de 2026,
+			// totes des del 2014-15-, i el que segueix es demana NOMÉS d'aquesta
+			// lliga: baixar-ho tot i filtrar aquí passava de les mil files que
+			// PostgREST talla en silenci, i la temporada d'ara perdia jugadors.
+			const { data: g, error: eg } = await db.from('lliga_groups').select('*').range(0, 9999);
+			if (eg) throw eg;
+			const totsElsGrups = (g ?? []) as LligaGroup[];
+			const actual = totsElsGrups.length
+				? Math.max(...totsElsGrups.map((x) => x.lliga_id))
+				: -1;
+			const divisionsActuals = [
+				...new Set(totsElsGrups.filter((x) => x.lliga_id === actual).map((x) => x.divisio_id))
+			];
 			const [
-				{ data: g, error: eg },
 				{ data: s, error: es },
 				{ data: pr, error: ep },
 				{ data: enc },
 				{ data: ins },
 				{ data: cal }
 			] = await Promise.all([
-				db.from('lliga_groups').select('*'),
-				db.from('lliga_standings').select('*').order('posicio'),
-				db.from('lliga_player_rankings').select('*').order('posicio'),
-				// El .range() és explícit, com als dos de sota: PostgREST talla a mil
-				// files en silenci i aquesta taula acaba de passar-hi. Guarda els
-				// encontres de TOTES les temporades, i des del setembre de 2026 no
-				// només els jugats -la federació publica el calendari sencer i la
-				// ingesta el desa-, o sigui que una temporada sola ja en són 672.
-				db.from('lliga_encontres').select('*').range(0, 19999),
+				db.from('lliga_standings').select('*').eq('lliga_id', actual).order('posicio').range(0, 4999),
+				db
+					.from('lliga_player_rankings')
+					.select('*')
+					.eq('lliga_id', actual)
+					.order('posicio')
+					.range(0, 9999),
+				// Els encontres no porten lliga_id: es demanen per les divisions de la
+				// lliga d'ara, que tenen ids propis de cada temporada. El .range() és
+				// explícit perquè PostgREST talla a mil files en silenci, i una
+				// temporada sola ja en són 672.
+				db.from('lliga_encontres').select('*').in('divisio_id', divisionsActuals).range(0, 19999),
 				// Els inscrits del club: qui la federació diu que juga la lliga amb
 				// cada club, que és més que qui ja hi ha jugat. El .range() és
 				// explícit perquè PostgREST talla a mil files en silenci.
@@ -58,10 +75,9 @@
 				// tot el que se'n sap: qui hi ha a cada grup, contra qui i quin dia.
 				db.from('lliga_calendari').select('*').order('jornada').range(0, 4999)
 			]);
-			if (eg) throw eg;
 			if (es) throw es;
 			if (ep) throw ep;
-			groups = (g ?? []) as LligaGroup[];
+			groups = totsElsGrups;
 			standings = (s ?? []) as StandingRow[];
 			pranks = (pr ?? []) as PlayerRankRow[];
 			encontres = enc ?? [];

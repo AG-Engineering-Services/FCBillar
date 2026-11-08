@@ -2833,9 +2833,11 @@ def arxiva_lliga_en_viu_cmd(
     sb = get_client()
 
     if not lliga_id:
+        from fcbillar.cloud_sync import _totes_amb
+
+        # Totes les files: amb les temporades passades n'hi ha més de mil.
         vives = {
-            r["lliga_id"]
-            for r in sb.table(taules.standings).select("lliga_id").execute().data or []
+            r["lliga_id"] for r in _totes_amb(lambda: sb.table(taules.standings).select("lliga_id"))
         }
         de_la_temporada = [
             i
@@ -3311,6 +3313,120 @@ COMMIT;
             f"[yellow]{len(sense)} inscrit(s) sense llicència a la nostra base, "
             f"fora del SQL:[/] {', '.join(j for j, _, _, _ in sense)}"
         )
+
+
+@app.command("lligues-passades")
+def lligues_passades_cmd(
+    lliga: list[int] = typer.Option(  # noqa: B008 — el patró de typer
+        None, "--lliga", help="Només aquestes (es pot repetir). Per defecte, totes les passades."
+    ),
+    ingereix: bool = typer.Option(
+        False,
+        "--ingereix",
+        help="Abans d'analitzar, torna a llegir de la web les lligues sense noms de grup, "
+        "sense resultats o sense dates.",
+    ),
+    aplica: bool = typer.Option(
+        False, "--aplica", help="Publica les que superen l'anàlisi. Sense això, només analitza."
+    ),
+    informe: Path = typer.Option(  # noqa: B008 — el patró de typer
+        Path("data/lligues-passades.md"), "--informe", help="On deixa l'informe de l'anàlisi."
+    ),
+) -> None:
+    """Analitza i (amb --aplica) publica les lligues de temporades passades.
+
+    Cap lliga es publica sense passar abans per `lligues_passades.analitza`:
+    classificació contra l'oficial de la federació, encontre per encontre i
+    partida per partida. L'informe diu què s'ha trobat i per què una lliga no
+    surt. Les lligues de la temporada en curs no es toquen mai des d'aquí.
+    """
+    from fcbillar import cloud_sync
+    from fcbillar import lligues_passades as lp
+
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    vives = lp.lligues_en_curs(conn)
+    passades = lp.lligues_passades(conn)
+    triades = sorted(set(lliga)) if lliga else passades
+    prohibides = [i for i in triades if i in vives or i not in passades]
+    if prohibides:
+        console.print(
+            f"[red]{prohibides}: no són lligues passades de la base local "
+            f"(les d'ara són {sorted(vives)}).[/]"
+        )
+        raise typer.Exit(1)
+
+    def prog(nivell: str, missatge: str) -> None:
+        color = {"ok": "green", "warn": "yellow"}.get(nivell, "red")
+        console.print(f"  [{color}]{missatge}[/]")
+
+    if ingereix:
+        for lliga_id in triades:
+            sense_noms = not conn.execute(
+                "SELECT 1 FROM lliga_noms WHERE lliga_id = ? LIMIT 1", (lliga_id,)
+            ).fetchone()
+            n, sense_res, sense_data = conn.execute(
+                "SELECT COUNT(*), SUM(p_match_local IS NULL), SUM(data IS NULL) "
+                "FROM encontres_lliga WHERE lliga_id = ?",
+                (lliga_id,),
+            ).fetchone()
+            if n and ((sense_res or 0) / n > lp.MAX_SENSE_RESULTAT or (sense_data or 0) / n > 0.5):
+                console.print(f"[cyan]Lliga {lliga_id}: es torna a ingerir de la web[/]")
+                try:
+                    ingest_lliga_cmd(lliga_id=lliga_id, modalitat=1, create_missing_players=False)
+                except typer.Exit as surt:
+                    if surt.exit_code:
+                        console.print(f"[red]Lliga {lliga_id}: la ingesta ha fallat[/]")
+            elif sense_noms:
+                console.print(f"[cyan]Lliga {lliga_id}: es llegeixen els noms dels grups[/]")
+                with ScraperClient(settings) as client:
+                    tree = discover_lliga(client, lliga_id, depth=2)
+                _desa_noms_de_lliga(conn, lliga_id, tree)
+        conn = ensure_schema(settings.db_path)
+
+    informes = []
+    for lliga_id in triades:
+        grups = [
+            tuple(r)
+            for r in conn.execute(
+                "SELECT DISTINCT divisio_id, grup_id FROM encontres_lliga "
+                "WHERE lliga_id = ? AND grup_id <> 0 ORDER BY 1, 2",
+                (lliga_id,),
+            )
+        ]
+        oficial = cloud_sync._fetch_official_lliga_standings(grups, prog, lliga_id)
+        inf = lp.analitza(conn, lliga_id, oficial)
+        informes.append(inf)
+        estat = "[green]es pot publicar[/]" if inf.publicable else "[red]NO es publica[/]"
+        console.print(
+            f"Lliga {lliga_id} ({inf.temporada}, {inf.mena}): {inf.encontres} encontres, "
+            f"{inf.partides} partides, {len(inf.errors)} errors, "
+            f"{len(inf.incidencies) - len(inf.errors)} avisos → {estat}"
+        )
+        for e in inf.errors[:5]:
+            console.print(f"    [red]{e.tipus}[/] {e.on}: {e.detall}")
+
+    informe.parent.mkdir(parents=True, exist_ok=True)
+    informe.write_text(lp.informe_markdown(informes), encoding="utf-8")
+    console.print(f"[cyan]Informe: {informe}[/]")
+
+    if not aplica:
+        console.print("[yellow]Només anàlisi: no s'ha publicat res (--aplica per publicar).[/]")
+        return
+    fallades = 0
+    for inf in informes:
+        if not inf.publicable:
+            continue
+        console.print(f"[cyan]Publicant la lliga {inf.lliga_id} ({inf.temporada}, {inf.mena})[/]")
+        try:
+            counts = lp.publica(settings.db_path, inf, prog)
+            console.print(f"  [green]comprovat al núvol[/] {counts}")
+        except Exception as exc:
+            # Una lliga que falla no atura les altres; surt amb 1 al final.
+            fallades += 1
+            console.print(f"  [red]{exc}[/]")
+    if fallades:
+        raise typer.Exit(1)
 
 
 if __name__ == "__main__":

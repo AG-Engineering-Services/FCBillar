@@ -1,0 +1,127 @@
+name: lligues-passades
+
+# Publica al núvol les lligues de temporades passades (del 2014-15 ençà), que
+# fins ara només hi tenien la classificació final (`lliga_standings_hist`).
+#
+# Fa, per ordre (vegeu `fcbillar lligues-passades` i src/fcbillar/lligues_passades.py):
+#
+#   1. Torna a llegir de la web de la federació les lligues que a la base no
+#      tenen noms de grup, resultats o dates (les de Tres Bandes del 2015-16 al
+#      2018-19 es van ingerir des del rànquing i no en tenen).
+#   2. Les analitza una per una: classificació contra l'oficial de la federació,
+#      encontre per encontre i partida per partida. Deixa l'informe com a
+#      artefacte i al resum de l'execució.
+#   3. Només amb `aplica`, publica les que superen l'anàlisi i torna a llegir el
+#      núvol per comprovar que hi ha exactament el que s'hi ha enviat.
+#   4. Repuja la base al release, perquè la nocturna tingui els noms, els
+#      resultats i les dates que s'han llegit (si no, cada nit avisaria que no sap
+#      de quina temporada són les lligues velles).
+#
+# Engegueu-lo primer SENSE `aplica`, llegiu l'informe, i després amb `aplica`.
+# Les lligues de la temporada en curs no es toquen mai des d'aquí.
+
+on:
+  workflow_dispatch:
+    inputs:
+      aplica:
+        description: "Publica les lligues que superin l'anàlisi (si no, només analitza)"
+        type: boolean
+        default: false
+      lligues:
+        description: "Ids separats per espais (buit = totes les passades)"
+        required: false
+        default: ""
+
+# El mateix grup que la càrrega de cada nit: totes dues baixen i repugen la base.
+concurrency:
+  group: reingest
+  cancel-in-progress: false
+
+jobs:
+  lligues-passades:
+    runs-on: ubuntu-latest
+    # La primera vegada torna a ingerir unes deu lligues encontre per encontre.
+    timeout-minutes: 330
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NEON_DATA_API_URL: ${{ secrets.NEON_DATA_API_URL }}
+      NEON_SERVICE_ROLE_TOKEN: ${{ secrets.NEON_SERVICE_ROLE_TOKEN }}
+      STATE_TAG: fcb-state
+      APLICA: ${{ github.event.inputs.aplica }}
+      LLIGUES: ${{ github.event.inputs.lligues }}
+    steps:
+      - name: Comprova el que es demana
+        run: |
+          if ! [[ "$LLIGUES" =~ ^[0-9\ ]*$ ]]; then
+            echo "Les lligues han de ser números separats per espais."; exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Baixa l'estat del release (BD)
+        run: |
+          gh release download "$STATE_TAG" --dir data --pattern 'fcbillar.db' --clobber || true
+          if [ ! -f data/fcbillar.db ]; then
+            echo "::warning title=Sense fcbillar.db::Al release no hi ha fcbillar.db; es fa servir fcbillar-anterior.db."
+            gh release download "$STATE_TAG" --dir data --pattern 'fcbillar-anterior.db' --clobber
+            mv data/fcbillar-anterior.db data/fcbillar.db
+          fi
+          ls -lh data/fcbillar.db
+          cp data/fcbillar.db "$RUNNER_TEMP/fcbillar-anterior.db"
+
+      - name: Ingereix, analitza i (si s'ha demanat) publica
+        id: feina
+        run: |
+          ARGS=(--ingereix --informe data/lligues-passades.md)
+          if [ "$APLICA" = "true" ]; then ARGS+=(--aplica); fi
+          for l in $LLIGUES; do ARGS+=(--lliga "$l"); done
+          set +e
+          uv run --no-dev fcbillar lligues-passades "${ARGS[@]}"
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit $rc
+
+      - name: L'informe, al resum
+        if: always()
+        run: |
+          if [ -f data/lligues-passades.md ]; then
+            # El resum de l'execució té un límit; l'informe sencer és a l'artefacte.
+            head -c 900000 data/lligues-passades.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Desa l'informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lligues-passades-informe
+          path: data/lligues-passades.md
+          if-no-files-found: warn
+
+      # Com la nocturna: primer la base com era en començar, i després la nova,
+      # amb reintents (un 502 de GitHub durant `--clobber` en va esborrar una).
+      - name: Repuja l'estat (BD) al release
+        if: always()
+        run: |
+          puja() {
+            for intent in 1 2 3 4 5; do
+              gh release upload "$STATE_TAG" "$@" --clobber && return 0
+              echo "::warning::La pujada de $* ha fallat (intent $intent); es torna a provar."
+              sleep $((intent * 20))
+            done
+            return 1
+          }
+          puja "$RUNNER_TEMP/fcbillar-anterior.db"
+          # Una base que no s'obre no es puja: es queda la que hi havia.
+          if uv run --no-dev python -c "import sqlite3; c=sqlite3.connect('data/fcbillar.db'); assert c.execute('pragma integrity_check').fetchone()[0]=='ok'"; then
+            puja data/fcbillar.db
+          else
+            echo "::error::La base ha quedat malmesa; no es puja."
+            exit 1
+          fi
