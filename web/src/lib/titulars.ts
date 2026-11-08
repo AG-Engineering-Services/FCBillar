@@ -15,23 +15,24 @@
 // tots iguals (1-3 en són tres i 4-8 en són cinc) i amb un club curt de gent el
 // repartiment ja no coincideix.
 //
-// No és cap alineació oficial: la federació no en publica cap.
+// Això val mentre no hi ha joc. A partir del tercer encontre de l'equip manen
+// els quatre que MÉS hi han jugat: els clubs mouen gent entre equips i no sempre
+// per l'ordre. De quin equip és cada partida ho diu l'encontre (`lliga_partides`
+// porta el jugador local i el visitant, i l'encontre, quin equip és cadascú).
+// És la mateixa regla que l'aplicació del club (NouProjecte, utils/titulars.ts).
 //
-// NOTA: NouProjecte té la seva versió d'això, amb un règim més que aquí no es
-// pot fer —quan un equip ja porta unes quantes jornades, manen els que hi
-// juguen de debò. Allà se sap de quin equip és cada partida; aquí el rànquing
-// individual és per club i per grup, i no distingeix l'A del B.
+// No és cap alineació oficial: la federació no en publica cap.
 
 /** Quants jugadors formen un equip a la lliga de tres bandes. */
 export const PER_EQUIP = 4;
 
 /** A partir de quina posició del club es pot jugar a cada equip. */
 export const PRIMERA_POSICIO: Readonly<Record<string, number>> = {
-	A: 1,
-	B: 4,
-	C: 9,
-	D: 13,
-	E: 17
+  A: 1,
+  B: 4,
+  C: 9,
+  D: 13,
+  E: 17,
 };
 
 /**
@@ -41,14 +42,14 @@ export const PRIMERA_POSICIO: Readonly<Record<string, number>> = {
  * l'únic que té i s'enduu els primers.
  */
 export function lletraEquip(nom: string): string {
-	return /"([A-Z])"\s*$/.exec((nom ?? '').toUpperCase())?.[1] ?? 'A';
+  return /"([A-Z])"\s*$/.exec((nom ?? "").toUpperCase())?.[1] ?? "A";
 }
 
 /** Si qui ocupa aquesta posició del club pot jugar en aquest equip. */
 export function potJugarA(posicio: number, lletra: string): boolean {
-	const minim = PRIMERA_POSICIO[lletra];
-	// Una lletra que no coneixem no restringeix: val més marcar de més que amagar.
-	return minim === undefined || posicio >= minim;
+  const minim = PRIMERA_POSICIO[lletra];
+  // Una lletra que no coneixem no restringeix: val més marcar de més que amagar.
+  return minim === undefined || posicio >= minim;
 }
 
 /**
@@ -57,31 +58,68 @@ export function potJugarA(posicio: number, lletra: string): boolean {
  * `posicions` són les que publica la federació. Es prenen tal com vénen i no es
  * renumeren: si la llista en salta alguna, el que val és el número escrit.
  */
-export function repartiment(lletra: string, posicions: readonly number[]): number[] {
-	const lletres = Object.keys(PRIMERA_POSICIO);
-	const fins = lletres.indexOf(lletra);
-	if (fins < 0) return [];
+export function repartiment(
+  lletra: string,
+  posicions: readonly number[],
+): number[] {
+  const lletres = Object.keys(PRIMERA_POSICIO);
+  const fins = lletres.indexOf(lletra);
+  if (fins < 0) return [];
 
-	const lliures = new Set(posicions);
-	let seves: number[] = [];
-	for (const l of lletres.slice(0, fins + 1)) {
-		seves = [...lliures]
-			.sort((a, b) => a - b)
-			.filter((p) => potJugarA(p, l))
-			.slice(0, PER_EQUIP);
-		for (const p of seves) lliures.delete(p);
-	}
-	return seves;
+  const lliures = new Set(posicions);
+  let seves: number[] = [];
+  for (const l of lletres.slice(0, fins + 1)) {
+    seves = [...lliures]
+      .sort((a, b) => a - b)
+      .filter((p) => potJugarA(p, l))
+      .slice(0, PER_EQUIP);
+    for (const p of seves) lliures.delete(p);
+  }
+  return seves;
 }
 
 /** Un inscrit, amb el número que li dona la federació. */
 export interface Inscrit {
-	jugador: string;
-	posicio: number;
+  jugador: string;
+  posicio: number;
 }
 
-/** Els noms dels quatre que s'esperen en aquest equip. */
-export function titulars(equip: string, plantilla: readonly Inscrit[]): Set<string> {
-	const tocades = new Set(repartiment(lletraEquip(equip), plantilla.map((j) => j.posicio)));
-	return new Set(plantilla.filter((j) => tocades.has(j.posicio)).map((j) => j.jugador));
+/** A partir de quants encontres jugats es mira qui juga de debò. */
+export const ENCONTRES_PER_FIAR_SE = 3;
+
+/**
+ * Els noms dels quatre que s'esperen en aquest equip.
+ *
+ * `partidesPerJugador` és quantes partides ha jugat cadascú AMB AQUEST EQUIP,
+ * per la clau que torna `clau`; `encontresJugats`, quants encontres porta
+ * l'equip. Amb menys de tres, o sense dades, mana l'ordre de la federació.
+ */
+export function titulars(
+  equip: string,
+  plantilla: readonly Inscrit[],
+  partidesPerJugador?: ReadonlyMap<string, number>,
+  encontresJugats = 0,
+  clau: (nom: string) => string = (n) => n,
+): Set<string> {
+  if (partidesPerJugador && encontresJugats >= ENCONTRES_PER_FIAR_SE) {
+    const jugats = plantilla
+      .map(({ jugador }) => ({
+        jugador,
+        n: partidesPerJugador.get(clau(jugador)) ?? 0,
+      }))
+      .filter((x) => x.n > 0)
+      // Si empaten, mana l'ordre de la llista: `sort` és estable.
+      .sort((a, b) => b.n - a.n);
+    if (jugats.length > 0)
+      return new Set(jugats.slice(0, PER_EQUIP).map((x) => x.jugador));
+  }
+  const tocades = new Set(
+    repartiment(
+      lletraEquip(equip),
+      plantilla.map((j) => j.posicio),
+    ),
+  );
+  return new Set(
+    plantilla.filter((j) => tocades.has(j.posicio)).map((j) => j.jugador),
+  );
 }
