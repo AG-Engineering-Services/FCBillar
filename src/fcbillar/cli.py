@@ -3326,6 +3326,12 @@ def lligues_passades_cmd(
         help="Abans d'analitzar, torna a llegir de la web les lligues sense noms de grup, "
         "sense resultats o sense dates.",
     ),
+    forca_ingesta: bool = typer.Option(
+        False,
+        "--forca-ingesta",
+        help="Amb --ingereix, torna a llegir de la web totes les lligues triades, encara que "
+        "tinguin resultats (a les velles hi falten encontres sencers).",
+    ),
     aplica: bool = typer.Option(
         False, "--aplica", help="Publica les que superen l'anàlisi. Sense això, només analitza."
     ),
@@ -3370,7 +3376,11 @@ def lligues_passades_cmd(
                 "FROM encontres_lliga WHERE lliga_id = ?",
                 (lliga_id,),
             ).fetchone()
-            if n and ((sense_res or 0) / n > lp.MAX_SENSE_RESULTAT or (sense_data or 0) / n > 0.5):
+            if n and (
+                forca_ingesta
+                or (sense_res or 0) / n > lp.MAX_SENSE_RESULTAT
+                or (sense_data or 0) / n > 0.5
+            ):
                 console.print(f"[cyan]Lliga {lliga_id}: es torna a ingerir de la web[/]")
                 try:
                     ingest_lliga_cmd(lliga_id=lliga_id, modalitat=1, create_missing_players=False)
