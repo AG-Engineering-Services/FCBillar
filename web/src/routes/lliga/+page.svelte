@@ -9,7 +9,7 @@
 		type LligaInscrit,
 		type EncontreCalendari
 	} from '$lib/db';
-	import { titulars } from '$lib/titulars';
+	import { titulars, ENCONTRES_PER_FIAR_SE } from '$lib/titulars';
 	import { clubDeLEquip } from '$lib/clubEquip';
 	import { clauDivisio, clauGrup, clauNomGrup, comparaGrups } from '$lib/divisions';
 
@@ -315,9 +315,25 @@
 					.sort((a, b) => a.posicio - b.posicio)
 			: []
 	);
-	/** Els quatre que és més probable que formin AQUEST equip, per la regla de la federació. */
+	/** Un nom de jugador per comparar: sense accents, minúscules i espais simples. */
+	const clauJugador = (nom: string) => norm(nom).replace(/\s+/g, ' ').trim();
+	/** Quantes partides ha jugat cadascú amb l'equip obert, i quants encontres porta. */
+	let partidesEquip = $state<{ perJugador: Map<string, number>; encontres: number } | null>(null);
+	const perAlineacions = $derived((partidesEquip?.encontres ?? 0) >= ENCONTRES_PER_FIAR_SE);
+	/**
+	 * Els quatre que és més probable que formin AQUEST equip: fins al tercer
+	 * encontre, per la regla de la federació; després, els que més hi juguen.
+	 */
 	const titularsDeLEquip = $derived(
-		equipObert ? titulars(equipObert.equip, jugadorsDeLEquip) : new Set<string>()
+		equipObert
+			? titulars(
+					equipObert.equip,
+					jugadorsDeLEquip,
+					partidesEquip?.perJugador,
+					partidesEquip?.encontres ?? 0,
+					clauJugador
+				)
+			: new Set<string>()
 	);
 	// <dialog> natiu: tanca amb Escape i deixa inert la pàgina del darrere.
 	let dlgEquip = $state<HTMLDialogElement>();
@@ -325,8 +341,46 @@
 	async function obreEquip(r: StandingRow, ev: MouseEvent) {
 		obridorEquip = ev.currentTarget as HTMLElement;
 		equipObert = r;
+		partidesEquip = null;
 		await tick();
 		dlgEquip?.showModal();
+		// Les partides dels encontres que ja ha jugat aquest equip: qui jugava de
+		// local era de l'equip local, i el visitant, del visitant.
+		type EncontreEquip = {
+			encontre_id: number;
+			equip_local: string;
+			equip_visitant: string;
+			gols_local: number | null;
+		};
+		type FilaPartida = {
+			encontre_id: number;
+			jugador_local: string | null;
+			jugador_visitant: string | null;
+			caramboles_local: number | null;
+			caramboles_visitant: number | null;
+		};
+		const seus = (encontres as EncontreEquip[]).filter(
+			(e) => (e.equip_local === r.equip || e.equip_visitant === r.equip) && e.gols_local != null
+		);
+		if (!seus.length) return;
+		const aCasa = new Map(seus.map((e) => [e.encontre_id, e.equip_local === r.equip]));
+		const { data, error: ePartides } = await db
+			.from('lliga_partides')
+			.select('encontre_id,jugador_local,jugador_visitant,caramboles_local,caramboles_visitant')
+			.in('encontre_id', [...aCasa.keys()])
+			.range(0, 4999);
+		if (ePartides || equipObert !== r) return;
+		const perJugador = new Map<string, number>();
+		const ambPartides = new Set<number>();
+		for (const p of (data ?? []) as FilaPartida[]) {
+			if (p.caramboles_local == null || p.caramboles_visitant == null) continue;
+			const nom = aCasa.get(p.encontre_id) ? p.jugador_local : p.jugador_visitant;
+			if (!nom) continue;
+			const k = clauJugador(nom);
+			perJugador.set(k, (perJugador.get(k) ?? 0) + 1);
+			ambPartides.add(p.encontre_id);
+		}
+		partidesEquip = { perJugador, encontres: ambPartides.size };
 	}
 	function tancaEquip() {
 		equipObert = null;
@@ -842,10 +896,16 @@
 					{/each}
 				</ul>
 				<p class="px-4 py-3 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-					Ombrejats, els quatre que s'esperen en aquest equip. L'ordre és el que fixa la
-					federació i diu on pot jugar cadascú: del 1r al 3r només a l'A, del 4t al 8è a l'A
-					i al B, del 9è al 12è fins al C, del 13è al 16è fins al D i del 17è endavant fins
-					a l'E. Qui ve fitxat d'un altre club hi surt marcat i qui se'n va fitxat no hi
+					{#if perAlineacions}
+						Ombrejats, els quatre que més han jugat amb aquest equip aquesta temporada ({partidesEquip?.encontres}
+						encontres).
+					{:else}
+						Ombrejats, els quatre que s'esperen en aquest equip. Fins al tercer encontre es fa
+						servir l'ordre que fixa la federació, que diu on pot jugar cadascú: del 1r al 3r
+						només a l'A, del 4t al 8è a l'A i al B, del 9è al 12è fins al C, del 13è al 16è fins
+						al D i del 17è endavant fins a l'E. Després, qui hi juga de debò.
+					{/if}
+					Qui ve fitxat d'un altre club hi surt marcat i qui se'n va fitxat no hi
 					surt, que la lliga la juga amb ells; el salt a la numeració és seu.
 				</p>
 			{/if}
