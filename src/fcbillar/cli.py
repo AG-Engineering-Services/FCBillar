@@ -2837,8 +2837,7 @@ def arxiva_lliga_en_viu_cmd(
 
         # Totes les files: amb les temporades passades n'hi ha més de mil.
         vives = {
-            r["lliga_id"]
-            for r in _totes_amb(lambda: sb.table(taules.standings).select("lliga_id"))
+            r["lliga_id"] for r in _totes_amb(lambda: sb.table(taules.standings).select("lliga_id"))
         }
         de_la_temporada = [
             i
@@ -3314,8 +3313,6 @@ COMMIT;
             f"[yellow]{len(sense)} inscrit(s) sense llicència a la nostra base, "
             f"fora del SQL:[/] {', '.join(j for j, _, _, _ in sense)}"
         )
-
-
 
 
 @app.command("lligues-passades")

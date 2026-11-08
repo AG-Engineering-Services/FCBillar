@@ -1805,9 +1805,7 @@ def publish_lliga(
 
         # Sense classificació oficial (la petició ha fallat) l'ordre es calcula
         # dels encontres, amb el mateix desempat que aplica la federació.
-        ranked = sorted(
-            stats.items(), key=lambda kv: (-(kv[1]["pf"]), -kv[1]["ppf"])
-        )
+        ranked = sorted(stats.items(), key=lambda kv: (-(kv[1]["pf"]), -kv[1]["ppf"]))
         for pos, (eid, s) in enumerate(ranked, start=1):
             standing_rows.append(_fila(pos, eid, s, s["pf"], None))
 
@@ -3119,9 +3117,7 @@ def publish_lliga_encontres(
     counts = {}
     counts[taules.encontres] = _upsert(sb, taules.encontres, enc_rows, "encontre_id", prog)
     try:
-        counts[taules.partides] = _upsert(
-            sb, taules.partides, part_rows, "encontre_id,ordre", prog
-        )
+        counts[taules.partides] = _upsert(sb, taules.partides, part_rows, "encontre_id,ordre", prog)
     except Exception as exc:
         # La sèrie major va arribar amb la migració 0032. Mentre el Data API no
         # en vegi les columnes, les partides es publiquen sense.
