@@ -1449,7 +1449,9 @@ def _match_official_rows(off_rows, stats: dict, equips: dict, repo) -> dict:
     return matched
 
 
-def _caramboles_per_encontre(conn, lliga: int, season_id) -> dict[int, list[tuple[int, int, int]]]:
+def _caramboles_per_encontre(
+    conn, lliga: int, season_id, tota_la_lliga: bool = False
+) -> dict[int, list[tuple[int, int, int]]]:
     """Les partides de cada encontre com a (caramboles local, caramboles visitant, entrades).
 
     Les mateixes dues fonts que `publish_lliga_encontres`, en el mateix ordre i
@@ -1480,9 +1482,9 @@ def _caramboles_per_encontre(conn, lliga: int, season_id) -> dict[int, list[tupl
                COALESCE(g.equip1_id = en.equip_visitant_id, 0) AS girada
         FROM games g JOIN encontres_lliga en ON en.id = g.encontre_lliga_id
         JOIN players p1 ON p1.id = g.player1_id JOIN players p2 ON p2.id = g.player2_id
-        WHERE en.lliga_id = ? AND en.temporada_id = ?
+        WHERE en.lliga_id = ? AND (en.temporada_id = ? OR ? = 1)
         """,
-        (lliga, season_id),
+        (lliga, season_id, int(tota_la_lliga)),
     ):
         _afegeix(r["eid"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"], bool(r["girada"]))
 
@@ -1492,9 +1494,9 @@ def _caramboles_per_encontre(conn, lliga: int, season_id) -> dict[int, list[tupl
                lp.player2_nom AS j2, lp.caramboles2 AS c2, lp.entrades AS e
         FROM lliga_pending_partides lp
         JOIN encontres_lliga en ON en.id = lp.encontre_lliga_id
-        WHERE en.lliga_id = ? AND en.temporada_id = ?
+        WHERE en.lliga_id = ? AND (en.temporada_id = ? OR ? = 1)
         """,
-        (lliga, season_id),
+        (lliga, season_id, int(tota_la_lliga)),
     ):
         _afegeix(r["eid"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"])
     return per_enc
@@ -1513,11 +1515,22 @@ def publish_lliga(
     *,
     taules: _TaulesLliga = _TAULES_3B,
     temporada_id: int | None = None,
+    tota_la_lliga: bool = False,
+    arxiva: bool = True,
+    ignora_oficial: set[tuple[int, int]] | frozenset = frozenset(),
 ) -> dict[str, int]:
     """Calcula i puja les classificacions de la lliga 3 bandes (temporada actual).
 
     `taules` i `temporada_id` hi són per a `publish_lliga_4m`, que publica una
     altra lliga a unes altres taules; sense ells fa el de sempre.
+
+    `tota_la_lliga` i `arxiva` són per a les lligues passades
+    (`fcbillar.lligues_passades`). Amb `tota_la_lliga` es compten tots els
+    encontres de la lliga, sigui quin sigui el seu `temporada_id`: les fases
+    d'estiu (promocions, finals) en porten el de la temporada següent, i amb el
+    filtre es perdien. I `arxiva=False` perquè l'arxivat dona per passades totes
+    les lligues que no són la que es publica: publicant-ne una de vella,
+    arxivaria la d'ara.
 
     Les estadístiques de detall (PJ/G/E/P, parcials) es deriven dels encontres,
     però la POSICIÓ i els PUNTS són els de la classificació OFICIAL de la
@@ -1538,7 +1551,9 @@ def publish_lliga(
     db_path = db_path or get_settings().db_path
     lliga = lliga_a_publicar("3B", lliga_id, db_path)
     sb = get_client()
-    arxivades = arxiva_lligues_passades(sb, Path(db_path), lliga, prog, taules=taules)
+    arxivades = (
+        arxiva_lligues_passades(sb, Path(db_path), lliga, prog, taules=taules) if arxiva else 0
+    )
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
 
@@ -1582,9 +1597,9 @@ def publish_lliga(
         for r in conn.execute(
             """
             SELECT DISTINCT divisio_id, grup_id FROM encontres_lliga
-            WHERE lliga_id = ? AND temporada_id = ? AND grup_id <> 0
+            WHERE lliga_id = ? AND (temporada_id = ? OR ? = 1) AND grup_id <> 0
             """,
-            (lliga, season_id),
+            (lliga, season_id, int(tota_la_lliga)),
         )
     } | {
         (r["divisio_id"], r["grup_id"])
@@ -1596,15 +1611,26 @@ def publish_lliga(
     }
     groups = [{"divisio_id": d, "grup_id": g} for d, g in sorted(claus)]
 
+    # La temporada de la lliga, a cada grup (migració 0032): és el que permet als
+    # lectors triar-ne una sense baixar tots els encontres de totes.
+    from fcbillar import en_curs as _en_curs
+
+    any_inici = _en_curs.any_d_inici_de_lliga_id(conn, lliga)
+    temporada_txt = _en_curs.amb_guio(any_inici) if any_inici is not None else None
+
     official: dict[tuple[int, int], list] = {}
     if use_official:
         official = _fetch_official_lliga_standings(
             [(g["divisio_id"], g["grup_id"]) for g in groups], prog, lliga
         )
+        # Grups on la taula oficial és d'una altra fase (`lligues_passades`):
+        # s'ordenen pels encontres, com si l'oficial no hagués respost.
+        for clau in ignora_oficial:
+            official.pop(clau, None)
 
     group_rows: list[dict] = []
     standing_rows: list[dict] = []
-    partides_de = _caramboles_per_encontre(conn, lliga, season_id)
+    partides_de = _caramboles_per_encontre(conn, lliga, season_id, tota_la_lliga)
     for grp in groups:
         div, gid = grp["divisio_id"], grp["grup_id"]
         group_rows.append(
@@ -1614,6 +1640,7 @@ def publish_lliga(
                 "grup_id": gid,
                 "divisio_nom": noms.get((div, 0)),
                 "grup_nom": noms.get((div, gid)),
+                "temporada": temporada_txt,
             }
         )
         enc = conn.execute(
@@ -1622,9 +1649,9 @@ def publish_lliga(
                    p_match_local AS pml, p_match_visitant AS pmv,
                    p_parcials_local AS ppl, p_parcials_visitant AS ppv
             FROM encontres_lliga
-            WHERE lliga_id = ? AND divisio_id = ? AND grup_id = ? AND temporada_id = ?
+            WHERE lliga_id = ? AND divisio_id = ? AND grup_id = ? AND (temporada_id = ? OR ? = 1)
             """,
-            (lliga, div, gid, season_id),
+            (lliga, div, gid, season_id, int(tota_la_lliga)),
         ).fetchall()
         stats: dict[int, dict] = {}
 
@@ -1732,7 +1759,11 @@ def publish_lliga(
                 # clau de la taula és el text i hi caben totes dues.
                 eid = eid_per_oficial.get(id(off)) or _equip_id_oficial(off.equip, equips, repo)
                 s = stats.get(eid, ZEROS) if eid is not None else ZEROS
-                computed_pm = 3 * s["g"] + s["e"]
+                # Els punts que donen els encontres, sumats tal com la federació
+                # els va posar a cada un. No `3·G + E`: fins a la 2020-21 un
+                # encontre guanyat valia 2 punts, i amb la regla d'ara tots els
+                # equips d'aquelles temporades sortien «penalitzats».
+                computed_pm = s["pf"]
                 # Sanció federativa = punts esperats per victòries − punts
                 # oficials. Només > 0 és sanció; < 0 vol dir que ens falten
                 # resultats, que no és cap sanció.
@@ -1766,24 +1797,40 @@ def publish_lliga(
             # que n'hem comptat. Perdre'l seria pitjor que ensenyar-lo desordenat.
             sobrants = sorted(
                 ((eid, s) for eid, s in stats.items() if eid not in vistos and eid is not None),
-                key=lambda kv: (-(3 * kv[1]["g"] + kv[1]["e"]), -kv[1]["ppf"]),
+                key=lambda kv: (-(kv[1]["pf"]), -kv[1]["ppf"]),
             )
             for pos, (eid, s) in enumerate(sobrants, start=len(off_rows) + 1):
-                standing_rows.append(_fila(pos, eid, s, 3 * s["g"] + s["e"], None))
+                standing_rows.append(_fila(pos, eid, s, s["pf"], None))
             continue
 
         # Sense classificació oficial (la petició ha fallat) l'ordre es calcula
         # dels encontres, amb el mateix desempat que aplica la federació.
         ranked = sorted(
-            stats.items(), key=lambda kv: (-(3 * kv[1]["g"] + kv[1]["e"]), -kv[1]["ppf"])
+            stats.items(), key=lambda kv: (-(kv[1]["pf"]), -kv[1]["ppf"])
         )
         for pos, (eid, s) in enumerate(ranked, start=1):
-            standing_rows.append(_fila(pos, eid, s, 3 * s["g"] + s["e"], None))
+            standing_rows.append(_fila(pos, eid, s, s["pf"], None))
 
     counts = {f"{taules.standings}_arxivades": arxivades}
-    counts[taules.groups] = _upsert(
-        sb, taules.groups, group_rows, "lliga_id,divisio_id,grup_id", prog
-    )
+    try:
+        counts[taules.groups] = _upsert(
+            sb, taules.groups, group_rows, "lliga_id,divisio_id,grup_id", prog
+        )
+    except Exception as exc:
+        if not esquema_encara_no_hi_es(exc):
+            raise
+        prog(
+            "warn",
+            f"{taules.groups}: el Data API encara no veu la columna `temporada` (0032); "
+            "es publica sense. Si dura més d'una hora, la migració no s'ha aplicat.",
+        )
+        counts[taules.groups] = _upsert(
+            sb,
+            taules.groups,
+            [{k: v for k, v in r.items() if k != "temporada"} for r in group_rows],
+            "lliga_id,divisio_id,grup_id",
+            prog,
+        )
     try:
         counts[taules.standings] = _upsert(
             sb, taules.standings, standing_rows, "lliga_id,divisio_id,grup_id,equip", prog
@@ -2130,24 +2177,28 @@ def _crea_historic(conn: sqlite3.Connection) -> None:
 
 
 def ja_arxivada(conn: sqlite3.Connection, sb, temporada: str, lliga: str) -> bool:
-    """Si l'històric, el local o el del núvol, ja té aquella temporada."""
+    """Si l'històric, el local o el del núvol, ja té aquella temporada.
+
+    Es compara la MENA de la lliga (Tres Bandes o 4 Modalitats) i no el nom: les
+    temporades que es van importar del web antic hi són amb el nom d'aleshores
+    («LLIGA CATALANA 3 BANDES», 2018-19 i 2019-20), i comparant el text l'arxivat
+    les tornava a escriure al costat amb el nom d'ara.
+    """
+    from fcbillar.en_curs import mena_de_lliga
+
+    mena = mena_de_lliga(lliga)
     _crea_historic(conn)
-    if conn.execute(
-        "SELECT 1 FROM lliga_standings_hist WHERE temporada = ? AND lliga = ? LIMIT 1",
-        (temporada, lliga),
-    ).fetchone():
+    locals_ = conn.execute(
+        "SELECT DISTINCT lliga FROM lliga_standings_hist WHERE temporada = ?", (temporada,)
+    ).fetchall()
+    if any(mena_de_lliga(nom) == mena for (nom,) in locals_):
         return True
     # Les del núvol que no són a la BD local (importades des d'un altre PC) no
     # s'han de trepitjar amb el que queda a les taules en viu.
-    res = (
-        sb.table("lliga_standings_hist")
-        .select("temporada")
-        .eq("temporada", temporada)
-        .eq("lliga", lliga)
-        .limit(1)
-        .execute()
+    al_nuvol = _totes_amb(
+        lambda: sb.table("lliga_standings_hist").select("lliga").eq("temporada", temporada)
     )
-    return bool(res.data)
+    return any(mena_de_lliga(f["lliga"]) == mena for f in al_nuvol)
 
 
 def files_per_arxivar(
@@ -2213,7 +2264,9 @@ def arxiva_lligues_passades(
     """
     from fcbillar import en_curs
 
-    vives = sb.table(taules.standings).select("lliga_id").execute().data or []
+    # Totes les files, no les mil primeres: amb les temporades passades
+    # publicades n'hi ha milers, i una lliga tallada no s'arxivaria mai.
+    vives = _totes_amb(lambda: sb.table(taules.standings).select("lliga_id"))
     passades = sorted({r["lliga_id"] for r in vives} - {lliga_en_curs})
     if not passades:
         return 0
@@ -2565,6 +2618,15 @@ def _nm_simple(nom: str) -> str:
     return " ".join(n.strip().lower().split())
 
 
+def es_descans(nom: str | None) -> bool:
+    """L'«equip» Descans: la jornada que un grup senar deixa un equip sense jugar.
+
+    La federació el publica com un enfrontament més («C.B.VILANOVA - Descans») i
+    la ingesta el desa com si fos un club. No és cap encontre: no es publica.
+    """
+    return (nom or "").strip().upper().startswith("DESCANS")
+
+
 def _sig_partida_lliga(na, ca, nb, cb, ent) -> str:
     """La signatura d'una partida: la parella, les caramboles i les entrades.
 
@@ -2585,6 +2647,8 @@ def publish_lliga_player_rankings(
     db_path: Path | None = None,
     on_progress: Progress | None = None,
     lliga_id: int | None = None,
+    *,
+    tota_la_lliga: bool = False,
 ) -> dict[str, int]:
     """Rànquing individual de jugadors per grup de la lliga 3 bandes (punts + mitjana).
 
@@ -2650,9 +2714,9 @@ def publish_lliga_player_rankings(
                g.caramboles1 AS c1, g.caramboles2 AS c2, g.entrades AS e,
                g.equip1_id AS eq1, g.equip2_id AS eq2, g.extras_json AS ex
         FROM games g JOIN encontres_lliga en ON en.id = g.encontre_lliga_id
-        WHERE en.lliga_id = ? AND en.temporada_id = ? AND g.entrades > 0
+        WHERE en.lliga_id = ? AND (en.temporada_id = ? OR ? = 1) AND g.entrades > 0
         """,
-        (lliga, season_id),
+        (lliga, season_id, int(tota_la_lliga)),
     ):
         try:
             ex = json.loads(r["ex"] or "{}")
@@ -2696,9 +2760,9 @@ def publish_lliga_player_rankings(
                lp.player2_nom AS n2, lp.caramboles2 AS c2, lp.entrades AS e
         FROM lliga_pending_partides lp
         JOIN encontres_lliga en ON en.id = lp.encontre_lliga_id
-        WHERE en.lliga_id = ? AND en.temporada_id = ? AND lp.entrades > 0
+        WHERE en.lliga_id = ? AND (en.temporada_id = ? OR ? = 1) AND lp.entrades > 0
         """,
-        (lliga, season_id),
+        (lliga, season_id, int(tota_la_lliga)),
     ):
         sig = _sig_partida_lliga(r["n1"], r["c1"], r["n2"], r["c2"], r["e"])
         if sig in vistes.get(r["eid"], set()):
@@ -2840,6 +2904,7 @@ def publish_lliga_encontres(
     lliga_id: int | None = None,
     taules: _TaulesLliga = _TAULES_3B,
     temporada_id: int | None = None,
+    tota_la_lliga: bool = False,
 ) -> dict[str, int]:
     """Encontres de lliga 3 bandes (per jornada) + les seves partides individuals.
 
@@ -2875,10 +2940,17 @@ def publish_lliga_encontres(
         """
         SELECT id, encontre_id_extern, divisio_id, grup_id, jornada_id, data,
                equip_local_id, equip_visitant_id, p_match_local, p_match_visitant
-        FROM encontres_lliga WHERE lliga_id = ? AND temporada_id = ?
+        FROM encontres_lliga WHERE lliga_id = ? AND (temporada_id = ? OR ? = 1)
         """,
-        (lliga, season_id),
+        (lliga, season_id, int(tota_la_lliga)),
     ).fetchall()
+    # Les jornades de descans no són encontres (vegeu `es_descans`).
+    encs = [
+        e
+        for e in encs
+        if not es_descans(equips.get(e["equip_local_id"], ("", ""))[0])
+        and not es_descans(equips.get(e["equip_visitant_id"], ("", ""))[0])
+    ]
 
     # Ordre de jornada per grup: rang del jornada_id per data mínima.
     jdates: dict = defaultdict(dict)
@@ -2970,13 +3042,25 @@ def publish_lliga_encontres(
     counter: dict = defaultdict(int)
     vistes: dict[int, set[str]] = defaultdict(set)
 
-    def _afegeix(eid, mod, j1, c1, j2, c2, ent) -> None:
+    def _afegeix(eid, mod, j1, c1, j2, c2, ent, s1=None, s2=None, girada=False) -> None:
         # `eid` ve de la base local; al núvol hi va la clau estable.
         eid = clau_de.get(eid, eid)
         sig = _sig_partida_lliga(j1, c1, j2, c2, ent)
         if sig in vistes[eid]:
             return
         vistes[eid].add(sig)
+        if girada:
+            # A `games` el jugador 1 és gairebé sempre el de casa, però no
+            # sempre: quan `equip1_id` és l'equip visitant, la partida va girada.
+            # Publicada tal qual, el jugador de fora sortia com a local i
+            # l'encontre semblava guanyat per l'altre equip.
+            j1, c1, s1, j2, c2, s2 = j2, c2, s2, j1, c1, s1
+        # Una sèrie més llarga que les caramboles de la partida és un error de
+        # picat a l'acta (n'hi ha alguna a les temporades velles): millor buida.
+        if s1 is not None and c1 is not None and s1 > c1:
+            s1 = None
+        if s2 is not None and c2 is not None and s2 > c2:
+            s2 = None
         counter[eid] += 1
         part_rows.append(
             {
@@ -2988,36 +3072,44 @@ def publish_lliga_encontres(
                 "jugador_visitant": _disp(j2),
                 "caramboles_visitant": c2,
                 "entrades": ent,
+                "serie_local": s1,
+                "serie_visitant": s2,
             }
         )
 
     for r in conn.execute(
         """
         SELECT g.encontre_lliga_id AS eid, m.codi_fcb AS mod,
-               p1.nom AS j1, g.caramboles1 AS c1, p2.nom AS j2, g.caramboles2 AS c2, g.entrades AS e
+               p1.nom AS j1, g.caramboles1 AS c1, p2.nom AS j2, g.caramboles2 AS c2, g.entrades AS e,
+               g.serie_max1 AS s1, g.serie_max2 AS s2,
+               COALESCE(g.equip1_id = en.equip_visitant_id, 0) AS girada
         FROM games g JOIN encontres_lliga en ON en.id = g.encontre_lliga_id
         JOIN modalitats m ON m.id = g.modalitat_id
         JOIN players p1 ON p1.id = g.player1_id JOIN players p2 ON p2.id = g.player2_id
-        WHERE en.lliga_id = ? AND en.temporada_id = ?
+        WHERE en.lliga_id = ? AND (en.temporada_id = ? OR ? = 1)
         ORDER BY g.encontre_lliga_id, m.codi_fcb
         """,
-        (lliga, season_id),
+        (lliga, season_id, int(tota_la_lliga)),
     ):
-        _afegeix(r["eid"], r["mod"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"])
+        _afegeix(
+            r["eid"], r["mod"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"],
+            r["s1"], r["s2"], bool(r["girada"]),
+        )  # fmt: skip
 
     for r in conn.execute(
         """
         SELECT lp.encontre_lliga_id AS eid, lp.modalitat_codi AS mod,
                lp.player1_nom AS j1, lp.caramboles1 AS c1,
-               lp.player2_nom AS j2, lp.caramboles2 AS c2, lp.entrades AS e
+               lp.player2_nom AS j2, lp.caramboles2 AS c2, lp.entrades AS e,
+               lp.serie1 AS s1, lp.serie2 AS s2
         FROM lliga_pending_partides lp
         JOIN encontres_lliga en ON en.id = lp.encontre_lliga_id
-        WHERE en.lliga_id = ? AND en.temporada_id = ?
+        WHERE en.lliga_id = ? AND (en.temporada_id = ? OR ? = 1)
         ORDER BY lp.encontre_lliga_id, lp.rowid
         """,
-        (lliga, season_id),
+        (lliga, season_id, int(tota_la_lliga)),
     ):
-        _afegeix(r["eid"], r["mod"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"])
+        _afegeix(r["eid"], r["mod"], r["j1"], r["c1"], r["j2"], r["c2"], r["e"], r["s1"], r["s2"])
 
     # Les actes mal picades que algú ha apuntat a mà: vegeu `fcbillar.correccions`.
     from fcbillar import correccions as _correccions
@@ -3026,7 +3118,25 @@ def publish_lliga_encontres(
 
     counts = {}
     counts[taules.encontres] = _upsert(sb, taules.encontres, enc_rows, "encontre_id", prog)
-    counts[taules.partides] = _upsert(sb, taules.partides, part_rows, "encontre_id,ordre", prog)
+    try:
+        counts[taules.partides] = _upsert(
+            sb, taules.partides, part_rows, "encontre_id,ordre", prog
+        )
+    except Exception as exc:
+        # La sèrie major va arribar amb la migració 0032. Mentre el Data API no
+        # en vegi les columnes, les partides es publiquen sense.
+        if not esquema_encara_no_hi_es(exc):
+            raise
+        prog(
+            "warn",
+            f"{taules.partides}: el Data API encara no veu la sèrie major (0032); "
+            "es publica sense. Si dura més d'una hora, la migració no s'ha aplicat.",
+        )
+        sense = [
+            {k: v for k, v in r.items() if k not in ("serie_local", "serie_visitant")}
+            for r in part_rows
+        ]
+        counts[taules.partides] = _upsert(sb, taules.partides, sense, "encontre_id,ordre", prog)
     if corregides:
         counts[f"{taules.partides}_corregides"] = corregides
 
