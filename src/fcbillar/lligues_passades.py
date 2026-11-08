@@ -34,6 +34,7 @@ import json
 import sqlite3
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
+from itertools import combinations
 
 from fcbillar import en_curs
 
@@ -455,14 +456,17 @@ def _compara_amb_oficial(
     repo = Repository(conn)
 
     # Descansos per grup i equip, i jornades de cada grup.
-    descansos: Counter = Counter()
+    # La federació pot escriure el mateix descans dues vegades a la mateixa
+    # jornada (contra ell mateix i contra «Descans»): es compta per jornada.
+    jornades_de_descans: set = set()
     jornades: dict[tuple[int, int], set] = defaultdict(set)
     for e in tots if tots is not None else encs:
         jornades[(e["divisio_id"], e["grup_id"])].add(e["jornada_id"])
         if cloud_sync.es_jornada_de_descans(e, equips):
             loc, vis = e["equip_local_id"], e["equip_visitant_id"]
             equip = vis if cloud_sync.es_descans((equips.get(loc) or ("",))[0]) else loc
-            descansos[(e["divisio_id"], e["grup_id"], equip)] += 1
+            jornades_de_descans.add((e["divisio_id"], e["grup_id"], equip, e["jornada_id"]))
+    descansos: Counter = Counter((d, g, q) for d, g, q, _ in jornades_de_descans)
 
     def _desc(eid, filtre) -> int:
         return sum(n for (d, g, q), n in descansos.items() if q == eid and filtre(d, g))
@@ -494,6 +498,30 @@ def _compara_amb_oficial(
         return difs
 
     de_la_lliga = _stats(lambda e: True)
+    per_grup = {k: _stats(lambda e, k=k: (e["divisio_id"], e["grup_id"]) == k) for k in grups}
+
+    def _suma(*parts: dict) -> dict:
+        return {c: sum(p[c] for p in parts) for c in ("pj", "pf", "ppf")}
+
+    def _acumula_altres_grups(r, eid, grup) -> bool:
+        """Si l'oficial d'aquest grup suma els d'algun altre grup on l'equip ha jugat.
+
+        Passa amb les promocions i les finals curtes: la taula oficial de la fase
+        regular hi afegeix els dos encontres de la promoció, que són un grup a
+        part (i potser d'una altra divisió), però no els de la resta de la lliga.
+        """
+        altres = [k for k in grups if k != grup and eid in per_grup[k]]
+        if not altres or len(altres) > 6:
+            return False
+        for n in range(1, len(altres) + 1):
+            for combo in combinations(altres, n):
+                ks = (grup, *combo)
+                s = _suma(*(per_grup[k][eid] for k in ks))
+                desc = _desc(eid, lambda d, g, ks=ks: (d, g) in ks)
+                if not _difs(r, s, desc):
+                    return True
+        return False
+
     for div, gid in grups:
         off_rows = oficial.get((div, gid))
         if not off_rows:
@@ -530,6 +558,7 @@ def _compara_amb_oficial(
             if difs and (
                 not _difs(r, de_la_divisio[eid], desc_div)
                 or not _difs(r, de_la_lliga[eid], desc_lliga)
+                or _acumula_altres_grups(r, eid, (div, gid))
             ):
                 inf.afegeix(AVIS, "fase_amb_punts_acumulats", on, "l'oficial suma la fase regular")
                 continue

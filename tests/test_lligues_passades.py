@@ -400,3 +400,51 @@ def test_si_ens_falten_encontres_mana_l_oficial(entorn) -> None:
     inf = lp.analitza(conn, LLIGA, oficial)
     assert inf.equips_desquadrats == 2
     assert inf.grups_oficial_d_altra_fase == set()
+
+
+def test_el_descans_escrit_dues_vegades_compta_una_jornada(entorn) -> None:
+    db, _ = entorn
+    conn = _conn(db)
+    # La federació escriu el descans contra «Descans» i contra ell mateix.
+    conn.execute("INSERT INTO clubs (id, fcb_id, nom) VALUES (9, 'Descans', 'Descans')")
+    conn.execute("INSERT INTO equips (id, club_id, lletra) VALUES (9, 9, 'UNICO')")
+    for vis in (9, 1):
+        conn.execute(
+            "INSERT INTO encontres_lliga (lliga_id, divisio_id, grup_id, jornada_id, data, "
+            "equip_local_id, equip_visitant_id) VALUES (?, ?, ?, 12, '2021-04-01', 1, ?)",
+            (LLIGA, DIV, GRUP, vis),
+        )
+    conn.commit()
+    oficial = {
+        (DIV, GRUP): [
+            LligaClassificacioRow(1, "C.B.BANYOLES A", 3, 10, 3),
+            LligaClassificacioRow(2, "B.C.GRANOLLERS A", 1, 6, 2),
+        ]
+    }
+    inf = lp.analitza(conn, LLIGA, oficial)
+    assert inf.equips_desquadrats == 0, [i.__dict__ for i in inf.incidencies]
+
+
+def test_l_oficial_que_suma_nomes_la_promocio(entorn) -> None:
+    db, _ = entorn
+    conn = _conn(db)
+    # Una promoció i una altra fase on també han jugat. L'oficial del grup hi
+    # suma la promoció però no l'altra fase: ni la divisió ni la lliga quadren.
+    conn.execute(
+        """INSERT INTO encontres_lliga (id, lliga_id, divisio_id, grup_id, jornada_id,
+               encontre_id_extern, data, temporada_id, equip_local_id, equip_visitant_id,
+               p_parcials_local, p_match_local, p_parcials_visitant, p_match_visitant)
+           VALUES (101, ?, 95, 400, 30, 504, '2021-07-01', 9289, 1, 2, 4, 1, 4, 1),
+                  (102, ?, 96, 500, 40, 505, '2021-07-08', 9289, 1, 2, 6, 2, 2, 0)""",
+        (LLIGA, LLIGA),
+    )
+    conn.commit()
+    oficial = {
+        (DIV, GRUP): [
+            LligaClassificacioRow(1, "C.B.BANYOLES A", 4, 14, 3),
+            LligaClassificacioRow(2, "B.C.GRANOLLERS A", 2, 10, 3),
+        ]
+    }
+    inf = lp.analitza(conn, LLIGA, oficial)
+    assert inf.equips_desquadrats == 0, [i.__dict__ for i in inf.incidencies]
+    assert "fase_amb_punts_acumulats" in {i.tipus for i in inf.incidencies}
