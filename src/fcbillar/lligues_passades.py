@@ -14,9 +14,8 @@ no es publica sense passar abans per `analitza`, i el que no la supera no surt.
 Els controls, de més greu a menys:
 
 - ERROR (la lliga no es publica): mena o temporada desconegudes, grups sense
-  nom, encontres sense resultat (més d'un 2 %), equips que no existeixen o que
-  juguen contra ells mateixos, partides d'una modalitat que no és la de la
-  lliga, caramboles negatives, un jugador contra ell mateix, o una
+  nom, encontres sense resultat (més d'un 2 %), equips que no existeixen,
+  caramboles negatives, un jugador contra ell mateix, o una
   classificació que no quadra amb l'oficial en més d'un 10 % dels equips.
 - AVÍS (es publica, i surt a l'informe): encontres sense les quatre partides,
   parcials que no expliquen el resultat, partides sense entrades o sense
@@ -134,7 +133,9 @@ def mena_per_dades(conn: sqlite3.Connection, lliga_id: int) -> str | None:
     if not files:
         return None
     mods = Counter(r[1] for r in files)
-    if set(mods) == {1}:
+    # Tres Bandes encara que hi hagi alguna partida mal codificada (n'hi ha una
+    # de 1.789 a la 2017-18): ho diu l'anàlisi partida per partida.
+    if mods[1] >= 0.98 * len(files):
         return en_curs.MENA_3B
     per_encontre: dict[int, set[int]] = defaultdict(set)
     for eid, mod in files:
@@ -196,15 +197,11 @@ def analitza(
             "SELECT e.id, e.lletra, c.nom FROM equips e JOIN clubs c ON c.id = e.club_id"
         )
     }
-    from fcbillar.cloud_sync import es_descans
+    from fcbillar.cloud_sync import es_jornada_de_descans
 
-    encs = [
-        e
-        for e in conn.execute("SELECT * FROM encontres_lliga WHERE lliga_id = ?", (lliga_id,))
-        # Les jornades de descans no són encontres i no es publiquen.
-        if not es_descans(equips.get(e["equip_local_id"]))
-        and not es_descans(equips.get(e["equip_visitant_id"]))
-    ]
+    tots = conn.execute("SELECT * FROM encontres_lliga WHERE lliga_id = ?", (lliga_id,)).fetchall()
+    # Les jornades de descans no són encontres i no es publiquen.
+    encs = [e for e in tots if not es_jornada_de_descans(e, equips)]
     inf.encontres = len(encs)
     grups = sorted({(e["divisio_id"], e["grup_id"]) for e in encs if e["grup_id"]})
     inf.grups = len(grups)
@@ -246,7 +243,7 @@ def analitza(
             f"{inf.encontres - inf.amb_resultat} de {inf.encontres} encontres sense resultat",
         )
 
-    _compara_amb_oficial(conn, inf, lliga_id, grups, encs, oficial)
+    _compara_amb_oficial(conn, inf, lliga_id, grups, encs, oficial, tots)
     return inf
 
 
@@ -356,7 +353,7 @@ def _analitza_acta(inf: InformeLliga, a, on: str) -> None:
     inf.afegeix(AVIS, "partida_nomes_a_l_acta", p, "el rànquing federatiu no la té")
     c1, c2, ent = a["caramboles1"], a["caramboles2"], a["entrades"]
     if inf.mena == en_curs.MENA_3B and a["modalitat_codi"] not in (None, 1):
-        inf.afegeix(ERROR, "modalitat", p, f"modalitat {a['modalitat_codi']}")
+        inf.afegeix(AVIS, "modalitat", p, f"modalitat {a['modalitat_codi']}")
     if c1 is None or c2 is None or c1 < 0 or c2 < 0:
         inf.afegeix(ERROR, "caramboles", p, f"{c1} / {c2}")
         return
@@ -387,7 +384,7 @@ def _analitza_partida(inf: InformeLliga, g, on: str) -> None:
     c1, c2, ent = g["caramboles1"], g["caramboles2"], g["entrades"]
     mena = inf.mena
     if mena == en_curs.MENA_3B and g["mod"] != 1:
-        inf.afegeix(ERROR, "modalitat", p, f"modalitat {g['mod']} en una lliga de tres bandes")
+        inf.afegeix(AVIS, "modalitat", p, f"modalitat {g['mod']} en una lliga de tres bandes")
     if c1 is None or c2 is None or c1 < 0 or c2 < 0:
         inf.afegeix(ERROR, "caramboles", p, f"{c1} / {c2}")
         return
@@ -434,8 +431,14 @@ def _compara_amb_oficial(
     grups: list[tuple[int, int]],
     encs: list,
     oficial: dict[tuple[int, int], list] | None,
+    tots: list | None = None,
 ) -> None:
-    """La classificació que surt dels encontres contra la de la federació."""
+    """La classificació que surt dels encontres contra la de la federació.
+
+    `tots` són els encontres amb les jornades de descans incloses: l'oficial
+    compta el descans com a partit jugat (amb zero punts), i sense saber-ho tots
+    els equips d'un grup senar semblaven desquadrats.
+    """
     from fcbillar import cloud_sync
     from fcbillar.db.repository import Repository
 
@@ -451,6 +454,19 @@ def _compara_amb_oficial(
     }
     repo = Repository(conn)
 
+    # Descansos per grup i equip, i jornades de cada grup.
+    descansos: Counter = Counter()
+    jornades: dict[tuple[int, int], set] = defaultdict(set)
+    for e in tots if tots is not None else encs:
+        jornades[(e["divisio_id"], e["grup_id"])].add(e["jornada_id"])
+        if cloud_sync.es_jornada_de_descans(e, equips):
+            loc, vis = e["equip_local_id"], e["equip_visitant_id"]
+            equip = vis if cloud_sync.es_descans((equips.get(loc) or ("",))[0]) else loc
+            descansos[(e["divisio_id"], e["grup_id"], equip)] += 1
+
+    def _desc(eid, filtre) -> int:
+        return sum(n for (d, g, q), n in descansos.items() if q == eid and filtre(d, g))
+
     def _stats(filtre) -> dict[int, dict]:
         out: dict[int, dict] = defaultdict(lambda: {"pj": 0, "pf": 0, "ppf": 0})
         for e in encs:
@@ -465,10 +481,11 @@ def _compara_amb_oficial(
                 out[eq]["ppf"] += pp or 0
         return out
 
-    def _difs(r, s) -> list[str]:
+    def _difs(r, s, desc: int = 0) -> list[str]:
         difs = []
         # Les classificacions velles porten la columna de jugats a zero: no diu res.
-        if r.j and r.j != s["pj"]:
+        # I l'oficial pot comptar els descansos com a jugats.
+        if r.j and r.j not in (s["pj"], s["pj"] + desc):
             difs.append(f"jugats {s['pj']} i l'oficial {r.j}")
         if r.pm != s["pf"]:
             difs.append(f"punts {s['pf']} i l'oficial {r.pm}")
@@ -476,6 +493,7 @@ def _compara_amb_oficial(
             difs.append(f"parcials {s['ppf']} i l'oficial {r.pp}")
         return difs
 
+    de_la_lliga = _stats(lambda e: True)
     for div, gid in grups:
         off_rows = oficial.get((div, gid))
         if not off_rows:
@@ -484,7 +502,8 @@ def _compara_amb_oficial(
         inf.grups_amb_oficial += 1
         stats = _stats(lambda e, div=div, gid=gid: (e["divisio_id"], e["grup_id"]) == (div, gid))
         # Algunes fases finals arrosseguen els punts de la fase regular: es
-        # comparen també amb el total de la divisió.
+        # comparen també amb el total de la divisió i amb el de tota la lliga
+        # (les promocions són divisions a part, i també se sumen).
         de_la_divisio = _stats(lambda e, div=div: e["divisio_id"] == div)
         # I algunes (finals i promocions de les temporades velles) ensenyen
         # directament la taula d'una ALTRA fase, on l'equip havia jugat abans.
@@ -504,8 +523,14 @@ def _compara_amb_oficial(
                 inf.equips_desquadrats += 1
                 inf.afegeix(AVIS, "equip_oficial_sense_casar", on, "no és a cap encontre nostre")
                 continue
-            difs = _difs(r, stats[eid])
-            if difs and not _difs(r, de_la_divisio[eid]):
+            desc_grup = _desc(eid, lambda d, g, div=div, gid=gid: (d, g) == (div, gid))
+            desc_div = _desc(eid, lambda d, g, div=div: d == div)
+            desc_lliga = _desc(eid, lambda d, g: True)
+            difs = _difs(r, stats[eid], desc_grup)
+            if difs and (
+                not _difs(r, de_la_divisio[eid], desc_div)
+                or not _difs(r, de_la_lliga[eid], desc_lliga)
+            ):
                 inf.afegeix(AVIS, "fase_amb_punts_acumulats", on, "l'oficial suma la fase regular")
                 continue
             if difs and any(eid in a and not _difs(r, a[eid]) for a in altres_fases):
@@ -520,9 +545,11 @@ def _compara_amb_oficial(
             if difs:
                 inf.equips_desquadrats += 1
                 inf.afegeix(AVIS, "classificacio_no_quadra", on, "; ".join(difs))
-                # Els jugats no els canvia cap sanció: si no quadren, la taula
-                # oficial no és la d'aquesta fase.
-                if r.j and r.j != stats[eid]["pj"]:
+                # Si l'oficial diu més partits dels que permeten les jornades del
+                # grup, la taula no és la d'aquesta fase (finals i promocions
+                # curtes). Menys jugats dels que diu l'oficial, en canvi, vol dir
+                # que ens falten encontres, i llavors mana l'oficial.
+                if r.j and r.j > len(jornades[(div, gid)]):
                     d_altra_fase += 1
         if d_altra_fase:
             inf.grups_oficial_d_altra_fase.add((div, gid))
@@ -644,15 +671,18 @@ def verifica(db_path, inf: InformeLliga, taules, counts: dict[str, int]) -> None
 
         n_encontres = sum(
             1
-            for loc, vis in conn.execute(
-                "SELECT cl.nom, cv.nom FROM encontres_lliga e "
+            for loc_id, vis_id, loc, vis in conn.execute(
+                "SELECT e.equip_local_id, e.equip_visitant_id, cl.nom, cv.nom "
+                "FROM encontres_lliga e "
                 "LEFT JOIN equips l ON l.id = e.equip_local_id "
                 "LEFT JOIN clubs cl ON cl.id = l.club_id "
                 "LEFT JOIN equips v ON v.id = e.equip_visitant_id "
                 "LEFT JOIN clubs cv ON cv.id = v.club_id WHERE e.lliga_id = ?",
                 (inf.lliga_id,),
             )
-            if not es_descans(loc) and not es_descans(vis)
+            # Les jornades de descans no es publiquen: contra «Descans» o
+            # contra ell mateix (vegeu `cloud_sync.es_jornada_de_descans`).
+            if not es_descans(loc) and not es_descans(vis) and loc_id != vis_id
         )
     finally:
         conn.close()

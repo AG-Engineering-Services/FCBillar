@@ -2625,6 +2625,24 @@ def es_descans(nom: str | None) -> bool:
     return (nom or "").strip().upper().startswith("DESCANS")
 
 
+def es_jornada_de_descans(e, equips: dict) -> bool:
+    """Un encontre que és una jornada de descans, en qualsevol de les dues formes.
+
+    La federació l'escriu contra l'«equip» Descans (vegeu `es_descans`) o, a la
+    2025-26, com l'equip contra ell mateix. `equips` és id → nom, o id → una
+    tupla que comença pel nom.
+    """
+    loc, vis = e["equip_local_id"], e["equip_visitant_id"]
+    if loc is not None and loc == vis:
+        return True
+
+    def _nom(eid):
+        v = equips.get(eid)
+        return v[0] if isinstance(v, tuple) else v
+
+    return es_descans(_nom(loc)) or es_descans(_nom(vis))
+
+
 def _sig_partida_lliga(na, ca, nb, cb, ent) -> str:
     """La signatura d'una partida: la parella, les caramboles i les entrades.
 
@@ -2943,12 +2961,7 @@ def publish_lliga_encontres(
         (lliga, season_id, int(tota_la_lliga)),
     ).fetchall()
     # Les jornades de descans no són encontres (vegeu `es_descans`).
-    encs = [
-        e
-        for e in encs
-        if not es_descans(equips.get(e["equip_local_id"], ("", ""))[0])
-        and not es_descans(equips.get(e["equip_visitant_id"], ("", ""))[0])
-    ]
+    encs = [e for e in encs if not es_jornada_de_descans(e, equips)]
 
     # Ordre de jornada per grup: rang del jornada_id per data mínima.
     jdates: dict = defaultdict(dict)

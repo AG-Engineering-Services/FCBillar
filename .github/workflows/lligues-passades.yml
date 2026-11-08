@@ -31,6 +31,10 @@ on:
         description: "Ids separats per espais (buit = totes les passades)"
         required: false
         default: ""
+      forca_ingesta:
+        description: "Torna a llegir de la web totes les lligues triades, encara que tinguin resultats"
+        type: boolean
+        default: false
 
 # El mateix grup que la càrrega de cada nit: totes dues baixen i repugen la base.
 concurrency:
@@ -51,6 +55,7 @@ jobs:
       STATE_TAG: fcb-state
       APLICA: ${{ github.event.inputs.aplica }}
       LLIGUES: ${{ github.event.inputs.lligues }}
+      FORCA: ${{ github.event.inputs.forca_ingesta }}
     steps:
       - name: Comprova el que es demana
         run: |
@@ -81,6 +86,7 @@ jobs:
         run: |
           ARGS=(--ingereix --informe data/lligues-passades.md)
           if [ "$APLICA" = "true" ]; then ARGS+=(--aplica); fi
+          if [ "$FORCA" = "true" ]; then ARGS+=(--forca-ingesta); fi
           for l in $LLIGUES; do ARGS+=(--lliga "$l"); done
           set +e
           uv run --no-dev fcbillar lligues-passades "${ARGS[@]}"

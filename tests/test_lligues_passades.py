@@ -316,3 +316,87 @@ def test_una_serie_impossible_es_publica_buida(entorn) -> None:
     cloud_sync.publish_lliga_encontres(db, None, lliga_id=LLIGA, tota_la_lliga=True)
     primera = next(f for f in magatzem["lliga_partides"] if f["jugador_local"] == "J1")
     assert primera["serie_local"] is None and primera["serie_visitant"] == 4
+
+
+def test_l_equip_contra_ell_mateix_es_una_jornada_de_descans(entorn) -> None:
+    db, magatzem = entorn
+    conn = _conn(db)
+    conn.execute(
+        "INSERT INTO encontres_lliga (lliga_id, divisio_id, grup_id, jornada_id, data, "
+        "equip_local_id, equip_visitant_id) VALUES (?, ?, ?, 12, '2021-04-01', 1, 1)",
+        (LLIGA, DIV, GRUP),
+    )
+    conn.commit()
+    inf = lp.analitza(conn, LLIGA, _oficial())
+    assert inf.encontres == 2 and inf.publicable
+    cloud_sync.publish_lliga_encontres(db, None, lliga_id=LLIGA, tota_la_lliga=True)
+    assert len(magatzem["lliga_encontres"]) == 2
+
+
+def test_una_promocio_en_una_altra_divisio_que_acumula_tota_la_lliga(entorn) -> None:
+    db, _ = entorn
+    conn = _conn(db)
+    # Una promoció (divisió a part) amb un encontre; l'oficial hi suma tota la lliga.
+    for div, grup, nom in ((95, 0, "PROMOCIÓ"), (95, 400, "GRUP ÚNIC")):
+        conn.execute(
+            "INSERT INTO lliga_noms (lliga_id, divisio_id, grup_id, nom) VALUES (?,?,?,?)",
+            (LLIGA, div, grup, nom),
+        )
+    conn.execute(
+        """INSERT INTO encontres_lliga (id, lliga_id, divisio_id, grup_id, jornada_id,
+               encontre_id_extern, data, temporada_id, equip_local_id, equip_visitant_id,
+               p_parcials_local, p_match_local, p_parcials_visitant, p_match_visitant)
+           VALUES (101, ?, 95, 400, 30, 504, '2021-07-01', 9289, 1, 2, 4, 1, 4, 1)""",
+        (LLIGA,),
+    )
+    conn.commit()
+    oficial = _oficial()
+    oficial[(95, 400)] = [
+        LligaClassificacioRow(1, "C.B.BANYOLES A", 4, 14, 3),
+        LligaClassificacioRow(2, "B.C.GRANOLLERS A", 2, 10, 3),
+    ]
+    inf = lp.analitza(conn, LLIGA, oficial)
+    assert inf.equips_desquadrats == 0
+    assert "fase_amb_punts_acumulats" in {i.tipus for i in inf.incidencies}
+
+
+def test_l_oficial_que_compta_els_descansos_com_a_jugats_quadra(entorn) -> None:
+    db, _ = entorn
+    conn = _conn(db)
+    # El Banyoles descansa una jornada; l'oficial li compta 3 jugats.
+    conn.execute("INSERT INTO clubs (id, fcb_id, nom) VALUES (9, 'Descans', 'Descans')")
+    conn.execute("INSERT INTO equips (id, club_id, lletra) VALUES (9, 9, 'UNICO')")
+    conn.execute(
+        "INSERT INTO encontres_lliga (lliga_id, divisio_id, grup_id, jornada_id, data, "
+        "equip_local_id, equip_visitant_id) VALUES (?, ?, ?, 12, '2021-04-01', 1, 9)",
+        (LLIGA, DIV, GRUP),
+    )
+    conn.commit()
+    oficial = {
+        (DIV, GRUP): [
+            LligaClassificacioRow(1, "C.B.BANYOLES A", 3, 10, 3),
+            LligaClassificacioRow(2, "B.C.GRANOLLERS A", 1, 6, 2),
+        ]
+    }
+    inf = lp.analitza(conn, LLIGA, oficial)
+    assert inf.equips_desquadrats == 0, [i.__dict__ for i in inf.incidencies]
+
+
+def test_si_ens_falten_encontres_mana_l_oficial(entorn) -> None:
+    db, _ = entorn
+    # L'oficial diu 2 jugats al grup però amb més punts: ens falta un encontre,
+    # no és la taula d'una altra fase (el grup té dues jornades).
+    oficial = {
+        (DIV, GRUP): [
+            LligaClassificacioRow(1, "C.B.BANYOLES A", 3, 10, 2),
+            LligaClassificacioRow(2, "B.C.GRANOLLERS A", 1, 6, 2),
+        ]
+    }
+    conn = _conn(db)
+    conn.execute(
+        "UPDATE encontres_lliga SET p_match_local = NULL, p_match_visitant = NULL WHERE id = 2"
+    )
+    conn.commit()
+    inf = lp.analitza(conn, LLIGA, oficial)
+    assert inf.equips_desquadrats == 2
+    assert inf.grups_oficial_d_altra_fase == set()
