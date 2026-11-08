@@ -358,3 +358,45 @@ def test_una_promocio_en_una_altra_divisio_que_acumula_tota_la_lliga(entorn) -> 
     inf = lp.analitza(conn, LLIGA, oficial)
     assert inf.equips_desquadrats == 0
     assert "fase_amb_punts_acumulats" in {i.tipus for i in inf.incidencies}
+
+
+def test_l_oficial_que_compta_els_descansos_com_a_jugats_quadra(entorn) -> None:
+    db, _ = entorn
+    conn = _conn(db)
+    # El Banyoles descansa una jornada; l'oficial li compta 3 jugats.
+    conn.execute("INSERT INTO clubs (id, fcb_id, nom) VALUES (9, 'Descans', 'Descans')")
+    conn.execute("INSERT INTO equips (id, club_id, lletra) VALUES (9, 9, 'UNICO')")
+    conn.execute(
+        "INSERT INTO encontres_lliga (lliga_id, divisio_id, grup_id, jornada_id, data, "
+        "equip_local_id, equip_visitant_id) VALUES (?, ?, ?, 12, '2021-04-01', 1, 9)",
+        (LLIGA, DIV, GRUP),
+    )
+    conn.commit()
+    oficial = {
+        (DIV, GRUP): [
+            LligaClassificacioRow(1, "C.B.BANYOLES A", 3, 10, 3),
+            LligaClassificacioRow(2, "B.C.GRANOLLERS A", 1, 6, 2),
+        ]
+    }
+    inf = lp.analitza(conn, LLIGA, oficial)
+    assert inf.equips_desquadrats == 0, [i.__dict__ for i in inf.incidencies]
+
+
+def test_si_ens_falten_encontres_mana_l_oficial(entorn) -> None:
+    db, _ = entorn
+    # L'oficial diu 2 jugats al grup però amb més punts: ens falta un encontre,
+    # no és la taula d'una altra fase (el grup té dues jornades).
+    oficial = {
+        (DIV, GRUP): [
+            LligaClassificacioRow(1, "C.B.BANYOLES A", 3, 10, 2),
+            LligaClassificacioRow(2, "B.C.GRANOLLERS A", 1, 6, 2),
+        ]
+    }
+    conn = _conn(db)
+    conn.execute(
+        "UPDATE encontres_lliga SET p_match_local = NULL, p_match_visitant = NULL WHERE id = 2"
+    )
+    conn.commit()
+    inf = lp.analitza(conn, LLIGA, oficial)
+    assert inf.equips_desquadrats == 2
+    assert inf.grups_oficial_d_altra_fase == set()
