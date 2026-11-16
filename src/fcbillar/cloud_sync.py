@@ -7012,13 +7012,16 @@ _NACIONAL: tuple[tuple[str, tuple[str, ...]], ...] = (
 
 
 def publish_nacional(
-    db_path: Path | None = None, on_progress: Progress | None = None
+    db_path: Path | None = None,
+    on_progress: Progress | None = None,
+    abans_de: str | None = None,
 ) -> dict[str, int]:
     """Puja la Lliga Nacional de la RFEB, tal com s'ha llegit dels seus PDF.
 
     Es reemplaça per temporada i divisió: una jornada que es torna a ingerir amb
     una correcció no ha de deixar files de la versió anterior. Les temporades que
-    la base local no té no es toquen.
+    la base local no té no es toquen, i amb `abans_de` tampoc les que hi són a
+    partir d'aquella: la base d'un PC pot tenir la temporada en curs endarrerida.
 
     Són taules a part i s'hi han de quedar: res d'aquí entra a `games`,
     `pending_games` ni a cap rànquing, i cap fila apunta a `players` o `clubs`.
@@ -7035,7 +7038,12 @@ def publish_nacional(
         if taula not in taules:
             prog("warn", f"{taula}: no és a la BD local")
             continue
-        files = [dict(r) for r in conn.execute(f"SELECT * FROM {taula}")]
+        files = [
+            dict(r)
+            for r in conn.execute(
+                f"SELECT * FROM {taula} WHERE ? IS NULL OR temporada < ?", (abans_de, abans_de)
+            )
+        ]
         if not files:
             # Sense res a la base local no es publica ni es retira: vol dir «no en
             # sé res», no «no n'hi ha cap».
@@ -7047,6 +7055,23 @@ def publish_nacional(
     conn.close()
     if not counts:
         prog("warn", "lliga nacional: sense dades locals (executa `fcbillar ingest-nacional`)")
+        return counts
+
+    # Els lligams amb la fitxa del cens surten del CSV validat a mà, no de la BBDD.
+    from fcbillar.config import PROJECT_ROOT
+    from fcbillar.nacional_fitxes import lligams_validats
+
+    lligams = lligams_validats(PROJECT_ROOT / "fonts" / "nacional" / "fitxes.csv")
+    if lligams:
+        counts["nacional_fitxes"] = _publica_reemplaçant(
+            sb,
+            "nacional_fitxes",
+            [{"jugador": j, "fcb_id": f} for j, f in lligams.items()],
+            ("jugador",),
+            (),
+            prog,
+            {()},
+        )
     return counts
 
 

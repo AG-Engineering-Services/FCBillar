@@ -2302,6 +2302,34 @@ def ingest_nacional_cmd(
         raise typer.Exit(1)
 
 
+@app.command("nacional-historic")
+def nacional_historic_cmd(
+    carpetes: list[str] = typer.Argument(  # noqa: B008
+        ..., help="Carpetes amb PDF, de menys a més preferent: l'última mana."
+    ),
+    abans_de: str = typer.Option(
+        "2026-2027", "--abans-de", help="Primera temporada que NO es toca (la que és en curs)."
+    ),
+) -> None:
+    """Carrega a la BBDD local temporades passades de la Lliga Nacional.
+
+    No publica res: després, `fcbillar publish-nacional`. Tornar-ho a executar
+    reemplaça el que ja hi ha, no ho duplica.
+    """
+    from collections import Counter
+    from pathlib import Path
+
+    from fcbillar.nacional_historic import carrega
+
+    conn = ensure_schema(get_settings().db_path)
+    res = carrega(conn, [Path(c) for c in carpetes], abans_de)
+    conn.close()
+    for r in res:
+        if r.estat != "desat":
+            console.print(f"[dim]{r.estat}[/] {r.fitxer}: {r.detall}")
+    console.print(dict(Counter(r.estat for r in res)))
+
+
 @app.command("nacional-candidats")
 def nacional_candidats_cmd(
     pdfs: list[str] = typer.Argument(  # noqa: B008
@@ -2415,7 +2443,14 @@ def nacional_puja_cmd(
 
 
 @app.command("publish-nacional")
-def publish_nacional_cmd() -> None:
+def publish_nacional_cmd(
+    abans_de: str = typer.Option(
+        None,
+        "--abans-de",
+        help="Publica només les temporades anteriors a aquesta (`2026-2027`). Per pujar "
+        "l'històric des d'un PC que no té la temporada en curs al dia.",
+    ),
+) -> None:
     """Publica només la Lliga Nacional. La resta del núvol no es toca.
 
     Per al procés curt que corre quan algú puja un PDF: tornar a publicar-ho tot
@@ -2426,7 +2461,9 @@ def publish_nacional_cmd() -> None:
     def _prog(level: str, msg: str) -> None:
         console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
 
-    counts = publica_si_hi_es("nacional", lambda: publish_nacional(on_progress=_prog), _prog)
+    counts = publica_si_hi_es(
+        "nacional", lambda: publish_nacional(on_progress=_prog, abans_de=abans_de), _prog
+    )
     console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
     if any(v < 0 for v in counts.values()):
         raise typer.Exit(1)

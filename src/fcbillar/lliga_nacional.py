@@ -54,7 +54,7 @@ construeixi a sobre:
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date
 from pathlib import Path
 
@@ -493,7 +493,25 @@ def _millors_series(paraules: list[_Paraula], amplada: float) -> list[MillorSeri
 
 
 def llegeix_jornada(cami: str | Path) -> Jornada:
-    """Llegeix el PDF d'una jornada. Llança `FormatDesconegut` si no té la forma esperada."""
+    """Llegeix el PDF d'una jornada, de qualsevol divisió.
+
+    Cada divisió té la seva disposició i es proven per ordre: Primera, Honor i
+    Segona. Llança `FormatDesconegut` si no és cap de les tres.
+    """
+    errors = []
+    for nom, lector in (
+        ("Primera", _llegeix_jornada_primera),
+        ("Honor", llegeix_jornada_honor),
+        ("Segona", llegeix_jornada_segona),
+    ):
+        try:
+            return lector(cami)
+        except FormatDesconegut as e:
+            errors.append(f"{nom}: {e}")
+    raise FormatDesconegut(" ".join(errors))
+
+
+def _llegeix_jornada_primera(cami: str | Path) -> Jornada:
     import pdfplumber
 
     grups: list[GrupDeJornada] = []
@@ -505,7 +523,10 @@ def llegeix_jornada(cami: str | Path) -> Jornada:
             if not paraules:
                 continue
             linies = _linies(paraules)
-            capcalera = capcalera or _capcalera(linies)
+            aquesta = _capcalera(linies)
+            if capcalera and aquesta and aquesta[0] != capcalera[0]:
+                raise FormatDesconegut(_MES_D_UNA)
+            capcalera = capcalera or aquesta
             if any(p.text == "MEJORES" for p in paraules):
                 series = _millors_series(paraules, float(pagina.width))
                 continue
@@ -522,6 +543,395 @@ def llegeix_jornada(cami: str | Path) -> Jornada:
     if not grups:
         raise FormatDesconegut("El PDF no porta cap grup.")
     return Jornada(numero=capcalera[0], data=capcalera[1], grups=grups, millors_series=series)
+
+
+# --------------------------- Divisió d'Honor ---------------------------
+#
+# Pàgina vertical i un encontre rere l'altre, que es llegeix bé línia a línia:
+#
+#     JORNADA 5ª - 22/11/2025
+#     C.B. AYAMONTE 4 4 DS PREDATOR CARTAGENA
+#     Javier Díaz Rodríguez 40 13 Carlos Anguita Díaz en 12
+#     ... (quatre partides)
+#     1,330 125 129 1,372 94
+#
+# A la capçalera de l'encontre, les partides guanyades per cada equip; a cada
+# partida, les caramboles de cada jugador i les entrades; als totals, mitjana i
+# caramboles de cada equip i entrades. A la pàgina següent hi ha la classificació
+# d'equips i les millors sèries.
+
+#: Hi ha PDF amb unes quantes jornades seguides («liga_nal_h_j7a9.pdf»). Llegits
+#: com si fossin una, els encontres de totes quedarien a la primera.
+_MES_D_UNA = "El PDF porta més d'una jornada."
+
+_RE_DATA_NUMERICA = re.compile(r"(\d{1,2})/(\d{1,2})/(\d{4})")
+_RE_ENCONTRE_HONOR = re.compile(r"^(\D+?) (\d+) (\d+) (\D+)$")
+_RE_PARTIDA_HONOR = re.compile(r"^(\D+?) (\d+) (\d+) (\D+?) en (\d+)$")
+_RE_TOTALS_HONOR = re.compile(r"^(\d+,\d+) (\d+) (\d+) (\d+,\d+) (\d+)$")
+_RE_FILA_EQUIPS = re.compile(
+    r"^(\d+)º? (\D+?) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+,\d+) (\d+) (\d+)$"
+)
+_RE_SERIE = re.compile(r"^(\D+?) (\d+) \D+? \d+,\d+$")
+
+
+def _linies_de_text(cami: str | Path) -> list[str]:
+    import pdfplumber
+
+    with pdfplumber.open(str(cami)) as pdf:
+        return [
+            linia.strip()
+            for pagina in pdf.pages
+            for linia in (pagina.extract_text() or "").split("\n")
+            if linia.strip()
+        ]
+
+
+def _sense_accents(text: str) -> str:
+    import unicodedata
+
+    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().upper()
+
+
+def llegeix_jornada_honor(cami: str | Path) -> Jornada:
+    """Llegeix el PDF d'una jornada de la Divisió d'Honor."""
+    linies = _linies_de_text(cami)
+    capcalera = None
+    for text in linies[:4]:
+        m, d = _RE_JORNADA.search(text), _RE_DATA_NUMERICA.search(text)
+        if m:
+            quan = date(int(d.group(3)), int(d.group(2)), int(d.group(1))) if d else None
+            capcalera = (int(m.group(1)), quan)
+            break
+    if capcalera is None:
+        raise FormatDesconegut("No trobo la línia «JORNADA …» a dalt de tot.")
+
+    encontres: list[EncontreNacional] = []
+    classificacio: list[FilaDeClassificacio] = []
+    series_crues: list[tuple[str, int]] = []
+    obert: tuple[re.Match, list[PartidaNacional]] | None = None
+    seccio = "encontres"
+    for text in linies:
+        if text.startswith("CLASIFICACI"):
+            seccio = "classificacio"
+            continue
+        if text.startswith("MEJORES SERIES"):
+            seccio = "series"
+            continue
+        if text.startswith("PRÓXIMA JORNADA"):
+            break
+        if (m := _RE_JORNADA.search(text)) and int(m.group(1)) != capcalera[0]:
+            raise FormatDesconegut(_MES_D_UNA)
+        if seccio == "classificacio":
+            if f := _RE_FILA_EQUIPS.match(text):
+                pos, equip, *n = f.groups()
+                classificacio.append(
+                    FilaDeClassificacio(
+                        posicio=int(pos),
+                        equip=equip,
+                        jugats=int(n[0]),
+                        guanyats=int(n[1]),
+                        empatats=int(n[2]),
+                        perduts=int(n[3]),
+                        caramboles=int(n[4]),
+                        entrades=int(n[5]),
+                        mitjana=_decimal(n[6]),
+                        parcials=int(n[7]),
+                        punts=int(n[8]),
+                    )
+                )
+            continue
+        if seccio == "series":
+            if s := _RE_SERIE.match(text):
+                series_crues.append((s.group(1), int(s.group(2))))
+            continue
+
+        if obert is None:
+            if e := _RE_ENCONTRE_HONOR.match(text):
+                obert = (e, [])
+            continue
+        capcal, partides = obert
+        if p := _RE_PARTIDA_HONOR.match(text):
+            partides.append(
+                PartidaNacional(
+                    ordre=len(partides) + 1,
+                    jugador_local=p.group(1),
+                    caramboles_local=int(p.group(2)),
+                    jugador_visitant=p.group(4),
+                    caramboles_visitant=int(p.group(3)),
+                    entrades=int(p.group(5)),
+                )
+            )
+            continue
+        t = _RE_TOTALS_HONOR.match(text)
+        if t is None:
+            raise FormatDesconegut(f"Línia inesperada dins d'un encontre: {text!r}")
+        car_l, car_v, entr = int(t.group(2)), int(t.group(3)), int(t.group(5))
+        if (
+            not partides
+            or sum(x.caramboles_local for x in partides) != car_l
+            or sum(x.caramboles_visitant for x in partides) != car_v
+            or sum(x.entrades for x in partides) != entr
+        ):
+            raise FormatDesconegut(f"Els totals de {capcal.group(1)} no quadren amb les partides.")
+        encontres.append(
+            EncontreNacional(
+                local=capcal.group(1),
+                visitant=capcal.group(4),
+                punts_local=int(capcal.group(2)),
+                punts_visitant=int(capcal.group(3)),
+                caramboles_local=car_l,
+                caramboles_visitant=car_v,
+                entrades=entr,
+                mitjana_local=_decimal(t.group(1)),
+                mitjana_visitant=_decimal(t.group(4)),
+                partides=partides,
+            )
+        )
+        obert = None
+
+    if obert is not None:
+        raise FormatDesconegut(f"L'encontre de {obert[0].group(1)} no té línia de totals.")
+    if not encontres:
+        raise FormatDesconegut("No hi ha cap encontre amb el format de la Divisió d'Honor.")
+
+    return Jornada(
+        numero=capcalera[0],
+        data=capcalera[1],
+        grups=[GrupDeJornada(grup=None, classificacio=classificacio, encontres=encontres)],
+        millors_series=_series(series_crues, {f.equip for f in classificacio}),
+    )
+
+
+def _series(crues: list[tuple[str, int]], equips: set[str]) -> list[MillorSerie]:
+    """Separa jugador i equip de cada línia de la taula de millors sèries.
+
+    Van enganxats i l'equip s'hi escriu en minúscules: és el de la classificació
+    amb què acaba la línia. Si n'hi ha cap d'un equip que no hi és, no en torna cap.
+    """
+    per_llargada = sorted(equips, key=len, reverse=True)
+    out = []
+    for nom_i_equip, serie in crues:
+        net = _sense_accents(nom_i_equip)
+        equip = next((q for q in per_llargada if net.endswith(" " + _sense_accents(q))), None)
+        if equip is None:
+            # La llista és de tota la divisió però el PDF només porta un grup
+            # (Primera 2020-2022): sense les sèries, i no se'n desa cap a mitges.
+            return []
+        jugador = nom_i_equip[: len(nom_i_equip) - len(equip)].strip()
+        out.append(MillorSerie(jugador=jugador, equip=equip, serie=serie))
+    return out
+
+
+# --------------------------- Segona Divisió ---------------------------
+#
+# Grups un rere l'altre, i a cada encontre:
+#
+#     C.B. HERVAS C.B. KALIMA-RIVAS "B"
+#     Javier Prieto Maroto 40 40 23 José L. Trillo Alonso
+#     8 Álvaro Esteban Vicente 36 50 32 Jesús Gutiérrez García 0
+#     ... (quatre partides)
+#     0,742 141 190 110 0,579
+#
+# Els dos equips van enganxats a la capçalera: el visitant comença on comencen
+# els noms dels jugadors visitants. A cada partida, caramboles del local,
+# entrades i caramboles del visitant. Les partides guanyades per cada equip van
+# al marge d'una de les files. Al final de cada grup, la seva classificació.
+
+_RE_TOTALS_SEGONA = re.compile(r"^(\d+,\d+) (\d+) (\d+) (\d+) (\d+,\d+)$")
+_RE_GRUP = re.compile(r"^GRUPO ([A-Z])$")
+
+
+def llegeix_jornada_segona(cami: str | Path) -> Jornada:
+    """Llegeix el PDF d'una jornada de la Segona Divisió (un o més grups)."""
+    import pdfplumber
+
+    with pdfplumber.open(str(cami)) as pdf:
+        linies = [li for pagina in pdf.pages for li in _linies(_paraules(pagina))]
+
+    capcalera = None
+    for linia in linies[:8]:
+        text = _text(linia)
+        m, d = _RE_JORNADA.search(text), _RE_DATA.search(text)
+        if m:
+            quan = None
+            if d and d.group(2).lower() in _MESOS:
+                quan = date(int(d.group(3)), _MESOS[d.group(2).lower()], int(d.group(1)))
+            capcalera = (int(m.group(1)), quan)
+            break
+    if capcalera is None:
+        raise FormatDesconegut("No trobo la línia «JORNADA …» a dalt de tot.")
+
+    grups: dict[str, GrupDeJornada] = {}
+    grup: str | None = None
+    capcal: list[_Paraula] | None = None
+    files: list[list[_Paraula]] = []
+    salta = False
+    series_crues: list[tuple[str, int]] = []
+    a_les_series = False
+    for linia in linies:
+        text = _text(linia)
+        if text.startswith("MEJORES SERIES"):
+            a_les_series = True
+            continue
+        if a_les_series:
+            if text.startswith("PRÓXIMA JORNADA"):
+                break
+            if s := _RE_SERIE.match(text):
+                series_crues.append((s.group(1), int(s.group(2))))
+            continue
+        if g := _RE_GRUP.match(text):
+            grup = g.group(1)
+            grups[grup] = GrupDeJornada(grup=grup)
+            capcal, files, salta = None, [], False
+            continue
+        if m := _RE_JORNADA.search(text):
+            if int(m.group(1)) != capcalera[0]:
+                raise FormatDesconegut(_MES_D_UNA)
+            continue
+        if grup is None:
+            continue
+        if salta:  # l'equip que descansa
+            salta = False
+            continue
+        if text.startswith("DESCANSA"):
+            # «DESCANSA» sol, amb l'equip a la línia següent, o «DESCANSA: equip».
+            salta = text == "DESCANSA"
+            continue
+        if f := _RE_FILA_EQUIPS.match(text):
+            pos, equip, *n = f.groups()
+            grups[grup].classificacio.append(
+                FilaDeClassificacio(
+                    posicio=int(pos),
+                    equip=equip,
+                    jugats=int(n[0]),
+                    guanyats=int(n[1]),
+                    empatats=int(n[2]),
+                    perduts=int(n[3]),
+                    caramboles=int(n[4]),
+                    entrades=int(n[5]),
+                    mitjana=_decimal(n[6]),
+                    parcials=int(n[7]),
+                    punts=int(n[8]),
+                )
+            )
+            continue
+        if t := _RE_TOTALS_SEGONA.match(text):
+            if capcal is None:
+                raise FormatDesconegut(f"Totals sense encontre al grup {grup}: {text!r}")
+            grups[grup].encontres.append(_encontre_segona(capcal, files, t))
+            capcal, files = None, []
+            continue
+        sense_numeros = not any(_RE_ENTER.match(p.text) or _RE_DECIMAL.match(p.text) for p in linia)
+        if capcal is None or (sense_numeros and not files):
+            # Sense partides encara, una línia sense números és la capçalera; si
+            # n'arriba una altra, la primera era un rètol de dalt de pàgina.
+            if sense_numeros and not text.startswith(("CLASIFICACI", "Clas.")):
+                capcal = linia
+            continue
+        files.append(linia)
+
+    if files:
+        raise FormatDesconegut(f"L'encontre «{_text(capcal)}» no té línia de totals.")
+    trobats = [g for g in grups.values() if g.encontres]
+    if not trobats:
+        raise FormatDesconegut("No hi ha cap encontre amb el format de la Segona Divisió.")
+    equips = {f.equip for g in trobats for f in g.classificacio}
+    trobats = [
+        replace(
+            g, encontres=[_parteix_amb_la_classificacio(e, g.classificacio) for e in g.encontres]
+        )
+        for g in trobats
+    ]
+    return Jornada(
+        numero=capcalera[0],
+        data=capcalera[1],
+        grups=trobats,
+        millors_series=_series(series_crues, equips),
+    )
+
+
+def _clau_equip(nom: str) -> str:
+    return re.sub(r"[^A-Z0-9]", "", _sense_accents(nom))
+
+
+def _parteix_amb_la_classificacio(
+    e: EncontreNacional, classificacio: list[FilaDeClassificacio]
+) -> EncontreNacional:
+    """Torna a partir els dos equips de la capçalera amb els noms de la classificació.
+
+    El tall per posició falla quan el nom del visitant és més llarg que la seva
+    columna («R.C. DE REGATAS C.C.R. | CHAPELA-RODAVIGO»).
+    """
+    claus = {_clau_equip(f.equip) for f in classificacio}
+    mots = f"{e.local} {e.visitant}".split()
+    for i in range(1, len(mots)):
+        local, visitant = " ".join(mots[:i]), " ".join(mots[i:])
+        if _clau_equip(local) in claus and _clau_equip(visitant) in claus:
+            return replace(e, local=local, visitant=visitant)
+    return e
+
+
+def _encontre_segona(
+    capcal: list[_Paraula], files: list[list[_Paraula]], totals: re.Match
+) -> EncontreNacional:
+    partides: list[PartidaNacional] = []
+    punts: list[int] = []
+    x_visitant = None
+    for linia in files:
+        paraules = list(linia)
+        # Els punts de l'encontre, quan hi són, al principi i al final de la fila.
+        if len(paraules) > 5 and _RE_ENTER.match(paraules[0].text):
+            punts.append(int(paraules.pop(0).text))
+            if _RE_ENTER.match(paraules[-1].text):
+                punts.append(int(paraules.pop().text))
+        idx = next(
+            (
+                i
+                for i in range(1, len(paraules) - 3)
+                if all(_RE_ENTER.match(p.text) for p in paraules[i : i + 3])
+            ),
+            None,
+        )
+        if idx is None:
+            raise FormatDesconegut(f"Partida sense caramboles i entrades: {_text(linia)!r}")
+        visitant = paraules[idx + 3 :]
+        x_visitant = visitant[0].x0 if x_visitant is None else min(x_visitant, visitant[0].x0)
+        partides.append(
+            PartidaNacional(
+                ordre=len(partides) + 1,
+                jugador_local=_text(paraules[:idx]),
+                caramboles_local=int(paraules[idx].text),
+                jugador_visitant=_text(visitant),
+                caramboles_visitant=int(paraules[idx + 2].text),
+                entrades=int(paraules[idx + 1].text),
+            )
+        )
+    nom = _text(capcal)
+    if len(punts) != 2:
+        raise FormatDesconegut(f"No trobo el resultat de l'encontre «{nom}».")
+    local = [p for p in capcal if p.x0 < x_visitant - 3]
+    visitant = [p for p in capcal if p.x0 >= x_visitant - 3]
+    if not local or not visitant:
+        raise FormatDesconegut(f"No sé partir els dos equips de «{nom}».")
+    car_l, entr, car_v = int(totals.group(2)), int(totals.group(3)), int(totals.group(4))
+    if (
+        sum(p.caramboles_local for p in partides) != car_l
+        or sum(p.caramboles_visitant for p in partides) != car_v
+        or sum(p.entrades for p in partides) != entr
+    ):
+        raise FormatDesconegut(f"Els totals de «{nom}» no quadren amb les partides.")
+    return EncontreNacional(
+        local=_text(local),
+        visitant=_text(visitant),
+        punts_local=punts[0],
+        punts_visitant=punts[1],
+        caramboles_local=car_l,
+        caramboles_visitant=car_v,
+        entrades=entr,
+        mitjana_local=_decimal(totals.group(1)),
+        mitjana_visitant=_decimal(totals.group(5)),
+        partides=partides,
+    )
 
 
 def llegeix_classificacio_de_jugadors(cami: str | Path) -> list[JugadorClassificat]:
@@ -599,22 +1009,24 @@ def desa_jornada(conn, jornada: Jornada, divisio: str, temporada: str | None = N
             raise ValueError("La jornada no porta data: cal dir-ne la temporada.")
         temporada = temporada_de(jornada.data)
     quan = jornada.data.isoformat() if jornada.data else None
-    clau = (temporada, divisio, jornada.numero)
 
-    conn.execute(
-        "DELETE FROM nacional_partides WHERE temporada = ? AND divisio = ? AND jornada = ?", clau
-    )
-    conn.execute(
-        "DELETE FROM nacional_encontres WHERE temporada = ? AND divisio = ? AND jornada = ?", clau
-    )
-    conn.execute(
-        "DELETE FROM nacional_classificacio WHERE temporada = ? AND divisio = ? AND jornada = ?",
-        clau,
-    )
-    conn.execute(
-        "DELETE FROM nacional_millors_series WHERE temporada = ? AND divisio = ? AND jornada = ?",
-        clau,
-    )
+    # Només els grups que porta el PDF: a Segona, el grup A i els B a D surten en
+    # PDF separats, cadascun amb la seva numeració de jornades, i esborrar la
+    # jornada sencera s'enduria els de l'altre fitxer.
+    for g in jornada.grups:
+        clau = (temporada, divisio, g.grup or "", jornada.numero)
+        for taula in ("nacional_partides", "nacional_encontres", "nacional_classificacio"):
+            conn.execute(
+                f"DELETE FROM {taula} WHERE temporada = ? AND divisio = ? AND grup = ? "
+                "AND jornada = ?",
+                clau,
+            )
+    if jornada.millors_series:
+        conn.execute(
+            "DELETE FROM nacional_millors_series WHERE temporada = ? AND divisio = ? "
+            "AND jornada = ?",
+            (temporada, divisio, jornada.numero),
+        )
     for g in jornada.grups:
         grup = g.grup or ""
         conn.executemany(
