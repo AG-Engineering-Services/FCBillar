@@ -1,6 +1,7 @@
 """Calendari esportiu federatiu en PDF → esdeveniments per setmana.
 
-Font actual: **RFEB** (`https://rfeb.org/cal_rfeb_XXYY.pdf`). La FCB publica el seu
+Font actual: **RFEB** (`Calendario2026-2027-RFEB-v2.pdf` a la biblioteca de mitjans del
+seu WordPress; vegeu `descobreix_rfeb`). La FCB publica el seu
 més tard cada any; el model deixa lloc a una segona font (`font='FCB'`) sense tocar
 res més.
 
@@ -57,14 +58,61 @@ FONT_RFEB = "RFEB"
 FONT_FCB = "FCB"
 
 
-def rfeb_url(temporada_inici: int) -> str:
-    """URL del calendari de la RFEB per a la temporada que comença l'any donat.
+#: Biblioteca de mitjans del WordPress de la RFEB. Fins a l'octubre de 2026 el
+#: calendari era sempre `rfeb.org/cal_rfeb_2627.pdf`; amb el web nou cada revisió
+#: és un fitxer amb la versió al nom, i aquell camí fa 404.
+RFEB_MEDIA = "https://rfeb.org/wp-json/wp/v2/media"
 
-    Temporada 2026/2027 → `cal_rfeb_2627.pdf`. Sense el `?v=N` que fa servir el
-    web de la RFEB: és només un trencacaus de memòria cau del navegador i el
-    fitxer és sempre el mateix camí.
+#: `Calendario2026-2027-RFEB-v1.3.pdf`. El `-1` del final, si n'hi ha, el posa el
+#: WordPress quan es torna a pujar un fitxer amb el mateix nom.
+_RE_CAL_RFEB = re.compile(
+    r"/Calendario[-_ ]?(\d{4})[-_](\d{4})[-_]RFEB[-_]v(\d+(?:\.\d+)*)(?:-\d+)?\.pdf$",
+    re.IGNORECASE,
+)
+
+
+@dataclass
+class CalendariRFEB:
+    """PDF de calendari de la RFEB trobat a la biblioteca de mitjans."""
+
+    temporada: str  # '2026/2027'
+    versio: tuple[int, ...]  # (1, 3) per a «v1.3»
+    url: str
+
+
+def descobreix_rfeb(urls: list[str] | None = None) -> list[CalendariRFEB]:
+    """La revisió més nova del calendari de la RFEB de cada temporada.
+
+    Sense `urls` les demana a l'API del WordPress; amb `urls` només les
+    classifica, que és el que fan els tests. Ordenat de la temporada més nova a
+    la més antiga.
     """
-    return f"https://rfeb.org/cal_rfeb_{temporada_inici % 100:02d}{(temporada_inici + 1) % 100:02d}.pdf"
+    if urls is None:
+        urls = _urls_de_media_rfeb()
+    millors: dict[str, CalendariRFEB] = {}
+    for url in urls:
+        m = _RE_CAL_RFEB.search(url)
+        if m is None:
+            continue
+        cal = CalendariRFEB(
+            temporada=f"{m.group(1)}/{m.group(2)}",
+            versio=tuple(int(n) for n in m.group(3).split(".")),
+            url=url,
+        )
+        actual = millors.get(cal.temporada)
+        if actual is None or cal.versio > actual.versio:
+            millors[cal.temporada] = cal
+    return sorted(millors.values(), key=lambda c: c.temporada, reverse=True)
+
+
+def _urls_de_media_rfeb() -> list[str]:
+    import json
+
+    pagina = _get(
+        RFEB_MEDIA,
+        params={"search": "Calendario RFEB", "per_page": 100, "_fields": "source_url"},
+    )
+    return [m["source_url"] for m in json.loads(pagina.content) if m.get("source_url")]
 
 
 def temporada_actual(avui: dt.date | None = None) -> int:
@@ -497,27 +545,28 @@ def fetch_pdf(url: str, etag: str | None = None) -> tuple[bytes | None, str | No
     Amb `etag` fa una petició condicional: si la RFEB no ha tocat el fitxer torna
     304 i ens estalviem tornar-lo a parsejar. És el que fa útil passar-hi cada dia.
     """
+    r = _get(url, headers={"If-None-Match": etag} if etag else {})
+    if r.status_code == 304:
+        return None, etag, None
+    return r.content, r.headers.get("ETag"), r.headers.get("Last-Modified")
+
+
+def _get(url: str, **kwargs):
     import ssl
 
     import httpx
 
-    headers = {"If-None-Match": etag} if etag else {}
     try:
-        r = httpx.get(url, headers=headers, follow_redirects=True, timeout=60.0)
+        r = httpx.get(url, follow_redirects=True, timeout=60.0, **kwargs)
     except (httpx.ConnectError, ssl.SSLError) as exc:
         if "DH_KEY_TOO_SMALL" not in str(exc):
             raise
         r = httpx.get(
-            url,
-            headers=headers,
-            follow_redirects=True,
-            timeout=60.0,
-            verify=_ssl_context_relaxat(),
+            url, follow_redirects=True, timeout=60.0, verify=_ssl_context_relaxat(), **kwargs
         )
-    if r.status_code == 304:
-        return None, etag, None
-    r.raise_for_status()
-    return r.content, r.headers.get("ETag"), r.headers.get("Last-Modified")
+    if r.status_code != 304:
+        r.raise_for_status()
+    return r
 
 
 # --- Font FCB: descobriment del PDF ----------------------------------------
@@ -1181,7 +1230,11 @@ def ingest_calendari(
 
     conn = ensure_schema(db_path)
     if pdf_bytes is None:
-        url = url or rfeb_url(temporada_actual())
+        if url is None:
+            trobats = descobreix_rfeb()
+            if not trobats:
+                raise ValueError("La RFEB no té cap calendari publicat a la biblioteca de mitjans.")
+            url = trobats[0].url
         # L'ETag es busca per URL: cada temporada és un fitxer diferent i barrejar-los
         # faria enviar l'ETag d'un altre recurs a la petició condicional.
         etag_previ = conn.execute(
