@@ -81,6 +81,9 @@ Versions:
 - 32: `lligues_obertes`, el llistat de lligues de la intranet tal com l'ha vist
      cada ingesta. És d'on la publicació treu quina lliga és la d'enguany, en
      comptes de dos ids escrits al codi. Taula nova: la crea l'executescript.
+- 34: `rfeb_proves` i `rfeb_classificacions`, les classificacions finals dels
+     campionats individuals de carambola de la RFEB (web vella). Són taules
+     noves: les crea l'executescript, no cal cap migració de dades.
 - 27: `torneig_fase_grups.serie_major` — el quart criteri de desempat del
      rànquing d'una fase, després de la posició al grup, els punts i la mitjana.
      No surt a la taula de classificació del grup: es calcula de les partides.
@@ -104,7 +107,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 33
+SCHEMA_VERSION = 34
 
 
 def _read_schema_sql() -> str:

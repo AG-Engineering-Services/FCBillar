@@ -2330,6 +2330,60 @@ def nacional_historic_cmd(
     console.print(dict(Counter(r.estat for r in res)))
 
 
+@app.command("rfeb-individuals")
+def rfeb_individuals_cmd(
+    carpeta: str = typer.Argument(  # noqa: B008
+        ..., help="Carpeta amb els PDF de la web vella de la RFEB (una subcarpeta per any)."
+    ),
+    detall: bool = typer.Option(  # noqa: B008
+        False, "--detall", help="Una línia per cada fitxer no desat, no només el resum."
+    ),
+) -> None:
+    """Carrega les classificacions finals dels campionats individuals de la RFEB.
+
+    Campionats i Grans Premis d'Espanya i opens de totes les modalitats de
+    carambola. Una prova es desa sencera o no es desa; tornar-ho a executar
+    la reemplaça, no la duplica, i si dos fitxers són la mateixa prova només
+    se'n desa un.
+    """
+    from pathlib import Path
+
+    from fcbillar.rfeb_individuals_carrega import carrega, cobertura, per_categoria, resum
+
+    arrel = Path(carpeta)
+    if not arrel.is_dir():
+        console.print(f"[red]No existeix la carpeta {carpeta}[/]")
+        raise typer.Exit(1)
+    conn = ensure_schema(get_settings().db_path)
+    res = carrega(conn, arrel)
+    if detall:
+        for r in res:
+            if r.estat != "desat":
+                console.print(f"[dim]{r.estat}[/] {r.fitxer}: {r.motiu} {r.detall}")
+    for estat, motius in resum(res).items():
+        console.print(f"[bold]{estat}[/] ({sum(motius.values())})")
+        for motiu, n in motius.most_common():
+            if estat != "desat":
+                console.print(f"  {n:4d}  {motiu}")
+
+    cob = cobertura(conn)
+    modalitats = sorted({m for fila in cob.values() for m in fila})
+    taula = Table(title="Proves desades per temporada i modalitat")
+    taula.add_column("temporada")
+    for m in modalitats:
+        taula.add_column(m, justify="right")
+    taula.add_column("total", justify="right")
+    for temporada, fila in cob.items():
+        taula.add_row(
+            temporada,
+            *(str(fila.get(m, "")) for m in modalitats),
+            str(sum(fila.values())),
+        )
+    console.print(taula)
+    console.print("Per categoria:", per_categoria(conn))
+    conn.close()
+
+
 @app.command("nacional-candidats")
 def nacional_candidats_cmd(
     pdfs: list[str] = typer.Argument(  # noqa: B008
