@@ -25,7 +25,7 @@
 // variable. És, a més, el que ja fa NouProjecte per llegir aquesta mateixa API.
 import { NeonPostgrestClient } from "@neondatabase/postgrest-js";
 import { env } from "$env/dynamic/public";
-import { ordenaNacional, type NacionalJugadorRow } from "./nacional";
+import { ordenaNacional, type NacionalPartidaRow } from "./nacional";
 
 const PUBLIC_NEON_DATA_API_URL = env.PUBLIC_NEON_DATA_API_URL;
 const PUBLIC_NEON_ANON_TOKEN = env.PUBLIC_NEON_ANON_TOKEN;
@@ -634,22 +634,23 @@ export interface CalendariCanvi {
 }
 
 // Lliga Nacional de tres bandes de la RFEB: no compta per a cap rànquing ni
-// mitjana catalana. `nacional_fitxes` lliga els noms tal com els escriu la RFEB
-// a una fitxa; un fcb_id pot tenir-ne diversos (variants d'anys diferents).
-export async function nacionalDelJugador(fcbId: string): Promise<NacionalJugadorRow[]> {
-  const { data: fitxes, error: e1 } = await db
-    .from("nacional_fitxes")
-    .select("jugador")
-    .eq("fcb_id", fcbId);
-  if (e1) throw e1;
-  const noms = (fitxes ?? []).map((f) => f.jugador as string);
-  if (!noms.length) return [];
-  const { data, error: e2 } = await db
-    .from("nacional_jugadors")
-    .select(
-      "temporada, divisio, posicio, jugador, equip, jugades, guanyades, empatades, perdudes, caramboles, entrades, mitjana, punts",
-    )
-    .in("jugador", noms);
-  if (e2) throw e2;
-  return ordenaNacional((data ?? []) as NacionalJugadorRow[]);
+// mitjana catalana. La vista `nacional_partides_fitxa` ja ve des del jugador amb fitxa.
+export async function nacionalPartidesDelJugador(fcbId: string): Promise<NacionalPartidaRow[]> {
+  const rows: NacionalPartidaRow[] = [];
+  const TRAM = 1000;
+  for (let des = 0; ; des += TRAM) {
+    const { data, error } = await db
+      .from("nacional_partides_fitxa")
+      .select("*")
+      .eq("fcb_id", fcbId)
+      .order("temporada", { ascending: false })
+      .order("jornada", { ascending: false })
+      .order("ordre_encontre")
+      .order("ordre")
+      .range(des, des + TRAM - 1);
+    if (error) throw error;
+    rows.push(...((data ?? []) as NacionalPartidaRow[]));
+    if ((data ?? []).length < TRAM) break;
+  }
+  return ordenaNacional(rows);
 }
