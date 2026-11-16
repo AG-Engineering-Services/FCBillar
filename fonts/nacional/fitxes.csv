@@ -1,57 +1,44 @@
 validat,jugador_rfeb,equip_rfeb,divisio,fcb_id,nom_cens,club_cens,motiu
-,Antonio Hdez. Parra,Inviktcues Granollers,1,308,"HERNÁNDEZ PARRA, ANTONI",B.C.GRANOLLERS,abreujat
-,Antonio Limones,C.B. BARCELONA,2,786,"LIMONES VILLALBA, ANTONIO",C.B.BARCELONA,un cognom
-,Antonio Mtnez. Carrillo,FOMENT MOLINS,2,367,"MARTÍNEZ CARRILLO, ANTONI",C.B.LLINARS,abreujat
-,Antonio Sánchez,C.B.C.A. LA ALBERCA,2,2464,"SÁNCHEZ ROSO, ANTONIO",C.B.LLINARS,un cognom
-,Arnold Gutiérrez,C.B. Barcelona,1,1891,"GUTIÉRREZ CONTRERAS, ARNOLD",C.B.BARCELONA,un cognom
-,César Martinicorena,DS Cachute,1,1835,"MARTINICORENA AGUILO, CÉSAR",,un cognom
-,Eduard Ramírez Mareos,C.B. BANYOLES,2,939,"RAMIREZ MATEOS, EDUARD",C.B.BANYOLES,falta
-,Esteve Corominas,C.B. BANYOLES,2,1310,"COROMINAS FRANCH, ESTEVE",C.B.BANYOLES,un cognom
-,Fernando Corpas,INVIKTCUES GRANOLLERS 'B',2,671,"CORPAS NATOLI, FERNANDO",C.B.LLINARS,un cognom
-,Fernando Rguez. Navarra,Inviktcues Granollers,1,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,abreujat
-,Fernando Rodríguez,C.B. BANYOLES,2,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,un cognom
-,Fernando Rodríguez Navarro,C.B. Banyoles,1,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,falta
-,Francisco Alarcón,C.B. DANY ELLS,2,581,"ALARCÓN GALISTEO, FRANCESC",C.B.2000 CERDANYOLA,un cognom
-,Francisco Moreno,D.S. MATADEPERA 'B',2,33,"MORENO EXPOSITO, FRANCISCO",C.B.TARRAGONA,un cognom
-,Joan Espinasa,Inviktcues Granollers,1,211,"ESPINASA SÁNCHEZ, JOAN",B.C.GRANOLLERS,un cognom
-,Jonatan Hdez. López,C.B. SANT ADRIÁ,2,307,"HERNÁNDEZ LÓPEZ, JONATAN",C.B.SANT ADRIÀ,abreujat
-,Josep Mª Nadal,C.B. BANYOLES,2,879,"NADAL FONT, JOSEP Mª",C.B.BANYOLES,un cognom
-,José Mª Nadal,C.B. Banyoles,1,879,"NADAL FONT, JOSEP Mª",C.B.BANYOLES,un cognom
-,Juan A. Navarro,INVIKTCUES GRANOLLERS 'B',2,410,"NAVARRO CARMONA, JOAN ANT.",B.C.GRANOLLERS,un cognom
-,Julián A. Cardona,C.B. MONFORTE,2,2483,"CARDONA GALLEGO, JULIÁN ALBERTO",C.B.MONFORTE,un cognom
-,Manuel González Castrillo,Madrid Esc. Nacional,1,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,falta
-,Manuel Gónzalez Castrillo,C.B. Ayamonte,1,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,falta
-,Mario Rodríguez,C.B. VALLADOLID,2,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,un cognom
-,Miguel A. Guerrero,DS Matadepera C.,1,755,"GUERRERO GONZÁLEZ, MIQUEL A.",C.B.SANT ADRIÀ,un cognom
-,Miguel Casademunt,C.B. Barcelona,1,655,"CASADEMUNT VALLES, MIQUEL",,un cognom
-,Xavier Fonellosa,C.B. MONFORTE,2,704,"FONELLOSA CASANOVAS, XAVIER",C.B.MONFORTE,un cognom
-,Xavier Minguell Roselló,C.B. Barcelona,1,857,"MINGUELL ROSSELLÓ, XAVIER",C.B.SANTS,falta
 si,Adriá García Dueñas,DS Matadepera C.,1,249,"GARCÍA DUEÑAS, ADRIÀ",,
 si,Albert Martínez Mateu,C.B. VIC,2,370,"MARTÍNEZ MATEU, ALBERT",S.E.CASAL CERVERA,
 si,Albert Segarra Solé,C.B. MATARÓ,honor,515,"SEGARRA SOLÉ, ALBERT",C.B.MATARÓ,
 si,Alejandro Pérez Andreu,C.B. Paiporta,1,907,"PÉREZ ANDREU, ALEJANDRO",C.B.MATADEPERA,
 si,Andreu Martín Sierra,D.S. MATADEPERA 'B',2,831,"MARTÍN SIERRA, ANDREU",C.B.MATADEPERA,
+si,Antonio Hdez. Parra,Inviktcues Granollers,1,308,"HERNÁNDEZ PARRA, ANTONI",B.C.GRANOLLERS,abreujat
 si,Antonio Hernández Parra,"INVIKTCUES GRANOLLERS ""B""",1,308,"HERNÁNDEZ PARRA, ANTONI",B.C.GRANOLLERS,
+si,Antonio Limones,C.B. BARCELONA,2,786,"LIMONES VILLALBA, ANTONIO",C.B.BARCELONA,un cognom
 si,Antonio Martínez Carrillo,S.B. FOMENT MOLINS,2,367,"MARTÍNEZ CARRILLO, ANTONI",C.B.LLINARS,
 si,Antonio Montes Gallardo,C.B. SANT ADRIÁ,2,397,"MONTES GALLARDO, ANTONIO",C.B.SANT ADRIÀ,
 si,Antonio Montes Monferrer,ASOC. B. PALMA,honor,398,"MONTES MONFERRER, ANTONIO",C.B.SANT ADRIÀ,
+si,Antonio Mtnez. Carrillo,FOMENT MOLINS,2,367,"MARTÍNEZ CARRILLO, ANTONI",C.B.LLINARS,abreujat
+no,Antonio Sánchez,C.B.C.A. LA ALBERCA,2,2464,"SÁNCHEZ ROSO, ANTONIO",C.B.LLINARS,un cognom
+si,Arnold Gutiérrez,C.B. Barcelona,1,1891,"GUTIÉRREZ CONTRERAS, ARNOLD",C.B.BARCELONA,un cognom
 si,Arnold Gutiérrez Contreras,C.B. Barcelona,1,1891,"GUTIÉRREZ CONTRERAS, ARNOLD",C.B.BARCELONA,
 si,Carlos Chacón López,ASC. B. PALMA,honor,661,"CHACÓN LÓPEZ, CARLOS J.",C.B.MONT-ROIG,
+si,César Martinicorena,DS Cachute,1,1835,"MARTINICORENA AGUILO, CÉSAR",,un cognom
 si,César Martinicorena Aguiló,C.B. Numancia,1,1835,"MARTINICORENA AGUILO, CÉSAR",,
 si,César Mas Canadell,"INVIKTCUES GRANOLLERS ""B""",1,842,"MAS CANADELL, CÉSAR",B.C.GRANOLLERS,
 si,David Bosqued Toré,C.B. SANT ADRIÁ,1,144,"BOSQUED TORE, DAVID",C.B.SANT ADRIÀ,
+si,Eduard Ramírez Mareos,C.B. BANYOLES,2,939,"RAMIREZ MATEOS, EDUARD",C.B.BANYOLES,falta
 si,Eduard Rodríguez Jiménez,C.B. Banyoles,1,954,"RODRIGUEZ JIMÉNEZ, EDUARD",C.B.BANYOLES,
 si,Enrique Yáñez Acuña,C.B. SANT ADRIÁ,2,53,"YÁÑEZ ACUÑA, ENRIQUE",C.B.SANT ADRIÀ,
+si,Esteve Corominas,C.B. BANYOLES,2,1310,"COROMINAS FRANCH, ESTEVE",C.B.BANYOLES,un cognom
 si,Esteve Corominas Franch,"INVIKTCUES GRANOLLERS ""B""",1,1310,"COROMINAS FRANCH, ESTEVE",C.B.BANYOLES,
 si,Esteve Mata Pardo,Inviktcues Granollers,1,375,"MATA PARDO, ESTEVE",B.C.GRANOLLERS,
 si,Eusebi Calle Ortega,C.B. Banyoles,1,638,"CALLE ORTEGA, EUSEBI",S.B. GEiEG,
 si,Eva Mª. Hermida Diaz,C.B. MATARÓ FEM.,2,1565,"HERMIDA DÍAZ, EVA MARÍA",C.B.MANRESA,
+si,Fernando Corpas,INVIKTCUES GRANOLLERS 'B',2,671,"CORPAS NATOLI, FERNANDO",C.B.LLINARS,un cognom
 si,Fernando Corpas Natoli,Inviktcues Granollers,1,671,"CORPAS NATOLI, FERNANDO",C.B.LLINARS,
 si,Fernando Jiménez Pérez,C.B. GRANOLLERS,honor,772,"JIMÉNEZ PÉREZ, FERNANDO",B.C.GRANOLLERS,
+si,Fernando Rguez. Navarra,Inviktcues Granollers,1,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,abreujat
+si,Fernando Rodríguez,C.B. BANYOLES,2,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,un cognom
+si,Fernando Rodríguez Navarro,C.B. Banyoles,1,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,falta
 si,Francesc Ricart Martínez,C.B. Barcelona,1,13,"RICART MARTÍNEZ, FRANCESC",C.B.BARCELONA,
+si,Francisco Alarcón,C.B. DANY ELLS,2,581,"ALARCÓN GALISTEO, FRANCESC",C.B.2000 CERDANYOLA,un cognom
 si,Francisco Alarcón Galisteo,Dany-ells C.B.,1,581,"ALARCÓN GALISTEO, FRANCESC",C.B.2000 CERDANYOLA,
 si,Francisco Gómez López,C.B.C. CHANTADA,2,56,"GOMEZ LOPEZ, FRANCISCO",C.B.BLANES,
 si,Francisco Hernández Hernández,C.B. Sant Adriá,1,306,"HERNÁNDEZ HERNÁNDEZ, FRANCESC",C.B.MANRESA,
+si,Francisco Moreno,D.S. MATADEPERA 'B',2,33,"MORENO EXPOSITO, FRANCISCO",C.B.TARRAGONA,un cognom
 si,Francisco Mula Callejón,S.B. FOMENT MOLINS,2,1189,"MULA CALLEJÓN, FRANCISCO",C.B.SANTS,
 si,Gabriel Liébana Cámara,Dany-ells C.B.,1,785,"LIEBANA CAMARA, GABRIEL",,
 si,Héctor F. Suárez Lasso,C.B. SANT ADRIÁ,2,1217,"SUÁREZ LASSO, HÉCTOR FABIO",C.B.SANT ADRIÀ,
@@ -63,12 +50,14 @@ si,Javier Martínez Alberto,Dany-ells C.B.,1,833,"MARTÍNEZ ALBERTO, XAVIER",C.B
 si,Jesús Luque Martínez,C.B. Sant Adriá,1,351,"LUQUE MARTÍNEZ, JESÚS",C.B.SANT ADRIÀ,
 si,Joan A. font Giménez,"INVIKTCUES GRANOLLERS ""B""",1,228,"FONT GIMÉNEZ, JOAN ANTON",C.B.MONT-ROIG,
 si,Joan Calvet Llach,C.B. SANT ADRIÁ,2,640,"CALVET LLACH, JOAN",C.B.SANT ADRIÀ,
+si,Joan Espinasa,Inviktcues Granollers,1,211,"ESPINASA SÁNCHEZ, JOAN",B.C.GRANOLLERS,un cognom
 si,Joan Espinasa Sánchez,"INVIKTCUES GRANOLLERS ""B""",1,211,"ESPINASA SÁNCHEZ, JOAN",B.C.GRANOLLERS,
 si,Joan Perales Sanz,C.B. BARCELONA,2,441,"PERALES SANZ, JOAN",S.B.F.MOLINS,
 si,Joan Ralita Ros,C.B. BANYOLES,2,468,"RALITA ROS, JOAN",C.B.BANYOLES,
 si,Joel Sánchez Gallego,"INVIKTCUES GRANOLLERS ""B""",1,1278,"SÁNCHEZ GALLEGO, JOEL",C.B.MATARÓ,
 si,John J. Zuleta Giraldo,C.B. MONFORTE,2,1051,"ZULETA GIRALDO, JOHN JAIRO",C.B.MONFORTE,
 si,John Jairo Zuleta Giraldo,"INVIKTCUES GRANOLLERS ""B""",1,1051,"ZULETA GIRALDO, JOHN JAIRO",C.B.MONFORTE,
+si,Jonatan Hdez. López,C.B. SANT ADRIÁ,2,307,"HERNÁNDEZ LÓPEZ, JONATAN",C.B.SANT ADRIÀ,abreujat
 si,Jonatan Hernández López,C.B. Sant Adriá,1,307,"HERNÁNDEZ LÓPEZ, JONATAN",C.B.SANT ADRIÀ,
 si,Jordi Garriga Comas,ASC. B. PALMA,honor,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,
 si,Jordi Gassó Chumillas,"INVIKTCUES GRANOLLERS ""B""",1,266,"GASSÓ CHUMILLAS, JORDI",B.C.GRANOLLERS,
@@ -77,10 +66,13 @@ si,Jordi Martí Sendra,C.B. Lleida,1,360,"MARTÍ SENDRA, JORDI",C.B.LLEIDA,
 si,Jordi Martínez Bellmunt,C.B. LLEIDA,honor,365,"MARTÍNEZ BELLMUNT, JORDI",C.B.LLEIDA,
 si,Jordi Oliver Sinca,C.B. MONFORTE,2,884,"OLIVER SINCA, JORDI",C.B.MONFORTE,
 si,Josep Martín Vilchez,"INVIKTCUES GRANOLLERS ""B""",1,832,"MARTÍN VÍLCHEZ, JOSEP",B.C.GRANOLLERS,
+si,Josep Mª Nadal,C.B. BANYOLES,2,879,"NADAL FONT, JOSEP Mª",C.B.BANYOLES,un cognom
 si,Josep Pallisa González,C.B. SANT ADRIÁ,1,424,"PALLISA GONZÁLEZ, JOSEP",C.B.SANT ADRIÀ,
 si,José Martín Vílchez,C.B. Sant Adriá,1,832,"MARTÍN VÍLCHEZ, JOSEP",B.C.GRANOLLERS,
 si,José Mª Mas Canadell,CHEF AMADEO GANDIA,honor,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,
+si,José Mª Nadal,C.B. Banyoles,1,879,"NADAL FONT, JOSEP Mª",C.B.BANYOLES,un cognom
 si,José Mª Sayeras Guiteras,C.B. MOLLET,2,993,"SAYERAS GUITERAS, JOSEP Mª",C.B.MOLLET,
+si,Juan A. Navarro,INVIKTCUES GRANOLLERS 'B',2,410,"NAVARRO CARMONA, JOAN ANT.",B.C.GRANOLLERS,un cognom
 si,Juan A. Navarro Carmona,"INVIKTCUES GRANOLLERS ""B""",1,410,"NAVARRO CARMONA, JOAN ANT.",B.C.GRANOLLERS,
 si,Juan Bouterín Bote,DS Matadepera C.,1,625,"BOUTERIN BOTE, JOAN",C.B.MOLLET,
 si,Juan C. Jiménez Vasco,C.B. Sant Adriá,1,773,"JIMÉNEZ VASCO, JOAN CARLES",C.B.SANT ADRIÀ,
@@ -89,21 +81,27 @@ si,Juan Carlos Jiménez Vasco,C.B. SANT ADRIÁ,1,773,"JIMÉNEZ VASCO, JOAN CARLE
 si,Juan J. Herrerías Cruz,Soc. Coral Colón,1,762,"HERRERÍAS CRUZ, JOAN JOSEP",,
 si,Juan J. Pineda Lafuente,C.B. Sant Adriá,1,453,"PINEDA LAFUENTE, JOAN JOSEP",C.B.SANT ADRIÀ,
 si,Juan José Pineda Lafuente,C.B. SANT ADRIÁ,1,453,"PINEDA LAFUENTE, JOAN JOSEP",C.B.SANT ADRIÀ,
+si,Julián A. Cardona,C.B. MONFORTE,2,2483,"CARDONA GALLEGO, JULIÁN ALBERTO",C.B.MONFORTE,un cognom
 si,Luis Ametller Congost,C.B. Banyoles,1,591,"AMETLLER CONGOST, LLUIS",C.B.BANYOLES,
 si,Manel Lozano Herrero,C.B. MONFORTE,2,350,"LOZANO HERRERO, MANUEL",C.B.MONFORTE,
 si,Manuel Castro Calvo,C.B. Barcelona,1,659,"CASTRO CALVO, MANUEL",C.B.SANTS,
 si,Manuel García Martínez,C.B. GRANOLLERS 'B',2,1530,"GARCÍA MARTÍNEZ, MANUEL",B.C.GRANOLLERS,
+no,Manuel González Castrillo,Madrid Esc. Nacional,1,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,falta
+no,Manuel Gónzalez Castrillo,C.B. Ayamonte,1,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,falta
 si,Manuel Pastor Rivas,S.B. FOMENT MOLINS,2,437,"PASTOR RIVAS, MANUEL",C.B.SANT BOI,
 si,Marc Maymó Torné,C.B. BARCELONA,2,850,"MAYMÓ TORNÉ, MARC",C.B.BARCELONA,
 si,Mario F. Rodríguez Maia,C.B. Banyoles,1,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,
+no,Mario Rodríguez,C.B. VALLADOLID,2,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,un cognom
 si,Mark S. Van Kessel,C.B. Mataró,1,1027,"VAN KESSEL, MARK STEFAN",C.B.MATARÓ,
 si,Mark S. van Kessel,C.B. MATARÓ,honor,1027,"VAN KESSEL, MARK STEFAN",C.B.MATARÓ,
 si,Mark Stefan Van Kessel,C.B. MATARÓ,honor,1027,"VAN KESSEL, MARK STEFAN",C.B.MATARÓ,
 si,Marta F. López Fernández,C.B. MATARÓ FEM.,2,2318,"LÓPEZ FERNÁNDEZ, MARTA FABIANA",C.B.MATARÓ,
 si,Marta Serramitjana Juan,C.B. MATARÓ FEM.,2,1000,"SERRAMITJANA JUAN, MARTA",C.B.MATARÓ,
 si,Melchor Martín Lima,FOMENT MOLINS,2,829,"MARTÍN LIMA, MELCHOR",S.B.LA GRAN PENYA,
+si,Miguel A. Guerrero,DS Matadepera C.,1,755,"GUERRERO GONZÁLEZ, MIQUEL A.",C.B.SANT ADRIÀ,un cognom
 si,Miguel A. Guerrero González,Inviktcues Granollers 'B',1,755,"GUERRERO GONZÁLEZ, MIQUEL A.",C.B.SANT ADRIÀ,
 si,Miguel Argemí Durán,FOMENT MOLINS,2,597,"ARGEMÍ DURÁN, MIQUEL",,
+si,Miguel Casademunt,C.B. Barcelona,1,655,"CASADEMUNT VALLES, MIQUEL",,un cognom
 si,Miguel Casademunt Vallés,C.B. Barcelona,1,655,"CASADEMUNT VALLES, MIQUEL",,
 si,Miguel Plandolit Martín,C.B. Mataró,1,922,"PLANDOLIT MARTÍN, MIQUEL",C.B.MATARÓ,
 si,Miguel Ángel Guerrero González,C.B. Sant Adriá,1,755,"GUERRERO GONZÁLEZ, MIQUEL A.",C.B.SANT ADRIÀ,
@@ -125,6 +123,8 @@ si,Sergio Jiménez Galera,INVIKTCUES GRANOLLERS,honor,769,"JIMÉNEZ GALERA, SERG
 si,Sergio Legido Fernández,C.B. MATARÓ,honor,783,"LEGIDO FERNÁNDEZ, SERGIO",C.B.MATARÓ,
 si,Sergio Martínez Avilés,Dany-ells C.B.,1,1194,"MARTÍNEZ AVILÉS, SERGIO",C.B.MATARÓ,
 si,Toni Gris Peralba,C.B. MATARÓ,honor,297,"GRIS PERALBA, TONI",C.B.CANET DE MAR,
+si,Xavier Fonellosa,C.B. MONFORTE,2,704,"FONELLOSA CASANOVAS, XAVIER",C.B.MONFORTE,un cognom
+si,Xavier Minguell Roselló,C.B. Barcelona,1,857,"MINGUELL ROSSELLÓ, XAVIER",C.B.SANTS,falta
 si,Yeimy A. Mancipe Segura,C.B. MATARÓ FEM.,2,820,"MANCIPE SEGURA, YEIMY ANDREA",C.B.CANET DE MAR,
 si,Yuri Trullas Vera,Soc. Coral Colón,1,547,"TRULLÁS VERA, YURI",S.B.CORAL COLÓN,
 si,Ángel M. Varela Peña,C.B. GRANOLLERS,honor,1028,"VARELA PEÑA, ANGEL M.",B.C.GRANOLLERS,
