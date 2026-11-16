@@ -233,7 +233,10 @@ def test_descobreix_rfeb_tria_la_revisio_mes_nova_de_cada_temporada():
 
 def test_descobreix_rfeb_v1_10_va_despres_de_v1_9():
     base = "https://rfeb.org/wp-content/uploads/2026/10"
-    urls = [f"{base}/Calendario2026-2027-RFEB-v1.10.pdf", f"{base}/Calendario2026-2027-RFEB-v1.9.pdf"]
+    urls = [
+        f"{base}/Calendario2026-2027-RFEB-v1.10.pdf",
+        f"{base}/Calendario2026-2027-RFEB-v1.9.pdf",
+    ]
     assert descobreix_rfeb(urls)[0].versio == (1, 10)
 
 
