@@ -12,6 +12,8 @@ export interface NacionalPartidaRow {
 	rival: string;
 	caramboles_rival: number;
 	rival_fcb_id: string | null;
+	/** El rival com l'escriu la federació catalana, si té fitxa al cens. */
+	rival_nom_fcb: string | null;
 	entrades: number | null;
 	equip: string;
 	equip_rival: string;

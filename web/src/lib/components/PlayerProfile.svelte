@@ -1870,9 +1870,9 @@
 														<a
 															href="/jugador/{r.rival_fcb_id}"
 															class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline"
-															>{r.rival}</a>
+															>{r.rival_nom_fcb ?? r.rival}</a>
 													{:else}
-														<div class="truncate text-sm leading-tight">{r.rival}</div>
+														<div class="truncate text-sm leading-tight">{r.rival_nom_fcb ?? r.rival}</div>
 													{/if}
 													<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
 														{#if r.data}{fmtDate(r.data)} · {/if}J{r.jornada}{r.grup ? ` ${r.grup}` : ''} · {g.grafies.get(normalitzaEquip(r.equip)) ?? r.equip} {r.punts_equip}–{r.punts_rival} {r.equip_rival}
