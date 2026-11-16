@@ -5,8 +5,16 @@
 		db,
 		type GameRow,
 		type PendingGameRow,
-		type ProvisionalRow
+		type ProvisionalRow,
+		nacionalDelJugador
 	} from '$lib/db';
+	import {
+		divisioNacional,
+		llocNacional,
+		mitjanaNacional,
+		temporadaCurta,
+		type NacionalJugadorRow
+	} from '$lib/nacional';
 	import { follows, toggleFollow } from '$lib/follows';
 	import RadarChart from '$lib/components/RadarChart.svelte';
 	import { theme } from '$lib/theme';
@@ -224,6 +232,24 @@
 	$effect(() => {
 		const id = fcbId;
 		if (id) loadAll(id);
+	});
+
+	// Apartat a part: si la consulta falla (p. ex. el cache d'esquemes de Neon encara
+	// no veu nacional_fitxes) o no hi ha temporades, simplement no surt.
+	let nacional = $state<NacionalJugadorRow[]>([]);
+	$effect(() => {
+		const id = fcbId;
+		let viu = true;
+		nacional = [];
+		if (id)
+			nacionalDelJugador(id)
+				.then((r) => {
+					if (viu) nacional = r;
+				})
+				.catch((e) => console.warn('Lliga Nacional no disponible', e));
+		return () => {
+			viu = false;
+		};
 	});
 
 	async function loadAll(id: string) {
@@ -1310,6 +1336,46 @@
 							</ul>
 						</div>
 					{/each}
+				</div>
+			</div>
+		{/if}
+
+		{#if nacional.length}
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lliga Nacional</div>
+				<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Tres bandes, RFEB. No compta per als rànquings ni les mitjanes catalanes.</p>
+				<div class="overflow-x-auto">
+					<table class="w-full text-sm tabular-nums">
+						<caption class="sr-only">Historial a la Lliga Nacional de tres bandes</caption>
+						<thead>
+							<tr class="border-b border-slate-100 dark:border-slate-800 text-left text-2xs text-slate-500 dark:text-slate-400">
+								<th scope="col" class="py-1 pr-2 font-semibold">Temporada</th>
+								<th scope="col" class="py-1 pr-2 font-semibold">Divisió</th>
+								<th scope="col" class="py-1 pr-2 font-semibold">Equip</th>
+								<th scope="col" class="py-1 pr-2 text-right font-semibold">PJ</th>
+								<th scope="col" class="py-1 pr-2 text-right font-semibold">G-E-P</th>
+								<th scope="col" class="hidden py-1 pr-2 text-right font-semibold sm:table-cell">Car.</th>
+								<th scope="col" class="hidden py-1 pr-2 text-right font-semibold sm:table-cell">Entr.</th>
+								<th scope="col" class="py-1 pr-2 text-right font-semibold">Mitjana</th>
+								<th scope="col" class="py-1 text-right font-semibold">Lloc</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each nacional as r (r.temporada + r.divisio + r.jugador)}
+								<tr class="border-b border-slate-100 dark:border-slate-800 last:border-b-0">
+									<td class="whitespace-nowrap py-1.5 pr-2">{temporadaCurta(r.temporada)}</td>
+									<td class="whitespace-nowrap py-1.5 pr-2">{divisioNacional(r.divisio)}</td>
+									<td class="max-w-32 truncate py-1.5 pr-2" title={r.equip}>{r.equip}</td>
+									<td class="py-1.5 pr-2 text-right">{r.jugades}</td>
+									<td class="whitespace-nowrap py-1.5 pr-2 text-right">{r.guanyades}-{r.empatades}-{r.perdudes}</td>
+									<td class="hidden py-1.5 pr-2 text-right sm:table-cell">{r.caramboles}</td>
+									<td class="hidden py-1.5 pr-2 text-right sm:table-cell">{r.entrades}</td>
+									<td class="py-1.5 pr-2 text-right font-mono font-bold">{mitjanaNacional(r.mitjana)}</td>
+									<td class="py-1.5 text-right font-mono">{llocNacional(r.posicio)}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
 				</div>
 			</div>
 		{/if}
