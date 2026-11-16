@@ -107,6 +107,33 @@ class JugadorCens:
 class Candidat:
     rfeb: JugadorRfeb
     cens: JugadorCens
+    #: Per què es proposa: «exacte», «abreujat», «falta» o «un cognom».
+    motiu: str = "exacte"
+
+
+#: Com abreuja la RFEB els cognoms més corrents («Jorge J. Sánchez Fdez.»).
+_ABREUJATS = {
+    "FDEZ": "FERNANDEZ",
+    "FERNDEZ": "FERNANDEZ",
+    "FDZ": "FERNANDEZ",
+    "RGUEZ": "RODRIGUEZ",
+    "RODGUEZ": "RODRIGUEZ",
+    "RDGUEZ": "RODRIGUEZ",
+    "RODZ": "RODRIGUEZ",
+    "GLEZ": "GONZALEZ",
+    "GZLEZ": "GONZALEZ",
+    "GONZ": "GONZALEZ",
+    "MTEZ": "MARTINEZ",
+    "MTNEZ": "MARTINEZ",
+    "MNEZ": "MARTINEZ",
+    "HDEZ": "HERNANDEZ",
+    "HDZ": "HERNANDEZ",
+    "HERNDEZ": "HERNANDEZ",
+    "DGUEZ": "DOMINGUEZ",
+    "DOMGUEZ": "DOMINGUEZ",
+    "JMNEZ": "JIMENEZ",
+    "GA": "GARCIA",  # «Gª»
+}
 
 
 def _mots(text: str) -> list[str]:
@@ -136,31 +163,88 @@ def _noms_compatibles(rfeb: list[str], cens: list[str]) -> bool:
     return all(_mateix_nom(a, b) for a, b in zip(rfeb, cens, strict=False))
 
 
+def _una_lletra(a: str, b: str) -> bool:
+    """Si `a` i `b` es diferencien en una lletra canviada, de més o de menys."""
+    if abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        return sum(x != y for x, y in zip(a, b, strict=True)) <= 1
+    curt, llarg = sorted((a, b), key=len)
+    return any(llarg[:i] + llarg[i + 1 :] == curt for i in range(len(llarg)))
+
+
+def _cognoms_casen(rfeb: tuple[str, ...], cens: tuple[str, ...]) -> str | None:
+    """«exacte», «abreujat», «falta» o `None` si els cognoms no són els mateixos."""
+    if rfeb == cens:
+        return "exacte"
+    if len(rfeb) != len(cens):
+        return None
+    desplegats = tuple(_ABREUJATS.get(m, m) for m in rfeb)
+    if desplegats == cens:
+        return "abreujat"
+    # Una sola lletra en un sol cognom, i només en cognoms prou llargs perquè
+    # una lletra no en faci un altre de corrent («Gil» i «Gilí»).
+    diferents = [(a, b) for a, b in zip(desplegats, cens, strict=True) if a != b]
+    if len(diferents) == 1 and min(map(len, diferents[0])) >= 5 and _una_lletra(*diferents[0]):
+        return "falta"
+    return None
+
+
 def candidats(rfeb: list[JugadorRfeb], cens: list[JugadorCens]) -> list[Candidat]:
-    """Parelles (RFEB, cens) amb els dos cognoms i el nom de pila iguals."""
-    per_cognoms: dict[tuple[str, ...], list[tuple[list[str], JugadorCens]]] = {}
+    """Parelles (RFEB, cens) que poden ser el mateix jugador, amb el motiu.
+
+    La base és el nom de pila (en català o castellà) i els dos cognoms. La RFEB,
+    però, escriu el mateix jugador de moltes maneres, i també es proposen:
+    cognoms abreujats («Fdez.»), una lletra de diferència en un cognom, i un sol
+    cognom quan al cens no hi ha cap altre jugador amb aquell nom i aquell
+    primer cognom. Tot passa per la validació a mà.
+    """
+    fitxes: list[tuple[tuple[str, ...], list[str], JugadorCens]] = []
     for c in cens:
         cognoms, _, noms = c.nom.partition(",")
-        mots_cognoms = _mots(cognoms)
+        mots_cognoms = tuple(_mots(cognoms))
         if len(mots_cognoms) >= 2 and noms.strip():
-            per_cognoms.setdefault(tuple(mots_cognoms), []).append((_mots(noms), c))
+            fitxes.append((mots_cognoms, _mots(noms), c))
 
     out = []
     for r in rfeb:
         mots = _mots(r.nom)
-        for cognoms, possibles in per_cognoms.items():
+        trobats = []
+        for cognoms, noms, c in fitxes:
             n = len(cognoms)
-            if len(mots) <= n or tuple(mots[-n:]) != cognoms:
+            if len(mots) <= n or not _noms_compatibles(mots[:-n], noms):
                 continue
-            for noms, c in possibles:
-                if _noms_compatibles(mots[:-n], noms):
-                    out.append(Candidat(rfeb=r, cens=c))
+            if motiu := _cognoms_casen(tuple(mots[-n:]), cognoms):
+                trobats.append(Candidat(rfeb=r, cens=c, motiu=motiu))
+        if not trobats and len(mots) >= 2:
+            # «Sergio Martínez»: un sol cognom. Només si és inequívoc al cens.
+            cognom = _ABREUJATS.get(mots[-1], mots[-1])
+            possibles = [
+                c
+                for cognoms, noms, c in fitxes
+                if cognoms[0] == cognom
+                # Si no, «Juan Pérez López» seria «Juan Pérez» de nom i «López».
+                and len(mots) - 1 <= len(noms)
+                and _noms_compatibles(mots[:-1], noms)
+            ]
+            if len(possibles) == 1:
+                trobats.append(Candidat(rfeb=r, cens=possibles[0], motiu="un cognom"))
+        out.extend(trobats)
     return out
 
 
 # --------------------------- el fitxer de validació ---------------------------
 
-CAMPS = ["validat", "jugador_rfeb", "equip_rfeb", "divisio", "fcb_id", "nom_cens", "club_cens"]
+CAMPS = [
+    "validat",
+    "jugador_rfeb",
+    "equip_rfeb",
+    "divisio",
+    "fcb_id",
+    "nom_cens",
+    "club_cens",
+    "motiu",
+]
 
 
 def escriu_candidats(trobats: list[Candidat], cami: str | Path) -> tuple[int, int]:
@@ -189,13 +273,14 @@ def escriu_candidats(trobats: list[Candidat], cami: str | Path) -> tuple[int, in
                 "fcb_id": c.cens.fcb_id,
                 "nom_cens": c.cens.nom,
                 "club_cens": c.cens.club,
+                "motiu": c.motiu,
             }
         )
         nous += 1
     files.sort(key=lambda f: (f["validat"] != "", f["jugador_rfeb"]))
     cami.parent.mkdir(parents=True, exist_ok=True)
     with cami.open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=CAMPS)
+        w = csv.DictWriter(f, fieldnames=CAMPS, restval="")
         w.writeheader()
         w.writerows(files)
     return len(files) - nous, nous
