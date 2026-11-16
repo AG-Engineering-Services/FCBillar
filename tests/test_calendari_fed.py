@@ -20,11 +20,11 @@ from fcbillar.calendari_fed import (
     Esdeveniment,
     _es_seu,
     descobreix_fcb,
+    descobreix_rfeb,
     diff,
     ingest_calendari,
     parse_calendari,
     parse_calendari_fcb,
-    rfeb_url,
     temporada_actual,
 )
 
@@ -213,17 +213,28 @@ def test_ingest_reemplaça_les_baixes(tmp_path):
     assert n == 0
 
 
-@pytest.mark.parametrize(
-    "any_inici, url",
-    [
-        (2026, "https://rfeb.org/cal_rfeb_2627.pdf"),
-        (2027, "https://rfeb.org/cal_rfeb_2728.pdf"),
-        (2029, "https://rfeb.org/cal_rfeb_2930.pdf"),
-        (2099, "https://rfeb.org/cal_rfeb_9900.pdf"),
-    ],
-)
-def test_rfeb_url(any_inici, url):
-    assert rfeb_url(any_inici) == url
+def test_descobreix_rfeb_tria_la_revisio_mes_nova_de_cada_temporada():
+    # Tal com les torna `wp-json/wp/v2/media?search=Calendario RFEB` el novembre de 2026.
+    base = "https://rfeb.org/wp-content/uploads/2026"
+    urls = [
+        f"{base}/11/Calendario2026-2027-RFEB-v2.pdf",
+        f"{base}/10/Calendario_Honor_2026-2027.pdf",
+        f"{base}/10/Calendario2026-2027-RFEB-v1.3.pdf",
+        f"{base}/10/Calendario2026-2027-RFEB-v1.10-1.pdf",
+        f"{base}/07/Calendario2027-2028-RFEB-v1.pdf",
+    ]
+    trobats = descobreix_rfeb(urls)
+    assert [(c.temporada, c.versio) for c in trobats] == [
+        ("2027/2028", (1,)),
+        ("2026/2027", (2,)),
+    ]
+    assert trobats[1].url.endswith("/11/Calendario2026-2027-RFEB-v2.pdf")
+
+
+def test_descobreix_rfeb_v1_10_va_despres_de_v1_9():
+    base = "https://rfeb.org/wp-content/uploads/2026/10"
+    urls = [f"{base}/Calendario2026-2027-RFEB-v1.10.pdf", f"{base}/Calendario2026-2027-RFEB-v1.9.pdf"]
+    assert descobreix_rfeb(urls)[0].versio == (1, 10)
 
 
 @pytest.mark.parametrize(

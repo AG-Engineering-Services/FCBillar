@@ -2302,6 +2302,59 @@ def ingest_nacional_cmd(
         raise typer.Exit(1)
 
 
+@app.command("nacional-candidats")
+def nacional_candidats_cmd(
+    pdfs: list[str] = typer.Argument(  # noqa: B008
+        None, help="Classificacions de jugadors en PDF, de la divisió de `--divisio`."
+    ),
+    divisio: str = typer.Option("1", "--divisio", help="honor, 1 o 2. Només amb PDF."),
+    sortida: str = typer.Option("fonts/nacional/fitxes.csv", "--sortida"),
+) -> None:
+    """Proposa quins jugadors de la Lliga Nacional són a la fitxa del cens català.
+
+    Llegeix els noms de la BBDD local i, si n'hi passes, de les classificacions
+    de jugadors en PDF. Els candidats nous s'afegeixen al CSV amb `validat`
+    buit; els que ja hi són, validats o no, no es toquen. Un lligam només val
+    quan hi poses «si».
+    """
+    from fcbillar.lliga_nacional import llegeix_classificacio_de_jugadors
+    from fcbillar.nacional_fitxes import (
+        JugadorCens,
+        JugadorRfeb,
+        candidats,
+        escriu_candidats,
+    )
+
+    conn = ensure_schema(get_settings().db_path)
+    rfeb = {
+        JugadorRfeb(nom=n, equip=e, divisio=d)
+        for n, e, d in conn.execute(
+            "SELECT jugador, equip, divisio FROM nacional_jugadors "
+            "UNION SELECT jugador, equip, divisio FROM nacional_alineacions"
+        )
+    }
+    for pdf in pdfs or []:
+        rfeb |= {
+            JugadorRfeb(nom=j.jugador, equip=j.equip, divisio=divisio)
+            for j in llegeix_classificacio_de_jugadors(pdf)
+        }
+    cens = [
+        JugadorCens(fcb_id=i, nom=n, club=c or "")
+        for i, n, c in conn.execute(
+            "SELECT p.fcb_id, p.nom, cl.nom FROM players p "
+            "LEFT JOIN clubs cl ON cl.id = p.club_id "
+            "WHERE p.fcb_id IS NOT NULL AND p.fcb_id NOT LIKE 'name:%'"
+        )
+    ]
+    conn.close()
+    trobats = candidats(sorted(rfeb, key=lambda r: (r.divisio, r.nom)), cens)
+    ja, nous = escriu_candidats(trobats, sortida)
+    console.print(
+        f"{len(rfeb)} jugadors de la Nacional, {len(trobats)} candidats: "
+        f"{nous} de nous a {sortida} ({ja} ja hi eren)."
+    )
+
+
 @app.command("nacional-alineacions")
 def nacional_alineacions_cmd(
     pdf: str = typer.Argument(..., help="L'«orden de fuerza» d'una divisió, en PDF."),
@@ -2674,8 +2727,9 @@ def ingest_calendari_cmd(
     del mateix fitxer. Si no ha canviat res, no fa feina; si ha canviat, llista què
     s'ha mogut respecte de la revisió anterior.
 
-    Sense `--url` ni `--fitxer` prova la temporada en curs I la següent: la RFEB
-    publica la del curs vinent al juliol, molt abans que se n'acabi l'actual.
+    Sense `--url` ni `--fitxer` busca a la biblioteca de mitjans de la RFEB la
+    revisió més nova de la temporada en curs I de la següent: la del curs vinent
+    es publica al juliol, molt abans que se n'acabi l'actual.
 
     El de la FCB va a part perquè la graella és una altra, però tampoc no li cal
     res: se'l busca al gestor de fitxers del WordPress i n'agafa la revisió més
@@ -2690,7 +2744,7 @@ def ingest_calendari_cmd(
 
     import httpx
 
-    from fcbillar.calendari_fed import ingest_calendari, rfeb_url, temporada_actual
+    from fcbillar.calendari_fed import ingest_calendari, temporada_actual
 
     if fitxer:
         # `--url` continua servint amb `--fitxer`: no s'hi baixa res, però queda
@@ -2721,8 +2775,21 @@ def ingest_calendari_cmd(
         versio = versio or cal.versio
         feines = [(cal.url, None)]
     else:
+        from fcbillar.calendari_fed import descobreix_rfeb
+
         any_actual = temporada_actual()
-        feines = [(rfeb_url(a), None) for a in (any_actual, any_actual + 1)]
+        vigents = {f"{a}/{a + 1}" for a in (any_actual, any_actual + 1)}
+        trobats = [c for c in descobreix_rfeb() if c.temporada in vigents]
+        if not trobats:
+            console.print(
+                "[red]No he trobat el calendari de la RFEB de la temporada a la seva "
+                "biblioteca de mitjans.[/] Passa-li `--url` o `--fitxer`."
+            )
+            raise typer.Exit(1)
+        for c in trobats:
+            v = ".".join(map(str, c.versio))
+            console.print(f"  [dim]publicat:[/] {c.temporada} v{v} — {c.url}")
+        feines = [(c.url, None) for c in trobats]
 
     fets = 0
     for u, dades in feines:

@@ -42,7 +42,10 @@ construeixi a sobre:
   · No lliga cap jugador ni cap equip amb el cens de la federació catalana. La
     llicència espanyola i la catalana són independents: es pot jugar la lliga
     catalana amb un club i la nacional amb un altre, i les dues coses són
-    veritat alhora. Aquí els noms es queden tal com els escriu la RFEB.
+    veritat alhora. Aquí els noms es queden tal com els escriu la RFEB. L'únic
+    lligam amb una fitxa del cens és el que algú ha validat a mà a
+    `fonts/nacional/fitxes.csv` (vegeu `nacional_fitxes`), i només serveix per
+    a l'apartat de Lliga Nacional de la fitxa.
   · No alimenta cap rànquing ni cap mitjana de la federació catalana. Les
     partides de la lliga nacional no compten per al rànquing català, i
     barrejar-les el falsejaria.
@@ -178,7 +181,8 @@ class JugadorClassificat:
     caramboles: int
     entrades: int
     mitjana: float
-    punts: int
+    #: La Segona no en publica: la seva classificació acaba a la mitjana.
+    punts: int | None
 
 
 # --------------------------- paraules i línies ---------------------------
@@ -537,9 +541,9 @@ def llegeix_classificacio_de_jugadors(cami: str | Path) -> list[JugadorClassific
                 if x_equip is None or x_numeros is None:
                     continue
                 numeros = [p for p in linia if p.x0 >= x_numeros]
-                if len(numeros) != 8 or not _RE_ENTER.match(linia[0].text):
+                if len(numeros) not in (7, 8) or not _RE_ENTER.match(linia[0].text):
                     continue
-                j, g, e, per, car, ent, mit, pts = (p.text for p in numeros)
+                j, g, e, per, car, ent, mit, *pts = (p.text for p in numeros)
                 # La capçalera «EQUIPO» va centrada sobre la columna i no diu on
                 # comença: el nom de l'equip arrenca més a l'esquerra. El que separa
                 # el jugador de l'equip és el salt més gros entre dues paraules.
@@ -559,7 +563,7 @@ def llegeix_classificacio_de_jugadors(cami: str | Path) -> list[JugadorClassific
                         caramboles=int(car),
                         entrades=int(ent),
                         mitjana=_decimal(mit),
-                        punts=int(pts),
+                        punts=int(pts[0]) if pts else None,
                     )
                 )
     if not out:

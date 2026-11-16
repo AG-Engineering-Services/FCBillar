@@ -20,6 +20,21 @@ els publica. Per afegir una jornada n'hi ha prou amb pujar-ne el PDF.
 De moment només es llegeix la Primera Divisió: la Divisió d'Honor i la Segona
 tenen una altra disposició.
 
+## Els jugadors que tenen fitxa al cens català
+
+`fitxes.csv` diu quins noms de la RFEB són quina fitxa del cens. La RFEB i la
+FCB no comparteixen cap identificador, així que el lligam el proposa la màquina
+i el valida una persona:
+
+    fcbillar nacional-candidats                                 # de la BBDD local
+    fcbillar nacional-candidats liga_nal_h_cjug.pdf --divisio honor
+
+Només es proposa una parella si té els dos cognoms iguals i el mateix nom de
+pila, en català o en castellà (Josep i José). A la columna `validat` s'hi posa
+`si` o `no`; tornar-ho a executar afegeix els candidats nous i no toca els que
+ja hi són. El lligam només fa sortir l'apartat de Lliga Nacional a la fitxa del
+jugador: no compta per a cap rànquing ni cap mitjana catalana.
+
 ## Pujar-los des de l'aplicació
 
 Un administrador d'un club que juga la lliga pot pujar el PDF des de la seva
