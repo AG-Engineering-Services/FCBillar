@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -31,8 +32,16 @@ _PAISOS = {
     "CROATIA": "HR", "SERBIA": "RS", "BULGARIA": "BG", "ROMANIA": "RO", "RUSSIA": "RU",
     "UKRAINE": "UA", "MOROCCO": "MA", "ALGERIA": "DZ", "TUNISIA": "TN", "JORDAN": "JO",
     "LUXEMBOURG": "LU", "IRELAND": "IE", "ENGLAND": "GB", "BOLIVIA": "BO", "PARAGUAY": "PY",
-    "URUGUAY": "UY", "CANADA": "CA", "AUSTRALIA": "AU", "SOUTH AFRICA": "ZA",
+    "URUGUAY": "UY", "THE NETHERLANDS": "NL", "CZECH": "CZ", "SLOVAKIA": "SK",
+    "MONTENEGRO": "ME", "LATVIA": "LV", "LITHUANIA": "LT", "ESTONIA": "EE", "NORWAY": "NO",
+    "NEW ZEALAND": "NZ", "PHILIPPINES": "PH", "INDONESIA": "ID", "MALAYSIA": "MY",
+    "SINGAPORE": "SG", "SAUDI ARABIA": "SA", "QATAR": "QA", "LEBANON": "LB", "IRAN": "IR",
+    "PANAMA": "PA", "COSTA RICA": "CR", "DOMINICAN REPUBLIC": "DO", "GUATEMALA": "GT", "CANADA": "CA", "AUSTRALIA": "AU", "SOUTH AFRICA": "ZA",
 }  # fmt: skip
+
+#: Els PDF posen «0000» als jugadors sense identificador: no és d'ningú, i compartit
+#: ajuntaria centenars de persones en una de sola.
+ID_SENSE_VALOR = {"0000"}
 
 _RE_NUM = re.compile(r"^\d+$")
 _RE_DEC = re.compile(r"^\d+[.,]\d+$")
@@ -101,6 +110,8 @@ class Costat:
     serie2: int | None
     # Qui comença juga una entrada més, així que cada costat porta les seves.
     entrades: int = 0
+    # Només als mundials per equips nacionals: el país amb què juga.
+    nacio: str | None = None
 
 
 @dataclass
@@ -169,6 +180,8 @@ def llegeix_jugadors(text: str) -> list[Jugador]:
                 break
             nums.append(x)
         umb_id = nums[2] if len(nums) >= 3 and len(nums[2]) == 4 else None
+        if umb_id in ID_SENSE_VALOR:
+            umb_id = None
         nat = t[idx]
         out.append(Jugador(nom=_divideix_cognom(t[:idx]), nacionalitat=nat[:2], umb_id=umb_id))
     return out
@@ -414,6 +427,140 @@ def llegeix_classificacio(text: str) -> list[Classificat]:
     return out
 
 
+# ------------------------- mundial per equips nacionals -------------------------
+# Cada fila és un jugador d'un encontre entre seleccions: «[joc] PAÍS Nom car inn mitjana
+# mp hr [hr2]». El número de joc (davant o en una línia a part) no es fa servir: la
+# càrrega renumera les partides de tota la prova.
+
+_RE_FILA_EQUIP = re.compile(
+    r"^(?:(\d+)\s+)?(.+?)\s+(\d+)\s+(\d+)\s+(\d+[.,]\d+)\s+(\d)\s+(\d+)(?:\s+(\d+))?$"
+)
+_RE_FASE_EQUIP = re.compile(
+    r"(?i)^(group\s+\w+|(?:round of \d+|quarter|semi)[ -]?finals?|finals?|ranking.*)$"
+)
+
+
+def es_equips(text: str) -> bool:
+    return bool(re.search(r"(?mi)^game\s+nation\s+match\s*/\s*players", text))
+
+
+def noms_de_la_llista_d_equips(text: str, nacions: list[str]) -> list[str]:
+    """Els noms de «TEAM PLAYERS RESERVE»: titulars i reserves, de dos en dos o més per línia."""
+    if not re.search(r"(?mi)^team\s+players\s+reserve", text):
+        return []
+    out: list[str] = []
+    for linia in text.splitlines():
+        t = linia.split()
+        if len(t) < 2 or not _RE_NUM.match(t[0]):
+            continue
+        t = t[1:]
+        for n in nacions:  # «9 BELGIUM 2 FORTHOMME Roland …»: el país va davant d'un número
+            k = len(n.split())
+            if t[:k] == n.split() and len(t) > k and _RE_NUM.match(t[k]):
+                t = t[k + 1 :]
+                break
+        t = [x for x in t if not _RE_NUM.match(x)]
+        nom: list[str] = []
+        for x in t:
+            majus = not any(c.islower() for c in x)
+            if majus and nom and any(any(c.islower() for c in y) for y in nom):
+                out.append(" ".join(nom))
+                nom = []
+            nom.append(x)
+        if nom and any(any(c.islower() for c in y) for y in nom):
+            out.append(" ".join(nom))
+    return out
+
+
+def _nacions_de(textos: list[str]) -> list[str]:
+    """Els noms de país que surten a la classificació per equips, més els coneguts."""
+    trobats = set(_PAISOS)
+    for text in textos:
+        for m in re.finditer(r"(?m)^\d+\s+([A-Z][A-Z .]+?)\s+\d+\s+\d+\s+\d+\s+\d+[.,]\d+", text):
+            trobats.add(m.group(1).strip())
+    return sorted(trobats, key=len, reverse=True)
+
+
+def llegeix_equips(
+    text: str, nacions: list[str], fase_per_defecte: str
+) -> tuple[list[Partida], list[str]]:
+    """Les partides individuals d'un PDF de resultats d'un mundial per equips nacionals."""
+    errors: list[str] = []
+    fase, grup = fase_per_defecte, ""
+    files: list[tuple[str, str, str, _Fila]] = []
+    for linia in text.splitlines():
+        linia = linia.strip()
+        if not linia:
+            continue
+        f = _RE_FASE_EQUIP.match(linia)
+        if f:
+            fase = linia.upper() if not linia.lower().startswith("group") else fase_per_defecte
+            grup = linia.split()[-1].upper() if linia.lower().startswith("group") else ""
+            continue
+        m = _RE_FILA_EQUIP.match(linia)
+        if not m:
+            continue
+        _, resta, car, inn, avg, mp, hr1, hr2 = m.groups()
+        pais = next((n for n in nacions if resta.upper().startswith(n + " ")), None)
+        nom = resta[len(pais) :].strip() if pais else ""
+        if not pais or not re.search(r"[A-Za-z]", nom):
+            continue
+        fila = _Fila(nom, _PAISOS.get(pais, pais[:2]), int(car), int(inn), _dec(avg), int(mp),
+                     [int(x) for x in (hr1, hr2) if x is not None])  # fmt: skip
+        files.append((fase, grup, pais, fila))
+    # Dos jugadors seguits són una partida; el joc solt va entre els dos o després.
+    out: list[Partida] = []
+    i = 0
+    while i + 1 < len(files):
+        (fa, ga, pa, a), (_, _, pb, b) = files[i], files[i + 1]
+        if pa == pb or a.inn != b.inn:
+            errors.append(f"{fa}: files que no fan parella ({a.nom}, {b.nom}), saltades")
+            i += 1
+            continue
+        c1, c2 = _costat(a), _costat(b)
+        c1.nacio, c2.nacio = a.nat, b.nat
+        out.append(Partida(fase=fa, grup=ga, ordre=len(out) + 1, a=c1, b=c2))
+        i += 2
+    return out, errors
+
+
+def _unifica_noms(partides: list[Partida], llista: list[str]) -> None:
+    """Les columnes tallen els noms llargs («DE BRUIJN Jean Pau»): s'agafa el més llarg del país."""
+    from difflib import SequenceMatcher
+
+    per_pais: dict[str, list[str]] = defaultdict(list)
+    for p in partides:
+        for c in (p.a, p.b):
+            if c.jugador not in per_pais[c.nacio or ""]:
+                per_pais[c.nacio or ""].append(c.jugador)
+    canon: dict[tuple[str, str], str] = {}
+    for pais, noms in per_pais.items():
+        for n in noms:
+            kn = clau(n)
+            # Primer la llista de jugadors, que té el nom sencer i ben escrit.
+            amb_llista = [x for x in llista if clau(x).startswith(kn)] if len(kn) >= 8 else []
+            if len(amb_llista) != 1:
+                amb_llista = [x for x in llista if clau(x) == kn] or sorted(
+                    (x for x in llista if SequenceMatcher(None, kn, clau(x)).ratio() >= 0.92),
+                    key=lambda x: -SequenceMatcher(None, kn, clau(x)).ratio(),
+                )[:1]
+            if amb_llista:
+                canon[(pais, n)] = amb_llista[0]
+                continue
+            millor = n
+            for altre in noms:
+                kn, ka = clau(n), clau(altre)
+                if altre == n or len(ka) <= len(kn):
+                    continue
+                semblant = ka.startswith(kn) or SequenceMatcher(None, kn, ka).ratio() >= 0.9
+                if semblant and len(altre) > len(millor):
+                    millor = altre
+            canon[(pais, n)] = millor
+    for p in partides:
+        for c in (p.a, p.b):
+            c.jugador = canon[(c.nacio or "", c.jugador)]
+
+
 # ------------------------------------ una prova ------------------------------------
 
 
@@ -453,6 +600,8 @@ def llegeix_prova(carpeta: Path) -> Llegit:
     per_clau = {clau(j.nom): j for j in res.jugadors}
     conegut = set(per_clau)
 
+    nacions = _nacions_de(list(textos.values()))
+    llista_equips = [n for t in textos.values() for n in noms_de_la_llista_d_equips(t, nacions)]
     for cami, text in textos.items():
         if cami.name in res.llegits:
             continue
@@ -462,6 +611,13 @@ def llegeix_prova(carpeta: Path) -> Llegit:
                 rows = llegeix_classificacio(_text(cami, y_tolerance=5))
                 if rows:
                     res.classificacio = rows
+                    res.llegits.append(cami.name)
+                continue
+            if es_equips(text):
+                ps, errs = llegeix_equips(text, nacions, _fase_del_fitxer(cami))
+                res.errors.extend(f"{cami.name}: {e}" for e in errs)
+                if ps:
+                    res.partides.extend(ps)
                     res.llegits.append(cami.name)
                 continue
             if re.search(r"(?i)group\s+match|match\s*players", text) and re.search(
@@ -491,6 +647,9 @@ def llegeix_prova(carpeta: Path) -> Llegit:
             nom_de[n] = j.nom if j else separa_nom(n)
         return nom_de[n]
 
+    equips = [p for p in res.partides if p.a.nacio]
+    if equips:
+        _unifica_noms(equips, llista_equips)
     for c in res.classificacio:
         c.jugador = canon(c.jugador)
     for p in res.partides:
@@ -504,8 +663,8 @@ def llegeix_prova(carpeta: Path) -> Llegit:
             j.nacionalitat = nat_per_clau.get(clau(j.nom))
     nous = {c.jugador: c.nacionalitat for c in res.classificacio}
     for p in res.partides:
-        nous.setdefault(p.a.jugador, None)
-        nous.setdefault(p.b.jugador, None)
+        nous.setdefault(p.a.jugador, p.a.nacio)
+        nous.setdefault(p.b.jugador, p.b.nacio)
     for nom, nat in nous.items():
         if nom not in coneguts:
             res.jugadors.append(Jugador(nom=nom, nacionalitat=nat))

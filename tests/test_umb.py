@@ -14,7 +14,15 @@ from pathlib import Path
 
 from fcbillar.db.migrations import ensure_schema
 from fcbillar.nacional_fitxes import JugadorCens
-from fcbillar.umb import clau, llegeix_jugadors, llegeix_prova, separa_nom
+from fcbillar.umb import (
+    clau,
+    es_equips,
+    llegeix_equips,
+    llegeix_jugadors,
+    llegeix_prova,
+    noms_de_la_llista_d_equips,
+    separa_nom,
+)
 from fcbillar.umb_carrega import carrega, disciplina_de, resum
 from fcbillar.umb_descarrega import llegeix_esdeveniment
 from fcbillar.umb_fitxes import (
@@ -199,6 +207,89 @@ def test_l_id_umb_es_hereta_d_una_altra_prova(tmp_path):
     ).fetchone()[:] == ("0777",)
 
 
+def test_id_0000_no_es_cap_id(tmp_path):
+    js = llegeix_jugadors(
+        "Players List\n5 GARCIA Pedro ES 10 100 0000\n6 LOPEZ Juan ES 11 90 0000\n"
+    )
+    assert [j.umb_id for j in js] == [None, None]
+    conn = ensure_schema(tmp_path / "t.db")
+    conn.execute("INSERT INTO umb_esdeveniments (id, nom, font) VALUES (1, 'A', 'x')")
+    conn.executemany(
+        "INSERT INTO umb_jugadors VALUES (1, ?, '0000', 'ES')", [("GARCIA Pedro",), ("LOPEZ Juan",)]
+    )
+    from fcbillar.umb_carrega import _hereta_ids
+
+    _hereta_ids(conn)
+    ids = {r[0] for r in conn.execute("SELECT umb_id FROM umb_jugadors")}
+    assert ids == {"x:garciapedro:ES", "x:lopezjuan:ES"}
+
+
+def test_un_id_compartit_per_dues_persones_es_separa(tmp_path):
+    from fcbillar.umb_carrega import _hereta_ids
+
+    conn = ensure_schema(tmp_path / "t.db")
+    for i in (1, 2, 3):
+        conn.execute(f"INSERT INTO umb_esdeveniments (id, nom, font) VALUES ({i}, 'A', 'x')")
+    conn.executemany(
+        "INSERT INTO umb_jugadors VALUES (?, ?, '2166', 'TR')",
+        [(1, "YAVUZ Tarik"), (2, "YAVUZ Tarik"), (3, "YILMAZ Savas")],
+    )
+    conn.executemany(
+        "INSERT INTO umb_jugadors VALUES (?, ?, '0211', 'ES')",
+        [(1, "MAS Jose-Maria"), (2, "MAS Jose Maria"), (3, "MAS José María")],
+    )
+    _hereta_ids(conn)
+    ids = dict(conn.execute("SELECT nom, umb_id FROM umb_jugadors"))
+    assert ids["YAVUZ Tarik"] == "2166"
+    assert ids["YILMAZ Savas"] == "x:yilmazsavas:TR"
+    assert {
+        i for n, i in conn.execute("SELECT nom, umb_id FROM umb_jugadors") if n.startswith("MAS")
+    } == {"0211"}
+
+
+def test_mundial_per_equips_nacionals():
+    text = (
+        "37th World Championship Nat. Teams 3-Cushion\n"
+        "QUARTER FINALS\n"
+        "Game Nation Match / players T-car T-Inn Av MP HR\n"
+        "THE NETHERLANDS JASPERS Dick 40 28 1.428 2 7\n"
+        "53\n"
+        "KOREA CHO Myung Woo 28 28 1.000 0 4\n"
+        "THE NETHERLANDS DE BRUIJN Jean Pau 33 25 1.320 0 8\n"
+        "54\n"
+        "SPAIN LEGAZPI Ruben 40 25 1.600 2 9\n"
+        "Match Nation MP CAR INN GAV HR DC_SET\n"
+        "THE NETHERLANDS 2 73 53 1.377 8 15\n"
+        "27\n"
+        "SPAIN 2 68 53 1.283 9 11\n"
+    )
+    assert es_equips(text)
+    ps, errs = llegeix_equips(text, ["THE NETHERLANDS", "KOREA", "SPAIN"], "x")
+    assert errs == [] and len(ps) == 2
+    assert (ps[0].a.jugador, ps[0].a.nacio, ps[0].b.nacio) == ("JASPERS Dick", "NL", "KR")
+    assert (ps[1].b.jugador, ps[1].b.nacio, ps[1].b.caramboles) == ("LEGAZPI Ruben", "ES", 40)
+    assert ps[1].fase == "QUARTER FINALS"
+    llista = (
+        "Teams\n"
+        "TEAM PLAYERS RESERVE\n"
+        "1 LEGAZPI Ruben ANGUITA Carlos\n"
+        "4 SPAIN\n"
+        "2 JIMENEZ Sergio CRESPO Carlos\n"
+        "1 CEULEMANS Peter MERCKX Eddy\n"
+        "9 BELGIUM 2 FORTHOMME Roland LONCELLE Johann\n"
+    )
+    assert noms_de_la_llista_d_equips(llista, ["BELGIUM", "SPAIN"]) == [
+        "LEGAZPI Ruben",
+        "ANGUITA Carlos",
+        "JIMENEZ Sergio",
+        "CRESPO Carlos",
+        "CEULEMANS Peter",
+        "MERCKX Eddy",
+        "FORTHOMME Roland",
+        "LONCELLE Johann",
+    ]
+
+
 def test_pagina_d_esdeveniment():
     html = (
         '<meta /><script type="application/ld&#x2B;json">{"@type": "SportsEvent", '
@@ -320,6 +411,14 @@ def test_pagina_de_la_ceb():
         ("SANCHEZ Daniel", "ES"),
         ("JASPERS Dick", "NL"),
     }
+
+
+def test_valors_amb_desempat_o_en_blanc_a_la_ceb():
+    from fcbillar.ceb import _enter, _mitjana
+
+    assert _enter("120 (3)") == 120
+    assert _mitjana("", "250", "1") == 250.0
+    assert _mitjana("7.05", "120 (3)", "17") == 7.05
 
 
 def test_llista_d_esdeveniments_de_la_ceb():

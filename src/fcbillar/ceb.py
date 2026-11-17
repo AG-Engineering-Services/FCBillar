@@ -113,6 +113,22 @@ def _parells(cel: Tag) -> list[str]:
     return [s.get_text(strip=True) for s in cel.find_all("span")]
 
 
+def _enter(text: str) -> int:
+    """«120 (3)» -> 120: entre parèntesis hi va el desempat a l'engegada, que no compta aquí."""
+    m = re.match(r"\s*(\d+)", text)
+    if not m:
+        raise ValueError(text)
+    return int(m.group(1))
+
+
+def _mitjana(avg: str, car: str, inn: str) -> float:
+    """Els vencedors per walkover o amb la mitjana en blanc: es calcula de caramboles i entrades."""
+    if avg.strip():
+        return float(avg)
+    e = _enter(inn)
+    return round(_enter(car) / e, 3) if e else 0.0
+
+
 def _nom_nat(text: str) -> tuple[str, str | None]:
     m = re.match(r"^(.*?)\s*\(([A-Z]{2,3})\)\s*$", text.strip())
     return (m.group(1).strip(), _nat(m.group(2))) if m else (text.strip(), None)
@@ -166,8 +182,10 @@ def llegeix_pagina(contingut: bytes) -> Llegit:
                     continue  # partida sense jugar o sense totes les dades
                 costats = [
                     Costat(
-                        jugador=noms[i], caramboles=int(car[i]), mitjana=float(avg[i]),
-                        punts=int(mp[i]), serie=int(hr[i]), serie2=None, entrades=int(inn[i]),
+                        jugador=noms[i], caramboles=_enter(car[i]),
+                        mitjana=_mitjana(avg[i], car[i], inn[i]), punts=int(mp[i]),
+                        serie=_enter(hr[i]) if hr[i] else None, serie2=None,
+                        entrades=_enter(inn[i]),
                     )
                     for i in (0, 1)
                 ]  # fmt: skip

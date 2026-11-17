@@ -17,7 +17,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
-from fcbillar.nacional_fitxes import JugadorCens, JugadorRfeb, candidats
+from fcbillar.nacional_fitxes import JugadorCens, JugadorRfeb, _mots, _una_lletra, candidats
 
 CAMPS = [
     "validat",
@@ -125,3 +125,97 @@ def lligams_validats(cami: str | Path) -> dict[str, str]:
             for r in csv.DictReader(f)
             if r["validat"].strip().lower() == "si"
         }
+
+
+# ------------------------- espanyols sense cap candidat -------------------------
+
+CAMPS_SENSE = ["umb_id", "jugador_umb", "proves", "partides", "anys", "possibles"]
+
+
+def _suggereix(nom_umb: str, cens: list[JugadorCens], n: int = 3) -> list[JugadorCens]:
+    """Fitxes del cens que s'assemblen al nom UMB pel cognom; per mirar-les a mà, sense garantia."""
+    mots = _mots(nom_natural(nom_umb))
+    if len(mots) < 2:
+        return []
+    cognom, noms = mots[-1], mots[:-1]
+    puntuats = []
+    for c in cens:
+        cognoms, _, pila = c.nom.partition(",")
+        cs = _mots(cognoms)
+        if not cs:
+            continue
+        pt = 0
+        if cognom in cs:
+            pt = 4 if cs[0] == cognom else 3
+        elif len(cognom) >= 5 and any(len(x) >= 5 and _una_lletra(cognom, x) for x in cs):
+            pt = 2
+        if not pt:
+            continue
+        pila_m = _mots(pila)
+        if pila_m and noms and pila_m[0][0] == noms[0][0]:
+            pt += 2
+        puntuats.append((-pt, c.nom, c))
+    puntuats.sort(key=lambda t: t[:2])
+    return [c for *_, c in puntuats[:n]]
+
+
+def sense_candidat(
+    conn: sqlite3.Connection,
+    jugadors: list[JugadorUmb],
+    amb_candidat: set[str],
+    validats: dict[str, str],
+    cens: list[JugadorCens],
+) -> list[dict]:
+    """Els espanyols (per `umb_id`) que no tenen ni lligam validat ni candidat, per revisar a mà."""
+    quedats = [j for j in jugadors if j.umb_id not in amb_candidat and j.umb_id not in validats]
+    out = []
+    for j in quedats:
+        noms = [
+            r[0]
+            for r in conn.execute(
+                "SELECT DISTINCT nom FROM umb_jugadors WHERE umb_id = ? AND nacionalitat IN "
+                f"{_ESPANYOLS}",
+                (j.umb_id,),
+            )
+        ]
+        marques = ",".join("?" * len(noms))
+        proves, partides, *_ = conn.execute(
+            "SELECT (SELECT COUNT(DISTINCT esdeveniment_id) FROM umb_jugadors WHERE umb_id = ?), "
+            "COUNT(*), MIN(substr(e.data_inici, 1, 4)), MAX(substr(e.data_inici, 1, 4)) "
+            "FROM (SELECT esdeveniment_id, jugador_a AS nom FROM umb_partides "
+            " UNION ALL SELECT esdeveniment_id, jugador_b FROM umb_partides) p "
+            "JOIN umb_jugadors uj ON uj.esdeveniment_id = p.esdeveniment_id AND uj.nom = p.nom "
+            f"JOIN umb_esdeveniments e ON e.id = p.esdeveniment_id WHERE uj.umb_id = ? AND p.nom IN ({marques})",
+            (j.umb_id, j.umb_id, *noms),
+        ).fetchone()
+        anys_prova = conn.execute(
+            "SELECT MIN(substr(e.data_inici, 1, 4)), MAX(substr(e.data_inici, 1, 4)) "
+            "FROM umb_jugadors uj JOIN umb_esdeveniments e ON e.id = uj.esdeveniment_id "
+            "WHERE uj.umb_id = ?",
+            (j.umb_id,),
+        ).fetchone()
+        a, b = anys_prova
+        out.append(
+            {
+                "umb_id": j.umb_id,
+                "jugador_umb": j.nom,
+                "proves": proves,
+                "partides": partides,
+                "anys": a if a == b else f"{a}-{b}",
+                "possibles": " | ".join(
+                    f"{c.fcb_id}:{c.nom} ({c.club})" if c.club else f"{c.fcb_id}:{c.nom}"
+                    for c in _suggereix(j.nom, cens)
+                ),
+            }
+        )
+    out.sort(key=lambda f: (-f["partides"], f["jugador_umb"]))
+    return out
+
+
+def escriu_sense_candidat(files: list[dict], cami: str | Path) -> None:
+    cami = Path(cami)
+    cami.parent.mkdir(parents=True, exist_ok=True)
+    with cami.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=CAMPS_SENSE)
+        w.writeheader()
+        w.writerows(files)

@@ -12,9 +12,10 @@ import re
 import sqlite3
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
+from difflib import SequenceMatcher
 from pathlib import Path
 
-from fcbillar.umb import Llegit, clau, llegeix_prova
+from fcbillar.umb import ID_SENSE_VALOR, Llegit, clau, llegeix_prova
 from fcbillar.umb_descarrega import Esdeveniment, carrega_esdeveniments
 
 _DISCIPLINES = [
@@ -87,19 +88,61 @@ def desa_esdeveniment(conn: sqlite3.Connection, ev: Esdeveniment, ll: Llegit) ->
     conn.executemany(
         "INSERT OR REPLACE INTO umb_partides (esdeveniment_id, fase, grup, ordre, jugador_a, "
         "caramboles_a, entrades_a, mitjana_a, punts_a, serie_a, serie2_a, jugador_b, "
-        "caramboles_b, entrades_b, mitjana_b, punts_b, serie_b, serie2_b) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "caramboles_b, entrades_b, mitjana_b, punts_b, serie_b, serie2_b, nacio_a, nacio_b) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             (
                 ev.id, p.fase, p.grup, p.ordre,
                 p.a.jugador, p.a.caramboles, p.a.entrades, p.a.mitjana, p.a.punts, p.a.serie,
                 p.a.serie2,
                 p.b.jugador, p.b.caramboles, p.b.entrades, p.b.mitjana, p.b.punts, p.b.serie,
-                p.b.serie2,
+                p.b.serie2, p.a.nacio, p.b.nacio,
             )
             for p in ll.partides
         ],
     )  # fmt: skip
+
+
+def _mateixa_persona(a: str, b: str) -> bool:
+    """Dues grafies del mateix nom: comparteixen un mot (d'una mica de cos) o s'hi assemblen molt."""
+    ca, cb = clau(a), clau(b)
+    if ca == cb or ca in cb or cb in ca:
+        return True
+    mots = lambda n: {clau(t) for t in re.split(r"[\s,\-]+", n) if len(clau(t)) >= 4}  # noqa: E731
+    return bool(mots(a) & mots(b)) or SequenceMatcher(None, ca, cb).ratio() >= 0.75
+
+
+def separa_ids_compartits(conn: sqlite3.Connection) -> int:
+    """Un id UMB amb dues persones diferents (noms sense res en comú): la minoritària perd l'id.
+
+    Les grafies diferents d'una mateixa persona («Jose-Maria», «José María») es queden juntes.
+    Torna quantes files han perdut l'id.
+    """
+    perdudes = 0
+    noms: dict[str, Counter[str]] = defaultdict(Counter)
+    for umb_id, nom, n in conn.execute(
+        "SELECT umb_id, nom, COUNT(*) FROM umb_jugadors "
+        "WHERE umb_id IS NOT NULL AND umb_id NOT LIKE 'x:%' GROUP BY umb_id, nom"
+    ):
+        noms[umb_id][nom] += n
+    for umb_id, c in noms.items():
+        if len(c) < 2:
+            continue
+        grups: list[list[str]] = []
+        for nom, _ in c.most_common():
+            for g in grups:
+                if any(_mateixa_persona(nom, x) for x in g):
+                    g.append(nom)
+                    break
+            else:
+                grups.append([nom])
+        for g in grups[1:]:  # el primer grup és el que més surt: es queda l'id
+            for nom in g:
+                perdudes += conn.execute(
+                    "UPDATE umb_jugadors SET umb_id = NULL WHERE umb_id = ? AND nom = ?",
+                    (umb_id, nom),
+                ).rowcount
+    return perdudes
 
 
 def _hereta_ids(conn: sqlite3.Connection) -> int:
@@ -109,6 +152,9 @@ def _hereta_ids(conn: sqlite3.Connection) -> int:
     Es torna a fer a cada càrrega: els ids sintètics d'abans es refan amb el que hi hagi ara.
     """
     conn.execute("UPDATE umb_jugadors SET umb_id = NULL WHERE umb_id LIKE 'x:%'")
+    for buit in ID_SENSE_VALOR:
+        conn.execute("UPDATE umb_jugadors SET umb_id = NULL WHERE umb_id = ?", (buit,))
+    separa_ids_compartits(conn)
     ids: dict[tuple[str, str], set[str]] = defaultdict(set)
     for nom, nat, umb_id in conn.execute(
         "SELECT nom, nacionalitat, umb_id FROM umb_jugadors WHERE umb_id IS NOT NULL"

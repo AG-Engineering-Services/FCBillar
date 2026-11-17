@@ -962,6 +962,8 @@ CREATE TABLE IF NOT EXISTS umb_partides (
     punts_b         INTEGER,
     serie_b         INTEGER,
     serie2_b        INTEGER,
+    nacio_a         TEXT,
+    nacio_b         TEXT,
     PRIMARY KEY (esdeveniment_id, fase, grup, ordre)
 );
 
