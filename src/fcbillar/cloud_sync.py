@@ -7075,6 +7075,70 @@ def publish_nacional(
     return counts
 
 
+#: Les taules de fora de Catalunya, amb la clau de cada fila. Els esdeveniments
+#: van primer: les partides i els totals hi apunten.
+_EXTERNES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("ext_esdeveniments", ("font", "id")),
+    ("ext_partides", ("font", "esdeveniment", "ordre")),
+    ("ext_totals", ("font", "esdeveniment", "jugador")),
+)
+
+
+def publish_externes(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Puja les partides i els totals de la CEB, la UMB i la RFEB, i els lligams validats.
+
+    Es reemplaça per font: un esdeveniment que la font ja no dona (o que el
+    lector ara descarta) marxa també del núvol. Si la base local no té res d'una
+    font, aquella font no es toca.
+
+    Com la Lliga Nacional, són taules a part: res d'aquí entra a `games` ni a cap
+    rànquing català.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    sb = get_client()
+
+    taules = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    counts: dict[str, int] = {}
+    fonts = (
+        {r[0] for r in conn.execute("SELECT DISTINCT font FROM ext_esdeveniments")}
+        if "ext_esdeveniments" in taules
+        else set()
+    )
+    if not fonts:
+        conn.close()
+        prog("warn", "externes: sense dades locals (executa `fcbillar ingest-externes`)")
+        return counts
+    for taula, clau in _EXTERNES:
+        files = [dict(r) for r in conn.execute(f"SELECT * FROM {taula}")]
+        counts[taula] = _publica_reemplaçant(
+            sb, taula, files, clau, ("font",), prog, {(f,) for f in fonts}
+        )
+    conn.close()
+
+    from fcbillar.config import PROJECT_ROOT
+    from fcbillar.externes.fitxes import lligams_validats
+
+    lligams = lligams_validats(
+        PROJECT_ROOT / "fonts" / "externes" / "fitxes.csv",
+        nacional=PROJECT_ROOT / "fonts" / "nacional" / "fitxes.csv",
+    )
+    counts["ext_fitxes"] = _publica_reemplaçant(
+        sb,
+        "ext_fitxes",
+        [{"font": f, "jugador": j, "fcb_id": i} for (f, j), i in lligams.items()],
+        ("font", "jugador"),
+        (),
+        prog,
+        {()},
+    )
+    return counts
+
+
 def publish_calendari(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:

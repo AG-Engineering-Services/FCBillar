@@ -26,6 +26,7 @@
 import { NeonPostgrestClient } from "@neondatabase/postgrest-js";
 import { env } from "$env/dynamic/public";
 import { ordenaNacional, type NacionalPartidaRow } from "./nacional";
+import type { ExtPartidaRow, ExtTotalRow } from "./externes";
 
 const PUBLIC_NEON_DATA_API_URL = env.PUBLIC_NEON_DATA_API_URL;
 const PUBLIC_NEON_ANON_TOKEN = env.PUBLIC_NEON_ANON_TOKEN;
@@ -653,4 +654,31 @@ export async function nacionalPartidesDelJugador(fcbId: string): Promise<Naciona
     if ((data ?? []).length < TRAM) break;
   }
   return ordenaNacional(rows);
+}
+
+// Partides i totals de fora de Catalunya (CEB, UMB, RFEB), ja des del jugador amb
+// fitxa. Com la Lliga Nacional, no compten per a cap rànquing ni mitjana catalana.
+export async function extPartidesDelJugador(fcbId: string): Promise<ExtPartidaRow[]> {
+  const rows: ExtPartidaRow[] = [];
+  const TRAM = 1000;
+  for (let des = 0; ; des += TRAM) {
+    const { data, error } = await db
+      .from("ext_partides_fitxa")
+      .select("*")
+      .eq("fcb_id", fcbId)
+      .order("font")
+      .order("esdeveniment")
+      .order("ordre")
+      .range(des, des + TRAM - 1);
+    if (error) throw error;
+    rows.push(...((data ?? []) as ExtPartidaRow[]));
+    if ((data ?? []).length < TRAM) break;
+  }
+  return rows;
+}
+
+export async function extTotalsDelJugador(fcbId: string): Promise<ExtTotalRow[]> {
+  const { data, error } = await db.from("ext_totals_fitxa").select("*").eq("fcb_id", fcbId);
+  if (error) throw error;
+  return (data ?? []) as ExtTotalRow[];
 }

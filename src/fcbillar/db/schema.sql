@@ -851,3 +851,68 @@ CREATE TABLE IF NOT EXISTS lligues_obertes (
     primera_vista TEXT NOT NULL,
     ultima_vista  TEXT NOT NULL
 );
+
+-- Partides i totals de fora de Catalunya (v34): Campionats d'Espanya (RFEB),
+-- Europeus (CEB), Mundials i Copes del Món (UMB).
+--
+-- Com les `nacional_*`, a part de tot el que ve de la federació catalana: no
+-- apunten a cap altra taula i no compten per a cap rànquing ni mitjana
+-- catalana. Els noms són tal com els escriu cada font; quina fitxa del cens és
+-- cadascú ho diuen els lligams validats a `fonts/externes/fitxes.csv`.
+CREATE TABLE IF NOT EXISTS ext_esdeveniments (
+    font        TEXT NOT NULL,              -- ceb | umb | rfeb
+    id          TEXT NOT NULL,              -- id de la font ('559', 'noticias2024/res_ce_3b')
+    nom         TEXT NOT NULL,
+    modalitat   TEXT NOT NULL,              -- 3B | LLIURE | 47/2 | BANDA | 71/2 | 47/1
+    ambit       TEXT NOT NULL,              -- espanya | internacional
+    tipus       TEXT NOT NULL,              -- campionat_espanya | gp_espanya | europeu | mundial | copa_mon
+    temporada   TEXT NOT NULL DEFAULT '',   -- '2024-2025'
+    data_inici  TEXT,
+    data_fi     TEXT,
+    lloc        TEXT NOT NULL DEFAULT '',
+    url         TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (font, id)
+);
+
+-- Una partida, tal com la dona la font. La CEB i la UMB les publiquen totes.
+CREATE TABLE IF NOT EXISTS ext_partides (
+    font          TEXT NOT NULL,
+    esdeveniment  TEXT NOT NULL,
+    ordre         INTEGER NOT NULL,
+    data          TEXT,
+    fase          TEXT NOT NULL DEFAULT '',
+    grup          TEXT NOT NULL DEFAULT '',
+    jugador1      TEXT NOT NULL,
+    nacio1        TEXT NOT NULL DEFAULT '',
+    caramboles1   INTEGER,
+    entrades1     INTEGER,
+    serie1        INTEGER,
+    punts1        INTEGER,
+    jugador2      TEXT NOT NULL,
+    nacio2        TEXT NOT NULL DEFAULT '',
+    caramboles2   INTEGER,
+    entrades2     INTEGER,
+    serie2        INTEGER,
+    punts2        INTEGER,
+    PRIMARY KEY (font, esdeveniment, ordre),
+    FOREIGN KEY (font, esdeveniment) REFERENCES ext_esdeveniments (font, id) ON DELETE CASCADE
+);
+
+-- Els totals d'un jugador en un campionat del qual la font no dona les
+-- partides (la RFEB). Es desen tal com venen.
+CREATE TABLE IF NOT EXISTS ext_totals (
+    font          TEXT NOT NULL,
+    esdeveniment  TEXT NOT NULL,
+    jugador       TEXT NOT NULL,
+    federacio     TEXT NOT NULL DEFAULT '',
+    posicio       INTEGER,
+    jugades       INTEGER,
+    guanyades     INTEGER,
+    empatades     INTEGER,
+    perdudes      INTEGER,
+    caramboles    INTEGER,
+    entrades      INTEGER,
+    serie         INTEGER,
+    PRIMARY KEY (font, esdeveniment, jugador),
+    FOREIGN KEY (font, esdeveniment) REFERENCES ext_esdeveniments (font, id) ON DELETE CASCADE
+);

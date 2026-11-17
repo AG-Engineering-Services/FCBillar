@@ -2383,6 +2383,88 @@ def nacional_candidats_cmd(
     )
 
 
+@app.command("ingest-externes")
+def ingest_externes_cmd(
+    fonts: list[str] = typer.Option(  # noqa: B008
+        ["ceb", "umb", "rfeb"], "--font", help="ceb, umb o rfeb. Es pot repetir."
+    ),
+    ceb_fins: int = typer.Option(650, "--ceb-fins", help="Darrer id d'esdeveniment de la CEB."),
+    umb_fins: int = typer.Option(400, "--umb-fins", help="Darrer id d'esdeveniment de la UMB."),
+    rfeb_des_de: int = typer.Option(2012, "--rfeb-des-de", help="Primera carpeta noticiasAAAA."),
+    rfeb_fins: int = typer.Option(2025, "--rfeb-fins", help="Darrera carpeta noticiasAAAA."),
+    ids: list[int] = typer.Option(  # noqa: B008
+        None, "--id", help="Només aquests esdeveniments (CEB o UMB)."
+    ),
+    refresca: bool = typer.Option(False, "--refresca", help="Torna a baixar el que ja hi ha."),
+) -> None:
+    """Desa partides de Campionats d'Espanya, Europeus, Mundials i Copes del Món.
+
+    - CEB: els Europeus de carambola que tenen la pestanya de partides.
+    - UMB: els Mundials i les Copes del Món, dels PDF de cada fase.
+    - RFEB: les classificacions finals dels Campionats d'Espanya (la RFEB no en
+      publica les partides), de les còpies de Wayback Machine.
+
+    Tot el que es baixa queda a `data/cache/externes/`. Va a les taules `ext_*`,
+    a part de la federació catalana.
+    """
+    from fcbillar.externes.ingesta import Descarregador, ingesta_ceb, ingesta_rfeb, ingesta_umb
+
+    settings = get_settings()
+    conn = ensure_schema(settings.db_path)
+    with Descarregador(settings.cache_dir / "externes", refresca=refresca) as d:
+        if "ceb" in fonts:
+            n = ingesta_ceb(conn, ids or range(1, ceb_fins + 1), d, console.print)
+            console.print(f"CEB: {n} Europeus desats.")
+        if "umb" in fonts:
+            n = ingesta_umb(conn, ids or range(1, umb_fins + 1), d, console.print)
+            console.print(f"UMB: {n} Mundials i Copes del Món desats.")
+        if "rfeb" in fonts:
+            n = ingesta_rfeb(conn, range(rfeb_des_de, rfeb_fins + 1), d, console.print)
+            console.print(f"RFEB: {n} classificacions de campionats desades.")
+    conn.close()
+
+
+@app.command("externes-candidats")
+def externes_candidats_cmd(
+    sortida: str = typer.Option("fonts/externes/fitxes.csv", "--sortida"),
+) -> None:
+    """Proposa quins jugadors de la CEB, la UMB i la RFEB són a la fitxa del cens.
+
+    Els candidats nous s'afegeixen al CSV amb `validat` buit; els que ja hi són
+    no es toquen. Un lligam només val quan hi poses «si». Els noms de la RFEB ja
+    validats per a la Lliga Nacional no cal tornar-los a validar.
+    """
+    from fcbillar.externes.fitxes import JugadorExtern, escriu_candidats, proposa
+    from fcbillar.nacional_fitxes import JugadorCens, lligams_validats
+
+    conn = ensure_schema(get_settings().db_path)
+    ja_nacional = set(lligams_validats(Path("fonts/nacional/fitxes.csv")))
+    jugadors = {
+        JugadorExtern(font=f, nom=n, nacio=p or "")
+        for f, n, p in conn.execute(
+            "SELECT font, jugador1, nacio1 FROM ext_partides "
+            "UNION SELECT font, jugador2, nacio2 FROM ext_partides "
+            "UNION SELECT font, jugador, federacio FROM ext_totals"
+        )
+    }
+    jugadors = {j for j in jugadors if not (j.font == "rfeb" and j.nom in ja_nacional)}
+    cens = [
+        JugadorCens(fcb_id=i, nom=n, club=c or "")
+        for i, n, c in conn.execute(
+            "SELECT p.fcb_id, p.nom, cl.nom FROM players p "
+            "LEFT JOIN clubs cl ON cl.id = p.club_id "
+            "WHERE p.fcb_id IS NOT NULL AND p.fcb_id NOT LIKE 'name:%'"
+        )
+    ]
+    conn.close()
+    trobats = proposa(sorted(jugadors, key=lambda j: (j.font, j.nom)), cens)
+    ja, nous = escriu_candidats(trobats, sortida)
+    console.print(
+        f"{len(jugadors)} jugadors de fora, {len(trobats)} candidats: "
+        f"{nous} de nous a {sortida} ({ja} ja hi eren)."
+    )
+
+
 @app.command("nacional-alineacions")
 def nacional_alineacions_cmd(
     pdf: str = typer.Argument(..., help="L'«orden de fuerza» d'una divisió, en PDF."),
@@ -2464,6 +2546,20 @@ def publish_nacional_cmd(
     counts = publica_si_hi_es(
         "nacional", lambda: publish_nacional(on_progress=_prog, abans_de=abans_de), _prog
     )
+    console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
+    if any(v < 0 for v in counts.values()):
+        raise typer.Exit(1)
+
+
+@app.command("publish-externes")
+def publish_externes_cmd() -> None:
+    """Publica només les partides de fora (CEB, UMB, RFEB) i els lligams validats."""
+    from fcbillar.cloud_sync import publica_si_hi_es, publish_externes
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
+
+    counts = publica_si_hi_es("externes", lambda: publish_externes(on_progress=_prog), _prog)
     console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
     if any(v < 0 for v in counts.values()):
         raise typer.Exit(1)

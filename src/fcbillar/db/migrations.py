@@ -92,6 +92,10 @@ Versions:
      fitxat a la lliga de tres bandes per un club i a la de 4 Modalitats per un
      altre. `players.club_id` és una columna sola i no ho pot dir. Taula nova:
      la crea l'executescript.
+- 34: les taules `ext_*`, partides i totals de fora de Catalunya (Campionats
+     d'Espanya de la RFEB, Europeus de la CEB, Mundials i Copes del Món de la
+     UMB). Com les `nacional_*`, a part de tot: no compten per a cap rànquing
+     ni mitjana catalana. Taules noves: les crea l'executescript.
 """
 
 from __future__ import annotations
@@ -104,7 +108,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 33
+SCHEMA_VERSION = 34
 
 
 def _read_schema_sql() -> str:
