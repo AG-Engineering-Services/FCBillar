@@ -851,3 +851,51 @@ CREATE TABLE IF NOT EXISTS lligues_obertes (
     primera_vista TEXT NOT NULL,
     ultima_vista  TEXT NOT NULL
 );
+
+-- Classificacions finals dels campionats individuals de carambola de la RFEB
+-- (v34): Campionats d'Espanya, Grans Premis d'Espanya i opens, llegits dels PDF
+-- de la web vella (`fcbillar rfeb-individuals`).
+--
+-- Són a part de tot el que ve de la federació catalana i no apunten a cap altra
+-- taula: els jugadors són text, tal com els escriu la RFEB, i no es lliguen amb
+-- el cens ni compten per a cap rànquing català.
+--
+-- `id` és `{carpeta}/{fitxer sense .pdf}` (`noticias2015/res_ce_3b_2015`), estable
+-- d'una càrrega a l'altra. La temporada va amb guió: '2015-2016'. Modalitat:
+-- 3b, banda, lliure, 47_2, 71_2, artistic, 5q. Categoria: absolut, femeni,
+-- sub15, sub17, sub21, sub25, senior, infantil, junior. Tipus: ce, gpe, altres.
+CREATE TABLE IF NOT EXISTS rfeb_proves (
+    id          TEXT PRIMARY KEY,
+    temporada   TEXT NOT NULL,
+    modalitat   TEXT NOT NULL,
+    categoria   TEXT NOT NULL,
+    tipus       TEXT NOT NULL,
+    titol       TEXT NOT NULL,
+    lloc        TEXT,
+    data_inici  TEXT,                    -- ISO, només si el PDF diu les dates
+    data_fi     TEXT,
+    font        TEXT NOT NULL            -- el PDF a rfeb.org
+);
+
+-- Una fila per jugador. Les columnes que la capçalera del PDF no té són NULL
+-- (les taules de banda i quadres no porten partides jugades, guanyades…).
+CREATE TABLE IF NOT EXISTS rfeb_classificacions (
+    prova_id        TEXT NOT NULL REFERENCES rfeb_proves (id) ON DELETE CASCADE,
+    posicio         INTEGER NOT NULL,
+    jugador         TEXT NOT NULL,
+    fed             TEXT,                -- sigles: CAT, MAD, VAL…
+    ronda           TEXT,                -- FF, Q, PQ-2º… fins on ha arribat (només 2018-2025)
+    posicio_empat   INTEGER,             -- la posició que comparteix, si el PDF la diu
+    jugades         INTEGER,
+    guanyades       INTEGER,
+    empatades       INTEGER,
+    perdudes        INTEGER,
+    caramboles      INTEGER,
+    entrades        INTEGER,
+    mitjana         REAL,
+    serie_major     INTEGER,
+    punts           INTEGER,
+    PRIMARY KEY (prova_id, posicio, jugador)
+);
+
+CREATE INDEX IF NOT EXISTS idx_rfeb_proves_temporada ON rfeb_proves (temporada, modalitat);

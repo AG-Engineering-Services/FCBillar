@@ -2330,6 +2330,60 @@ def nacional_historic_cmd(
     console.print(dict(Counter(r.estat for r in res)))
 
 
+@app.command("rfeb-individuals")
+def rfeb_individuals_cmd(
+    carpeta: str = typer.Argument(  # noqa: B008
+        ..., help="Carpeta amb els PDF de la web vella de la RFEB (una subcarpeta per any)."
+    ),
+    detall: bool = typer.Option(  # noqa: B008
+        False, "--detall", help="Una línia per cada fitxer no desat, no només el resum."
+    ),
+) -> None:
+    """Carrega les classificacions finals dels campionats individuals de la RFEB.
+
+    Campionats i Grans Premis d'Espanya i opens de totes les modalitats de
+    carambola. Una prova es desa sencera o no es desa; tornar-ho a executar
+    la reemplaça, no la duplica, i si dos fitxers són la mateixa prova només
+    se'n desa un.
+    """
+    from pathlib import Path
+
+    from fcbillar.rfeb_individuals_carrega import carrega, cobertura, per_categoria, resum
+
+    arrel = Path(carpeta)
+    if not arrel.is_dir():
+        console.print(f"[red]No existeix la carpeta {carpeta}[/]")
+        raise typer.Exit(1)
+    conn = ensure_schema(get_settings().db_path)
+    res = carrega(conn, arrel)
+    if detall:
+        for r in res:
+            if r.estat != "desat":
+                console.print(f"[dim]{r.estat}[/] {r.fitxer}: {r.motiu} {r.detall}")
+    for estat, motius in resum(res).items():
+        console.print(f"[bold]{estat}[/] ({sum(motius.values())})")
+        for motiu, n in motius.most_common():
+            if estat != "desat":
+                console.print(f"  {n:4d}  {motiu}")
+
+    cob = cobertura(conn)
+    modalitats = sorted({m for fila in cob.values() for m in fila})
+    taula = Table(title="Proves desades per temporada i modalitat")
+    taula.add_column("temporada")
+    for m in modalitats:
+        taula.add_column(m, justify="right")
+    taula.add_column("total", justify="right")
+    for temporada, fila in cob.items():
+        taula.add_row(
+            temporada,
+            *(str(fila.get(m, "")) for m in modalitats),
+            str(sum(fila.values())),
+        )
+    console.print(taula)
+    console.print("Per categoria:", per_categoria(conn))
+    conn.close()
+
+
 @app.command("nacional-candidats")
 def nacional_candidats_cmd(
     pdfs: list[str] = typer.Argument(  # noqa: B008
@@ -2361,6 +2415,18 @@ def nacional_candidats_cmd(
             "UNION SELECT jugador, equip, divisio FROM nacional_alineacions"
         )
     }
+    # Els campionats individuals: només els de la federació catalana, que són
+    # els que poden tenir fitxa al cens. A `equip` hi va la prova.
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='rfeb_classificacions'"
+    ).fetchone():
+        rfeb |= {
+            JugadorRfeb(nom=n, equip=t, divisio="individual")
+            for n, t in conn.execute(
+                "SELECT c.jugador, p.titol FROM rfeb_classificacions c "
+                "JOIN rfeb_proves p ON p.id = c.prova_id WHERE c.fed = 'CAT'"
+            )
+        }
     for pdf in pdfs or []:
         rfeb |= {
             JugadorRfeb(nom=j.jugador, equip=j.equip, divisio=divisio)
@@ -2440,6 +2506,22 @@ def nacional_puja_cmd(
         console.print(f"[red]No l'he pogut llegir:[/] {estat['error']}")
         raise typer.Exit(1)
     console.print(f"  {estat['resum']} → {estat['fitxer']}")
+
+
+@app.command("publish-rfeb-individuals")
+def publish_rfeb_individuals_cmd() -> None:
+    """Publica les classificacions dels campionats individuals de la RFEB."""
+    from fcbillar.cloud_sync import publica_si_hi_es, publish_rfeb_individuals
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
+
+    counts = publica_si_hi_es(
+        "rfeb individuals", lambda: publish_rfeb_individuals(on_progress=_prog), _prog
+    )
+    console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
+    if any(v < 0 for v in counts.values()):
+        raise typer.Exit(1)
 
 
 @app.command("publish-nacional")

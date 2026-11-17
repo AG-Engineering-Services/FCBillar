@@ -7075,6 +7075,42 @@ def publish_nacional(
     return counts
 
 
+def publish_rfeb_individuals(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Puja les classificacions dels campionats individuals de la RFEB.
+
+    Es reemplaça per prova: una prova que es torna a llegir no deixa files de la
+    lectura anterior. Les proves que la base local no té no es toquen.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    taules = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if "rfeb_proves" not in taules:
+        conn.close()
+        prog("warn", "rfeb individuals: sense dades locals (executa `fcbillar rfeb-individuals`)")
+        return {}
+    proves = [dict(r) for r in conn.execute("SELECT * FROM rfeb_proves")]
+    files = [dict(r) for r in conn.execute("SELECT * FROM rfeb_classificacions")]
+    conn.close()
+    if not proves:
+        return {}
+    sb = get_client()
+    counts = {"rfeb_proves": _upsert(sb, "rfeb_proves", proves, "id", prog)}
+    counts["rfeb_classificacions"] = _publica_reemplaçant(
+        sb,
+        "rfeb_classificacions",
+        files,
+        ("prova_id", "posicio", "jugador"),
+        ("prova_id",),
+        prog,
+        {(p["id"],) for p in proves},
+    )
+    return counts
+
+
 def publish_calendari(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
