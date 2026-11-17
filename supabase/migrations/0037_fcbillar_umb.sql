@@ -4,7 +4,8 @@
 -- l'admin valida el SQL i l'executa amb `psql` i la connexió sense pool.
 --
 -- Mundials i Copes del Món de carambola, llegits dels PDF de resultats que la
--- UMB publica a umb-carom.org. Com la Lliga Nacional i els campionats de la
+-- UMB publica a umb-carom.org, i Campionats d'Europa de la CEB (eurobillard.org),
+-- desats amb id 100000 + id de la CEB. Com la Lliga Nacional i els campionats de la
 -- RFEB, és a part de la federació catalana: res d'aquí compta per a cap rànquing
 -- ni mitjana catalana.
 --
@@ -65,7 +66,7 @@ create table if not exists fcbillar.umb_partides (
     mitjana_b       numeric,
     punts_b         integer,
     serie_b         integer,
-    serie2_b        integer
+    serie2_b        integer,
     primary key (esdeveniment_id, fase, grup, ordre)
 );
 
