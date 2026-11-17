@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 from pathlib import Path
 
-from fcbillar.umb import ID_SENSE_VALOR, Llegit, clau, llegeix_prova
+from fcbillar.umb import ID_SENSE_VALOR, Llegit, clau, llegeix_prova, text_sets
 from fcbillar.umb_descarrega import Esdeveniment, carrega_esdeveniments
 
 _DISCIPLINES = [
@@ -88,15 +88,16 @@ def desa_esdeveniment(conn: sqlite3.Connection, ev: Esdeveniment, ll: Llegit) ->
     conn.executemany(
         "INSERT OR REPLACE INTO umb_partides (esdeveniment_id, fase, grup, ordre, jugador_a, "
         "caramboles_a, entrades_a, mitjana_a, punts_a, serie_a, serie2_a, jugador_b, "
-        "caramboles_b, entrades_b, mitjana_b, punts_b, serie_b, serie2_b, nacio_a, nacio_b) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "caramboles_b, entrades_b, mitjana_b, punts_b, serie_b, serie2_b, nacio_a, nacio_b, "
+        "sets_a, sets_b) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             (
                 ev.id, p.fase, p.grup, p.ordre,
                 p.a.jugador, p.a.caramboles, p.a.entrades, p.a.mitjana, p.a.punts, p.a.serie,
                 p.a.serie2,
                 p.b.jugador, p.b.caramboles, p.b.entrades, p.b.mitjana, p.b.punts, p.b.serie,
-                p.b.serie2, p.a.nacio, p.b.nacio,
+                p.b.serie2, p.a.nacio, p.b.nacio, text_sets(p.a.sets), text_sets(p.b.sets),
             )
             for p in ll.partides
         ],

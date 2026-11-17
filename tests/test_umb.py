@@ -22,6 +22,8 @@ from fcbillar.umb import (
     llegeix_prova,
     noms_de_la_llista_d_equips,
     separa_nom,
+    llegeix_partides,
+    text_sets,
 )
 from fcbillar.umb_carrega import carrega, disciplina_de, resum
 from fcbillar.umb_descarrega import llegeix_esdeveniment
@@ -439,3 +441,59 @@ def test_llista_d_esdeveniments_de_la_ceb():
     assert [e.id for e in evs] == [DESPLACAMENT + 375, DESPLACAMENT + 372]
     assert evs[0].inici == "2017-09-15" and evs[0].lloc == "Ronchin (FRA)"
     assert [es_individual(e) for e in evs] == [True, False]
+
+
+# --- partides a sets de 15 (fins al 2011) -----------------------------------------
+
+GRUPS_A_SETS = """SLUISKIL WORLD CUP / GRAND PRIX
+21 till 27 January 2008 -- Sluiskil (NL)
+Qual Groups ABC
+Group Match players S1-Car S1-Inn S2-Car S2-Inn S3-Car S3-Inn T-car T-Inn Av MP Sets HR
+A MANCINI Giorgio 15 14 15 7 30 21 1,428 2 2 6
+BLAUWBLOMME Henk 8 13 10 7 18 20 0,900 0 -2 7
+DEMMING Adrie 12 10 15 17 15 9 42 36 1,166 2 1 6
+MANCINI Giorgio 15 11 13 16 8 9 36 36 1,000 0 -1 6
+Players Nat T-Car T-Inn Gen-Av MP Ba-Sets HR Place
+MANCINI Giorgio IT 66 57 1,157 2 1 6 1
+"""
+
+#: La capçalera de les eliminatòries surt en tres línies, i es juga a cinc sets.
+ELIMINATORIA_A_SETS = """21 till 27 January 2008 -- Sluiskil (NL) 1/16 Matches
+S1- S1- S2- S2- S3- S3- S4- S4- S5- S5-
+Match players Nat T-car T-Inn Av MP Sets HR
+Car Inn Car Inn Car Inn Car Inn Car Inn
+BLOMDAHL Torbjorn SE 9 11 4 7 15 11 15 4 15 7 58 40 1,450 2 1 9
+PALAZON Javier ES 15 11 15 8 10 10 9 4 10 6 59 39 1,512 0 -1 7
+"""
+
+
+def test_sets_el_total_es_el_de_davant_de_la_mitjana():
+    ps, errs = llegeix_partides(GRUPS_A_SETS, set(), "Q")
+    assert not errs
+    a, b = ps[0].a, ps[0].b
+    assert (a.jugador, a.caramboles, a.entrades, a.punts, a.serie) == ("MANCINI Giorgio", 30, 21, 2, 6)
+    assert a.sets == [(15, 14), (15, 7)]
+    # La diferència de sets negativa («-2») no es pren per la sèrie.
+    assert (b.caramboles, b.entrades, b.punts, b.serie, b.sets) == (18, 20, 0, 7, [(8, 13), (10, 7)])
+    # Tres sets: el perdedor de la partida pot guanyar-ne un.
+    assert ps[1].a.sets == [(12, 10), (15, 17), (15, 9)]
+    assert text_sets(ps[1].b.sets) == "15/11,13/16,8/9"
+
+
+def test_sets_guanya_qui_guanya_mes_sets_no_mes_caramboles():
+    ps, _ = llegeix_partides(ELIMINATORIA_A_SETS, set(), "1/16")
+    [p] = ps
+    assert (p.a.jugador, p.a.caramboles, p.a.punts) == ("BLOMDAHL Torbjorn", 58, 2)
+    assert (p.b.jugador, p.b.caramboles, p.b.punts) == ("PALAZON Javier", 59, 0)
+    assert len(p.a.sets) == 5 and p.b.sets[0] == (15, 11)
+    assert (p.a.serie, p.b.serie) == (9, 7)
+
+
+def test_sense_sets_res_no_canvia():
+    text = """Match players Nat T-Car T-Inn Penalty T-car T-Inn Av MP HR
+ZANETTI Marco IT 40 31 40 31 1,290 2 6
+GARZON Cesar CO 33 31 33 31 1,064 0 5
+"""
+    [p] = llegeix_partides(text, set(), "1/16")[0]
+    assert (p.a.caramboles, p.a.entrades, p.a.sets, p.b.serie) == (40, 31, [], 5)
+    assert text_sets(p.a.sets) is None

@@ -112,6 +112,14 @@ class Costat:
     entrades: int = 0
     # Només als mundials per equips nacionals: el país amb què juga.
     nacio: str | None = None
+    # Fins al 2008-2011 es jugava a sets de 15: (caramboles, entrades) de cada set.
+    # La partida la guanya qui guanya més sets, no qui fa més caramboles.
+    sets: list[tuple[int, int]] = field(default_factory=list)
+
+
+def text_sets(sets: list[tuple[int, int]]) -> str | None:
+    """[(15, 14), (15, 7)] -> «15/14,15/7», com es desa; None si no és a sets."""
+    return ",".join(f"{c}/{e}" for c, e in sets) if sets else None
 
 
 @dataclass
@@ -213,9 +221,14 @@ class _Fila:
     mp: int
     hr: list[int]
     grup: str = ""
+    sets: list[tuple[int, int]] = field(default_factory=list)
 
 
-def _fila_partida(linia: str, amb_nat: bool) -> _Fila | None:
+def _fila_partida(linia: str, amb_nat: bool, amb_sets: bool = False) -> _Fila | None:
+    """Una fila de partida. Amb `amb_sets` (capçalera amb «S1-Car … Sets»), els
+    números de davant del total són les caramboles i les entrades de cada set, i
+    darrere dels punts hi ha la diferència de sets abans de la sèrie major.
+    """
     nom, nums = _tokens_fila(linia)
     if not nums or not nom:
         return None
@@ -228,6 +241,8 @@ def _fila_partida(linia: str, amb_nat: bool) -> _Fila | None:
     k = next((i for i, x in enumerate(nums) if _RE_DEC.match(x)), None)
     if k is None or k < 2 or k + 2 > len(nums):
         return None
+    if amb_sets:
+        return _fila_amb_sets(" ".join(nom), nat, nums, k)
     try:
         return _Fila(
             nom=" ".join(nom),
@@ -240,6 +255,33 @@ def _fila_partida(linia: str, amb_nat: bool) -> _Fila | None:
         )
     except ValueError:
         return None
+
+
+def _fila_amb_sets(nom: str, nat: str | None, nums: list[str], k: int) -> _Fila | None:
+    """«MANCINI Giorgio 15 14 15 7 30 21 1,428 2 2 6»: dos sets (15/14 i 15/7), el
+    total (30/21), la mitjana, els punts, la diferència de sets i la sèrie major.
+
+    El total és el parell de just davant de la mitjana, i els de més enrere són els
+    sets. La diferència de sets pot ser negativa («-2») i aleshores no arriba com a
+    número: per això la sèrie es pren sempre de l'última columna.
+    """
+    abans = [int(x) for x in nums[:k]]
+    if len(abans) < 2 or len(abans) % 2:
+        return None
+    sets = [(abans[i], abans[i + 1]) for i in range(0, len(abans) - 2, 2)]
+    darrere = [int(x) for x in nums[k + 1 :]]
+    if not darrere:
+        return None
+    return _Fila(
+        nom=nom,
+        nat=nat,
+        car=abans[-2],
+        inn=abans[-1],
+        avg=_dec(nums[k]),
+        mp=darrere[0],
+        hr=[darrere[-1]] if len(darrere) >= 2 else [],
+        sets=sets,
+    )
 
 
 _RE_FASE = re.compile(
@@ -281,6 +323,8 @@ def llegeix_partides(
     errors: list[str] = []
     fase = fase_per_defecte
     mode: str | None = None  # "grup", "elim" o None (classificació de grup)
+    #: La capçalera porta la columna «Sets»: partides a sets de 15 (fins al 2011).
+    amb_sets = False
     blocs: list[tuple[str, str, list[_Fila]]] = []
     files: list[_Fila] = []
 
@@ -297,10 +341,12 @@ def llegeix_partides(
         if re.match(r"(?i)^group\s+match", linia):
             tanca()
             mode = "grup"
+            amb_sets = bool(re.search(r"\bSets\b", linia))
             continue
         if re.match(r"(?i)^match\s*players", linia):
             tanca()
             mode = "elim"
+            amb_sets = bool(re.search(r"\bSets\b", linia))
             continue
         if re.match(r"(?i)^players\s+nat", linia):
             tanca()
@@ -314,7 +360,7 @@ def llegeix_partides(
             continue
         if mode is None:
             continue
-        fila = _fila_partida(linia, amb_nat=(mode == "elim"))
+        fila = _fila_partida(linia, amb_nat=(mode == "elim"), amb_sets=amb_sets)
         if fila is None:
             continue
         if mode == "grup":
@@ -354,6 +400,7 @@ def _costat(f: _Fila) -> Costat:
         serie=f.hr[0] if f.hr else None,
         serie2=f.hr[1] if len(f.hr) > 1 else None,
         entrades=f.inn,
+        sets=f.sets,
     )
 
 
