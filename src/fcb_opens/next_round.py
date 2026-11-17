@@ -52,7 +52,7 @@ def group_is_closed(group: Group) -> bool:
     return False
 
 
-def secured_winners(phase: PhaseDetail) -> list["RoundWinner"]:
+def secured_winners(phase: PhaseDetail) -> list[RoundWinner]:
     """Guanyadors SEGURS d'una fase de grups: el 1r de cada grup REGULAR i TANCAT,
     amb punts/mitjana/sèrie-major de la ronda. L'ordre dins el grup és l'oficial de
     la federació (ja aplica els seus desempats), així que `standings[0]` és el 1r."""
@@ -77,7 +77,7 @@ def secured_winners(phase: PhaseDetail) -> list["RoundWinner"]:
     return out
 
 
-def rank_winners(winners: list["RoundWinner"]) -> list["RoundWinner"]:
+def rank_winners(winners: list[RoundWinner]) -> list[RoundWinner]:
     """Ordre de sembra a la ronda següent: **punts desc, mitjana desc, sèrie major
     desc**, i nom com a últim desempat (determinisme). El k-è d'aquesta llista omple
     el placeholder `<k>-<fase>`."""
@@ -87,12 +87,44 @@ def rank_winners(winners: list["RoundWinner"]) -> list["RoundWinner"]:
     )
 
 
+def secured_qualifiers(phase: PhaseDetail, best_seconds: int = 0) -> list[RoundWinner]:
+    """Classificats SEGURS en l'ordre dels placeholders `<k>-<fase>`: primer els
+    guanyadors (`rank_winners`) i, darrere, els `best_seconds` millors segons.
+
+    Quan la fase ha d'eliminar un nombre senar de jugadors, també passa el millor
+    segon (Art. IX.3). Comparar segons només té sentit amb TOTS els grups tancats,
+    així que fins llavors no se'n dona cap."""
+    firsts = rank_winners(secured_winners(phase))
+    if best_seconds <= 0:
+        return firsts
+    regular = [g for g in phase.groups if _is_regular_group(g.label) and g.standings]
+    if not regular or len(firsts) < len(regular):
+        return firsts
+    seconds: list[RoundWinner] = []
+    for g in regular:
+        if len(g.standings) < 2:
+            continue
+        sm = _group_sm_by_player(g)
+        sec = g.standings[1]
+        seconds.append(
+            RoundWinner(
+                player_name=sec.player_name,
+                club=sec.club,
+                group_label=g.label,
+                punts=sec.punts,
+                mitjana=sec.mitjana,
+                serie_major=sm.get(sec.player_name, 0),
+            )
+        )
+    return firsts + rank_winners(seconds)[:best_seconds]
+
+
 _PLACEHOLDER_RE = re.compile(r"^(\d+)-([A-Z]+)$")
 
 
 def resolve_next_round(
     projected_groups: list[dict],
-    winners_ranked: list["RoundWinner"],
+    winners_ranked: list[RoundWinner],
     from_phase: str,
 ) -> tuple[list[dict], int, int]:
     """Resol els placeholders `<k>-<from_phase>` dels grups PROJECTATS de la ronda

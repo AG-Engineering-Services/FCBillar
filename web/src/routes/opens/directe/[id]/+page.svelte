@@ -49,7 +49,9 @@
 	// rànquing de TRES BANDES (modalitat_codi=1) s'aplica i ho recalculem aquí,
 	// sense dependre de cap republicació. Només per a opens de 3 bandes.
 	const CA_MONTHS = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
-	const is3b = $derived(/TRES\s*BANDES|3\s*BANDES|\b3B\b/i.test(payload?.name ?? ''));
+	const is3b = $derived(
+		/TRES\s*BANDES|3\s*BANDES|\b3B\b/i.test(payload?.name ?? '') || row?.modality === 'Tres Bandes'
+	);
 	
 	type RankSeq = { num_seq: number; any_pub: number | null; mes_pub: number | null };
 	let rankSeqs = $state<RankSeq[]>([]);
@@ -252,7 +254,7 @@
 			}
 			// Premis 3B: carrega les seqüències del rànquing i les posicions del mes triat.
 			const nm3b = (row.payload_json?.name ?? '').toUpperCase();
-			if (/TRES\s*BANDES|3\s*BANDES|3B/.test(nm3b)) {
+			if (/TRES\s*BANDES|3\s*BANDES|3B/.test(nm3b) || row.modality === 'Tres Bandes') {
 				if (!rankSeqs.length) await loadRankSeqs();
 				if (selectedSeq != null && posByFcbId.size === 0) await loadRankEntries(selectedSeq);
 			}

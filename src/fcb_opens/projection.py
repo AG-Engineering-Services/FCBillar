@@ -32,10 +32,6 @@ _PHASE_TITLES = {
 # Order to present phases in the UI: deepest (played first) at the top.
 _PHASE_ORDER = ["PPP", "PP", "P"]
 
-# P phase group labels in draw order, to pair Fase Final setzens.
-_P_LABELS = ["A", "B", "C", "D", "E", "F", "G", "H",
-             "I", "J", "K", "L", "M", "N", "O", "P"]
-
 
 def order_inscrits(inscrits: list[InscritEntry]) -> list[InscritEntry]:
     """Return inscrits sorted into final seed order (1..N), Art. XVIII.
@@ -62,10 +58,17 @@ def _ordinal_ca(n: int) -> str:
     return {1: "1r", 2: "2n", 3: "3r", 4: "4t"}.get(n, f"{n}è")
 
 
-def _placeholder_label(slot: GroupSlot) -> str:
-    """Human label for a 'winner of a lower phase' slot, e.g. '1r de Pre-prèvies'."""
+def _placeholder_label(slot: GroupSlot, source_groups: int) -> str:
+    """Human label for a qualifier slot, e.g. 'Guanyador 1r de Pre-prèvies'.
+
+    Ranks past the number of groups of the source phase are its best seconds.
+    """
     phase = _PHASE_TITLES.get(slot.placeholder_phase or "", slot.placeholder_phase or "")
-    return f"Guanyador {_ordinal_ca(slot.placeholder_rank or 0)} de {phase}"
+    rank = slot.placeholder_rank or 0
+    if rank > source_groups:
+        nth = rank - source_groups
+        return f"Millor segon de {phase}" if nth == 1 else f"{_ordinal_ca(nth)} millor segon de {phase}"
+    return f"Guanyador {_ordinal_ca(rank)} de {phase}"
 
 
 def _build_warnings(ordered: list[InscritEntry], inscrits: InscritsList, n: int) -> list[dict]:
@@ -178,11 +181,12 @@ def _assemble_projection(
                     entry_phase[slot.inscription_position] = _PHASE_TITLES[pname]
                     players_out.append({"slot": idx, "kind": "player", **seed_dict(slot.inscription_position)})
                 else:
+                    source = tournament.phases[slot.placeholder_phase or ""]
                     players_out.append({
                         "slot": idx,
                         "kind": "winner",
                         "placeholder": slot.label,
-                        "label": _placeholder_label(slot),
+                        "label": _placeholder_label(slot, len(source.groups)),
                     })
             groups_out.append({"label": group.label, "players": players_out})
         phases_out.append({
@@ -197,18 +201,21 @@ def _assemble_projection(
     for position in range(1, n + 1):
         seeds_out.append({**seed_dict(position), "entry_phase": entry_phase.get(position, "Prèvies")})
 
-    # Fase Final K.O.: seeds 1-16 enter directly and are paired against the 16
-    # P-group winners per the reglament setzens table (16-1P, 15-2P, ..., 1-16P).
+    # Fase Final K.O.: seeds 1-16 enter directly against the 16 Prèvia
+    # qualifiers ranked like any other phase's (16 vs 1-P ... 1 vs 16-P), as in
+    # the reglament table and the federation's SETZENS DE FINAL sheet. 'k-P' is
+    # the k-th best qualifier, not the winner of group k.
     setzens = []
     for i in range(1, 17):
         seed_pos = 17 - i
+        slot = GroupSlot.from_phase("P", i)
         setzens.append({
             "match": i,
             "a": {"kind": "player", **seed_dict(seed_pos)},
             "b": {
                 "kind": "winner",
-                "group": _P_LABELS[i - 1],
-                "label": f"Guanyador Grup {_P_LABELS[i - 1]}",
+                "placeholder": slot.label,
+                "label": _placeholder_label(slot, len(tournament.phases["P"].groups)),
             },
         })
 
@@ -218,6 +225,7 @@ def _assemble_projection(
         "num_inscriptions": n,
         "declared_total": declared_total,
         "structure": {pn: len(tournament.phases[pn].groups) for pn in tournament.phases},
+        "qualifiers": {pn: tournament.phases[pn].qualifiers for pn in tournament.phases},
         "warnings": warnings,
         "seeds": seeds_out,
         "phases": phases_out,
@@ -447,4 +455,5 @@ def projection_to_live_payload(
         "projected": True,
         "num_inscriptions": projection.get("num_inscriptions"),
         "structure": projection.get("structure"),
+        "qualifiers": projection.get("qualifiers"),
     }
