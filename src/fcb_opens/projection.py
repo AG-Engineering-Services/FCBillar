@@ -120,6 +120,7 @@ class _Seed:
     ranking_position: int | None
     mitjana: float
     ranquing_estat: str
+    punts: int | None = None  # rànquing d'opens, tal com el porta el RÀNQUING INICIAL
 
 
 def _assemble_projection(
@@ -160,6 +161,7 @@ def _assemble_projection(
             "ranking_position": s.ranking_position,
             "mitjana": s.mitjana,
             "ranquing_estat": s.ranquing_estat,
+            "punts": s.punts,
             "fcb_id": fcb_ids.get(s.player_name),
             "opens_points": points.get(s.player_name),
         }
@@ -305,7 +307,7 @@ def build_projection_from_seeded(
     """
     ordered = list(ranking.entries)  # already sorted by Posició in the parser
     seeds = [
-        _Seed(e.player_name, e.club, e.ranking_position, e.mitjana, e.ranquing_estat)
+        _Seed(e.player_name, e.club, e.ranking_position, e.mitjana, e.ranquing_estat, e.punts)
         for e in ordered
     ]
     return _assemble_projection(
@@ -456,4 +458,17 @@ def projection_to_live_payload(
         "num_inscriptions": projection.get("num_inscriptions"),
         "structure": projection.get("structure"),
         "qualifiers": projection.get("qualifiers"),
+        "ranking_inicial": [
+            {
+                "posicio": s["seed_order"],
+                "player_name": s["player_name"],
+                "club": s.get("club") or "",
+                "ranking_position": s.get("ranking_position"),
+                "ranquing_estat": s.get("ranquing_estat") or "",
+                "punts": s.get("punts"),
+                "mitjana": s.get("mitjana") or 0.0,
+                "entry_phase": s.get("entry_phase") or "",
+            }
+            for s in projection["seeds"]
+        ],
     }

@@ -6816,6 +6816,8 @@ def publish_live_opens(
         if auto_phases:
             _enrich_real_groups_with_projection(payload["phases"], auto_phases)
             payload["phases"] = _merge_projected_phases(payload["phases"], auto_phases)
+            if auto.get("ranking_inicial"):
+                payload["ranking_inicial"] = auto["ranking_inicial"]
         else:
             proj_full = [r for r in live_rows() if (r.get("fcb_division_id") or 0) < 0]
             template = _matching_projection_payload(state.structure.name, modality, proj_full)

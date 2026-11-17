@@ -443,6 +443,18 @@ export interface OpenLivePayload {
   projected?: boolean;
   num_inscriptions?: number;
   structure?: Record<string, number>;
+  // RÀNQUING INICIAL de la federació (ordre de sembra de l'open), tal com ve al PDF.
+  ranking_inicial?: RankingInicialRow[];
+}
+export interface RankingInicialRow {
+  posicio: number;
+  player_name: string;
+  club: string;
+  ranking_position: number | null; // posició al rànquing català d'opens
+  ranquing_estat: string; // OPENS | Definitiva | Provisional
+  punts: number | null; // punts del rànquing d'opens
+  mitjana: number;
+  entry_phase: string; // fase on comença: Fase Final, Prèvies, Pre-prèvies…
 }
 export interface OpenLiveRow {
   fcb_division_id: number;

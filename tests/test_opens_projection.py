@@ -270,6 +270,20 @@ def test_generator_matches_every_published_draw(draw):
     assert got == real["phases"]
 
 
+def test_live_payload_carries_the_initial_ranking():
+    from fcb_opens.projection import projection_to_live_payload
+
+    proj = build_projection_from_seeded(_synthetic_ranking(107))
+    payload = projection_to_live_payload(proj, division_id=-1, fetched_at="2026-11-17T00:00:00Z")
+    ri = payload["ranking_inicial"]
+    assert [r["posicio"] for r in ri] == list(range(1, 108))
+    assert ri[0]["player_name"] == "PLAYER 001" and ri[0]["punts"] == 899
+    assert ri[0]["entry_phase"] == "Fase Final"
+    assert ri[16]["entry_phase"] == "Prèvies"
+    assert ri[-1]["entry_phase"] == "Pre-pre-prèvies"
+    assert ri[-1]["ranking_position"] is None and ri[-1]["ranquing_estat"] == "Definitiva"
+
+
 def test_projection_labels_the_best_second_slot():
     proj = build_projection_from_seeded(_synthetic_ranking(107))
     assert proj["qualifiers"] == {"P": 16, "PP": 16, "PPP": 7}

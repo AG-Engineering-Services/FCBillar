@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import type { OpenLiveRow } from '$lib/db';
+	import type { OpenLiveRow, RankingInicialRow } from '$lib/db';
 	// Cache per divisió: en tornar enrere des d'una fitxa de jugador, la pàgina
 	// es repinta a l'instant (contingut complet) i la restauració d'scroll de
 	// SvelteKit recupera el punt on era l'usuari sense esperar la xarxa.
@@ -19,6 +19,7 @@
 	let selectedPhase = $state<number | null>(phaseCache.get(id0) ?? null);
 	let scores = $state<OpenLiveScore[]>([]);
 	let showClassif = $state(false); // pestanya "Classificació" (paral·lela a les fases)
+	let showRanking = $state(false); // pestanya "Rànquing inicial"
 	let timer: ReturnType<typeof setInterval> | null = null;
 	let scoresTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -27,6 +28,17 @@
 	const phases = $derived(payload?.phases ?? []);
 	// Open PROJECTAT (rànquing inicial, abans del sorteig oficial FCB).
 	const projected = $derived(!!payload?.projected);
+	const rankingInicial = $derived(payload?.ranking_inicial ?? []);
+	// Trams del rànquing inicial per la fase on entra cada jugador, en l'ordre del PDF.
+	const rankingTrams = $derived.by(() => {
+		const out: { fase: string; rows: RankingInicialRow[] }[] = [];
+		for (const r of rankingInicial) {
+			const last = out[out.length - 1];
+			if (last && last.fase === r.entry_phase) last.rows.push(r);
+			else out.push({ fase: r.entry_phase, rows: [r] });
+		}
+		return out;
+	});
 
 	// Classificació provisional (jugadors ELIMINATS, per tram segons la fase on cauen),
 	// agrupada per ronda i ordenada pel millor lloc. Es va omplint a mesura que cauen.
@@ -464,9 +476,9 @@
 			{@const st = phaseStatus(p)}
 			<button
 				type="button"
-				onclick={() => { selectedPhase = i; showClassif = false; }}
-				aria-pressed={selectedPhase === i && !showClassif}
-				class="min-h-11 rounded-lg border px-2.5 py-1 text-xs font-medium {selectedPhase === i && !showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600' : ''} {p.projected
+				onclick={() => { selectedPhase = i; showClassif = false; showRanking = false; }}
+				aria-pressed={selectedPhase === i && !showClassif && !showRanking}
+				class="min-h-11 rounded-lg border px-2.5 py-1 text-xs font-medium {selectedPhase === i && !showClassif && !showRanking ? 'ring-2 ring-slate-400 dark:ring-slate-600' : ''} {p.projected
 					? 'border-dashed border-amber-400 dark:border-amber-700 bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400'
 					: st === 'done'
 						? 'border-emerald-300 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
@@ -481,16 +493,28 @@
 		{#if classByRound.length}
 			<button
 				type="button"
-				onclick={() => (showClassif = true)}
+				onclick={() => { showClassif = true; showRanking = false; }}
 				aria-pressed={showClassif}
 				class="min-h-11 rounded-lg border px-2.5 py-1 text-xs font-medium {showClassif ? 'ring-2 ring-slate-400 dark:ring-slate-600 ' : ''}border-violet-300 dark:border-violet-900/50 bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300"
 			>
 				Classificació
 			</button>
 		{/if}
+		{#if rankingInicial.length}
+			<button
+				type="button"
+				onclick={() => { showRanking = true; showClassif = false; }}
+				aria-pressed={showRanking}
+				class="min-h-11 rounded-lg border px-2.5 py-1 text-xs font-medium {showRanking ? 'ring-2 ring-slate-400 dark:ring-slate-600 ' : ''}border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+			>
+				Rànquing inicial
+			</button>
+		{/if}
 	</div>
 
-	{#if showClassif}
+	{#if showRanking}
+		{@render rankingView()}
+	{:else if showClassif}
 		{@render classifView()}
 	{:else if selectedPhase !== null && phases[selectedPhase]}
 		{@const phase = phases[selectedPhase]}
@@ -722,6 +746,42 @@
 	{/if}
 
 {/if}
+
+{#snippet rankingView()}
+	<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+		<div class="mb-2">
+			<h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Rànquing inicial</h2>
+			<p class="mt-0.5 text-2xs leading-tight text-slate-500 dark:text-slate-400">L'ordre de sembra que publica la federació: decideix a quina fase entra cadascú i a quin grup cau. {rankingInicial.length} inscrits.</p>
+		</div>
+		<div class="space-y-3">
+			{#each rankingTrams as tram (tram.fase + tram.rows[0].posicio)}
+				{@const lo = tram.rows[0].posicio}
+				{@const hi = tram.rows[tram.rows.length - 1].posicio}
+				<div>
+					<h3 class="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+						<span>{tram.fase === 'Fase Final' ? 'Directes a la fase final' : `Entren a ${tram.fase.toLowerCase()}`}</span>
+						<span class="font-mono font-normal text-slate-500 dark:text-slate-400">{lo}–{hi}</span>
+					</h3>
+					<ol class="space-y-0.5">
+						{#each tram.rows as r (r.posicio)}
+							<li class="flex items-center gap-2 text-sm">
+								<span class="w-8 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{r.posicio}</span>
+								<span class="flex min-w-0 flex-1 flex-col leading-tight sm:flex-row sm:items-baseline sm:gap-2">
+									{@render player(r.player_name, 'truncate')}
+									<span class="truncate text-2xs text-slate-500 dark:text-slate-400">{r.club}</span>
+								</span>
+								<span class="hidden w-20 shrink-0 text-right text-2xs text-slate-500 dark:text-slate-400 sm:inline" title="Posició al rànquing català d'opens">{r.ranking_position ? `${r.ranking_position}è opens` : r.ranquing_estat}</span>
+								<span class="hidden w-10 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:inline" title="Punts del rànquing d'opens">{r.punts ?? ''}</span>
+								<span class="w-12 shrink-0 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-200" title="Mitjana">{r.mitjana ? r.mitjana.toFixed(3) : '—'}</span>
+							</li>
+						{/each}
+					</ol>
+				</div>
+			{/each}
+		</div>
+		<p class="mt-2 text-2xs leading-tight text-slate-500 dark:text-slate-400">Columnes: número de sembra, jugador i club, posició al rànquing d'opens (o «Definitiva» / «Provisional» si no hi és), punts d'opens i mitjana.</p>
+	</div>
+{/snippet}
 
 {#snippet classifView()}
 	<div class="rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
