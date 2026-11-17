@@ -29,6 +29,15 @@ voldrem tornar a llegir.
 
 Si mai molesten, es poden esborrar sense por: el git les recorda.
 
+## `rfeb_individuals/` — la web vella de la RFEB
+
+PDF de classificacions finals dels campionats individuals, copiats de la
+recuperació de Wayback amb la mateixa estructura de carpetes (`noticiasAAAA/`):
+un per cada capçalera de taula que sap llegir `fcbillar.rfeb_individuals`
+(3 bandes amb sèrie major, amb ronda, banda, quadres amb i sense `Puntos`,
+sub-17 amb la federació escrita, femení sense columna de nom i sub-21 amb la
+posició al final). Els fan servir `tests/test_rfeb_individuals.py`.
+
 ## `umb/` — resultats de la UMB
 
 Només PDF de resultats (partides, llistes de jugadors sense data de naixement i
