@@ -7076,10 +7076,8 @@ def publish_nacional(
     return counts
 
 
-def publish_rfeb_individuals(
-    db_path: Path | None = None, on_progress: Progress | None = None
-) -> dict[str, int]:
-    """Puja les classificacions dels campionats individuals de la RFEB.
+def publish_umb(db_path: Path | None = None, on_progress: Progress | None = None) -> dict[str, int]:
+    """Puja els resultats de la UMB i els lligams validats amb el cens.
 
     Es reemplaça per prova: una prova que es torna a llegir no deixa files de la
     lectura anterior. Les proves que la base local no té no es toquen.
@@ -7089,26 +7087,46 @@ def publish_rfeb_individuals(
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     taules = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-    if "rfeb_proves" not in taules:
+    if "umb_esdeveniments" not in taules:
         conn.close()
-        prog("warn", "rfeb individuals: sense dades locals (executa `fcbillar rfeb-individuals`)")
+        prog("warn", "umb: sense dades locals (executa `fcbillar umb-carrega`)")
         return {}
-    proves = [dict(r) for r in conn.execute("SELECT * FROM rfeb_proves")]
-    files = [dict(r) for r in conn.execute("SELECT * FROM rfeb_classificacions")]
+    esdeveniments = [dict(r) for r in conn.execute("SELECT * FROM umb_esdeveniments")]
+    dades = {
+        t: [dict(r) for r in conn.execute(f"SELECT * FROM {t}")]
+        for t in ("umb_jugadors", "umb_classificacions", "umb_partides")
+    }
     conn.close()
-    if not proves:
+    if not esdeveniments:
         return {}
     sb = get_client()
-    counts = {"rfeb_proves": _upsert(sb, "rfeb_proves", proves, "id", prog)}
-    counts["rfeb_classificacions"] = _publica_reemplaçant(
-        sb,
-        "rfeb_classificacions",
-        files,
-        ("prova_id", "posicio", "jugador"),
-        ("prova_id",),
-        prog,
-        {(p["id"],) for p in proves},
-    )
+    counts = {"umb_esdeveniments": _upsert(sb, "umb_esdeveniments", esdeveniments, "id", prog)}
+    ambits = {(e["id"],) for e in esdeveniments}
+    claus = {
+        "umb_jugadors": ("esdeveniment_id", "nom"),
+        "umb_classificacions": ("esdeveniment_id", "posicio", "jugador"),
+        "umb_partides": ("esdeveniment_id", "fase", "grup", "ordre"),
+    }
+    for taula, files in dades.items():
+        counts[taula] = _publica_reemplaçant(
+            sb, taula, files, claus[taula], ("esdeveniment_id",), prog, ambits
+        )
+
+    # Els lligams amb la fitxa del cens surten del CSV validat a mà, no de la BBDD.
+    from fcbillar.config import PROJECT_ROOT
+    from fcbillar.umb_fitxes import lligams_validats
+
+    lligams = lligams_validats(PROJECT_ROOT / "fonts" / "internacional" / "fitxes.csv")
+    if lligams:
+        counts["umb_fitxes"] = _publica_reemplaçant(
+            sb,
+            "umb_fitxes",
+            [{"umb_id": u, "fcb_id": f} for u, f in lligams.items()],
+            ("umb_id",),
+            (),
+            prog,
+            {()},
+        )
     return counts
 
 
@@ -7359,3 +7377,39 @@ def publish_calendari(
         "club_plantilles": n_pla,
         "lliga_inscrits": n_insc,
     }
+
+
+def publish_rfeb_individuals(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Puja les classificacions dels campionats individuals de la RFEB.
+
+    Es reemplaça per prova: una prova que es torna a llegir no deixa files de la
+    lectura anterior. Les proves que la base local no té no es toquen.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    taules = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if "rfeb_proves" not in taules:
+        conn.close()
+        prog("warn", "rfeb individuals: sense dades locals (executa `fcbillar rfeb-individuals`)")
+        return {}
+    proves = [dict(r) for r in conn.execute("SELECT * FROM rfeb_proves")]
+    files = [dict(r) for r in conn.execute("SELECT * FROM rfeb_classificacions")]
+    conn.close()
+    if not proves:
+        return {}
+    sb = get_client()
+    counts = {"rfeb_proves": _upsert(sb, "rfeb_proves", proves, "id", prog)}
+    counts["rfeb_classificacions"] = _publica_reemplaçant(
+        sb,
+        "rfeb_classificacions",
+        files,
+        ("prova_id", "posicio", "jugador"),
+        ("prova_id",),
+        prog,
+        {(p["id"],) for p in proves},
+    )
+    return counts

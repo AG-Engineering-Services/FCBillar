@@ -2513,12 +2513,138 @@ def publish_rfeb_individuals_cmd() -> None:
     """Publica les classificacions dels campionats individuals de la RFEB."""
     from fcbillar.cloud_sync import publica_si_hi_es, publish_rfeb_individuals
 
+
+@app.command("umb-descarrega")
+def umb_descarrega_cmd(
+    carpeta: str = typer.Option("data/cache/umb", "--carpeta"),  # noqa: B008
+    maxim: int = typer.Option(  # noqa: B008
+        450, "--maxim", help="Últim id d'esdeveniment que es prova."
+    ),
+    sense_descobrir: bool = typer.Option(  # noqa: B008
+        False, "--sense-descobrir", help="Reutilitza esdeveniments.json sense recórrer els ids."
+    ),
+    ceb: bool = typer.Option(  # noqa: B008
+        True, "--ceb/--sense-ceb", help="Baixa també els campionats d'Europa d'eurobillard.org."
+    ),
+    carpeta_ceb: str = typer.Option("data/cache/ceb", "--carpeta-ceb"),  # noqa: B008
+) -> None:
+    """Descobreix les proves de umb-carom.org i en baixa els PDF de resultats.
+
+    En sèrie i amb pausa d'un segon. Només es baixa el que falta: es pot tornar a
+    executar sense repetir res.
+    """
+    from pathlib import Path
+
+    from fcbillar.umb_descarrega import carrega_esdeveniments, descarrega, descobreix
+
+    cache = Path(carpeta)
+    evs = carrega_esdeveniments(cache) if sense_descobrir else descobreix(cache, maxim)
+    amb_pdf = [e for e in evs if e.pdfs]
+    console.print(f"{len(evs)} esdeveniments, {len(amb_pdf)} amb PDF de resultats")
+    nous, ja, errors = descarrega(cache, amb_pdf)
+    console.print(f"PDF: {nous} de nous, {ja} que ja hi eren, {len(errors)} errors")
+    for e in errors:
+        console.print(f"[yellow]no s'ha pogut baixar[/] {e}")
+    if ceb:
+        from fcbillar.ceb import descobreix as descobreix_ceb
+
+        europeus = descobreix_ceb(Path(carpeta_ceb))
+        console.print(f"CEB: {len(europeus)} proves individuals a {carpeta_ceb}")
+
+
+@app.command("umb-carrega")
+def umb_carrega_cmd(
+    carpeta: str = typer.Option("data/cache/umb", "--carpeta"),  # noqa: B008
+    carpeta_ceb: str = typer.Option("data/cache/ceb", "--carpeta-ceb"),  # noqa: B008
+    detall: bool = typer.Option(False, "--detall", help="Els errors de cada PDF."),  # noqa: B008
+) -> None:
+    """Carrega a la BBDD local els resultats de la UMB baixats amb `umb-descarrega`.
+
+    Una prova es reemplaça sencera, no es duplica. Un PDF il·legible queda a la
+    llista d'errors i no atura la resta.
+    """
+    from pathlib import Path
+
+    from fcbillar.umb_carrega import carrega, cobertura, per_motiu, resum
+
+    arrel = Path(carpeta)
+    if not arrel.is_dir():
+        console.print(f"[red]No existeix la carpeta {carpeta}[/]")
+        raise typer.Exit(1)
+    conn = ensure_schema(get_settings().db_path)
+    res = carrega(conn, arrel)
+    if Path(carpeta_ceb).is_dir():
+        from fcbillar.umb_carrega import carrega_ceb
+
+        res += carrega_ceb(conn, Path(carpeta_ceb))
+    console.print(dict(per_motiu(res)))
+    for r in res:
+        if r.estat == "buit":
+            console.print(f"[dim]{r.estat}[/] {r.esdeveniment} {r.nom}: {r.detall}")
+        if r.errors and (detall or r.estat == "buit"):
+            for e in r.errors:
+                console.print(f"  [yellow]{r.esdeveniment}[/] {e}")
+    console.print("PDF amb error:", sum(len(r.errors) for r in res))
+    cob = cobertura(conn)
+    disciplines = sorted({d for fila in cob.values() for d in fila})
+    taula = Table(title="Proves desades per any i disciplina")
+    taula.add_column("any")
+    for d in disciplines:
+        taula.add_column(d, justify="right")
+    for any_, fila in cob.items():
+        taula.add_row(any_, *(str(fila.get(d, "")) for d in disciplines))
+    console.print(taula)
+    console.print(resum(conn))
+    conn.close()
+
+
+@app.command("umb-candidats")
+def umb_candidats_cmd(
+    sortida: str = typer.Option("fonts/internacional/fitxes.csv", "--sortida"),  # noqa: B008
+) -> None:
+    """Proposa quins jugadors espanyols de la UMB són a la fitxa del cens català.
+
+    Els candidats nous s'afegeixen al CSV amb `validat` buit; els que ja hi són,
+    validats o no, no es toquen. Un lligam només val quan hi poses «si».
+    """
+    from collections import Counter
+
+    from fcbillar.nacional_fitxes import JugadorCens
+    from fcbillar.umb_fitxes import escriu_candidats, jugadors_espanyols, proposa
+
+    conn = ensure_schema(get_settings().db_path)
+    jugadors, sense_id = jugadors_espanyols(conn)
+    cens = [
+        JugadorCens(fcb_id=i, nom=n, club=c or "")
+        for i, n, c in conn.execute(
+            "SELECT p.fcb_id, p.nom, cl.nom FROM players p "
+            "LEFT JOIN clubs cl ON cl.id = p.club_id "
+            "WHERE p.fcb_id IS NOT NULL AND p.fcb_id NOT LIKE 'name:%'"
+        )
+    ]
+    conn.close()
+    trobats = proposa(jugadors, cens)
+    ja, nous = escriu_candidats(trobats, sortida)
+    console.print(
+        f"{len(jugadors)} jugadors espanyols amb id UMB ({sense_id} sense id), "
+        f"{len(trobats)} candidats: {nous} de nous a {sortida} ({ja} ja hi eren)."
+    )
+    console.print("Per motiu:", dict(Counter(m for _, m, _ in trobats)))
+
+
+@app.command("publish-umb")
+def publish_umb_cmd() -> None:
+    """Publica els resultats de la UMB i els lligams validats amb el cens."""
+    from fcbillar.cloud_sync import publica_si_hi_es, publish_umb
+
     def _prog(level: str, msg: str) -> None:
         console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
 
     counts = publica_si_hi_es(
         "rfeb individuals", lambda: publish_rfeb_individuals(on_progress=_prog), _prog
     )
+
+    counts = publica_si_hi_es("umb", lambda: publish_umb(on_progress=_prog), _prog)
     console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
     if any(v < 0 for v in counts.values()):
         raise typer.Exit(1)

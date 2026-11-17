@@ -37,3 +37,10 @@ un per cada capçalera de taula que sap llegir `fcbillar.rfeb_individuals`
 (3 bandes amb sèrie major, amb ronda, banda, quadres amb i sense `Puntos`,
 sub-17 amb la federació escrita, femení sense columna de nom i sub-21 amb la
 posició al final). Els fan servir `tests/test_rfeb_individuals.py`.
+
+## `umb/` — resultats de la UMB
+
+Només PDF de resultats (partides, llistes de jugadors sense data de naixement i
+classificació final), amb l'id de l'esdeveniment de `umb-carom.org` com a carpeta:
+`50` (2013, noms amb espais i decimals amb coma), `200` (2018, noms enganxats i
+sense identificador) i `307` (2025). Els fa servir `tests/test_umb.py`.

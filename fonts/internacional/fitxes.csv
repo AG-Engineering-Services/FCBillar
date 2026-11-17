@@ -1,0 +1,32 @@
+validat,umb_id,jugador_umb,nacionalitat,proves,fcb_id,nom_cens,club_cens,motiu
+si,x:aguilarsalaramon:ES,AGUILAR SALA Ramon,ES,1,84,"AGUILAR SALA, RAMÓN",C.B.BANYOLES,exacte
+si,x:apariciosergio:ES,APARICIO Sergio,ES,1,2542,"APARICIO ESCUDERO, SERGI",BILLAR EL MASNOU,un cognom
+si,x:arnauricard:ES,ARNAU Ricard,ES,1,109,"ARNAU FONT, RICARD",C.B.MONT-ROIG,un cognom
+si,1273,BOTE Juan Bouterin,ES,9,625,"BOUTERIN BOTE, JOAN",C.B.MOLLET,exacte
+si,x:diezayzajavier:ES,DIEZ AYZA Javier,ES,2,206,"DIEZ AYZA, XAVIER",S.B.P.E.CENTELLES,exacte
+si,x:diezayzaxavier:ES,DIEZ AYZA Xavier,ES,1,206,"DIEZ AYZA, XAVIER",S.B.P.E.CENTELLES,exacte
+si,x:espinasajoan:ES,ESPINASA Joan,ES,4,211,"ESPINASA SÁNCHEZ, JOAN",B.C.GRANOLLERS,un cognom
+si,x:fonellosaxavier:ES,FONELLOSA Xavier,ES,1,704,"FONELLOSA CASANOVAS, XAVIER",C.B.MONFORTE,un cognom
+si,x:garcescarmelo:ES,GARCES Carmelo,ES,1,1218,"GARCÉS TURMO, CARMELO",C.B.LLEIDA,un cognom
+si,0262,GARCIA ALARCON Ricardo,ES,11,716,"GARCÍA ALARCÓN, RICARDO",C.B.MONFORTE,exacte
+si,x:garciaadria:ES,GARCIA Adria,ES,1,249,"GARCÍA DUEÑAS, ADRIÀ",,un cognom
+si,2458,GARCIA DUENAS Adria,ES,3,249,"GARCÍA DUEÑAS, ADRIÀ",,exacte
+si,x:garciasorianoantonio:ES,GARCIA SORIANO Antonio,ES,1,727,"GARCÍA SORIANO, ANTONI",C.B.CARDONA,exacte
+si,1822,GARRIGA Jordi,ES,18,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,un cognom
+si,0308,GONZALEZ CASTRILLO Manuel,ES,8,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,falta
+si,x:gutierrezantoni:ES,GUTIERREZ Antoni,ES,1,302,"GUTIÉRREZ CASTRO, ANTONI",C.B.PUNT D'ATAC,un cognom
+si,x:hermidaeva:ES,HERMIDA Eva,ES,2,1565,"HERMIDA DÍAZ, EVA MARÍA",C.B.MANRESA,un cognom
+si,0189,JIMENEZ Sergio,ES,40,769,"JIMÉNEZ GALERA, SERGI",B.C.GRANOLLERS,un cognom
+si,x:martinjose:ES,MARTIN Jose,ES,4,832,"MARTÍN VÍLCHEZ, JOSEP",B.C.GRANOLLERS,un cognom
+si,x:martinezcarrilloantonio:ES,MARTINEZ CARRILLO Antonio,ES,4,367,"MARTÍNEZ CARRILLO, ANTONI",C.B.LLINARS,exacte
+si,2863,MARTINEZ Sergio,ES,7,1194,"MARTÍNEZ AVILÉS, SERGIO",C.B.MATARÓ,un cognom
+si,3660,MAS Cesar,ES,2,842,"MAS CANADELL, CÉSAR",B.C.GRANOLLERS,un cognom
+si,0211,MAS Jose Maria,ES,31,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,un cognom
+si,x:masjosemaria:ES,MAS José-Maria,ES,31,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,un cognom
+si,1846,MATA Esteve,ES,9,375,"MATA PARDO, ESTEVE",B.C.GRANOLLERS,un cognom
+si,x:matapardoesteve:ES,MATA PARDO Esteve,ES,1,375,"MATA PARDO, ESTEVE",B.C.GRANOLLERS,exacte
+si,x:oliverjordi:ES,OLIVER Jordi,ES,1,884,"OLIVER SINCA, JORDI",C.B.MONFORTE,un cognom
+si,1980,PEREZ Rafael,ES,10,916,"PÉREZ ZORRILLA, RAFAEL",C.B.MOLLET,un cognom
+si,1173,PINEDA Juan Jose,ES,7,453,"PINEDA LAFUENTE, JOAN JOSEP",C.B.SANT ADRIÀ,un cognom
+si,x:ralitarosjuan:ES,RALITA ROS Juan,ES,1,468,"RALITA ROS, JOAN",C.B.BANYOLES,exacte
+si,x:torriscoenriquejose:ES,TORRISCO Enrique Jose,ES,4,323,"JOSÉ TORRISCO, ENRIQUE",C.B.LLIÇÀ D'AMUNT,exacte
