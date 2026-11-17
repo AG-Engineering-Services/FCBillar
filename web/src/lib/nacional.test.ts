@@ -4,7 +4,9 @@ import {
 	divisioNacional,
 	equipsDistints,
 	mitjanaNacional,
+	nomProva,
 	normalitzaEquip,
+	posicioProva,
 	ordenaNacional,
 	resultatPartida,
 	resumNacional,
@@ -90,5 +92,20 @@ describe('lliga nacional', () => {
 		expect(g[0].equips).toHaveLength(2);
 		expect(g[0].resum.pj).toBe(3);
 		expect(g[1].temporada).toBe('2024-2025');
+	});
+});
+
+describe('campionats individuals', () => {
+	const base = { tipus: 'ce', modalitat: '3b', categoria: 'sub21', titol: 'x' };
+	it('anomena la prova pel tipus, la modalitat i la categoria', () => {
+		expect(nomProva(base)).toBe("Campionat d'Espanya · Tres bandes sub-21");
+		expect(nomProva({ ...base, tipus: 'gpe', categoria: 'absolut', modalitat: '71_2' })).toBe("Gran Premi d'Espanya · Quadre 71/2");
+		expect(nomProva({ ...base, tipus: 'altres', titol: 'Prova de Santander' })).toBe('Prova de Santander');
+	});
+	it('escriu la posició amb ordinals catalans i l’empat', () => {
+		expect(posicioProva({ posicio: 1, posicio_empat: null, participants: 14 })).toBe('1r de 14');
+		expect(posicioProva({ posicio: 2, posicio_empat: null, participants: 14 })).toBe('2n de 14');
+		expect(posicioProva({ posicio: 4, posicio_empat: 3, participants: 32 })).toBe('4t (=3r) de 32');
+		expect(posicioProva({ posicio: 18, posicio_empat: 18, participants: 120 })).toBe('18è de 120');
 	});
 });

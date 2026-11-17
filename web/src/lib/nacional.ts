@@ -159,3 +159,76 @@ export function agrupaNacional(rows: NacionalPartidaRow[]): NacionalGrup[] {
 		partides
 	}));
 }
+
+/** Una classificació final d'un campionat individual de la RFEB (vista rfeb_individuals_fitxa). */
+export interface RfebIndividualRow {
+	fcb_id: string;
+	prova_id: string;
+	posicio: number;
+	/** La posició compartida quan la RFEB en dona una d'empatada. */
+	posicio_empat: number | null;
+	ronda: string | null;
+	jugades: number | null;
+	guanyades: number | null;
+	empatades: number | null;
+	perdudes: number | null;
+	caramboles: number | null;
+	entrades: number | null;
+	mitjana: number | null;
+	serie_major: number | null;
+	temporada: string;
+	modalitat: string;
+	categoria: string;
+	tipus: string;
+	titol: string;
+	lloc: string | null;
+	data_inici: string | null;
+	participants: number;
+}
+
+const TIPUS: Record<string, string> = { ce: "Campionat d'Espanya", gpe: "Gran Premi d'Espanya" };
+const MODALITATS: Record<string, string> = {
+	'3b': 'Tres bandes',
+	banda: 'Banda',
+	lliure: 'Lliure',
+	'47_2': 'Quadre 47/2',
+	'71_2': 'Quadre 71/2',
+	artistic: 'Artístic',
+	'5q': 'Cinc quilles'
+};
+const CATEGORIES: Record<string, string> = {
+	absolut: '',
+	femeni: 'femení',
+	sub15: 'sub-15',
+	sub17: 'sub-17',
+	sub21: 'sub-21',
+	sub25: 'sub-25',
+	senior: 'sènior',
+	infantil: 'infantil',
+	junior: 'júnior'
+};
+
+/** «Campionat d'Espanya · Tres bandes sub-21»; les proves sense tipus conegut fan servir el títol. */
+export function nomProva(r: Pick<RfebIndividualRow, 'tipus' | 'modalitat' | 'categoria' | 'titol'>): string {
+	const tipus = TIPUS[r.tipus];
+	if (!tipus) return r.titol;
+	const cat = CATEGORIES[r.categoria] ?? r.categoria;
+	return `${tipus} · ${MODALITATS[r.modalitat] ?? r.modalitat}${cat ? ` ${cat}` : ''}`;
+}
+
+/** «3r de 14», o «4t (=3r) de 14» si la RFEB la dona empatada. */
+export function posicioProva(r: Pick<RfebIndividualRow, 'posicio' | 'posicio_empat' | 'participants'>): string {
+	const ord = (n: number) => `${n}${n === 1 ? 'r' : n === 2 ? 'n' : n === 3 ? 'r' : n === 4 ? 't' : 'è'}`;
+	const empat = r.posicio_empat != null && r.posicio_empat !== r.posicio ? ` (=${ord(r.posicio_empat)})` : '';
+	return `${ord(r.posicio)}${empat} de ${r.participants}`;
+}
+
+export function ordenaIndividuals(rows: RfebIndividualRow[]): RfebIndividualRow[] {
+	return [...rows].sort(
+		(a, b) =>
+			b.temporada.localeCompare(a.temporada) ||
+			(b.data_inici ?? '').localeCompare(a.data_inici ?? '') ||
+			a.tipus.localeCompare(b.tipus) ||
+			a.titol.localeCompare(b.titol)
+	);
+}

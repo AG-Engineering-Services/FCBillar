@@ -6,17 +6,23 @@
 		type GameRow,
 		type PendingGameRow,
 		type ProvisionalRow,
-		nacionalPartidesDelJugador
+		nacionalPartidesDelJugador,
+		rfebIndividualsDelJugador,
+		umbDelJugador
 	} from '$lib/db';
+	import { agrupaUmb, resultatUmb, type UmbProva } from '$lib/internacional';
 	import {
 		agrupaNacional,
 		divisioNacional,
 		grafiaPerEquip,
 		mitjanaNacional,
+		nomProva,
 		normalitzaEquip,
+		posicioProva,
 		resultatPartida,
 		temporadaCurta,
-		type NacionalPartidaRow
+		type NacionalPartidaRow,
+		type RfebIndividualRow
 	} from '$lib/nacional';
 	import { follows, toggleFollow } from '$lib/follows';
 	import RadarChart from '$lib/components/RadarChart.svelte';
@@ -267,6 +273,60 @@
 			viu = false;
 		};
 	});
+
+	let individuals = $state<RfebIndividualRow[]>([]);
+	const individualsPerTemporada = $derived.by(() => {
+		const m = new Map<string, RfebIndividualRow[]>();
+		for (const r of individuals) m.set(r.temporada, [...(m.get(r.temporada) ?? []), r]);
+		return [...m];
+	});
+	$effect(() => {
+		const id = fcbId;
+		let viu = true;
+		individuals = [];
+		if (id)
+			rfebIndividualsDelJugador(id)
+				.then((r) => {
+					if (viu) individuals = r;
+				})
+				.catch((e) => console.warn('Campionats individuals RFEB no disponibles', e));
+		return () => {
+			viu = false;
+		};
+	});
+
+	let internacional = $state<UmbProva[]>([]);
+	$effect(() => {
+		const id = fcbId;
+		let viu = true;
+		internacional = [];
+		if (id)
+			umbDelJugador(id)
+				.then((r) => {
+					if (viu) internacional = agrupaUmb(r.partides, r.classificacions);
+				})
+				.catch((e) => console.warn('Proves internacionals no disponibles', e));
+		return () => {
+			viu = false;
+		};
+	});
+
+	// Catalunya, Espanya i Internacional no es barregen; cada opció surt només si té dades.
+	type Ambit = 'cat' | 'esp' | 'int';
+	let ambit = $state<Ambit>('cat');
+	const teEspanya = $derived(nacional.length > 0 || individuals.length > 0);
+	const teInternacional = $derived(internacional.length > 0);
+	const ambits = $derived(
+		(
+			[
+				['cat', 'Catalunya', true],
+				['esp', 'Espanya', teEspanya],
+				['int', 'Internacional', teInternacional]
+			] as [Ambit, string, boolean][]
+		).filter((a) => a[2])
+	);
+	const veuEspanya = $derived(ambit === 'esp' && teEspanya);
+	const veuInternacional = $derived(ambit === 'int' && teInternacional);
 
 	async function loadAll(id: string) {
 		loading = true;
@@ -1119,6 +1179,36 @@
 		</div>
 	{/if}
 
+	{#if ambits.length > 1}
+		<div class="mb-3 grid {ambits.length === 3 ? 'grid-cols-3' : 'grid-cols-2'} overflow-hidden rounded-lg ring-1 ring-slate-300 dark:ring-slate-700 print:hidden" role="group" aria-label="Competicions">
+			{#each ambits as [k, etiq] (k)}
+				<button
+					type="button"
+					onclick={() => (ambit = k)}
+					aria-pressed={ambit === k}
+					class="min-h-11 text-sm font-semibold {ambit === k
+						? 'bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900'
+						: 'bg-white text-slate-600 dark:bg-slate-900 dark:text-slate-300'}"
+				>{etiq}</button>
+			{/each}
+		</div>
+		<p class="mb-3 hidden text-sm font-medium print:block">{veuInternacional ? 'Competicions de la UMB i la CEB' : veuEspanya ? 'Competicions de la RFEB' : 'Competicions de la FCB'}</p>
+	{/if}
+
+	{#if veuInternacional}
+		<div class="max-w-3xl">
+			{@render provesInternacionals()}
+		</div>
+	{:else if veuEspanya}
+		<div class="lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start print:block">
+			<div class="min-w-0">
+				{@render lligaNacional()}
+			</div>
+			<div class="min-w-0">
+				{@render campionatsEspanya()}
+			</div>
+		</div>
+	{:else}
 	{#if modalitats.length > 1}
 		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] print:hidden">
 			{#each modalitats as m}
@@ -1828,8 +1918,15 @@
 			<p class="px-1 py-3 text-center text-[11px] text-slate-500 dark:text-slate-400 print:hidden">{modGames.length} partides</p>
 		{/if}
 
-		{#if nacional.length}
-			<div class="mt-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+			</div>
+		</div>
+	{/if}
+	{/if}
+{/if}
+
+{#snippet lligaNacional()}
+	{#if nacional.length}
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lliga Nacional</div>
 				<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Tres bandes, RFEB. No compta per als rànquings, les mitjanes ni els gràfics catalans.</p>
 				<div class="space-y-3">
@@ -1900,11 +1997,108 @@
 					</button>
 				{/if}
 			</div>
-		{/if}
+	{/if}
+{/snippet}
+
+{#snippet campionatsEspanya()}
+	{#if individuals.length}
+		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+			<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Campionats d'Espanya i GPE</div>
+			<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Classificacions finals de la RFEB, totes les modalitats.</p>
+			<div class="space-y-3">
+				{#each individualsPerTemporada as [temporada, proves] (temporada)}
+					<section>
+						<h3 class="mb-1 text-sm font-semibold leading-tight">{temporadaCurta(temporada)}</h3>
+						<ul class="divide-y divide-slate-100 overflow-hidden rounded-lg ring-1 ring-slate-200 dark:divide-slate-800 dark:ring-slate-800">
+							{#each proves as r (r.prova_id)}
+								<li class="flex items-start justify-between gap-3 px-3 py-2">
+									<div class="min-w-0">
+										<div class="text-sm font-medium leading-tight">{nomProva(r)}</div>
+										<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
+											{posicioProva(r)}{#if r.ronda} · {r.ronda}{/if}{#if r.jugades} · {r.jugades} PJ {r.guanyades ?? 0}-{r.empatades ?? 0}-{r.perdudes ?? 0}{/if}{#if r.serie_major} · S.M. {r.serie_major}{/if}{#if r.lloc} · {r.lloc}{/if}
+										</div>
+									</div>
+									<div class="shrink-0 text-right">
+										<div class="font-mono text-sm font-bold tabular-nums">{mitjanaNacional(r.mitjana)}</div>
+										{#if r.caramboles != null && r.entrades}
+											<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.caramboles}/{r.entrades}</div>
+										{/if}
+									</div>
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/each}
 			</div>
 		</div>
 	{/if}
-{/if}
+{/snippet}
+
+{#snippet provesInternacionals()}
+	<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+		<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Proves internacionals</div>
+		<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Mundials i Copes del Món de la UMB i Campionats d'Europa de la CEB. No compta per als rànquings catalans.</p>
+		<div class="space-y-3">
+			{#each internacional as pr (pr.id)}
+				<section>
+					<div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+						<h3 class="min-w-0 text-sm font-semibold leading-tight">{pr.nom}{pr.any && !pr.nom.includes(pr.any) ? ` ${pr.any}` : ''}{pr.lloc ? ` · ${pr.lloc}` : ''}</h3>
+						<p class="whitespace-nowrap text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
+							{[
+								pr.classificacio ? posicioProva({ posicio: pr.classificacio.posicio, posicio_empat: null, participants: pr.classificacio.participants }) : '',
+								pr.classificacio?.ronda ?? '',
+								pr.pj ? `${pr.pj} PJ · ${pr.g}-${pr.e}-${pr.p}` : ''
+							]
+								.filter(Boolean)
+								.join(' · ')} · <span class="font-mono font-bold">{mitjanaNacional(pr.mitjana ?? pr.classificacio?.mitjana ?? null)}</span>
+						</p>
+					</div>
+					{#if pr.partides.length}
+						<div class="games-wrap overflow-hidden rounded-lg ring-1 ring-slate-200 dark:ring-slate-800">
+							<table class="w-full text-sm">
+								<caption class="sr-only">Partides de {pr.nom}</caption>
+								<thead class="print-only bg-slate-50 text-left text-2xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+									<tr>
+										<th scope="col" class="px-3 py-1.5 font-medium">Res.</th>
+										<th scope="col" class="px-3 py-1.5 font-medium">Rival · Fase</th>
+										<th scope="col" class="px-3 py-1.5 text-right font-medium">Marcador</th>
+										<th scope="col" class="px-3 py-1.5 text-right font-medium">Mitjana</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each pr.partides as r (r.fase + r.grup + r.ordre)}
+										{@const res = resultatUmb(r)}
+										<tr class="border-b border-slate-100 dark:border-slate-800 last:border-b-0">
+											<td class="w-8 px-2 py-2 text-center sm:px-3">
+												<span class="inline-block w-6 rounded text-center text-xs font-bold {res === 'E'
+													? 'text-slate-500 dark:text-slate-400'
+													: res === 'G'
+														? 'text-emerald-600 dark:text-emerald-400'
+														: 'text-red-500 dark:text-red-400'}">{res}</span>
+											</td>
+											<td class="w-full max-w-0 px-2 py-2 sm:px-3">
+												{#if r.rival_fcb_id && !kiosk}
+													<a href="/jugador/{r.rival_fcb_id}" class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline">{r.rival}</a>
+												{:else}
+													<div class="truncate text-sm leading-tight">{r.rival}</div>
+												{/if}
+												<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">{r.fase}{r.grup ? ` · Grup ${r.grup}` : ''}{r.serie ? ` · S.M. ${r.serie}` : ''}</div>
+											</td>
+											<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{r.caramboles ?? '—'}–{r.rival_caramboles ?? '—'}</td>
+											<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400 sm:px-3">
+												{r.caramboles != null && r.entrades ? `${(r.caramboles / r.entrades).toFixed(3).replace('.', ',')} · ${r.entrades} ent.` : '—'}
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					{/if}
+				</section>
+			{/each}
+		</div>
+	</div>
+{/snippet}
 
 <style>
 	/* A pantalla la capçalera no es veu, però el lector de pantalla hi troba els
