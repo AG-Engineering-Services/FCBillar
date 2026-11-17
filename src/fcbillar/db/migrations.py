@@ -81,6 +81,10 @@ Versions:
 - 32: `lligues_obertes`, el llistat de lligues de la intranet tal com l'ha vist
      cada ingesta. És d'on la publicació treu quina lliga és la d'enguany, en
      comptes de dos ids escrits al codi. Taula nova: la crea l'executescript.
+- 35: `umb_*`, els resultats internacionals oficials de la UMB (mundials i
+     copes del món, llegits dels seus PDF) i `umb_fitxes`, els lligams validats
+     amb el cens. Taules noves: les crea l'executescript. El 34 és de la branca
+     de la RFEB individual; aquí es deixa lliure per no xocar-hi.
 - 27: `torneig_fase_grups.serie_major` — el quart criteri de desempat del
      rànquing d'una fase, després de la posició al grup, els punts i la mitjana.
      No surt a la taula de classificació del grup: es calcula de les partides.
@@ -104,7 +108,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 33
+SCHEMA_VERSION = 35
 
 
 def _read_schema_sql() -> str:

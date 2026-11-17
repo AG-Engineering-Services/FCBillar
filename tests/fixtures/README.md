@@ -28,3 +28,10 @@ d'aquell marcatge, i perquè hi ha HTML antic arxivat que algun dia potser
 voldrem tornar a llegir.
 
 Si mai molesten, es poden esborrar sense por: el git les recorda.
+
+## `umb/` — resultats de la UMB
+
+Només PDF de resultats (partides, llistes de jugadors sense data de naixement i
+classificació final), amb l'id de l'esdeveniment de `umb-carom.org` com a carpeta:
+`50` (2013, noms amb espais i decimals amb coma), `200` (2018, noms enganxats i
+sense identificador) i `307` (2025). Els fa servir `tests/test_umb.py`.

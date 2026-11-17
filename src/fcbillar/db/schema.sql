@@ -851,3 +851,76 @@ CREATE TABLE IF NOT EXISTS lligues_obertes (
     primera_vista TEXT NOT NULL,
     ultima_vista  TEXT NOT NULL
 );
+
+-- Resultats internacionals oficials de la UMB (v35): mundials i copes del món de
+-- carambola, llegits dels PDF de umb-carom.org (`fcbillar umb-carrega`).
+--
+-- Són a part de tot el que ve de la federació catalana: els jugadors són text,
+-- tal com els escriu la UMB («COGNOM Nom»), i només `umb_fitxes` els lliga amb
+-- el cens, pel seu identificador UMB i només els lligams validats a mà.
+-- `id` és el de umb-carom.org/events/{id}.
+CREATE TABLE IF NOT EXISTS umb_esdeveniments (
+    id          INTEGER PRIMARY KEY,
+    nom         TEXT NOT NULL,
+    disciplina  TEXT,
+    lloc        TEXT,
+    data_inici  TEXT,
+    data_fi     TEXT,
+    font        TEXT NOT NULL
+);
+
+-- Tots els jugadors de la prova, no només els espanyols: calen per nomenar rivals.
+-- `umb_id` pot faltar als PDF anteriors al 2021.
+CREATE TABLE IF NOT EXISTS umb_jugadors (
+    esdeveniment_id INTEGER NOT NULL REFERENCES umb_esdeveniments (id) ON DELETE CASCADE,
+    nom             TEXT NOT NULL,
+    umb_id          TEXT,
+    nacionalitat    TEXT,
+    PRIMARY KEY (esdeveniment_id, nom)
+);
+
+CREATE TABLE IF NOT EXISTS umb_classificacions (
+    esdeveniment_id    INTEGER NOT NULL REFERENCES umb_esdeveniments (id) ON DELETE CASCADE,
+    posicio            INTEGER NOT NULL,
+    jugador            TEXT NOT NULL,
+    nacionalitat       TEXT,
+    ronda              TEXT,
+    punts              INTEGER,
+    mitjana            REAL,
+    mitjana_particular REAL,
+    serie1             INTEGER,
+    serie2             INTEGER,
+    caramboles         INTEGER,
+    entrades           INTEGER,
+    PRIMARY KEY (esdeveniment_id, posicio, jugador)
+);
+
+CREATE TABLE IF NOT EXISTS umb_partides (
+    esdeveniment_id INTEGER NOT NULL REFERENCES umb_esdeveniments (id) ON DELETE CASCADE,
+    fase            TEXT NOT NULL,
+    grup            TEXT NOT NULL DEFAULT '',
+    ordre           INTEGER NOT NULL,
+    jugador_a       TEXT NOT NULL,
+    caramboles_a    INTEGER,
+    entrades_a      INTEGER,
+    mitjana_a       REAL,
+    punts_a         INTEGER,
+    serie_a         INTEGER,
+    serie2_a        INTEGER,
+    jugador_b       TEXT NOT NULL,
+    caramboles_b    INTEGER,
+    entrades_b      INTEGER,
+    mitjana_b       REAL,
+    punts_b         INTEGER,
+    serie_b         INTEGER,
+    serie2_b        INTEGER,
+    PRIMARY KEY (esdeveniment_id, fase, grup, ordre)
+);
+
+-- Lligams validats UMB -> cens (de `fonts/internacional/fitxes.csv`).
+CREATE TABLE IF NOT EXISTS umb_fitxes (
+    umb_id TEXT PRIMARY KEY,
+    fcb_id TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_umb_jugadors_umb_id ON umb_jugadors (umb_id);
