@@ -159,12 +159,14 @@
 	// darrera ronda NETA (sense l'open en curs), deixant-hi els 4 opens acabats
 	// més recents i afegint-hi l'open en curs amb els punts de la classificació
 	// provisional EN DIRECTE (open_live). Marcat «calculat · subjecte a errors».
-	function is3BLive(name: string): boolean {
-		const u = norm(name);
+	// Un open projectat duu el nom del PDF, que de vegades no diu la modalitat
+	// («X CIUTAT DE SANT ADRIA»): per això també mana la columna `modality`.
+	function is3BLive(o: OpenLiveRow): boolean {
+		const u = norm(o.name);
 		if (u.includes('femeni')) return false;
-		return /tres ?bandes|3 ?bandes|\b3b\b/.test(u);
+		return /tres ?bandes|3 ?bandes|\b3b\b/.test(u) || o.modality === 'Tres Bandes';
 	}
-	const liveCD = $derived(liveOpens.find((o) => is3BLive(o.name)) ?? null);
+	const liveCD = $derived(liveOpens.find(is3BLive) ?? null);
 
 	// {fcb_id -> {pts, pos, nom, club}} d'un open en directe. `open_points` ja ve
 	// calculat al payload per a TOTHOM (eliminats per posició final, encara en joc

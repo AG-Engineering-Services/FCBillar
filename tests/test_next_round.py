@@ -7,6 +7,7 @@ from fcb_opens.next_round import (
     group_is_closed,
     rank_winners,
     resolve_next_round,
+    secured_qualifiers,
     secured_winners,
 )
 from fcb_opens.scraper.open_live import (
@@ -177,3 +178,45 @@ def test_resolve_ignores_other_phase_placeholders():
     out, nres, npend = resolve_next_round(groups, ranked, "PP")
     assert (nres, npend) == (0, 0)
     assert out[0]["players"][0]["kind"] == "winner"  # intacte
+
+
+# --------------------------------------------------------------------------- #
+# secured_qualifiers: guanyadors i, amb tots els grups tancats, millors segons
+# --------------------------------------------------------------------------- #
+
+
+def _closed(label, first, second, third):
+    return _group(
+        label,
+        [first, second, third],
+        [
+            _match(second[0], third[0], 30, 20),
+            _match(first[0], third[0], 30, 20),
+            _match(first[0], second[0], 30, 25),
+        ],
+    )
+
+
+def test_best_second_goes_after_every_winner():
+    g1 = _closed("Grup A", ("A1", "", 4, 0.9), ("A2", "", 2, 0.8), ("A3", "", 0, 0.5))
+    g2 = _closed("Grup B", ("B1", "", 4, 0.7), ("B2", "", 2, 0.6), ("B3", "", 0, 0.4))
+    phase = PhaseDetail(ref=PhaseRef("PRE-PRE-PREVIA", "group", ""), groups=(g1, g2))
+    got = [w.player_name for w in secured_qualifiers(phase, best_seconds=1)]
+    assert got == ["A1", "B1", "A2"]
+
+
+def test_no_best_second_until_every_group_is_closed():
+    g1 = _closed("Grup A", ("A1", "", 4, 0.9), ("A2", "", 2, 0.8), ("A3", "", 0, 0.5))
+    open_g = _group(
+        "Grup B",
+        [("B2", "", 2, 0.6), ("B1", "", 0, 0.0), ("B3", "", 0, 0.4)],
+        [_match("B2", "B3", 30, 20), _match("B1", "B3", 0, 0, ent=None)],
+    )
+    phase = PhaseDetail(ref=PhaseRef("PRE-PRE-PREVIA", "group", ""), groups=(g1, open_g))
+    assert [w.player_name for w in secured_qualifiers(phase, best_seconds=1)] == ["A1"]
+
+
+def test_without_best_seconds_it_is_just_the_winners():
+    g1 = _closed("Grup A", ("A1", "", 4, 0.9), ("A2", "", 2, 0.8), ("A3", "", 0, 0.5))
+    phase = PhaseDetail(ref=PhaseRef("PREVIA", "group", ""), groups=(g1,))
+    assert [w.player_name for w in secured_qualifiers(phase)] == ["A1"]

@@ -6049,16 +6049,15 @@ def _autobuild_projection_payload(
     # Així, en comptes de "Guanyador Grup X", es veu qui s'ha classificat de veritat
     # abans que la FCB dibuixi el sorteig. Placeholders sense guanyador segur queden.
     if live_phases:
-        from fcb_opens.next_round import (
-            rank_winners,
-            resolve_next_round,
-            secured_winners,
-        )
+        from fcb_opens.next_round import resolve_next_round, secured_qualifiers
 
+        structure = proj.get("structure") or {}
+        qualifiers = proj.get("qualifiers") or {}
         winners_by_code: dict[str, list] = {}
         for lp in live_phases:
             code = _phase_code(lp.ref.label, lp.ref.kind)
-            w = rank_winners(secured_winners(lp))
+            best_seconds = qualifiers.get(code, 0) - structure.get(code, 0)
+            w = secured_qualifiers(lp, best_seconds)
             if w:
                 winners_by_code[code] = w
         # La font dels placeholders d'una fase de grups és la fase inferior:
@@ -6817,6 +6816,8 @@ def publish_live_opens(
         if auto_phases:
             _enrich_real_groups_with_projection(payload["phases"], auto_phases)
             payload["phases"] = _merge_projected_phases(payload["phases"], auto_phases)
+            if auto.get("ranking_inicial"):
+                payload["ranking_inicial"] = auto["ranking_inicial"]
         else:
             proj_full = [r for r in live_rows() if (r.get("fcb_division_id") or 0) < 0]
             template = _matching_projection_payload(state.structure.name, modality, proj_full)

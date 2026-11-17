@@ -101,6 +101,10 @@ def parse_ranking_inicial_pdf(path: str | Path) -> RankingInicialList:
     import pdfplumber
 
     open_name: str | None = None
+    # Some opens are titled without the word OPEN ('X CIUTAT DE SANT ADRIA
+    # "MEMORIAL ..."'); then the title is the row right above 'RÀNQUING INICIAL'.
+    above_heading: str | None = None
+    previous_row: str | None = None
     entries: list[RankingInicialEntry] = []
 
     with pdfplumber.open(str(path)) as pdf:
@@ -108,6 +112,9 @@ def parse_ranking_inicial_pdf(path: str | Path) -> RankingInicialList:
             words = page.extract_words(use_text_flow=False, keep_blank_chars=False)
             for row in _cluster_rows(words):
                 row_text = " ".join(w["text"] for w in row)
+                if above_heading is None and "INICIAL" in row_text.upper():
+                    above_heading = previous_row
+                previous_row = row_text.strip() or previous_row
 
                 pos_tokens = [
                     w for w in row if w["x0"] < _POS_MAX and _INT_RE.match(w["text"])
@@ -150,4 +157,4 @@ def parse_ranking_inicial_pdf(path: str | Path) -> RankingInicialList:
 
     # Trust Posició, but sort defensively (pages are already in order).
     entries.sort(key=lambda e: e.posicio)
-    return RankingInicialList(open_name=open_name, entries=tuple(entries))
+    return RankingInicialList(open_name=open_name or above_heading, entries=tuple(entries))
