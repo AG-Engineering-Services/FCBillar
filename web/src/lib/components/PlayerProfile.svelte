@@ -29,6 +29,8 @@
 	import { theme } from '$lib/theme';
 	import { ADMIN_EMAIL, esAdminLocal, marcaAdmin } from '$lib/admin';
 	import AvisError from '$lib/components/AvisError.svelte';
+	import RivalFilter from '$lib/components/RivalFilter.svelte';
+	import type { Rival } from '$lib/rivals';
 
 	// Reutilitzable: la pàgina normal passa kiosk=false; la vista aïllada /fitxa passa
 	// kiosk=true (sense botons de navegació ni enllaços que surtin de la vista).
@@ -240,6 +242,7 @@
 
 	$effect(() => {
 		const id = fcbId;
+		rivalSel = null;
 		if (id) loadAll(id);
 	});
 
@@ -250,7 +253,7 @@
 	const nacionalGrups = $derived.by(() => {
 		let resta = nacionalShown;
 		const grups = [];
-		for (const g of agrupaNacional(nacional)) {
+		for (const g of agrupaNacional(nacionalFiltrat)) {
 			if (resta <= 0) break;
 			const grafies = grafiaPerEquip(g.partides.map((p) => p.equip));
 			grups.push({ ...g, grafies, visibles: g.partides.slice(0, resta) });
@@ -327,6 +330,79 @@
 	);
 	const veuEspanya = $derived(ambit === 'esp' && teEspanya);
 	const veuInternacional = $derived(ambit === 'int' && teInternacional);
+
+	// «Partides contra…»: els rivals de l'àmbit que es mira, de totes les
+	// modalitats. Amb un de triat, només s'ensenyen les partides contra ell. Els
+	// àmbits no es barregen: canviar d'àmbit buida el filtre.
+	let rivalSel = $state<Rival | null>(null);
+	$effect(() => {
+		void ambit;
+		rivalSel = null;
+	});
+	const clauRival = (id: string | null, nom: string) => id ?? nom;
+	const rivals = $derived.by(() => {
+		const map = new Map<string, Rival>();
+		const compta = (key: string, nom: string) => {
+			const r = map.get(key);
+			if (r) r.partides++;
+			else map.set(key, { key, nom, partides: 1 });
+		};
+		if (veuInternacional) {
+			for (const pr of internacional) for (const r of pr.partides) compta(clauRival(r.rival_fcb_id, r.rival), r.rival);
+		} else if (veuEspanya) {
+			for (const r of nacional) compta(clauRival(r.rival_fcb_id, r.rival), r.rival);
+		} else {
+			for (const g of games) {
+				const p = persp(g);
+				compta(clauRival(p.oppId, p.opp), p.opp);
+			}
+		}
+		return [...map.values()];
+	});
+	const esRival = (id: string | null, nom: string) => rivalSel != null && clauRival(id, nom) === rivalSel.key;
+	const rivalGames = $derived(
+		rivalSel
+			? games.filter((g) => {
+					const p = persp(g);
+					return esRival(p.oppId, p.opp);
+				})
+			: []
+	);
+	const nacionalFiltrat = $derived(rivalSel ? nacional.filter((r) => esRival(r.rival_fcb_id, r.rival)) : nacional);
+	const internacionalFiltrat = $derived(
+		rivalSel
+			? internacional
+					.map((pr) => ({ ...pr, partides: pr.partides.filter((r) => esRival(r.rival_fcb_id, r.rival)) }))
+					.filter((pr) => pr.partides.length)
+			: internacional
+	);
+	// Balanç contra el rival, només amb les partides de l'àmbit que es mira.
+	const rivalKpi = $derived.by(() => {
+		let n = 0, w = 0, t = 0, l = 0, car = 0, ent = 0;
+		const suma = (res: 'G' | 'E' | 'P', c: number | null, e: number | null) => {
+			n++;
+			if (res === 'G') w++;
+			else if (res === 'E') t++;
+			else l++;
+			if (c != null && e) {
+				car += c;
+				ent += e;
+			}
+		};
+		if (!rivalSel) return { n, w, t, l, mitjana: 0 };
+		if (veuInternacional) {
+			for (const pr of internacionalFiltrat) for (const r of pr.partides) suma(resultatUmb(r), r.caramboles, r.entrades);
+		} else if (veuEspanya) {
+			for (const r of nacionalFiltrat) suma(resultatPartida(r.caramboles, r.caramboles_rival), r.caramboles, r.entrades);
+		} else {
+			for (const g of rivalGames) {
+				const p = persp(g);
+				suma(p.tie ? 'E' : p.won ? 'G' : 'P', p.myCar, p.ent);
+			}
+		}
+		return { n, w, t, l, mitjana: ent ? car / ent : 0 };
+	});
+	const nomModalitat = (codi: number | null) => modalitats.find((m) => m.codi === codi)?.nom ?? null;
 
 	async function loadAll(id: string) {
 		loading = true;
@@ -607,7 +683,9 @@
 			.sort((a, b) => b.pct - a.pct);
 	});
 	const displayGames = $derived(
-		serieFilter && kpi.sm > 0
+		rivalSel
+			? rivalGames
+			: serieFilter && kpi.sm > 0
 			? modGames.filter((g) => persp(g).mySerie === kpi.sm)
 			: modGames.slice(0, shown)
 	);
@@ -1193,6 +1271,21 @@
 			{/each}
 		</div>
 		<p class="mb-3 hidden text-sm font-medium print:block">{veuInternacional ? 'Competicions de la UMB i la CEB' : veuEspanya ? 'Competicions de la RFEB' : 'Competicions de la FCB'}</p>
+	{/if}
+
+	{#if !loading && rivals.length}
+		<div class="mb-3 max-w-md">
+			<RivalFilter {rivals} bind:selected={rivalSel} />
+			{#if rivalSel}
+				<p class="-mt-0.5 px-1 text-sm text-slate-700 dark:text-slate-200" aria-live="polite">
+					{rivalKpi.n} {rivalKpi.n === 1 ? 'partida' : 'partides'} ·
+					<span class="font-semibold text-emerald-700 dark:text-emerald-400">{rivalKpi.w} G</span>
+					· <span class="text-slate-600 dark:text-slate-300">{rivalKpi.t} E</span>
+					· <span class="font-semibold text-red-700 dark:text-red-400">{rivalKpi.l} P</span>
+					{#if rivalKpi.mitjana} · mitjana <span class="font-mono tabular-nums">{rivalKpi.mitjana.toFixed(3)}</span>{/if}
+				</p>
+			{/if}
+		</div>
 	{/if}
 
 	{#if veuInternacional}
@@ -1814,7 +1907,7 @@
 
 			</div>
 			<div class="min-w-0">
-			{#if copaPend.length}
+			{#if copaPend.length && !rivalSel}
 				<div class="mb-3 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 p-3">
 					<div class="mb-1.5 text-2xs font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300">
 						{copaPend.length} {copaPend.length === 1 ? 'partida pendent' : 'partides pendents'} · incloses a la previsió del proper rànquing
@@ -1852,6 +1945,11 @@
 					{/if}
 				</div>
 			{/if}
+		{#if rivalSel && !rivalGames.length}
+			<p class="rounded-xl bg-white px-3 py-4 text-sm text-slate-600 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800">
+				Cap partida dels campionats catalans contra {rivalSel.nom}.
+			</p>
+		{:else}
 		<div class="games-wrap overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
 			<table class="w-full text-sm">
 				<thead class="print-only bg-slate-50 text-left text-2xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
@@ -1894,7 +1992,7 @@
 										<div class="truncate text-sm leading-tight">{p.opp}</div>
 									{/if}
 									<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
-										{#if inCur}<span class="mr-1 rounded bg-slate-200 px-1 py-px text-2xs font-bold uppercase tracking-wide text-slate-700 dark:bg-slate-700 dark:text-slate-200" title="Computa a la mitjana del rànquing vigent">rànquing</span>{:else if inNext}<span class="mr-1 rounded bg-sky-100 px-1 py-px text-2xs font-bold uppercase tracking-wide text-sky-700 dark:bg-sky-900/60 dark:text-sky-300" title="Entrarà al proper rànquing">proper</span>{/if}{fmtDate(p.date)}{#if p.comp} · {p.comp}{/if}{#if p.mySerie} · S.M. {p.mySerie}{/if}
+										{#if inCur}<span class="mr-1 rounded bg-slate-200 px-1 py-px text-2xs font-bold uppercase tracking-wide text-slate-700 dark:bg-slate-700 dark:text-slate-200" title="Computa a la mitjana del rànquing vigent">rànquing</span>{:else if inNext}<span class="mr-1 rounded bg-sky-100 px-1 py-px text-2xs font-bold uppercase tracking-wide text-sky-700 dark:bg-sky-900/60 dark:text-sky-300" title="Entrarà al proper rànquing">proper</span>{/if}{fmtDate(p.date)}{#if rivalSel && modalitats.length > 1 && nomModalitat(g.modalitat_codi)} · {nomModalitat(g.modalitat_codi)}{/if}{#if p.comp} · {p.comp}{/if}{#if p.mySerie} · S.M. {p.mySerie}{/if}
 									</div>
 								</td>
 								<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{p.myCar}–{p.oppCar}</td>
@@ -1906,7 +2004,10 @@
 					</tbody>
 				</table>
 			</div>
-		{#if !serieFilter && modGames.length > shown}
+		{/if}
+		{#if rivalSel}
+			<!-- Sense paginació: contra un rival les partides són poques. -->
+		{:else if !serieFilter && modGames.length > shown}
 			<button
 				type="button"
 				onclick={() => (shown += 60)}
@@ -1925,7 +2026,7 @@
 {/if}
 
 {#snippet lligaNacional()}
-	{#if nacional.length}
+	{#if nacionalFiltrat.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lliga Nacional</div>
 				<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Tres bandes, RFEB. No compta per als rànquings, les mitjanes ni els gràfics catalans.</p>
@@ -1987,13 +2088,13 @@
 						</section>
 					{/each}
 				</div>
-				{#if nacional.length > nacionalShown}
+				{#if nacionalFiltrat.length > nacionalShown}
 					<button
 						type="button"
 						onclick={() => (nacionalShown += 40)}
 						class="mt-2 min-h-11 w-full rounded-lg bg-white dark:bg-slate-900 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800 active:bg-slate-50 dark:active:bg-slate-800/50 print:hidden"
 					>
-						Carregar més ({nacionalShown} de {nacional.length})
+						Carregar més ({nacionalShown} de {nacionalFiltrat.length})
 					</button>
 				{/if}
 			</div>
@@ -2001,7 +2102,7 @@
 {/snippet}
 
 {#snippet campionatsEspanya()}
-	{#if individuals.length}
+	{#if individuals.length && !rivalSel}
 		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 			<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Campionats d'Espanya i GPE</div>
 			<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Classificacions finals de la RFEB, totes les modalitats.</p>
@@ -2039,7 +2140,7 @@
 		<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Proves internacionals</div>
 		<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Mundials i Copes del Món de la UMB i Campionats d'Europa de la CEB. No compta per als rànquings catalans.</p>
 		<div class="space-y-3">
-			{#each internacional as pr (pr.id)}
+			{#each internacionalFiltrat as pr (pr.id)}
 				<section>
 					<div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
 						<h3 class="min-w-0 text-sm font-semibold leading-tight">{pr.nom}{pr.any && !pr.nom.includes(pr.any) ? ` ${pr.any}` : ''}{pr.lloc ? ` · ${pr.lloc}` : ''}</h3>
