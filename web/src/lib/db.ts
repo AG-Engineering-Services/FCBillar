@@ -25,7 +25,12 @@
 // variable. És, a més, el que ja fa NouProjecte per llegir aquesta mateixa API.
 import { NeonPostgrestClient } from "@neondatabase/postgrest-js";
 import { env } from "$env/dynamic/public";
-import { ordenaNacional, type NacionalPartidaRow } from "./nacional";
+import {
+  ordenaIndividuals,
+  ordenaNacional,
+  type NacionalPartidaRow,
+  type RfebIndividualRow,
+} from "./nacional";
 
 const PUBLIC_NEON_DATA_API_URL = env.PUBLIC_NEON_DATA_API_URL;
 const PUBLIC_NEON_ANON_TOKEN = env.PUBLIC_NEON_ANON_TOKEN;
@@ -653,4 +658,17 @@ export async function nacionalPartidesDelJugador(fcbId: string): Promise<Naciona
     if ((data ?? []).length < TRAM) break;
   }
   return ordenaNacional(rows);
+}
+
+/** Les classificacions del jugador als campionats individuals de la RFEB (CE, GPE…). */
+export async function rfebIndividualsDelJugador(fcbId: string): Promise<RfebIndividualRow[]> {
+  const { data, error } = await db
+    .from("rfeb_individuals_fitxa")
+    .select(
+      "fcb_id,prova_id,posicio,posicio_empat,ronda,jugades,guanyades,empatades,perdudes,caramboles,entrades,mitjana,serie_major,temporada,modalitat,categoria,tipus,titol,lloc,data_inici,participants",
+    )
+    .eq("fcb_id", fcbId)
+    .limit(1000);
+  if (error) throw error;
+  return ordenaIndividuals((data ?? []) as RfebIndividualRow[]);
 }

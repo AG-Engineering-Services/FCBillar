@@ -6,17 +6,21 @@
 		type GameRow,
 		type PendingGameRow,
 		type ProvisionalRow,
-		nacionalPartidesDelJugador
+		nacionalPartidesDelJugador,
+		rfebIndividualsDelJugador
 	} from '$lib/db';
 	import {
 		agrupaNacional,
 		divisioNacional,
 		grafiaPerEquip,
 		mitjanaNacional,
+		nomProva,
 		normalitzaEquip,
+		posicioProva,
 		resultatPartida,
 		temporadaCurta,
-		type NacionalPartidaRow
+		type NacionalPartidaRow,
+		type RfebIndividualRow
 	} from '$lib/nacional';
 	import { follows, toggleFollow } from '$lib/follows';
 	import RadarChart from '$lib/components/RadarChart.svelte';
@@ -267,6 +271,32 @@
 			viu = false;
 		};
 	});
+
+	let individuals = $state<RfebIndividualRow[]>([]);
+	const individualsPerTemporada = $derived.by(() => {
+		const m = new Map<string, RfebIndividualRow[]>();
+		for (const r of individuals) m.set(r.temporada, [...(m.get(r.temporada) ?? []), r]);
+		return [...m];
+	});
+	$effect(() => {
+		const id = fcbId;
+		let viu = true;
+		individuals = [];
+		if (id)
+			rfebIndividualsDelJugador(id)
+				.then((r) => {
+					if (viu) individuals = r;
+				})
+				.catch((e) => console.warn('Campionats individuals RFEB no disponibles', e));
+		return () => {
+			viu = false;
+		};
+	});
+
+	// La fitxa catalana i l'espanyola no es barregen: el selector només surt si hi ha dades de la RFEB.
+	let ambit = $state<'cat' | 'esp'>('cat');
+	const teEspanya = $derived(nacional.length > 0 || individuals.length > 0);
+	const veuEspanya = $derived(ambit === 'esp' && teEspanya);
 
 	async function loadAll(id: string) {
 		loading = true;
@@ -1119,6 +1149,32 @@
 		</div>
 	{/if}
 
+	{#if teEspanya}
+		<div class="mb-3 grid grid-cols-2 overflow-hidden rounded-lg ring-1 ring-slate-300 dark:ring-slate-700 print:hidden" role="group" aria-label="Competicions">
+			{#each [['cat', 'Catalunya'], ['esp', 'Espanya']] as [k, etiq] (k)}
+				<button
+					type="button"
+					onclick={() => (ambit = k as 'cat' | 'esp')}
+					aria-pressed={ambit === k}
+					class="min-h-11 text-sm font-semibold {ambit === k
+						? 'bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900'
+						: 'bg-white text-slate-600 dark:bg-slate-900 dark:text-slate-300'}"
+				>{etiq}</button>
+			{/each}
+		</div>
+		<p class="mb-3 hidden text-sm font-medium print:block">{veuEspanya ? 'Competicions de la RFEB' : 'Competicions de la FCB'}</p>
+	{/if}
+
+	{#if veuEspanya}
+		<div class="lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start print:block">
+			<div class="min-w-0">
+				{@render lligaNacional()}
+			</div>
+			<div class="min-w-0">
+				{@render campionatsEspanya()}
+			</div>
+		</div>
+	{:else}
 	{#if modalitats.length > 1}
 		<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] print:hidden">
 			{#each modalitats as m}
@@ -1828,8 +1884,15 @@
 			<p class="px-1 py-3 text-center text-[11px] text-slate-500 dark:text-slate-400 print:hidden">{modGames.length} partides</p>
 		{/if}
 
-		{#if nacional.length}
-			<div class="mt-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+			</div>
+		</div>
+	{/if}
+	{/if}
+{/if}
+
+{#snippet lligaNacional()}
+	{#if nacional.length}
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lliga Nacional</div>
 				<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Tres bandes, RFEB. No compta per als rànquings, les mitjanes ni els gràfics catalans.</p>
 				<div class="space-y-3">
@@ -1900,11 +1963,42 @@
 					</button>
 				{/if}
 			</div>
-		{/if}
+	{/if}
+{/snippet}
+
+{#snippet campionatsEspanya()}
+	{#if individuals.length}
+		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+			<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Campionats d'Espanya i GPE</div>
+			<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Classificacions finals de la RFEB, totes les modalitats.</p>
+			<div class="space-y-3">
+				{#each individualsPerTemporada as [temporada, proves] (temporada)}
+					<section>
+						<h3 class="mb-1 text-sm font-semibold leading-tight">{temporadaCurta(temporada)}</h3>
+						<ul class="divide-y divide-slate-100 overflow-hidden rounded-lg ring-1 ring-slate-200 dark:divide-slate-800 dark:ring-slate-800">
+							{#each proves as r (r.prova_id)}
+								<li class="flex items-start justify-between gap-3 px-3 py-2">
+									<div class="min-w-0">
+										<div class="text-sm font-medium leading-tight">{nomProva(r)}</div>
+										<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
+											{posicioProva(r)}{#if r.ronda} · {r.ronda}{/if}{#if r.jugades} · {r.jugades} PJ {r.guanyades ?? 0}-{r.empatades ?? 0}-{r.perdudes ?? 0}{/if}{#if r.serie_major} · S.M. {r.serie_major}{/if}{#if r.lloc} · {r.lloc}{/if}
+										</div>
+									</div>
+									<div class="shrink-0 text-right">
+										<div class="font-mono text-sm font-bold tabular-nums">{mitjanaNacional(r.mitjana)}</div>
+										{#if r.caramboles != null && r.entrades}
+											<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.caramboles}/{r.entrades}</div>
+										{/if}
+									</div>
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/each}
 			</div>
 		</div>
 	{/if}
-{/if}
+{/snippet}
 
 <style>
 	/* A pantalla la capçalera no es veu, però el lector de pantalla hi troba els
