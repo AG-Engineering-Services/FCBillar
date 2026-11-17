@@ -31,6 +31,7 @@ import {
   type NacionalPartidaRow,
   type RfebIndividualRow,
 } from "./nacional";
+import type { UmbClassificacioRow, UmbPartidaRow } from "./internacional";
 
 const PUBLIC_NEON_DATA_API_URL = env.PUBLIC_NEON_DATA_API_URL;
 const PUBLIC_NEON_ANON_TOKEN = env.PUBLIC_NEON_ANON_TOKEN;
@@ -671,4 +672,33 @@ export async function rfebIndividualsDelJugador(fcbId: string): Promise<RfebIndi
     .limit(1000);
   if (error) throw error;
   return ordenaIndividuals((data ?? []) as RfebIndividualRow[]);
+}
+
+/** Les partides i les posicions finals del jugador a les proves de la UMB i la CEB. */
+export async function umbDelJugador(
+  fcbId: string,
+): Promise<{ partides: UmbPartidaRow[]; classificacions: UmbClassificacioRow[] }> {
+  const partides: UmbPartidaRow[] = [];
+  const TRAM = 1000;
+  for (let des = 0; ; des += TRAM) {
+    const { data, error } = await db
+      .from("umb_partides_fitxa")
+      .select(
+        "fcb_id,esdeveniment_id,esdeveniment,disciplina,lloc,data_inici,fase,grup,ordre,caramboles,entrades,punts,serie,rival,rival_caramboles,rival_punts,rival_fcb_id",
+      )
+      .eq("fcb_id", fcbId)
+      .order("esdeveniment_id")
+      .order("ordre")
+      .range(des, des + TRAM - 1);
+    if (error) throw error;
+    partides.push(...((data ?? []) as UmbPartidaRow[]));
+    if ((data ?? []).length < TRAM) break;
+  }
+  const { data, error } = await db
+    .from("umb_classificacions_fitxa")
+    .select("fcb_id,esdeveniment_id,esdeveniment,lloc,data_inici,posicio,ronda,mitjana,participants")
+    .eq("fcb_id", fcbId)
+    .limit(1000);
+  if (error) throw error;
+  return { partides, classificacions: (data ?? []) as UmbClassificacioRow[] };
 }
