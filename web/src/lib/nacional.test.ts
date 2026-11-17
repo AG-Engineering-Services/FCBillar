@@ -16,7 +16,7 @@ function fila(o: Partial<NacionalPartidaRow>): NacionalPartidaRow {
 	return {
 		fcb_id: '1', temporada: '2025-2026', divisio: 'honor', grup: '', jornada: 1, data: null,
 		ordre_encontre: 1, ordre: 1, jugador: 'A', caramboles: 30, rival: 'B', caramboles_rival: 20,
-		rival_fcb_id: null, entrades: 40, equip: 'X', equip_rival: 'Y', punts_equip: 5, punts_rival: 3,
+		rival_fcb_id: null, rival_nom_fcb: null, entrades: 40, equip: 'X', equip_rival: 'Y', punts_equip: 5, punts_rival: 3,
 		a_casa: true, ...o
 	};
 }

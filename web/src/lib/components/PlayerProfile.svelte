@@ -1356,80 +1356,6 @@
 			</div>
 		{/if}
 
-		{#if nacional.length}
-			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lliga Nacional</div>
-				<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Tres bandes, RFEB. No compta per als rànquings, les mitjanes ni els gràfics catalans.</p>
-				<div class="space-y-3">
-					{#each nacionalGrups as g (g.clau)}
-						<section>
-							<div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-								<h3 class="min-w-0 text-sm font-semibold leading-tight">
-									{temporadaCurta(g.temporada)} · {divisioNacional(g.divisio)}{g.grup ? ` · Grup ${g.grup}` : ''} · {g.equips.join(' / ')}
-								</h3>
-								<p class="whitespace-nowrap text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
-									{g.resum.pj} PJ · {g.resum.g}-{g.resum.e}-{g.resum.p} · <span class="font-mono font-bold">{mitjanaNacional(g.resum.mitjana)}</span>
-								</p>
-							</div>
-							<div class="games-wrap overflow-hidden rounded-lg ring-1 ring-slate-200 dark:ring-slate-800">
-								<table class="w-full text-sm">
-									<caption class="sr-only">Partides de la Lliga Nacional, {temporadaCurta(g.temporada)}, {divisioNacional(g.divisio)}</caption>
-									<thead class="print-only bg-slate-50 text-left text-2xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-										<tr>
-											<th scope="col" class="px-3 py-1.5 font-medium">Res.</th>
-											<th scope="col" class="px-3 py-1.5 font-medium">Rival · Encontre</th>
-											<th scope="col" class="px-3 py-1.5 text-right font-medium">Marcador</th>
-											<th scope="col" class="px-3 py-1.5 text-right font-medium">Mitjana</th>
-										</tr>
-									</thead>
-									<tbody>
-										{#each g.visibles as r (r.temporada + r.divisio + r.grup + r.jornada + r.ordre_encontre + r.ordre)}
-											{@const res = resultatPartida(r.caramboles, r.caramboles_rival)}
-											<tr class="border-b border-slate-100 dark:border-slate-800 last:border-b-0">
-												<td class="w-8 px-2 py-2 text-center sm:px-3">
-													<span class="inline-block w-6 rounded text-center text-xs font-bold {res === 'E'
-														? 'text-slate-500 dark:text-slate-400'
-														: res === 'G'
-															? 'text-emerald-600 dark:text-emerald-400'
-															: 'text-red-500 dark:text-red-400'}">{res}</span>
-												</td>
-												<td class="w-full max-w-0 px-2 py-2 sm:px-3">
-													{#if r.rival_fcb_id && !kiosk}
-														<a
-															href="/jugador/{r.rival_fcb_id}"
-															class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline"
-															>{r.rival}</a>
-													{:else}
-														<div class="truncate text-sm leading-tight">{r.rival}</div>
-													{/if}
-													<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
-														{#if r.data}{fmtDate(r.data)} · {/if}J{r.jornada}{r.grup ? ` ${r.grup}` : ''}· {g.grafies.get(normalitzaEquip(r.equip)) ?? r.equip} {r.punts_equip}–{r.punts_rival} {r.equip_rival}
-													</div>
-												</td>
-												<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{r.caramboles}–{r.caramboles_rival}</td>
-												<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400 sm:px-3">
-													{r.entrades ? `${(r.caramboles / r.entrades).toFixed(3).replace('.', ',')} · ${r.entrades} ent.` : '—'}
-												</td>
-											</tr>
-										{/each}
-									</tbody>
-								</table>
-							</div>
-						</section>
-					{/each}
-				</div>
-				{#if nacional.length > nacionalShown}
-					<button
-						type="button"
-						onclick={() => (nacionalShown += 40)}
-						class="mt-2 min-h-11 w-full rounded-lg bg-white dark:bg-slate-900 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800 active:bg-slate-50 dark:active:bg-slate-800/50 print:hidden"
-					>
-						Carregar més ({nacionalShown} de {nacional.length})
-					</button>
-				{/if}
-			</div>
-		{/if}
-
 		{#if h2h.played.length || h2h.won.length || h2h.lost.length}
 			<div class="mb-4 space-y-2 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rivals destacats (històric)</div>
@@ -1900,6 +1826,80 @@
 			</button>
 		{:else if modGames.length > 60}
 			<p class="px-1 py-3 text-center text-[11px] text-slate-500 dark:text-slate-400 print:hidden">{modGames.length} partides</p>
+		{/if}
+
+		{#if nacional.length}
+			<div class="mt-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lliga Nacional</div>
+				<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Tres bandes, RFEB. No compta per als rànquings, les mitjanes ni els gràfics catalans.</p>
+				<div class="space-y-3">
+					{#each nacionalGrups as g (g.clau)}
+						<section>
+							<div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+								<h3 class="min-w-0 text-sm font-semibold leading-tight">
+									{temporadaCurta(g.temporada)} · {divisioNacional(g.divisio)}{g.grup ? ` · Grup ${g.grup}` : ''} · {g.equips.join(' / ')}
+								</h3>
+								<p class="whitespace-nowrap text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
+									{g.resum.pj} PJ · {g.resum.g}-{g.resum.e}-{g.resum.p} · <span class="font-mono font-bold">{mitjanaNacional(g.resum.mitjana)}</span>
+								</p>
+							</div>
+							<div class="games-wrap overflow-hidden rounded-lg ring-1 ring-slate-200 dark:ring-slate-800">
+								<table class="w-full text-sm">
+									<caption class="sr-only">Partides de la Lliga Nacional, {temporadaCurta(g.temporada)}, {divisioNacional(g.divisio)}</caption>
+									<thead class="print-only bg-slate-50 text-left text-2xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+										<tr>
+											<th scope="col" class="px-3 py-1.5 font-medium">Res.</th>
+											<th scope="col" class="px-3 py-1.5 font-medium">Rival · Encontre</th>
+											<th scope="col" class="px-3 py-1.5 text-right font-medium">Marcador</th>
+											<th scope="col" class="px-3 py-1.5 text-right font-medium">Mitjana</th>
+										</tr>
+									</thead>
+									<tbody>
+										{#each g.visibles as r (r.temporada + r.divisio + r.grup + r.jornada + r.ordre_encontre + r.ordre)}
+											{@const res = resultatPartida(r.caramboles, r.caramboles_rival)}
+											<tr class="border-b border-slate-100 dark:border-slate-800 last:border-b-0">
+												<td class="w-8 px-2 py-2 text-center sm:px-3">
+													<span class="inline-block w-6 rounded text-center text-xs font-bold {res === 'E'
+														? 'text-slate-500 dark:text-slate-400'
+														: res === 'G'
+															? 'text-emerald-600 dark:text-emerald-400'
+															: 'text-red-500 dark:text-red-400'}">{res}</span>
+												</td>
+												<td class="w-full max-w-0 px-2 py-2 sm:px-3">
+													{#if r.rival_fcb_id && !kiosk}
+														<a
+															href="/jugador/{r.rival_fcb_id}"
+															class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline"
+															>{r.rival_nom_fcb ?? r.rival}</a>
+													{:else}
+														<div class="truncate text-sm leading-tight">{r.rival_nom_fcb ?? r.rival}</div>
+													{/if}
+													<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
+														{#if r.data}{fmtDate(r.data)} · {/if}J{r.jornada}{r.grup ? ` ${r.grup}` : ''} · {g.grafies.get(normalitzaEquip(r.equip)) ?? r.equip} {r.punts_equip}–{r.punts_rival} {r.equip_rival}
+													</div>
+												</td>
+												<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{r.caramboles}–{r.caramboles_rival}</td>
+												<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400 sm:px-3">
+													{r.entrades ? `${(r.caramboles / r.entrades).toFixed(3).replace('.', ',')} · ${r.entrades} ent.` : '—'}
+												</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</div>
+						</section>
+					{/each}
+				</div>
+				{#if nacional.length > nacionalShown}
+					<button
+						type="button"
+						onclick={() => (nacionalShown += 40)}
+						class="mt-2 min-h-11 w-full rounded-lg bg-white dark:bg-slate-900 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800 active:bg-slate-50 dark:active:bg-slate-800/50 print:hidden"
+					>
+						Carregar més ({nacionalShown} de {nacional.length})
+					</button>
+				{/if}
+			</div>
 		{/if}
 			</div>
 		</div>
