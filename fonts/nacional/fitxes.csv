@@ -1,4 +1,153 @@
 validat,jugador_rfeb,equip_rfeb,divisio,fcb_id,nom_cens,club_cens,motiu
+si,ALEIX ARNAU,XXXIX CAMPEONATO DE ESPAÑA SUB-21 DE BILLAR A TRES BANDAS,individual,1564,"ARNAU ABILLEIRA, ALEIX",C.B.TARRAGONA,un cognom
+si,Adriá García,IV CAMPEONATO DE ESPAÑA SUB'15 A TRES BANDAS,individual,249,"GARCÍA DUEÑAS, ADRIÀ",,un cognom
+si,Albert García Tarrats,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,individual,2257,"GARCIA TARRATS, ALBERT",C.B.BANYOLES,exacte
+si,Albert Martínez,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,370,"MARTÍNEZ MATEU, ALBERT",S.E.CASAL CERVERA,un cognom
+si,Albert Segarra Sole,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XVII MEMORIAL JOAQUIM DOMINGO""",individual,515,"SEGARRA SOLÉ, ALBERT",C.B.MATARÓ,exacte
+si,Aleix Arnau Abilleira,Campionat d'Espanya de banda 2022-2023,individual,1564,"ARNAU ABILLEIRA, ALEIX",C.B.TARRAGONA,exacte
+si,Alejandro López,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,341,"LÓPEZ BALBOA, ALEJANDRO",S.B.F.MOLINS,un cognom
+si,Alejandro López Balboa,LXXIV CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,341,"LÓPEZ BALBOA, ALEJANDRO",S.B.F.MOLINS,exacte
+si,Alex Casado Roca,Campionat d'Espanya de quadre 47/2 2022-2023,individual,166,"CASADÓ ROCA, ALEX",C.B.TARRAGONA,exacte
+si,Alex Casadó Roca,LXXII CAMPEONATO DE ESPAÑA DE BILLAR A LA BANDA,individual,166,"CASADÓ ROCA, ALEX",C.B.TARRAGONA,exacte
+si,Andrés Méndez Escobar,LXXXIII CAMPEONATO DE ESPAÑA,individual,382,"MÉNDEZ ESCOBAR, ANDRÉS",S.E.CASAL CERVERA,exacte
+si,Antoni Gutiérrez Castro,Campionat d'Espanya de banda 2019-2020,individual,302,"GUTIÉRREZ CASTRO, ANTONI",C.B.PUNT D'ATAC,exacte
+si,Antoni Sendra Gabarro,LXXXIII CAMPEONATO DE ESPAÑA,individual,519,"SENDRA GABARRÓ, ANTONI",S.E.CASAL CERVERA,exacte
+si,Antonio García Soriano,Campionat d'Espanya de banda 2015-2016,individual,727,"GARCÍA SORIANO, ANTONI",C.B.CARDONA,exacte
+si,Antonio Gutiérrez Castro,Campionat d'Espanya de banda 2022-2023,individual,302,"GUTIÉRREZ CASTRO, ANTONI",C.B.PUNT D'ATAC,exacte
+si,Antonio Magdaleno Carreño,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),individual,817,"MAGDALENO CARREÑO, ANTONI",C.B.PUNT D'ATAC,exacte
+si,Antonio Montes Montferrer,Gran Premi d'Espanya de tres bandes (res_gpe_3b_llinars),individual,398,"MONTES MONFERRER, ANTONIO",C.B.SANT ADRIÀ,falta
+si,Antonio Roses Guitart,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XVII MEMORIAL JOAQUIM DOMINGO""",individual,41,"ROSES GUITART, ANTONI",C.B.SANTS,exacte
+si,Arturo Gómez Pérez,LXXXI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,individual,282,"GÓMEZ PÉREZ, ARTURO",C.B.CANET DE MAR,exacte
+si,Carles Tuset,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,551,"TUSET MALLOL, CARLES",S.B.F.MOLINS,un cognom
+si,Carles Tuset Mallol,Campionat d'Espanya de banda 2025-2026,individual,551,"TUSET MALLOL, CARLES",S.B.F.MOLINS,exacte
+si,Carlos Tuset,LX CAMPEONATO DE ESPAÑA CUADRO 71/2,individual,551,"TUSET MALLOL, CARLES",S.B.F.MOLINS,un cognom
+si,Carlos Tuset Mallol,LXI CAMPEONATO DE ESPAÑA CUADRO 71/2,individual,551,"TUSET MALLOL, CARLES",S.B.F.MOLINS,exacte
+si,Carlos de Vega Gracia,Campionat d'Espanya de banda 2025-2026,individual,2486,"DE VEGA GRACIA, CARLOS",S.E.CASAL CERVERA,exacte
+si,Cipriano Becerra,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,128,"BECERRA GÓMEZ, CIPRIANO",B.LA UNIÓ CORAL,un cognom
+si,David Bosqued Tore,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XVII MEMORIAL JOAQUIM DOMINGO""",individual,144,"BOSQUED TORE, DAVID",C.B.SANT ADRIÀ,exacte
+si,David Nogues Blanco,LXXIV CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,413,"NOGUÉS BLANCO, DAVID",C.B.LLINARS,exacte
+si,David Nogués Blanco,Campionat d'Espanya de quadre 47/2 2022-2023,individual,413,"NOGUÉS BLANCO, DAVID",C.B.LLINARS,exacte
+si,Enrique José Torrisco,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""IV TROFEO COMUNIDAD DE MADRID""",individual,323,"JOSÉ TORRISCO, ENRIQUE",C.B.LLIÇÀ D'AMUNT,exacte
+si,Ernest Latorre Puigvert,LXIX CAMPEONATO DE ESPAÑA CUADRO 71/2,individual,330,"LATORRE PUIGVERT, ERNEST",C.B.LLEIDA,exacte
+si,Esteban León Puig,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XVII MEMORIAL JOAQUIM DOMINGO""",individual,332,"LEÓN PUIG, ESTEBAN",C.B.SANTS,exacte
+si,Esteve Mata,LX CAMPEONATO DE ESPAÑA CUADRO 71/2,individual,375,"MATA PARDO, ESTEVE",B.C.GRANOLLERS,un cognom
+si,Eugenio Sánchez,LXXV CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,508,"SÁNCHEZ TORRALBA, EUGENIO",C.B.MATARÓ,un cognom
+si,Eugenio Sánchez Torralba,Campionat d'Espanya de quadre 47/2 2015-2016,individual,508,"SÁNCHEZ TORRALBA, EUGENIO",C.B.MATARÓ,exacte
+si,Eva Juliá Soldevila,XIV CAMPEONATO DE ESPAÑA FEMENINO DE BILLAR A TRES BANDAS,individual,325,"JULIA SOLDEVILA, EVA",C.B.CANET DE MAR,exacte
+si,Eva Juliá Soldevilla,Campionat d'Espanya de tres bandes femeni 2022-2023,individual,325,"JULIA SOLDEVILA, EVA",C.B.CANET DE MAR,falta
+si,Eva Mª Hermida,Campionat d'Espanya de tres bandes femeni 2019-2020,individual,1565,"HERMIDA DÍAZ, EVA MARÍA",C.B.MANRESA,un cognom
+si,Eva Mª Hermida Díaz,XXV CAMPEONATO DE ESPAÑA FEMENINO DE BILLAR A TRES BANDAS,individual,1565,"HERMIDA DÍAZ, EVA MARÍA",C.B.MANRESA,exacte
+si,FERRAN RODRIGUEZ,Prova de tres bandes (res_bilbao),individual,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,un cognom
+si,Fernando Moreno Carretero,Campionat d'Espanya de banda 2022-2023,individual,869,"MORENO CARRETERO, FERNANDO",C.B.TARRAGONA,exacte
+si,Fernando Rodríguez Navarra,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""III EDICIÓN MIJAS-COSTA DEL SOL""",individual,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,exacte
+si,Ferran Jou Mora,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""GRAN PRIX LLINARS""",individual,776,"JOU MORA, FERRÀN",C.B.SANT BOI,exacte
+si,Ferrán Jou Mora,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,individual,776,"JOU MORA, FERRÀN",C.B.SANT BOI,exacte
+si,Ferrán Rodríguez Navarra,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""IV TROFEO COMUNIDAD DE MADRID""",individual,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,exacte
+si,Francesc Varela Losada,LXXXIV CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,60,"VARELA LOSADA, FRANCESC",C.B.SANTS,exacte
+si,Francesc X. Santesmasses,LXXXIII CAMPEONATO DE ESPAÑA,individual,510,"SANTESMASSES BENET, FRANCESC X.",S.E.CASAL CERVERA,un cognom
+si,Francisco Hernández Hdez.,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XVII MEMORIAL JOAQUIM DOMINGO""",individual,306,"HERNÁNDEZ HERNÁNDEZ, FRANCESC",C.B.MANRESA,abreujat
+si,Francisco Moreno Expósito,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,individual,33,"MORENO EXPOSITO, FRANCISCO",C.B.TARRAGONA,exacte
+si,Francisco Narváez Sánchez,XCII CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,individual,2347,"NARVAEZ SÁNCHEZ, FRANCISCO",C.B.SANTS,exacte
+si,GEORGETA ANGHEL,XVI CTO. ESPAÑA FEMENINO BILLAR 3 BANDAS,individual,1129,"ANGHEL TURMAC, GEORGETA",C.B.MANRESA,un cognom
+si,Georgeta Anghel,Campionat d'Espanya de tres bandes femeni 2020-2021,individual,1129,"ANGHEL TURMAC, GEORGETA",C.B.MANRESA,un cognom
+si,Gregori Campaña Comino,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XVII MEMORIAL JOAQUIM DOMINGO""",individual,153,"CAMPAÑA COMINO, GREGORI",S.E.CASAL CERVERA,exacte
+si,Hector Melo Mejia,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""GRAN PRIX LLINARS""",individual,852,"MELO MEJIA, HECTOR",,exacte
+si,Héctor Melo Mejía,Gran Premi d'Espanya de tres bandes (res_gpe_3b_astorga),individual,852,"MELO MEJIA, HECTOR",,exacte
+si,Ignacio Abizanda Soler,Campionat d'Espanya de banda 2025-2026,individual,1316,"ABIZANDA SOLER, IGNACIO",C.B.LLEIDA,exacte
+si,Isidre Robledo González,Campionat d'Espanya de banda 2022-2023,individual,480,"ROBLEDO GONZÁLEZ, ISIDRE",C.B.TARRAGONA,exacte
+si,Iván Vives Herrando,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""IV TROFEO COMUNIDAD DE MADRID""",individual,573,"VIVES HERRANDO, IVÁN",,exacte
+si,JOEL SÁNCHEZ,XLIII CAMPEONATO DE ESPAÑA TRES BANDAS SUB.21,individual,1278,"SÁNCHEZ GALLEGO, JOEL",C.B.MATARÓ,un cognom
+si,Jaume Carreras Batlle,Gran Premi d'Espanya de tres bandes (res_gpe_3b_llinars),individual,652,"CARRERAS BATLLE, JAUME",,exacte
+si,Jaume Ferré Guallar,Campionat d'Espanya de banda 2025-2026,individual,702,"FERRÉ GUALLAR, JAUME",C.B.SANT ADRIÀ,exacte
+si,Jaume Roselló Rodríguez,Campionat d'Espanya de quadre 71/2 2022-2023,individual,490,"ROSSELLÓ RODRIGUEZ, JAUME",S.B.LA GRAN PENYA,falta
+si,Joan Bouterín Bote,LXXXI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,individual,625,"BOUTERIN BOTE, JOAN",C.B.MOLLET,exacte
+si,Joan Carles Fontanet Belles,Gran Premi d'Espanya de tres bandes (res_gpe_3b_llinars),individual,707,"FONTANET BELLES, JOAN CARLES",S.B.F.MOLINS,exacte
+si,Joan Font Giménez,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,individual,228,"FONT GIMÉNEZ, JOAN ANTON",C.B.MONT-ROIG,exacte
+si,Joan Graells Bosch,Campionat d'Espanya de banda 2022-2023,individual,752,"GRAELLS BOSCH, JOAN",S.E.CASAL CERVERA,exacte
+si,Joan Morcillo,LX CAMPEONATO DE ESPAÑA BANDA,individual,1057,"MORCILLO MARIN, JUAN",C.B.MONT-ROIG,un cognom
+si,Joan Morcillo Marin,LXI CAMPEONATO DE ESPAÑA UNA BANDA,individual,1057,"MORCILLO MARIN, JUAN",C.B.MONT-ROIG,exacte
+si,Joan Rojals Valls,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),individual,1185,"ROJALS VALLS, JOAN",C.B.SANT BOI,exacte
+si,Joan Vidal Gibert,Campionat d'Espanya de banda 2025-2026,individual,1038,"VIDAL GIBERT, JOAN",C.B.TARRAGONA,exacte
+si,Jordi Armengol Bertrán,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XVII MEMORIAL JOAQUIM DOMINGO""",individual,599,"ARMENGOL BERTRAN, JORDI",C.B.SANTS,exacte
+si,Jordi Cadillac,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,149,"CADILLAC JODAR, JORDI",C.B.PUNT D'ATAC,un cognom
+si,Jordi Cadillac Jodar,Campionat d'Espanya de quadre 47/2 2022-2023,individual,149,"CADILLAC JODAR, JORDI",C.B.PUNT D'ATAC,exacte
+si,Jordi Garriga,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,un cognom
+si,Jordi Gassó,LX CAMPEONATO DE ESPAÑA BANDA,individual,266,"GASSÓ CHUMILLAS, JORDI",B.C.GRANOLLERS,un cognom
+si,Jordi Limones,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""GRAN PRIX LLINARS""",individual,335,"LIMONES VILLALBA, JORDI",C.B.BARCELONA,un cognom
+si,Jorge Sánchez Barrera,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,individual,503,"SÁNCHEZ BARRERA, JORGE A.",C.B.PRAT,exacte
+si,Josep Bargalló Jaume,"GPE I OPEN ""SOMAN TOMELLOSO"" DE BILLAR A TRES BANDAS",individual,68,"BARGALLO JAUME, JOSEP",C.B.SANT BOI,exacte
+si,Josep Labrador Codina,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,individual,1605,"LABRADOR CODINA, JOSEP",C.B.LLEIDA,exacte
+si,Josep María Mas Canadell,LXXX CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,individual,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,exacte
+si,Josep Planes,LX CAMPEONATO DE ESPAÑA CUADRO 71/2,individual,456,"PLANES BLANCH, JOSEP",S.E.CASAL CERVERA,un cognom
+si,Josep Planes Blanch,LXXIV CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,456,"PLANES BLANCH, JOSEP",S.E.CASAL CERVERA,exacte
+si,Josep R. Molina Maspoch,Campionat d'Espanya de banda 2019-2020,individual,392,"MOLINA MASPOCH, JOSEP RAMÓN",S.B.F.MOLINS,exacte
+si,Josep Ramón Molina,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,392,"MOLINA MASPOCH, JOSEP RAMÓN",S.B.F.MOLINS,un cognom
+si,Josep Serarols Montes,Campionat d'Espanya de banda 2022-2023,individual,520,"SERAROLS MONTES, JOSEP",S.E.CASAL CERVERA,exacte
+si,José Gay Vila,Campionat d'Espanya de tres bandes 2016-2017,individual,267,"GAY VILA, JOSEP",,exacte
+si,José L. González Sánchez,Campionat d'Espanya de tres bandes 2018-2019,individual,747,"GONZÁLEZ SÁNCHEZ, JOSEP LL.",C.B.MANRESA,exacte
+si,José L. Quesada Martos,"GPE I OPEN ""SOMAN TOMELLOSO"" DE BILLAR A TRES BANDAS",individual,936,"QUESADA MARTOS, JOSÉ LUIS",C.B.SANT BOI,exacte
+si,José Martín Vilchez,Gran Premi d'Espanya de tres bandes (res_gpe_3b_llinars),individual,832,"MARTÍN VÍLCHEZ, JOSEP",B.C.GRANOLLERS,exacte
+si,José María Sayeras Guiteras,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XVII MEMORIAL JOAQUIM DOMINGO""",individual,993,"SAYERAS GUITERAS, JOSEP Mª",C.B.MOLLET,exacte
+si,José R. Molina Maspoch,LXXXIII CAMPEONATO DE ESPAÑA,individual,392,"MOLINA MASPOCH, JOSEP RAMÓN",S.B.F.MOLINS,exacte
+si,José Ramón Molina,LX CAMPEONATO DE ESPAÑA CUADRO 71/2,individual,392,"MOLINA MASPOCH, JOSEP RAMÓN",S.B.F.MOLINS,un cognom
+si,José Serrano Chamorro,Campionat d'Espanya de banda 2025-2026,individual,523,"SERRANO CHAMORRO, JOSÉ",C.B.CARDONA,exacte
+si,Juan Ant. Navarro,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,410,"NAVARRO CARMONA, JOAN ANT.",B.C.GRANOLLERS,un cognom
+si,Juan J. Barrientos,Campionat d'Espanya de quadre 47/2 2022-2023,individual,123,"BARRIENTOS CABALLERO, JOAN JOSEP",C.B.2000 CERDANYOLA,un cognom
+si,Juan José Barrientos,Campionat d'Espanya de quadre 71/2 2015-2016,individual,123,"BARRIENTOS CABALLERO, JOAN JOSEP",C.B.2000 CERDANYOLA,un cognom
+si,Juan Morcillo Marín,Campionat d'Espanya de banda 2020-2021,individual,1057,"MORCILLO MARIN, JUAN",C.B.MONT-ROIG,exacte
+si,Juan Perales Sanz,Gran Premi d'Espanya de tres bandes (res_gpe_3b_llinars),individual,441,"PERALES SANZ, JOAN",S.B.F.MOLINS,exacte
+si,Juan Santiago Romero,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),individual,1981,"SANTIAGO ROMERO, JUAN",C.B.SANT BOI,exacte
+si,Laurea Giménez Figuera,Campionat d'Espanya de banda 2025-2026,individual,272,"GIMÉNEZ FIGUERA, LAUREÀ",S.B.LA GRAN PENYA,exacte
+si,Lluis González,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,286,"GONZÁLEZ CARVAJAL, LLUÍS",C.B.TARRAGONA,un cognom
+si,MARC MÉRIDA,XXVIII CAMPEONATO DE ESPAÑA SUB-17 DE BILLAR A TRES BANDAS,individual,28,"MÉRIDA MARTIN, MARC",,un cognom
+si,MARIO FELIPE RODRIGUEZ,Prova de tres bandes (res_bilbao),individual,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,un cognom
+si,MARTA SERRAMITJANA,XVI CTO. ESPAÑA FEMENINO BILLAR 3 BANDAS,individual,1000,"SERRAMITJANA JUAN, MARTA",C.B.MATARÓ,un cognom
+si,Manel Fontes Fulquet,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""III EDICIÓN MIJAS-COSTA DEL SOL""",individual,30,"FONTES FULQUET, MANEL",C.B.SANT BOI,exacte
+si,Manuel Cuenca Pardo,Campionat d'Espanya de tres bandes 2012-2013,individual,675,"CUENCA PARDO, MANUEL",,exacte
+si,Manuel Cusiné Barber,Campionat d'Espanya de quadre 47/2 2025-2026,individual,1179,"CUSINÉ BARBER, MANUEL",C.B.LLEIDA,exacte
+si,Manuel González Castillo,Campionat d'Espanya de quadre 71/2 2015-2016,individual,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,exacte
+si,Manuel Pérez Viña,Campionat d'Espanya de banda 2025-2026,individual,448,"PÉREZ VIÑA, MANUEL",C.B.LLINARS,exacte
+si,Marc Maymó Torne,Gran Premi d'Espanya de tres bandes (res_gpe_3b_llinars),individual,850,"MAYMÓ TORNÉ, MARC",C.B.BARCELONA,exacte
+si,Mario Felipe Rodríguez,LXXXI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,individual,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,un cognom
+si,Mario Felipe Rodríguez Maia,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""GRAN PRIX LLINARS""",individual,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,exacte
+si,Martí Llop,XIV CAMPEONATO DE ESPAÑA DE TRES BANDAS SUB'25,individual,338,"LLOP RUANA, MARTÍ",,un cognom
+si,Martí Llop Ruana,XV CAMPEONATO DE ESPAÑA SUB'25 DE BILLAR A TRES BANDAS,individual,338,"LLOP RUANA, MARTÍ",,exacte
+si,Mateu Carbonell Trilla,Campionat d'Espanya de quadre 47/2 2025-2026,individual,161,"CARBONELL TRILLA, MATEU",S.E.CASAL CERVERA,exacte
+si,Miguel Argemi Durán,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""GRAN PRIX LLINARS""",individual,597,"ARGEMÍ DURÁN, MIQUEL",,exacte
+si,Miquel Casademunt Vallés,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""GRAN PRIX LLINARS""",individual,655,"CASADEMUNT VALLES, MIQUEL",,exacte
+si,Miquel Costa Salvans,Campionat d'Espanya de quadre 47/2 2025-2026,individual,1233,"COSTA SALVANS, MIQUEL",C.B.VIC,exacte
+si,Miquel Plandolit,LXXIII CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,922,"PLANDOLIT MARTÍN, MIQUEL",C.B.MATARÓ,un cognom
+si,Miquel Plandolit Martín,Campionat d'Espanya de banda 2015-2016,individual,922,"PLANDOLIT MARTÍN, MIQUEL",C.B.MATARÓ,exacte
+si,Miquel de la Hoz Alonso,Campionat d'Espanya de quadre 47/2 2025-2026,individual,203,"DE LA HOZ ALONSO, MIQUEL",C.B.CANET DE MAR,exacte
+si,Pere Arnau,LX CAMPEONATO DE ESPAÑA CUADRO 71/2,individual,600,"ARNAU CANALDA, PERE",C.B.TARRAGONA,un cognom
+si,Pere Arnau Canalda,LXXXIII CAMPEONATO DE ESPAÑA,individual,600,"ARNAU CANALDA, PERE",C.B.TARRAGONA,exacte
+si,Pere Lluma Vergara,Campionat d'Espanya de quadre 47/2 2015-2016,individual,339,"LLUMA VERGARA, PERE",C.B.VIC,exacte
+si,Pietro Prinzivalli Carrubba,LXIX CAMPEONATO DE ESPAÑA CUADRO 71/2,individual,463,"PRINZIVALLI CARRUBBA, PIETRO",C.B.TARRAGONA,exacte
+si,RAÚL UCEDA,XXXV CAMPEONATO DE ESPAÑA SUB-21 DE BILLAR A TRES BANDAS,individual,1293,"UCEDA LÓPEZ, RAÚL",C.B.MATARÓ,un cognom
+si,Rafael Bragulat Santos,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XVII MEMORIAL JOAQUIM DOMINGO""",individual,627,"BRAGULAT SANTOS, RAFAEL",,exacte
+si,Rafael Gascón Reyes,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,individual,265,"GASCÓN REYES, RAFAEL",C.B.SANT BOI,exacte
+si,Ramón Aguilar Sala,Campionat d'Espanya de tres bandes 2016-2017,individual,84,"AGUILAR SALA, RAMÓN",C.B.BANYOLES,exacte
+si,Ramón Agut Bonfills,Campionat d'Espanya de quadre 47/2 2020-2021,individual,1204,"AGUT BONSFILLS, RAMON",C.B.2000 CERDANYOLA,falta
+si,Ramón Agut Bonsfills,Campionat d'Espanya de quadre 71/2 2020-2021,individual,1204,"AGUT BONSFILLS, RAMON",C.B.2000 CERDANYOLA,exacte
+si,Ramón Camps Estela,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,individual,2595,"CAMPS ESTELA, RAMÓN",C.B.BANYOLES,exacte
+si,Ricard Arnau Font,Campionat d'Espanya de banda 2020-2021,individual,109,"ARNAU FONT, RICARD",C.B.MONT-ROIG,exacte
+si,Ricardo Garcia Alarcón,LXXX CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,individual,716,"GARCÍA ALARCÓN, RICARDO",C.B.MONFORTE,exacte
+si,SERGIO JIMENEZ,Prova de tres bandes (res_bilbao),individual,769,"JIMÉNEZ GALERA, SERGI",B.C.GRANOLLERS,un cognom
+si,SERGIO MARTINEZ,XXXIX CAMPEONATO DE ESPAÑA SUB-21 DE BILLAR A TRES BANDAS,individual,1194,"MARTÍNEZ AVILÉS, SERGIO",C.B.MATARÓ,un cognom
+si,SERGIO MARTÍNEZ,XXVI CAMPEONATO DE ESPAÑA SUB-17 DE BILLAR A TRES BANDAS,individual,1194,"MARTÍNEZ AVILÉS, SERGIO",C.B.MATARÓ,un cognom
+si,Salvador Martí Talavera,Campionat d'Espanya de banda 2022-2023,individual,361,"MARTÍ TALAVERA, SALVADOR",C.B.LLEIDA,exacte
+si,Sergi Garriga Llovet,Campionat d'Espanya de banda 2022-2023,individual,264,"GARRIGA LLOVET, SERGI",S.E.CASAL CERVERA,exacte
+si,Valentí Vilalta Pare,LXXIV CAMPEONATO DE ESPAÑA CUADRO 47/2,individual,566,"VILALTA PARÉ, VALENTÍ",C.B.SANTS,exacte
+si,Valentín Carrillo Letona,Campionat d'Espanya de quadre 47/2 2015-2016,individual,58,"CARRILLO LETONA, VALENTIN",,exacte
+si,Valentín Vilalta Paré,Campionat d'Espanya de quadre 47/2 2025-2026,individual,566,"VILALTA PARÉ, VALENTÍ",C.B.SANTS,exacte
+si,Vicente Alberich Sánchez,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),individual,87,"ALBERICH SÁNCHEZ, VICENTE",C.B.MONT-ROIG,exacte
+si,Vicente Martínez Lopezosa,Campionat d'Espanya de banda 2022-2023,individual,836,"MARTÍNEZ LOPEZOSA, VICENÇ",C.B.MONT-ROIG,exacte
+si,Xavier Díez Ayza,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""GRAN PRIX LLINARS""",individual,206,"DIEZ AYZA, XAVIER",S.B.P.E.CENTELLES,exacte
+si,Xavier Fonellosa Casanovas,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""GRAN PRIX LLINARS""",individual,704,"FONELLOSA CASANOVAS, XAVIER",C.B.MONFORTE,exacte
+si,Xavier Rius Piqué,Campionat d'Espanya de banda 2025-2026,individual,478,"RIUS PIQUÉ, XAVIER",S.E.CASAL CERVERA,exacte
+si,Álvaro Da Silva Rivilla,"GPE I OPEN ""SOMAN TOMELLOSO"" DE BILLAR A TRES BANDAS",individual,2512,"DA SILVA RIVILLA, ÁLVARO",C.B.BANYOLES,exacte
+si,Ángel Hernández Perea,Campionat d'Espanya de tres bandes 2012-2013,individual,309,"HERNÁNDEZ PEREA, ANGEL",S.E.CASAL CERVERA,exacte
+si,Ángel Palacios Gay,Campionat d'Espanya de banda 2022-2023,individual,422,"PALACIOS GAY, ANGEL",,exacte
 si,Adriá García Dueñas,DS Matadepera C.,1,249,"GARCÍA DUEÑAS, ADRIÀ",,
 si,Albert Martínez Mateu,C.B. VIC,2,370,"MARTÍNEZ MATEU, ALBERT",S.E.CASAL CERVERA,
 si,Albert Segarra Solé,C.B. MATARÓ,honor,515,"SEGARRA SOLÉ, ALBERT",C.B.MATARÓ,

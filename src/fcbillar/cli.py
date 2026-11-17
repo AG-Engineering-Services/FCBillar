@@ -2415,6 +2415,18 @@ def nacional_candidats_cmd(
             "UNION SELECT jugador, equip, divisio FROM nacional_alineacions"
         )
     }
+    # Els campionats individuals: només els de la federació catalana, que són
+    # els que poden tenir fitxa al cens. A `equip` hi va la prova.
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='rfeb_classificacions'"
+    ).fetchone():
+        rfeb |= {
+            JugadorRfeb(nom=n, equip=t, divisio="individual")
+            for n, t in conn.execute(
+                "SELECT c.jugador, p.titol FROM rfeb_classificacions c "
+                "JOIN rfeb_proves p ON p.id = c.prova_id WHERE c.fed = 'CAT'"
+            )
+        }
     for pdf in pdfs or []:
         rfeb |= {
             JugadorRfeb(nom=j.jugador, equip=j.equip, divisio=divisio)
@@ -2494,6 +2506,22 @@ def nacional_puja_cmd(
         console.print(f"[red]No l'he pogut llegir:[/] {estat['error']}")
         raise typer.Exit(1)
     console.print(f"  {estat['resum']} → {estat['fitxer']}")
+
+
+@app.command("publish-rfeb-individuals")
+def publish_rfeb_individuals_cmd() -> None:
+    """Publica les classificacions dels campionats individuals de la RFEB."""
+    from fcbillar.cloud_sync import publica_si_hi_es, publish_rfeb_individuals
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
+
+    counts = publica_si_hi_es(
+        "rfeb individuals", lambda: publish_rfeb_individuals(on_progress=_prog), _prog
+    )
+    console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
+    if any(v < 0 for v in counts.values()):
+        raise typer.Exit(1)
 
 
 @app.command("publish-nacional")
