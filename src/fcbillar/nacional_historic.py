@@ -18,15 +18,20 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from fcbillar.lliga_nacional import (
+    RE_FITXER_CONCENTRAT,
     FormatDesconegut,
     desa_classificacio_de_jugadors,
     desa_jornada,
     llegeix_classificacio_de_jugadors,
     llegeix_jornada,
+    llegeix_jornades_concentrades,
     temporada_de,
 )
 
 _RE_DIVISIO = re.compile(r"liga[-_]nal[-_](h|1|2)", re.IGNORECASE)
+#: `noticias2016`: la carpeta de la web vella on es publicava la temporada que
+#: començava aquell any (la 2016-2017).
+_RE_CARPETA_ANY = re.compile(r"noticias(\d{4})$", re.IGNORECASE)
 #: `liga_nal_1a_j3.pdf`: el grup A de Primera, en un PDF a part.
 _RE_GRUP_AL_NOM = re.compile(r"liga[-_]nal[-_][12]([a-d])[-_]j", re.IGNORECASE)
 
@@ -45,17 +50,49 @@ def _divisio(nom: str) -> str | None:
     return "honor" if m.group(1).lower() == "h" else m.group(1)
 
 
+def temporada_de_la_carpeta(carpeta: Path) -> str | None:
+    """«noticias2016» -> «2016-2017». Per a les jornades que no porten data."""
+    m = _RE_CARPETA_ANY.search(carpeta.name)
+    return f"{m.group(1)}-{int(m.group(1)) + 1}" if m else None
+
+
 def _llegeix(f: Path):
     """La jornada o la classificació d'un PDF, o l'error. Va en un altre procés."""
     try:
         if "cjug" in f.name:
             return llegeix_classificacio_de_jugadors(f)
+        if RE_FITXER_CONCENTRAT.search(f.name):
+            # Unes quantes jornades de cop (Honor 2020-21, per concentracions).
+            return llegeix_jornades_concentrades(f)
         return llegeix_jornada(f)
     except FormatDesconegut as e:
         return e
     except Exception as e:
         # Algunes còpies de Wayback són fitxers truncats que ni s'obren.
         return FormatDesconegut(f"PDF il·legible: {type(e).__name__}: {e}")
+
+
+def _desa_una(
+    conn, f: Path, sub: Path, j, divisio: str, abans_de: str, temporades
+) -> list[Resultat]:
+    """Desa una jornada llegida de `f` i diu què n'ha passat."""
+    # Les jornades d'Honor d'abans del 2019 no porten data: la temporada és la
+    # de la carpeta de la web vella on es van publicar.
+    temporada_carpeta = temporada_de_la_carpeta(sub)
+    if j.data is None and temporada_carpeta is None:
+        return [Resultat(str(f), "error", "jornada sense data")]
+    # El format d'Honor no diu el grup. Quan una divisió de grups surt amb aquest
+    # format, un PDF per grup, el grup és al nom del fitxer; sense, el segon grup
+    # xafaria el primer.
+    g = _RE_GRUP_AL_NOM.search(f.name)
+    if g and len(j.grups) == 1 and j.grups[0].grup is None:
+        j = replace(j, grups=[replace(j.grups[0], grup=g.group(1).upper())])
+    temporada = temporada_de(j.data) if j.data else temporada_carpeta
+    temporades[temporada] += 1
+    if temporada >= abans_de:
+        return [Resultat(str(f), "saltat", f"temporada {temporada}, en curs")]
+    desa_jornada(conn, j, divisio, temporada)
+    return [Resultat(str(f), "desat", f"{temporada} {divisio} j{j.numero} {j.data or ''}")]
 
 
 def carrega(conn, carpetes: list[Path], abans_de: str) -> list[Resultat]:
@@ -95,26 +132,16 @@ def carrega(conn, carpetes: list[Path], abans_de: str) -> list[Resultat]:
                     else:
                         cjugs.append((f, divisio))
                     continue
-                j = llegits[f]
-                if isinstance(j, FormatDesconegut):
-                    out.append(Resultat(str(f), "error", str(j)[:160]))
+                if f not in llegits:
+                    # Play-offs i fases d'ascens: no es llegeixen (vegeu `tots`).
+                    out.append(Resultat(str(f), "saltat", "play-off o fase"))
                     continue
-                if j.data is None:
-                    out.append(Resultat(str(f), "error", "jornada sense data"))
+                llegit = llegits[f]
+                if isinstance(llegit, FormatDesconegut):
+                    out.append(Resultat(str(f), "error", str(llegit)[:160]))
                     continue
-                # El format d'Honor no diu el grup. Quan una divisió de grups surt
-                # amb aquest format, un PDF per grup, el grup és al nom del fitxer;
-                # sense, el segon grup xafaria el primer.
-                g = _RE_GRUP_AL_NOM.search(f.name)
-                if g and len(j.grups) == 1 and j.grups[0].grup is None:
-                    j = replace(j, grups=[replace(j.grups[0], grup=g.group(1).upper())])
-                temporada = temporada_de(j.data)
-                temporades[temporada] += 1
-                if temporada >= abans_de:
-                    out.append(Resultat(str(f), "saltat", f"temporada {temporada}, en curs"))
-                    continue
-                desa_jornada(conn, j, divisio, temporada)
-                out.append(Resultat(str(f), "desat", f"{temporada} {divisio} j{j.numero} {j.data}"))
+                for j in llegit if isinstance(llegit, list) else [llegit]:
+                    out.extend(_desa_una(conn, f, sub, j, divisio, abans_de, temporades))
 
             if len(temporades) != 1:
                 for f, _ in cjugs:
