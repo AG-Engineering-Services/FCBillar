@@ -87,6 +87,12 @@ Versions:
 - 35: `umb_*`, els resultats internacionals oficials de la UMB (mundials i
      copes del món, llegits dels seus PDF) i `umb_fitxes`, els lligams validats
      amb el cens. Taules noves: les crea l'executescript.
+- 36: `umb_partides.nacio_a` i `nacio_b`, el país amb què juga cada costat. Als
+     mundials per equips nacionals la partida és d'un jugador dins d'un encontre
+     entre seleccions; sense el país no es veu amb quina selecció juga.
+- 37: `umb_partides.sets_a` i `sets_b`, el resultat de cada set de les partides
+     a sets de 15 (fins al 2011). Les partides es tornen a carregar: fins ara
+     d'aquestes s'hi desava el primer set com si fos el total.
 - 27: `torneig_fase_grups.serie_major` — el quart criteri de desempat del
      rànquing d'una fase, després de la posició al grup, els punts i la mitjana.
      No surt a la taula de classificació del grup: es calcula de les partides.
@@ -110,7 +116,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 35
+SCHEMA_VERSION = 37
 
 
 def _read_schema_sql() -> str:
@@ -640,6 +646,28 @@ def _migrate_to_v28(conn: sqlite3.Connection) -> None:
             log.info("→v28: afegida columna torneig_fases.%s", nom)
 
 
+def _migrate_to_v36(conn: sqlite3.Connection) -> None:
+    """El país de cada costat d'una partida UMB (nul·la: abans no es desava)."""
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(umb_partides)").fetchall()}
+    if not cols:
+        return
+    for nom in ("nacio_a", "nacio_b"):
+        if nom not in cols:
+            conn.execute(f"ALTER TABLE umb_partides ADD COLUMN {nom} TEXT")
+            log.info("→v36: afegida columna umb_partides.%s", nom)
+
+
+def _migrate_to_v37(conn: sqlite3.Connection) -> None:
+    """Els sets de les partides UMB a sets de 15 (nul·la: abans no es desaven)."""
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(umb_partides)").fetchall()}
+    if not cols:
+        return
+    for nom in ("sets_a", "sets_b"):
+        if nom not in cols:
+            conn.execute(f"ALTER TABLE umb_partides ADD COLUMN {nom} TEXT")
+            log.info("→v37: afegida columna umb_partides.%s", nom)
+
+
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
     conn = connect(db_path)
     version = current_version(conn)
@@ -697,6 +725,11 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     # → v33: un encontre no jugat no té resultat, ni que la federació hi posi 0 / 0.
     if 1 <= version < 33:
         _migrate_to_v33(conn)
+    # → v36: el país de cada costat d'una partida de la UMB.
+    if 1 <= version < 36:
+        _migrate_to_v36(conn)
+    if 1 <= version < 37:
+        _migrate_to_v37(conn)
     # v2 → v3 no necessita ALTER (només afegeix taula nova que crearà
     # executescript via CREATE TABLE IF NOT EXISTS).
     # v3 → v4 tampoc (afegeix torneigs_individuals + torneig_participants).

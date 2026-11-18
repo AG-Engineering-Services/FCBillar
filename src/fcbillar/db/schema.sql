@@ -962,6 +962,12 @@ CREATE TABLE IF NOT EXISTS umb_partides (
     punts_b         INTEGER,
     serie_b         INTEGER,
     serie2_b        INTEGER,
+    nacio_a         TEXT,
+    nacio_b         TEXT,
+    -- Partides a sets de 15 (fins al 2011): «caramboles/entrades» de cada set,
+    -- separats per comes («15/14,15/7»). NULL si la partida no és a sets.
+    sets_a          TEXT,
+    sets_b          TEXT,
     PRIMARY KEY (esdeveniment_id, fase, grup, ordre)
 );
 

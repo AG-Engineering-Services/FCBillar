@@ -14,7 +14,17 @@ from pathlib import Path
 
 from fcbillar.db.migrations import ensure_schema
 from fcbillar.nacional_fitxes import JugadorCens
-from fcbillar.umb import clau, llegeix_jugadors, llegeix_prova, separa_nom
+from fcbillar.umb import (
+    clau,
+    es_equips,
+    llegeix_equips,
+    llegeix_jugadors,
+    llegeix_partides,
+    llegeix_prova,
+    noms_de_la_llista_d_equips,
+    separa_nom,
+    text_sets,
+)
 from fcbillar.umb_carrega import carrega, disciplina_de, resum
 from fcbillar.umb_descarrega import llegeix_esdeveniment
 from fcbillar.umb_fitxes import (
@@ -199,6 +209,89 @@ def test_l_id_umb_es_hereta_d_una_altra_prova(tmp_path):
     ).fetchone()[:] == ("0777",)
 
 
+def test_id_0000_no_es_cap_id(tmp_path):
+    js = llegeix_jugadors(
+        "Players List\n5 GARCIA Pedro ES 10 100 0000\n6 LOPEZ Juan ES 11 90 0000\n"
+    )
+    assert [j.umb_id for j in js] == [None, None]
+    conn = ensure_schema(tmp_path / "t.db")
+    conn.execute("INSERT INTO umb_esdeveniments (id, nom, font) VALUES (1, 'A', 'x')")
+    conn.executemany(
+        "INSERT INTO umb_jugadors VALUES (1, ?, '0000', 'ES')", [("GARCIA Pedro",), ("LOPEZ Juan",)]
+    )
+    from fcbillar.umb_carrega import _hereta_ids
+
+    _hereta_ids(conn)
+    ids = {r[0] for r in conn.execute("SELECT umb_id FROM umb_jugadors")}
+    assert ids == {"x:garciapedro:ES", "x:lopezjuan:ES"}
+
+
+def test_un_id_compartit_per_dues_persones_es_separa(tmp_path):
+    from fcbillar.umb_carrega import _hereta_ids
+
+    conn = ensure_schema(tmp_path / "t.db")
+    for i in (1, 2, 3):
+        conn.execute(f"INSERT INTO umb_esdeveniments (id, nom, font) VALUES ({i}, 'A', 'x')")
+    conn.executemany(
+        "INSERT INTO umb_jugadors VALUES (?, ?, '2166', 'TR')",
+        [(1, "YAVUZ Tarik"), (2, "YAVUZ Tarik"), (3, "YILMAZ Savas")],
+    )
+    conn.executemany(
+        "INSERT INTO umb_jugadors VALUES (?, ?, '0211', 'ES')",
+        [(1, "MAS Jose-Maria"), (2, "MAS Jose Maria"), (3, "MAS José María")],
+    )
+    _hereta_ids(conn)
+    ids = dict(conn.execute("SELECT nom, umb_id FROM umb_jugadors"))
+    assert ids["YAVUZ Tarik"] == "2166"
+    assert ids["YILMAZ Savas"] == "x:yilmazsavas:TR"
+    assert {
+        i for n, i in conn.execute("SELECT nom, umb_id FROM umb_jugadors") if n.startswith("MAS")
+    } == {"0211"}
+
+
+def test_mundial_per_equips_nacionals():
+    text = (
+        "37th World Championship Nat. Teams 3-Cushion\n"
+        "QUARTER FINALS\n"
+        "Game Nation Match / players T-car T-Inn Av MP HR\n"
+        "THE NETHERLANDS JASPERS Dick 40 28 1.428 2 7\n"
+        "53\n"
+        "KOREA CHO Myung Woo 28 28 1.000 0 4\n"
+        "THE NETHERLANDS DE BRUIJN Jean Pau 33 25 1.320 0 8\n"
+        "54\n"
+        "SPAIN LEGAZPI Ruben 40 25 1.600 2 9\n"
+        "Match Nation MP CAR INN GAV HR DC_SET\n"
+        "THE NETHERLANDS 2 73 53 1.377 8 15\n"
+        "27\n"
+        "SPAIN 2 68 53 1.283 9 11\n"
+    )
+    assert es_equips(text)
+    ps, errs = llegeix_equips(text, ["THE NETHERLANDS", "KOREA", "SPAIN"], "x")
+    assert errs == [] and len(ps) == 2
+    assert (ps[0].a.jugador, ps[0].a.nacio, ps[0].b.nacio) == ("JASPERS Dick", "NL", "KR")
+    assert (ps[1].b.jugador, ps[1].b.nacio, ps[1].b.caramboles) == ("LEGAZPI Ruben", "ES", 40)
+    assert ps[1].fase == "QUARTER FINALS"
+    llista = (
+        "Teams\n"
+        "TEAM PLAYERS RESERVE\n"
+        "1 LEGAZPI Ruben ANGUITA Carlos\n"
+        "4 SPAIN\n"
+        "2 JIMENEZ Sergio CRESPO Carlos\n"
+        "1 CEULEMANS Peter MERCKX Eddy\n"
+        "9 BELGIUM 2 FORTHOMME Roland LONCELLE Johann\n"
+    )
+    assert noms_de_la_llista_d_equips(llista, ["BELGIUM", "SPAIN"]) == [
+        "LEGAZPI Ruben",
+        "ANGUITA Carlos",
+        "JIMENEZ Sergio",
+        "CRESPO Carlos",
+        "CEULEMANS Peter",
+        "MERCKX Eddy",
+        "FORTHOMME Roland",
+        "LONCELLE Johann",
+    ]
+
+
 def test_pagina_d_esdeveniment():
     html = (
         '<meta /><script type="application/ld&#x2B;json">{"@type": "SportsEvent", '
@@ -322,6 +415,14 @@ def test_pagina_de_la_ceb():
     }
 
 
+def test_valors_amb_desempat_o_en_blanc_a_la_ceb():
+    from fcbillar.ceb import _enter, _mitjana
+
+    assert _enter("120 (3)") == 120
+    assert _mitjana("", "250", "1") == 250.0
+    assert _mitjana("7.05", "120 (3)", "17") == 7.05
+
+
 def test_llista_d_esdeveniments_de_la_ceb():
     from fcbillar.ceb import DESPLACAMENT, es_individual, llegeix_llista
 
@@ -340,3 +441,71 @@ def test_llista_d_esdeveniments_de_la_ceb():
     assert [e.id for e in evs] == [DESPLACAMENT + 375, DESPLACAMENT + 372]
     assert evs[0].inici == "2017-09-15" and evs[0].lloc == "Ronchin (FRA)"
     assert [es_individual(e) for e in evs] == [True, False]
+
+
+# --- partides a sets de 15 (fins al 2011) -----------------------------------------
+
+GRUPS_A_SETS = """SLUISKIL WORLD CUP / GRAND PRIX
+21 till 27 January 2008 -- Sluiskil (NL)
+Qual Groups ABC
+Group Match players S1-Car S1-Inn S2-Car S2-Inn S3-Car S3-Inn T-car T-Inn Av MP Sets HR
+A MANCINI Giorgio 15 14 15 7 30 21 1,428 2 2 6
+BLAUWBLOMME Henk 8 13 10 7 18 20 0,900 0 -2 7
+DEMMING Adrie 12 10 15 17 15 9 42 36 1,166 2 1 6
+MANCINI Giorgio 15 11 13 16 8 9 36 36 1,000 0 -1 6
+Players Nat T-Car T-Inn Gen-Av MP Ba-Sets HR Place
+MANCINI Giorgio IT 66 57 1,157 2 1 6 1
+"""
+
+#: La capçalera de les eliminatòries surt en tres línies, i es juga a cinc sets.
+ELIMINATORIA_A_SETS = """21 till 27 January 2008 -- Sluiskil (NL) 1/16 Matches
+S1- S1- S2- S2- S3- S3- S4- S4- S5- S5-
+Match players Nat T-car T-Inn Av MP Sets HR
+Car Inn Car Inn Car Inn Car Inn Car Inn
+BLOMDAHL Torbjorn SE 9 11 4 7 15 11 15 4 15 7 58 40 1,450 2 1 9
+PALAZON Javier ES 15 11 15 8 10 10 9 4 10 6 59 39 1,512 0 -1 7
+"""
+
+
+def test_sets_el_total_es_el_de_davant_de_la_mitjana():
+    ps, errs = llegeix_partides(GRUPS_A_SETS, set(), "Q")
+    assert not errs
+    a, b = ps[0].a, ps[0].b
+    assert (a.jugador, a.caramboles, a.entrades, a.punts, a.serie) == (
+        "MANCINI Giorgio",
+        30,
+        21,
+        2,
+        6,
+    )
+    assert a.sets == [(15, 14), (15, 7)]
+    # La diferència de sets negativa («-2») no es pren per la sèrie.
+    assert (b.caramboles, b.entrades, b.punts, b.serie, b.sets) == (
+        18,
+        20,
+        0,
+        7,
+        [(8, 13), (10, 7)],
+    )
+    # Tres sets: el perdedor de la partida pot guanyar-ne un.
+    assert ps[1].a.sets == [(12, 10), (15, 17), (15, 9)]
+    assert text_sets(ps[1].b.sets) == "15/11,13/16,8/9"
+
+
+def test_sets_guanya_qui_guanya_mes_sets_no_mes_caramboles():
+    ps, _ = llegeix_partides(ELIMINATORIA_A_SETS, set(), "1/16")
+    [p] = ps
+    assert (p.a.jugador, p.a.caramboles, p.a.punts) == ("BLOMDAHL Torbjorn", 58, 2)
+    assert (p.b.jugador, p.b.caramboles, p.b.punts) == ("PALAZON Javier", 59, 0)
+    assert len(p.a.sets) == 5 and p.b.sets[0] == (15, 11)
+    assert (p.a.serie, p.b.serie) == (9, 7)
+
+
+def test_sense_sets_res_no_canvia():
+    text = """Match players Nat T-Car T-Inn Penalty T-car T-Inn Av MP HR
+ZANETTI Marco IT 40 31 40 31 1,290 2 6
+GARZON Cesar CO 33 31 33 31 1,064 0 5
+"""
+    [p] = llegeix_partides(text, set(), "1/16")[0]
+    assert (p.a.caramboles, p.a.entrades, p.a.sets, p.b.serie) == (40, 31, [], 5)
+    assert text_sets(p.a.sets) is None

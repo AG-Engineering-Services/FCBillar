@@ -2556,6 +2556,9 @@ def umb_descarrega_cmd(
 def umb_carrega_cmd(
     carpeta: str = typer.Option("data/cache/umb", "--carpeta"),  # noqa: B008
     carpeta_ceb: str = typer.Option("data/cache/ceb", "--carpeta-ceb"),  # noqa: B008
+    carpeta_antic: str = typer.Option(  # noqa: B008
+        "data/cache/eb_antic", "--carpeta-antic", help="PDF del web vell d'eurobillard.org."
+    ),
     detall: bool = typer.Option(False, "--detall", help="Els errors de cada PDF."),  # noqa: B008
 ) -> None:
     """Carrega a la BBDD local els resultats de la UMB baixats amb `umb-descarrega`.
@@ -2573,6 +2576,8 @@ def umb_carrega_cmd(
         raise typer.Exit(1)
     conn = ensure_schema(get_settings().db_path)
     res = carrega(conn, arrel)
+    if Path(carpeta_antic).is_dir():
+        res += carrega(conn, Path(carpeta_antic))
     if Path(carpeta_ceb).is_dir():
         from fcbillar.umb_carrega import carrega_ceb
 
@@ -2598,9 +2603,29 @@ def umb_carrega_cmd(
     conn.close()
 
 
+@app.command("ceb-antic-descarrega")
+def ceb_antic_descarrega_cmd(
+    carpeta: str = typer.Option("data/cache/eb_antic", "--carpeta"),  # noqa: B008
+) -> None:
+    """Baixa del Wayback els PDF de resultats del web vell d'eurobillard.org (2007-2014)."""
+    from pathlib import Path
+
+    from fcbillar.eurobillard_antic import descarrega
+
+    evs, errors = descarrega(Path(carpeta))
+    console.print(f"{len(evs)} proves; {len(errors)} errors")
+    for e in errors:
+        console.print(f"  [yellow]{e}[/]")
+
+
 @app.command("umb-candidats")
 def umb_candidats_cmd(
     sortida: str = typer.Option("fonts/internacional/fitxes.csv", "--sortida"),  # noqa: B008
+    sense: str = typer.Option(  # noqa: B008
+        "fonts/internacional/espanyols_sense_candidat.csv",
+        "--sense-candidat",
+        help="Espanyols sense lligam ni candidat, per revisar a mà.",
+    ),
 ) -> None:
     """Proposa quins jugadors espanyols de la UMB són a la fitxa del cens català.
 
@@ -2610,7 +2635,14 @@ def umb_candidats_cmd(
     from collections import Counter
 
     from fcbillar.nacional_fitxes import JugadorCens
-    from fcbillar.umb_fitxes import escriu_candidats, jugadors_espanyols, proposa
+    from fcbillar.umb_fitxes import (
+        escriu_candidats,
+        escriu_sense_candidat,
+        jugadors_espanyols,
+        lligams_validats,
+        proposa,
+        sense_candidat,
+    )
 
     conn = ensure_schema(get_settings().db_path)
     jugadors, sense_id = jugadors_espanyols(conn)
@@ -2622,9 +2654,18 @@ def umb_candidats_cmd(
             "WHERE p.fcb_id IS NOT NULL AND p.fcb_id NOT LIKE 'name:%'"
         )
     ]
-    conn.close()
     trobats = proposa(jugadors, cens)
     ja, nous = escriu_candidats(trobats, sortida)
+    files = sense_candidat(
+        conn,
+        jugadors,
+        {j.umb_id for j, _, _ in trobats},
+        lligams_validats(sortida),
+        cens,
+    )
+    escriu_sense_candidat(files, sense)
+    conn.close()
+    console.print(f"{len(files)} espanyols sense lligam ni candidat a {sense}.")
     console.print(
         f"{len(jugadors)} jugadors espanyols amb id UMB ({sense_id} sense id), "
         f"{len(trobats)} candidats: {nous} de nous a {sortida} ({ja} ja hi eren)."
@@ -2639,10 +2680,6 @@ def publish_umb_cmd() -> None:
 
     def _prog(level: str, msg: str) -> None:
         console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
-
-    counts = publica_si_hi_es(
-        "rfeb individuals", lambda: publish_rfeb_individuals(on_progress=_prog), _prog
-    )
 
     counts = publica_si_hi_es("umb", lambda: publish_umb(on_progress=_prog), _prog)
     console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")

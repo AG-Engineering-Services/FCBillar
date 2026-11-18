@@ -1,4 +1,10 @@
 validat,umb_id,jugador_umb,nacionalitat,proves,fcb_id,nom_cens,club_cens,motiu
+,x:cadillacjordi:ES,CADILLAC Jordi,ES,1,149,"CADILLAC JODAR, JORDI",C.B.PUNT D'ATAC,un cognom
+,x:garrigajorge:ES,GARRIGA Jorge,ES,1,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,un cognom
+,x:gassojordi:ES,GASSO Jordi,ES,1,266,"GASSÓ CHUMILLAS, JORDI",B.C.GRANOLLERS,un cognom
+,x:guerreromiguelangel:ES,GUERRERO Miguel Angel,ES,1,755,"GUERRERO GONZÁLEZ, MIQUEL A.",C.B.SANT ADRIÀ,un cognom
+,x:perezalejandro:ES,PEREZ Alejandro,ES,1,907,"PÉREZ ANDREU, ALEJANDRO",C.B.MATADEPERA,un cognom
+,x:vankesselmarkstefan:ES,VAN KESSEL Mark Stefan,ES,1,1027,"VAN KESSEL, MARK STEFAN",C.B.MATARÓ,exacte
 si,x:aguilarsalaramon:ES,AGUILAR SALA Ramon,ES,1,84,"AGUILAR SALA, RAMÓN",C.B.BANYOLES,exacte
 si,x:apariciosergio:ES,APARICIO Sergio,ES,1,2542,"APARICIO ESCUDERO, SERGI",BILLAR EL MASNOU,un cognom
 si,x:arnauricard:ES,ARNAU Ricard,ES,1,109,"ARNAU FONT, RICARD",C.B.MONT-ROIG,un cognom
