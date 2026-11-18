@@ -2681,10 +2681,6 @@ def publish_umb_cmd() -> None:
     def _prog(level: str, msg: str) -> None:
         console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
 
-    counts = publica_si_hi_es(
-        "rfeb individuals", lambda: publish_rfeb_individuals(on_progress=_prog), _prog
-    )
-
     counts = publica_si_hi_es("umb", lambda: publish_umb(on_progress=_prog), _prog)
     console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
     if any(v < 0 for v in counts.values()):
