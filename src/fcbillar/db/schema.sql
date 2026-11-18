@@ -900,6 +900,33 @@ CREATE TABLE IF NOT EXISTS rfeb_classificacions (
 
 CREATE INDEX IF NOT EXISTS idx_rfeb_proves_temporada ON rfeb_proves (temporada, modalitat);
 
+-- Les partides una a una de les proves de la RFEB que en publiquen el detall
+-- (v38): els fulls de Google de desenvolupament (`fcbillar rfeb-fulls`) i les
+-- eliminatòries dels PDF antics. La prova és a `rfeb_proves`; les dels fulls
+-- tenen l'id `full/{id del full}`. Els jugadors són text, com a la classificació.
+-- Les entrades són les mateixes per als dos jugadors. `modalitat` només hi és
+-- quan la prova en barreja (el campionat per equips de jocs de sèrie).
+CREATE TABLE IF NOT EXISTS rfeb_partides (
+    prova_id      TEXT NOT NULL REFERENCES rfeb_proves (id) ON DELETE CASCADE,
+    fase          TEXT NOT NULL,
+    grup          TEXT NOT NULL DEFAULT '',
+    ordre         INTEGER NOT NULL,
+    data          TEXT,
+    modalitat     TEXT,
+    jugador_a     TEXT NOT NULL,
+    equip_a       TEXT,
+    caramboles_a  INTEGER NOT NULL,
+    serie_a       INTEGER,
+    punts_a       INTEGER,
+    jugador_b     TEXT NOT NULL,
+    equip_b       TEXT,
+    caramboles_b  INTEGER NOT NULL,
+    serie_b       INTEGER,
+    punts_b       INTEGER,
+    entrades      INTEGER NOT NULL,
+    PRIMARY KEY (prova_id, fase, grup, ordre)
+);
+
 -- Resultats internacionals oficials de la UMB (v35): mundials i copes del món de
 -- carambola, llegits dels PDF de umb-carom.org (`fcbillar umb-carrega`).
 --

@@ -30,6 +30,7 @@ import {
   ordenaNacional,
   type NacionalPartidaRow,
   type RfebIndividualRow,
+  type RfebPartidaRow,
 } from "./nacional";
 import type { UmbClassificacioRow, UmbPartidaRow } from "./internacional";
 
@@ -684,6 +685,19 @@ export async function rfebIndividualsDelJugador(fcbId: string): Promise<RfebIndi
     .limit(1000);
   if (error) throw error;
   return ordenaIndividuals((data ?? []) as RfebIndividualRow[]);
+}
+
+/** Les partides del jugador a les proves de la RFEB que en publiquen el detall. */
+export async function rfebPartidesDelJugador(fcbId: string): Promise<RfebPartidaRow[]> {
+  const { data, error } = await db
+    .from("rfeb_partides_fitxa")
+    .select(
+      "fcb_id,prova_id,fase,grup,ordre,data,jugador,equip,caramboles,serie,punts,rival,equip_rival,rival_caramboles,rival_serie,rival_punts,entrades,modalitat,temporada,categoria,tipus,titol,lloc,data_inici,rival_fcb_id",
+    )
+    .eq("fcb_id", fcbId)
+    .limit(1000);
+  if (error) throw error;
+  return (data ?? []) as RfebPartidaRow[];
 }
 
 /** Les partides i les posicions finals del jugador a les proves de la UMB i la CEB. */

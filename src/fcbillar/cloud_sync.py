@@ -7379,6 +7379,48 @@ def publish_calendari(
     }
 
 
+def publish_rfeb_partides(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Puja les partides una a una de les proves de la RFEB (`rfeb_partides`).
+
+    També la prova de cada una, perquè les dels fulls de Google no tenen
+    classificació i no les puja `publish_rfeb_individuals`. Es reemplaça per
+    prova, i les proves sense cap partida a la base local no es toquen.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    taules = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if "rfeb_partides" not in taules:
+        conn.close()
+        prog("warn", "rfeb partides: sense dades locals (executa `fcbillar rfeb-fulls`)")
+        return {}
+    proves = [
+        dict(r)
+        for r in conn.execute(
+            "SELECT * FROM rfeb_proves WHERE id IN (SELECT DISTINCT prova_id FROM rfeb_partides)"
+        )
+    ]
+    files = [dict(r) for r in conn.execute("SELECT * FROM rfeb_partides")]
+    conn.close()
+    if not proves:
+        return {}
+    sb = get_client()
+    counts = {"rfeb_proves": _upsert(sb, "rfeb_proves", proves, "id", prog)}
+    counts["rfeb_partides"] = _publica_reemplaçant(
+        sb,
+        "rfeb_partides",
+        files,
+        ("prova_id", "fase", "grup", "ordre"),
+        ("prova_id",),
+        prog,
+        {(p["id"],) for p in proves},
+    )
+    return counts
+
+
 def publish_rfeb_individuals(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:

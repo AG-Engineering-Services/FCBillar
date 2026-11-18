@@ -8,17 +8,20 @@
 		type ProvisionalRow,
 		nacionalPartidesDelJugador,
 		rfebIndividualsDelJugador,
+		rfebPartidesDelJugador,
 		umbDelJugador
 	} from '$lib/db';
 	import { agrupaUmb, resultatSets, resultatUmb, type UmbProva } from '$lib/internacional';
 	import {
 		aportacionsNacional,
 		aportacionsRfeb,
+		aportacionsRfebPartides,
 		aportacionsUmb,
 		filtraModalitat,
 		efectivitatRfeb,
 		finestres,
 		gamesDeNacional,
+		gamesDeRfeb,
 		gamesDeUmb,
 		tipusCompeticio,
 		type GameRowAmbit,
@@ -30,15 +33,18 @@
 	} from '$lib/indicadorsAmbit';
 	import {
 		agrupaNacional,
+		agrupaRfebPartides,
 		divisioNacional,
 		grafiaPerEquip,
 		mitjanaNacional,
 		normalitzaEquip,
 		posicioProva,
 		resultatPartida,
+		resultatRfeb,
 		temporadaCurta,
 		type NacionalPartidaRow,
-		type RfebIndividualRow
+		type RfebIndividualRow,
+		type RfebPartidaRow
 	} from '$lib/nacional';
 	import { follows, toggleFollow } from '$lib/follows';
 	import RadarChart from '$lib/components/RadarChart.svelte';
@@ -309,6 +315,25 @@
 		};
 	});
 
+	// Les partides una a una de les proves de la RFEB que en publiquen el detall
+	// (fulls de desenvolupament, PDF de fases antics).
+	let rfebPartides = $state<RfebPartidaRow[]>([]);
+	$effect(() => {
+		const id = fcbId;
+		let viu = true;
+		rfebPartides = [];
+		if (id)
+			rfebPartidesDelJugador(id)
+				.then((r) => {
+					if (viu) rfebPartides = r;
+				})
+				.catch((e) => console.warn('Partides de la RFEB no disponibles', e));
+		return () => {
+			viu = false;
+		};
+	});
+	const provesAmbPartides = $derived(new Set(rfebPartides.map((r) => r.prova_id)));
+
 	let internacional = $state<UmbProva[]>([]);
 	$effect(() => {
 		const id = fcbId;
@@ -328,7 +353,7 @@
 	// Catalunya, Espanya i Internacional no es barregen; cada opció surt només si té dades.
 	type Ambit = 'cat' | 'esp' | 'int';
 	let ambit = $state<Ambit>('cat');
-	const teEspanya = $derived(nacional.length > 0 || individuals.length > 0);
+	const teEspanya = $derived(nacional.length > 0 || individuals.length > 0 || rfebPartides.length > 0);
 	const teInternacional = $derived(internacional.length > 0);
 	const ambits = $derived(
 		(
@@ -362,6 +387,7 @@
 			for (const pr of internacional) for (const r of pr.partides) compta(clauRival(r.rival_fcb_id, r.rival), r.rival);
 		} else if (veuEspanya) {
 			for (const r of nacional) compta(clauRival(r.rival_fcb_id, r.rival), r.rival);
+			for (const r of rfebPartides) compta(clauRival(r.rival_fcb_id, r.rival), r.rival);
 		} else {
 			for (const g of games) {
 				const p = persp(g);
@@ -380,6 +406,7 @@
 			: []
 	);
 	const nacionalFiltrat = $derived(rivalSel ? nacional.filter((r) => esRival(r.rival_fcb_id, r.rival)) : nacional);
+	const rfebFiltrat = $derived(rivalSel ? rfebPartides.filter((r) => esRival(r.rival_fcb_id, r.rival)) : rfebPartides);
 	const internacionalFiltrat = $derived(
 		rivalSel
 			? internacional
@@ -405,6 +432,7 @@
 			for (const pr of internacionalFiltrat) for (const r of pr.partides) suma(resultatUmb(r), r.caramboles, r.entrades);
 		} else if (veuEspanya) {
 			for (const r of nacionalFiltrat) suma(resultatPartida(r.caramboles, r.caramboles_rival), r.caramboles, r.entrades);
+			for (const r of rfebFiltrat) suma(resultatRfeb(r), r.caramboles, r.entrades);
 		} else {
 			for (const g of rivalGames) {
 				const p = persp(g);
@@ -419,7 +447,11 @@
 		veuInternacional
 			? aportacionsUmb(internacional)
 			: veuEspanya
-				? [...aportacionsNacional(nacional), ...aportacionsRfeb(individuals)]
+				? [
+						...aportacionsNacional(nacional),
+						...aportacionsRfebPartides(rfebPartides),
+						...aportacionsRfeb(individuals, provesAmbPartides)
+					]
 				: []
 	);
 	const opcionsMod = $derived(modalitatsDe(apsAmbit.map((a) => a.modalitat)));
@@ -430,6 +462,10 @@
 	// La Lliga Nacional només es juga a tres bandes.
 	const nacionalLlista = $derived(modAlt == null || modAlt === MOD_TRES_BANDES ? nacionalFiltrat : []);
 	const individualsLlista = $derived(modAlt == null ? individuals : individuals.filter((r) => modalitatRfeb(r.modalitat) === modAlt));
+	const rfebGrups = $derived(
+		agrupaRfebPartides(modAlt == null ? rfebFiltrat : rfebFiltrat.filter((r) => modalitatRfeb(r.modalitat) === modAlt))
+	);
+	let rfebObertes = $state<Set<string>>(new Set());
 	const internacionalLlista = $derived(
 		modAlt == null ? internacionalFiltrat : internacionalFiltrat.filter((pr) => modalitatUmb(pr.disciplina) === modAlt)
 	);
@@ -631,7 +667,11 @@
 	// són les partides de la Lliga Nacional i de la UMB/CEB escrites com les catalanes,
 	// i així els tres àmbits tenen els mateixos apartats calculats igual.
 	const gamesAmbit = $derived<GameRowAmbit[]>(
-		veuEspanya ? gamesDeNacional(fcbId, nacional) : veuInternacional ? gamesDeUmb(fcbId, internacional) : []
+		veuEspanya
+			? [...gamesDeNacional(fcbId, nacional), ...gamesDeRfeb(fcbId, rfebPartides)]
+			: veuInternacional
+				? gamesDeUmb(fcbId, internacional)
+				: []
 	);
 	const modGames = $derived<GameRow[]>(
 		veuEspanya || veuInternacional
@@ -713,7 +753,7 @@
 		}
 		// Dels campionats d'Espanya només hi ha els totals de cada jugador.
 		if (veuEspanya)
-			for (const r of efectivitatRfeb(individualsLlista)) {
+			for (const r of efectivitatRfeb(individualsLlista, provesAmbPartides)) {
 				const b = map.get(r.tipus) ?? { w: 0, e: 0, l: 0, n: 0 };
 				map.set(r.tipus, { w: b.w + r.w, e: b.e + r.e, l: b.l + r.l, n: b.n + r.n });
 			}
@@ -1901,6 +1941,7 @@
 			<div class="min-w-0">
 			{#if veuEspanya}
 				{@render lligaNacional()}
+				{@render partidesRfeb()}
 			{:else if veuInternacional}
 				{@render provesInternacionals()}
 			{:else}
@@ -2107,9 +2148,9 @@
 			<p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
 				{#if rivalSel && nacional.length}Cap partida de la Lliga Nacional contra {rivalSel.nom}.{:else if modAlt != null && modAlt !== MOD_TRES_BANDES}La Lliga Nacional només es juga a tres bandes.{:else}Cap partida de la Lliga Nacional.{/if}
 			</p>
-			{#if individuals.length && !rivalSel}
+			{#if individuals.some((r) => !provesAmbPartides.has(r.prova_id)) && !rivalSel}
 				<p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-					Dels Campionats d'Espanya i els GPE la RFEB només publica la classificació final, sense les partides: compten a les targetes i a l'efectivitat.
+					De la majoria de Campionats d'Espanya i GPE la RFEB només publica la classificació final, sense les partides: compten a les targetes i a l'efectivitat.
 				</p>
 			{/if}
 		</div>
@@ -2185,6 +2226,90 @@
 					</button>
 				{/if}
 			</div>
+	{/if}
+{/snippet}
+
+{#snippet partidesRfeb()}
+	{#if rfebGrups.length}
+		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+			<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Campionats de la RFEB</div>
+			<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">
+				Partida a partida, de les proves de les quals la RFEB publica el desenvolupament. No compta per als rànquings, les mitjanes ni els gràfics catalans.
+			</p>
+			<div class="space-y-3">
+				{#each rfebGrups as g (g.prova_id)}
+					{@const obert = rfebObertes.has(g.prova_id)}
+					{@const visibles = obert ? g.partides : g.partides.slice(0, 6)}
+					<section>
+						<div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+							<h3 class="min-w-0 text-sm font-semibold leading-tight">
+								{temporadaCurta(g.temporada)} · {g.nom}
+								<span class="block truncate text-[11px] font-normal text-slate-500 dark:text-slate-400">{g.titol}</span>
+							</h3>
+							<p class="whitespace-nowrap text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
+								{g.resum.pj} PJ · {g.resum.g}-{g.resum.e}-{g.resum.p} · <span class="font-mono font-bold">{mitjanaNacional(g.resum.mitjana)}</span>
+							</p>
+						</div>
+						<div class="games-wrap overflow-hidden rounded-lg ring-1 ring-slate-200 dark:ring-slate-800">
+							<table class="w-full text-sm">
+								<caption class="sr-only">Partides de {g.nom}, {temporadaCurta(g.temporada)}</caption>
+								<thead class="print-only bg-slate-50 text-left text-2xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+									<tr>
+										<th scope="col" class="px-3 py-1.5 font-medium">Res.</th>
+										<th scope="col" class="px-3 py-1.5 font-medium">Rival · Fase</th>
+										<th scope="col" class="px-3 py-1.5 text-right font-medium">Marcador</th>
+										<th scope="col" class="px-3 py-1.5 text-right font-medium">Mitjana</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each visibles as r (r.fase + r.grup + r.ordre)}
+										{@const res = resultatRfeb(r)}
+										<tr class="border-b border-slate-100 dark:border-slate-800 last:border-b-0">
+											<td class="w-8 px-2 py-2 text-center sm:px-3">
+												<span class="inline-block w-6 rounded text-center text-xs font-bold {res === 'E'
+													? 'text-slate-500 dark:text-slate-400'
+													: res === 'G'
+														? 'text-emerald-600 dark:text-emerald-400'
+														: 'text-red-500 dark:text-red-400'}">{res}</span>
+											</td>
+											<td class="w-full max-w-0 px-2 py-2 sm:px-3">
+												{#if r.rival_fcb_id && !kiosk}
+													<a href="/jugador/{r.rival_fcb_id}" class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline">{r.rival}</a>
+												{:else}
+													<div class="truncate text-sm leading-tight">{r.rival}</div>
+												{/if}
+												<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
+													{#if r.data}{fmtDate(r.data)} · {/if}{r.fase}{r.grup ? ` ${r.grup}` : ''}{r.equip_rival && r.equip_rival.length > 5 ? ` · ${r.equip_rival}` : ''}
+												</div>
+											</td>
+											<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{r.caramboles}–{r.rival_caramboles}</td>
+											<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400 sm:px-3">
+												{r.entrades ? `${(r.caramboles / r.entrades).toFixed(3).replace('.', ',')} · ${r.entrades} ent.` : '—'}
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+						{#if g.partides.length > 6}
+							<button
+								type="button"
+								aria-expanded={obert}
+								onclick={() => {
+									const s = new Set(rfebObertes);
+									if (obert) s.delete(g.prova_id);
+									else s.add(g.prova_id);
+									rfebObertes = s;
+								}}
+								class="mt-1 min-h-11 w-full rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 active:bg-slate-50 dark:active:bg-slate-800/50 print:hidden"
+							>
+								{obert ? 'Amaga-les' : `Totes les partides (${g.partides.length})`}
+							</button>
+						{/if}
+					</section>
+				{/each}
+			</div>
+		</div>
 	{/if}
 {/snippet}
 

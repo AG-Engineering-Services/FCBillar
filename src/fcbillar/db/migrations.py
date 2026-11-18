@@ -116,7 +116,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 37
+SCHEMA_VERSION = 38
 
 
 def _read_schema_sql() -> str:

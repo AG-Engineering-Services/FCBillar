@@ -4,7 +4,14 @@
 
 import type { GameRow } from './db';
 import { resultatUmb, type UmbProva } from './internacional';
-import { resultatPartida, type NacionalPartidaRow, type RfebIndividualRow } from './nacional';
+import {
+	nomProva,
+	resultatPartida,
+	resultatRfeb,
+	type NacionalPartidaRow,
+	type RfebIndividualRow,
+	type RfebPartidaRow
+} from './nacional';
 
 /** Una partida, o el total d'un campionat, amb el que aporta als indicadors. */
 export interface Aportacio {
@@ -101,10 +108,14 @@ export function aportacionsNacional(rows: NacionalPartidaRow[]): Aportacio[] {
 	});
 }
 
-/** La RFEB només publica el total de cada campionat: sense `jugades` només en surt la mitjana. */
-export function aportacionsRfeb(rows: RfebIndividualRow[]): Aportacio[] {
+/**
+ * La RFEB només publica el total de cada campionat: sense `jugades` només en surt la mitjana.
+ * Les proves de `ambPartides` es compten partida a partida (`aportacionsRfebPartides`) i aquí no.
+ */
+export function aportacionsRfeb(rows: RfebIndividualRow[], ambPartides: Set<string> = new Set()): Aportacio[] {
 	const out: Aportacio[] = [];
 	for (const r of rows) {
+		if (ambPartides.has(r.prova_id)) continue;
 		const jugades = r.jugades ?? 0;
 		const teMitjana = r.caramboles != null && !!r.entrades;
 		if (!jugades && !teMitjana && r.serie_major == null) continue;
@@ -122,6 +133,24 @@ export function aportacionsRfeb(rows: RfebIndividualRow[]): Aportacio[] {
 		});
 	}
 	return out;
+}
+
+export function aportacionsRfebPartides(rows: RfebPartidaRow[]): Aportacio[] {
+	return rows.map((r) => {
+		const res = resultatRfeb(r);
+		return {
+			temporada: temporadaDeText(r.temporada) ?? temporadaDeData(r.data ?? r.data_inici),
+			modalitat: modalitatRfeb(r.modalitat),
+			n: 1,
+			g: +(res === 'G'),
+			e: +(res === 'E'),
+			p: +(res === 'P'),
+			car: r.caramboles,
+			ent: r.entrades,
+			serie: r.serie,
+			partida: true
+		};
+	});
 }
 
 export function aportacionsUmb(proves: UmbProva[]): Aportacio[] {
@@ -245,6 +274,26 @@ export function gamesDeNacional(fcbId: string, rows: NacionalPartidaRow[]): Game
 	});
 }
 
+export function gamesDeRfeb(fcbId: string, rows: RfebPartidaRow[]): GameRowAmbit[] {
+	return rows.map((r) => ({
+		id: `rfeb:${r.prova_id}:${r.fase}:${r.grup}:${r.ordre}`,
+		data_partida: r.data ?? r.data_inici,
+		modalitat_codi: null,
+		competicio: nomProva(r),
+		player1_fcb_id: fcbId,
+		player1_nom: null,
+		caramboles1: r.caramboles,
+		serie_max1: r.serie,
+		player2_fcb_id: r.rival_fcb_id,
+		player2_nom: r.rival,
+		caramboles2: r.rival_caramboles,
+		serie_max2: r.rival_serie,
+		entrades: r.entrades,
+		guanyador_fcb_id: guanyador(fcbId, resultatRfeb(r)),
+		modAmbit: modalitatRfeb(r.modalitat)
+	}));
+}
+
 export function gamesDeUmb(fcbId: string, proves: UmbProva[]): GameRowAmbit[] {
 	const out: GameRowAmbit[] = [];
 	for (const pr of proves) {
@@ -281,7 +330,15 @@ export function tipusCompeticio(ambit: 'cat' | 'esp' | 'int', competicio: string
 		if (/europ/.test(s)) return 'Europeu';
 		return 'Altres';
 	}
-	if (ambit === 'esp') return s.includes('lliga') ? 'Lliga Nacional' : null;
+	if (ambit === 'esp') {
+		if (s.includes('play-off')) return 'Play-off de la Lliga Nacional';
+		if (s.includes('lliga')) return 'Lliga Nacional';
+		if (s.includes('gran premi')) return "Gran Premi d'Espanya";
+		if (s.includes('seleccions')) return 'Seleccions autonòmiques';
+		if (s.includes('per equips')) return "Campionat d'Espanya per equips";
+		if (s.includes("campionat d'espanya")) return "Campionat d'Espanya";
+		return null;
+	}
 	if (s.includes('lliga') || s.includes('liga')) return 'Lliga';
 	if (s.includes('open')) return 'Open';
 	if (s.includes('individual') || s.includes('catalunya')) return 'Individual';
@@ -289,11 +346,17 @@ export function tipusCompeticio(ambit: 'cat' | 'esp' | 'int', competicio: string
 	return null;
 }
 
-/** Els campionats de la RFEB a l'efectivitat: només els que diuen quantes partides es van jugar. */
-export function efectivitatRfeb(rows: RfebIndividualRow[]): { tipus: string; w: number; e: number; l: number; n: number }[] {
+/**
+ * Els campionats de la RFEB a l'efectivitat: només els que diuen quantes partides es van jugar,
+ * i no els de `ambPartides`, que ja hi són partida a partida.
+ */
+export function efectivitatRfeb(
+	rows: RfebIndividualRow[],
+	ambPartides: Set<string> = new Set()
+): { tipus: string; w: number; e: number; l: number; n: number }[] {
 	const map = new Map<string, { w: number; e: number; l: number; n: number }>();
 	for (const r of rows) {
-		if (!r.jugades) continue;
+		if (!r.jugades || ambPartides.has(r.prova_id)) continue;
 		const tipus = r.tipus === 'gpe' ? "Gran Premi d'Espanya" : r.tipus === 'ce' ? "Campionat d'Espanya" : 'Altres';
 		const b = map.get(tipus) ?? { w: 0, e: 0, l: 0, n: 0 };
 		b.w += r.guanyades ?? 0;

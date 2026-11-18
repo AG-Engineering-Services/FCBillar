@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	aportacionsNacional,
 	aportacionsRfeb,
+	aportacionsRfebPartides,
 	aportacionsUmb,
 	filtraModalitat,
 	finestres,
@@ -11,12 +12,13 @@ import {
 	temporadaDeData,
 	efectivitatRfeb,
 	gamesDeNacional,
+	gamesDeRfeb,
 	gamesDeUmb,
 	tipusCompeticio,
 	MOD_TRES_BANDES,
 } from './indicadorsAmbit';
 import { agrupaUmb, type UmbPartidaRow } from './internacional';
-import type { NacionalPartidaRow, RfebIndividualRow } from './nacional';
+import type { NacionalPartidaRow, RfebIndividualRow, RfebPartidaRow } from './nacional';
 
 const avui = new Date(2026, 10, 17); // novembre del 2026: temporada 2026/27
 
@@ -171,5 +173,41 @@ describe('partides en la forma de les catalanes', () => {
 			{ tipus: "Campionat d'Espanya", w: 2, e: 0, l: 1, n: 3 },
 			{ tipus: "Gran Premi d'Espanya", w: 1, e: 1, l: 2, n: 4 }
 		]);
+	});
+});
+
+describe('partides de la RFEB (fulls i fases)', () => {
+	function part(o: Partial<RfebPartidaRow>): RfebPartidaRow {
+		return {
+			fcb_id: '1', prova_id: 'full/x', fase: 'Grups', grup: 'A', ordre: 1, data: null, jugador: 'A', equip: null,
+			caramboles: 40, serie: 6, punts: 2, rival: 'X', equip_rival: null, rival_caramboles: 30, rival_serie: 4,
+			rival_punts: 0, entrades: 35, modalitat: '3b', temporada: '2024-2025', categoria: 'absolut', tipus: 'gpe',
+			titol: 'GPE', lloc: null, data_inici: '2025-03-01', rival_fcb_id: null, ...o
+		};
+	}
+
+	it('compten partida a partida, i la classificació de la mateixa prova ja no', () => {
+		const rows = [part({}), part({ ordre: 2, caramboles: 20, rival_caramboles: 40, punts: 0, rival_punts: 2 })];
+		const aps = [
+			...aportacionsRfebPartides(rows),
+			...aportacionsRfeb([rfeb({ prova_id: 'full/x', jugades: 2, guanyades: 1, perdudes: 1, caramboles: 60, entrades: 70 })], new Set(['full/x']))
+		];
+		const k = indicadors(aps);
+		expect([k.n, k.w, k.l, k.sm]).toEqual([2, 1, 1, 6]);
+		expect(k.mitjana).toBeCloseTo(60 / 70);
+	});
+
+	it('als penals guanya qui diuen els punts', () => {
+		const [g] = gamesDeRfeb('1', [part({ caramboles: 30, rival_caramboles: 30, punts: 0, rival_punts: 2 })]);
+		expect(g!.guanyador_fcb_id).toBe('rival');
+		expect(g!.competicio).toBe("Gran Premi d'Espanya · Tres bandes");
+	});
+
+	it('cada tipus de prova va al seu grup d’efectivitat', () => {
+		expect(tipusCompeticio('esp', "Gran Premi d'Espanya · Tres bandes")).toBe("Gran Premi d'Espanya");
+		expect(tipusCompeticio('esp', 'Play-off de la Lliga Nacional · Tres bandes')).toBe('Play-off de la Lliga Nacional');
+		expect(tipusCompeticio('esp', "Campionat d'Espanya de seleccions · Tres bandes")).toBe('Seleccions autonòmiques');
+		expect(tipusCompeticio('esp', "Campionat d'Espanya · Lliure sub-15")).toBe("Campionat d'Espanya");
+		expect(efectivitatRfeb([rfeb({ prova_id: 'full/x', jugades: 3, guanyades: 3 })], new Set(['full/x']))).toEqual([]);
 	});
 });
