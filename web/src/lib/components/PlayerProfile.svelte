@@ -16,7 +16,12 @@
 		aportacionsRfeb,
 		aportacionsUmb,
 		filtraModalitat,
+		efectivitatRfeb,
 		finestres,
+		gamesDeNacional,
+		gamesDeUmb,
+		tipusCompeticio,
+		type GameRowAmbit,
 		modalitatRfeb,
 		modalitatsDe,
 		modalitatUmb,
@@ -628,7 +633,17 @@
 		};
 	}
 
-	const modGames = $derived(games.filter((g) => selMod == null || g.modalitat_codi === selMod));
+	// Tots els apartats de la fitxa surten d'aquesta llista. A Espanya i Internacional
+	// són les partides de la Lliga Nacional i de la UMB/CEB escrites com les catalanes,
+	// i així els tres àmbits tenen els mateixos apartats calculats igual.
+	const gamesAmbit = $derived<GameRowAmbit[]>(
+		veuEspanya ? gamesDeNacional(fcbId, nacional) : veuInternacional ? gamesDeUmb(fcbId, internacional) : []
+	);
+	const modGames = $derived<GameRow[]>(
+		veuEspanya || veuInternacional
+			? gamesAmbit.filter((g) => modAlt == null || g.modAmbit === modAlt)
+			: games.filter((g) => selMod == null || g.modalitat_codi === selMod)
+	);
 	function computeKpi(gs: GameRow[]) {
 		let car = 0, ent = 0, w = 0, l = 0, t = 0, sm = 0, n = 0;
 		let best: number | null = null, bestN = 0;
@@ -688,14 +703,8 @@
 	// Efectivitat per competició (Lliga / Open / Individual / Copa) sobre la modalitat.
 	// Punts: victòria = 2 (copa 3), empat = 1, derrota = 0.
 	const compBuckets = $derived.by(() => {
-		const kind = (c: string | null): string | null => {
-			const s = (c ?? '').toLowerCase();
-			if (s.includes('lliga') || s.includes('liga')) return 'Lliga';
-			if (s.includes('open')) return 'Open';
-			if (s.includes('individual') || s.includes('catalunya')) return 'Individual';
-			if (s.includes('copa')) return 'Copa';
-			return null;
-		};
+		const ambitClau = veuEspanya ? 'esp' : veuInternacional ? 'int' : 'cat';
+		const kind = (c: string | null) => tipusCompeticio(ambitClau, c);
 		const map = new Map<string, { w: number; e: number; l: number; n: number }>();
 		for (const g of modGames) {
 			const p = persp(g);
@@ -708,6 +717,12 @@
 			else if (p.won) b.w++;
 			else b.l++;
 		}
+		// Dels campionats d'Espanya només hi ha els totals de cada jugador.
+		if (veuEspanya)
+			for (const r of efectivitatRfeb(individualsLlista)) {
+				const b = map.get(r.tipus) ?? { w: 0, e: 0, l: 0, n: 0 };
+				map.set(r.tipus, { w: b.w + r.w, e: b.e + r.e, l: b.l + r.l, n: b.n + r.n });
+			}
 		return [...map.entries()]
 			.map(([tipus, b]) => {
 				const winVal = tipus === 'Copa' ? 3 : 2;
@@ -1333,23 +1348,7 @@
 			)}
 			<p class="mb-3 hidden text-sm font-medium print:block">Modalitat: {modAlt ?? '—'}</p>
 		{/if}
-		<div class="profile-root lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start print:block">
-			<div class="min-w-0">
-				{@render targetesIndicadors(kpiAmbit.historic, kpiAmbit.actual, ambitAnterior, false)}
-				{#if veuEspanya}
-					{@render campionatsEspanya()}
-				{/if}
-			</div>
-			<div class="min-w-0">
-				{#if veuEspanya}
-					{@render lligaNacional()}
-				{:else}
-					{@render provesInternacionals()}
-				{/if}
-			</div>
-		</div>
-	{:else}
-	{#if modalitats.length > 1}
+	{:else if modalitats.length > 1}
 		{@render selectorModalitat(
 			modalitats.map((m) => ({ id: m.codi, nom: m.nom })),
 			selMod,
@@ -1368,12 +1367,16 @@
 	{:else}
 		<div class="profile-root lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start print:block">
 			<div class="min-w-0">
-			{@render targetesIndicadors(kpi, seasonKpi, prevSeasonKpi.n ? prevSeasonKpi : null, true)}
+			{#if veuEspanya || veuInternacional}
+				{@render targetesIndicadors(kpiAmbit.historic, kpiAmbit.actual, ambitAnterior, false)}
+			{:else}
+				{@render targetesIndicadors(kpi, seasonKpi, prevSeasonKpi.n ? prevSeasonKpi : null, true)}
+			{/if}
 			{#if serieFilter}
 				<p class="mb-2 px-1 text-[11px] text-blue-600 dark:text-blue-400">Partides amb la sèrie màxima ({kpi.sm}). Torna a tocar «Sèrie màx» per desfer.</p>
 			{/if}
 
-		{#if currentPos != null}
+		{#if !veuEspanya && !veuInternacional && currentPos != null}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<!-- La finestra no és 15 a totes les modalitats (tres bandes 15, la resta
 				     10) i els no definitius en tenen menys: el nombre surt de les
@@ -1455,7 +1458,7 @@
 			</div>
 		{/if}
 
-		{#if openRank.length}
+		{#if !veuEspanya && !veuInternacional && openRank.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rànquing d'Opens 3 Bandes</div>
 				<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -1479,7 +1482,7 @@
 			</div>
 		{/if}
 
-		{#if openRankFem.length}
+		{#if !veuEspanya && !veuInternacional && openRankFem.length}
 			<div class="mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 p-3 ring-1 ring-rose-200 dark:ring-rose-900/50">
 				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-rose-400 dark:text-rose-400">
 					Rànquing Circuit Català Tres Bandes Femení
@@ -1505,7 +1508,7 @@
 			</div>
 		{/if}
 
-		{#if palmaresBySeason.length}
+		{#if !veuEspanya && !veuInternacional && palmaresBySeason.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Palmarès individual</div>
 				<div class="space-y-3">
@@ -1588,7 +1591,7 @@
 		{/if}
 
 		<!-- Rendiment per nivell d'oponent (aranya, per modalitat) -->
-		{#if selMod != null && ratingBuckets.some((b) => b.wins + b.losses > 0)}
+		{#if !veuEspanya && !veuInternacional && selMod != null && ratingBuckets.some((b) => b.wins + b.losses > 0)}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-center justify-between">
 					<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -1643,7 +1646,7 @@
 			</div>
 		{/if}
 
-		{#if mitjanaChart}
+		{#if !veuEspanya && !veuInternacional && mitjanaChart}
 			{#if selIdx != null && rankHist[selIdx]}
 				<div class="mb-2 flex items-center justify-center gap-3 rounded-lg bg-slate-900 dark:bg-slate-700 px-3 py-1.5 text-xs text-white">
 					<span class="font-semibold">{dateFromSeq(rankHist[selIdx].num_seq)}</span>
@@ -1886,7 +1889,11 @@
 			</div>
 		{/if}
 
-		{#if clubGroups.length}
+		{#if veuEspanya}
+			<!-- On la fitxa catalana té els clubs: el que es mira després de l'anàlisi. -->
+			{@render campionatsEspanya()}
+		{/if}
+		{#if !veuEspanya && !veuInternacional && clubGroups.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Clubs</div>
 				<div class="flex flex-wrap gap-1.5">
@@ -1902,6 +1909,11 @@
 
 			</div>
 			<div class="min-w-0">
+			{#if veuEspanya}
+				{@render lligaNacional()}
+			{:else if veuInternacional}
+				{@render provesInternacionals()}
+			{:else}
 			{#if copaPend.length && !rivalSel}
 				<div class="mb-3 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 p-3">
 					<div class="mb-1.5 text-2xs font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300">
@@ -2013,10 +2025,10 @@
 		{:else if modGames.length > 60}
 			<p class="px-1 py-3 text-center text-[11px] text-slate-500 dark:text-slate-400 print:hidden">{modGames.length} partides</p>
 		{/if}
+			{/if}
 
 			</div>
 		</div>
-	{/if}
 	{/if}
 {/if}
 

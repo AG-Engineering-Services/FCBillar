@@ -2,6 +2,7 @@
 // Espanya i Internacional, amb les mateixes xifres que ensenya Catalunya però
 // calculats només amb les dades de cada àmbit.
 
+import type { GameRow } from './db';
 import { resultatUmb, type UmbProva } from './internacional';
 import { resultatPartida, type NacionalPartidaRow, type RfebIndividualRow } from './nacional';
 
@@ -204,4 +205,102 @@ export function modalitatsDe(claus: string[]): OpcioModalitat[] {
 
 export function filtraModalitat(aps: Aportacio[], mod: string | null): Aportacio[] {
 	return mod == null ? aps : aps.filter((a) => a.modalitat === mod);
+}
+
+// --- Partides d'Espanya i Internacional en la forma de les catalanes ----------
+//
+// Tots els apartats de la fitxa catalana (millor partida, rivals destacats,
+// mitjana mòbil, distribució…) surten d'una llista de `GameRow` vista des del
+// jugador. Escrivint les partides de la Lliga Nacional i de la UMB/CEB de la
+// mateixa manera, els tres àmbits tenen els mateixos apartats calculats igual.
+
+/** Una partida d'un altre àmbit, amb la modalitat amb què s'agrupa a l'àmbit. */
+export type GameRowAmbit = GameRow & { modAmbit: string };
+
+/** Guanyador: el jugador, el rival (`'rival'`) o ningú si és empat. */
+function guanyador(fcbId: string, res: 'G' | 'E' | 'P'): string | null {
+	return res === 'G' ? fcbId : res === 'P' ? 'rival' : null;
+}
+
+export function gamesDeNacional(fcbId: string, rows: NacionalPartidaRow[]): GameRowAmbit[] {
+	return rows.map((r) => {
+		const res = resultatPartida(r.caramboles, r.caramboles_rival);
+		return {
+			id: `nac:${r.temporada}:${r.divisio}:${r.grup}:${r.jornada}:${r.ordre_encontre}:${r.ordre}`,
+			data_partida: r.data,
+			modalitat_codi: null,
+			competicio: 'Lliga Nacional',
+			player1_fcb_id: fcbId,
+			player1_nom: null,
+			caramboles1: r.caramboles,
+			serie_max1: null,
+			player2_fcb_id: r.rival_fcb_id,
+			player2_nom: r.rival_nom_fcb ?? r.rival,
+			caramboles2: r.caramboles_rival,
+			serie_max2: null,
+			entrades: r.entrades,
+			guanyador_fcb_id: guanyador(fcbId, res),
+			modAmbit: MOD_TRES_BANDES
+		};
+	});
+}
+
+export function gamesDeUmb(fcbId: string, proves: UmbProva[]): GameRowAmbit[] {
+	const out: GameRowAmbit[] = [];
+	for (const pr of proves) {
+		for (const r of pr.partides) {
+			out.push({
+				id: `umb:${r.esdeveniment_id}:${r.fase}:${r.grup}:${r.ordre}`,
+				data_partida: pr.data ?? r.data_inici,
+				modalitat_codi: null,
+				competicio: pr.nom,
+				player1_fcb_id: fcbId,
+				player1_nom: null,
+				caramboles1: r.caramboles,
+				serie_max1: r.serie,
+				player2_fcb_id: r.rival_fcb_id,
+				player2_nom: r.rival,
+				caramboles2: r.rival_caramboles,
+				serie_max2: null,
+				entrades: r.entrades,
+				// A sets, i amb penals, guanya qui diuen els punts, no les caramboles.
+				guanyador_fcb_id: guanyador(fcbId, resultatUmb(r)),
+				modAmbit: modalitatUmb(pr.disciplina)
+			});
+		}
+	}
+	return out;
+}
+
+/** El grup d'«Efectivitat per competició» on va una competició de cada àmbit. */
+export function tipusCompeticio(ambit: 'cat' | 'esp' | 'int', competicio: string | null): string | null {
+	const s = (competicio ?? '').toLowerCase();
+	if (ambit === 'int') {
+		if (/world cup|coupe du monde|copa del m/.test(s)) return 'Copa del Món';
+		if (/world championship|world games|mundial/.test(s)) return 'Mundial';
+		if (/europ/.test(s)) return 'Europeu';
+		return 'Altres';
+	}
+	if (ambit === 'esp') return s.includes('lliga') ? 'Lliga Nacional' : null;
+	if (s.includes('lliga') || s.includes('liga')) return 'Lliga';
+	if (s.includes('open')) return 'Open';
+	if (s.includes('individual') || s.includes('catalunya')) return 'Individual';
+	if (s.includes('copa')) return 'Copa';
+	return null;
+}
+
+/** Els campionats de la RFEB a l'efectivitat: només els que diuen quantes partides es van jugar. */
+export function efectivitatRfeb(rows: RfebIndividualRow[]): { tipus: string; w: number; e: number; l: number; n: number }[] {
+	const map = new Map<string, { w: number; e: number; l: number; n: number }>();
+	for (const r of rows) {
+		if (!r.jugades) continue;
+		const tipus = r.tipus === 'gpe' ? "Gran Premi d'Espanya" : r.tipus === 'ce' ? "Campionat d'Espanya" : 'Altres';
+		const b = map.get(tipus) ?? { w: 0, e: 0, l: 0, n: 0 };
+		b.w += r.guanyades ?? 0;
+		b.e += r.empatades ?? 0;
+		b.l += r.perdudes ?? 0;
+		b.n += r.jugades;
+		map.set(tipus, b);
+	}
+	return [...map].map(([tipus, b]) => ({ tipus, ...b }));
 }

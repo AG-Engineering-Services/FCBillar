@@ -8,7 +8,12 @@ import {
 	indicadors,
 	modalitatsDe,
 	temporadaActual,
-	temporadaDeData
+	temporadaDeData,
+	efectivitatRfeb,
+	gamesDeNacional,
+	gamesDeUmb,
+	tipusCompeticio,
+	MOD_TRES_BANDES,
 } from './indicadorsAmbit';
 import { agrupaUmb, type UmbPartidaRow } from './internacional';
 import type { NacionalPartidaRow, RfebIndividualRow } from './nacional';
@@ -131,5 +136,40 @@ describe('modalitat', () => {
 	it('una prova sense partides agafa la modalitat del nom', () => {
 		const [pr] = agrupaUmb([], [{ fcb_id: '1', esdeveniment_id: 9, esdeveniment: 'European Championship 3-Cushion', lloc: null, data_inici: '2019-05-01', posicio: 5, ronda: null, mitjana: 1, participants: 24 }]);
 		expect(pr.disciplina).toBe('3 bandes');
+	});
+});
+
+describe('partides en la forma de les catalanes', () => {
+	it('Lliga Nacional: des del jugador, amb el rival i el guanyador', () => {
+		const [g] = gamesDeNacional('716', [nac({ caramboles: 40, caramboles_rival: 31, entrades: 30, rival: 'X', rival_fcb_id: '9' })]);
+		expect([g.player1_fcb_id, g.player2_fcb_id, g.caramboles1, g.caramboles2, g.entrades]).toEqual(['716', '9', 40, 31, 30]);
+		expect([g.guanyador_fcb_id, g.competicio, g.modAmbit]).toEqual(['716', 'Lliga Nacional', MOD_TRES_BANDES]);
+		const [p] = gamesDeNacional('716', [nac({ caramboles: 20, caramboles_rival: 40 })]);
+		expect(p.guanyador_fcb_id).toBe('rival');
+		const [e] = gamesDeNacional('716', [nac({ caramboles: 40, caramboles_rival: 40 })]);
+		expect(e.guanyador_fcb_id).toBeNull();
+	});
+
+	it('UMB: a sets guanya qui diuen els punts, encara que faci menys caramboles', () => {
+		const proves = agrupaUmb([umb({ caramboles: 58, rival_caramboles: 59, punts: 2, rival_punts: 0, serie: 9 })], []);
+		const [g] = gamesDeUmb('716', proves);
+		expect([g.guanyador_fcb_id, g.serie_max1, g.caramboles1, g.caramboles2]).toEqual(['716', 9, 58, 59]);
+	});
+
+	it('efectivitat per competició de cada àmbit', () => {
+		expect(tipusCompeticio('int', 'World Cup 3-Cushion')).toBe('Copa del Món');
+		expect(tipusCompeticio('int', 'World Championship 3-Cushion Juniors')).toBe('Mundial');
+		expect(tipusCompeticio('int', 'European Championship 3-Cushion U25')).toBe('Europeu');
+		expect(tipusCompeticio('esp', 'Lliga Nacional')).toBe('Lliga Nacional');
+		expect(tipusCompeticio('cat', 'Open de Mataró')).toBe('Open');
+		const ef = efectivitatRfeb([
+			rfeb({ tipus: 'ce', jugades: 3, guanyades: 2, empatades: 0, perdudes: 1 }),
+			rfeb({ tipus: 'gpe', jugades: 4, guanyades: 1, empatades: 1, perdudes: 2 }),
+			rfeb({ tipus: 'ce', jugades: null })
+		]);
+		expect(ef).toEqual([
+			{ tipus: "Campionat d'Espanya", w: 2, e: 0, l: 1, n: 3 },
+			{ tipus: "Gran Premi d'Espanya", w: 1, e: 1, l: 2, n: 4 }
+		]);
 	});
 });
