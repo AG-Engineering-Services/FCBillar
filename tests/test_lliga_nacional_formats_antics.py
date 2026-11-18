@@ -84,3 +84,15 @@ def test_honor_2021_jornades_concentrades():
 def test_la_temporada_de_la_carpeta_de_la_web_vella():
     assert temporada_de_la_carpeta(Path("x/noticias2016")) == "2016-2017"
     assert temporada_de_la_carpeta(Path("fonts/nacional/2025-2026")) is None
+
+
+def test_primera_2017_amb_un_equip_retirat():
+    # «8 C. DE ANTEQUERA RETIRADO» no porta números: la classificació no s'ha
+    # d'acabar abans d'ell, i el seu encontre (tot a zero, sense jugadors) no es
+    # va jugar.
+    j = llegeix_jornada(NACIONAL / "liga_nal_1_j1_1718.pdf")
+    assert j.data == date(2017, 10, 14)
+    a = next(g for g in j.grups if g.grup == "A")
+    assert len(a.classificacio) == 7
+    assert [(e.local, e.visitant) for e in a.encontres][0] == ("C.B. MURCIA", "C.B. SEVILLA")
+    assert all("ANTEQUERA" not in e.local + e.visitant for e in a.encontres)

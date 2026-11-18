@@ -279,6 +279,11 @@ def _classificacio(
         if len(numeros) != 9 or not all(
             _RE_ENTER.match(p.text) or _RE_DECIMAL.match(p.text) for p in numeros
         ):
+            # Un equip retirat queda a la taula sense números («8 C. DE ANTEQUERA
+            # RETIRADO»): és la seva última fila, no la primera de sota.
+            if files and re.search(r"\bRETIRAD[OA]S?$", _text(linia)):
+                final = linia[0].y
+                continue
             # La primera línia que ja no és una fila de la taula l'acaba, tret de
             # les que només porten el rètol del grup, que hi van intercalades.
             if files and not _es_al_marge(linia, x_equip):
@@ -349,7 +354,15 @@ def _encontre(paraules: list[_Paraula], on: str) -> EncontreNacional | None:
     if not paraules:
         return None
     enters = [p for p in paraules if _RE_ENTER.match(p.text)]
+    # Un encontre amb un equip retirat surt tot a zero i sense jugadors: no es va
+    # jugar (Primera 2017-18, «C. DE ANTEQUERA RETIRADO»).
+    if enters and all(p.text == "0" for p in enters):
+        return None
     cols = _columnes(enters)
+    if len(cols) > 3:
+        # Els zeros de l'encontre del costat, si és d'un equip retirat i no porta
+        # noms, poden caure dins d'aquesta meitat: no són d'aquest encontre.
+        cols = [c for c in cols if not all(p.text == "0" for p in c)]
     if len(cols) != 3:
         raise FormatDesconegut(
             f"{on}: esperava tres columnes de números (caramboles, entrades, caramboles) "

@@ -132,6 +132,10 @@ def carrega(conn, carpetes: list[Path], abans_de: str) -> list[Resultat]:
                     else:
                         cjugs.append((f, divisio))
                     continue
+                if f not in llegits:
+                    # Play-offs i fases d'ascens: no es llegeixen (vegeu `tots`).
+                    out.append(Resultat(str(f), "saltat", "play-off o fase"))
+                    continue
                 llegit = llegits[f]
                 if isinstance(llegit, FormatDesconegut):
                     out.append(Resultat(str(f), "error", str(llegit)[:160]))
