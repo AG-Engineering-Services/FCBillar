@@ -19,10 +19,10 @@ from fcbillar.umb import (
     es_equips,
     llegeix_equips,
     llegeix_jugadors,
+    llegeix_partides,
     llegeix_prova,
     noms_de_la_llista_d_equips,
     separa_nom,
-    llegeix_partides,
     text_sets,
 )
 from fcbillar.umb_carrega import carrega, disciplina_de, resum
@@ -471,10 +471,22 @@ def test_sets_el_total_es_el_de_davant_de_la_mitjana():
     ps, errs = llegeix_partides(GRUPS_A_SETS, set(), "Q")
     assert not errs
     a, b = ps[0].a, ps[0].b
-    assert (a.jugador, a.caramboles, a.entrades, a.punts, a.serie) == ("MANCINI Giorgio", 30, 21, 2, 6)
+    assert (a.jugador, a.caramboles, a.entrades, a.punts, a.serie) == (
+        "MANCINI Giorgio",
+        30,
+        21,
+        2,
+        6,
+    )
     assert a.sets == [(15, 14), (15, 7)]
     # La diferència de sets negativa («-2») no es pren per la sèrie.
-    assert (b.caramboles, b.entrades, b.punts, b.serie, b.sets) == (18, 20, 0, 7, [(8, 13), (10, 7)])
+    assert (b.caramboles, b.entrades, b.punts, b.serie, b.sets) == (
+        18,
+        20,
+        0,
+        7,
+        [(8, 13), (10, 7)],
+    )
     # Tres sets: el perdedor de la partida pot guanyar-ne un.
     assert ps[1].a.sets == [(12, 10), (15, 17), (15, 9)]
     assert text_sets(ps[1].b.sets) == "15/11,13/16,8/9"
