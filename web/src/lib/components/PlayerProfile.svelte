@@ -10,7 +10,7 @@
 		rfebIndividualsDelJugador,
 		umbDelJugador
 	} from '$lib/db';
-	import { agrupaUmb, resultatUmb, textSets, type UmbProva } from '$lib/internacional';
+	import { agrupaUmb, resultatSets, resultatUmb, type UmbProva } from '$lib/internacional';
 	import {
 		aportacionsNacional,
 		aportacionsRfeb,
@@ -2258,6 +2258,7 @@
 								<tbody>
 									{#each pr.partides as r (r.fase + r.grup + r.ordre)}
 										{@const res = resultatUmb(r)}
+										{@const sets = resultatSets(r)}
 										<tr class="border-b border-slate-100 dark:border-slate-800 last:border-b-0">
 											<td class="w-8 px-2 py-2 text-center sm:px-3">
 												<span class="inline-block w-6 rounded text-center text-xs font-bold {res === 'E'
@@ -2273,9 +2274,19 @@
 													<div class="truncate text-sm leading-tight">{r.rival}</div>
 												{/if}
 												<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">{r.fase}{r.grup ? ` · Grup ${r.grup}` : ''}{r.serie ? ` · S.M. ${r.serie}` : ''}</div>
-												{#if textSets(r)}<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{textSets(r)}</div>{/if}
+												{#if sets}<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.caramboles ?? '—'}–{r.rival_caramboles ?? '—'} car. en total</div>{/if}
 											</td>
-											<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{r.caramboles ?? '—'}–{r.rival_caramboles ?? '—'}</td>
+											<td class="whitespace-nowrap px-2 py-2 text-right align-top font-mono text-sm tabular-nums sm:px-3">
+												{#if sets}
+													<!-- A sets guanya qui en guanya més: el marcador és el dels sets, i a sota cada set. -->
+													<div class="font-semibold">{sets.jo}–{sets.rival} <span class="font-sans text-[11px] font-normal text-slate-500 dark:text-slate-400">sets</span></div>
+													<ol class="mt-0.5 text-[11px] leading-snug text-slate-600 dark:text-slate-300" aria-label="Resultat de cada set">
+														{#each sets.detall as set, i (i)}<li>{set}</li>{/each}
+													</ol>
+												{:else}
+													{r.caramboles ?? '—'}–{r.rival_caramboles ?? '—'}
+												{/if}
+											</td>
 											<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400 sm:px-3">
 												{r.caramboles != null && r.entrades ? `${(r.caramboles / r.entrades).toFixed(3).replace('.', ',')} · ${r.entrades} ent.` : '—'}
 											</td>
