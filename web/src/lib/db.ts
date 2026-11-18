@@ -692,19 +692,31 @@ export async function umbDelJugador(
 ): Promise<{ partides: UmbPartidaRow[]; classificacions: UmbClassificacioRow[] }> {
   const partides: UmbPartidaRow[] = [];
   const TRAM = 1000;
+  const BASE =
+    "fcb_id,esdeveniment_id,esdeveniment,disciplina,lloc,data_inici,fase,grup,ordre,caramboles,entrades,punts,serie,rival,rival_caramboles,rival_punts,rival_fcb_id";
+  // Les columnes de sets són noves a la vista: si encara no hi són, es llegeix sense.
+  let columnes = `${BASE},sets,rival_sets`;
   for (let des = 0; ; des += TRAM) {
-    const { data, error } = await db
+    let r = await db
       .from("umb_partides_fitxa")
-      .select(
-        "fcb_id,esdeveniment_id,esdeveniment,disciplina,lloc,data_inici,fase,grup,ordre,caramboles,entrades,punts,serie,rival,rival_caramboles,rival_punts,rival_fcb_id",
-      )
+      .select(columnes)
       .eq("fcb_id", fcbId)
       .order("esdeveniment_id")
       .order("ordre")
       .range(des, des + TRAM - 1);
-    if (error) throw error;
-    partides.push(...((data ?? []) as UmbPartidaRow[]));
-    if ((data ?? []).length < TRAM) break;
+    if (r.error && columnes !== BASE) {
+      columnes = BASE;
+      r = await db
+        .from("umb_partides_fitxa")
+        .select(columnes)
+        .eq("fcb_id", fcbId)
+        .order("esdeveniment_id")
+        .order("ordre")
+        .range(des, des + TRAM - 1);
+    }
+    if (r.error) throw r.error;
+    partides.push(...((r.data ?? []) as unknown as UmbPartidaRow[]));
+    if ((r.data ?? []).length < TRAM) break;
   }
   const { data, error } = await db
     .from("umb_classificacions_fitxa")

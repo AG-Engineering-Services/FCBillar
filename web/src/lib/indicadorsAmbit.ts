@@ -1,0 +1,207 @@
+// Indicadors de la fitxa (Històric, Temporada actual, Temporada anterior) per a
+// Espanya i Internacional, amb les mateixes xifres que ensenya Catalunya però
+// calculats només amb les dades de cada àmbit.
+
+import { resultatUmb, type UmbProva } from './internacional';
+import { resultatPartida, type NacionalPartidaRow, type RfebIndividualRow } from './nacional';
+
+/** Una partida, o el total d'un campionat, amb el que aporta als indicadors. */
+export interface Aportacio {
+	/** Any en què comença la temporada (2025 per a 2025/26), o null si no se sap. */
+	temporada: number | null;
+	modalitat: string;
+	/** Partides jugades: 1 per partida, `jugades` per a un campionat, 0 si només en sabem la mitjana. */
+	n: number;
+	g: number;
+	e: number;
+	p: number;
+	car: number | null;
+	ent: number | null;
+	serie: number | null;
+	/** Cert si és una partida concreta: només aquestes poden ser la millor mitjana. */
+	partida: boolean;
+}
+
+export interface Indicadors {
+	n: number;
+	w: number;
+	t: number;
+	l: number;
+	mitjana: number;
+	sm: number | null;
+	pct: number;
+	best: number | null;
+	bestN: number;
+	/** Campionats sense partides publicades: només han comptat per a la mitjana. */
+	nomesMitjana: number;
+}
+
+/** Any en què comença la temporada d'una data: l'1 d'agost canvia. */
+export function temporadaDeData(data: string | null | undefined): number | null {
+	const m = /^(\d{4})-(\d{2})/.exec(data ?? '');
+	if (!m) return null;
+	return Number(m[2]) >= 8 ? Number(m[1]) : Number(m[1]) - 1;
+}
+
+/** '2025-2026' o '2025/26' -> 2025. */
+export function temporadaDeText(t: string | null | undefined): number | null {
+	const m = /^(\d{4})\s*[-/]/.exec(t ?? '');
+	return m ? Number(m[1]) : null;
+}
+
+export function temporadaActual(avui: Date = new Date()): number {
+	return avui.getMonth() + 1 >= 8 ? avui.getFullYear() : avui.getFullYear() - 1;
+}
+
+export const MOD_TRES_BANDES = 'Tres bandes';
+export const MOD_ALTRES = 'Altres';
+
+const MOD_RFEB: Record<string, string> = {
+	'3b': MOD_TRES_BANDES,
+	banda: 'Banda',
+	lliure: 'Lliure',
+	'47_2': 'Quadre',
+	'71_2': 'Quadre',
+	artistic: 'Artístic',
+	'5q': 'Cinc quilles'
+};
+const MOD_UMB: Record<string, string> = {
+	'3 bandes': MOD_TRES_BANDES,
+	'1 banda': 'Banda',
+	'5 quilles': 'Cinc quilles',
+	quadre: 'Quadre',
+	artistic: 'Artístic',
+	lliure: 'Lliure',
+	combinada: 'Combinada'
+};
+
+export function modalitatRfeb(modalitat: string): string {
+	return MOD_RFEB[modalitat] ?? MOD_ALTRES;
+}
+export function modalitatUmb(disciplina: string | null): string {
+	return (disciplina && MOD_UMB[disciplina]) || MOD_ALTRES;
+}
+
+export function aportacionsNacional(rows: NacionalPartidaRow[]): Aportacio[] {
+	return rows.map((r) => {
+		const res = resultatPartida(r.caramboles, r.caramboles_rival);
+		return {
+			temporada: temporadaDeText(r.temporada) ?? temporadaDeData(r.data),
+			modalitat: MOD_TRES_BANDES,
+			n: 1,
+			g: +(res === 'G'),
+			e: +(res === 'E'),
+			p: +(res === 'P'),
+			car: r.caramboles,
+			ent: r.entrades,
+			serie: null,
+			partida: true
+		};
+	});
+}
+
+/** La RFEB només publica el total de cada campionat: sense `jugades` només en surt la mitjana. */
+export function aportacionsRfeb(rows: RfebIndividualRow[]): Aportacio[] {
+	const out: Aportacio[] = [];
+	for (const r of rows) {
+		const jugades = r.jugades ?? 0;
+		const teMitjana = r.caramboles != null && !!r.entrades;
+		if (!jugades && !teMitjana && r.serie_major == null) continue;
+		out.push({
+			temporada: temporadaDeText(r.temporada) ?? temporadaDeData(r.data_inici),
+			modalitat: modalitatRfeb(r.modalitat),
+			n: jugades,
+			g: jugades ? (r.guanyades ?? 0) : 0,
+			e: jugades ? (r.empatades ?? 0) : 0,
+			p: jugades ? (r.perdudes ?? 0) : 0,
+			car: r.caramboles,
+			ent: r.entrades,
+			serie: r.serie_major,
+			partida: false
+		});
+	}
+	return out;
+}
+
+export function aportacionsUmb(proves: UmbProva[]): Aportacio[] {
+	const out: Aportacio[] = [];
+	for (const pr of proves) {
+		for (const r of pr.partides) {
+			const res = resultatUmb(r);
+			out.push({
+				temporada: temporadaDeData(pr.data ?? r.data_inici),
+				modalitat: modalitatUmb(pr.disciplina),
+				n: 1,
+				g: +(res === 'G'),
+				e: +(res === 'E'),
+				p: +(res === 'P'),
+				car: r.caramboles,
+				ent: r.entrades,
+				serie: r.serie,
+				partida: true
+			});
+		}
+	}
+	return out;
+}
+
+export function indicadors(aps: Aportacio[]): Indicadors {
+	let n = 0, w = 0, t = 0, l = 0, car = 0, ent = 0, nomesMitjana = 0;
+	let sm: number | null = null;
+	let best: number | null = null;
+	let bestN = 0;
+	for (const a of aps) {
+		n += a.n;
+		w += a.g;
+		t += a.e;
+		l += a.p;
+		if (!a.n && a.car != null && a.ent) nomesMitjana++;
+		if (a.car != null && a.ent) {
+			car += a.car;
+			ent += a.ent;
+		}
+		if (a.serie != null) sm = Math.max(sm ?? 0, a.serie);
+		if (a.partida && a.car != null && a.ent) {
+			const m = a.car / a.ent;
+			if (best == null || m > best + 1e-9) {
+				best = m;
+				bestN = 1;
+			} else if (Math.abs(m - best) < 1e-9) bestN++;
+		}
+	}
+	return { n, w, t, l, mitjana: ent ? car / ent : 0, sm, pct: n ? Math.round((100 * w) / n) : 0, best, bestN, nomesMitjana };
+}
+
+export interface FinestresIndicadors {
+	historic: Indicadors;
+	actual: Indicadors;
+	anterior: Indicadors;
+}
+
+/** Les tres targetes. Sense temporada ni data, l'aportació només compta a l'Històric. */
+export function finestres(aps: Aportacio[], avui: Date = new Date()): FinestresIndicadors {
+	const t = temporadaActual(avui);
+	return {
+		historic: indicadors(aps),
+		actual: indicadors(aps.filter((a) => a.temporada === t)),
+		anterior: indicadors(aps.filter((a) => a.temporada === t - 1))
+	};
+}
+
+export interface OpcioModalitat {
+	clau: string;
+	n: number;
+}
+
+/** Modalitats amb dades, la més jugada primer. */
+export function modalitatsDe(claus: string[]): OpcioModalitat[] {
+	const m = new Map<string, number>();
+	for (const c of claus) m.set(c, (m.get(c) ?? 0) + 1);
+	return [...m]
+		.map(([clau, n]) => ({ clau, n }))
+		.sort((a, b) => b.n - a.n || a.clau.localeCompare(b.clau));
+}
+
+export function filtraModalitat(aps: Aportacio[], mod: string | null): Aportacio[] {
+	return mod == null ? aps : aps.filter((a) => a.modalitat === mod);
+}
