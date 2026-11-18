@@ -503,6 +503,7 @@ def llegeix_jornada(cami: str | Path) -> Jornada:
         ("Primera", _llegeix_jornada_primera),
         ("Honor", llegeix_jornada_honor),
         ("Segona", llegeix_jornada_segona),
+        ("Segona a dues columnes", llegeix_jornada_segona_dues_columnes),
     ):
         try:
             return lector(cami)
@@ -600,6 +601,9 @@ def llegeix_jornada_honor(cami: str | Path) -> Jornada:
         m, d = _RE_JORNADA.search(text), _RE_DATA_NUMERICA.search(text)
         if m:
             quan = date(int(d.group(3)), int(d.group(2)), int(d.group(1))) if d else None
+            # Fins al 2018 la data anava en lletres: «8 de octubre de 2016».
+            if quan is None and (dl := _RE_DATA.search(text)) and dl.group(2).lower() in _MESOS:
+                quan = date(int(dl.group(3)), _MESOS[dl.group(2).lower()], int(dl.group(1)))
             capcalera = (int(m.group(1)), quan)
             break
     if capcalera is None:
@@ -741,6 +745,197 @@ _RE_TOTALS_SEGONA = re.compile(r"^(\d+,\d+) (\d+) (\d+) (\d+) (\d+,\d+)$")
 _RE_GRUP = re.compile(r"^GRUPO ([A-Z])$")
 
 
+_RE_PROM_GRAL = re.compile(r"Prom\. Gral: (\d+,\d+) Prom\. Gral: (\d+,\d+)")
+
+
+def llegeix_jornada_segona_dues_columnes(cami: str | Path) -> Jornada:
+    """Segona Divisió 2016-17: dos grups per PDF i cada grup a dues columnes.
+
+    A l'esquerra la classificació del grup; a la dreta els encontres, amb el
+    format de la Divisió d'Honor però tancats amb «Prom. Gral: …» en lloc d'una
+    línia de totals. Llegint el text de corregut les dues columnes es barregen:
+    es separen per la posició de cada paraula. Cada grup comença on l'esquerra
+    porta la capçalera «# Equipo», i la seva lletra és la que hi ha sola al marge.
+    La classificació no es llegeix: a la base ja hi ha la final, de la pàgina de
+    jugadors.
+    """
+    import pdfplumber
+
+    with pdfplumber.open(str(cami)) as pdf:
+        pagines = [(_paraules(p), float(p.width)) for p in pdf.pages]
+    if not pagines:
+        raise FormatDesconegut("El PDF no té cap pàgina.")
+
+    capcalera = None
+    for linia in _linies(pagines[0][0])[:4]:
+        text = _text(linia)
+        if (m := _RE_JORNADA.search(text)) and (d := _RE_DATA.search(text)):
+            if d.group(2).lower() in _MESOS:
+                quan = date(int(d.group(3)), _MESOS[d.group(2).lower()], int(d.group(1)))
+                capcalera = (int(m.group(1)), quan)
+                break
+    if capcalera is None:
+        raise FormatDesconegut("No trobo la línia «JORNADA … de … de …» a dalt de tot.")
+
+    grups: dict[str, GrupDeJornada] = {}
+    for paraules, amplada in pagines:
+        tall = amplada * 0.44
+        esquerra = _linies([p for p in paraules if p.x0 < tall])
+        dreta = _linies([p for p in paraules if p.x0 >= tall])
+        inicis = [li[0].y for li in esquerra if _text(li).startswith("# Equipo")]
+        if not inicis:
+            continue
+        fi = min((p.y for p in paraules if p.text == "MEJORES"), default=float("inf"))
+        # La lletra del grup és sola a la seva línia, al marge («A»); no la «J» de
+        # la capçalera de la classificació.
+        lletres = sorted(
+            (li[0] for li in esquerra if len(li) == 1 and re.fullmatch(r"[A-Z]", li[0].text)),
+            key=lambda p: p.y,
+        )
+
+        def lletra(i: int) -> str:
+            fins = inicis[i + 1] if i + 1 < len(inicis) else fi
+            for p in lletres:
+                if inicis[i] <= p.y < fins:
+                    return p.text
+            raise FormatDesconegut("No trobo la lletra d'un grup.")
+
+        obert: tuple[re.Match, list[PartidaNacional], int] | None = None
+        for linia in dreta:
+            y = linia[0].y
+            if y >= fi or y < inicis[0] - 5:
+                continue
+            i = max(k for k, inici in enumerate(inicis) if inici <= y + 5)
+            text = _text(linia)
+            if obert is None:
+                if e := _RE_ENCONTRE_HONOR.match(text):
+                    obert = (e, [], i)
+                continue
+            capcal, partides, gi = obert
+            if p := _RE_PARTIDA_HONOR.match(text):
+                partides.append(
+                    PartidaNacional(
+                        ordre=len(partides) + 1,
+                        jugador_local=p.group(1),
+                        caramboles_local=int(p.group(2)),
+                        jugador_visitant=p.group(4),
+                        caramboles_visitant=int(p.group(3)),
+                        entrades=int(p.group(5)),
+                    )
+                )
+                continue
+            if t := _RE_PROM_GRAL.search(text):
+                if not partides:
+                    raise FormatDesconegut(f"L'encontre de {capcal.group(1)} no té partides.")
+                g = lletra(gi)
+                grups.setdefault(g, GrupDeJornada(grup=g)).encontres.append(
+                    EncontreNacional(
+                        local=capcal.group(1),
+                        visitant=capcal.group(4),
+                        punts_local=int(capcal.group(2)),
+                        punts_visitant=int(capcal.group(3)),
+                        caramboles_local=sum(x.caramboles_local for x in partides),
+                        caramboles_visitant=sum(x.caramboles_visitant for x in partides),
+                        entrades=sum(x.entrades for x in partides),
+                        mitjana_local=_decimal(t.group(1)),
+                        mitjana_visitant=_decimal(t.group(2)),
+                        partides=partides,
+                    )
+                )
+                obert = None
+        if obert is not None:
+            raise FormatDesconegut(f"L'encontre de {obert[0].group(1)} no es tanca.")
+    if not grups:
+        raise FormatDesconegut("No hi ha cap grup a dues columnes.")
+    return Jornada(numero=capcalera[0], data=capcalera[1], grups=list(grups.values()))
+
+
+_RE_JORNADES_CONCENTRADES = re.compile(r"JORNADAS\s+(\d+)\D+?(?:y|a)\s+(\d+)", re.IGNORECASE)
+#: «liga_nal_h_j10y11.pdf», «liga_nal_h_j12a16.pdf»: unes quantes jornades de cop.
+RE_FITXER_CONCENTRAT = re.compile(r"_j\d+(?:y|a)\d+", re.IGNORECASE)
+
+
+def llegeix_jornades_concentrades(cami: str | Path) -> list[Jornada]:
+    """Divisió d'Honor 2020-21: unes quantes jornades jugades de cop a cada seu.
+
+    Cada pàgina és una seu («JORNADAS 10ª y 11ª, 22/05/2021 - SEDE: VIC») amb els
+    seus encontres seguits, amb el format de sempre. El PDF no diu de quina
+    jornada és cada encontre: és de la primera mentre cap dels equips no ha jugat
+    encara a aquella seu, i quan un hi torna, de la següent. Un «DESCANSA»
+    compta com a jornada jugada per a l'equip que descansa. Totes les seus
+    s'ajunten per jornada, que és com es desen.
+    """
+    import pdfplumber
+
+    per_jornada: dict[int, list[EncontreNacional]] = {}
+    dates: dict[int, date | None] = {}
+    with pdfplumber.open(str(cami)) as pdf:
+        for pagina in pdf.pages:
+            linies = [li.strip() for li in (pagina.extract_text() or "").split("\n") if li.strip()]
+            cap = next((m for t in linies[:4] if (m := _RE_JORNADES_CONCENTRADES.search(t))), None)
+            if cap is None:
+                continue
+            primera, darrera = int(cap.group(1)), int(cap.group(2))
+            d = _RE_DATA_NUMERICA.search(cap.string)
+            quan = date(int(d.group(3)), int(d.group(2)), int(d.group(1))) if d else None
+            jornada, jugats = primera, set()
+            obert: tuple[re.Match, list[PartidaNacional]] | None = None
+            descansa = False
+
+            def compta(equips: set[str]) -> int:
+                nonlocal jornada, jugats
+                if equips & jugats:
+                    jornada, jugats = min(jornada + 1, darrera), set()
+                jugats |= equips
+                return jornada
+
+            for text in linies:
+                if e := _RE_ENCONTRE_HONOR.match(text):
+                    equips = {e.group(1).strip(), e.group(4).strip()}
+                    descansa = "DESCANSA" in equips
+                    compta(equips - {"DESCANSA"})
+                    obert = None if descansa else (e, [])
+                    continue
+                if descansa or obert is None:
+                    continue
+                capcal, partides = obert
+                if p := _RE_PARTIDA_HONOR.match(text):
+                    partides.append(
+                        PartidaNacional(
+                            ordre=len(partides) + 1,
+                            jugador_local=p.group(1),
+                            caramboles_local=int(p.group(2)),
+                            jugador_visitant=p.group(4),
+                            caramboles_visitant=int(p.group(3)),
+                            entrades=int(p.group(5)),
+                        )
+                    )
+                    continue
+                if (t := _RE_TOTALS_HONOR.match(text)) and partides:
+                    per_jornada.setdefault(jornada, []).append(
+                        EncontreNacional(
+                            local=capcal.group(1),
+                            visitant=capcal.group(4),
+                            punts_local=int(capcal.group(2)),
+                            punts_visitant=int(capcal.group(3)),
+                            caramboles_local=int(t.group(2)),
+                            caramboles_visitant=int(t.group(3)),
+                            entrades=int(t.group(5)),
+                            mitjana_local=_decimal(t.group(1)),
+                            mitjana_visitant=_decimal(t.group(4)),
+                            partides=partides,
+                        )
+                    )
+                    dates.setdefault(jornada, quan)
+                    obert = None
+    if not per_jornada:
+        raise FormatDesconegut("No hi ha cap encontre de jornades concentrades.")
+    return [
+        Jornada(numero=n, data=dates[n], grups=[GrupDeJornada(grup=None, encontres=e)])
+        for n, e in sorted(per_jornada.items())
+    ]
+
+
 def llegeix_jornada_segona(cami: str | Path) -> Jornada:
     """Llegeix el PDF d'una jornada de la Segona Divisió (un o més grups)."""
     import pdfplumber
@@ -821,7 +1016,13 @@ def llegeix_jornada_segona(cami: str | Path) -> Jornada:
             grups[grup].encontres.append(_encontre_segona(capcal, files, t))
             capcal, files = None, []
             continue
-        sense_numeros = not any(_RE_ENTER.match(p.text) or _RE_DECIMAL.match(p.text) for p in linia)
+        # La capçalera és la línia dels dos equips: sense decimals ni els tres
+        # números seguits d'una partida. Un número sol pot ser del nom de l'equip
+        # («C.B. BAEZA 2»), i abans això la feia passar per una partida.
+        te_partida = any(
+            all(_RE_ENTER.match(p.text) for p in linia[i : i + 3]) for i in range(len(linia) - 2)
+        )
+        sense_numeros = not te_partida and not any(_RE_DECIMAL.match(p.text) for p in linia)
         if capcal is None or (sense_numeros and not files):
             # Sense partides encara, una línia sense números és la capçalera; si
             # n'arriba una altra, la primera era un rètol de dalt de pàgina.
