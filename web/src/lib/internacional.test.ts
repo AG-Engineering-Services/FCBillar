@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { agrupaUmb, resultatUmb, type UmbPartidaRow } from './internacional';
+import { agrupaUmb, resultatSets, resultatUmb, textSets, type UmbPartidaRow } from './internacional';
 
 function p(o: Partial<UmbPartidaRow>): UmbPartidaRow {
 	return {
@@ -30,5 +30,23 @@ describe('internacional', () => {
 		expect(v.mitjana).toBe(1);
 		expect(v.classificacio?.posicio).toBe(17);
 		expect(v.any).toBe('2024');
+	});
+});
+
+describe('sets', () => {
+	const sets = { sets: '9/11,4/7,15/11,15/4,15/7', rival_sets: '15/11,15/8,10/10,9/4,10/6' };
+	it('compta els sets pels caramboles de cada set', () => {
+		expect(resultatSets(sets)).toEqual({ jo: 3, rival: 2, detall: ['9-15', '4-15', '15-10', '15-9', '15-10'] });
+		expect(textSets(sets)).toBe('Sets 3-2 · 9-15, 4-15, 15-10, 15-9, 15-10');
+	});
+	it('no es a sets si falten les columnes o no quadren', () => {
+		expect(resultatSets({})).toBeNull();
+		expect(resultatSets({ sets: null, rival_sets: null })).toBeNull();
+		expect(resultatSets({ sets: '1/2,3/4', rival_sets: '1/2' })).toBeNull();
+		expect(textSets({ sets: 'x', rival_sets: 'y' })).toBe('');
+	});
+	it('sense punts, guanya qui guanya mes sets encara que faci menys caramboles', () => {
+		expect(resultatUmb({ punts: null, rival_punts: null, caramboles: 53, rival_caramboles: 59, ...sets })).toBe('G');
+		expect(resultatUmb({ punts: 0, rival_punts: 2, caramboles: 53, rival_caramboles: 59, ...sets })).toBe('P');
 	});
 });
