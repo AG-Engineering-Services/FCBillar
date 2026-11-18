@@ -33,7 +33,6 @@
 		divisioNacional,
 		grafiaPerEquip,
 		mitjanaNacional,
-		nomProva,
 		normalitzaEquip,
 		posicioProva,
 		resultatPartida,
@@ -295,11 +294,6 @@
 	});
 
 	let individuals = $state<RfebIndividualRow[]>([]);
-	const individualsPerTemporada = $derived.by(() => {
-		const m = new Map<string, RfebIndividualRow[]>();
-		for (const r of individualsLlista) m.set(r.temporada, [...(m.get(r.temporada) ?? []), r]);
-		return [...m];
-	});
 	$effect(() => {
 		const id = fcbId;
 		let viu = true;
@@ -1889,10 +1883,6 @@
 			</div>
 		{/if}
 
-		{#if veuEspanya}
-			<!-- On la fitxa catalana té els clubs: el que es mira després de l'anàlisi. -->
-			{@render campionatsEspanya()}
-		{/if}
 		{#if !veuEspanya && !veuInternacional && clubGroups.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Clubs</div>
@@ -2061,10 +2051,11 @@
 <!-- Les mateixes tres targetes a Catalunya, Espanya i Internacional; a Catalunya la sèrie màxima filtra les partides. -->
 {#snippet targetesIndicadors(k: TargetaKpi, s: TargetaKpi, p: TargetaKpi | null, serieBtn: boolean)}
 	{@const mit = (x: TargetaKpi) => (x.mitjana ? x.mitjana.toFixed(3) : '—')}
+	{@const pct = (x: TargetaKpi) => (x.w + x.t + x.l ? x.pct + '%' : '—')}
 	<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 		<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Històric</div>
 		<div class="grid grid-cols-5 gap-2">
-			{#each [['Partides', k.n, ''], ['Mitjana', mit(k), ''], ['Sèrie màx', k.sm ?? '—', 'sm'], ['% vict.', k.pct + '%', ''], [k.bestN > 1 ? `Millor mitj. ×${k.bestN}` : 'Millor mitj.', k.best != null ? k.best.toFixed(3) : '—', '']] as [label, val, key]}
+			{#each [['Partides', k.n, ''], ['Mitjana', mit(k), ''], ['Sèrie màx', k.sm ?? '—', 'sm'], ['% vict.', pct(k), ''], [k.bestN > 1 ? `Millor mitj. ×${k.bestN}` : 'Millor mitj.', k.best != null ? k.best.toFixed(3) : '—', '']] as [label, val, key]}
 				{#if key === 'sm' && serieBtn}
 					<!-- L'única xifra que fa alguna cosa: filtra les partides amb la sèrie màxima -->
 					<button type="button" onclick={() => (serieFilter = !serieFilter)} aria-pressed={serieFilter} class="min-h-11 rounded-lg py-0.5 text-center underline decoration-dotted underline-offset-4 {serieFilter ? 'ring-2 ring-blue-500' : ''}">
@@ -2084,7 +2075,7 @@
 	<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 		<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Temporada actual</div>
 		<div class="grid grid-cols-4 gap-2">
-			{#each [['Partides', s.n], ['Mitjana', mit(s)], ['Sèrie màx', s.sm ?? '—'], ['% vict.', s.pct + '%']] as [label, val]}
+			{#each [['Partides', s.n], ['Mitjana', mit(s)], ['Sèrie màx', s.sm ?? '—'], ['% vict.', pct(s)]] as [label, val]}
 				<div class="text-center">
 					<div class="font-mono text-base font-bold tabular-nums">{val}</div>
 					<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
@@ -2097,7 +2088,7 @@
 		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 			<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Temporada anterior</div>
 			<div class="grid grid-cols-4 gap-2">
-				{#each [['Partides', p.n], ['Mitjana', mit(p)], ['Sèrie màx', p.sm ?? '—'], ['% vict.', p.pct + '%']] as [label, val]}
+				{#each [['Partides', p.n], ['Mitjana', mit(p)], ['Sèrie màx', p.sm ?? '—'], ['% vict.', pct(p)]] as [label, val]}
 					<div class="text-center">
 						<div class="font-mono text-base font-bold tabular-nums">{val}</div>
 						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
@@ -2116,6 +2107,11 @@
 			<p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
 				{#if rivalSel && nacional.length}Cap partida de la Lliga Nacional contra {rivalSel.nom}.{:else if modAlt != null && modAlt !== MOD_TRES_BANDES}La Lliga Nacional només es juga a tres bandes.{:else}Cap partida de la Lliga Nacional.{/if}
 			</p>
+			{#if individuals.length && !rivalSel}
+				<p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+					Dels Campionats d'Espanya i els GPE la RFEB només publica la classificació final, sense les partides: compten a les targetes i a l'efectivitat.
+				</p>
+			{/if}
 		</div>
 	{:else}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
@@ -2189,47 +2185,6 @@
 					</button>
 				{/if}
 			</div>
-	{/if}
-{/snippet}
-
-{#snippet campionatsEspanya()}
-	{#if !individualsLlista.length || rivalSel}
-		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Campionats d'Espanya i GPE</div>
-			<p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-				{#if rivalSel}La RFEB no publica les partides dels campionats: no hi surt cap rival.{:else}Cap campionat d'Espanya ni GPE en aquesta modalitat.{/if}
-			</p>
-		</div>
-	{:else}
-		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Campionats d'Espanya i GPE</div>
-			<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Classificacions finals de la RFEB.</p>
-			<div class="space-y-3">
-				{#each individualsPerTemporada as [temporada, proves] (temporada)}
-					<section>
-						<h3 class="mb-1 text-sm font-semibold leading-tight">{temporadaCurta(temporada)}</h3>
-						<ul class="divide-y divide-slate-100 overflow-hidden rounded-lg ring-1 ring-slate-200 dark:divide-slate-800 dark:ring-slate-800">
-							{#each proves as r (r.prova_id)}
-								<li class="flex items-start justify-between gap-3 px-3 py-2">
-									<div class="min-w-0">
-										<div class="text-sm font-medium leading-tight">{nomProva(r)}</div>
-										<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
-											{posicioProva(r)}{#if r.ronda} · {r.ronda}{/if}{#if r.jugades} · {r.jugades} PJ {r.guanyades ?? 0}-{r.empatades ?? 0}-{r.perdudes ?? 0}{/if}{#if r.serie_major} · S.M. {r.serie_major}{/if}{#if r.lloc} · {r.lloc}{/if}
-										</div>
-									</div>
-									<div class="shrink-0 text-right">
-										<div class="font-mono text-sm font-bold tabular-nums">{mitjanaNacional(r.mitjana)}</div>
-										{#if r.caramboles != null && r.entrades}
-											<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.caramboles}/{r.entrades}</div>
-										{/if}
-									</div>
-								</li>
-							{/each}
-						</ul>
-					</section>
-				{/each}
-			</div>
-		</div>
 	{/if}
 {/snippet}
 
