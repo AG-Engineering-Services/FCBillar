@@ -135,6 +135,34 @@ export function aportacionsRfeb(rows: RfebIndividualRow[], ambPartides: Set<stri
 	return out;
 }
 
+/**
+ * Les proves on les partides del jugador poden substituir el total oficial.
+ *
+ * Moltes proves només en tenen una part (una fase que no s'ha pogut llegir).
+ * Les partides compten als indicadors només si sumen exactament les caramboles,
+ * les entrades i (si la RFEB les diu) les partides de la classificació del
+ * jugador; si no, mana el total oficial. Una prova amb partides i sense
+ * classificació hi és sempre: no hi ha cap total que les desmenteixi.
+ */
+export function provesAmbPartidesCompletes(rows: RfebPartidaRow[], individuals: RfebIndividualRow[]): Set<string> {
+	const suma = new Map<string, { n: number; car: number; ent: number }>();
+	for (const r of rows) {
+		const t = suma.get(r.prova_id) ?? { n: 0, car: 0, ent: 0 };
+		t.n++;
+		t.car += r.caramboles;
+		t.ent += r.entrades;
+		suma.set(r.prova_id, t);
+	}
+	const oficials = new Map(individuals.map((r) => [r.prova_id, r]));
+	const out = new Set<string>();
+	for (const [prova, t] of suma) {
+		const o = oficials.get(prova);
+		if (!o || (o.caramboles === t.car && o.entrades === t.ent && (o.jugades == null || o.jugades === t.n)))
+			out.add(prova);
+	}
+	return out;
+}
+
 export function aportacionsRfebPartides(rows: RfebPartidaRow[]): Aportacio[] {
 	return rows.map((r) => {
 		const res = resultatRfeb(r);

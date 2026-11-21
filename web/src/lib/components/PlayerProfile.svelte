@@ -16,6 +16,7 @@
 		aportacionsNacional,
 		aportacionsRfeb,
 		aportacionsRfebPartides,
+		provesAmbPartidesCompletes,
 		aportacionsUmb,
 		filtraModalitat,
 		efectivitatRfeb,
@@ -311,6 +312,8 @@
 		};
 	});
 	const provesAmbPartides = $derived(new Set(rfebPartides.map((r) => r.prova_id)));
+	// Per a les targetes: només les proves on les partides quadren amb el total oficial.
+	const provesCompletes = $derived(provesAmbPartidesCompletes(rfebPartides, individuals));
 
 	let internacional = $state<UmbProva[]>([]);
 	$effect(() => {
@@ -443,8 +446,8 @@
 			: veuEspanya
 				? [
 						...aportacionsNacional(nacional),
-						...aportacionsRfebPartides(rfebPartides),
-						...aportacionsRfeb(individuals, provesAmbPartides)
+						...aportacionsRfebPartides(rfebPartides.filter((r) => provesCompletes.has(r.prova_id))),
+						...aportacionsRfeb(individuals, provesCompletes)
 					]
 				: []
 	);
@@ -714,7 +717,11 @@
 		const ambitClau = veuEspanya ? 'esp' : veuInternacional ? 'int' : 'cat';
 		const kind = (c: string | null) => tipusCompeticio(ambitClau, c);
 		const map = new Map<string, { w: number; e: number; l: number; n: number }>();
-		for (const g of modGames) {
+		// Les partides d'una prova de la RFEB que no quadren amb el total oficial no
+		// hi compten: hi compta el total (més avall), com a les targetes.
+		const deProvaIncompleta = (id: string) =>
+			id.startsWith('rfeb:') && !provesCompletes.has(id.slice(5).split(':')[0]!);
+		for (const g of modGames.filter((g) => !deProvaIncompleta(g.id))) {
 			const p = persp(g);
 			const k = kind(p.comp);
 			if (!k) continue;
@@ -727,7 +734,7 @@
 		}
 		// Dels campionats d'Espanya només hi ha els totals de cada jugador.
 		if (veuEspanya)
-			for (const r of efectivitatRfeb(individualsLlista, provesAmbPartides)) {
+			for (const r of efectivitatRfeb(individualsLlista, provesCompletes)) {
 				const b = map.get(r.tipus) ?? { w: 0, e: 0, l: 0, n: 0 };
 				map.set(r.tipus, { w: b.w + r.w, e: b.e + r.e, l: b.l + r.l, n: b.n + r.n });
 			}

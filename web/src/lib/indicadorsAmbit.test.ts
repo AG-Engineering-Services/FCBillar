@@ -3,6 +3,7 @@ import {
 	aportacionsNacional,
 	aportacionsRfeb,
 	aportacionsRfebPartides,
+	provesAmbPartidesCompletes,
 	aportacionsUmb,
 	filtraModalitat,
 	finestres,
@@ -209,5 +210,20 @@ describe('partides de la RFEB (fulls i fases)', () => {
 		expect(tipusCompeticio('esp', "Campionat d'Espanya de seleccions · Tres bandes")).toBe('Seleccions autonòmiques');
 		expect(tipusCompeticio('esp', "Campionat d'Espanya · Lliure sub-15")).toBe("Campionat d'Espanya");
 		expect(efectivitatRfeb([rfeb({ prova_id: 'full/x', jugades: 3, guanyades: 3 })], new Set(['full/x']))).toEqual([]);
+	});
+});
+
+describe('partides o total oficial', () => {
+	const p = (o: Partial<RfebPartidaRow>): RfebPartidaRow =>
+		({ prova_id: 'a', caramboles: 40, entrades: 30, ...o }) as RfebPartidaRow;
+
+	it('les partides substitueixen el total només si hi sumen exactament', () => {
+		const rows = [p({}), p({ caramboles: 30 }), p({ prova_id: 'b' }), p({ prova_id: 'full/x' })];
+		const set = provesAmbPartidesCompletes(rows, [
+			rfeb({ prova_id: 'a', caramboles: 70, entrades: 60, jugades: 2 }),
+			// En falta una: mana el total oficial.
+			rfeb({ prova_id: 'b', caramboles: 80, entrades: 60, jugades: 2 })
+		]);
+		expect([...set].sort()).toEqual(['a', 'full/x']);
 	});
 });
