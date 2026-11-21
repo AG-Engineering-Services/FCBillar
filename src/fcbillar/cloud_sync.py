@@ -272,9 +272,62 @@ def publish_rankings(
     counts["ranking_entries"] = _upsert(
         sb, "ranking_entries", entries, "modalitat_codi,num_seq,player_fcb_id", prog
     )
+    counts["ranking_entries_retirades"] = _retira_entrades_sobrants(sb, entries, prog)
 
     conn.close()
     return counts
+
+
+#: Quants rànquings recents de cada modalitat es revisen per retirar-ne files.
+#: La federació corregeix els rànquings dels últims mesos, no els de fa anys, i
+#: mirar-los tots serien centenars de consultes cada nit.
+_RANQUINGS_A_REVISAR = 3
+
+
+def _retira_entrades_sobrants(sb, entries: list[dict], prog: Progress) -> int:
+    """Treu del núvol les files dels rànquings recents que la base ja no té.
+
+    La publicació només afegia: quan la federació treia un jugador d'un rànquing
+    ja publicat, la fila vella es quedava al núvol i deixava dos jugadors a la
+    mateixa posició (el 126, el novembre de 2026).
+    """
+    per_ranquing: dict[tuple[int, int], set[str]] = {}
+    for e in entries:
+        per_ranquing.setdefault((e["modalitat_codi"], e["num_seq"]), set()).add(
+            str(e["player_fcb_id"])
+        )
+    recents: list[tuple[int, int]] = []
+    for mod in {m for m, _ in per_ranquing}:
+        nums = sorted((n for m, n in per_ranquing if m == mod), reverse=True)
+        recents += [(mod, n) for n in nums[:_RANQUINGS_A_REVISAR]]
+    fora = 0
+    for mod, num in recents:
+        locals_ = per_ranquing[(mod, num)]
+        al_nuvol = _totes_amb(
+            lambda mod=mod, num=num: (
+                sb.table("ranking_entries")
+                .select("player_fcb_id")
+                .eq("modalitat_codi", mod)
+                .eq("num_seq", num)
+            )
+        )
+        sobrants = sorted({str(f["player_fcb_id"]) for f in al_nuvol} - locals_)
+        # Un rànquing sencer que no quadra vol dir una base a mitges, no correccions.
+        if len(sobrants) > max(20, len(locals_) // 10):
+            prog(
+                "warn",
+                f"ranking_entries {mod}/{num}: {len(sobrants)} files del núvol no són a la base "
+                "local; massa per retirar-les sense mirar: NO s'ha retirat res.",
+            )
+            continue
+        for fcb in sobrants:
+            sb.table("ranking_entries").delete(returning=_MINIM).eq("modalitat_codi", mod).eq(
+                "num_seq", num
+            ).eq("player_fcb_id", fcb).execute()
+        fora += len(sobrants)
+    if fora:
+        prog("ok", f"ranking_entries: {fora} files retirades dels rànquings recents")
+    return fora
 
 
 def publish_provisional_ranking(
