@@ -1287,6 +1287,23 @@ def _fitxer_de_publicacio() -> Path:
     return get_settings().db_path.with_name("darrera_publicacio.json")
 
 
+@app.command("dedup-games")
+def dedup_games_cmd() -> None:
+    """Fusiona les partides que hi són dues vegades amb ids diferents.
+
+    Passa quan un jugador amb fitxa provisional rep la llicència: les seves
+    partides velles tornen a sortir amb un id nou. Es queda la que porta més
+    context, i els enllaços amb els rànquings hi passen. Idempotent.
+    """
+    conn = ensure_schema(get_settings().db_path)
+    fusions = Repository(conn).dedup_games()
+    conn.commit()
+    conn.close()
+    for queda, marxa in fusions:
+        console.print(f"  {marxa} → {queda}")
+    console.print(f"{len(fusions)} partides duplicades fusionades")
+
+
 @app.command("publish-cloud")
 def publish_cloud_cmd(
     lleuger: bool = typer.Option(

@@ -401,6 +401,7 @@ def test_merge_clubs_moves_equips_and_creates_alias(repo: Repository) -> None:
 def test_merge_clubs_collapses_duplicate_equips(repo: Repository) -> None:
     """Si target ja té equip A i source també, els games del source es reassignen."""
     from datetime import date as _date
+
     from fcbillar.models import Game, Player
 
     repo.upsert_club(Club(fcb_id="SOURCE", nom="SOURCE"))
@@ -700,3 +701,59 @@ def test_un_encontre_sense_equips_no_es_duplica_en_reingerir(repo) -> None:
     assert len(files) == 1, "l'encontre no es pot duplicar"
     assert files[0][0] == eid
     assert files[0][1] is not None and files[0][2] == visitant
+
+
+def _partida(p2: str) -> Game:
+    return Game(
+        data_partida=date(2025, 4, 12),
+        competicio_nom="LLIGA",
+        modalitat_codi_fcb=1,
+        player1_fcb_id="1125",
+        player2_fcb_id=p2,
+        caramboles1=15,
+        caramboles2=20,
+        entrades=50,
+    )
+
+
+def test_un_jugador_que_rep_la_llicencia_no_duplica_les_seves_partides(repo: Repository) -> None:
+    """El 25/10/2026 se'n van inserir 36 de duplicades: l'id es calcula amb el fcb_id."""
+    repo.upsert_player(Player(fcb_id="1125", nom="TAPIA MORDILLO, ANTONI"))
+    repo.upsert_player(Player(fcb_id="name:OBANDO QUINTERO, CARLOS", nom="OBANDO QUINTERO, CARLOS"))
+    vell = repo.upsert_game(_partida("name:OBANDO QUINTERO, CARLOS"))
+    repo.conn.execute(
+        "UPDATE players SET fcb_id = '1910' WHERE fcb_id = 'name:OBANDO QUINTERO, CARLOS'"
+    )
+
+    nou = repo.upsert_game(_partida("1910"))
+
+    assert nou == vell != _partida("1910").id_natural
+    assert repo.counts()["games"] == 1
+
+
+def test_dedup_games_fusiona_i_passa_els_enllacos(repo: Repository) -> None:
+    repo.upsert_player(Player(fcb_id="1125", nom="TAPIA MORDILLO, ANTONI"))
+    repo.upsert_player(Player(fcb_id="1910", nom="OBANDO QUINTERO, CARLOS"))
+    repo.upsert_ranking(Ranking(num_seq=121, modalitat_codi_fcb=1, url="", format_url="datahome"))
+    repo.upsert_game(_partida("1910"))
+    original = _partida("1910").id_natural
+    # Una còpia amb un altre id, com les que van entrar el 25/10.
+    repo.conn.execute(
+        "INSERT INTO games (id, data_partida, competicio_id, modalitat_id, player1_id, player2_id, "
+        "caramboles1, caramboles2, entrades, encontre_lliga_id, created_at) "
+        "SELECT 'copia', data_partida, competicio_id, modalitat_id, player2_id, player1_id, "
+        "caramboles2, caramboles1, entrades, NULL, '2026-10-25 12:59:35' FROM games"
+    )
+    repo.conn.execute("UPDATE games SET serie_max1 = 4 WHERE id = ?", (original,))
+    repo.link_game_to_ranking(
+        RankingGameLink(
+            ranking_num_seq=121, ranking_modalitat=1, game_id="copia", player_fcb_id_origen="1910"
+        )
+    )
+
+    fusions = repo.dedup_games()
+
+    assert fusions == [(original, "copia")]
+    assert repo.counts()["games"] == 1
+    enllacos = repo.conn.execute("SELECT game_id FROM ranking_game_links").fetchall()
+    assert [r[0] for r in enllacos] == [original]

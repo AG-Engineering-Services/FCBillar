@@ -1197,7 +1197,43 @@ def publish_games(
         )
     n = _upsert(sb, "games", games, "id", prog)
     conn.close()
-    return {"games": n}
+    return {
+        "games": n,
+        "games_retirades": _retira_games_sobrants(sb, {g["id"] for g in games}, prog),
+    }
+
+
+#: Més partides de sobra que això al núvol no es retiren: vol dir que la base
+#: local no és la de la reingesta (un PC amb la base a mitges), no que n'hi hagi
+#: tantes d'esborrades.
+_MAX_GAMES_A_RETIRAR = 200
+
+
+def _retira_games_sobrants(sb, locals_: set[str], prog: Progress) -> int:
+    """Treu del núvol les partides que la base local ja no té.
+
+    La publicació només afegia i actualitzava: una partida fusionada amb una
+    altra (`dedup-games`) o reidentificada es quedava al núvol per sempre, i la
+    fitxa la comptava dues vegades.
+    """
+    if not locals_:
+        return 0
+    al_nuvol = {f["id"] for f in _totes_amb(lambda: sb.table("games").select("id").order("id"))}
+    sobrants = sorted(al_nuvol - locals_)
+    if not sobrants:
+        return 0
+    limit = max(_MAX_GAMES_A_RETIRAR, len(al_nuvol) // 100)
+    if len(sobrants) > limit:
+        prog(
+            "warn",
+            f"games: {len(sobrants)} partides del núvol no són a la base local; són massa "
+            f"(més de {limit}) per retirar-les sense mirar: NO s'ha retirat res.",
+        )
+        return 0
+    for i in range(0, len(sobrants), 100):
+        sb.table("games").delete(returning=_MINIM).in_("id", sobrants[i : i + 100]).execute()
+    prog("ok", f"games: {len(sobrants)} partides retirades (ja no són a la base local)")
+    return len(sobrants)
 
 
 def publish_rating_buckets(
