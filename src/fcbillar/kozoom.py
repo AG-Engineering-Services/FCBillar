@@ -54,7 +54,11 @@ def nom_umb(nom: str) -> str:
     """
     paraules = nom.split()
     i = len(paraules)
-    while i > 0 and paraules[i - 1].upper() == paraules[i - 1] and any(c.isalpha() for c in paraules[i - 1]):
+    while (
+        i > 0
+        and paraules[i - 1].upper() == paraules[i - 1]
+        and any(c.isalpha() for c in paraules[i - 1])
+    ):
         i -= 1
     if i == 0 or i == len(paraules):
         return nom.strip()
@@ -140,7 +144,8 @@ def llegeix_partides(html: str) -> tuple[Titol | None, list[Partida], list[Jugad
         (
             t
             for t in sopa.select("table.listing")
-            if "stage" in " ".join(td.get_text(" ").lower() for td in t.select("thead td, thead th"))
+            if "stage"
+            in " ".join(td.get_text(" ").lower() for td in t.select("thead td, thead th"))
         ),
         None,
     )
@@ -194,7 +199,9 @@ def _costats(cols: dict[str, Tag], na: str, nb: str) -> tuple[Costat, Costat] | 
     if car[0] is None or car[1] is None:
         return None
     guanya = [_guanya(p) for p in _parells(punts)] + [False, False]
-    pa, pb = (2, 0) if guanya[0] and not guanya[1] else (0, 2) if guanya[1] and not guanya[0] else (1, 1)
+    pa, pb = (
+        (2, 0) if guanya[0] and not guanya[1] else (0, 2) if guanya[1] and not guanya[0] else (1, 1)
+    )
 
     def costat(i: int, nom: str, punts_: int) -> Costat:
         e = int(ent[i]) if ent[i] is not None else 0
@@ -252,7 +259,9 @@ def _costats_a_sets(
             run = _valors(td)
     if not sets_a:
         return None
-    pa, pb = (2, 0) if guanyats[0] > guanyats[1] else (0, 2) if guanyats[1] > guanyats[0] else (1, 1)
+    pa, pb = (
+        (2, 0) if guanyats[0] > guanyats[1] else (0, 2) if guanyats[1] > guanyats[0] else (1, 1)
+    )
 
     def costat(nom: str, sets: list[tuple[int, int]], i: int, punts: int) -> Costat:
         car = sum(c for c, _ in sets)
@@ -323,7 +332,11 @@ def llegeix_classificacio(html: str) -> tuple[Titol | None, list[Classificat], l
 def enllacos_jugadors(html: str, prova: int) -> list[str]:
     """Els enllaços `players/…/matches.html?event_id=…` d'una classificació."""
     return sorted(
-        set(re.findall(rf'href="(/en/billiard-carom/players/[^"?]+/matches\.html\?event_id={prova})"', html))
+        set(
+            re.findall(
+                rf'href="(/en/billiard-carom/players/[^"?]+/matches\.html\?event_id={prova})"', html
+            )
+        )
     )
 
 
@@ -342,7 +355,12 @@ def de_les_pagines_de_jugador(pagines: list[str]) -> Llegit:
         for p in partides:
             clau = (
                 p.fase,
-                frozenset({(p.a.jugador, p.a.caramboles, p.a.entrades), (p.b.jugador, p.b.caramboles, p.b.entrades)}),
+                frozenset(
+                    {
+                        (p.a.jugador, p.a.caramboles, p.a.entrades),
+                        (p.b.jugador, p.b.caramboles, p.b.entrades),
+                    }
+                ),
             )
             if clau in vistes:
                 continue
