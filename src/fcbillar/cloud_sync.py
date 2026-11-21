@@ -7520,6 +7520,44 @@ def publish_rfeb_partides(
     return counts
 
 
+def publish_palmares(
+    db_path: Path | None = None, on_progress: Progress | None = None
+) -> dict[str, int]:
+    """Puja el palmarès (`palmares_medalles`): medalles de la RFEB i del CEB.
+
+    Es reemplaça per font, competició i categoria: una competició que es torna a
+    llegir no deixa medalles de la lectura anterior. Aquí el reemplaçament és
+    per categoria i no només per competició perquè «Tres bandes» de la RFEB són
+    cinc PDF (absolut, femení, sub-17, sub-21 i sub-25) i llegir-ne un no ha de
+    buidar els altres. Les competicions que la base local no té no es toquen.
+    """
+    prog: Progress = on_progress or (lambda level, msg: None)
+    db_path = db_path or get_settings().db_path
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    taules = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if "palmares_medalles" not in taules:
+        conn.close()
+        prog("warn", "palmarès: sense dades locals (executa `fcbillar palmares`)")
+        return {}
+    files = [dict(r) for r in conn.execute("SELECT * FROM palmares_medalles")]
+    conn.close()
+    if not files:
+        return {}
+    sb = get_client()
+    return {
+        "palmares_medalles": _publica_reemplaçant(
+            sb,
+            "palmares_medalles",
+            files,
+            ("font", "competicio", "categoria", "edicio", "posicio", "jugador"),
+            ("font", "competicio", "categoria"),
+            prog,
+            {(f["font"], f["competicio"], f["categoria"]) for f in files},
+        )
+    }
+
+
 def publish_rfeb_individuals(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:

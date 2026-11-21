@@ -1005,3 +1005,23 @@ CREATE TABLE IF NOT EXISTS umb_fitxes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_umb_jugadors_umb_id ON umb_jugadors (umb_id);
+
+-- Palmarès: campió, subcampió i tercer de cada edició dels campionats d'Espanya
+-- (medallero de la RFEB) i d'Europa (Rolls of Honors del CEB), llegits dels seus
+-- PDF. Els noms són els que escriu la font, sense identificador: el lligam amb la
+-- fitxa del cens es fa a part, pel nom, i només el validat a mà val.
+CREATE TABLE IF NOT EXISTS palmares_medalles (
+    font        TEXT NOT NULL,          -- 'rfeb' o 'ceb'
+    competicio  TEXT NOT NULL,          -- «Tres bandes», «Campionat d'Europa lliure»…
+    categoria   TEXT NOT NULL,          -- absolut, femení, sub-21, júnior…
+    edicio      TEXT NOT NULL,          -- xifra romana (RFEB) o número (CEB)
+    any_edicio  INTEGER,                -- NULL si el PDF no el porta llegible
+    lloc        TEXT,
+    posicio     INTEGER NOT NULL CHECK (posicio BETWEEN 1 AND 3),
+    jugador     TEXT NOT NULL,          -- tal com ho escriu la font
+    pais        TEXT,                   -- només el CEB
+    mitjana     REAL,                   -- a l'artístic és un percentatge
+    PRIMARY KEY (font, competicio, categoria, edicio, posicio, jugador)
+);
+
+CREATE INDEX IF NOT EXISTS idx_palmares_jugador ON palmares_medalles (jugador);
