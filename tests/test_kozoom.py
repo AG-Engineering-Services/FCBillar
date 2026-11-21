@@ -153,3 +153,11 @@ def test_una_partida_llegida_a_dues_fonts_es_desa_un_sol_cop(tmp_path):
     assert treu_repetides(Firmes(conn), ll, titol) == 1
     assert len(ll.partides) == len(partides) - 1
     assert ("KERLS Uwe", 40) not in {(p.a.jugador, p.a.caramboles) for p in ll.partides}
+
+
+def test_la_pagina_mes_alta_de_partides():
+    from fcbillar.kozoom_carrega import _ultima_pagina
+
+    html = '<a href="/en/billiard-carom/results/9984/matches.html?page=2">2</a> <a href="?x"><a href="/en/billiard-carom/results/9984/matches.html?page=3">3</a>'
+    assert _ultima_pagina(html) == 3
+    assert _ultima_pagina("<p>sense paginació</p>") == 1

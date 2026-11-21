@@ -173,28 +173,53 @@ def seleccio(cache: Path) -> list[str]:
     return sorted(triades, key=int)
 
 
+def _ultima_pagina(html: str) -> int:
+    """La pàgina més alta enllaçada des d'una pàgina de partides (`matches.html?page=N`)."""
+    return max((int(n) for n in re.findall(r"matches\.html\?page=(\d+)", html)), default=1)
+
+
+def _fitxers_de_partides(cache: Path, pid: str) -> list[Path]:
+    """`{id}_matches.html` i les pàgines següents (`{id}_matches_p2.html`…), per ordre."""
+    pags = [cache / f"{pid}_matches.html"] + sorted(
+        cache.glob(f"{pid}_matches_p*.html"), key=lambda f: int(f.stem.rsplit("_p", 1)[1])
+    )
+    return [f for f in pags if f.exists()]
+
+
 def descarrega(cache: Path, ids: list[str], espera: float = 1.0) -> dict[str, int]:
-    """Baixa `matches.html` de cada prova o, si no n'hi ha, les pàgines dels jugadors."""
+    """Baixa les partides de cada prova: totes les pàgines de `matches.html` (van de 32 en 32).
+
+    Si en falta alguna pàgina, o la prova no en té, es baixen també les pàgines
+    de partides dels jugadors, que les completen.
+    """
     proves = _proves(cache)
     idx_f = cache / "jugadors.json"
     idx = (
         json.loads(idx_f.read_text(encoding="utf-8")) if idx_f.exists() else indexa_jugadors(cache)
     )
-    compte = {"matches": 0, "jugadors": 0, "res": 0}
+    compte = {"completes": 0, "amb_jugadors": 0, "res": 0}
     with _client() as c:
         for pid in ids:
             p = proves[pid]
-            desti = cache / f"{pid}_matches.html"
+            completa = False
             if "url_matches" in p:
-                if not desti.exists():
-                    desti.write_text(
-                        _get(c, f"{WAYBACK}/web/{p['ts_matches']}id_/{p['url_matches']}"),
-                        encoding="utf-8",
-                    )
+                base = f"{WAYBACK}/web/{p['ts_matches']}id_/{p['url_matches']}"
+                primera = cache / f"{pid}_matches.html"
+                if not primera.exists() or primera.stat().st_size < 2000:
+                    primera.write_text(_get(c, base), encoding="utf-8")
                     time.sleep(espera)
-                if llegeix_partides(desti.read_text(encoding="utf-8"))[1]:
-                    compte["matches"] += 1
-                    continue
+                html = primera.read_text(encoding="utf-8")
+                completa = bool(llegeix_partides(html)[1])
+                for n in range(2, _ultima_pagina(html) + 1):
+                    f = cache / f"{pid}_matches_p{n}.html"
+                    if not f.exists() or f.stat().st_size < 2000:
+                        f.write_text(_get(c, f"{base}?page={n}"), encoding="utf-8")
+                        time.sleep(espera)
+                    if not llegeix_partides(f.read_text(encoding="utf-8"))[1]:
+                        completa = False  # el Wayback no té aquella pàgina
+            if completa:
+                compte["completes"] += 1
+                continue
             pagines = idx.get(pid, [])
             if not pagines:
                 compte["res"] += 1
@@ -204,36 +229,40 @@ def descarrega(cache: Path, ids: list[str], espera: float = 1.0) -> dict[str, in
             for ts, url in pagines:
                 nom = re.search(r"/players/([^/]+)/", url).group(1)
                 f = carpeta / f"{nom}.html"
-                if f.exists():
+                if f.exists() and f.stat().st_size > 2000:
                     continue
                 f.write_text(_get(c, f"{WAYBACK}/web/{ts}id_/{url}"), encoding="utf-8")
                 time.sleep(espera)
-            compte["jugadors"] += 1
+            compte["amb_jugadors"] += 1
     return compte
 
 
 def llegeix_prova(cache: Path, pid: str) -> tuple[Titol | None, Llegit]:
+    """La classificació i totes les partides d'una prova.
+
+    Les partides surten de totes les pàgines de `matches.html` i de les pàgines
+    dels jugadors, si n'hi ha; una partida que surt a més d'un lloc es compta
+    una sola vegada.
+    """
     ll = Llegit()
     titol = None
     f = cache / f"{pid}_rankings.html"
     if f.exists():
         titol, ll.classificacio, ll.jugadors = llegeix_classificacio(f.read_text(encoding="utf-8"))
-    m = cache / f"{pid}_matches.html"
-    partides, jugadors = [], []
-    if m.exists():
-        t, partides, jugadors = llegeix_partides(m.read_text(encoding="utf-8"))
-        titol = titol or t
-    if not partides and (carpeta := cache / "jugadors" / pid).is_dir():
-        pags = [x.read_text(encoding="utf-8") for x in sorted(carpeta.glob("*.html"))]
+    pags = [x.read_text(encoding="utf-8") for x in _fitxers_de_partides(cache, pid)]
+    if titol is None and pags:
+        titol = llegeix_partides(pags[0])[0]
+    if (carpeta := cache / "jugadors" / pid).is_dir():
+        de_jugadors = [x.read_text(encoding="utf-8") for x in sorted(carpeta.glob("*.html"))]
         # La pàgina d'un jugador pot ser d'una altra prova (el Wayback a vegades
         # desa la del desplegable per defecte): només les que porten aquest títol.
         if titol:
-            pags = [h for h in pags if (llegeix_partides(h)[0] or titol) == titol]
-        de_jug = de_les_pagines_de_jugador(pags)
-        partides, jugadors = de_jug.partides, de_jug.jugadors
-    ll.partides = partides
+            de_jugadors = [h for h in de_jugadors if (llegeix_partides(h)[0] or titol) == titol]
+        pags += de_jugadors
+    totes = de_les_pagines_de_jugador(pags)
+    ll.partides = totes.partides
     noms = {j.nom for j in ll.jugadors}
-    ll.jugadors += [j for j in jugadors if j.nom not in noms]
+    ll.jugadors += [j for j in totes.jugadors if j.nom not in noms]
     return titol, ll
 
 
