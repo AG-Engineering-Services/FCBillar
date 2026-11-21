@@ -219,6 +219,218 @@ def _jocs_de_serie(linies: list[str], fase: str) -> list[PartidaFull]:
     return partides
 
 
+# ------------------------------------------- partides costat per costat (2012-2014)
+#
+# Els PDF de fases de banda i quadre del 2012 al 2014 posen dues partides una al
+# costat de l'altra, sense federació:
+#
+#     CAR ENT PROM SM CAR ENT PROM SM
+#     Esteve Mata 100 12,50 33 Carmelo Garcés 100 3,13 17
+#     8 32
+#     Salvador Lacarcel 39 4,88 16 José Luis Peláez 60 1,88 13
+#
+# La línia del mig són les entrades de cada partida. Al davant d'un nom hi pot
+# haver text de la columna del costat («GRUPO 1», «CLASIFICACIÓN», la capçalera
+# de la classificació): es treu.
+
+_RE_TROS = re.compile(
+    r"(?P<nom>[^\W\d_][^\W\d_.'\- ]*(?:[ .'\-]+[^\W\d_][^\W\d_.'\-]*)*)\s+"
+    r"(?P<car>\d{1,3})\s+(?P<prom>\d{1,3},\d{1,3})(?:\s+(?P<sm>\d{1,3}))?(?=\s|$)"
+)
+_RE_ENTRADES = re.compile(r"^\d{1,3}(?:\s+\d{1,3})?$")
+_SOROLL = {
+    "grupo", "clasificacion", "nombre", "fed", "car", "ent", "prom", "ptos", "sm",
+    "lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo", "h", "fase",
+}  # fmt: skip
+
+
+def _sense_accent(t: str) -> str:
+    return unicodedata.normalize("NFKD", t).encode("ascii", "ignore").decode().lower()
+
+
+def _trossos(text: str) -> list[tuple[str, int, float, int | None]]:
+    """Els (nom, caramboles, mitjana, sèrie) d'una línia de jugadors."""
+    if re.search(r"\d+\s*º", text):
+        return []  # una fila de classificació («1º Esteve Mata Cat 300 46 6,52 6»)
+    out = []
+    for m in _RE_TROS.finditer(text):
+        paraules = m.group("nom").split()
+        while paraules and (
+            _sense_accent(paraules[0]).strip(".") in _SOROLL or len(paraules[0]) == 1
+        ):
+            paraules.pop(0)
+        if not paraules:
+            continue
+        sm = int(m.group("sm")) if m.group("sm") else None
+        out.append(
+            (" ".join(paraules), int(m.group("car")), float(m.group("prom").replace(",", ".")), sm)
+        )
+    return out
+
+
+def _quadra(car: int, ent: int, prom: float) -> bool:
+    if ent <= 0:
+        return False
+    if car == 0:
+        return prom == 0
+    decimals = len(f"{prom}".split(".")[1]) if "." in f"{prom}" else 0
+    return abs(car / ent - prom) <= 0.6 * 10 ** -max(decimals, 2) + 1e-9
+
+
+def _costat_per_costat(linies: list[str], fase: str) -> tuple[list[PartidaFull], int]:
+    partides: list[PartidaFull] = []
+    descartats = 0
+    i = 0
+    while i + 2 < len(linies):
+        dalt = _trossos(linies[i])
+        mig = linies[i + 1].strip()
+        if not dalt or not _RE_ENTRADES.match(mig):
+            i += 1
+            continue
+        baix = _trossos(linies[i + 2])
+        entrades = [int(x) for x in mig.split()]
+        if not (len(dalt) == len(baix) == len(entrades)):
+            descartats += 1
+            i += 1
+            continue
+        for (na, ca, pa, sa), (nb, cb, pb, sb), ent in zip(dalt, baix, entrades, strict=True):
+            if not (_quadra(ca, ent, pa) and _quadra(cb, ent, pb)):
+                descartats += 1
+                continue
+            punts = (2, 0) if ca > cb else (0, 2) if cb > ca else (1, 1)
+            partides.append(
+                PartidaFull(
+                    fase=fase,
+                    grup="",
+                    ordre=len(partides) + 1,
+                    jugador_a=na,
+                    caramboles_a=ca,
+                    serie_a=sa if sa is None or sa <= ca else None,
+                    jugador_b=nb,
+                    caramboles_b=cb,
+                    serie_b=sb if sb is None or sb <= cb else None,
+                    entrades=ent,
+                    punts_a=punts[0],
+                    punts_b=punts[1],
+                )
+            )
+        i += 3
+    return partides, descartats
+
+
+# ------------------------------------------------ una fila per jugador (2012-2019)
+#
+# Altres PDF posen cada jugador en una fila amb les caramboles, les entrades, la
+# mitjana, la sèrie i els punts, i les dues files d'una partida una sota l'altra
+# (a vegades amb l'hora, el billar i l'àrbitre entremig):
+#
+#     ESTEVE MATA 250 4 62,500 199 2 1
+#     9:00 1 PERE LLUMÀ
+#     MIQUEL PLANDOLIT 8 4 2,000 3 0 1
+#
+# o dues partides per línia, amb la federació:
+#
+#     Esteve Mata Cat 250 7 35,714 125 2 J. Albert Tornero Val 250 14 17,857 105 2
+#     Jordi Garriga Cat 14 7 2 10 0 Joan Espinasa Cat 238 14 17 57 0
+#
+# Una fila només compta si les caramboles entre les entrades fan la mitjana, i
+# una partida si les dues files tenen les mateixes entrades.
+
+_RE_FILA = re.compile(
+    r"(?P<nom>[^\W\d_][^\W\d_.'\- ]*(?:[ .'\-]+[^\W\d_][^\W\d_.'\-]*)*)\s+"
+    r"(?:\d{2}/\d{2}/\d{2}\s+)?(?P<car>\d{1,3})\s+(?P<ent>\d{1,3})\s+(?P<prom>\d{1,3}(?:,\d{1,3})?)"
+    r"(?:\s+(?P<sm>\d{1,3}))?\s+(?P<pts>[012])(?:\s+\d)?(?=\s|$)"
+)
+
+
+@dataclass
+class _Fila:
+    nom: str
+    fed: str | None
+    car: int
+    ent: int
+    sm: int | None
+
+
+def _nom_i_fed(nom: str) -> tuple[str, str | None]:
+    from fcbillar.rfeb_individuals import normalitza_fed
+
+    paraules = nom.split()
+    while paraules and _sense_accent(paraules[0]).strip(".") in _SOROLL:
+        paraules.pop(0)
+    fed = None
+    if len(paraules) > 2 and len(paraules[-1]) <= 5 and (f := normalitza_fed(paraules[-1])):
+        fed = f
+        paraules.pop()
+    nom = " ".join(paraules)
+    if nom.isupper():
+        nom = nom.title()
+    return nom, fed
+
+
+#: La mateixa fila amb la federació i els punts davant de les caramboles
+#: (sub-17, sub-21 i sub-25 del 2014-15): `2 DAVID FIOL CAT 2 18 50 0,360 3`.
+_RE_FILA_PUNTS_DAVANT = re.compile(
+    r"(?P<nom>[^\W\d_][^\W\d_.'\- ]*(?:[ .'\-]+[^\W\d_][^\W\d_.'\-]*)*)\s+"
+    r"(?P<pts>[012])\s+(?P<car>\d{1,3})\s+(?P<ent>\d{1,3})\s+(?P<prom>\d{1,3},\d{1,3})"
+    r"(?:\s+(?P<sm>\d{1,3}))?(?=\s|$)"
+)
+
+
+def _files(text: str) -> list[_Fila]:
+    if re.search(r"clasif", text, re.I):
+        return []
+    # Una fila de classificació al davant («… 0,670 5 1º»): només compta el que ve després.
+    text = re.split(r"\d+\s*º", text)[-1]
+    out = []
+    trobades = list(_RE_FILA.finditer(text)) or list(_RE_FILA_PUNTS_DAVANT.finditer(text))
+    for m in trobades:
+        car, ent = int(m.group("car")), int(m.group("ent"))
+        if not _quadra(car, ent, float(m.group("prom").replace(",", "."))):
+            continue
+        nom, fed = _nom_i_fed(m.group("nom"))
+        if len(nom) < 4:
+            continue
+        sm = int(m.group("sm")) if m.group("sm") else None
+        out.append(_Fila(nom, fed, car, ent, sm if sm is None or sm <= car else None))
+    return out
+
+
+def _fila_per_jugador(linies: list[str], fase: str) -> tuple[list[PartidaFull], int]:
+    amb = [f for f in (_files(t) for t in linies) if f]
+    partides: list[PartidaFull] = []
+    descartats = 0
+    i = 0
+    while i + 1 < len(amb):
+        dalt, baix = amb[i], amb[i + 1]
+        if len(dalt) == len(baix) and all(a.ent == b.ent for a, b in zip(dalt, baix, strict=True)):
+            for a, b in zip(dalt, baix, strict=True):
+                punts = (2, 0) if a.car > b.car else (0, 2) if b.car > a.car else (1, 1)
+                partides.append(
+                    PartidaFull(
+                        fase=fase,
+                        grup="",
+                        ordre=len(partides) + 1,
+                        jugador_a=a.nom,
+                        caramboles_a=a.car,
+                        serie_a=a.sm,
+                        jugador_b=b.nom,
+                        caramboles_b=b.car,
+                        serie_b=b.sm,
+                        entrades=a.ent,
+                        punts_a=punts[0],
+                        punts_b=punts[1],
+                        equip_a=a.fed,
+                        equip_b=b.fed,
+                    )
+                )
+            i += 2
+        else:
+            descartats += 1
+            i += 1
+    return partides, descartats
+
+
 def llegeix_fase(cami: str | Path) -> tuple[list[PartidaFull], int]:
     """Les partides d'un PDF de fase i quants blocs no s'han pogut llegir."""
     cami = Path(cami)
@@ -229,7 +441,10 @@ def llegeix_fase(cami: str | Path) -> tuple[list[PartidaFull], int]:
         return [], -1  # lletra codificada: no hi ha text per llegir
     if serie := _jocs_de_serie(linies, fase):
         return serie, 0
-    return _parelles(linies, fase)
+    amb_fed = _parelles(linies, fase)
+    # Cada format només llegeix el seu: el que en treu més partides és el del PDF.
+    lectures = [amb_fed, _costat_per_costat(linies, fase), _fila_per_jugador(linies, fase)]
+    return max(lectures, key=lambda r: len(r[0]))
 
 
 def desa_partides(conn: sqlite3.Connection, prova_id: str, partides: list[PartidaFull]) -> None:
