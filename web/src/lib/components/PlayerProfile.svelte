@@ -9,6 +9,8 @@
 		nacionalPartidesDelJugador,
 		rfebIndividualsDelJugador,
 		rfebPartidesDelJugador,
+		palmaresDelJugador,
+		type PalmaresRow,
 		umbDelJugador
 	} from '$lib/db';
 	import { agrupaUmb, resultatUmb, type UmbProva } from '$lib/internacional';
@@ -315,6 +317,37 @@
 	// Per a les targetes: només les proves on les partides quadren amb el total oficial.
 	const provesCompletes = $derived(provesAmbPartidesCompletes(rfebPartides, individuals));
 
+	// Les medalles dels campionats d'Espanya (RFEB) i d'Europa (CEB).
+	let medalles = $state<PalmaresRow[]>([]);
+	$effect(() => {
+		const id = fcbId;
+		let viu = true;
+		medalles = [];
+		if (id)
+			palmaresDelJugador(id)
+				.then((r) => {
+					if (viu) medalles = r;
+				})
+				.catch((e) => console.warn('Palmarès no disponible', e));
+		return () => {
+			viu = false;
+		};
+	});
+	// Per any, del més recent al més antic; les edicions sense any, al final.
+	function medallesPerAny(font: 'rfeb' | 'ceb') {
+		const grups = new Map<string, PalmaresRow[]>();
+		const files = medalles
+			.filter((m) => m.font === font)
+			.sort((a, b) => (b.any_edicio ?? 0) - (a.any_edicio ?? 0) || a.posicio - b.posicio);
+		for (const m of files) {
+			const clau = m.any_edicio != null ? String(m.any_edicio) : 'Sense any';
+			grups.set(clau, [...(grups.get(clau) ?? []), m]);
+		}
+		return [...grups].map(([any, entries]) => ({ any, entries }));
+	}
+	const medallesEsp = $derived(medalles.length ? medallesPerAny('rfeb') : []);
+	const medallesInt = $derived(medalles.length ? medallesPerAny('ceb') : []);
+
 	let internacional = $state<UmbProva[]>([]);
 	$effect(() => {
 		const id = fcbId;
@@ -334,8 +367,10 @@
 	// Catalunya, Espanya i Internacional no es barregen; cada opció surt només si té dades.
 	type Ambit = 'cat' | 'esp' | 'int';
 	let ambit = $state<Ambit>('cat');
-	const teEspanya = $derived(nacional.length > 0 || individuals.length > 0 || rfebPartides.length > 0);
-	const teInternacional = $derived(internacional.length > 0);
+	const teEspanya = $derived(
+		nacional.length > 0 || individuals.length > 0 || rfebPartides.length > 0 || medallesEsp.length > 0
+	);
+	const teInternacional = $derived(internacional.length > 0 || medallesInt.length > 0);
 	const ambits = $derived(
 		(
 			[
@@ -1527,6 +1562,35 @@
 						<div class="font-mono text-lg font-bold tabular-nums">{openFemCur?.punts ?? '—'}</div>
 						<div class="text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">punts</div>
 					</div>
+				</div>
+			</div>
+		{/if}
+
+		{#if (veuEspanya ? medallesEsp : veuInternacional ? medallesInt : []).length}
+			{@const grups = veuEspanya ? medallesEsp : medallesInt}
+			{@const total = grups.reduce((n, g) => n + g.entries.length, 0)}
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+					Palmarès individual · {veuEspanya ? "campionats d'Espanya" : 'campionats internacionals'} · {total}
+				</div>
+				<div class="space-y-3">
+					{#each grups as g}
+						<div>
+							<div class="mb-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{g.any}</div>
+							<ul class="space-y-1">
+								{#each g.entries as m}
+									<li class="flex items-center gap-2 px-1.5 py-1 text-sm">
+										<span class="w-6 shrink-0 text-center font-mono font-bold">{ordinal(m.posicio)}</span>
+										<div class="min-w-0 flex-1">
+											<div class="truncate font-medium">{m.competicio}{m.categoria !== 'absolut' ? ` · ${m.categoria}` : ''}</div>
+											<div class="truncate text-2xs text-slate-500 dark:text-slate-400">Edició {m.edicio}{m.lloc ? ` · ${m.lloc}` : ''}</div>
+										</div>
+										{#if m.mitjana != null}<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{m.mitjana.toLocaleString('ca', { maximumFractionDigits: 3 })}{m.competicio.startsWith('Art') ? ' %' : ''}</span>{/if}
+									</li>
+								{/each}
+							</ul>
+						</div>
+					{/each}
 				</div>
 			</div>
 		{/if}

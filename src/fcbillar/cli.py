@@ -2761,6 +2761,22 @@ def publish_rfeb_partides_cmd() -> None:
         raise typer.Exit(1)
 
 
+@app.command("publish-palmares")
+def publish_palmares_cmd() -> None:
+    """Publica el palmarès (medalles de la RFEB i del CEB) llegit amb `fcbillar palmares`."""
+    from fcbillar.cloud_sync import publica_si_hi_es, publish_palmares
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
+
+    counts = publica_si_hi_es(
+        "palmares_medalles", lambda: publish_palmares(on_progress=_prog), _prog
+    )
+    console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
+    if any(v < 0 for v in counts.values()):
+        raise typer.Exit(1)
+
+
 @app.command("umb-descarrega")
 def umb_descarrega_cmd(
     carpeta: str = typer.Option("data/cache/umb", "--carpeta"),  # noqa: B008
