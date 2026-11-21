@@ -186,7 +186,13 @@ export interface RfebIndividualRow {
 	participants: number;
 }
 
-const TIPUS: Record<string, string> = { ce: "Campionat d'Espanya", gpe: "Gran Premi d'Espanya" };
+const TIPUS: Record<string, string> = {
+	ce: "Campionat d'Espanya",
+	gpe: "Gran Premi d'Espanya",
+	playoff: 'Play-off de la Lliga Nacional',
+	seleccions: "Campionat d'Espanya de seleccions",
+	equips: "Campionat d'Espanya per equips"
+};
 const MODALITATS: Record<string, string> = {
 	'3b': 'Tres bandes',
 	banda: 'Banda',
@@ -194,7 +200,8 @@ const MODALITATS: Record<string, string> = {
 	'47_2': 'Quadre 47/2',
 	'71_2': 'Quadre 71/2',
 	artistic: 'Artístic',
-	'5q': 'Cinc quilles'
+	'5q': 'Cinc quilles',
+	serie: 'Jocs de sèrie'
 };
 const CATEGORIES: Record<string, string> = {
 	absolut: '',
@@ -231,4 +238,79 @@ export function ordenaIndividuals(rows: RfebIndividualRow[]): RfebIndividualRow[
 			a.tipus.localeCompare(b.tipus) ||
 			a.titol.localeCompare(b.titol)
 	);
+}
+
+/** Una partida d'una prova de la RFEB vista des del jugador (vista rfeb_partides_fitxa). */
+export interface RfebPartidaRow {
+	fcb_id: string;
+	prova_id: string;
+	fase: string;
+	grup: string;
+	ordre: number;
+	data: string | null;
+	jugador: string;
+	equip: string | null;
+	caramboles: number;
+	serie: number | null;
+	punts: number | null;
+	rival: string;
+	equip_rival: string | null;
+	rival_caramboles: number;
+	rival_serie: number | null;
+	rival_punts: number | null;
+	entrades: number;
+	/** La de la partida, o la de la prova si no en barreja. */
+	modalitat: string;
+	temporada: string;
+	categoria: string;
+	tipus: string;
+	titol: string;
+	lloc: string | null;
+	data_inici: string | null;
+	rival_fcb_id: string | null;
+}
+
+/** G, E o P: els punts quan el full els dona (hi ha eliminatòries que es decideixen als penals). */
+export function resultatRfeb(r: Pick<RfebPartidaRow, 'caramboles' | 'rival_caramboles' | 'punts' | 'rival_punts'>): 'G' | 'E' | 'P' {
+	if (r.punts != null && r.rival_punts != null && r.punts !== r.rival_punts) return r.punts > r.rival_punts ? 'G' : 'P';
+	return resultatPartida(r.caramboles, r.rival_caramboles);
+}
+
+export interface RfebProvaPartides {
+	prova_id: string;
+	nom: string;
+	titol: string;
+	temporada: string;
+	data: string | null;
+	partides: RfebPartidaRow[];
+	resum: NacionalResum;
+}
+
+/** Les partides agrupades per prova, la més recent primer, i dins de cada prova en l'ordre del full. */
+export function agrupaRfebPartides(rows: RfebPartidaRow[]): RfebProvaPartides[] {
+	const map = new Map<string, RfebPartidaRow[]>();
+	for (const r of rows) map.set(r.prova_id, [...(map.get(r.prova_id) ?? []), r]);
+	return [...map.values()]
+		.map((ps) => {
+			const r = ps[0]!;
+			let g = 0, e = 0, p = 0, car = 0, ent = 0;
+			for (const x of ps) {
+				const res = resultatRfeb(x);
+				if (res === 'G') g++;
+				else if (res === 'E') e++;
+				else p++;
+				car += x.caramboles;
+				ent += x.entrades;
+			}
+			return {
+				prova_id: r.prova_id,
+				nom: nomProva({ ...r, modalitat: ps.every((x) => x.modalitat === r.modalitat) ? r.modalitat : 'serie' }),
+				titol: r.titol,
+				temporada: r.temporada,
+				data: r.data_inici,
+				partides: ps,
+				resum: { pj: ps.length, g, e, p, caramboles: car, entrades: ent, mitjana: ent ? car / ent : null }
+			};
+		})
+		.sort((a, b) => b.temporada.localeCompare(a.temporada) || (b.data ?? '').localeCompare(a.data ?? ''));
 }

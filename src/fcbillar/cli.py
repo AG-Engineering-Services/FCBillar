@@ -1353,6 +1353,7 @@ def publish_cloud_cmd(
         publish_lliga_player_rankings,
         publish_lliga_standings_hist,
         publish_nacional,
+        publish_rfeb_partides,
         publish_open_fases,
         publish_open_grups,
         publish_open_partides,
@@ -1460,6 +1461,17 @@ def publish_cloud_cmd(
         counts.update(
             publica_si_hi_es("nacional", lambda: publish_nacional(on_progress=_prog), _prog)
         )
+        # Les partides dels fulls de la RFEB: un GPE en curs canvia cada dia.
+        # Taula petita (un miler de files) i a part: que falli no atura res.
+        try:
+            counts.update(
+                publica_si_hi_es(
+                    "rfeb_partides", lambda: publish_rfeb_partides(on_progress=_prog), _prog
+                )
+            )
+        except Exception as exc:  # noqa: BLE001
+            console.print(f"[yellow]Partides de la RFEB NO publicades: {exc}[/]")
+            counts["rfeb_partides"] = -1
         if not lleuger:
             counts.update(publish_open_ranking(on_progress=_prog))
             counts.update(publish_open_ranking_femeni(on_progress=_prog))
@@ -2444,6 +2456,19 @@ def nacional_candidats_cmd(
                 "JOIN rfeb_proves p ON p.id = c.prova_id WHERE c.fed = 'CAT'"
             )
         }
+    # Les partides dels fulls de desenvolupament i de les eliminatòries: tots
+    # els jugadors, perquè la majoria de fulls no diuen la federació.
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='rfeb_partides'"
+    ).fetchone():
+        rfeb |= {
+            JugadorRfeb(nom=n, equip=t, divisio="partides")
+            for n, t in conn.execute(
+                "SELECT x.jugador, p.titol FROM (SELECT prova_id, jugador_a AS jugador "
+                "FROM rfeb_partides UNION SELECT prova_id, jugador_b FROM rfeb_partides) x "
+                "JOIN rfeb_proves p ON p.id = x.prova_id"
+            )
+        }
     for pdf in pdfs or []:
         rfeb |= {
             JugadorRfeb(nom=j.jugador, equip=j.equip, divisio=divisio)
@@ -2529,6 +2554,145 @@ def nacional_puja_cmd(
 def publish_rfeb_individuals_cmd() -> None:
     """Publica les classificacions dels campionats individuals de la RFEB."""
     from fcbillar.cloud_sync import publica_si_hi_es, publish_rfeb_individuals
+
+    # Només importava: la publicació no es feia (restes d'una fusió).
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
+
+    counts = publica_si_hi_es(
+        "rfeb_individuals", lambda: publish_rfeb_individuals(on_progress=_prog), _prog
+    )
+    console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
+    if any(v < 0 for v in counts.values()):
+        raise typer.Exit(1)
+
+
+def _valida_rfeb(conn) -> None:
+    """Treu el que la classificació oficial desmenteix i diu què ha tret."""
+    from fcbillar.rfeb_valida import valida_totes
+
+    for v in valida_totes(conn):
+        if not v.partides_fora:
+            continue
+        console.print(
+            f"[yellow]{v.prova_id}[/]: {v.partides_fora} de {v.partides} partides fora"
+            + (f" · fases que eren resums: {', '.join(v.fases_fora)}" if v.fases_fora else "")
+            + (
+                f" · per sobre de la classificació: {', '.join(v.jugadors_fora)}"
+                if v.jugadors_fora
+                else ""
+            )
+        )
+
+
+@app.command("rfeb-fulls")
+def rfeb_fulls_cmd(
+    config: str = typer.Option("fonts/rfeb/fulls.csv", "--config"),  # noqa: B008
+    carpeta: str = typer.Option("fonts/rfeb/fulls", "--carpeta"),  # noqa: B008
+    baixa: str = typer.Option(  # noqa: B008
+        "", "--baixa", help="«vius»: torna a baixar els fulls en curs; «tots»: tots."
+    ),
+    nomes_vius: bool = typer.Option(  # noqa: B008
+        False, "--nomes-vius", help="Només carrega els fulls de proves en curs (la nit)."
+    ),
+) -> None:
+    """Carrega les partides dels fulls de Google de desenvolupament de la RFEB.
+
+    Els fulls són a `fonts/rfeb/fulls.csv` i les seves pestanyes, en CSV, a
+    `fonts/rfeb/fulls/`. Amb `--baixa vius` es tornen a baixar els de les proves
+    que encara es juguen. Cada prova es reemplaça sencera.
+    """
+    from fcbillar.rfeb_fulls import baixa as baixa_fulls
+    from fcbillar.rfeb_fulls import desa, llegeix_config, partides_del_full
+
+    fulls = llegeix_config(config)
+    if nomes_vius:
+        fulls = [f for f in fulls if f.viu]
+    if baixa:
+        errors = baixa_fulls(fulls, carpeta, nomes_vius=baixa != "tots")
+        for e in errors:
+            console.print(f"[yellow]no s'ha pogut baixar[/] {e}")
+    from fcbillar.rfeb_fulls import sense_repetides
+
+    conn = ensure_schema(get_settings().db_path)
+    total = 0
+    # Una prova pot venir de més d'un full (la fase de grups i la final en
+    # fulls a part): s'ajunten abans de desar, o el segon esborraria el primer.
+    per_prova: dict[str, tuple] = {}
+    for full in fulls:
+        partides = partides_del_full(full, carpeta)
+        if not partides:
+            console.print(f"[yellow]sense partides[/] {full.temporada} {full.titol}")
+            continue
+        primer, totes = per_prova.get(full.prova_id, (full, []))
+        per_prova[full.prova_id] = (primer, totes + partides)
+    for primer, partides in per_prova.values():
+        partides = sense_repetides(partides)
+        comptes: dict[tuple[str, str], int] = {}
+        for p in partides:
+            comptes[(p.fase, p.grup)] = comptes.get((p.fase, p.grup), 0) + 1
+            p.ordre = comptes[(p.fase, p.grup)]
+        desa(conn, primer, partides)
+        total += len(partides)
+        console.print(f"  {primer.temporada} {primer.titol}: {len(partides)} partides")
+    _valida_rfeb(conn)
+    conn.commit()
+    conn.close()
+    console.print(f"{total} partides de {len(fulls)} fulls")
+
+
+@app.command("rfeb-fases")
+def rfeb_fases_cmd(
+    carpeta: str = typer.Argument(  # noqa: B008
+        "data/cache/rfeb_individuals", help="La mateixa carpeta de PDF de `rfeb-individuals`."
+    ),
+    detall: bool = typer.Option(False, "--detall", help="Una línia per PDF."),  # noqa: B008
+) -> None:
+    """Carrega les partides dels PDF de fases de la web vella de la RFEB (2012-2024).
+
+    Cal haver carregat abans les classificacions (`rfeb-individuals`): cada fase
+    es desa a la seva prova. Tornar-ho a executar la reemplaça.
+    """
+    from collections import Counter
+    from pathlib import Path
+
+    from fcbillar.rfeb_fases_pdf import carrega
+
+    arrel = Path(carpeta)
+    if not arrel.is_dir():
+        console.print(f"[red]No existeix la carpeta {carpeta}[/]")
+        raise typer.Exit(1)
+    conn = ensure_schema(get_settings().db_path)
+    res = carrega(conn, arrel)
+    _valida_rfeb(conn)
+    conn.commit()
+    conn.close()
+    if detall:
+        for r in res:
+            console.print(
+                f"  {r.fitxer}: {r.partides} partides, {r.descartats} blocs fora {r.motiu}"
+            )
+    motius = Counter(r.motiu or "llegit" for r in res)
+    console.print(
+        f"{sum(r.partides for r in res)} partides de {sum(1 for r in res if r.partides)} PDF; "
+        + ", ".join(f"{m}: {n}" for m, n in motius.most_common())
+    )
+
+
+@app.command("publish-rfeb-partides")
+def publish_rfeb_partides_cmd() -> None:
+    """Publica les partides una a una de les proves de la RFEB."""
+    from fcbillar.cloud_sync import publica_si_hi_es, publish_rfeb_partides
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
+
+    counts = publica_si_hi_es(
+        "rfeb_partides", lambda: publish_rfeb_partides(on_progress=_prog), _prog
+    )
+    console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
+    if any(v < 0 for v in counts.values()):
+        raise typer.Exit(1)
 
 
 @app.command("umb-descarrega")
