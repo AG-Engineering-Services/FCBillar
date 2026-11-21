@@ -430,8 +430,152 @@ si,ÁNGEL HERNÁNDEZ PEREA,Campionat d'Espanya de tres bandes 2012-2013,partides
 si,JOAN RALITA,Gran Premi d'Espanya de tres bandes (res_gpe_3b_murcia),partides,468,"RALITA ROS, JOAN",C.B.BANYOLES,un cognom; jugador català que també ha jugat per una altra federació
 si,JORDI GARRIGA,Gran Premi d'Espanya de tres bandes (res_gpe_3b_astorga),partides,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,un cognom; jugador català que també ha jugat per una altra federació
 si,JOSE MARÍA MAS,Campionat d'Espanya de tres bandes 2012-2013,partides,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,un cognom; jugador català que també ha jugat per una altra federació
-,Lluis Boya Soler,DS Matadepera C.,1,626,"BOYA SOLER, LLUÍS",C.B.MATADEPERA,exacte
-,Manuel Fernández,Campeonato de España por Equipos de Juegos de Serie 2015-2016,partides,2546,"FERNÁNDEZ NÚÑEZ, MANUEL",C.B.MONFORTE,un cognom
-,Manuel Glez. Castrillo,C.B. Almonte,1,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,falta
+si,Lluis Boya Soler,DS Matadepera C.,1,626,"BOYA SOLER, LLUÍS",C.B.MATADEPERA,exacte; revisat per l'usuari
+si,Manuel Fernández,Campeonato de España por Equipos de Juegos de Serie 2015-2016,partides,2546,"FERNÁNDEZ NÚÑEZ, MANUEL",C.B.MONFORTE,un cognom; revisat per l'usuari
+si,Manuel Glez. Castrillo,C.B. Almonte,1,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,falta; revisat per l'usuari
 si,Pietro Prinzivalli,Campeonato de España por Equipos de Juegos de Serie 2022-2023,partides,463,"PRINZIVALLI CARRUBBA, PIETRO",C.B.TARRAGONA,un cognom; cognom únic
-,Sergio Martínez,C.B. MATARÓ,honor,1194,"MARTÍNEZ AVILÉS, SERGIO",C.B.MATARÓ,un cognom
+si,Sergio Martínez,C.B. MATARÓ,honor,1194,"MARTÍNEZ AVILÉS, SERGIO",C.B.MATARÓ,un cognom; revisat per l'usuari
+si,Carmelo Garcés Turmo,Campionat d'Espanya de banda 2020-2021,partides,1218,"GARCÉS TURMO, CARMELO",C.B.LLEIDA,exacte
+si,FERRÁN JOU MORA,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),partides,776,"JOU MORA, FERRÀN",C.B.SANT BOI,exacte
+si,JAVIER MARTÍNEZ ALBERTO,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),partides,833,"MARTÍNEZ ALBERTO, XAVIER",C.B.MOLLET,exacte
+si,JUAN PERALES SANZ,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),partides,441,"PERALES SANZ, JOAN",S.B.F.MOLINS,exacte
+si,Jaume Rosselló Rodríguez,Gran Premi d'Espanya de tres bandes (res_gpe_3b_baeza),partides,490,"ROSSELLÓ RODRIGUEZ, JAUME",S.B.LA GRAN PENYA,exacte
+si,Joan Morcillo Marín,Campionat d'Espanya de banda 2021-2022,partides,1057,"MORCILLO MARIN, JUAN",C.B.MONT-ROIG,exacte
+si,Joan Perales  Sanz,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,441,"PERALES SANZ, JOAN",S.B.F.MOLINS,exacte
+si,Joel Sanchez Gallego,GPE X COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,1278,"SÁNCHEZ GALLEGO, JOEL",C.B.MATARÓ,exacte
+si,Jorge Sanchez Barrera,GPE X COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,503,"SÁNCHEZ BARRERA, JORGE A.",C.B.PRAT,exacte
+si,Jose María  Mas Canadell,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,exacte
+si,Juan Navarro Carmona,Campionat d'Espanya de tres bandes 2020-2021,partides,410,"NAVARRO CARMONA, JOAN ANT.",B.C.GRANOLLERS,exacte
+si,MArk S. Van Kessel,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,1027,"VAN KESSEL, MARK STEFAN",C.B.MATARÓ,exacte
+si,Mario F. Rodriguez Maia,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,exacte
+si,Mario Felipe Rodriguez Maia,Campionat d'Espanya de tres bandes 2018-2019,partides,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,exacte
+si,SERGIO MARTÍNEZ AVILÉS,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),partides,1194,"MARTÍNEZ AVILÉS, SERGIO",C.B.MATARÓ,exacte
+si,VICENTE  ALBERICH SÁNCHEZ,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),partides,87,"ALBERICH SÁNCHEZ, VICENTE",C.B.MONT-ROIG,exacte
+si,Vicente Alberich Sanchez,GPE X COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,87,"ALBERICH SÁNCHEZ, VICENTE",C.B.MONT-ROIG,exacte
+si,ADRIAN GARCIA,Campionat d'Espanya de tres bandes sub25 2022-2023,partides,249,"GARCÍA DUEÑAS, ADRIÀ",,un cognom; revisat per l'usuari
+si,ALEÍX ARNAU,CAMPEONATO DE ESPAÑA TRES BANDAS SUB.21,partides,1564,"ARNAU ABILLEIRA, ALEIX",C.B.TARRAGONA,un cognom; revisat per l'usuari
+si,ANTONI GUTIERREZ,Campionat d'Espanya de quadre 47/2 2022-2023,partides,302,"GUTIÉRREZ CASTRO, ANTONI",C.B.PUNT D'ATAC,un cognom; revisat per l'usuari
+si,ARMAND MORENO,Campionat d'Espanya de quadre 47/2 2020-2021,partides,402,"MORENO CORTÉS, ARMAND",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,Adrián García,Campionat d'Espanya de tres bandes sub25 2021-2022,partides,249,"GARCÍA DUEÑAS, ADRIÀ",,un cognom; revisat per l'usuari
+si,Albert García,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,partides,2257,"GARCIA TARRATS, ALBERT",C.B.BANYOLES,un cognom; revisat per l'usuari
+si,Aleix Arnau,XXVI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,1564,"ARNAU ABILLEIRA, ALEIX",C.B.TARRAGONA,un cognom; revisat per l'usuari
+si,Alex Casado,Campionat d'Espanya de quadre 47/2 2022-2023,partides,166,"CASADÓ ROCA, ALEX",C.B.TARRAGONA,un cognom; revisat per l'usuari
+si,Alex Casadó,LXIX CAMPEONATO DE ESPAÑA CUADRO 71/2,partides,166,"CASADÓ ROCA, ALEX",C.B.TARRAGONA,un cognom; revisat per l'usuari
+si,Angel Ruiz,XXV CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,2635,"RUIZ MINA, ÁNGEL DAVID",C.B.VIC,un cognom; revisat per l'usuari
+si,Antoni Gutierrez,LXXII CAMPEONATO DE ESPAÑA DE BILLAR A LA BANDA,partides,302,"GUTIÉRREZ CASTRO, ANTONI",C.B.PUNT D'ATAC,un cognom; revisat per l'usuari
+si,Antoni Gutiérrez,LXIX CAMPEONATO DE ESPAÑA CUADRO 71/2,partides,302,"GUTIÉRREZ CASTRO, ANTONI",C.B.PUNT D'ATAC,un cognom; revisat per l'usuari
+si,Antonio Gutiérrez,LXXXIV CAMPEONATO DE ESPAÑA CUADRO 47/2,partides,302,"GUTIÉRREZ CASTRO, ANTONI",C.B.PUNT D'ATAC,un cognom; revisat per l'usuari
+si,Antonio Hernandez,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,308,"HERNÁNDEZ PARRA, ANTONI",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,Antonio Hernández,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,308,"HERNÁNDEZ PARRA, ANTONI",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,Antonio López,Campionat d'Espanya de tres bandes 2020-2021,partides,342,"LÓPEZ CARBONELL, ANTONI",BC OLESA,un cognom; revisat per l'usuari
+si,Antonio Martinez,Campionat d'Espanya de tres bandes 2021-2022,partides,367,"MARTÍNEZ CARRILLO, ANTONI",C.B.LLINARS,un cognom; revisat per l'usuari
+si,Antonio Martínez,Campionat d'Espanya de tres bandes 2022-2023,partides,367,"MARTÍNEZ CARRILLO, ANTONI",C.B.LLINARS,un cognom; revisat per l'usuari
+si,Antonio Mártinez,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,367,"MARTÍNEZ CARRILLO, ANTONI",C.B.LLINARS,un cognom; revisat per l'usuari
+si,Arturo Gómez,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,282,"GÓMEZ PÉREZ, ARTURO",C.B.CANET DE MAR,un cognom; revisat per l'usuari
+si,CARLOS TUSET,Campionat d'Espanya de quadre 71/2 2021-2022,partides,551,"TUSET MALLOL, CARLES",S.B.F.MOLINS,un cognom; revisat per l'usuari
+si,CARMELO GARCES,Campionat d'Espanya de quadre 47/2 2020-2021,partides,1218,"GARCÉS TURMO, CARMELO",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,Carlos Molina,Campionat d'Espanya de tres bandes 2021-2022,partides,2481,"MOLINA ROMERO, CARLOS ALBERTO",,un cognom; revisat per l'usuari
+si,Carmelo Garcés,Campionat d'Espanya de quadre 71/2 2020-2021,partides,1218,"GARCÉS TURMO, CARMELO",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,ERNEST LATORRE,Campionat d'Espanya de quadre 47/2 2020-2021,partides,330,"LATORRE PUIGVERT, ERNEST",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,EVA HERMIDA,Campionat d'Espanya de tres bandes femeni 2022-2023,partides,1565,"HERMIDA DÍAZ, EVA MARÍA",C.B.MANRESA,un cognom; revisat per l'usuari
+si,EVA JULIA,Campionat d'Espanya de tres bandes femeni 2022-2023,partides,325,"JULIA SOLDEVILA, EVA",C.B.CANET DE MAR,un cognom; revisat per l'usuari
+si,Ernest Latorre,Campionat d'Espanya de quadre 71/2 2020-2021,partides,330,"LATORRE PUIGVERT, ERNEST",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,Eva M. Hermida,XXV CAMPEONATO DE ESPAÑA FEMENINO DE BILLAR A TRES BANDAS,partides,1565,"HERMIDA DÍAZ, EVA MARÍA",C.B.MANRESA,un cognom; revisat per l'usuari
+si,Eva María Hermida,Campionat d'Espanya de tres bandes femeni 2021-2022,partides,1565,"HERMIDA DÍAZ, EVA MARÍA",C.B.MANRESA,un cognom; revisat per l'usuari
+si,FERNANDO RODRÍGUEZ,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,un cognom; revisat per l'usuari
+si,FRANCISCO MARTÍN,Campeonato de España Sub-21 de Tres Bandas (diciembre 2023),partides,1459,"MARTÍN TOVAR, FRANCISCO",C.B.LLINARS,un cognom; revisat per l'usuari
+si,Fernando Moreno,LXIX CAMPEONATO DE ESPAÑA CUADRO 71/2,partides,869,"MORENO CARRETERO, FERNANDO",C.B.TARRAGONA,un cognom; revisat per l'usuari
+si,Fernando Rodriguez,Campionat d'Espanya de tres bandes 2021-2022,partides,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,un cognom; revisat per l'usuari
+si,Ferrán Jou,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,776,"JOU MORA, FERRÀN",C.B.SANT BOI,un cognom; revisat per l'usuari
+si,Francesc Varela,LXXXIV CAMPEONATO DE ESPAÑA CUADRO 47/2,partides,60,"VARELA LOSADA, FRANCESC",C.B.SANTS,un cognom; revisat per l'usuari
+si,Francisco Gómez,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,56,"GOMEZ LOPEZ, FRANCISCO",C.B.BLANES,un cognom; revisat per l'usuari
+si,Francisco Suau,GPE DS BILLAR - CIUTAT DE PALMA DE BILLAR A TRES BANDAS,partides,2607,"SUAU PUIG, FRANCESC",S.E.CASAL CERVERA,un cognom; revisat per l'usuari
+si,Hector F. Suarez,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,1217,"SUÁREZ LASSO, HÉCTOR FABIO",C.B.SANT ADRIÀ,un cognom; revisat per l'usuari
+si,Héctor F. Suárez,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,1217,"SUÁREZ LASSO, HÉCTOR FABIO",C.B.SANT ADRIÀ,un cognom; revisat per l'usuari
+si,IGNACIO ABIZANDA,Campionat d'Espanya de quadre 47/2 2020-2021,partides,1316,"ABIZANDA SOLER, IGNACIO",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,Ignacio Abizanda,Campionat d'Espanya de quadre 71/2 2020-2021,partides,1316,"ABIZANDA SOLER, IGNACIO",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,JAVIER MUÑOZ,Campionat d'Espanya de quadre 47/2 2021-2022,partides,2082,"MUÑOZ LÓPEZ, JAVIER",C.B.MONFORTE,un cognom; revisat per l'usuari
+si,JOEL SANCHEZ,Campionat d'Espanya de tres bandes sub25 2022-2023,partides,1278,"SÁNCHEZ GALLEGO, JOEL",C.B.MATARÓ,un cognom; revisat per l'usuari
+si,JORDI CADILLAC,Campionat d'Espanya de quadre 47/2 2022-2023,partides,149,"CADILLAC JODAR, JORDI",C.B.PUNT D'ATAC,un cognom; revisat per l'usuari
+si,JOSE R. MOLINA,Campionat d'Espanya de quadre 71/2 2021-2022,partides,392,"MOLINA MASPOCH, JOSEP RAMÓN",S.B.F.MOLINS,un cognom; revisat per l'usuari
+si,JOSE RUIZ,Campionat d'Espanya de quadre 47/2 2020-2021,partides,2540,"RUIZ LARA, JOSÉ",BILLAR EL MASNOU,un cognom; revisat per l'usuari
+si,JOSEP MOLINA,Campionat d'Espanya de quadre 71/2 2022-2023,partides,392,"MOLINA MASPOCH, JOSEP RAMÓN",S.B.F.MOLINS,un cognom; revisat per l'usuari
+si,JOSEP PALLISA,Campionat d'Espanya de quadre 71/2 2020-2021,partides,424,"PALLISA GONZÁLEZ, JOSEP",C.B.SANT ADRIÀ,un cognom; revisat per l'usuari
+si,JOSEP R. MOLINA,Campionat d'Espanya de quadre 71/2 2022-2023,partides,392,"MOLINA MASPOCH, JOSEP RAMÓN",S.B.F.MOLINS,un cognom; revisat per l'usuari
+si,Javier Martinez,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,833,"MARTÍNEZ ALBERTO, XAVIER",C.B.MOLLET,un cognom; revisat per l'usuari
+si,Joan Font,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,partides,228,"FONT GIMÉNEZ, JOAN ANTON",C.B.MONT-ROIG,un cognom; revisat per l'usuari
+si,Joan Graells,LXXXIII CAMPEONATO DE ESPAÑA,partides,752,"GRAELLS BOSCH, JOAN",S.E.CASAL CERVERA,un cognom; revisat per l'usuari
+si,Joan Perales,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,441,"PERALES SANZ, JOAN",S.B.F.MOLINS,un cognom; revisat per l'usuari
+si,Joan Ralita,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,468,"RALITA ROS, JOAN",C.B.BANYOLES,un cognom; revisat per l'usuari
+si,Joan Vidal,LXXXIII CAMPEONATO DE ESPAÑA,partides,1038,"VIDAL GIBERT, JOAN",C.B.TARRAGONA,un cognom; revisat per l'usuari
+si,Joel Sánchez,XXVI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,1278,"SÁNCHEZ GALLEGO, JOEL",C.B.MATARÓ,un cognom; revisat per l'usuari
+si,Jonatan Hernández,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,partides,307,"HERNÁNDEZ LÓPEZ, JONATAN",C.B.SANT ADRIÀ,un cognom; revisat per l'usuari
+si,Jordi Marti,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,360,"MARTÍ SENDRA, JORDI",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,Jordi Martí,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,360,"MARTÍ SENDRA, JORDI",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,Jorge Garriga,GPE DS BILLAR - CIUTAT DE PALMA DE BILLAR A TRES BANDAS,partides,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,un cognom; revisat per l'usuari
+si,Jorge Sánchez,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,503,"SÁNCHEZ BARRERA, JORGE A.",C.B.PRAT,un cognom; revisat per l'usuari
+si,Jose Maria Mas,Campionat d'Espanya de tres bandes 2021-2022,partides,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,Jose María Mas,Campionat d'Espanya de tres bandes 2021-2022,partides,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,Jose Mª. Mas,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,partides,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,Josep Bargalló,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,68,"BARGALLO JAUME, JOSEP",C.B.SANT BOI,un cognom; revisat per l'usuari
+si,Josep Labrador,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,1605,"LABRADOR CODINA, JOSEP",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,Josep Pallisa,LXXXIII CAMPEONATO DE ESPAÑA,partides,424,"PALLISA GONZÁLEZ, JOSEP",C.B.SANT ADRIÀ,un cognom; revisat per l'usuari
+si,Josep Serarols,LXXXIII CAMPEONATO DE ESPAÑA,partides,520,"SERAROLS MONTES, JOSEP",S.E.CASAL CERVERA,un cognom; revisat per l'usuari
+si,José Gomez,Campionat d'Espanya de tres bandes 2021-2022,partides,740,"GÓMEZ GONZÁLEZ, JOSEP",C.B.SANT BOI,un cognom; revisat per l'usuari
+si,José Gómez,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,740,"GÓMEZ GONZÁLEZ, JOSEP",C.B.SANT BOI,un cognom; revisat per l'usuari
+si,José L. González,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,747,"GONZÁLEZ SÁNCHEZ, JOSEP LL.",C.B.MANRESA,un cognom; revisat per l'usuari
+si,José Martín Vilches,Campionat d'Espanya de tres bandes 2018-2019,partides,832,"MARTÍN VÍLCHEZ, JOSEP",B.C.GRANOLLERS,falta; revisat per l'usuari
+si,José María Mas,Campionat d'Espanya de tres bandes 2021-2022,partides,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,José Mª Mas,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,José Ortiz,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,2682,"ORTIZ SATORRES, JOSÉ LUIS",S.B.F.MOLINS,un cognom; revisat per l'usuari
+si,José Ruiz,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,2540,"RUIZ LARA, JOSÉ",BILLAR EL MASNOU,un cognom; revisat per l'usuari
+si,Juan Bouterin,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,625,"BOUTERIN BOTE, JOAN",C.B.MOLLET,un cognom; revisat per l'usuari
+si,Juan Bouterín,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,625,"BOUTERIN BOTE, JOAN",C.B.MOLLET,un cognom; revisat per l'usuari
+si,Juan C. Pareras,Campionat d'Espanya de tres bandes 2021-2022,partides,432,"PARERAS MÉNDEZ, JOAN CARLES",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,Juan J. Pineda,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,partides,453,"PINEDA LAFUENTE, JOAN JOSEP",C.B.SANT ADRIÀ,un cognom; revisat per l'usuari
+si,Juan Morcillo,Campionat d'Espanya de banda 2020-2021,partides,1057,"MORCILLO MARIN, JUAN",C.B.MONT-ROIG,un cognom; revisat per l'usuari
+si,Juan Moreno,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,1988,"MORENO MEDINA, JUAN CARLOS",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,Juan Navarro,Campionat d'Espanya de tres bandes 2021-2022,partides,410,"NAVARRO CARMONA, JOAN ANT.",B.C.GRANOLLERS,un cognom; revisat per l'usuari
+si,Juan Perales,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,441,"PERALES SANZ, JOAN",S.B.F.MOLINS,un cognom; revisat per l'usuari
+si,Juan Santiago,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,1981,"SANTIAGO ROMERO, JUAN",C.B.SANT BOI,un cognom; revisat per l'usuari
+si,Juan Sánchez,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,1191,"SÁNCHEZ LORENTE, JUAN",,un cognom; revisat per l'usuari
+si,Luis González,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,286,"GONZÁLEZ CARVAJAL, LLUÍS",C.B.TARRAGONA,un cognom; revisat per l'usuari
+si,MANEL CUSINÉ,Campionat d'Espanya de quadre 71/2 2020-2021,partides,1179,"CUSINÉ BARBER, MANUEL",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,MATEU CARBONELL,Campionat d'Espanya de quadre 47/2 2022-2023,partides,161,"CARBONELL TRILLA, MATEU",S.E.CASAL CERVERA,un cognom; revisat per l'usuari
+si,Manel Cusine,Campionat d'Espanya de quadre 71/2 2020-2021,partides,1179,"CUSINÉ BARBER, MANUEL",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,Manel Fontes,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,30,"FONTES FULQUET, MANEL",C.B.SANT BOI,un cognom; revisat per l'usuari
+si,Manuel Cusiné,Campionat d'Espanya de quadre 71/2 2024-2025,partides,1179,"CUSINÉ BARBER, MANUEL",C.B.LLEIDA,un cognom; revisat per l'usuari
+si,Manuel González,Campionat d'Espanya de tres bandes 2021-2022,partides,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,un cognom; revisat per l'usuari
+si,Manuel J. González Castrillo,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,falta; revisat per l'usuari
+si,Manuel Perez,Campionat d'Espanya de quadre 71/2 2024-2025,partides,448,"PÉREZ VIÑA, MANUEL",C.B.LLINARS,un cognom; revisat per l'usuari
+si,Manuel Vázquez,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,556,"VÁZQUEZ TRABADO, MANUEL",C.B.LLIÇÀ D'AMUNT,un cognom; revisat per l'usuari
+si,Mario F. Rodriguez,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,un cognom; revisat per l'usuari
+si,Mario Garcia,Campionat d'Espanya de tres bandes 2021-2022,partides,254,"GARCÍA GAVILÁN, MARIO",S.B.LA GRAN PENYA,un cognom; revisat per l'usuari
+si,Mario García,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,254,"GARCÍA GAVILÁN, MARIO",S.B.LA GRAN PENYA,un cognom; revisat per l'usuari
+si,Marta Fabiana López,XXIV CAMPEONATO DE ESPAÑA FEMENINO DE BILLAR A TRES BANDAS,partides,2318,"LÓPEZ FERNÁNDEZ, MARTA FABIANA",C.B.MATARÓ,un cognom; revisat per l'usuari
+si,Mateu Carbonell,LXXXIII CAMPEONATO DE ESPAÑA,partides,161,"CARBONELL TRILLA, MATEU",S.E.CASAL CERVERA,un cognom; revisat per l'usuari
+si,Pau Benítez,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,133,"BENITEZ REINA, PAU",C.B.MATARÓ,un cognom; revisat per l'usuari
+si,Pere Aranau Canalda,Campionat d'Espanya de banda 2021-2022,partides,600,"ARNAU CANALDA, PERE",C.B.TARRAGONA,falta; revisat per l'usuari
+si,RAMON AGUT,Campionat d'Espanya de quadre 47/2 2020-2021,partides,1204,"AGUT BONSFILLS, RAMON",C.B.2000 CERDANYOLA,un cognom; revisat per l'usuari
+si,RAUL UCEDA,Campionat d'Espanya de tres bandes sub25 2022-2023,partides,1293,"UCEDA LÓPEZ, RAÚL",C.B.MATARÓ,un cognom; revisat per l'usuari
+si,Rafael Gascón,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,265,"GASCÓN REYES, RAFAEL",C.B.SANT BOI,un cognom; revisat per l'usuari
+si,Rafael Pérez,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,916,"PÉREZ ZORRILLA, RAFAEL",C.B.MOLLET,un cognom; revisat per l'usuari
+si,Rafaél Gascón,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,265,"GASCÓN REYES, RAFAEL",C.B.SANT BOI,un cognom; revisat per l'usuari
+si,Ramon Camps,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,partides,2595,"CAMPS ESTELA, RAMÓN",C.B.BANYOLES,un cognom; revisat per l'usuari
+si,Ramón Agut,Campionat d'Espanya de quadre 47/2 2018-2019,partides,1204,"AGUT BONSFILLS, RAMON",C.B.2000 CERDANYOLA,un cognom; revisat per l'usuari
+si,Ramón Arbiol,GPE DS BILLAR - CIUTAT DE PALMA DE BILLAR A TRES BANDAS,partides,1198,"ARBIOL MORERA, RAMON",S.B.LA GRAN PENYA,un cognom; revisat per l'usuari
+si,Ramón Ruiz,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,1207,"RUIZ VÉLEZ, RAMÓN",,un cognom; revisat per l'usuari
+si,Ramón Ruíz,Campionat d'Espanya de tres bandes 2021-2022,partides,1207,"RUIZ VÉLEZ, RAMÓN",,un cognom; revisat per l'usuari
+si,Raúl Uceda,Campionat d'Espanya de tres bandes sub25 2021-2022,partides,1293,"UCEDA LÓPEZ, RAÚL",C.B.MATARÓ,un cognom; revisat per l'usuari
+si,Ricard Arnau,LXXII CAMPEONATO DE ESPAÑA DE BILLAR A LA BANDA,partides,109,"ARNAU FONT, RICARD",C.B.MONT-ROIG,un cognom; revisat per l'usuari
+si,SERGIO MÁRTINEZ,CAMPEONATO DE ESPAÑA TRES BANDAS SUB.21,partides,1194,"MARTÍNEZ AVILÉS, SERGIO",C.B.MATARÓ,un cognom; revisat per l'usuari
+si,Sergi Garriga,LXXXIII CAMPEONATO DE ESPAÑA,partides,264,"GARRIGA LLOVET, SERGI",S.E.CASAL CERVERA,un cognom; revisat per l'usuari
+si,Toni Gris,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),partides,297,"GRIS PERALBA, TONI",C.B.CANET DE MAR,un cognom; revisat per l'usuari
+si,Valenti Vilalta,Campionat d'Espanya de quadre 47/2 2022-2023,partides,566,"VILALTA PARÉ, VALENTÍ",C.B.SANTS,un cognom; revisat per l'usuari
+si,Valentí Vilalta,LXXXIII CAMPEONATO DE ESPAÑA,partides,566,"VILALTA PARÉ, VALENTÍ",C.B.SANTS,un cognom; revisat per l'usuari
+si,Vicente Alberich,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,partides,87,"ALBERICH SÁNCHEZ, VICENTE",C.B.MONT-ROIG,un cognom; revisat per l'usuari
+si,Vicente Martinez,LXIX CAMPEONATO DE ESPAÑA CUADRO 71/2,partides,836,"MARTÍNEZ LOPEZOSA, VICENÇ",C.B.MONT-ROIG,un cognom; revisat per l'usuari
+si,Xavier Martínez,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,partides,833,"MARTÍNEZ ALBERTO, XAVIER",C.B.MOLLET,un cognom; revisat per l'usuari
+si,Xavier Rius,Campionat d'Espanya de quadre 47/2 2022-2023,partides,478,"RIUS PIQUÉ, XAVIER",S.E.CASAL CERVERA,un cognom; revisat per l'usuari
+si,YEIMY A. MANCIPE,XXIV CAMPEONATO DE ESPAÑA FEMENINO DE BILLAR A TRES BANDAS,partides,820,"MANCIPE SEGURA, YEIMY ANDREA",C.B.CANET DE MAR,un cognom; revisat per l'usuari
+si,Yeimy A. Mancipe,XXIV CAMPEONATO DE ESPAÑA FEMENINO DE BILLAR A TRES BANDAS,partides,820,"MANCIPE SEGURA, YEIMY ANDREA",C.B.CANET DE MAR,un cognom; revisat per l'usuari
