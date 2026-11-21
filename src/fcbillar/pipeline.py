@@ -308,7 +308,7 @@ def ingest_partides(
 
     # Primera passa: construir games i upsertarlos.
     # Recopilarem (data, caramboles_del_jugador, entrades) per filtrar darrers 15.
-    games_info: list[tuple[date, Game, int | None, int | None]] = []
+    games_info: list[tuple[date, Game, int | None, int | None, str]] = []
 
     for row in parsed.rows:
         game = _build_game_from_raw_row(
@@ -321,9 +321,11 @@ def ingest_partides(
         if game is None:
             skipped += 1
             continue
-        if not repo.game_exists(game.id_natural):
+        existia = repo.game_exists(game.id_natural)
+        game_id = repo.upsert_game(game)
+        # Una partida que ja hi era amb un altre id no és nova.
+        if game_id == game.id_natural and not existia:
             new += 1
-        repo.upsert_game(game)
         upserted += 1
 
         # Obtenim els caramboles del jugador consultat.
@@ -332,7 +334,7 @@ def ingest_partides(
         else:
             car_jugador = game.caramboles2
 
-        games_info.append((game.data_partida, game, car_jugador, game.entrades))
+        games_info.append((game.data_partida, game, car_jugador, game.entrades, game_id))
 
     # Segona passa: seleccionar darrers 15 games i crear links.
     if games_info:
@@ -342,12 +344,12 @@ def ingest_partides(
 
         for idx in selected_idxs:
             if idx < len(games_info):
-                _, game, _, _ = games_info[idx]
+                _, game, _, _, game_id = games_info[idx]
                 repo.link_game_to_ranking(
                     RankingGameLink(
                         ranking_num_seq=num_seq,
                         ranking_modalitat=modalitat_codi_fcb,
-                        game_id=game.id_natural,
+                        game_id=game_id,
                         player_fcb_id_origen=player_fcb_id,
                     )
                 )

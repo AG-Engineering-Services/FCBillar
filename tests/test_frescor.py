@@ -408,6 +408,29 @@ def test_una_revisio_nova_del_calendari_que_no_tenim_falla(conn) -> None:
     assert fila.esperat == "2026/2027 V-3"
 
 
+def test_una_revisio_vella_mirada_despres_de_la_nova_no_fa_fallar(conn) -> None:
+    """El web llista totes les revisions i cada nit es tornen a mirar totes.
+
+    El novembre de 2026 la V-3 es mirava després de la V-4, i com que la
+    comprovació agafava la darrera mirada, deia que la V-4 no hi era.
+    """
+    conn.execute(
+        "INSERT INTO calendari_versions (font, temporada, versio, sha256, last_checked_at) "
+        "VALUES ('FCB', '2026/2027', 'V-3', 'v3', '2026-10-08 22:30:00')"
+    )
+    # La V-2 és l'última que s'ha mirat; la V-3 és la del web i ja és ingerida.
+    conn.execute(
+        "UPDATE calendari_versions SET last_checked_at = '2026-10-08 22:40:00' "
+        "WHERE font = 'FCB' AND versio = 'V-2'"
+    )
+    amb_la_v3 = SITEMAP.replace("calendari-fcb-2026-27-v-2", "calendari-fcb-2026-27-v-3")
+
+    fila = _fila(frescor.comprova(conn, _fonts(sitemap=_font(amb_la_v3)), ara=ARA), "Calendari FCB")
+
+    assert fila.estat == OK
+    assert fila.nostre == "2026/2027 V-3"
+
+
 def test_un_calendari_que_fa_dies_que_no_es_mira_falla(conn) -> None:
     conn.execute("UPDATE calendari_versions SET last_checked_at = '2026-10-01 22:00:00'")
 

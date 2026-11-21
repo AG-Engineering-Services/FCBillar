@@ -527,7 +527,45 @@ class Repository:
             self.conn.execute("SELECT 1 FROM games WHERE id = ?", (game_id,)).fetchone() is not None
         )
 
+    def id_existent(
+        self, game: Game, p1: int, p2: int, competicio_id: int, modalitat_id: int
+    ) -> str | None:
+        """L'id d'aquesta mateixa partida si ja hi és amb un altre `id_natural`.
+
+        L'`id_natural` es calcula amb els `fcb_id`. Quan un jugador que tenia
+        una fitxa provisional (`name:…`) rep la llicència, les seves partides
+        velles tornen a sortir amb un id nou: el 25/10/2026 se'n van inserir 36
+        de duplicades, que comptaven dues vegades als rànquings. La partida és
+        la mateixa si coincideixen el dia, la competició, la modalitat, els dos
+        jugadors (pels ids interns, que no canvien), les caramboles de cadascun i
+        les entrades.
+        """
+        fila = self.conn.execute(
+            """SELECT id FROM games
+               WHERE data_partida = ? AND competicio_id = ? AND modalitat_id = ?
+                 AND entrades IS ?
+                 AND ((player1_id = ? AND player2_id = ? AND caramboles1 IS ? AND caramboles2 IS ?)
+                   OR (player1_id = ? AND player2_id = ? AND caramboles1 IS ? AND caramboles2 IS ?))
+               ORDER BY created_at, id LIMIT 1""",
+            (
+                game.data_partida.isoformat(),
+                competicio_id,
+                modalitat_id,
+                game.entrades,
+                p1,
+                p2,
+                game.caramboles1,
+                game.caramboles2,
+                p2,
+                p1,
+                game.caramboles2,
+                game.caramboles1,
+            ),
+        ).fetchone()
+        return fila[0] if fila else None
+
     def upsert_game(self, game: Game) -> str:
+        """Desa una partida i torna el seu id, que pot ser el d'una que ja hi era."""
         p1 = self.get_player_id_by_fcb_id(game.player1_fcb_id)
         p2 = self.get_player_id_by_fcb_id(game.player2_fcb_id)
         if p1 is None or p2 is None:
@@ -538,6 +576,7 @@ class Repository:
         competicio_id = self.upsert_competicio(
             Competicio(nom=game.competicio_nom, modalitat_codi_fcb=game.modalitat_codi_fcb)
         )
+        game_id = self.id_existent(game, p1, p2, competicio_id, modalitat_id) or game.id_natural
         guanyador_id = (
             self.get_player_id_by_fcb_id(game.guanyador_fcb_id) if game.guanyador_fcb_id else None
         )
@@ -571,7 +610,7 @@ class Repository:
                 extras_json = COALESCE(excluded.extras_json, games.extras_json)
             """,
             (
-                game.id_natural,
+                game_id,
                 game.data_partida.isoformat(),
                 competicio_id,
                 modalitat_id,
@@ -594,7 +633,47 @@ class Repository:
                 extras,
             ),
         )
-        return game.id_natural
+        return game_id
+
+    def dedup_games(self) -> list[tuple[str, str]]:
+        """Fusiona les partides duplicades: [(id que es queda, id que se'n va)].
+
+        Mateix criteri que `id_existent`. Es queda la que porta més context
+        (encontre, equips, temporada, sèries) i, si empaten, la més antiga. Els
+        enllaços amb els rànquings de la que se'n va passen a la que es queda.
+        """
+        grups: dict[tuple, list] = {}
+        for r in self.conn.execute(
+            """SELECT id, data_partida, competicio_id, modalitat_id, player1_id, player2_id,
+                      caramboles1, caramboles2, entrades, created_at,
+                      (encontre_lliga_id IS NOT NULL) + (equip1_id IS NOT NULL)
+                      + (temporada_id IS NOT NULL) + (serie_max1 IS NOT NULL)
+                      + (torneig_id IS NOT NULL) AS context
+               FROM games"""
+        ):
+            gid, data, comp, mod, a, b, ca, cb, ent, creat, context = r
+            if a > b:
+                a, b, ca, cb = b, a, cb, ca
+            grups.setdefault((data, comp, mod, a, b, ca, cb, ent), []).append(
+                (-context, creat or "", gid)
+            )
+        fusions = []
+        for files in grups.values():
+            if len(files) < 2:
+                continue
+            files.sort()
+            queda = files[0][2]
+            for _c, _t, marxa in files[1:]:
+                self.conn.execute(
+                    """INSERT OR IGNORE INTO ranking_game_links (ranking_id, game_id, player_id_origen)
+                       SELECT ranking_id, ?, player_id_origen FROM ranking_game_links
+                       WHERE game_id = ?""",
+                    (queda, marxa),
+                )
+                self.conn.execute("DELETE FROM ranking_game_links WHERE game_id = ?", (marxa,))
+                self.conn.execute("DELETE FROM games WHERE id = ?", (marxa,))
+                fusions.append((queda, marxa))
+        return fusions
 
     def enrich_game_by_signature(
         self, game: Game, season_range: tuple[str, str] | None = None

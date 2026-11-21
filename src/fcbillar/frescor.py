@@ -750,16 +750,27 @@ def calendari(conn: sqlite3.Connection, sitemap: Font, ara: datetime) -> list[Fi
         return [_no_llegida("Calendari", sitemap)]
 
     for font in ("FCB", "RFEB"):
-        fila = conn.execute(
+        # La revisió nostra és la més nova que s'ha ingerit, no la darrera que
+        # s'ha comprovat. El web de la FCB llista totes les revisions de la
+        # temporada i cada nit es tornen a mirar totes: el novembre de 2026 la
+        # V-3 es mirava després de la V-4, i aquesta comprovació deia que la V-4
+        # no s'havia ingerit quan feia una setmana que hi era.
+        revisions = conn.execute(
             "SELECT temporada, versio, last_checked_at FROM calendari_versions "
-            "WHERE font = ? ORDER BY last_checked_at DESC, id DESC LIMIT 1",
+            "WHERE font = ? ORDER BY id",
             (font,),
-        ).fetchone()
+        ).fetchall()
         familia = f"Calendari {font}"
-        if fila is None:
+        if not revisions:
             files.append(Fila(familia, AVIS, "cap", "—", "No se n'ha ingerit mai cap."))
             continue
-        temporada, versio, mirat = fila
+
+        def _ordre(r: tuple) -> tuple:
+            nums = re.findall(r"\d+", r[1] or "")
+            return (r[0] or "", tuple(int(n) for n in nums))
+
+        temporada, versio, _ = max(revisions, key=_ordre)
+        mirat = max((r[2] for r in revisions if r[2]), default=None)
         try:
             dies = (ara - datetime.fromisoformat(mirat)).days
         except (TypeError, ValueError):

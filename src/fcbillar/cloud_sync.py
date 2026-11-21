@@ -272,9 +272,62 @@ def publish_rankings(
     counts["ranking_entries"] = _upsert(
         sb, "ranking_entries", entries, "modalitat_codi,num_seq,player_fcb_id", prog
     )
+    counts["ranking_entries_retirades"] = _retira_entrades_sobrants(sb, entries, prog)
 
     conn.close()
     return counts
+
+
+#: Quants rànquings recents de cada modalitat es revisen per retirar-ne files.
+#: La federació corregeix els rànquings dels últims mesos, no els de fa anys, i
+#: mirar-los tots serien centenars de consultes cada nit.
+_RANQUINGS_A_REVISAR = 3
+
+
+def _retira_entrades_sobrants(sb, entries: list[dict], prog: Progress) -> int:
+    """Treu del núvol les files dels rànquings recents que la base ja no té.
+
+    La publicació només afegia: quan la federació treia un jugador d'un rànquing
+    ja publicat, la fila vella es quedava al núvol i deixava dos jugadors a la
+    mateixa posició (el 126, el novembre de 2026).
+    """
+    per_ranquing: dict[tuple[int, int], set[str]] = {}
+    for e in entries:
+        per_ranquing.setdefault((e["modalitat_codi"], e["num_seq"]), set()).add(
+            str(e["player_fcb_id"])
+        )
+    recents: list[tuple[int, int]] = []
+    for mod in {m for m, _ in per_ranquing}:
+        nums = sorted((n for m, n in per_ranquing if m == mod), reverse=True)
+        recents += [(mod, n) for n in nums[:_RANQUINGS_A_REVISAR]]
+    fora = 0
+    for mod, num in recents:
+        locals_ = per_ranquing[(mod, num)]
+        al_nuvol = _totes_amb(
+            lambda mod=mod, num=num: (
+                sb.table("ranking_entries")
+                .select("player_fcb_id")
+                .eq("modalitat_codi", mod)
+                .eq("num_seq", num)
+            )
+        )
+        sobrants = sorted({str(f["player_fcb_id"]) for f in al_nuvol} - locals_)
+        # Un rànquing sencer que no quadra vol dir una base a mitges, no correccions.
+        if len(sobrants) > max(20, len(locals_) // 10):
+            prog(
+                "warn",
+                f"ranking_entries {mod}/{num}: {len(sobrants)} files del núvol no són a la base "
+                "local; massa per retirar-les sense mirar: NO s'ha retirat res.",
+            )
+            continue
+        for fcb in sobrants:
+            sb.table("ranking_entries").delete(returning=_MINIM).eq("modalitat_codi", mod).eq(
+                "num_seq", num
+            ).eq("player_fcb_id", fcb).execute()
+        fora += len(sobrants)
+    if fora:
+        prog("ok", f"ranking_entries: {fora} files retirades dels rànquings recents")
+    return fora
 
 
 def publish_provisional_ranking(
@@ -875,11 +928,21 @@ def publish_pending_games(
         # Capturades per ingest_lliga_encontre (promocions/finals i jornades recents)
         # abans que partideshome les pugi a `games`. Dedup per signatura contra `games`:
         # en incorporar-les la ingesta oficial, deixen de ser pendents.
+        #
+        # Només les de la temporada en curs. Una partida de lliga que no arriba
+        # mai a `games` (una promoció, una final, una signatura que no casa) es
+        # quedava pendent per sempre: el novembre de 2026 encara es publicava un
+        # JIMÉNEZ GALERA - ORTIZ ALAMILLO del 18/09/2021, i la fitxa el donava
+        # per jugat el dia que els dos clubs s'havien de trobar. Sense data no es
+        # pot saber de quina temporada és, i tampoc no hi entra.
+        from fcbillar.calendari_fed import temporada_actual as any_temporada
+
+        inici_temporada = f"{any_temporada()}-08-01"
         for r in conn.execute(
             """SELECT competicio, player1_nom n1, caramboles1 c1, serie1 s1,
                       player2_nom n2, caramboles2 c2, serie2 s2, entrades e, data
-               FROM lliga_pending_partides WHERE modalitat_codi = ?""",
-            (mod,),
+               FROM lliga_pending_partides WHERE modalitat_codi = ? AND data >= ?""",
+            (mod, inici_temporada),
         ):
             if not r["e"] or r["e"] <= 0:
                 continue
@@ -1187,7 +1250,43 @@ def publish_games(
         )
     n = _upsert(sb, "games", games, "id", prog)
     conn.close()
-    return {"games": n}
+    return {
+        "games": n,
+        "games_retirades": _retira_games_sobrants(sb, {g["id"] for g in games}, prog),
+    }
+
+
+#: Més partides de sobra que això al núvol no es retiren: vol dir que la base
+#: local no és la de la reingesta (un PC amb la base a mitges), no que n'hi hagi
+#: tantes d'esborrades.
+_MAX_GAMES_A_RETIRAR = 200
+
+
+def _retira_games_sobrants(sb, locals_: set[str], prog: Progress) -> int:
+    """Treu del núvol les partides que la base local ja no té.
+
+    La publicació només afegia i actualitzava: una partida fusionada amb una
+    altra (`dedup-games`) o reidentificada es quedava al núvol per sempre, i la
+    fitxa la comptava dues vegades.
+    """
+    if not locals_:
+        return 0
+    al_nuvol = {f["id"] for f in _totes_amb(lambda: sb.table("games").select("id").order("id"))}
+    sobrants = sorted(al_nuvol - locals_)
+    if not sobrants:
+        return 0
+    limit = max(_MAX_GAMES_A_RETIRAR, len(al_nuvol) // 100)
+    if len(sobrants) > limit:
+        prog(
+            "warn",
+            f"games: {len(sobrants)} partides del núvol no són a la base local; són massa "
+            f"(més de {limit}) per retirar-les sense mirar: NO s'ha retirat res.",
+        )
+        return 0
+    for i in range(0, len(sobrants), 100):
+        sb.table("games").delete(returning=_MINIM).in_("id", sobrants[i : i + 100]).execute()
+    prog("ok", f"games: {len(sobrants)} partides retirades (ja no són a la base local)")
+    return len(sobrants)
 
 
 def publish_rating_buckets(

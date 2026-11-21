@@ -332,6 +332,12 @@ jobs:
           # d'una classificació que aquesta BD no té.
           run "rfeb-fulls"           uv run --no-dev fcbillar rfeb-fulls --baixa vius --nomes-vius
 
+          # Partides que hi són dues vegades amb ids diferents (un jugador que
+          # ha rebut la llicència i les seves partides velles tornen amb un id
+          # nou). Abans de publicar: `publish-cloud` retira del núvol les que ja
+          # no hi són.
+          run "dedup-games"          uv run --no-dev fcbillar dedup-games
+
           # Publicació al núvol (fcbillar publica tot des de la BD, rànquings
           # inclosos: són upserts per clau natural, o sigui que és idempotent).
           #

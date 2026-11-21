@@ -497,10 +497,18 @@
 			const { data: pg } = await db
 				.from('pending_games')
 				.select(
-					'modalitat_codi, competicio, font, opponent_nom, caramboles, caramboles_opp, entrades, serie'
+					'modalitat_codi, competicio, font, opponent_nom, caramboles, caramboles_opp, entrades, serie, data'
 				)
 				.eq('player_fcb_id', id);
-			pendingRows = (pg ?? []) as PendingGameRow[];
+			// Només les d'aquesta temporada (les sense data són de la copa en curs). La
+			// llista no ensenya la data i una de fa anys semblaria d'aquesta setmana.
+			const iniciTemporada = (() => {
+				const d = new Date();
+				return `${d.getMonth() + 1 >= 8 ? d.getFullYear() : d.getFullYear() - 1}-08-01`;
+			})();
+			pendingRows = ((pg ?? []) as (PendingGameRow & { data: string | null })[]).filter(
+				(r) => r.data == null || r.data >= iniciTemporada
+			);
 
 			// Projecció del proper rànquing (autoritativa, computada al backend).
 			const { data: pr } = await db
