@@ -90,7 +90,8 @@ _MODALITATS = {
 }
 
 _RE_ENTER = re.compile(r"^\d{1,4}$")
-_RE_DECIMAL = re.compile(r"^\d{1,2},\d{1,3}$")
+#: Amb coma; amb punt, només amb tres decimals perquè no es confongui amb una hora.
+_RE_DECIMAL = re.compile(r"^\d{1,2}(?:,\d{1,3}|\.\d{3})$")
 _RE_DATA = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b")
 _RE_GRUP = re.compile(r"^GRUPO\s+([A-Z])$")
 
@@ -132,6 +133,16 @@ def _es_nom(cel: str) -> bool:
     if pla in _NO_NOMS or pla in _MODALITATS or _RE_DATA.search(cel):
         return False
     return " " in cel.strip() or len(cel.strip()) > 5
+
+
+_RE_FED_AL_NOM = re.compile(r"\s*\(([A-Za-z.\- ]{2,8})\)\s*$")
+
+
+def neteja_nom(nom: str) -> tuple[str, str | None]:
+    """(nom, federació) de «Sergio Jiménez Galera (CAT)»; sense parèntesis, (nom, None)."""
+    if m := _RE_FED_AL_NOM.search(nom):
+        return nom[: m.start()].strip(), m.group(1).strip().upper()
+    return nom.strip(), None
 
 
 def _num(cel: str) -> int | float | None:
@@ -210,6 +221,17 @@ def _acta(nums: list[int | float]) -> tuple[int, int, int, int, int] | None:
             return None
         if not (_quadra(ca, ent, ma) and _quadra(cb, ent, mb)):
             return None
+    elif (
+        len(nums) in (8, 9)
+        and isinstance(nums[0], float)
+        and all(isinstance(n, int) for n in nums[1:])
+    ):
+        # CE 2018-19: «NOM A | mitjana | punts | sèrie | caramboles | entrades |
+        # caramboles | sèrie | punts | [núm.] NOM B». La mitjana, de vegades
+        # amb dos decimals.
+        ma, _pa, sa, ca, ent, cb, sb = nums[:7]
+        if not ent or abs(ca / ent - ma) >= 0.006:
+            return None
     else:
         return None
     if ent < 1 or sa > ca or sb > cb or max(ca, cb) == 0:
@@ -264,22 +286,24 @@ def llegeix_actes(files: list[list[str]], fase: str) -> list[PartidaFull]:
             sa, ca, ent, cb, sb = acta
             pa, pb = _punts(ca, cb)
             equips = ctx.equip(i)
+            nom_a, fed_a = neteja_nom(fila[i])
+            nom_b, fed_b = neteja_nom(fila[j])
             partides.append(
                 PartidaFull(
                     fase=fase,
                     grup=ctx.grup(i),
                     ordre=len(partides) + 1,
-                    jugador_a=fila[i],
+                    jugador_a=nom_a,
                     caramboles_a=ca,
                     serie_a=sa,
-                    jugador_b=fila[j],
+                    jugador_b=nom_b,
                     caramboles_b=cb,
                     serie_b=sb,
                     entrades=ent,
                     punts_a=pa,
                     punts_b=pb,
-                    equip_a=equips[0] if equips else None,
-                    equip_b=equips[1] if equips else None,
+                    equip_a=equips[0] if equips else fed_a,
+                    equip_b=equips[1] if equips else fed_b,
                     data=ctx.data(i),
                     modalitat=modalitat,
                 )
@@ -301,8 +325,10 @@ class _Linia:
 
 
 def _linia(fila: list[str]) -> _Linia | None:
+    # El primer nom de la fila i els números que el segueixen. Als GPE la
+    # primera fila de cada partida repeteix al final el nom del guanyador.
     noms = [i for i, c in enumerate(fila) if _es_nom(c)]
-    if len(noms) != 1:
+    if not noms:
         return None
     i = noms[0]
     nums, fase = [], None
@@ -388,10 +414,10 @@ def llegeix_parelles(files: list[list[str]], fase: str, grup: str = "") -> list[
                     fase=a.fase or fase,
                     grup=grup,
                     ordre=len(partides) + 1,
-                    jugador_a=a.nom,
+                    jugador_a=neteja_nom(a.nom)[0],
                     caramboles_a=ca,
                     serie_a=sa,
-                    jugador_b=b.nom,
+                    jugador_b=neteja_nom(b.nom)[0],
                     caramboles_b=cb,
                     serie_b=sb,
                     entrades=ent,
@@ -441,13 +467,16 @@ class Full:
     lloc: str | None
     data_inici: str | None
     data_fi: str | None
-    format: str  # actes | parelles
+    format: str  # actes | parelles | auto
     pestanyes: list[str]
     viu: bool
+    #: La prova de `rfeb_proves` (la classificació d'un PDF) on van les partides,
+    #: si n'hi ha. Sense, la prova és el mateix full: `full/{id}`.
+    prova: str | None = None
 
     @property
     def prova_id(self) -> str:
-        return f"full/{self.full}"
+        return self.prova or f"full/{self.full}"
 
 
 def llegeix_config(cami: str | Path) -> list[Full]:
@@ -466,6 +495,7 @@ def llegeix_config(cami: str | Path) -> list[Full]:
                 format=r["format"],
                 pestanyes=[p for p in r["pestanyes"].split("|") if p],
                 viu=r["viu"].strip().lower() == "si",
+                prova=(r.get("prova") or "").strip() or None,
             )
             for r in csv.DictReader(f)
         ]
@@ -519,8 +549,13 @@ def partides_del_full(full: Full, carpeta: str | Path) -> list[PartidaFull]:
         fase, grup = fase_de_pestanya(p)
         if full.format == "actes":
             out.extend(llegeix_actes(files, fase))
-        else:
+        elif full.format == "parelles":
             out.extend(llegeix_parelles(files, fase, grup))
+        else:
+            # Cada pestanya del full a la seva manera: la lectura que en treu més.
+            actes, parelles = llegeix_actes(files, fase), llegeix_parelles(files, fase, grup)
+            out.extend(actes if len(actes) >= len(parelles) else parelles)
+    out = sense_repetides(out)
     comptes: dict[tuple[str, str], int] = {}
     for partida in out:
         clau = (partida.fase, partida.grup)
@@ -529,12 +564,38 @@ def partides_del_full(full: Full, carpeta: str | Path) -> list[PartidaFull]:
     return out
 
 
+def sense_repetides(partides: list[PartidaFull]) -> list[PartidaFull]:
+    """Sense la mateixa partida dues vegades.
+
+    Molts fulls tenen una pestanya per ronda i una altra amb «tots els
+    partits»: la mateixa partida hi surt dues vegades, de vegades amb els
+    jugadors girats. Es queda la primera.
+    """
+    vistes, out = set(), []
+    for p in partides:
+        clau = (
+            frozenset({(_pla(p.jugador_a), p.caramboles_a), (_pla(p.jugador_b), p.caramboles_b)}),
+            p.entrades,
+        )
+        if clau in vistes:
+            continue
+        vistes.add(clau)
+        out.append(p)
+    return out
+
+
 def desa(conn: sqlite3.Connection, full: Full, partides: list[PartidaFull]) -> None:
-    """Desa la prova i les seves partides, reemplaçant les que ja hi hagi."""
+    """Desa la prova i les seves partides, reemplaçant les que ja hi hagi.
+
+    Si el full va a una prova que ja hi és (`prova`), la prova no es toca.
+    """
     dates = sorted(p.data for p in partides if p.data)
     inici = full.data_inici or (dates[0].isoformat() if dates else None)
     fi = full.data_fi or (dates[-1].isoformat() if dates else None)
     conn.execute("DELETE FROM rfeb_partides WHERE prova_id = ?", (full.prova_id,))
+    if full.prova:
+        _insereix_partides(conn, full.prova_id, partides)
+        return
     conn.execute(
         "INSERT OR REPLACE INTO rfeb_proves (id, temporada, modalitat, categoria, tipus, titol, "
         "lloc, data_inici, data_fi, font) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -551,13 +612,19 @@ def desa(conn: sqlite3.Connection, full: Full, partides: list[PartidaFull]) -> N
             URL_FULL.format(full=full.full),
         ),
     )
+    _insereix_partides(conn, full.prova_id, partides)
+
+
+def _insereix_partides(
+    conn: sqlite3.Connection, prova_id: str, partides: list[PartidaFull]
+) -> None:
     conn.executemany(
         "INSERT INTO rfeb_partides (prova_id, fase, grup, ordre, data, modalitat, jugador_a, "
         "equip_a, caramboles_a, serie_a, punts_a, jugador_b, equip_b, caramboles_b, serie_b, "
         "punts_b, entrades) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             (
-                full.prova_id,
+                prova_id,
                 p.fase,
                 p.grup,
                 p.ordre,

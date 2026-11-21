@@ -2550,12 +2550,33 @@ def publish_rfeb_individuals_cmd() -> None:
         raise typer.Exit(1)
 
 
+def _valida_rfeb(conn) -> None:
+    """Treu el que la classificació oficial desmenteix i diu què ha tret."""
+    from fcbillar.rfeb_valida import valida_totes
+
+    for v in valida_totes(conn):
+        if not v.partides_fora:
+            continue
+        console.print(
+            f"[yellow]{v.prova_id}[/]: {v.partides_fora} de {v.partides} partides fora"
+            + (f" · fases que eren resums: {', '.join(v.fases_fora)}" if v.fases_fora else "")
+            + (
+                f" · per sobre de la classificació: {', '.join(v.jugadors_fora)}"
+                if v.jugadors_fora
+                else ""
+            )
+        )
+
+
 @app.command("rfeb-fulls")
 def rfeb_fulls_cmd(
     config: str = typer.Option("fonts/rfeb/fulls.csv", "--config"),  # noqa: B008
     carpeta: str = typer.Option("fonts/rfeb/fulls", "--carpeta"),  # noqa: B008
     baixa: str = typer.Option(  # noqa: B008
         "", "--baixa", help="«vius»: torna a baixar els fulls en curs; «tots»: tots."
+    ),
+    nomes_vius: bool = typer.Option(  # noqa: B008
+        False, "--nomes-vius", help="Només carrega els fulls de proves en curs (la nit)."
     ),
 ) -> None:
     """Carrega les partides dels fulls de Google de desenvolupament de la RFEB.
@@ -2568,20 +2589,36 @@ def rfeb_fulls_cmd(
     from fcbillar.rfeb_fulls import desa, llegeix_config, partides_del_full
 
     fulls = llegeix_config(config)
+    if nomes_vius:
+        fulls = [f for f in fulls if f.viu]
     if baixa:
         errors = baixa_fulls(fulls, carpeta, nomes_vius=baixa != "tots")
         for e in errors:
             console.print(f"[yellow]no s'ha pogut baixar[/] {e}")
+    from fcbillar.rfeb_fulls import sense_repetides
+
     conn = ensure_schema(get_settings().db_path)
     total = 0
+    # Una prova pot venir de més d'un full (la fase de grups i la final en
+    # fulls a part): s'ajunten abans de desar, o el segon esborraria el primer.
+    per_prova: dict[str, tuple] = {}
     for full in fulls:
         partides = partides_del_full(full, carpeta)
         if not partides:
             console.print(f"[yellow]sense partides[/] {full.temporada} {full.titol}")
             continue
-        desa(conn, full, partides)
+        primer, totes = per_prova.get(full.prova_id, (full, []))
+        per_prova[full.prova_id] = (primer, totes + partides)
+    for primer, partides in per_prova.values():
+        partides = sense_repetides(partides)
+        comptes: dict[tuple[str, str], int] = {}
+        for p in partides:
+            comptes[(p.fase, p.grup)] = comptes.get((p.fase, p.grup), 0) + 1
+            p.ordre = comptes[(p.fase, p.grup)]
+        desa(conn, primer, partides)
         total += len(partides)
-        console.print(f"  {full.temporada} {full.titol}: {len(partides)} partides")
+        console.print(f"  {primer.temporada} {primer.titol}: {len(partides)} partides")
+    _valida_rfeb(conn)
     conn.commit()
     conn.close()
     console.print(f"{total} partides de {len(fulls)} fulls")
@@ -2610,6 +2647,7 @@ def rfeb_fases_cmd(
         raise typer.Exit(1)
     conn = ensure_schema(get_settings().db_path)
     res = carrega(conn, arrel)
+    _valida_rfeb(conn)
     conn.commit()
     conn.close()
     if detall:

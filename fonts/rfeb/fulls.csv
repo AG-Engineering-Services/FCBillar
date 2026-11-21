@@ -1,21 +1,84 @@
-full,temporada,modalitat,categoria,tipus,titol,lloc,data_inici,data_fi,format,pestanyes,viu
-1xn1d7Yu5eAvdztaHU4faR8QyoJFPu3Y9X2RWkPMJ6zo,2020-2021,3b,absolut,seleccions,XXVI Campeonato de España de Selecciones Autonómicas,Gandia,2021-05-14,2021-05-16,actes,VIERNES|SÁBADO|FASE FINAL,
-1wFk5fSHWhAN5QOwShtEUJ8kA51uts1nI9OiiJa-KGxY,2021-2022,3b,absolut,seleccions,XXVII Campeonato de España de Selecciones Autonómicas,,,,actes,RESULTADOS,
-1K58Hw37IvK-R5iIix16o3NxAr8xYuVrhT24A1HtJtfw,2022-2023,3b,absolut,seleccions,XXVIII Campeonato de España de Selecciones Autonómicas,,,,actes,ACTAS FASE DE GRUPOS|ACTAS FASE FINAL,
-1KFABt0iMaYGb1ipWAag4yiJBd4I-PcibAkqL43vZlL4,2023-2024,3b,absolut,seleccions,XXIX Campeonato de España de Selecciones Autonómicas,,,,actes,ACTAS FASE DE GRUPOS|ACTAS FASE FINAL,
-1id6jGX1WWFyQ7glyUnoeQDteJ_kMGTBGjJaSOrm-6LY,2024-2025,3b,absolut,seleccions,XXX Campeonato de España de Selecciones Autonómicas,Valladolid,2025-05-01,2025-05-04,actes,ACTAS FASE DE GRUPOS|ACTAS FASE FINAL,
-1Z6Jw6ogbYwZA_AoWkgyIpndv9ZewApsZT6w9g6fn3YM,2022-2023,3b,absolut,playoff,Play-off de ascenso de Primera División,,,,actes,PLAYOFF 1 DIV,
-1c5HgbgIRE3RaNYx-n8YuIMALyOYy1cLLqHCLJRoxjuI,2022-2023,3b,absolut,playoff,Play-off de ascenso de Segunda División,,,,actes,Playoff 2DIV,
-1w68TPBjYVcEUkjuU3U2h-p5DwSWplKpAUAOsZ3CR2cY,2023-2024,3b,absolut,playoff,Play-off de ascenso de Primera División,,,,actes,FASE GRUPOS|FASE KO,
-1TJUQIyRuKLjmW7h_FYh4VQCYSdClnBE_NPh1Cj8FK3Q,2023-2024,3b,absolut,playoff,Play-off de ascenso de Segunda División,,,,actes,FASE GRUPOS|FASE KO,
-1NHqFqac3ogzOHnBaHAXMdyJ46AiYDkDrkvIUhLevDM4,2024-2025,3b,absolut,playoff,Play-off de ascenso de Primera División,,,,actes,Playoff 1 División,
-10wNP59vZWHtP8l_nqxfldV0mRkNqdxIMkpQIruuXiec,2024-2025,3b,absolut,playoff,Play-off de ascenso de Segunda División,,,,actes,Playoff 2DIV,
-1BgrNNH-PC_6BTBlfW--q2jwIPLvId6UePcH_t2Hpnd4,2024-2025,serie,absolut,equips,Campeonato de España por Equipos de Juegos de Serie (fase final),,,,actes,PARTIDOS VIERNES|PARTIDOS SÁBADO|PARTIDOS DOMINGO,
-1ov8hhivkU3URxFZMtZwnay47zDRvWnBApjxs5M_f9J8,2022-2023,3b,sub15,ce,XIV Campeonato de España Sub-15 de Tres Bandas,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|CUARTOS|SEMIS Y FINAL,
-1bp4mPTxppfG5rOdz_gu21bTV8L3NC9XlKi44V1-asB8,2022-2023,lliure,sub15,ce,XXI Campeonato de España Sub-15 de Libre,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|CUARTOS|SEMIS Y FINAL,
-1aRNFToYFSHv14glIfB3rSsWXhGBxnyLYl16fUXjZkRA,2023-2024,3b,sub15,ce,XV Campeonato de España Sub-15 de Tres Bandas,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|CUARTOS|SEMIS Y FINAL,
-1fp9QZNJ_M-JYlYeg1jNwx4QWA8jUFpcOQCZFgAjrNko,2023-2024,lliure,sub15,ce,XXII Campeonato de España Sub-15 de Libre,,,,parelles,FASE DE GRUPOS|OCTAVOS|CUARTOS|SEMIS Y FINAL,
-18fIPq-CdAeJrMXSffEatWHOpzhzYGDendRVIsDTmXIU,2024-2025,3b,sub15,ce,XVI Campeonato de España Sub-15 de Tres Bandas,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|GRUPO G|GRUPO H|GRUPO I|OCTAVOS|CUARTOS|SEMIS Y FINAL,
-1i5Y3Pk3esDe_mT_yLj8hLuhBd44qFk7DD2V2JV8JMck,2024-2025,lliure,sub15,ce,XXIII Campeonato de España Sub-15 de Libre,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|GRUPO G|GRUPO H|GRUPO I|GRUPO J|GRUPO K|GRUPO L|OCTAVOS|CUARTOS|SEMIS Y FINAL,
-1Nh4tnmMGl09OFD1JdGmddG9QCgHGCN9jfY4u-Qz8aDE,2024-2025,lliure,femeni,ce,I Campeonato de España Femenino Sub-15 de Libre,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|CUARTOS|SEMIS Y FINAL,
-1GGwY4Scvy1jOphoJQmGVG4EwR5Gm1Krb,2026-2027,3b,absolut,gpe,GPE II Open Soman Tomelloso de Billar a Tres Bandas,Tomelloso,2026-11-16,2026-11-21,parelles,Acumulado Partidos,si
+full,temporada,modalitat,categoria,tipus,titol,lloc,data_inici,data_fi,format,pestanyes,viu,prova
+1xn1d7Yu5eAvdztaHU4faR8QyoJFPu3Y9X2RWkPMJ6zo,2020-2021,3b,absolut,seleccions,XXVI Campeonato de España de Selecciones Autonómicas,Gandia,2021-05-14,2021-05-16,actes,VIERNES|SÁBADO|FASE FINAL,,
+1wFk5fSHWhAN5QOwShtEUJ8kA51uts1nI9OiiJa-KGxY,2021-2022,3b,absolut,seleccions,XXVII Campeonato de España de Selecciones Autonómicas,,,,actes,RESULTADOS,,
+1K58Hw37IvK-R5iIix16o3NxAr8xYuVrhT24A1HtJtfw,2022-2023,3b,absolut,seleccions,XXVIII Campeonato de España de Selecciones Autonómicas,,,,actes,ACTAS FASE DE GRUPOS|ACTAS FASE FINAL,,
+1KFABt0iMaYGb1ipWAag4yiJBd4I-PcibAkqL43vZlL4,2023-2024,3b,absolut,seleccions,XXIX Campeonato de España de Selecciones Autonómicas,,,,actes,ACTAS FASE DE GRUPOS|ACTAS FASE FINAL,,
+1id6jGX1WWFyQ7glyUnoeQDteJ_kMGTBGjJaSOrm-6LY,2024-2025,3b,absolut,seleccions,XXX Campeonato de España de Selecciones Autonómicas,Valladolid,2025-05-01,2025-05-04,actes,ACTAS FASE DE GRUPOS|ACTAS FASE FINAL,,
+1Z6Jw6ogbYwZA_AoWkgyIpndv9ZewApsZT6w9g6fn3YM,2022-2023,3b,absolut,playoff,Play-off de ascenso de Primera División,,,,actes,PLAYOFF 1 DIV,,
+1c5HgbgIRE3RaNYx-n8YuIMALyOYy1cLLqHCLJRoxjuI,2022-2023,3b,absolut,playoff,Play-off de ascenso de Segunda División,,,,actes,Playoff 2DIV,,
+1w68TPBjYVcEUkjuU3U2h-p5DwSWplKpAUAOsZ3CR2cY,2023-2024,3b,absolut,playoff,Play-off de ascenso de Primera División,,,,actes,FASE GRUPOS|FASE KO,,
+1TJUQIyRuKLjmW7h_FYh4VQCYSdClnBE_NPh1Cj8FK3Q,2023-2024,3b,absolut,playoff,Play-off de ascenso de Segunda División,,,,actes,FASE GRUPOS|FASE KO,,
+1NHqFqac3ogzOHnBaHAXMdyJ46AiYDkDrkvIUhLevDM4,2024-2025,3b,absolut,playoff,Play-off de ascenso de Primera División,,,,actes,Playoff 1 División,,
+10wNP59vZWHtP8l_nqxfldV0mRkNqdxIMkpQIruuXiec,2024-2025,3b,absolut,playoff,Play-off de ascenso de Segunda División,,,,actes,Playoff 2DIV,,
+1BgrNNH-PC_6BTBlfW--q2jwIPLvId6UePcH_t2Hpnd4,2024-2025,serie,absolut,equips,Campeonato de España por Equipos de Juegos de Serie (fase final),,,,actes,PARTIDOS VIERNES|PARTIDOS SÁBADO|PARTIDOS DOMINGO,,
+1ov8hhivkU3URxFZMtZwnay47zDRvWnBApjxs5M_f9J8,2022-2023,3b,sub15,ce,XIV Campeonato de España Sub-15 de Tres Bandas,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|CUARTOS|SEMIS Y FINAL,,
+1bp4mPTxppfG5rOdz_gu21bTV8L3NC9XlKi44V1-asB8,2022-2023,lliure,sub15,ce,XXI Campeonato de España Sub-15 de Libre,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|CUARTOS|SEMIS Y FINAL,,
+1aRNFToYFSHv14glIfB3rSsWXhGBxnyLYl16fUXjZkRA,2023-2024,3b,sub15,ce,XV Campeonato de España Sub-15 de Tres Bandas,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|CUARTOS|SEMIS Y FINAL,,
+1fp9QZNJ_M-JYlYeg1jNwx4QWA8jUFpcOQCZFgAjrNko,2023-2024,lliure,sub15,ce,XXII Campeonato de España Sub-15 de Libre,,,,parelles,FASE DE GRUPOS|OCTAVOS|CUARTOS|SEMIS Y FINAL,,
+18fIPq-CdAeJrMXSffEatWHOpzhzYGDendRVIsDTmXIU,2024-2025,3b,sub15,ce,XVI Campeonato de España Sub-15 de Tres Bandas,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|GRUPO G|GRUPO H|GRUPO I|OCTAVOS|CUARTOS|SEMIS Y FINAL,,
+1i5Y3Pk3esDe_mT_yLj8hLuhBd44qFk7DD2V2JV8JMck,2024-2025,lliure,sub15,ce,XXIII Campeonato de España Sub-15 de Libre,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|GRUPO G|GRUPO H|GRUPO I|GRUPO J|GRUPO K|GRUPO L|OCTAVOS|CUARTOS|SEMIS Y FINAL,,
+1Nh4tnmMGl09OFD1JdGmddG9QCgHGCN9jfY4u-Qz8aDE,2024-2025,lliure,femeni,ce,I Campeonato de España Femenino Sub-15 de Libre,,,,parelles,GRUPO A|GRUPO B|GRUPO C|GRUPO D|CUARTOS|SEMIS Y FINAL,,
+1GGwY4Scvy1jOphoJQmGVG4EwR5Gm1Krb,2026-2027,3b,absolut,gpe,GPE II Open Soman Tomelloso de Billar a Tres Bandas,Tomelloso,2026-11-16,2026-11-21,parelles,Acumulado Partidos,si,
+1ce2H9Y54x5nGca-s7JilfurTtCdK21POaP6ReUDzo0Y,2018-2019,3b,absolut,ce,Campionat d'Espanya de tres bandes 2018-2019,,,,auto,FFINAL|8º|16º|R7|R6|R5|R4|R3|R2|R1,,noticias2018/res_ce_3b
+1LShIxXp9qD3Uc2AYRpb_LzfCnEs9sCT5uYZTDS-0g44,2018-2019,banda,absolut,ce,Campionat d'Espanya de banda 2018-2019,Paiporta (Valencia),2019-02-15,2019-02-17,auto,F FINAL|GRUPOS Q|GRUPOS PQ,,noticias2018/res_ce_banda
+1WxKa2fV9RhPIPT2Wv6zb09xnJeJ4m4PzRrokmw0LbL0,2018-2019,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),,,,auto,Semis-Final|Cuartos|Octavos|Dieciseisavos|Ronda1|Ronda2|Ronda3|Ronda4|Ronda5|Ronda6,,noticias2018/res_gpe_3b_madrid
+1sDY2-DiTV-njlB3hS2rUUeSzDTGFw1h_BFWtSoVFUDo,2018-2019,47_2,absolut,ce,Campionat d'Espanya de quadre 47/2 2018-2019,Sueca (Valencia),2019-01-18,2019-01-20,auto,FASE QUALY|FASE PRE-QUALY|DOMINGO,,noticias2018/res_ce_47-2
+1CxxMI1rZKiiQz39VCDriymXnQKzemQSfa1eKGArNayo,2018-2019,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),,,,auto,Semis-Final|Cuartos|Octavos|Dieciseisavos|Ronda5|Ronda4|Ronda3|Ronda2|Ronda1,,noticias2018/res_gpe_3b_gandia
+12FYWWacdvox4M3MmVBGHhtvLM4aTFH6u,2020-2021,3b,sub25,ce,Campionat d'Espanya de tres bandes sub25 2020-2021,,,,auto,RESULTADOS GRUPOS,,noticias2020/res_ce_3b_s25
+11u0MeDzw0AHLTMC1SQiCU1Q_08gthDgp,2020-2021,3b,femeni,ce,Campionat d'Espanya de tres bandes femeni 2020-2021,,,,auto,RESULTADOS GRUPOS,,noticias2020/res_ce_3b_fem
+1iAbUSsVohlj6c8eWmmDVmVQRQ7UwyMyPef9zTDPC_Lc,2020-2021,3b,absolut,ce,Campionat d'Espanya de tres bandes 2020-2021,,,,auto,Ronda1|Ronda2|Ronda3|Ronda4|Ronda5|Ronda6|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2020/res_ce_3b
+1kUm5ot9PtwcfHeEfeJlyL_Ylw9HPjP0Xq7VrEVrKCmk,2020-2021,71_2,absolut,ce,Campionat d'Espanya de quadre 71/2 2020-2021,Lérida,2021-04-30,2021-05-02,auto,FASE CLASIFICACIÓN|FASE FINAL,,noticias2020/res_ce_71-2
+1TIWg3ijvVnACGmqkWZOl6C2dcgI6-ihT,2020-2021,banda,absolut,ce,Campionat d'Espanya de banda 2020-2021,Paiporta (Valencia),2021-04-16,2021-04-18,auto,FASE FINAL|FASE PREVIA,,noticias2020/res_ce_banda
+1JEJEi2p-oegnt2DTgYsHsgU4a2QbbTss52ydz2N6s8Q,2020-2021,47_2,absolut,ce,Campionat d'Espanya de quadre 47/2 2020-2021,Gandía (Valencia),2020-12-11,2020-12-13,auto,FP VIERNES|FQ SABADO|DOMINGO,,noticias2020/res_ce_47-2
+1--ylEbL1NfMF8RlMOfBqJ29RrmDK5do4,2020-2021,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),,,,auto,Ronda1|Ronda2|Ronda3|Ronda4|SETZENS |OCTAUS|QUARTS|SEMIS-FINAL,,noticias2020/res_gpe_3b_gandia
+1DZ69Y2ZbMRtt0MgrDzMAu2pOF1-etYJGxsvp6Roiu5c,2021-2022,3b,sub15,ce,Campeonato de España Sub-15 de Tres Bandas (julio 2022),,,,auto,GRUPO A|GRUPO B|GRUPO C|SEMIS Y FINAL,,
+18_sOf5nZyJmi1khe-1ZBZ7pfzQoJ9wdiCdTr_R_Ix_w,2021-2022,lliure,sub15,ce,Campeonato de España Sub-15 de Libre (julio 2022),,,,auto,GRUPO A|GRUPO B|GRUPO C|SEMIS Y FINAL,,
+1dkkXyBJCizYkOc75_Ef1okEIvRIDqBamxowza2osV00,2021-2022,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_asturias),,,,auto,Ronda1|Ronda2|Ronda3|Ronda4|Ronda5|Ronda6|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2021/res_gpe_3b_asturias
+19uG1laiNPtWyX55b5l1mUnhN275fHIIfX0Hilpr0ULY,2021-2022,71_2,absolut,ce,Campionat d'Espanya de quadre 71/2 2021-2022,Valencia,2022-05-21,2022-05-22,auto,FQ SABADO|DOMINGO,,noticias2021/res_ce_71-2
+1_VzAXR1D7afEJsBYYoJeqBe5X6dYd-7pmLvE44i9w18,2021-2022,3b,sub25,ce,Campionat d'Espanya de tres bandes sub25 2021-2022,,,,auto,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|GRUPO G|CUARTOS|SEMIS Y FINAL,,noticias2021/res_ce_3b_s25
+1jHjPFV_Dt9YarkldDubB1m0U6rpX8cfI6TTTB8-6Dyk,2021-2022,3b,femeni,ce,Campionat d'Espanya de tres bandes femeni 2021-2022,,,,auto,GRUPO A|GRUPO B|GRUPO C|SEMIS Y FINAL,,noticias2021/res_ce_3b_fem
+1rEn237rzNFztsbGqkmSzdX4DlkpWpbrjg8Qmk_SxFR8,2021-2022,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),,,,auto,Ronda1|Ronda2|Ronda3|Ronda4|Ronda5|Ronda6|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2021/res_gpe_3b_madrid
+1PGoY0-mtyoK2tlBflghOVxg5iwUgzRYte0NQSsMMHg4,2021-2022,47_2,absolut,ce,Campionat d'Espanya de quadre 47/2 2021-2022,Elda (Alicante),2022-04-01,2022-04-03,auto,FQ SABADO|DOMINGO,,noticias2021/res_ce_47-2
+1fNwR6K9Vw8ehiypzsYMYJdROGfegrmZG7eelliYWnXo,2021-2022,banda,absolut,ce,Campionat d'Espanya de banda 2021-2022,Paiporta (Valencia),2022-03-11,2022-03-13,auto,DOMINGO|SABADO|PQ GRUPS|VIERNES,,noticias2021/res_ce_banda
+1qIu1D9r8etgkkbMX2SCvzXvmTsBnxPcJrs-H2nGQ5Sc,2021-2022,3b,absolut,ce,Campionat d'Espanya de tres bandes 2021-2022,,,,auto,PREVIA|PPPPQ|PPPQ|PPQ|PQ|Q,,noticias2021/res_ce_3b
+1VWemE82mXT9iOyTnfYddYvE3PJNBcNXl3dkJg4ho79E,2021-2022,3b,absolut,ce,Campionat d'Espanya de tres bandes 2021-2022,,,,auto,Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2021/res_ce_3b
+1zQ3_SMTpj85G9JKaHAdWZ5TT4IZaRcGCo9eN-_CryD4,2021-2022,3b,sub17,ce,CAMPEONATO DE ESPAÑA TRES BANDAS SUB.17,,,,auto,GRUPO A|GRUPO B|GRUPO C|GRUPO D,,noticias2021/res_ce_3b_s17
+1i3VdzTCLX5XNCCTZewHRHWepHx0ad1K60MBbJR1nyLg,2021-2022,lliure,sub15,ce,XIX CAMPEONATO DE ESPAÑA LIBRE SUB.15,,,,auto,GRUPO A|GRUPO B|GRUPO C|CUARTOS|SEMIS Y FINAL,,noticias2021/res_ce_libre_s15
+1vi2h4mPmPsClPfzWA4ns1SVJNEZvbVHdugLdCW5jah0,2021-2022,3b,sub15,ce,CAMPEONATO DE ESPAÑA TRES BANDAS SUB.15,,,,auto,GRUPO A|GRUPO B|GRUPO C|CUARTOS|SEMIS Y FINAL,,noticias2021/res_ce_3b_s15
+1azQXIzH8AaMQZTzrpT2xGZH8zkMhmof_-OkJbWIBfkY,2021-2022,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_mijas),,,,auto,Ronda1|Ronda2|Ronda3|Ronda4|Ronda5|Ronda6|Ronda7|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2021/res_gpe_3b_mijas
+1ijc3Tt6BaCg2cjk5Vo4aVHYsuvqXcgkz8qe_N0HNo3s,2021-2022,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),,,,auto,Ronda1|Ronda2|Ronda3|Ronda4|Ronda5|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2021/res_gpe_3b_gandia
+1CzaNAG1Gz-y61-34uFx3yTMv28k-QwOSc6J3v4MJbdg,2022-2023,3b,sub25,ce,Campionat d'Espanya de tres bandes sub25 2022-2023,,,,auto,GRUPOS SUB25|FASE FINAL SUB 25,,noticias2022/res_ce_3b_s25
+1CzaNAG1Gz-y61-34uFx3yTMv28k-QwOSc6J3v4MJbdg,2022-2023,3b,femeni,ce,Campionat d'Espanya de tres bandes femeni 2022-2023,,,,auto,GRUPOS FEMENINO|FASE FINAL FEMENINO,,noticias2022/res_ce_3b_fem
+1j3DRTUGqXa-0DlAokzITZsNLWka5BZO0ed2z3p8bwRw,2022-2023,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_madrid),,,,auto,PREVIA|PPPQ|PPQ|PQ|Q|16AVOS|OCTAVOS|CUARTOS|SEMI-FINAL,,noticias2022/res_gpe_3b_madrid
+19oG8PBx_3WRragihZVPTfOt0C_c62ZEow9_iMglUy5s,2022-2023,3b,absolut,gpe,GPE Mijas-Costa del Sol de Billar a Tres Bandas 2022-23,,,,auto,Ronda1|Ronda2|Ronda3|Ronda4|Ronda5|Ronda6|Ronda7|Dieciseisavos|Octavos|Cuartos|Semis-Final,,
+1d6VfFzQwK16pxvmyUjm4IS3d9VWZ9tDWT4X9wucRbL8,2022-2023,banda,absolut,ce,Campionat d'Espanya de banda 2022-2023,Cervera (Lérida),2023-02-23,2023-02-26,auto,FASE PPQ|FASE PQ |FASE CLASIFICACIÓN|FASE FINAL ,,noticias2022/res_ce_banda
+1K_SbBdtgPNmaBnYs_A-PECl52Bjt7zcEeVt4bJpDDX8,2022-2023,3b,absolut,ce,Campionat d'Espanya de tres bandes 2022-2023,,,,auto,Ronda1|Ronda2|Ronda3|Ronda4|Ronda5|Ronda6|Ronda7|Ronda8|Ronda9|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2022/res_ce_3b
+1SV_ZXpXsds5KEpXLIKSHm_AzHFjIShs2m-P035f72pI,2022-2023,71_2,absolut,ce,Campionat d'Espanya de quadre 71/2 2022-2023,Alicante,2022-12-16,2022-12-18,auto,FP VIERNES|FQ SABADO|DOMINGO,,noticias2022/res_ce_71-2
+16rIOYaWd7k9BX7GH6yCzMFB701iNa9_aud2FW0X2Cdc,2022-2023,3b,sub17,ce,CAMPEONATO DE ESPAÑA TRES BANDAS,,,,auto,GRUPO A|GRUPO B|GRUPO C|SEMIS Y FINAL,,noticias2022/res_ce_3b_s17
+1vQrHG3ndpJmmWKgRX9_koRVIG8m9C8AULXqUCP1KNLE,2022-2023,3b,sub21,ce,CAMPEONATO DE ESPAÑA TRES BANDAS SUB.21,,,,auto,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|CUARTOS|SEMIS Y FINAL,,noticias2022/res_ce_3b_s21
+13E8qQeFfcfb4oBAzYOWO3pVUxEeYPlB6k3HdJbZk0KU,2022-2023,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_baeza),,,,auto,Ronda1|Ronda2|Ronda3|Ronda4|Ronda5|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2022/res_gpe_3b_baeza
+10NbMZ49RLzX0TDuVvYrQ5QQh85cQDf5DwY5rR5eCpBA,2022-2023,47_2,absolut,ce,Campionat d'Espanya de quadre 47/2 2022-2023,Vic (Barcelona),2022-10-28,2022-10-30,auto,FASE PREVIA |FASE CLASIFICACIÓN|FASE FINAL ,,noticias2022/res_ce_47-2
+1c5mCq4S6ucW1bs_-1vLfHAS4VvCTCB1FnMcWd3N4ndY,2022-2023,3b,absolut,gpe,Gran Premi d'Espanya de tres bandes (res_gpe_3b_gandia),,,,auto,R1|R2|R3|R4|R5|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2022/res_gpe_3b_gandia
+1eSId_U4DdAi0v7Y7lbL-Y5jF0N7J5VSgDGVeX6NnTn0,2023-2024,3b,sub25,ce,XXV CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,Murcia,2024-06-28,2024-06-30,auto,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|CUARTOS|SEMIS Y FINAL,,noticias2023/res_ce_3b_s25
+1rWfPAMR6Cvw1ZXzhfsR7B1y8HPqqwPRBzzn3mTj3928,2023-2024,3b,femeni,ce,XXIV CAMPEONATO DE ESPAÑA FEMENINO DE BILLAR A TRES BANDAS,Murcia,2024-06-27,2024-06-28,auto,GRUPO A|GRUPO B|GRUPO C|SEMIS Y FINAL,,noticias2023/res_ce_3b_fem
+1p01t8xs03H2-s9vBg66NXnshtSJnhF_LerIDlS8QBhU,2023-2024,3b,absolut,gpe,GPE IX COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,Madrid,2024-05-26,2024-06-02,auto,PPPPQ|PPPQ|PPQ|PQ|Q|16AVOS|OCTAVOS|CUARTOS|SEMI-FINAL,,noticias2023/res_gpe_3b_madrid
+1vQcQppvQRA8X8erD-0fH8q3deDAHKIKGmVf6V76INYs,2023-2024,3b,absolut,gpe,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""III EDICIÓN MIJAS-COSTA DEL SOL""",Mijas (Málaga),2024-03-04,2024-03-10,auto,Ronda2|Ronda3|Ronda4|Ronda5|Ronda6|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2023/res_gpe_3b_mijas
+1JKhFWcVBhySTm3MqgLqRfRNuH9iahbks4Fi9IbDBwDg,2023-2024,3b,absolut,ce,XC CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,La Coruña,2024-01-21,2024-01-27,auto,PREVIA|PPPQ|PPQ|PQ|Q|16AVOS|OCTAVOS|CUARTOS|SEMI-FINAL,,noticias2023/res_ce_3b
+1-MsqVQ1vmi_1GadpG5a1pFGvAZKw7_h6LP2_1gC8bCw,2023-2024,71_2,absolut,ce,LXIX CAMPEONATO DE ESPAÑA CUADRO 71/2,Tarragona,2024-01-18,2024-01-21,auto,FASE PPQ|FASE PQ |FASE Q|FASE FINAL ,,noticias2023/res_ce_71-2
+1IXroLugKS4OsW5CD1LrF42Smt85K_XKKXoBFl-GNNHk,2023-2024,3b,sub17,ce,Campionat d'Espanya de tres bandes sub17 2023-2024,,,,auto,GRUPO A|GRUPO B|GRUPO C|GRUPO D|SEMIS Y FINAL,,noticias2023/res_ce_3b_s17
+13v69MXccjBD25wZFNqq5p9BvHL_c9y3yzhtTSdDf_bc,2023-2024,47_2,absolut,ce,LXXXIII CAMPEONATO DE ESPAÑA,Cervera (Lérida),2023-11-30,2023-12-03,auto,FASE PREVIA|FASE PQ |FASE CLASIFICACIÓN|FASE FINAL ,,noticias2023/res_ce_47-2
+1XlU3VL7nYkrP-ACeocyYaZ0iJpKe7AxB0xe0Mv5MeLs,2023-2024,3b,absolut,gpe,GPE DS BILLAR - CIUTAT DE PALMA DE BILLAR A TRES BANDAS,Palma De Mallorca,2023-11-14,2023-11-19,auto,PREVIA|PQ|Q|16AVOS|OCTAVOS|CUARTOS|SEMI-FINAL,,noticias2023/res_gpe_3b_palma
+11ePiwqpLUttxb-GDFMolSoD9ObxAFtVr3QWDDGy8tCs,2023-2024,3b,absolut,gpe,XVIII GPE Ciutat de Gandia de Billar a Tres Bandas,,,,auto,R1|R2|R3|R4|R5|R6|Dieciseisavos|Octavos|Cuartos|Semis-Final,,
+15yJ43Un_ZO5SMNbHxo7VkkJqqWP6dnvATRJ4sag3EEA,2024-2025,3b,sub25,ce,XXVI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,Murcia,2025-06-25,2025-06-27,auto,GRUPO A|GRUPO B|GRUPO C|SEMIS Y FINAL,,noticias2024/res_ce_3b_s25
+10FG9Do2Bd8Ta730HdrXzwjfqNpf9Ww1Mnwomf8Iw2bY,2024-2025,71_2,absolut,ce,Campionat d'Espanya de quadre 71/2 2024-2025,,,,auto,FASE PQ |FASE Q|FASE FINAL ,,noticias2024/res_ce_71-2
+1dSmE0agBCClbw-MQRLnHEvhxGMWQwlDYSwy4tqTQ9Ws,2024-2025,3b,absolut,gpe,GPE X COMUNIDAD DE MADRID DE BILLAR A TRES BANDAS,Madrid,2025-06-01,2025-06-08,auto,FASE PREVIA|PPPQ|PPQ|PQ|Q|16AVOS|OCTAVOS|CUARTOS|SEMI-FINAL,,noticias2024/res_gpe_3b_madrid
+1eYye9Y_Br5hnGgcHnp6B-YDWLunoFvH39XSWJWmDPW8,2024-2025,3b,femeni,ce,XXV CAMPEONATO DE ESPAÑA FEMENINO DE BILLAR A TRES BANDAS,Mallorca,2025-05-24,2025-05-25,auto,GRUPO A|GRUPO B|SEMIS Y FINAL,,noticias2024/res_ce_3b_fem
+1lPmHOWIgCVfgTvg9-EFcqGIcB9szsB4RFHugMv-PTAU,2024-2025,3b,absolut,gpe,GPE I TROFEO ARAGÓN DE BILLAR A TRES BANDAS,Zaragoza,2025-03-15,2025-03-23,auto,PREVIA|PPPPQ|PPPQ|PPQ|PQ|Q|16AVOS|OCTAVOS|CUARTOS|SEMI-FINAL,,noticias2024/res_gpe_3b_zaragoza
+1UnAb_0Tm9-Yt_udTir5nacBbyG5CIRsIsdiYJyBypFk,2024-2025,banda,absolut,ce,LXXII CAMPEONATO DE ESPAÑA DE BILLAR A LA BANDA,Elda (Alicante),2025-02-27,2025-03-02,auto,FASE PQ|FASE CLASIFICACIÓN|FASE FINAL ,,noticias2024/res_ce_banda
+17HBQ4awYZJIFhZTtQNYQt4b8gmQBF7NI9cuMrOJGtEk,2024-2025,3b,absolut,ce,XCI CAMPEONATO DE ESPAÑA DE BILLAR A TRES BANDAS,Cartagena,2025-01-18,2025-01-26,auto,PREVIA|PPPPPQ|PPPPQ|PPPQ|PPQ|PQ|Q|16AVOS|OCTAVOS|CUARTOS|SEMI-FINAL,,noticias2024/res_ce_3b
+1mEhCiNUppuEdfQnU4BxaGPyl7rME5p717vUjx6cFUI0,2024-2025,3b,sub21,ce,XLIII CAMPEONATO DE ESPAÑA TRES BANDAS SUB.21,,,,auto,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|CUARTOS|SEMIS Y FINAL,,noticias2024/res_ce_3b_s21
+1ERwzs3vSYpcf_Ts5EBVTZX5iorTHOWwLaMnM1Tbb8ZM,2024-2025,3b,sub17,ce,XXXIV CAMPEONATO DE ESPAÑA TRES BANDAS SUB.17,,,,auto,GRUPO A|GRUPO B|GRUPO C|GRUPO D|SEMIS Y FINAL,,noticias2024/res_ce_3b_s17
+1ZMYRtyc2xwAdPCIZkYXZmjJvQE37j9ZZ,2024-2025,3b,absolut,gpe,"GPE I OPEN ""SOMAN TOMELLOSO"" DE BILLAR A TRES BANDAS",Tomelloso,2024-11-17,2024-11-24,auto,PRE3|PRE2|16 avos|8 avos|Resto,,noticias2024/res_gpe_3b_tomelloso
+18xm2imqmN63ZSj3OYzAeQOTglPklAjhy5Wxj0crkL2g,2024-2025,3b,absolut,gpe,"GRAN PREMIO DE ESPAÑA DE BILLAR A TRES BANDAS ""XIX CIUTAT DE GANDIA-CHEF AMADEO""",Gandía (Valencia),2024-09-29,2024-10-06,auto,R1|R2|R3|R4|R5|R6|Dieciseisavos|Octavos|Cuartos|Semis-Final,,noticias2024/res_gpe_3b_gandia
+1oaM1E4ZPnMQaK8Y4hVSP7zcXL65ST13l-u6Y165mUDs,2024-2025,47_2,absolut,ce,LXXXIV CAMPEONATO DE ESPAÑA CUADRO 47/2,Elda (Alicante),2024-09-19,2024-09-22,auto,FASE PREVIA|FASE PQ |FASE CLASIFICACIÓN|FASE FINAL ,,noticias2024/res_ce_47-2
+1xAQyBlB7Wx4K6jWSMS5qk4GvGraWeUqutDIMmk6Jicw,2023-2024,3b,sub21,ce,Campeonato de España Sub-21 de Tres Bandas (diciembre 2023),,,,auto,GRUPO A|GRUPO B|GRUPO C|GRUPO D|GRUPO E|GRUPO F|GRUPO G|CUARTOS|SEMIS Y FINAL,,

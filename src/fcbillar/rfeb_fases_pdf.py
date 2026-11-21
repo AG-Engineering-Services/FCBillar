@@ -311,12 +311,21 @@ def _prova_per_jugadors(
     """
     jugadors = {_mots(p.jugador_a) for p in partides} | {_mots(p.jugador_b) for p in partides}
     carpeta = cami.parent.name + "/"
-    llocs = set(cami.stem.lower().split("_")) - _MOTS_GENERICS
+    mots_fitxer = set(cami.stem.lower().split("_"))
+    llocs = mots_fitxer - _MOTS_GENERICS
+    # Si el nom diu de quin tipus és («gpe», «ce»), només una prova del mateix
+    # tipus. Sense això, la fase final del GPE de Múrcia 2012 anava a parar al
+    # Campionat d'Espanya d'aquell any, que tenia gairebé els mateixos jugadors.
+    tipus = mots_fitxer & {"gpe", "ce"}
+
+    def del_tipus(pid: str) -> bool:
+        return not tipus or bool(tipus & set(pid.split("/")[-1].lower().split("_")))
+
     cob = sorted(
         (
             (_cobertura(jugadors, cls), pid)
             for pid, cls in classificats.items()
-            if pid.startswith(carpeta)
+            if pid.startswith(carpeta) and del_tipus(pid)
         ),
         reverse=True,
     )

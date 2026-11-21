@@ -326,9 +326,11 @@ jobs:
           run "nacional"             uv run --no-dev fcbillar ingest-nacional-fonts
 
           # Les partides de la RFEB dels seus fulls de Google de desenvolupament
-          # (`fonts/rfeb/fulls.csv`). Els de proves acabades són al repositori;
-          # els de les que encara es juguen (`viu`) es tornen a baixar cada nit.
-          run "rfeb-fulls"           uv run --no-dev fcbillar rfeb-fulls --baixa vius
+          # (`fonts/rfeb/fulls.csv`). Només els de les proves que encara es juguen
+          # (`viu`): es tornen a baixar i es publiquen. Els de proves acabades
+          # es carreguen i es publiquen a mà un cop, perquè molts van a la prova
+          # d'una classificació que aquesta BD no té.
+          run "rfeb-fulls"           uv run --no-dev fcbillar rfeb-fulls --baixa vius --nomes-vius
 
           # Publicació al núvol (fcbillar publica tot des de la BD, rànquings
           # inclosos: són upserts per clau natural, o sigui que és idempotent).
