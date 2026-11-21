@@ -875,11 +875,21 @@ def publish_pending_games(
         # Capturades per ingest_lliga_encontre (promocions/finals i jornades recents)
         # abans que partideshome les pugi a `games`. Dedup per signatura contra `games`:
         # en incorporar-les la ingesta oficial, deixen de ser pendents.
+        #
+        # Només les de la temporada en curs. Una partida de lliga que no arriba
+        # mai a `games` (una promoció, una final, una signatura que no casa) es
+        # quedava pendent per sempre: el novembre de 2026 encara es publicava un
+        # JIMÉNEZ GALERA - ORTIZ ALAMILLO del 18/09/2021, i la fitxa el donava
+        # per jugat el dia que els dos clubs s'havien de trobar. Sense data no es
+        # pot saber de quina temporada és, i tampoc no hi entra.
+        from fcbillar.calendari_fed import temporada_actual as any_temporada
+
+        inici_temporada = f"{any_temporada()}-08-01"
         for r in conn.execute(
             """SELECT competicio, player1_nom n1, caramboles1 c1, serie1 s1,
                       player2_nom n2, caramboles2 c2, serie2 s2, entrades e, data
-               FROM lliga_pending_partides WHERE modalitat_codi = ?""",
-            (mod,),
+               FROM lliga_pending_partides WHERE modalitat_codi = ? AND data >= ?""",
+            (mod, inici_temporada),
         ):
             if not r["e"] or r["e"] <= 0:
                 continue

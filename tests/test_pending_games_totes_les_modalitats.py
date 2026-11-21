@@ -14,6 +14,8 @@ no té fitxa segueix quedant fora —però ara es diu.
 
 from __future__ import annotations
 
+import sqlite3
+
 import pytest
 
 from fcbillar import cloud_sync
@@ -102,6 +104,8 @@ def entorn(tmp_path, monkeypatch):
 
     magatzem: dict[str, list[dict]] = {"open_live": []}
     monkeypatch.setattr(cloud_sync, "get_client", lambda: ClientFals(magatzem))
+    # La temporada en curs és la 2026-27, passi el dia que passi el test.
+    monkeypatch.setattr("fcbillar.calendari_fed.temporada_actual", lambda avui=None: 2026)
     return db, magatzem
 
 
@@ -240,3 +244,26 @@ def test_el_ranquing_provisional_es_mou_a_les_altres_modalitats(entorn) -> None:
     assert files["103"]["partides_post"] == 3
     assert files["103"]["mitjana_provisional"] is not None
     assert files["104"]["partides_post"] == 2
+
+
+def test_una_partida_de_lliga_d_una_altra_temporada_no_es_pendent(entorn) -> None:
+    """La que no arriba mai al rànquing no s'ha de quedar pendent per sempre.
+
+    El novembre de 2026 encara es publicava un JIMÉNEZ GALERA - ORTIZ ALAMILLO
+    del 18/09/2021, i la fitxa el donava per jugat.
+    """
+    db, magatzem = entorn
+    conn = sqlite3.connect(db)
+    conn.execute(
+        "INSERT INTO lliga_pending_partides (encontre_lliga_id, modalitat_codi, competicio, "
+        "data, player1_nom, caramboles1, serie1, player2_nom, caramboles2, serie2, entrades) "
+        "VALUES (900, ?, 'LLIGA', '2021-09-18', 'ALBA, ANNA', 40, NULL, 'DURAN, DAVID', 3, NULL, 12)",
+        (TRES_BANDES,),
+    )
+    conn.commit()
+    conn.close()
+
+    cloud_sync.publish_pending_games(db_path=db)
+
+    de_lliga = [f for f in _de(magatzem, TRES_BANDES) if f["font"] == "lliga"]
+    assert {f["data"] for f in de_lliga} == {"2026-10-11"}
