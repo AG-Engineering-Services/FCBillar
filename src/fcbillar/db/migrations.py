@@ -93,6 +93,8 @@ Versions:
 - 37: `umb_partides.sets_a` i `sets_b`, el resultat de cada set de les partides
      a sets de 15 (fins al 2011). Les partides es tornen a carregar: fins ara
      d'aquestes s'hi desava el primer set com si fos el total.
+- 39: `palmares_medalles`, el palmarès dels campionats d'Espanya (RFEB) i
+     d'Europa (CEB) llegit dels seus PDF. Taula nova: la crea l'executescript.
 - 27: `torneig_fase_grups.serie_major` — el quart criteri de desempat del
      rànquing d'una fase, després de la posició al grup, els punts i la mitjana.
      No surt a la taula de classificació del grup: es calcula de les partides.
@@ -116,7 +118,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 38
+SCHEMA_VERSION = 39
 
 
 def _read_schema_sql() -> str:

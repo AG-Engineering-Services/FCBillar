@@ -2420,13 +2420,19 @@ def nacional_candidats_cmd(
     ),
     divisio: str = typer.Option("1", "--divisio", help="honor, 1 o 2. Només amb PDF."),
     sortida: str = typer.Option("fonts/nacional/fitxes.csv", "--sortida"),
+    al_final: bool = typer.Option(  # noqa: B008
+        False,
+        "--al-final",
+        help="Afegeix els nous al final del CSV, sense reordenar-lo (un diff petit).",
+    ),
 ) -> None:
     """Proposa quins jugadors de la Lliga Nacional són a la fitxa del cens català.
 
     Llegeix els noms de la BBDD local i, si n'hi passes, de les classificacions
-    de jugadors en PDF. Els candidats nous s'afegeixen al CSV amb `validat`
-    buit; els que ja hi són, validats o no, no es toquen. Un lligam només val
-    quan hi poses «si».
+    de jugadors en PDF. També els del palmarès (`fcbillar palmares`): els de la
+    RFEB i, del CEB, els de país ES. Els candidats nous s'afegeixen al CSV amb
+    `validat` buit; els que ja hi són, validats o no, no es toquen. Un lligam
+    només val quan hi poses «si».
     """
     from fcbillar.lliga_nacional import llegeix_classificacio_de_jugadors
     from fcbillar.nacional_fitxes import (
@@ -2469,6 +2475,13 @@ def nacional_candidats_cmd(
                 "JOIN rfeb_proves p ON p.id = x.prova_id"
             )
         }
+    # El palmarès (medalles dels campionats d'Espanya i d'Europa).
+    from fcbillar.palmares import jugadors_per_candidats
+
+    rfeb |= {
+        JugadorRfeb(nom=n, equip=c, divisio="palmares" if f == "rfeb" else "palmares-ceb")
+        for n, c, f in jugadors_per_candidats(conn)
+    }
     for pdf in pdfs or []:
         rfeb |= {
             JugadorRfeb(nom=j.jugador, equip=j.equip, divisio=divisio)
@@ -2484,11 +2497,64 @@ def nacional_candidats_cmd(
     ]
     conn.close()
     trobats = candidats(sorted(rfeb, key=lambda r: (r.divisio, r.nom)), cens)
-    ja, nous = escriu_candidats(trobats, sortida)
+    if al_final:
+        from fcbillar.palmares import afegeix_candidats
+
+        ja, nous = afegeix_candidats(trobats, sortida)
+    else:
+        ja, nous = escriu_candidats(trobats, sortida)
     console.print(
         f"{len(rfeb)} jugadors de la Nacional, {len(trobats)} candidats: "
         f"{nous} de nous a {sortida} ({ja} ja hi eren)."
     )
+
+
+@app.command("palmares")
+def palmares_cmd(
+    carpeta: str = typer.Option("fonts/palmares", "--carpeta", help="On viuen els PDF."),
+    baixa: bool = typer.Option(  # noqa: B008
+        False, "--baixa", help="Baixa primer els PDF que falten (rfeb.org i eurobillard.org)."
+    ),
+    forca: bool = typer.Option(  # noqa: B008
+        False, "--forca", help="Amb --baixa, també els que ja hi són."
+    ),
+    desa: bool = typer.Option(  # noqa: B008
+        True, "--desa/--no-desa", help="Desa les medalles a la BBDD local o només les compta."
+    ),
+    detall: bool = typer.Option(  # noqa: B008
+        False, "--detall", help="Mostra totes les línies que no s'han pogut llegir."
+    ),
+) -> None:
+    """Llegeix el palmarès dels campionats d'Espanya (RFEB) i d'Europa (CEB).
+
+    Els PDF del «medallero» de la RFEB i dels «Rolls of Honors» del CEB. Cada
+    competició es reemplaça sencera: tornar-ho a executar no duplica res. El que
+    no es pot llegir no s'endevina: surt a la llista de línies sense llegir.
+    """
+    from fcbillar import palmares as P
+
+    if baixa:
+        fallats = P.baixa(carpeta, forca=forca, log=lambda m: console.print(f"[dim]{m}[/]"))
+        for f in fallats:
+            console.print(f"[red]No s'ha pogut baixar {f}[/]")
+    informes = P.llegeix_carpeta(carpeta)
+    if not informes:
+        console.print(f"[red]Cap PDF a {carpeta} (usa --baixa)[/]")
+        raise typer.Exit(1)
+    taula = Table(title="Palmarès llegit")
+    for c in ("fitxer", "edicions", "medalles", "sense llegir"):
+        taula.add_column(c, justify="left" if c == "fitxer" else "right")
+    for i in informes:
+        taula.add_row(i.fitxer, str(i.edicions), str(len(i.medalles)), str(len(i.no_llegit)))
+    console.print(taula)
+    for i in informes:
+        for on, que in i.no_llegit if detall else i.no_llegit[:5]:
+            console.print(f"[yellow]{i.fitxer} {on}:[/] {que}")
+    if desa:
+        conn = ensure_schema(get_settings().db_path)
+        n = P.desa(conn, informes)
+        conn.close()
+        console.print(f"{n} medalles desades.")
 
 
 @app.command("nacional-alineacions")
@@ -2689,6 +2755,22 @@ def publish_rfeb_partides_cmd() -> None:
 
     counts = publica_si_hi_es(
         "rfeb_partides", lambda: publish_rfeb_partides(on_progress=_prog), _prog
+    )
+    console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
+    if any(v < 0 for v in counts.values()):
+        raise typer.Exit(1)
+
+
+@app.command("publish-palmares")
+def publish_palmares_cmd() -> None:
+    """Publica el palmarès (medalles de la RFEB i del CEB) llegit amb `fcbillar palmares`."""
+    from fcbillar.cloud_sync import publica_si_hi_es, publish_palmares
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"  {msg}" if level != "warn" else f"[yellow]{msg}[/]")
+
+    counts = publica_si_hi_es(
+        "palmares_medalles", lambda: publish_palmares(on_progress=_prog), _prog
     )
     console.print(", ".join(f"{k}={v}" for k, v in counts.items()) or "res a publicar")
     if any(v < 0 for v in counts.values()):
