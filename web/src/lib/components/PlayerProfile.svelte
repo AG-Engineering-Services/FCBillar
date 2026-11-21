@@ -11,7 +11,7 @@
 		rfebPartidesDelJugador,
 		umbDelJugador
 	} from '$lib/db';
-	import { agrupaUmb, resultatSets, resultatUmb, type UmbProva } from '$lib/internacional';
+	import { agrupaUmb, resultatUmb, type UmbProva } from '$lib/internacional';
 	import {
 		aportacionsNacional,
 		aportacionsRfeb,
@@ -28,20 +28,11 @@
 		modalitatRfeb,
 		modalitatsDe,
 		modalitatUmb,
-		MOD_TRES_BANDES,
 		type Indicadors
 	} from '$lib/indicadorsAmbit';
 	import {
-		agrupaNacional,
-		agrupaRfebPartides,
-		divisioNacional,
-		grafiaPerEquip,
-		mitjanaNacional,
-		normalitzaEquip,
-		posicioProva,
 		resultatPartida,
 		resultatRfeb,
-		temporadaCurta,
 		type NacionalPartidaRow,
 		type RfebIndividualRow,
 		type RfebPartidaRow
@@ -271,23 +262,10 @@
 	// Apartat a part: si la consulta falla (p. ex. el cache d'esquemes de Neon encara
 	// no veu nacional_partides_fitxa) o no hi ha partides, simplement no surt.
 	let nacional = $state<NacionalPartidaRow[]>([]);
-	let nacionalShown = $state(40);
-	const nacionalGrups = $derived.by(() => {
-		let resta = nacionalShown;
-		const grups = [];
-		for (const g of agrupaNacional(nacionalLlista)) {
-			if (resta <= 0) break;
-			const grafies = grafiaPerEquip(g.partides.map((p) => p.equip));
-			grups.push({ ...g, grafies, visibles: g.partides.slice(0, resta) });
-			resta -= g.partides.length;
-		}
-		return grups;
-	});
 	$effect(() => {
 		const id = fcbId;
 		let viu = true;
 		nacional = [];
-		nacionalShown = 40;
 		if (id)
 			nacionalPartidesDelJugador(id)
 				.then((r) => {
@@ -397,9 +375,25 @@
 		return [...map.values()];
 	});
 	const esRival = (id: string | null, nom: string) => rivalSel != null && clauRival(id, nom) === rivalSel.key;
+
+	// Tots els apartats de la fitxa surten d'aquesta llista. A Espanya i Internacional
+	// són les partides de la Lliga Nacional i de la UMB/CEB escrites com les catalanes,
+	// i així els tres àmbits tenen els mateixos apartats calculats igual.
+	const gamesAmbit = $derived<GameRowAmbit[]>(
+		(veuEspanya
+			? [...gamesDeNacional(fcbId, nacional), ...gamesDeRfeb(fcbId, rfebPartides)]
+			: veuInternacional
+				? gamesDeUmb(fcbId, internacional)
+				: []
+		)
+			// La més recent primer, com les catalanes.
+			.sort((a, b) => (b.data_partida ?? '').localeCompare(a.data_partida ?? ''))
+	);
+	// Les partides de l'àmbit que es mira: les catalanes, o les d'Espanya o
+	// Internacional escrites com les catalanes (`gamesAmbit`, més avall).
 	const rivalGames = $derived(
 		rivalSel
-			? games.filter((g) => {
+			? (veuEspanya || veuInternacional ? gamesAmbit : games).filter((g) => {
 					const p = persp(g);
 					return esRival(p.oppId, p.opp);
 				})
@@ -459,16 +453,7 @@
 	const modAlt = $derived(opcionsMod.some((o) => o.clau === selModAlt) ? selModAlt : (opcionsMod[0]?.clau ?? null));
 	const kpiAmbit = $derived(finestres(filtraModalitat(apsAmbit, modAlt)));
 	const ambitAnterior = $derived(kpiAmbit.anterior.n || kpiAmbit.anterior.nomesMitjana ? kpiAmbit.anterior : null);
-	// La Lliga Nacional només es juga a tres bandes.
-	const nacionalLlista = $derived(modAlt == null || modAlt === MOD_TRES_BANDES ? nacionalFiltrat : []);
 	const individualsLlista = $derived(modAlt == null ? individuals : individuals.filter((r) => modalitatRfeb(r.modalitat) === modAlt));
-	const rfebGrups = $derived(
-		agrupaRfebPartides(modAlt == null ? rfebFiltrat : rfebFiltrat.filter((r) => modalitatRfeb(r.modalitat) === modAlt))
-	);
-	let rfebObertes = $state<Set<string>>(new Set());
-	const internacionalLlista = $derived(
-		modAlt == null ? internacionalFiltrat : internacionalFiltrat.filter((pr) => modalitatUmb(pr.disciplina) === modAlt)
-	);
 	type TargetaKpi = Omit<Indicadors, 'nomesMitjana'> & { nomesMitjana?: number };
 	const nomModalitat = (codi: number | null) => modalitats.find((m) => m.codi === codi)?.nom ?? null;
 
@@ -662,17 +647,6 @@
 			tie: g.guanyador_fcb_id == null && g.caramboles1 === g.caramboles2
 		};
 	}
-
-	// Tots els apartats de la fitxa surten d'aquesta llista. A Espanya i Internacional
-	// són les partides de la Lliga Nacional i de la UMB/CEB escrites com les catalanes,
-	// i així els tres àmbits tenen els mateixos apartats calculats igual.
-	const gamesAmbit = $derived<GameRowAmbit[]>(
-		veuEspanya
-			? [...gamesDeNacional(fcbId, nacional), ...gamesDeRfeb(fcbId, rfebPartides)]
-			: veuInternacional
-				? gamesDeUmb(fcbId, internacional)
-				: []
-	);
 	const modGames = $derived<GameRow[]>(
 		veuEspanya || veuInternacional
 			? gamesAmbit.filter((g) => modAlt == null || g.modAmbit === modAlt)
@@ -1377,7 +1351,7 @@
 				modAlt,
 				(id) => {
 					selModAlt = id as string;
-					nacionalShown = 40;
+					shown = 60;
 				}
 			)}
 			<p class="mb-3 hidden text-sm font-medium print:block">Modalitat: {modAlt ?? '—'}</p>
@@ -1939,13 +1913,15 @@
 
 			</div>
 			<div class="min-w-0">
-			{#if veuEspanya}
-				{@render lligaNacional()}
-				{@render partidesRfeb()}
-			{:else if veuInternacional}
-				{@render provesInternacionals()}
-			{:else}
-			{#if copaPend.length && !rivalSel}
+			<!-- El mateix llistat als tres àmbits. A Espanya i Internacional, les
+			     partides de la Lliga Nacional, dels campionats de la RFEB i de la
+			     UMB/CEB, totes juntes com les catalanes. -->
+			{#if veuEspanya && individuals.some((r) => !provesAmbPartides.has(r.prova_id)) && !rivalSel}
+				<p class="mb-2 px-1 text-[11px] text-slate-500 dark:text-slate-400">
+					De la majoria de Campionats d'Espanya i GPE la RFEB només publica la classificació final, sense les partides: compten a les targetes i a l'efectivitat, però no surten en aquesta llista.
+				</p>
+			{/if}
+			{#if copaPend.length && !rivalSel && !veuEspanya && !veuInternacional}
 				<div class="mb-3 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 p-3">
 					<div class="mb-1.5 text-2xs font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300">
 						{copaPend.length} {copaPend.length === 1 ? 'partida pendent' : 'partides pendents'} · incloses a la previsió del proper rànquing
@@ -1967,7 +1943,7 @@
 					</ul>
 				</div>
 			{/if}
-			{#if currentIds.size || nextOnlyIds.size}
+			{#if (currentIds.size || nextOnlyIds.size) && !veuEspanya && !veuInternacional}
 				<div class="mb-2 space-y-0.5 px-1 text-[11px] text-slate-500 dark:text-slate-400">
 					{#if currentIds.size}
 						<p class="flex items-center gap-1.5">
@@ -1985,7 +1961,7 @@
 			{/if}
 		{#if rivalSel && !rivalGames.length}
 			<p class="rounded-xl bg-white px-3 py-4 text-sm text-slate-600 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800">
-				Cap partida dels campionats catalans contra {rivalSel.nom}.
+				Cap partida {veuEspanya ? "de les competicions de la RFEB" : veuInternacional ? 'de les proves de la UMB i la CEB' : 'dels campionats catalans'} contra {rivalSel.nom}.
 			</p>
 		{:else}
 		<div class="games-wrap overflow-hidden rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
@@ -2032,6 +2008,9 @@
 									<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
 										{#if inCur}<span class="mr-1 rounded bg-slate-200 px-1 py-px text-2xs font-bold uppercase tracking-wide text-slate-700 dark:bg-slate-700 dark:text-slate-200" title="Computa a la mitjana del rànquing vigent">rànquing</span>{:else if inNext}<span class="mr-1 rounded bg-sky-100 px-1 py-px text-2xs font-bold uppercase tracking-wide text-sky-700 dark:bg-sky-900/60 dark:text-sky-300" title="Entrarà al proper rànquing">proper</span>{/if}{fmtDate(p.date)}{#if rivalSel && modalitats.length > 1 && nomModalitat(g.modalitat_codi)} · {nomModalitat(g.modalitat_codi)}{/if}{#if p.comp} · {p.comp}{/if}{#if p.mySerie} · S.M. {p.mySerie}{/if}
 									</div>
+									{#if (g as GameRowAmbit).detall}
+										<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">{(g as GameRowAmbit).detall}</div>
+									{/if}
 								</td>
 								<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{p.myCar}–{p.oppCar}</td>
 								<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400 sm:px-3">
@@ -2056,7 +2035,6 @@
 		{:else if modGames.length > 60}
 			<p class="px-1 py-3 text-center text-[11px] text-slate-500 dark:text-slate-400 print:hidden">{modGames.length} partides</p>
 		{/if}
-			{/if}
 
 			</div>
 		</div>
@@ -2141,258 +2119,6 @@
 	{/if}
 {/snippet}
 
-{#snippet lligaNacional()}
-	{#if !nacionalLlista.length}
-		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lliga Nacional</div>
-			<p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-				{#if rivalSel && nacional.length}Cap partida de la Lliga Nacional contra {rivalSel.nom}.{:else if modAlt != null && modAlt !== MOD_TRES_BANDES}La Lliga Nacional només es juga a tres bandes.{:else}Cap partida de la Lliga Nacional.{/if}
-			</p>
-			{#if individuals.some((r) => !provesAmbPartides.has(r.prova_id)) && !rivalSel}
-				<p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-					De la majoria de Campionats d'Espanya i GPE la RFEB només publica la classificació final, sense les partides: compten a les targetes i a l'efectivitat.
-				</p>
-			{/if}
-		</div>
-	{:else}
-			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lliga Nacional</div>
-				<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Tres bandes, RFEB. No compta per als rànquings, les mitjanes ni els gràfics catalans.</p>
-				<div class="space-y-3">
-					{#each nacionalGrups as g (g.clau)}
-						<section>
-							<div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-								<h3 class="min-w-0 text-sm font-semibold leading-tight">
-									{temporadaCurta(g.temporada)} · {divisioNacional(g.divisio)}{g.grup ? ` · Grup ${g.grup}` : ''} · {g.equips.join(' / ')}
-								</h3>
-								<p class="whitespace-nowrap text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
-									{g.resum.pj} PJ · {g.resum.g}-{g.resum.e}-{g.resum.p} · <span class="font-mono font-bold">{mitjanaNacional(g.resum.mitjana)}</span>
-								</p>
-							</div>
-							<div class="games-wrap overflow-hidden rounded-lg ring-1 ring-slate-200 dark:ring-slate-800">
-								<table class="w-full text-sm">
-									<caption class="sr-only">Partides de la Lliga Nacional, {temporadaCurta(g.temporada)}, {divisioNacional(g.divisio)}</caption>
-									<thead class="print-only bg-slate-50 text-left text-2xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-										<tr>
-											<th scope="col" class="px-3 py-1.5 font-medium">Res.</th>
-											<th scope="col" class="px-3 py-1.5 font-medium">Rival · Encontre</th>
-											<th scope="col" class="px-3 py-1.5 text-right font-medium">Marcador</th>
-											<th scope="col" class="px-3 py-1.5 text-right font-medium">Mitjana</th>
-										</tr>
-									</thead>
-									<tbody>
-										{#each g.visibles as r (r.temporada + r.divisio + r.grup + r.jornada + r.ordre_encontre + r.ordre)}
-											{@const res = resultatPartida(r.caramboles, r.caramboles_rival)}
-											<tr class="border-b border-slate-100 dark:border-slate-800 last:border-b-0">
-												<td class="w-8 px-2 py-2 text-center sm:px-3">
-													<span class="inline-block w-6 rounded text-center text-xs font-bold {res === 'E'
-														? 'text-slate-500 dark:text-slate-400'
-														: res === 'G'
-															? 'text-emerald-600 dark:text-emerald-400'
-															: 'text-red-500 dark:text-red-400'}">{res}</span>
-												</td>
-												<td class="w-full max-w-0 px-2 py-2 sm:px-3">
-													{#if r.rival_fcb_id && !kiosk}
-														<a
-															href="/jugador/{r.rival_fcb_id}"
-															class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline"
-															>{r.rival_nom_fcb ?? r.rival}</a>
-													{:else}
-														<div class="truncate text-sm leading-tight">{r.rival_nom_fcb ?? r.rival}</div>
-													{/if}
-													<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
-														{#if r.data}{fmtDate(r.data)} · {/if}J{r.jornada}{r.grup ? ` ${r.grup}` : ''} · {g.grafies.get(normalitzaEquip(r.equip)) ?? r.equip} {r.punts_equip}–{r.punts_rival} {r.equip_rival}
-													</div>
-												</td>
-												<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{r.caramboles}–{r.caramboles_rival}</td>
-												<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400 sm:px-3">
-													{r.entrades ? `${(r.caramboles / r.entrades).toFixed(3).replace('.', ',')} · ${r.entrades} ent.` : '—'}
-												</td>
-											</tr>
-										{/each}
-									</tbody>
-								</table>
-							</div>
-						</section>
-					{/each}
-				</div>
-				{#if nacionalLlista.length > nacionalShown}
-					<button
-						type="button"
-						onclick={() => (nacionalShown += 40)}
-						class="mt-2 min-h-11 w-full rounded-lg bg-white dark:bg-slate-900 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800 active:bg-slate-50 dark:active:bg-slate-800/50 print:hidden"
-					>
-						Carregar més ({nacionalShown} de {nacionalLlista.length})
-					</button>
-				{/if}
-			</div>
-	{/if}
-{/snippet}
-
-{#snippet partidesRfeb()}
-	{#if rfebGrups.length}
-		<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-			<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Campionats de la RFEB</div>
-			<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">
-				Partida a partida, de les proves de les quals la RFEB publica el desenvolupament. No compta per als rànquings, les mitjanes ni els gràfics catalans.
-			</p>
-			<div class="space-y-3">
-				{#each rfebGrups as g (g.prova_id)}
-					{@const obert = rfebObertes.has(g.prova_id)}
-					{@const visibles = obert ? g.partides : g.partides.slice(0, 6)}
-					<section>
-						<div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-							<h3 class="min-w-0 text-sm font-semibold leading-tight">
-								{temporadaCurta(g.temporada)} · {g.nom}
-								<span class="block truncate text-[11px] font-normal text-slate-500 dark:text-slate-400">{g.titol}</span>
-							</h3>
-							<p class="whitespace-nowrap text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
-								{g.resum.pj} PJ · {g.resum.g}-{g.resum.e}-{g.resum.p} · <span class="font-mono font-bold">{mitjanaNacional(g.resum.mitjana)}</span>
-							</p>
-						</div>
-						<div class="games-wrap overflow-hidden rounded-lg ring-1 ring-slate-200 dark:ring-slate-800">
-							<table class="w-full text-sm">
-								<caption class="sr-only">Partides de {g.nom}, {temporadaCurta(g.temporada)}</caption>
-								<thead class="print-only bg-slate-50 text-left text-2xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-									<tr>
-										<th scope="col" class="px-3 py-1.5 font-medium">Res.</th>
-										<th scope="col" class="px-3 py-1.5 font-medium">Rival · Fase</th>
-										<th scope="col" class="px-3 py-1.5 text-right font-medium">Marcador</th>
-										<th scope="col" class="px-3 py-1.5 text-right font-medium">Mitjana</th>
-									</tr>
-								</thead>
-								<tbody>
-									{#each visibles as r (r.fase + r.grup + r.ordre)}
-										{@const res = resultatRfeb(r)}
-										<tr class="border-b border-slate-100 dark:border-slate-800 last:border-b-0">
-											<td class="w-8 px-2 py-2 text-center sm:px-3">
-												<span class="inline-block w-6 rounded text-center text-xs font-bold {res === 'E'
-													? 'text-slate-500 dark:text-slate-400'
-													: res === 'G'
-														? 'text-emerald-600 dark:text-emerald-400'
-														: 'text-red-500 dark:text-red-400'}">{res}</span>
-											</td>
-											<td class="w-full max-w-0 px-2 py-2 sm:px-3">
-												{#if r.rival_fcb_id && !kiosk}
-													<a href="/jugador/{r.rival_fcb_id}" class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline">{r.rival}</a>
-												{:else}
-													<div class="truncate text-sm leading-tight">{r.rival}</div>
-												{/if}
-												<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
-													{#if r.data}{fmtDate(r.data)} · {/if}{r.fase}{r.grup ? ` ${r.grup}` : ''}{r.equip_rival && r.equip_rival.length > 5 ? ` · ${r.equip_rival}` : ''}
-												</div>
-											</td>
-											<td class="whitespace-nowrap px-2 py-2 text-right font-mono text-sm tabular-nums sm:px-3">{r.caramboles}–{r.rival_caramboles}</td>
-											<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400 sm:px-3">
-												{r.entrades ? `${(r.caramboles / r.entrades).toFixed(3).replace('.', ',')} · ${r.entrades} ent.` : '—'}
-											</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-						{#if g.partides.length > 6}
-							<button
-								type="button"
-								aria-expanded={obert}
-								onclick={() => {
-									const s = new Set(rfebObertes);
-									if (obert) s.delete(g.prova_id);
-									else s.add(g.prova_id);
-									rfebObertes = s;
-								}}
-								class="mt-1 min-h-11 w-full rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 active:bg-slate-50 dark:active:bg-slate-800/50 print:hidden"
-							>
-								{obert ? 'Amaga-les' : `Totes les partides (${g.partides.length})`}
-							</button>
-						{/if}
-					</section>
-				{/each}
-			</div>
-		</div>
-	{/if}
-{/snippet}
-
-{#snippet provesInternacionals()}
-	<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-		<div class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Proves internacionals</div>
-		<p class="mb-2 text-2xs text-slate-500 dark:text-slate-400">Mundials i Copes del Món de la UMB i Campionats d'Europa de la CEB. No compta per als rànquings catalans.</p>
-		{#if !internacionalLlista.length}
-			<p class="text-sm text-slate-600 dark:text-slate-300">{rivalSel ? `Cap partida contra ${rivalSel.nom} en aquesta modalitat.` : 'Cap prova en aquesta modalitat.'}</p>
-		{/if}
-		<div class="space-y-3">
-			{#each internacionalLlista as pr (pr.id)}
-				<section>
-					<div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-						<h3 class="min-w-0 text-sm font-semibold leading-tight">{pr.nom}{pr.any && !pr.nom.includes(pr.any) ? ` ${pr.any}` : ''}{pr.lloc ? ` · ${pr.lloc}` : ''}</h3>
-						<p class="whitespace-nowrap text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
-							{[
-								pr.classificacio ? posicioProva({ posicio: pr.classificacio.posicio, posicio_empat: null, participants: pr.classificacio.participants }) : '',
-								pr.classificacio?.ronda ?? '',
-								pr.pj ? `${pr.pj} PJ · ${pr.g}-${pr.e}-${pr.p}` : ''
-							]
-								.filter(Boolean)
-								.join(' · ')} · <span class="font-mono font-bold">{mitjanaNacional(pr.mitjana ?? pr.classificacio?.mitjana ?? null)}</span>
-						</p>
-					</div>
-					{#if pr.partides.length}
-						<div class="games-wrap overflow-hidden rounded-lg ring-1 ring-slate-200 dark:ring-slate-800">
-							<table class="w-full text-sm">
-								<caption class="sr-only">Partides de {pr.nom}</caption>
-								<thead class="print-only bg-slate-50 text-left text-2xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-									<tr>
-										<th scope="col" class="px-3 py-1.5 font-medium">Res.</th>
-										<th scope="col" class="px-3 py-1.5 font-medium">Rival · Fase</th>
-										<th scope="col" class="px-3 py-1.5 text-right font-medium">Marcador</th>
-										<th scope="col" class="px-3 py-1.5 text-right font-medium">Mitjana</th>
-									</tr>
-								</thead>
-								<tbody>
-									{#each pr.partides as r (r.fase + r.grup + r.ordre)}
-										{@const res = resultatUmb(r)}
-										{@const sets = resultatSets(r)}
-										<tr class="border-b border-slate-100 dark:border-slate-800 last:border-b-0">
-											<td class="w-8 px-2 py-2 text-center sm:px-3">
-												<span class="inline-block w-6 rounded text-center text-xs font-bold {res === 'E'
-													? 'text-slate-500 dark:text-slate-400'
-													: res === 'G'
-														? 'text-emerald-600 dark:text-emerald-400'
-														: 'text-red-500 dark:text-red-400'}">{res}</span>
-											</td>
-											<td class="w-full max-w-0 px-2 py-2 sm:px-3">
-												{#if r.rival_fcb_id && !kiosk}
-													<a href="/jugador/{r.rival_fcb_id}" class="block truncate text-sm font-medium leading-tight underline-offset-2 active:underline">{r.rival}</a>
-												{:else}
-													<div class="truncate text-sm leading-tight">{r.rival}</div>
-												{/if}
-												<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">{r.fase}{r.grup ? ` · Grup ${r.grup}` : ''}{r.serie ? ` · S.M. ${r.serie}` : ''}</div>
-												{#if sets}<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{r.caramboles ?? '—'}–{r.rival_caramboles ?? '—'} car. en total</div>{/if}
-											</td>
-											<td class="whitespace-nowrap px-2 py-2 text-right align-top font-mono text-sm tabular-nums sm:px-3">
-												{#if sets}
-													<!-- A sets guanya qui en guanya més: el marcador és el dels sets, i a sota cada set. -->
-													<div class="font-semibold">{sets.jo}–{sets.rival} <span class="font-sans text-[11px] font-normal text-slate-500 dark:text-slate-400">sets</span></div>
-													<ol class="mt-0.5 text-[11px] leading-snug text-slate-600 dark:text-slate-300" aria-label="Resultat de cada set">
-														{#each sets.detall as set, i (i)}<li>{set}</li>{/each}
-													</ol>
-												{:else}
-													{r.caramboles ?? '—'}–{r.rival_caramboles ?? '—'}
-												{/if}
-											</td>
-											<td class="whitespace-nowrap px-2 py-2 text-right text-[11px] tabular-nums text-slate-500 dark:text-slate-400 sm:px-3">
-												{r.caramboles != null && r.entrades ? `${(r.caramboles / r.entrades).toFixed(3).replace('.', ',')} · ${r.entrades} ent.` : '—'}
-											</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-					{/if}
-				</section>
-			{/each}
-		</div>
-	</div>
-{/snippet}
 
 <style>
 	/* A pantalla la capçalera no es veu, però el lector de pantalla hi troba els

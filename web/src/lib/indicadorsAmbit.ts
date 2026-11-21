@@ -3,7 +3,7 @@
 // calculats només amb les dades de cada àmbit.
 
 import type { GameRow } from './db';
-import { resultatUmb, type UmbProva } from './internacional';
+import { resultatUmb, textSets, type UmbProva } from './internacional';
 import {
 	nomProva,
 	resultatPartida,
@@ -244,7 +244,12 @@ export function filtraModalitat(aps: Aportacio[], mod: string | null): Aportacio
 // mateixa manera, els tres àmbits tenen els mateixos apartats calculats igual.
 
 /** Una partida d'un altre àmbit, amb la modalitat amb què s'agrupa a l'àmbit. */
-export type GameRowAmbit = GameRow & { modAmbit: string };
+/**
+ * Una partida d'un altre àmbit, amb la modalitat amb què s'agrupa i, si cal, un
+ * detall que el llistat ensenya sota la competició (la jornada i l'encontre de
+ * la Lliga Nacional, la fase d'un campionat, els sets d'una partida de la UMB).
+ */
+export type GameRowAmbit = GameRow & { modAmbit: string; detall?: string };
 
 /** Guanyador: el jugador, el rival (`'rival'`) o ningú si és empat. */
 function guanyador(fcbId: string, res: 'G' | 'E' | 'P'): string | null {
@@ -269,7 +274,8 @@ export function gamesDeNacional(fcbId: string, rows: NacionalPartidaRow[]): Game
 			serie_max2: null,
 			entrades: r.entrades,
 			guanyador_fcb_id: guanyador(fcbId, res),
-			modAmbit: MOD_TRES_BANDES
+			modAmbit: MOD_TRES_BANDES,
+			detall: `J${r.jornada}${r.grup ? ` ${r.grup}` : ''} · ${r.equip} ${r.punts_equip}–${r.punts_rival} ${r.equip_rival}`
 		};
 	});
 }
@@ -290,7 +296,8 @@ export function gamesDeRfeb(fcbId: string, rows: RfebPartidaRow[]): GameRowAmbit
 		serie_max2: r.rival_serie,
 		entrades: r.entrades,
 		guanyador_fcb_id: guanyador(fcbId, resultatRfeb(r)),
-		modAmbit: modalitatRfeb(r.modalitat)
+		modAmbit: modalitatRfeb(r.modalitat),
+		detall: r.fase + (r.grup ? ` ${r.grup}` : '')
 	}));
 }
 
@@ -314,7 +321,8 @@ export function gamesDeUmb(fcbId: string, proves: UmbProva[]): GameRowAmbit[] {
 				entrades: r.entrades,
 				// A sets, i amb penals, guanya qui diuen els punts, no les caramboles.
 				guanyador_fcb_id: guanyador(fcbId, resultatUmb(r)),
-				modAmbit: modalitatUmb(pr.disciplina)
+				modAmbit: modalitatUmb(pr.disciplina),
+				detall: [r.fase, textSets(r)].filter(Boolean).join(' · ')
 			});
 		}
 	}
