@@ -299,8 +299,10 @@ def llegeix_classificacio(html: str) -> tuple[Titol | None, list[Classificat], l
             continue
         cols = {capcalera[i]: tds[i] for i in range(len(tds))}
         pos = _num(cols.get("rank").get_text()) if cols.get("rank") else None
-        enllac = tds[1]
+        # La bandera pot ser a la mateixa cel·la que el nom o a una de pròpia (l'artístic).
+        enllac = next((td for td in tds if td.find("a", href=re.compile(r"/players/"))), tds[1])
         nom, pais, _club = _jugador(enllac)
+        pais = pais or next((_pais(td) for td in tds if _pais(td)), None)
         if pos is None or not nom:
             continue
 
