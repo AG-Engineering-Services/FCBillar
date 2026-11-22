@@ -186,3 +186,46 @@ def test_la_seleccio_no_llegeix_la_classificacio_d_una_prova_internacional(tmp_p
     (tmp_path / "proves.json").write_text(json.dumps(proves), encoding="utf-8")
     # Sense cap «rankings.html»: l'europeu entra pel títol, el nacional sense jugadors d'aquí no.
     assert seleccio(tmp_path) == ["1"]
+
+
+def _umb_amb_partides(conn, classificacio: bool) -> None:
+    conn.execute(
+        "INSERT INTO umb_esdeveniments (id, nom, disciplina, data_inici, font) "
+        "VALUES (200050, 'European Championship Cadre 71/2', 'quadre', '2023-04-11', 'ceb')"
+    )
+    conn.execute(
+        "INSERT INTO umb_partides (esdeveniment_id, fase, grup, ordre, jugador_a, jugador_b) "
+        "VALUES (200050, 'G', 'A', 1, 'X', 'Y')"
+    )
+    if classificacio:
+        conn.execute(
+            "INSERT INTO umb_classificacions (esdeveniment_id, posicio, jugador) "
+            "VALUES (200050, 1, 'OFICIAL Un')"
+        )
+
+
+def test_si_la_prova_antiga_no_te_classificacio_s_hi_posa_la_de_kozoom(tmp_path):
+    from fcbillar.db.migrations import ensure_schema
+    from fcbillar.kozoom_carrega import carrega
+
+    _cache(tmp_path, "712", "classificacio_ec_712_2023.html", TITOL_EC)
+    conn = ensure_schema(tmp_path / "t.db")
+    _umb_amb_partides(conn, classificacio=False)
+    carrega(conn, tmp_path, ["712"])
+    fila = conn.execute(
+        "SELECT posicio, caramboles FROM umb_classificacions "
+        "WHERE esdeveniment_id = 200050 AND jugador = 'MATA Esteve'"
+    ).fetchone()
+    assert tuple(fila) == (8, 317)
+
+
+def test_la_classificacio_oficial_no_es_toca(tmp_path):
+    from fcbillar.db.migrations import ensure_schema
+    from fcbillar.kozoom_carrega import carrega
+
+    _cache(tmp_path, "712", "classificacio_ec_712_2023.html", TITOL_EC)
+    conn = ensure_schema(tmp_path / "t.db")
+    _umb_amb_partides(conn, classificacio=True)
+    carrega(conn, tmp_path, ["712"])
+    noms = [f[0] for f in conn.execute("SELECT jugador FROM umb_classificacions WHERE esdeveniment_id = 200050")]
+    assert noms == ["OFICIAL Un"]

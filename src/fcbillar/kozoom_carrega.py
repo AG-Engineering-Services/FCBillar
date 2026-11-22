@@ -443,6 +443,33 @@ def _afegeix_partides(conn: sqlite3.Connection, e_id: int, ll: Llegit) -> None:
     )  # fmt: skip
 
 
+def _completa_classificacio(conn: sqlite3.Connection, e_id: int, ll: Llegit) -> int:
+    """Si la prova de la UMB o la CEB no té classificació, hi posa la de Kozoom.
+
+    Alguns PDF del web vell d'eurobillard.org porten només les partides. Si la prova ja
+    té classificació oficial no es toca. Torna quantes files ha afegit.
+    """
+    if not ll.classificacio:
+        return 0
+    if conn.execute(
+        "SELECT 1 FROM umb_classificacions WHERE esdeveniment_id = ? LIMIT 1", (e_id,)
+    ).fetchone():
+        return 0
+    conn.executemany(
+        "INSERT OR IGNORE INTO umb_classificacions (esdeveniment_id, posicio, jugador, "
+        "nacionalitat, ronda, punts, mitjana, mitjana_particular, serie1, serie2, caramboles, "
+        "entrades) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+            (
+                e_id, c.posicio, c.jugador, c.nacionalitat, c.ronda, c.punts, c.mitjana,
+                c.mitjana_particular, c.serie1, c.serie2, c.caramboles, c.entrades,
+            )
+            for c in ll.classificacio
+        ],
+    )  # fmt: skip
+    return len(ll.classificacio)
+
+
 def falten_a(conn: sqlite3.Connection, firmes: Firmes, e_id: int, partides: list, titol: Titol) -> list:
     """Les partides de Kozoom que de debò no són a la prova `e_id`.
 
@@ -515,6 +542,8 @@ def carrega(conn: sqlite3.Connection, cache: Path, ids: list[str]) -> list[Resul
             # Les que falten a la prova de la UMB (grups que el PDF no porta) s'hi afegeixen.
             existent = ja_hi_es(conn, titol)
             afegides = 0
+            if existent:
+                _completa_classificacio(conn, existent.id, ll)
             if existent and ll.partides:
                 _nomes_les_que_falten(ll, falten_a(conn, firmes, existent.id, ll.partides, titol))
                 _afegeix_partides(conn, existent.id, ll)
@@ -525,6 +554,8 @@ def carrega(conn: sqlite3.Connection, cache: Path, ids: list[str]) -> list[Resul
             out.append(Resultat(DESPLACAMENT + int(pid), nom, "ja_hi_es", detall))
             continue
         existent = ja_hi_es(conn, titol)
+        if existent:
+            _completa_classificacio(conn, existent.id, ll)
         if existent and existent.partides:
             _nomes_les_que_falten(ll, falten_a(conn, firmes, existent.id, ll.partides, titol))
             _afegeix_partides(conn, existent.id, ll)
