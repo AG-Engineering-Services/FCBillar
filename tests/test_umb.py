@@ -547,3 +547,11 @@ def test_classificacio_del_web_vell_amb_punts_de_partida_en_forma_de_marcador():
     assert (primera.jugador, primera.nacionalitat, primera.punts) == ("VAN EXTER Monique", "NL", 12)
     assert (primera.caramboles, primera.entrades, primera.mitjana, primera.serie1) == (938, 103, 9.11, 64)
     assert (tercera.posicio, tercera.jugador) == (3, "ALES Véronique")
+
+
+def test_un_jugador_que_es_diu_frank_no_es_una_fase():
+    # «Frank 3» contenia «rank 3» i la fila de Spruzina passava per títol de fase.
+    from fcbillar.umb import _fase_de_linia
+
+    assert _fase_de_linia("SPRUZINA Frank 3 13 4 16 7 29 0,241 0 -2 1") is None
+    assert _fase_de_linia("Pre-Qual Groups DEF") == "Pre-Qual Groups DEF"
