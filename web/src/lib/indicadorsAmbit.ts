@@ -3,7 +3,7 @@
 // calculats només amb les dades de cada àmbit.
 
 import type { GameRow } from './db';
-import { resultatUmb, textSets, type UmbProva } from './internacional';
+import { disciplinaDePartida, resultatUmb, textSets, type UmbProva } from './internacional';
 import {
 	nomProva,
 	resultatPartida,
@@ -188,7 +188,7 @@ export function aportacionsUmb(proves: UmbProva[]): Aportacio[] {
 			const res = resultatUmb(r);
 			out.push({
 				temporada: temporadaDeData(pr.data ?? r.data_inici),
-				modalitat: modalitatUmb(pr.disciplina),
+				modalitat: modalitatUmb(disciplinaDePartida(pr.disciplina, r.fase)),
 				n: 1,
 				g: +(res === 'G'),
 				e: +(res === 'E'),
@@ -353,7 +353,7 @@ export function gamesDeUmb(fcbId: string, proves: UmbProva[]): GameRowAmbit[] {
 				entrades: r.entrades,
 				// A sets, i amb penals, guanya qui diuen els punts, no les caramboles.
 				guanyador_fcb_id: guanyador(fcbId, resultatUmb(r)),
-				modAmbit: modalitatUmb(pr.disciplina),
+				modAmbit: modalitatUmb(disciplinaDePartida(pr.disciplina, r.fase)),
 				detall: [r.fase, textSets(r)].filter(Boolean).join(' · ')
 			});
 		}

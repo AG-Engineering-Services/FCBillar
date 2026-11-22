@@ -109,6 +109,16 @@ const DISCIPLINES: [RegExp, string][] = [
 	[/pentathlon|biathlon|triathlon/i, 'combinada']
 ];
 
+/**
+ * La disciplina d'una partida. Les proves que barregen modalitats (copes de clubs,
+ * «Carom Series») la diuen de vegades a la fase: «Group A (47/2)», «C 71/2», «1 Cushion».
+ * Només es mira la fase quan la prova no té disciplina pròpia, perquè no en surtin falsos.
+ */
+export function disciplinaDePartida(disciplinaProva: string | null, fase: string | null): string | null {
+	if (disciplinaProva != null && disciplinaProva !== 'combinada') return disciplinaProva;
+	return (fase ? disciplinaDeNom(fase) : null) ?? disciplinaProva;
+}
+
 /** Mirall de `disciplina_de` del Python: per a les proves sense partides, que no en porten. */
 export function disciplinaDeNom(nom: string): string | null {
 	return DISCIPLINES.find(([re]) => re.test(nom))?.[1] ?? null;
