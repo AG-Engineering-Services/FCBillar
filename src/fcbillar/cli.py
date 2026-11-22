@@ -2957,6 +2957,9 @@ def umb_carrega_cmd(
 @app.command("kozoom-descarrega")
 def kozoom_descarrega_cmd(
     carpeta: str = typer.Option("data/cache/kozoom", "--carpeta"),  # noqa: B008
+    id_max: int = typer.Option(  # noqa: B008
+        0, "--id-max", help="Només proves fins a aquest id de Kozoom (17500 és de finals del 2016)."
+    ),
 ) -> None:
     """Baixa del Wayback les partides de les proves de Kozoom que interessen.
 
@@ -2968,7 +2971,7 @@ def kozoom_descarrega_cmd(
     from fcbillar.kozoom_carrega import descarrega, inventaria, seleccio
 
     cache = Path(carpeta)
-    inventaria(cache)
+    inventaria(cache, id_max=id_max or None)
     ids = seleccio(cache)
     console.print(f"{len(ids)} proves triades")
     console.print(descarrega(cache, ids))

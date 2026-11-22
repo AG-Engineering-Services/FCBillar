@@ -282,3 +282,25 @@ def test_les_grafies_velles_de_la_disciplina():
     assert disciplina_de("European Championship Ladies -3- Cushion") == "3 bandes"
     assert disciplina_de("European Championship Artistique") == "artistic"
     assert disciplina_de("CMT-European Championship One Cushion") == "1 banda"
+
+
+def test_l_inventari_s_atura_a_l_id_maxim(tmp_path, monkeypatch):
+    import contextlib
+
+    from fcbillar import kozoom_carrega as kc
+
+    cdx = (
+        "20200101000000 http://www.kozoom.com/en/billiard-carom/results/100/rankings.html\n"
+        "20200101000000 http://www.kozoom.com/en/billiard-carom/results/30000/rankings.html\n"
+    )
+    demanades = []
+
+    def _get(_c, url):
+        demanades.append(url)
+        return cdx if "cdx" in url else "<title>3-Cushion - World Cup - X (ESP) - 1/1/10 - Kozoom</title>"
+
+    monkeypatch.setattr(kc, "_get", _get)
+    monkeypatch.setattr(kc, "_client", lambda: contextlib.nullcontext())
+    proves = kc.inventaria(tmp_path, espera=0, id_max=17500)
+    assert list(proves) == ["100"]
+    assert not any("/results/30000/" in u for u in demanades)
