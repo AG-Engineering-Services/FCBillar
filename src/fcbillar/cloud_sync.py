@@ -6439,6 +6439,68 @@ def _seed_first_ko_by_projection(state, proj_phases: list[dict]) -> bool:
     return True
 
 
+def _seed_unplayed_groups_by_ranking_inicial(state, ranking_inicial: list[dict]) -> bool:
+    """Reordena els grups encara no jugats per la Posició del RÀNQUING INICIAL.
+    Muta `state` in-place; retorna si ha canviat res.
+
+    `fetch_live_state` ja els ordena pel rànquing d'Opens, però els jugadors sense
+    punts d'Opens (tota la pre-pre-prèvia, sovint) hi queden amb l'ordre de la taula
+    de la federació, que a 0 punts és arbitrari: a Sant Adrià posava Lozano (96) per
+    davant d'Ametller (95). El rànquing inicial ordena tots els inscrits.
+    """
+    import unicodedata
+
+    from fcb_opens.scraper.open_live import (
+        PhaseDetail,
+        _norm_name,
+        _phase_player_names,
+        _seed_unplayed_groups,
+    )
+
+    def _key(name: str) -> str:
+        sense = "".join(
+            c for c in unicodedata.normalize("NFD", name) if not unicodedata.combining(c)
+        )
+        return _norm_name(sense)
+
+    pos_by_key = {
+        _key(r["player_name"]): r["posicio"]
+        for r in ranking_inicial
+        if r.get("player_name") and r.get("posicio")
+    }
+    if not pos_by_key:
+        return False
+    rank: dict[str, int] = {}
+    for ph in state.phases:
+        for g in ph.groups:
+            for s in g.standings:
+                pos = pos_by_key.get(_key(s.player_name))
+                if pos is not None:
+                    rank[_norm_name(s.player_name)] = pos
+
+    changed = False
+    earlier: frozenset[str] = frozenset()
+    new_phases = []
+    for ph in state.phases:
+        if ph.ref.kind == "group":
+            groups = _seed_unplayed_groups(ph.groups, earlier, rank)
+            if groups != ph.groups:
+                changed = True
+                ph = PhaseDetail(
+                    ref=ph.ref,
+                    groups=groups,
+                    ko_matches=ph.ko_matches,
+                    provisional_qualifiers=ph.provisional_qualifiers,
+                    provisional_matches=ph.provisional_matches,
+                    provisional_players=ph.provisional_players,
+                )
+        earlier = earlier | _phase_player_names(ph)
+        new_phases.append(ph)
+    if changed:
+        state.phases = new_phases
+    return changed
+
+
 def _enrich_live_payload(
     payload: dict, sb, open_name: str = "", division_id: int | None = None
 ) -> None:
@@ -6896,6 +6958,8 @@ def publish_live_opens(
             # RÀNQUING INICIAL (l'ordre oficial d'aquest open), no pel rànquing
             # d'Opens vigent (que ja ha derivat des del sorteig).
             _seed_first_ko_by_projection(state, auto_phases)
+        if auto and auto.get("ranking_inicial"):
+            _seed_unplayed_groups_by_ranking_inicial(state, auto["ranking_inicial"])
 
         payload = _state_payload(state, fetched_at)
         _enrich_live_payload(payload, sb, open_name=state.structure.name, division_id=e.division_id)
