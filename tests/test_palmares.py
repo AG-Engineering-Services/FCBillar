@@ -320,3 +320,47 @@ def test_quadre_honor_fcb_pdf_real():
     assert ("1a", 1, "Claudio Nadal", "C.B. Barcelona") in tb
     assert ("2a", 1, "Ferran Rodríguez", "C.B. Banyoles") in tb
     assert all(m.edicio == "1985-86" and m.any_edicio == 1986 for m in inf.medalles)
+
+
+def test_quadre_honor_fcb_llista_dins_taula_de_sis_columnes():
+    """Al 1973-74 el Trofeu Claudio Puigvert és «1r | jugador | club | | »: un campió i un subcampió."""
+    from pathlib import Path
+
+    from fcbillar.palmares import llegeix_fcb
+
+    cami = Path(__file__).parents[1] / "fonts/palmares/fcb/quadrehonorfcb1973-1974.pdf"
+    inf = llegeix_fcb(cami)
+    trofeu = sorted((m.categoria, m.posicio, m.jugador) for m in inf.medalles if m.competicio == "Trofeu Claudio Puigvert")
+    assert trofeu == [("absolut", 1, "Pascual Peña"), ("absolut", 2, "Norman Solé")]
+    copa = sorted((m.posicio, m.jugador) for m in inf.medalles if m.competicio == "Copa Presidente")
+    assert copa == [(1, "Segundo Goméz"), (2, "Isidoro Mizrahi")]
+    assert inf.no_llegit == []
+
+
+def test_quadre_honor_fcb_celles_combinades():
+    """2016-17: una sola cel·la «5 QUILLES / BIATHLÓ» per a dues files, una per modalitat.
+
+    2015-16: dos GP femenins el mateix any (la segona categoria es numera).
+    2012-13: «----------» vol dir que no hi ha subcampió.
+    """
+    from pathlib import Path
+
+    from fcbillar.palmares import llegeix_fcb
+
+    arrel = Path(__file__).parents[1] / "fonts/palmares/fcb"
+    m16 = llegeix_fcb(arrel / "quadrehonorfcb2016-2017.pdf").medalles
+    campio = {m.competicio: m.jugador for m in m16 if m.posicio == 1 and m.competicio in ("5 quilles", "Biatló")}
+    assert campio == {"5 quilles": "Lino Brizzi", "Biatló": "Angel Viladomat Gonfaus"}
+
+    m15 = llegeix_fcb(arrel / "quadrehonorfcb2015-2016.pdf").medalles
+    gp = sorted((m.categoria, m.posicio, m.jugador) for m in m15 if m.categoria.startswith("GP"))
+    assert gp == [
+        ("GP Femení", 1, "Georgeta Anghel"),
+        ("GP Femení", 2, "Mònica Planes Bravo"),
+        ("GP Femení 2", 1, "Eva Julià Soldevila"),
+        ("GP Femení 2", 2, "Mònica Planes Bravo"),
+    ]
+
+    m12 = llegeix_fcb(arrel / "quadrehonorfcb2012-2013.pdf").medalles
+    assert not [m for m in m12 if not any(ch.isalpha() for ch in m.jugador)]
+    assert ("Quadre 71/2", "2a", 1, "Alejandro López Balboa") in {(m.competicio, m.categoria, m.posicio, m.jugador) for m in m12}

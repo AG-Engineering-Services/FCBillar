@@ -32,8 +32,8 @@ d'un any a l'altre.
 - **FCB** (`fcbillar.cat`, «Històric Quadre d'Honor»): un PDF per temporada des
   del 1961-62, amb una taula `modalitat | categoria | campió | club | subcampió |
   club`. Només hi ha campió i subcampió. El club es desa a `lloc`. Les primeres
-  temporades (fins al 1964-65) tenen algunes competicions en format de llista
-  (`1r | jugador | club`). Es llegeixen les modalitats individuals de
+  temporades (fins al 1964-65), el Trofeu Claudio Puigvert i la Copa Presidente
+  surten en format de llista (`1r | jugador | club`). Es llegeixen les modalitats individuals de
   carambola; les lligues, els interclubs, el pool i el snooker no.
 """
 
@@ -543,8 +543,9 @@ _MODALITATS_FCB = [
     (r"^ART[IÍ]STIC[O]?$", "Artístic"),
     (r"^(CHAP[OÓ]|XAP[OÓ])$", "Chapó"),
     (r"^5 QUILLES$", "5 quilles"),
-    (r"^5 QUILLES BIATHL[OÓ]$|^([IVX]+ )?BIATHL[OÓ]$", "Biatló"),
+    (r"^([IVX]+ )?BIATHL[OÓ]$", "Biatló"),
     (r"^TROFEU CLAUDIO PUIGVERT$", "Trofeu Claudio Puigvert"),
+    (r"^COPA PRESIDENTE$", "Copa Presidente"),
 ]
 _RE_TEMPORADA_FCB = re.compile(r"(\d{4})-(\d{4})")
 
@@ -573,8 +574,8 @@ def _categoria_fcb(text: str) -> str:
 
 def _jugador_fcb(text: str) -> str | None:
     t = " ".join(text.split())
-    if not t or "NO JUGAT" in t.upper() or "DESERT" in t.upper() or "/" in t:
-        return None  # sense campió, o una parella
+    if not re.search(r"[^\W\d_]", t) or "NO JUGAT" in t.upper() or "DESERT" in t.upper() or "/" in t:
+        return None  # sense campió («----------», «NO JUGAT»), o una parella
     return t
 
 
@@ -597,19 +598,48 @@ def llegeix_fcb(cami: str | Path) -> Informe:
         modalitat: str | None = None
         competicio: str | None = None
         categoria_llista = "absolut"
+        en_llista = False
+        segon_vist = False
+        cua: list[str] = []  # modalitats d'una cel·la combinada, una per fila
         for fila in taula:
             cel = [" ".join((c or "").split()) for c in fila]
             while len(cel) not in (4, 6) and len(cel) > 4 and not cel[-1]:
                 cel.pop()  # una columna buida de més al final
             if not any(cel) or cel[0] == "MODALITAT" or cel[0].upper().startswith("QUADRE D'HONOR"):
                 continue
+            if any(c.upper().startswith("CLASSIF") for c in cel[1:2]) or "JUGADOR" in (c.upper() for c in cel):
+                competicio = None  # capçalera d'una secció en format de llista
+                continue
             if cel[0]:
                 modalitat = cel[0]
-                competicio = _competicio_fcb(modalitat)
+                # L'Excel original combina cel·les: una sola cel·la pot portar una
+                # modalitat per línia («5 QUILLES» / «BIATHLÓ»), una per a cada fila.
+                linies = [ln.strip() for ln in (fila[0] or "").splitlines() if ln.strip()]
+                per_linia = [_competicio_fcb(ln) for ln in linies]
+                if len(linies) > 1 and all(per_linia) and len(set(per_linia)) == len(per_linia):
+                    cua = per_linia[1:]
+                    competicio = per_linia[0]
+                else:
+                    cua = []
+                    competicio = _competicio_fcb(modalitat)
+                # Un bloc que comença per «1r» és una classificació en format de
+                # llista, encara que la taula tingui sis columnes.
+                en_llista = cel[1].lower() == "1r"
+                segon_vist = False
+            elif cua:
+                competicio = cua.pop(0)
             if competicio is None:
                 continue
+            if len(cel) == 6 and en_llista and not cel[4] and not cel[5]:
+                cel = cel[:4]
             if len(cel) == 6:
                 categoria = _categoria_fcb(cel[1])
+                n = 2
+                base = categoria
+                while (competicio, categoria) in vistes:
+                    # La mateixa categoria dues vegades (dos GP femenins el mateix any).
+                    categoria = f"{base} {n}"
+                    n += 1
                 vistes.add((competicio, categoria))
                 for posicio, nom, club in ((1, cel[2], cel[3]), (2, cel[4], cel[5])):
                     jugador = _jugador_fcb(nom)
@@ -618,13 +648,18 @@ def llegeix_fcb(cami: str | Path) -> Informe:
                             Medalla(FONT_FCB, competicio, categoria, edicio, any_fi, club or None, posicio, jugador)
                         )
             elif len(cel) == 4:
-                # Format de llista (1961-1965): «1r | jugador | club».
-                if cel[1].upper().startswith("CLASSIF"):
-                    continue
+                # Format de llista: «1r | jugador | club».
+                if not any(cel[1:]):
+                    continue  # una competició que aquell any no es va jugar
                 pos = {"1r": 1, "2n": 2, "3r": 3}.get(cel[1].lower())
+                if pos is None and cel[1].lower() == "2a" and not segon_vist:
+                    pos = 2  # «2a» per «2n»; si ja hi ha un 2n, és una altra competició
+                if pos == 2:
+                    segon_vist = True
                 jugador = _jugador_fcb(cel[2])
                 if pos is None:
-                    inf.no_llegit.append((edicio, " | ".join(cel)))
+                    if jugador:
+                        inf.no_llegit.append((edicio, " | ".join(cel)))
                     continue
                 vistes.add((competicio, categoria_llista))
                 if jugador:
