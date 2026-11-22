@@ -401,6 +401,9 @@ class ProvisionalQualifier:
     punts: int
     mitjana: float
     serie_major: int = 0     # max SM across the player's group matches
+    # Sèrie major de cada partida jugada, de més gran a més petita: a igualtat de
+    # punts, mitjana i sèrie major, desempata la 2a sèrie major, i així.
+    series: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -996,6 +999,26 @@ def _group_sm_by_player(group: Group) -> dict[str, int]:
     return sm
 
 
+def _group_series_by_player(group: Group) -> dict[str, tuple[int, ...]]:
+    """Sèrie major de cada partida JUGADA del grup per jugador, de més gran a més
+    petita. Desempata quan punts, mitjana i sèrie major són iguals."""
+    series: dict[str, list[int]] = {}
+    for m in group.matches:
+        if not m.is_played:
+            continue
+        if m.player_a:
+            series.setdefault(m.player_a, []).append(m.serie_major_a)
+        if m.player_b:
+            series.setdefault(m.player_b, []).append(m.serie_major_b)
+    return {n: tuple(sorted(v, reverse=True)) for n, v in series.items()}
+
+
+def series_key(series: tuple[int, ...]) -> tuple[int, ...]:
+    """Clau d'ordenació ascendent per a `series` (la millor primer). S'omple amb
+    zeros perquè qui té menys partides no guanyi per tenir la tupla més curta."""
+    return tuple(-x for x in series) + (0,) * (16 - len(series))
+
+
 def _is_regular_group(label: str) -> bool:
     """A 'regular' group label is 'Grup X' where X is one or more uppercase
     letters. RESERVATS and lowercase ad-hoc groups (like 'Grup ww') are not
@@ -1042,6 +1065,7 @@ def compute_provisional_qualifiers(
         if not any(m.is_played for m in group.matches):
             continue
         sm = _group_sm_by_player(group)
+        ser = _group_series_by_player(group)
         for idx, s in enumerate(group.standings):
             is_winner = idx == 0
             advanced = bool(next_phase_names) and (
@@ -1058,6 +1082,7 @@ def compute_provisional_qualifiers(
                     punts=s.punts,
                     mitjana=s.mitjana,
                     serie_major=sm.get(s.player_name, 0),
+                    series=ser.get(s.player_name, ()),
                 )
             )
     return tuple(out)

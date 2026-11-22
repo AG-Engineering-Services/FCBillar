@@ -6477,6 +6477,7 @@ def _add_best_seconds_to_qualifiers(state, best_seconds_by_code: dict[str, int])
     from fcb_opens.next_round import RoundWinner, rank_winners
     from fcb_opens.scraper.open_live import (
         ProvisionalQualifier,
+        _group_series_by_player,
         _group_sm_by_player,
         _is_regular_group,
         _norm_name,
@@ -6508,6 +6509,7 @@ def _add_best_seconds_to_qualifiers(state, best_seconds_by_code: dict[str, int])
                     punts=sec.punts,
                     mitjana=sec.mitjana,
                     serie_major=_group_sm_by_player(g).get(sec.player_name, 0),
+                    series=_group_series_by_player(g).get(sec.player_name, ()),
                 )
             )
         seconds = rank_winners(candidates)[:n]
@@ -6520,6 +6522,7 @@ def _add_best_seconds_to_qualifiers(state, best_seconds_by_code: dict[str, int])
                 punts=w.punts,
                 mitjana=w.mitjana,
                 serie_major=w.serie_major,
+                series=w.series,
             )
             for w in seconds
             if _norm_name(w.player_name) not in already

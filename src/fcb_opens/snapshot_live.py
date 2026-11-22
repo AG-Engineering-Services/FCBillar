@@ -183,6 +183,7 @@ def _state_payload(
                 "punts": q.punts,
                 "mitjana": q.mitjana,
                 "serie_major": q.serie_major,
+                "series": list(q.series),
             }
             for q in detail.provisional_qualifiers
         ]
