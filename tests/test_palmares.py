@@ -515,3 +515,34 @@ def test_seleccions_pdf_real():
         (2018, 2),
         (2019, 3),
     ]
+
+
+def test_rfeb_quadre_47_2_columna_de_numeracio_i_nota():
+    """A la primera pàgina hi ha una columna de numeració davant de l'edició, i una nota."""
+    from pathlib import Path
+
+    inf = P.llegeix_rfeb(Path(__file__).parents[1] / "fonts/palmares/rfeb/Cuadro-47_2-1.pdf")
+    assert inf.no_llegit == []
+    assert any("CUADRO 45/2" in n for n in inf.notes)
+    primera = [m for m in inf.medalles if m.edicio == "I"]
+    assert [(m.any_edicio, m.posicio, m.jugador) for m in primera] == [(1930, 1, "Raimundo Vives")]
+    assert [m.jugador for m in inf.medalles if m.edicio == "XII"] == [
+        "Joaquín Domingo",
+        "Juan Butrón",
+        "Julio Bofill",
+    ]
+
+
+def test_rfeb_5_quilles_sense_mitjanes():
+    from pathlib import Path
+
+    inf = P.llegeix_rfeb(
+        Path(__file__).parents[1] / "fonts/palmares/rfeb/Ctos.-Espana-5-Quillas.pdf"
+    )
+    assert inf.no_llegit == []
+    iii = [(m.posicio, m.jugador, m.mitjana) for m in inf.medalles if m.edicio == "III"]
+    assert iii == [
+        (1, "Lluis Carral", None),
+        (2, "Xavier Minguell", None),
+        (3, "Carlos Gerardi", None),
+    ]

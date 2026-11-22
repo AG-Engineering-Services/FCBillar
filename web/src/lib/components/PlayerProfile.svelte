@@ -310,7 +310,7 @@
 	});
 	// Per any, del més recent al més antic; les edicions sense any, al final.
 	// Al medaller de la RFEB, la competició que porta el nom d'una modalitat és el campionat d'Espanya.
-	const MODALITATS_RFEB = new Set(['Tres bandes', 'Lliure', 'Una banda', 'Quadre 47/1', 'Quadre 47/2', 'Quadre 71/2', 'Artístic']);
+	const MODALITATS_RFEB = new Set(['Tres bandes', 'Lliure', 'Una banda', 'Quadre 47/1', 'Quadre 47/2', 'Quadre 71/2', 'Artístic', '5 quilles']);
 	const NOMS_RFEB: Record<string, string> = {
 		"Gran Premi d'Espanya tres bandes": "Gran Premi d'Espanya de Tres Bandes",
 		'Seleccions autonòmiques tres bandes': 'Seleccions Autonòmiques de Tres Bandes'
