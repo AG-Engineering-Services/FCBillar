@@ -121,3 +121,8 @@ def test_la_lliga_no_porta_la_classificacio_d_equips():
     )
     assert (nc, np_) == (0, 1)
     assert conn.execute("SELECT count(*) FROM rfeb_classificacions").fetchone()[0] == 0
+
+
+def test_una_prova_de_kozoom_ja_publicada_es_torna_a_fer():
+    t = _t("Spanish National Championship", d=date(2012, 6, 26))
+    assert ja_hi_es(t, [_existent(id="kozoom/8576", temporada="2011-2012")]) is None

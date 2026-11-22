@@ -368,3 +368,19 @@ def test_youth_i_juniors_women_i_ladies_son_el_mateix_tipus():
     assert _tipus("European Championship Juniors 3-Cushion") != _tipus(
         "European Championship 3-Cushion"
     )
+
+
+def test_el_ranquing_de_la_barra_no_es_una_classificacio():
+    from fcbillar.kozoom_carrega import es_de_la_barra
+    from fcbillar.umb import Classificat
+
+    def fila(pos, nom, **kw):
+        base = dict(nacionalitat="BE", ronda=None, punts=None, mitjana=None,
+                    mitjana_particular=None, serie1=None, serie2=None, caramboles=None,
+                    entrades=None)  # fmt: skip
+        return Classificat(pos, nom, **(base | kw))
+
+    barra = [fila(1, "JASPERS Dick"), fila(2, "CAUDRON Frédéric")]
+    assert es_de_la_barra(barra)
+    assert not es_de_la_barra([fila(1, "JASPERS Dick", mitjana=2.1), fila(2, "CAUDRON Frédéric")])
+    assert not es_de_la_barra([])

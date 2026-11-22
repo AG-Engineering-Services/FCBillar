@@ -118,6 +118,8 @@ def ja_hi_es(titol: Titol, existents: list[dict]) -> Existent | None:
     if ti == "altres":
         return None
     for r in existents:
+        if r["id"].startswith("kozoom/"):
+            continue  # les nostres, d'una càrrega anterior: es tornen a fer
         if (r["temporada"], r["modalitat"], r["tipus"]) != (t, m, ti):
             continue
         # El «Junior» de Kozoom és el sub-17 de la RFEB (setembre-octubre).
