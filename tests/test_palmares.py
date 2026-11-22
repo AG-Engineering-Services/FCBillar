@@ -316,7 +316,11 @@ def test_quadre_honor_fcb_pdf_real():
     cami = Path(__file__).parents[1] / "fonts/palmares/fcb/quadrehonorfcb1985-1986.pdf"
     inf = llegeix_fcb(cami)
     assert inf.no_llegit == []
-    tb = [(m.categoria, m.posicio, m.jugador, m.lloc) for m in inf.medalles if m.competicio == "Tres bandes"]
+    tb = [
+        (m.categoria, m.posicio, m.jugador, m.lloc)
+        for m in inf.medalles
+        if m.competicio == "Tres bandes"
+    ]
     assert ("1a", 1, "Claudio Nadal", "C.B. Barcelona") in tb
     assert ("2a", 1, "Ferran Rodríguez", "C.B. Banyoles") in tb
     assert all(m.edicio == "1985-86" and m.any_edicio == 1986 for m in inf.medalles)
@@ -330,7 +334,11 @@ def test_quadre_honor_fcb_llista_dins_taula_de_sis_columnes():
 
     cami = Path(__file__).parents[1] / "fonts/palmares/fcb/quadrehonorfcb1973-1974.pdf"
     inf = llegeix_fcb(cami)
-    trofeu = sorted((m.categoria, m.posicio, m.jugador) for m in inf.medalles if m.competicio == "Trofeu Claudio Puigvert")
+    trofeu = sorted(
+        (m.categoria, m.posicio, m.jugador)
+        for m in inf.medalles
+        if m.competicio == "Trofeu Claudio Puigvert"
+    )
     assert trofeu == [("absolut", 1, "Pascual Peña"), ("absolut", 2, "Norman Solé")]
     copa = sorted((m.posicio, m.jugador) for m in inf.medalles if m.competicio == "Copa Presidente")
     assert copa == [(1, "Segundo Goméz"), (2, "Isidoro Mizrahi")]
@@ -349,7 +357,11 @@ def test_quadre_honor_fcb_celles_combinades():
 
     arrel = Path(__file__).parents[1] / "fonts/palmares/fcb"
     m16 = llegeix_fcb(arrel / "quadrehonorfcb2016-2017.pdf").medalles
-    campio = {m.competicio: m.jugador for m in m16 if m.posicio == 1 and m.competicio in ("5 quilles", "Biatló")}
+    campio = {
+        m.competicio: m.jugador
+        for m in m16
+        if m.posicio == 1 and m.competicio in ("5 quilles", "Biatló")
+    }
     assert campio == {"5 quilles": "Lino Brizzi", "Biatló": "Angel Viladomat Gonfaus"}
 
     m15 = llegeix_fcb(arrel / "quadrehonorfcb2015-2016.pdf").medalles
@@ -363,4 +375,6 @@ def test_quadre_honor_fcb_celles_combinades():
 
     m12 = llegeix_fcb(arrel / "quadrehonorfcb2012-2013.pdf").medalles
     assert not [m for m in m12 if not any(ch.isalpha() for ch in m.jugador)]
-    assert ("Quadre 71/2", "2a", 1, "Alejandro López Balboa") in {(m.competicio, m.categoria, m.posicio, m.jugador) for m in m12}
+    assert ("Quadre 71/2", "2a", 1, "Alejandro López Balboa") in {
+        (m.competicio, m.categoria, m.posicio, m.jugador) for m in m12
+    }

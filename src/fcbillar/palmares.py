@@ -574,7 +574,12 @@ def _categoria_fcb(text: str) -> str:
 
 def _jugador_fcb(text: str) -> str | None:
     t = " ".join(text.split())
-    if not re.search(r"[^\W\d_]", t) or "NO JUGAT" in t.upper() or "DESERT" in t.upper() or "/" in t:
+    if (
+        not re.search(r"[^\W\d_]", t)
+        or "NO JUGAT" in t.upper()
+        or "DESERT" in t.upper()
+        or "/" in t
+    ):
         return None  # sense campió («----------», «NO JUGAT»), o una parella
     return t
 
@@ -607,7 +612,9 @@ def llegeix_fcb(cami: str | Path) -> Informe:
                 cel.pop()  # una columna buida de més al final
             if not any(cel) or cel[0] == "MODALITAT" or cel[0].upper().startswith("QUADRE D'HONOR"):
                 continue
-            if any(c.upper().startswith("CLASSIF") for c in cel[1:2]) or "JUGADOR" in (c.upper() for c in cel):
+            if any(c.upper().startswith("CLASSIF") for c in cel[1:2]) or "JUGADOR" in (
+                c.upper() for c in cel
+            ):
                 competicio = None  # capçalera d'una secció en format de llista
                 continue
             if cel[0]:
@@ -645,7 +652,16 @@ def llegeix_fcb(cami: str | Path) -> Informe:
                     jugador = _jugador_fcb(nom)
                     if jugador:
                         inf.medalles.append(
-                            Medalla(FONT_FCB, competicio, categoria, edicio, any_fi, club or None, posicio, jugador)
+                            Medalla(
+                                FONT_FCB,
+                                competicio,
+                                categoria,
+                                edicio,
+                                any_fi,
+                                club or None,
+                                posicio,
+                                jugador,
+                            )
                         )
             elif len(cel) == 4:
                 # Format de llista: «1r | jugador | club».
@@ -664,7 +680,16 @@ def llegeix_fcb(cami: str | Path) -> Informe:
                 vistes.add((competicio, categoria_llista))
                 if jugador:
                     inf.medalles.append(
-                        Medalla(FONT_FCB, competicio, categoria_llista, edicio, any_fi, cel[3] or None, pos, jugador)
+                        Medalla(
+                            FONT_FCB,
+                            competicio,
+                            categoria_llista,
+                            edicio,
+                            any_fi,
+                            cel[3] or None,
+                            pos,
+                            jugador,
+                        )
                     )
             else:
                 inf.no_llegit.append((edicio, " | ".join(cel)))
