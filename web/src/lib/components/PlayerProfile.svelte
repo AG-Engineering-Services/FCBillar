@@ -42,6 +42,7 @@
 	} from '$lib/nacional';
 	import { follows, toggleFollow } from '$lib/follows';
 	import { LLINDAR_RESUM, resumMedalles, type ResumMedalles } from '$lib/palmaresResum';
+	import { palmaresCatalunya, recomptePerMena, type MenaDePalmares } from '$lib/palmaresCatalunya';
 	import RadarChart from '$lib/components/RadarChart.svelte';
 	import { theme } from '$lib/theme';
 	import { ADMIN_EMAIL, esAdminLocal, marcaAdmin } from '$lib/admin';
@@ -126,8 +127,6 @@
 	let shown = $state(60);
 	let serieFilter = $state(false);
 	let clubHist = $state<{ temporada: string; club: string | null }[]>([]);
-	/** Què és una entrada del palmarès. La federació no ho diu: es dedueix del nom. */
-	type MenaDePalmares = 'campionat' | 'open' | 'torneig';
 
 	let palmares = $state<
 		{
@@ -207,32 +206,6 @@
 		return groups
 			.reverse()
 			.map((g) => ({ club: g.club, label: `${g.y1}-${g.y2}` }));
-	});
-	const palmaresBySeason = $derived.by(() => {
-		const groups = new Map<
-			string,
-			{
-				openId: number;
-				nom: string;
-				categoria: string | null;
-				modalitat: number | null;
-				tipus: 'campionat' | 'open' | 'torneig';
-				temporada: string;
-				posicio: number;
-				club: string | null;
-			}[]
-		>();
-		for (const p of palmares.filter((x) => x.modalitat === selMod)) {
-			const season = p.temporada || 'Temporada desconeguda';
-			if (!groups.has(season)) groups.set(season, []);
-			groups.get(season)!.push(p);
-		}
-		return [...groups.entries()]
-			.sort(([a], [b]) => b.localeCompare(a))
-			.map(([temporada, entries]) => ({
-				temporada,
-				entries: entries.sort((a, b) => a.posicio - b.posicio || a.nom.localeCompare(b.nom))
-			}));
 	});
 	let loading = $state(true);
 	let error = $state<string | null>(null);
@@ -346,25 +319,22 @@
 		}
 		return [...grups].map(([any, entries]) => ({ any, entries }));
 	}
-	// El recompte de Catalunya és sobre el Quadre d'Honor sencer, també el que la llista no repeteix.
-	const medallesQuadreHonor = $derived(medalles.filter((m) => m.font === 'fcb'));
 	const medallesEsp = $derived(medalles.length ? medallesPerAny('rfeb') : []);
 	const medallesInt = $derived(medalles.length ? medallesPerAny('ceb') : []);
-	// Del Quadre d'Honor, les que el palmarès de la FCB ja mostra com a campionat
-	// de Catalunya (mateixa temporada, modalitat i posició) no es repeteixen.
-	const MODALITAT_QH: Record<string, number> = { 'Tres bandes': 1, Lliure: 2, 'Quadre 47/2': 3, Banda: 4, 'Quadre 71/2': 6 };
-	const temporadaCurta = (t: string) => t.replace(/^(\d{4})-\d{2}(\d{2})$/, '$1-$2');
-	const jaAlPalmares = $derived(
-		new Set(
-			palmares
-				.filter((p) => p.tipus === 'campionat' && p.modalitat != null)
-				.map((p) => `${temporadaCurta(p.temporada)}|${p.modalitat}|${p.posicio}`)
+	// Catalunya en una sola llista: el Quadre d'Honor i els podis de la web, sense repetir títols.
+	const MENA_PLURAL: Record<MenaDePalmares, string> = {
+		campionat: 'Campionats de Catalunya',
+		open: 'Opens',
+		torneig: 'Tornejos'
+	};
+	const palmaresCat = $derived(palmaresCatalunya(palmares, medalles.filter((m) => m.font === 'fcb')));
+	const recompteCat = $derived(recomptePerMena(palmaresCat));
+	const campionatsCat = $derived(
+		palmaresCat.flatMap((g) =>
+			g.entries
+				.filter((e) => e.tipus === 'campionat' && e.posicio <= 3)
+				.map((e) => ({ competicio: e.nom, categoria: e.categoria || 'absolut', posicio: e.posicio as 1 | 2 | 3 }))
 		)
-	);
-	const medallesCat = $derived(
-		medalles.length
-			? medallesPerAny('fcb', (m) => jaAlPalmares.has(`${m.edicio}|${MODALITAT_QH[m.competicio]}|${m.posicio}`))
-			: []
 	);
 
 	let internacional = $state<UmbProva[]>([]);
@@ -626,7 +596,7 @@
 					const isChampionship =
 						!isOpen &&
 						(modalityOnly.test(rawNom) ||
-							/CAMPIONAT\s+CATALUNYA|CATALUNYA|^(?:TRES BANDES|3 BANDES|LLIURE|BANDA|QUADRE 47\/2|QUADRE 71\/2)\s+-/i.test(
+							/CAMPIONAT\s+CATALUNYA|CATALUNYA|^(?:TRES BANDES|3 BANDES|LLIURE|BANDA|QUADRE 47\/2|QUADRE 71\/2)(?:\s+INDIVIDUAL)?\s+-/i.test(
 								rawNom
 							) ||
 							/\b(?:TRES BANDES|3 BANDES|LLIURE|BANDA|QUADRE 47\/2|QUADRE 71\/2)\s+(?:FEMEN[IÍ]|JUNIOR)\b/i.test(
@@ -1606,55 +1576,50 @@
 			</div>
 		{/if}
 
-		{#if !veuEspanya && !veuInternacional && medallesQuadreHonor.length > LLINDAR_RESUM}
-			{@const r = resumMedalles(medallesQuadreHonor)}
+		{#if !veuEspanya && !veuInternacional && palmaresCat.length}
+			{@const total = palmaresCat.reduce((n, g) => n + g.entries.length, 0)}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-					Campionats de Catalunya · Quadre d'Honor de la FCB · {r.total}
-				</div>
-				{@render recompteMedalles(r)}
-				<details class="mt-2">
-					<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Per competició</summary>
-					{@render taulaResum(r)}
-				</details>
-			</div>
-		{/if}
-
-		{#if !veuEspanya && !veuInternacional && medallesCat.length}
-			{@const total = medallesCat.reduce((n, g) => n + g.entries.length, 0)}
-			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-					Palmarès individual · Quadre d'Honor de la FCB · {total}
-				</div>
-				{#if total > LLINDAR_RESUM}
-					<details>
-						<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Llista per anys</summary>
-						{@render llistaMedalles(medallesCat, true)}
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Palmarès individual · {total}</div>
+				<table class="w-full text-sm">
+					<thead>
+						<tr class="text-2xs text-slate-500 dark:text-slate-400">
+							<th scope="col" class="py-1 text-left font-medium"><span class="sr-only">Competició</span></th>
+							<th scope="col" class="w-12 text-right font-medium">1r</th>
+							<th scope="col" class="w-12 text-right font-medium">2n</th>
+							<th scope="col" class="w-12 text-right font-medium">3r</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each recompteCat as f (f.tipus)}
+							<tr class="border-t border-slate-100 dark:border-slate-800">
+								<th scope="row" class="py-1.5 text-left font-medium">{MENA_PLURAL[f.tipus]}</th>
+								{#each [f.primers, f.segons, f.tercers] as n}
+									<td class="text-right font-mono text-lg tabular-nums {n ? 'font-bold' : 'text-slate-500 dark:text-slate-400'}">{n}</td>
+								{/each}
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+				{#if campionatsCat.length > LLINDAR_RESUM}
+					<details class="mt-2">
+						<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Campionats de Catalunya per modalitat</summary>
+						{@render taulaResum(resumMedalles(campionatsCat))}
 					</details>
-				{:else}
-					{@render llistaMedalles(medallesCat, true)}
 				{/if}
-			</div>
-		{/if}
-
-		{#if !veuEspanya && !veuInternacional && palmaresBySeason.length}
-			{@const totalCat = palmaresBySeason.reduce((n, s) => n + s.entries.length, 0)}
-			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Palmarès individual · {totalCat}</div>
-				{#if totalCat > LLINDAR_RESUM}
+				{#if total > LLINDAR_RESUM}
 					<details>
 						<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Llista per temporades</summary>
 						{@render llistaPalmaresCat()}
 					</details>
 				{:else}
-					{@render llistaPalmaresCat()}
+					<div class="mt-3">{@render llistaPalmaresCat()}</div>
 				{/if}
 			</div>
 		{/if}
 
 		{#snippet llistaPalmaresCat()}
 				<div class="space-y-3">
-					{#each palmaresBySeason as season}
+					{#each palmaresCat as season (season.temporada)}
 						<div>
 							<div class="mb-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{season.temporada}</div>
 							<ul class="space-y-1">
@@ -1664,7 +1629,7 @@
 										<div class="min-w-0 flex-1">
 											<div class="mb-0.5 flex items-center gap-1.5">
 												<span class="shrink-0 rounded px-1 py-0.5 text-2xs font-bold uppercase tracking-wide {p.tipus === 'campionat' ? 'bg-blue-600 text-white' : p.tipus === 'open' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{p.tipus === 'campionat' ? 'Camp. Catalunya' : p.tipus === 'open' ? 'Open' : 'Torneig'}</span>
-												{#if kiosk}<span class="min-w-0 truncate font-medium">{p.nom}</span>
+												{#if kiosk || p.openId == null}<span class="min-w-0 truncate font-medium">{p.nom}</span>
 												{:else}<a href="/opens/{p.openId}" class="min-w-0 truncate font-medium active:underline">{p.nom}</a>{/if}
 											</div>
 											{#if p.categoria}<div class="truncate text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria · {p.categoria}</div>{/if}
