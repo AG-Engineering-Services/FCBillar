@@ -612,7 +612,7 @@ si,Antoni Hernández,C.B. Sant Martí,palmares-fcb,308,"HERNÁNDEZ PARRA, ANTONI
 si,Antoni López,B.C. Olesa,palmares-fcb,342,"LÓPEZ CARBONELL, ANTONI",BC OLESA,un cognom
 si,Antoni Magdaleno Carreño,C.B. Punt d'Atac,palmares-fcb,817,"MAGDALENO CARREÑO, ANTONI",C.B.PUNT D'ATAC,exacte
 si,Antoni Martínez Carrillo,C.B. Sants,palmares-fcb,367,"MARTÍNEZ CARRILLO, ANTONI",C.B.LLINARS,exacte
-si,Antoni Pérez,S.B. Coral Colón,palmares-fcb,911,"PÉREZ FERNÁNDEZ, ANTONIO",C.B.PUNT D'ATAC,un cognom
+no,Antoni Pérez,S.B. Coral Colón,palmares-fcb,911,"PÉREZ FERNÁNDEZ, ANTONIO",C.B.PUNT D'ATAC,homònim d'una altra generació (revisat per fitxa)
 si,Antoni Sendra Gabarró,S.E. Casal de Cervera,palmares-fcb,519,"SENDRA GABARRÓ, ANTONI",S.E.CASAL CERVERA,exacte
 si,Antonio González,S.B.C. Paz y Justicia,palmares-fcb,293,"GONZÁLEZ SERRANO, ANTONI",C.B.CANET DE MAR,un cognom
 si,Antonio González Serrano,C.B. Canet de Mar,palmares-fcb,293,"GONZÁLEZ SERRANO, ANTONI",C.B.CANET DE MAR,exacte
@@ -652,12 +652,12 @@ si,Ferran Corpas,C.A.B. Córdoba,palmares-fcb,671,"CORPAS NATOLI, FERNANDO",C.B.
 si,Ferran Rodríguez,C.B. Banyoles,palmares-fcb,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,un cognom
 si,Francesc García Espigares,C.B. Sant Adrià,palmares-fcb,252,"GARCÍA ESPIGARES, FRANCISCO",,exacte
 si,Francesc Hernández Hernández,C.B. Manresa,palmares-fcb,306,"HERNÁNDEZ HERNÁNDEZ, FRANCESC",C.B.MANRESA,exacte
-si,Francesc Rodríguez,C.B. Tarragona,palmares-fcb,2466,"RODRIGUEZ CARRILLO, FRANCISCO",C.B.BLANES,un cognom
+no,Francesc Rodríguez,C.B. Tarragona,palmares-fcb,2466,"RODRIGUEZ CARRILLO, FRANCISCO",C.B.BLANES,homònim d'una altra generació (revisat per fitxa)
 si,Francisco García Espigares,C.B. Sant Adrià,palmares-fcb,252,"GARCÍA ESPIGARES, FRANCISCO",,exacte
 si,Francisco Giménez,C.B. Monforte,palmares-fcb,273,"GIMÉNEZ FONT, FRANCESC XAVIER",C.B.SANT FELIU,un cognom
 si,Francisco Lorenzo Mula Callejó,nC.B. Vic,palmares-fcb,1189,"MULA CALLEJÓN, FRANCISCO",C.B.SANTS,falta
 si,Francisco Lorenzo Mula Callejón,C.B. Monforte,palmares-fcb,1189,"MULA CALLEJÓN, FRANCISCO",C.B.SANTS,exacte
-si,Francisco Rodríguez,S.B.C.N. Reus Ploms,palmares-fcb,2466,"RODRIGUEZ CARRILLO, FRANCISCO",C.B.BLANES,un cognom
+no,Francisco Rodríguez,S.B.C.N. Reus Ploms,palmares-fcb,2466,"RODRIGUEZ CARRILLO, FRANCISCO",C.B.BLANES,homònim d'una altra generació (revisat per fitxa)
 si,Frederic Font,C.B. Mont-Roig del Camp,palmares-fcb,227,"FONT DALMAU, FREDERIC",,un cognom
 si,Félix Tormo Blanco,S.B. Foment Molins,palmares-fcb,1012,"TORMO BLANCO, FÉLIX",B.LA UNIÓ CORAL,exacte
 si,Gabriel Cervera,S.B. L'Aliança Poble Nou,palmares-fcb,1906,"CERVERA SANS, GABRIEL",C.B.MONFORTE,un cognom
@@ -666,7 +666,7 @@ si,Gabriel Liebana,C.B. Mollet,palmares-fcb,785,"LIEBANA CAMARA, GABRIEL",,un co
 si,Georgeta Anghel Turmac,C.B. Manresa,palmares-fcb,1129,"ANGHEL TURMAC, GEORGETA",C.B.MANRESA,exacte
 si,Germán Toro Corrales,C.B. Matadepera,palmares-fcb,543,"TORO CORRALES, GERMÁN",C.B.PUNT D'ATAC,exacte
 si,Henry Castro Téllez,C.B. Monforte,palmares-fcb,1245,"CASTRO TÉLLEZ, HENRY",C.B.MONFORTE,exacte
-si,Ignacio Gómez,S.B. Foment Molins,palmares-fcb,2788,"GÓMEZ-PIMPOLLO VELASCO, IGNACIO",B.C.GRANOLLERS,un cognom
+no,Ignacio Gómez,S.B. Foment Molins,palmares-fcb,2788,"GÓMEZ-PIMPOLLO VELASCO, IGNACIO",B.C.GRANOLLERS,homònim d'una altra generació (revisat per fitxa)
 si,Isidor Cardet Calderó,C.B. Sants,palmares-fcb,162,"CARDET CALDERÓ, ISIDOR",C.B.LLEIDA,exacte
 si,Isidre Baz Vergara,S.B. Centre Lectura Valls,palmares-fcb,127,"BAZ VERGARA, ISIDRE",C.B.MONT-ROIG,exacte
 si,Isidre Robledo,C.B. Punt d'Atac,palmares-fcb,480,"ROBLEDO GONZÁLEZ, ISIDRE",C.B.TARRAGONA,un cognom
@@ -737,7 +737,7 @@ si,Josep Maria Prats Quiñones,C.B. Mont-roig,palmares-fcb,462,"PRATS QUIÑONES,
 si,Josep Martín,C.B. Sants,palmares-fcb,832,"MARTÍN VÍLCHEZ, JOSEP",B.C.GRANOLLERS,un cognom
 si,Josep Miguel Márquez Montes,B.C. Olesa,palmares-fcb,358,"MÁRQUEZ MONTES, JOSÉ MIGUEL",C.B.2000 CERDANYOLA,exacte
 si,Josep Miquel Márquez,C.B. Monforte,palmares-fcb,358,"MÁRQUEZ MONTES, JOSÉ MIGUEL",C.B.2000 CERDANYOLA,un cognom
-si,Josep Mª Galvez,C.B. Sants,palmares-fcb,243,"GÁLVEZ PAREJO, JOSÉ MARÍA",C.B.CANET DE MAR,un cognom
+no,Josep Mª Galvez,C.B. Sants,palmares-fcb,243,"GÁLVEZ PAREJO, JOSÉ MARÍA",C.B.CANET DE MAR,homònim d'una altra generació (revisat per fitxa)
 si,Josep Mª Mas Canadell,S.B. Coral Colón,palmares-fcb,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,exacte
 si,Josep Mª Polo Camarasa,C.B. L'Amistat de Mollerussa,palmares-fcb,460,"POLO CAMARASA, JOSEP Mª",C.B. BORGES,exacte
 si,Josep Mª Prats Quiñones,C.B. Montroig,palmares-fcb,462,"PRATS QUIÑONES, JOSEP Mª",C.B.MONT-ROIG,exacte
@@ -760,11 +760,11 @@ si,José Martín,C.B. Sant Adrià,palmares-fcb,832,"MARTÍN VÍLCHEZ, JOSEP",B.C
 si,José María Mesas Pardo,C.B. Llinars,palmares-fcb,1294,"MESAS PARDO, JOSÉ MARÍA",,exacte
 si,José Miguel Márquez,C.B. Monforte,palmares-fcb,358,"MÁRQUEZ MONTES, JOSÉ MIGUEL",C.B.2000 CERDANYOLA,un cognom
 si,José Miguel Márquez Montes,S.B. Foment Molins de Rei,palmares-fcb,358,"MÁRQUEZ MONTES, JOSÉ MIGUEL",C.B.2000 CERDANYOLA,exacte
-si,José Mª Gálvez,C.B. Sants,palmares-fcb,243,"GÁLVEZ PAREJO, JOSÉ MARÍA",C.B.CANET DE MAR,un cognom
+no,José Mª Gálvez,C.B. Sants,palmares-fcb,243,"GÁLVEZ PAREJO, JOSÉ MARÍA",C.B.CANET DE MAR,homònim d'una altra generació (revisat per fitxa)
 si,José Vicente,C.B. Sants,palmares-fcb,560,"VICENTE RUIZ, JOSÉ",C.B.SANTS,un cognom
 si,José Vicente Ruiz,C.B. Matadepera,palmares-fcb,560,"VICENTE RUIZ, JOSÉ",C.B.SANTS,exacte
-si,Juan Font,C.B. Barcelona,palmares-fcb,228,"FONT GIMÉNEZ, JOAN ANTON",C.B.MONT-ROIG,un cognom
-si,Juan García,C.B. Sants,palmares-fcb,2521,"GARCÍA SANTOS, JOAN",C.B.SANT FELIU,un cognom
+no,Juan Font,C.B. Barcelona,palmares-fcb,228,"FONT GIMÉNEZ, JOAN ANTON",C.B.MONT-ROIG,homònim d'una altra generació (revisat per fitxa)
+no,Juan García,C.B. Sants,palmares-fcb,2521,"GARCÍA SANTOS, JOAN",C.B.SANT FELIU,homònim d'una altra generació (revisat per fitxa)
 si,Juan José Barrientos Caballero,S.B. Coral Colón,palmares-fcb,123,"BARRIENTOS CABALLERO, JOAN JOSEP",C.B.2000 CERDANYOLA,exacte
 si,Juan Rojals,C.B. Sants,palmares-fcb,1185,"ROJALS VALLS, JOAN",C.B.SANT BOI,un cognom
 si,Juan Vidal,S.B.C. Paz y Justicia,palmares-fcb,1038,"VIDAL GIBERT, JOAN",C.B.TARRAGONA,un cognom
@@ -893,3 +893,144 @@ si,Ricardo GARCIA,RFEB individuals,individual,716,"GARCÍA ALARCÓN, RICARDO",C.
 si,RICARDO GARCÍA,RFEB individuals,individual,716,"GARCÍA ALARCÓN, RICARDO",C.B.MONFORTE,abreujat de Ricardo García Alarcón; únic Ricardo García del circuit
 si,Cesar Martinicorena,RFEB individuals,individual,1835,"MARTINICORENA AGUILO, CÉSAR",,"un cognom, rar: César Martinicorena Aguilo, ja validat"
 si,César Martinicorena Aguilo,RFEB individuals,individual,1835,"MARTINICORENA AGUILO, CÉSAR",,exacte
+si,Jaume Carreras,C.B. Barcelona,palmares-fcb,652,"CARRERAS BATLLE, JAUME",,confirmat per fitxa
+si,Joan Vidal,S.B. Casino Tarragona,palmares-fcb,1038,"VIDAL GIBERT, JOAN",C.B.TARRAGONA,confirmat per fitxa
+si,Joan Vidal Gibert,C.B. Tarragona,palmares-fcb,1038,"VIDAL GIBERT, JOAN",C.B.TARRAGONA,confirmat per fitxa
+si,Joan Font Giménez,C.B. Mont-roig del Camp,palmares-fcb,228,"FONT GIMÉNEZ, JOAN ANTON",C.B.MONT-ROIG,confirmat per fitxa
+si,José Luis Liarte,C.B. Tarragona,palmares-fcb,784,"LIARTE LISA, JOSEP LLUIS",,confirmat per fitxa
+si,Pere Adell,C.B. Barcelona,palmares-fcb,578,"ADELL CASARRAMONA, PERE",C.B.MONFORTE,confirmat per fitxa
+no,Luis González,C.B. Sants,palmares-fcb,286,"GONZÁLEZ CARVAJAL, LLUÍS",C.B.TARRAGONA,homònim d'una altra generació (revisat per fitxa)
+no,Lluis González,C.B. Sants,palmares-fcb,286,"GONZÁLEZ CARVAJAL, LLUÍS",C.B.TARRAGONA,homònim d'una altra generació (revisat per fitxa)
+si,Cipriano Becerra,S.B.F. Molins de Rei,palmares-fcb,128,"BECERRA GÓMEZ, CIPRIANO",B.LA UNIÓ CORAL,confirmat per fitxa
+si,Joan Rojals Valls,C.B. Sant Boi,palmares-fcb,1185,"ROJALS VALLS, JOAN",C.B.SANT BOI,confirmat per fitxa
+si,Pascual Peña,S.C. Alba,palmares-fcb,440,"PEÑA GARCÉS, PASCUAL",,confirmat per fitxa
+si,Jaume Ferré Guallar,C.S.B. Pool Calella,palmares-fcb,702,"FERRÉ GUALLAR, JAUME",C.B.SANT ADRIÀ,confirmat per fitxa
+si,Jordi Amell,C.B. Vilanova,palmares-fcb,99,"AMELL AMELL, JORDI",S.B.LA GRAN PENYA,confirmat per fitxa
+si,Fernando Rodríguez,C.B. Banyoles,palmares-fcb,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,confirmat per fitxa
+si,Miquel Plandolit,C.B. Mataró,palmares-fcb,922,"PLANDOLIT MARTÍN, MIQUEL",C.B.MATARÓ,confirmat per fitxa
+si,Miquel Plandolit Martín,C.B. Mataró,palmares-fcb,922,"PLANDOLIT MARTÍN, MIQUEL",C.B.MATARÓ,confirmat per fitxa
+si,Carlos Tuset,S.B. La Vicentina,palmares-fcb,551,"TUSET MALLOL, CARLES",S.B.F.MOLINS,confirmat per fitxa
+si,Carles Tuset,S.B. La Vicentina,palmares-fcb,551,"TUSET MALLOL, CARLES",S.B.F.MOLINS,confirmat per fitxa
+si,Carles Tuset Mallol,S.B. La Vicentina,palmares-fcb,551,"TUSET MALLOL, CARLES",S.B.F.MOLINS,confirmat per fitxa
+no,Antonio López,C.B. Vilanova,palmares-fcb,342,"LÓPEZ CARBONELL, ANTONI",BC OLESA,homònim d'una altra generació (revisat per fitxa)
+si,Rafael Bragulat,C.C. Comerç de Terrasa,palmares-fcb,627,"BRAGULAT SANTOS, RAFAEL",,confirmat per fitxa
+si,Vicente Martínez Lopezosa,C.B. Tarragona,palmares-fcb,836,"MARTÍNEZ LOPEZOSA, VICENÇ",C.B.MONT-ROIG,confirmat per fitxa
+si,Esteve Corominas,S.B.C.C. Banyoles,palmares-fcb,1310,"COROMINAS FRANCH, ESTEVE",C.B.BANYOLES,confirmat per fitxa
+si,Joan Espinasa,C.B. Parets,palmares-fcb,211,"ESPINASA SÁNCHEZ, JOAN",B.C.GRANOLLERS,confirmat per fitxa
+si,Joan Espinasa Sánchez,B.C. Granollers,palmares-fcb,211,"ESPINASA SÁNCHEZ, JOAN",B.C.GRANOLLERS,confirmat per fitxa
+si,Salvador Bort Cariñena,C.B. Mataró,palmares-fcb,623,"BORT CARIÑENA, SALVADOR",C.B.MATARÓ,confirmat per fitxa
+si,Xavier Fonellosa,C.B. Barcelona,palmares-fcb,704,"FONELLOSA CASANOVAS, XAVIER",C.B.MONFORTE,confirmat per fitxa
+si,Xavier Fonellosa Casanovas,C.B. Monforte,palmares-fcb,704,"FONELLOSA CASANOVAS, XAVIER",C.B.MONFORTE,confirmat per fitxa
+si,Pere Arnau,C.B. Ulldecona,palmares-fcb,600,"ARNAU CANALDA, PERE",C.B.TARRAGONA,confirmat per fitxa
+si,Delfí Santigosa Gasset,S.B.F. Molins de Rei,palmares-fcb,511,"SANTIGOSA GASSET, DELFÍ",S.B.F.MOLINS,confirmat per fitxa
+si,Josep Ramón Molina,C.B. Vilanova,palmares-fcb,392,"MOLINA MASPOCH, JOSEP RAMÓN",S.B.F.MOLINS,confirmat per fitxa
+si,Manuel Pastor,S.B. Ateneu Santboià,palmares-fcb,437,"PASTOR RIVAS, MANUEL",C.B.SANT BOI,confirmat per fitxa
+si,Manuel Pastor Rivas,C.B. Sant Boi,palmares-fcb,437,"PASTOR RIVAS, MANUEL",C.B.SANT BOI,confirmat per fitxa
+si,Xavier Minguell,C.B. Monforte,palmares-fcb,857,"MINGUELL ROSSELLÓ, XAVIER",C.B.SANTS,confirmat per fitxa
+si,Jordi Oliver,C.B. Barcelona,palmares-fcb,884,"OLIVER SINCA, JORDI",C.B.MONFORTE,confirmat per fitxa
+si,Jordi Oliver Sinca,C.B. Manresa,palmares-fcb,884,"OLIVER SINCA, JORDI",C.B.MONFORTE,confirmat per fitxa
+no,Manuel Castro,C.B. Granollers,palmares-fcb,659,"CASTRO CALVO, MANUEL",C.B.SANTS,homònim d'una altra generació (revisat per fitxa)
+si,Rafael Salazar Hernández,C.B. Mataró,palmares-fcb,500,"SALAZAR HERNÁNDEZ, RAFAEL",C.B.MATARÓ,confirmat per fitxa
+si,Valentí Vilalta,C.B. Sants,palmares-fcb,566,"VILALTA PARÉ, VALENTÍ",C.B.SANTS,confirmat per fitxa
+si,Valentí Vilalta Pare,C.B. Sants,palmares-fcb,566,"VILALTA PARÉ, VALENTÍ",C.B.SANTS,confirmat per fitxa
+si,Josep Serarols,S.B. Casal de Cervera,palmares-fcb,520,"SERAROLS MONTES, JOSEP",S.E.CASAL CERVERA,confirmat per fitxa
+si,Josep Serarols Montes,S.E. Casal de Cervera,palmares-fcb,520,"SERAROLS MONTES, JOSEP",S.E.CASAL CERVERA,confirmat per fitxa
+si,Juan Morcillo,C.B. Ulldecona,palmares-fcb,1057,"MORCILLO MARIN, JUAN",C.B.MONT-ROIG,confirmat per fitxa
+si,Juan Morcillo Marín,C.B. Mont-roig,palmares-fcb,1057,"MORCILLO MARIN, JUAN",C.B.MONT-ROIG,confirmat per fitxa
+si,Ricard Arnau,C.B. Ulldecona,palmares-fcb,109,"ARNAU FONT, RICARD",C.B.MONT-ROIG,confirmat per fitxa
+si,Ricard Arnau Font,C.B. Ulldecona,palmares-fcb,109,"ARNAU FONT, RICARD",C.B.MONT-ROIG,confirmat per fitxa
+si,Antonio Hernández,C.B. Sant Martí,palmares-fcb,308,"HERNÁNDEZ PARRA, ANTONI",B.C.GRANOLLERS,confirmat per fitxa
+si,Fernando Corpas,C.B. Monforte,palmares-fcb,671,"CORPAS NATOLI, FERNANDO",C.B.LLINARS,confirmat per fitxa
+si,Jordi Garriga,C.B. Mataró,palmares-fcb,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,confirmat per fitxa
+si,Jordi Garriga Comas,C.B. Mataró,palmares-fcb,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,confirmat per fitxa
+si,Jaume Norberto,C.B. Vic,palmares-fcb,414,"NORBERTO BAYONA, JAUME",,confirmat per fitxa
+si,Juan Carlos Jiménez Vasco,S.B. La Colmena,palmares-fcb,773,"JIMÉNEZ VASCO, JOAN CARLES",C.B.SANT ADRIÀ,confirmat per fitxa
+no,Albert Martínez,C.B. Mataró,palmares-fcb,370,"MARTÍNEZ MATEU, ALBERT",S.E.CASAL CERVERA,homònim d'una altra generació (revisat per fitxa)
+no,Albert Martínez Mateu,C.B. Mataró,palmares-fcb,370,"MARTÍNEZ MATEU, ALBERT",S.E.CASAL CERVERA,homònim d'una altra generació (revisat per fitxa)
+si,Sergi Garriga,S.E. Casal de Cervera,palmares-fcb,264,"GARRIGA LLOVET, SERGI",S.E.CASAL CERVERA,confirmat per fitxa
+si,Sergi Garriga Llovet,S.E. Casal Cervera,palmares-fcb,264,"GARRIGA LLOVET, SERGI",S.E.CASAL CERVERA,confirmat per fitxa
+si,Xavier Martínez,S.B. Aliança Poble Nou,palmares-fcb,833,"MARTÍNEZ ALBERTO, XAVIER",C.B.MOLLET,confirmat per fitxa
+si,Josep Mª Mas,C.B. Matadepera,palmares-fcb,843,"MAS CANADELL, JOSEP Mª",B.C.GRANOLLERS,confirmat per fitxa
+si,Joan Perales,S.B. La Vicentina,palmares-fcb,441,"PERALES SANZ, JOAN",S.B.F.MOLINS,confirmat per fitxa
+si,Juan Perales Sanz,S.B. La Vicentina,palmares-fcb,441,"PERALES SANZ, JOAN",S.B.F.MOLINS,confirmat per fitxa
+si,Xavier Rius,S.E. Casal de Cervera,palmares-fcb,478,"RIUS PIQUÉ, XAVIER",S.E.CASAL CERVERA,confirmat per fitxa
+si,Xavier Rius Piqué,S.E. Casal de Cervera,palmares-fcb,478,"RIUS PIQUÉ, XAVIER",S.E.CASAL CERVERA,confirmat per fitxa
+si,Juan José Barrientos,C.B. Sant Adrià,palmares-fcb,123,"BARRIENTOS CABALLERO, JOAN JOSEP",C.B.2000 CERDANYOLA,confirmat per fitxa
+si,Juan J. Barrientos Caballero,C.B. Sant Adrià,palmares-fcb,123,"BARRIENTOS CABALLERO, JOAN JOSEP",C.B.2000 CERDANYOLA,confirmat per fitxa
+si,Rafael Moya Gálvez,S.B. Coral Colón,palmares-fcb,405,"MOYA GÁLVEZ, RAFAEL",S.B.CORAL COLÓN,confirmat per fitxa
+si,Alex Casadó,C.B. Punt d'Atac,palmares-fcb,166,"CASADÓ ROCA, ALEX",C.B.TARRAGONA,confirmat per fitxa
+si,Alex Casadó Roca,C.B. Punt d'Atac,palmares-fcb,166,"CASADÓ ROCA, ALEX",C.B.TARRAGONA,confirmat per fitxa
+si,Antoni Gutiérrez,C.B. Punt d'Atac,palmares-fcb,302,"GUTIÉRREZ CASTRO, ANTONI",C.B.PUNT D'ATAC,confirmat per fitxa
+si,Antoni Gutiérrez Castro,C.B. Punt d'Atac,palmares-fcb,302,"GUTIÉRREZ CASTRO, ANTONI",C.B.PUNT D'ATAC,confirmat per fitxa
+si,Jordi Gassó,S.E. Casal de Cervera,palmares-fcb,266,"GASSÓ CHUMILLAS, JORDI",B.C.GRANOLLERS,confirmat per fitxa
+si,Jordi Gassó Chumillas,S.E. Casal de Cervera,palmares-fcb,266,"GASSÓ CHUMILLAS, JORDI",B.C.GRANOLLERS,confirmat per fitxa
+si,Marta Serramitjana Juan,C.B. Barcelona,palmares-fcb,1000,"SERRAMITJANA JUAN, MARTA",C.B.MATARÓ,confirmat per fitxa
+si,Miquel Casademunt,C.B. Barcelona,palmares-fcb,655,"CASADEMUNT VALLES, MIQUEL",,confirmat per fitxa
+si,Mario Felipe Rodríguez Maia,C.B. Banyoles,palmares-fcb,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,confirmat per fitxa
+si,Iván Vives,C.B. Sants,palmares-fcb,573,"VIVES HERRANDO, IVÁN",,confirmat per fitxa
+si,Iván Vives Herrando,C.B. Sants,palmares-fcb,573,"VIVES HERRANDO, IVÁN",,confirmat per fitxa
+si,Esteve Mata Pardo,S.B.P.E. Centelles,palmares-fcb,375,"MATA PARDO, ESTEVE",B.C.GRANOLLERS,confirmat per fitxa
+si,Sergio Legido Fernández,C.B. Mataró,palmares-fcb,783,"LEGIDO FERNÁNDEZ, SERGIO",C.B.MATARÓ,confirmat per fitxa
+si,Pau Benítez Reina,C.B. Mataró,palmares-fcb,133,"BENITEZ REINA, PAU",C.B.MATARÓ,confirmat per fitxa
+si,Ernest Latorre Puigvert,C.B. Serós,palmares-fcb,330,"LATORRE PUIGVERT, ERNEST",C.B.LLEIDA,confirmat per fitxa
+si,Ramón Agut Bonfills,C.B. LLeida,palmares-fcb,1204,"AGUT BONSFILLS, RAMON",C.B.2000 CERDANYOLA,confirmat per fitxa
+si,Ramón Agut Bonsfills,C.B. Matadepera,palmares-fcb,1204,"AGUT BONSFILLS, RAMON",C.B.2000 CERDANYOLA,confirmat per fitxa
+si,Miguel A. Guerrero González,C.B. Premià,palmares-fcb,755,"GUERRERO GONZÁLEZ, MIQUEL A.",C.B.SANT ADRIÀ,confirmat per fitxa
+si,Antonio Magdaleno Carreño,S.B.C.N. Reus Ploms,palmares-fcb,817,"MAGDALENO CARREÑO, ANTONI",C.B.PUNT D'ATAC,confirmat per fitxa
+si,Xavier Díez Ayza,S.B.P.E. Centelles,palmares-fcb,206,"DIEZ AYZA, XAVIER",S.B.P.E.CENTELLES,confirmat per fitxa
+si,Jordi Cadillac Jodar,C.B. Sants,palmares-fcb,149,"CADILLAC JODAR, JORDI",C.B.PUNT D'ATAC,confirmat per fitxa
+si,Eduard Rodríguez Jiménez,C.B. Banyoles,palmares-fcb,954,"RODRIGUEZ JIMÉNEZ, EDUARD",C.B.BANYOLES,confirmat per fitxa
+si,Mateu Carbonell Trilla,S.E. Casal de Cervera,palmares-fcb,161,"CARBONELL TRILLA, MATEU",S.E.CASAL CERVERA,confirmat per fitxa
+si,Jordi Martí Sendra,C.B. Borges,palmares-fcb,360,"MARTÍ SENDRA, JORDI",C.B.LLEIDA,confirmat per fitxa
+si,Sergio Jiménez Galera,C.B. Sant Adrià,palmares-fcb,769,"JIMÉNEZ GALERA, SERGI",B.C.GRANOLLERS,confirmat per fitxa
+si,Fernando Moreno Carretero,C.B. Tarragona,palmares-fcb,869,"MORENO CARRETERO, FERNANDO",C.B.TARRAGONA,confirmat per fitxa
+si,Miquel de la Hoz Alonso,C.B. Mataró,palmares-fcb,203,"DE LA HOZ ALONSO, MIQUEL",C.B.CANET DE MAR,confirmat per fitxa
+si,Ramón Sanz Gracia,C.B. Premià,palmares-fcb,512,"SÁNZ GRACIA, RAMÓN",,confirmat per fitxa
+si,David Nogués Blanco,C.B. Premià,palmares-fcb,413,"NOGUÉS BLANCO, DAVID",C.B.LLINARS,confirmat per fitxa
+si,Rafael Gascón Reyes,C.B. Sant Boi,palmares-fcb,265,"GASCÓN REYES, RAFAEL",C.B.SANT BOI,confirmat per fitxa
+si,Joan Ralita Ros,C.B. Casino Olotí,palmares-fcb,468,"RALITA ROS, JOAN",C.B.BANYOLES,confirmat per fitxa
+si,Santiago Sans Lafarga,C.B. Premià,palmares-fcb,985,"SANS LAFARGA, SANTIAGO",C.B.PREMIÀ,confirmat per fitxa
+si,Jaume Andreu Pérez,B.C. Granollers,palmares-fcb,103,"ANDREU PÉREZ, JAUME",S.B.F.MOLINS,confirmat per fitxa
+si,Manuel Pérez Viña,C.B. Llinars,palmares-fcb,448,"PÉREZ VIÑA, MANUEL",C.B.LLINARS,confirmat per fitxa
+si,Salvador Martí Talavera,S.E. Casal de Cervera,palmares-fcb,361,"MARTÍ TALAVERA, SALVADOR",C.B.LLEIDA,confirmat per fitxa
+si,Jordi Martínez Bellmunt,C.B. Borges,palmares-fcb,365,"MARTÍNEZ BELLMUNT, JORDI",C.B.LLEIDA,confirmat per fitxa
+si,Juan José Pineda Lafuente,C.B. Sants,palmares-fcb,453,"PINEDA LAFUENTE, JOAN JOSEP",C.B.SANT ADRIÀ,confirmat per fitxa
+si,Alejandro López Balboa,C.B. Alt Empordà,palmares-fcb,341,"LÓPEZ BALBOA, ALEJANDRO",S.B.F.MOLINS,confirmat per fitxa
+si,Vicente Alberich Sánchez,C.B. Sant Boi,palmares-fcb,87,"ALBERICH SÁNCHEZ, VICENTE",C.B.MONT-ROIG,confirmat per fitxa
+si,Antonio Montes Monferrer,C.B. Sant Adrià,palmares-fcb,398,"MONTES MONFERRER, ANTONIO",C.B.SANT ADRIÀ,confirmat per fitxa
+si,Antoni Sendra Gabarro,S.E. Casal de Cervera,palmares-fcb,519,"SENDRA GABARRÓ, ANTONI",S.E.CASAL CERVERA,confirmat per fitxa
+si,Manuel González Castillo,S.B. Coral Colón,palmares-fcb,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,confirmat per fitxa
+si,Josep Planes Blanch,S.E. Casal de Cervera,palmares-fcb,456,"PLANES BLANCH, JOSEP",S.E.CASAL CERVERA,confirmat per fitxa
+si,Ramón Aguilar Sala,C.B. Banyoles,palmares-fcb,84,"AGUILAR SALA, RAMÓN",C.B.BANYOLES,confirmat per fitxa
+si,César Mas Canadell,C.B. Matadepera,palmares-fcb,842,"MAS CANADELL, CÉSAR",B.C.GRANOLLERS,confirmat per fitxa
+si,Marc Maymó Torné,S.B. Foment Molins de Rei,palmares-fcb,850,"MAYMÓ TORNÉ, MARC",C.B.BARCELONA,confirmat per fitxa
+si,Mark Stefan Van Kessel,C.B. Matadepera,palmares-fcb,1027,"VAN KESSEL, MARK STEFAN",C.B.MATARÓ,confirmat per fitxa
+si,Melchor Martín Lima,S.B. Foment Molins de Rei,palmares-fcb,829,"MARTÍN LIMA, MELCHOR",S.B.LA GRAN PENYA,confirmat per fitxa
+si,Jorge Sánchez Barrera,C.B. Sant Boi,palmares-fcb,503,"SÁNCHEZ BARRERA, JORGE A.",C.B.PRAT,confirmat per fitxa
+si,Enrique José Torrisco,C.B. Montmeló,palmares-fcb,323,"JOSÉ TORRISCO, ENRIQUE",C.B.LLIÇÀ D'AMUNT,confirmat per fitxa
+si,Joan Calvet Llach,C.B. Alba,palmares-fcb,640,"CALVET LLACH, JOAN",C.B.SANT ADRIÀ,confirmat per fitxa
+si,Jordi Limones Villalba,C.B. Barcelona,palmares-fcb,335,"LIMONES VILLALBA, JORDI",C.B.BARCELONA,confirmat per fitxa
+si,Fernando Jiménez Pérez,C.B. Montmeló,palmares-fcb,772,"JIMÉNEZ PÉREZ, FERNANDO",B.C.GRANOLLERS,confirmat per fitxa
+si,John Jairo Zuleta Giraldo,C.B. Monforte,palmares-fcb,1051,"ZULETA GIRALDO, JOHN JAIRO",C.B.MONFORTE,confirmat per fitxa
+si,Ricardo García Alarcón,C.B. Coral Colón,palmares-fcb,716,"GARCÍA ALARCÓN, RICARDO",C.B.MONFORTE,confirmat per fitxa
+si,Arturo Gómez Pérez,C.B. Canet de Mar,palmares-fcb,282,"GÓMEZ PÉREZ, ARTURO",C.B.CANET DE MAR,confirmat per fitxa
+si,Martí Llop Ruana,C.B. Sants,palmares-fcb,338,"LLOP RUANA, MARTÍ",,confirmat per fitxa
+si,Eugenio Sánchez Torralba,C.B. Llinars,palmares-fcb,508,"SÁNCHEZ TORRALBA, EUGENIO",C.B.MATARÓ,confirmat per fitxa
+si,Joan Graells Bosch,S.E. Casal de Cervera,palmares-fcb,752,"GRAELLS BOSCH, JOAN",S.E.CASAL CERVERA,confirmat per fitxa
+si,David Bosqued Toré,C.B. Sant Adrià,palmares-fcb,144,"BOSQUED TORE, DAVID",C.B.SANT ADRIÀ,confirmat per fitxa
+si,Joan Carles Fontanet Belles,B. La Unió Coral,palmares-fcb,707,"FONTANET BELLES, JOAN CARLES",S.B.F.MOLINS,confirmat per fitxa
+si,Manuel Cusiné Barber,C.B. L'amistat Mollerussa,palmares-fcb,1179,"CUSINÉ BARBER, MANUEL",C.B.LLEIDA,confirmat per fitxa
+si,Sergio Martínez Avilés,C.B. Mollet,palmares-fcb,1194,"MARTÍNEZ AVILÉS, SERGIO",C.B.MATARÓ,confirmat per fitxa
+si,Georgeta Anghel,C.B. Manresa,palmares-fcb,1129,"ANGHEL TURMAC, GEORGETA",C.B.MANRESA,confirmat per fitxa
+si,Josep Bargalló Jaume,C.B. Sant Boi,palmares-fcb,68,"BARGALLO JAUME, JOSEP",C.B.SANT BOI,confirmat per fitxa
+si,Manel Fontes Fulquet,C.B. Sant Boi,palmares-fcb,30,"FONTES FULQUET, MANEL",C.B.SANT BOI,confirmat per fitxa
+si,Jesús Luque Martínez,C.B. Sant Adrià,palmares-fcb,351,"LUQUE MARTÍNEZ, JESÚS",C.B.SANT ADRIÀ,confirmat per fitxa
+si,Raúl Uceda López,C.B. Mataró,palmares-fcb,1293,"UCEDA LÓPEZ, RAÚL",C.B.MATARÓ,confirmat per fitxa
+si,Francesc Varela Losada,C.B. Sants,palmares-fcb,60,"VARELA LOSADA, FRANCESC",C.B.SANTS,confirmat per fitxa
+si,Manuel Cuenca Pardo,C.B. Monforte,palmares-fcb,675,"CUENCA PARDO, MANUEL",,confirmat per fitxa
+si,Albert Segarra Solé,C.B. Montmeló,palmares-fcb,515,"SEGARRA SOLÉ, ALBERT",C.B.MATARÓ,confirmat per fitxa
+si,Gregori Campaña Comino,S.E. Casal Cervera,palmares-fcb,153,"CAMPAÑA COMINO, GREGORI",S.E.CASAL CERVERA,confirmat per fitxa
+si,Ricardo García,C.B. Sant Martí,palmares-fcb,716,"GARCÍA ALARCÓN, RICARDO",C.B.MONFORTE,confirmat per l'usuari: García Alarcón al C.B. Sant Martí i al C.B. Barcelona
+si,Ricard García,C.B. Barcelona,palmares-fcb,716,"GARCÍA ALARCÓN, RICARDO",C.B.MONFORTE,confirmat per l'usuari: García Alarcón al C.B. Sant Martí i al C.B. Barcelona
+si,Ricado García Alarcón,C.B. Vic,palmares-fcb,716,"GARCÍA ALARCÓN, RICARDO",C.B.MONFORTE,confirmat per l'usuari: García Alarcón al C.B. Sant Martí i al C.B. Barcelona
+si,"GARCÍA ALARCÓN, RICARDO",C.B.VIC,palmares-fcb,716,"GARCÍA ALARCÓN, RICARDO",C.B.MONFORTE,confirmat per l'usuari: García Alarcón al C.B. Sant Martí i al C.B. Barcelona
