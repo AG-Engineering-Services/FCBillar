@@ -274,6 +274,19 @@ def descarrega(cache: Path, ids: list[str], espera: float = 1.0) -> dict[str, in
     return compte
 
 
+def es_de_la_barra(files: list) -> bool:
+    """Una «classificació» sense cap xifra és el rànquing mundial de la barra lateral.
+
+    Les pàgines de Kozoom sense classificació (notícies, entrevistes, i també proves
+    que no la tenen) porten a la barra el top 20 mundial: Jaspers, Caudron,
+    Blomdahl… sense punts, mitjana ni caramboles.
+    """
+    return bool(files) and all(
+        c.punts is None and c.mitjana is None and c.caramboles is None and c.entrades is None
+        for c in files
+    )
+
+
 def llegeix_prova(cache: Path, pid: str) -> tuple[Titol | None, Llegit]:
     """La classificació i totes les partides d'una prova.
 
@@ -286,6 +299,8 @@ def llegeix_prova(cache: Path, pid: str) -> tuple[Titol | None, Llegit]:
     f = cache / f"{pid}_rankings.html"
     if f.exists():
         titol, ll.classificacio, ll.jugadors = llegeix_classificacio(f.read_text(encoding="utf-8"))
+        if es_de_la_barra(ll.classificacio):
+            ll.classificacio, ll.jugadors = [], []
     pags = [x.read_text(encoding="utf-8") for x in _fitxers_de_partides(cache, pid)]
     if titol is None and pags:
         titol = llegeix_partides(pags[0])[0]
