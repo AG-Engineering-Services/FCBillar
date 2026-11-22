@@ -2479,7 +2479,11 @@ def nacional_candidats_cmd(
     from fcbillar.palmares import jugadors_per_candidats
 
     rfeb |= {
-        JugadorRfeb(nom=n, equip=c, divisio="palmares" if f == "rfeb" else "palmares-ceb")
+        JugadorRfeb(
+            nom=n,
+            equip=c or "",
+            divisio={"rfeb": "palmares", "fcb": "palmares-fcb"}.get(f, "palmares-ceb"),
+        )
         for n, c, f in jugadors_per_candidats(conn)
     }
     for pdf in pdfs or []:

@@ -317,7 +317,7 @@
 	// Per a les targetes: només les proves on les partides quadren amb el total oficial.
 	const provesCompletes = $derived(provesAmbPartidesCompletes(rfebPartides, individuals));
 
-	// Les medalles dels campionats d'Espanya (RFEB) i d'Europa (CEB).
+	// Les medalles del Quadre d'Honor de la FCB i dels campionats d'Espanya (RFEB) i d'Europa (CEB).
 	let medalles = $state<PalmaresRow[]>([]);
 	$effect(() => {
 		const id = fcbId;
@@ -334,10 +334,10 @@
 		};
 	});
 	// Per any, del més recent al més antic; les edicions sense any, al final.
-	function medallesPerAny(font: 'rfeb' | 'ceb') {
+	function medallesPerAny(font: PalmaresRow['font'], treu: (m: PalmaresRow) => boolean = () => false) {
 		const grups = new Map<string, PalmaresRow[]>();
 		const files = medalles
-			.filter((m) => m.font === font)
+			.filter((m) => m.font === font && !treu(m))
 			.sort((a, b) => (b.any_edicio ?? 0) - (a.any_edicio ?? 0) || a.posicio - b.posicio);
 		for (const m of files) {
 			const clau = m.any_edicio != null ? String(m.any_edicio) : 'Sense any';
@@ -347,6 +347,22 @@
 	}
 	const medallesEsp = $derived(medalles.length ? medallesPerAny('rfeb') : []);
 	const medallesInt = $derived(medalles.length ? medallesPerAny('ceb') : []);
+	// Del Quadre d'Honor, les que el palmarès de la FCB ja mostra com a campionat
+	// de Catalunya (mateixa temporada, modalitat i posició) no es repeteixen.
+	const MODALITAT_QH: Record<string, number> = { 'Tres bandes': 1, Lliure: 2, 'Quadre 47/2': 3, Banda: 4, 'Quadre 71/2': 6 };
+	const temporadaCurta = (t: string) => t.replace(/^(\d{4})-\d{2}(\d{2})$/, '$1-$2');
+	const jaAlPalmares = $derived(
+		new Set(
+			palmares
+				.filter((p) => p.tipus === 'campionat' && p.modalitat != null)
+				.map((p) => `${temporadaCurta(p.temporada)}|${p.modalitat}|${p.posicio}`)
+		)
+	);
+	const medallesCat = $derived(
+		medalles.length
+			? medallesPerAny('fcb', (m) => jaAlPalmares.has(`${m.edicio}|${MODALITAT_QH[m.competicio]}|${m.posicio}`))
+			: []
+	);
 
 	let internacional = $state<UmbProva[]>([]);
 	$effect(() => {
@@ -1586,6 +1602,33 @@
 											<div class="truncate text-2xs text-slate-500 dark:text-slate-400">Edició {m.edicio}{m.lloc ? ` · ${m.lloc}` : ''}</div>
 										</div>
 										{#if m.mitjana != null}<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{m.mitjana.toLocaleString('ca', { maximumFractionDigits: 3 })}{m.competicio.startsWith('Art') ? ' %' : ''}</span>{/if}
+									</li>
+								{/each}
+							</ul>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
+
+		{#if !veuEspanya && !veuInternacional && medallesCat.length}
+			{@const total = medallesCat.reduce((n, g) => n + g.entries.length, 0)}
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+					Palmarès individual · Quadre d'Honor de la FCB · {total}
+				</div>
+				<div class="space-y-3">
+					{#each medallesCat as g}
+						<div>
+							<div class="mb-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{g.entries[0].edicio}</div>
+							<ul class="space-y-1">
+								{#each g.entries as m}
+									<li class="flex items-center gap-2 px-1.5 py-1 text-sm">
+										<span class="w-6 shrink-0 text-center font-mono font-bold">{ordinal(m.posicio)}</span>
+										<div class="min-w-0 flex-1">
+											<div class="truncate font-medium">{m.competicio}{m.categoria !== 'absolut' ? ` · ${m.categoria}` : ''}</div>
+											{#if m.lloc}<div class="truncate text-2xs text-slate-500 dark:text-slate-400">{m.lloc}</div>{/if}
+										</div>
 									</li>
 								{/each}
 							</ul>
