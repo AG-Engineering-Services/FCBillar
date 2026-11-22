@@ -2413,6 +2413,36 @@ def rfeb_individuals_cmd(
     conn.close()
 
 
+@app.command("rfeb-palmares")
+def rfeb_palmares_cmd(
+    totes: bool = typer.Option(  # noqa: B008
+        False, "--totes", help="També les que coincideixen, no només les que no quadren."
+    ),
+) -> None:
+    """Contrasta el podi de cada Campionat d'Espanya carregat amb el palmarès de medalles.
+
+    No corregeix res: només diu quins campionats tenen un podi diferent al de la
+    llista de medalles de la RFEB, i quins no hi són.
+    """
+    from collections import Counter
+
+    from fcbillar.rfeb_palmares import compara
+
+    conn = ensure_schema(get_settings().db_path)
+    res = compara(conn)
+    conn.close()
+    console.print(dict(Counter(c.estat for c in res)))
+    for c in res:
+        if c.estat == "coincideix" and not totes:
+            continue
+        console.print(
+            f"[bold]{c.estat}[/] {c.prova_id} ({c.any_edicio or '?'})",
+            f"  palmarès:      {', '.join(c.palmares) or '-'}",
+            f"  classificació: {', '.join(c.classificacio) or '-'}",
+            sep="\n",
+        )
+
+
 @app.command("nacional-candidats")
 def nacional_candidats_cmd(
     pdfs: list[str] = typer.Argument(  # noqa: B008

@@ -289,6 +289,19 @@ def _desdobla(linia: str) -> str:
     return " ".join(out)
 
 
+def _desdobla_nom(nom: str) -> str:
+    """«JJoosséé AAllbbeerrtt TToorrnneerroo» torna a ser «José Albert Tornero».
+
+    A `_desdobla` només es desfà la línia sencera; hi ha files on només el nom va
+    escrit dues vegades i els números no. Només es toca si TOTES les paraules del
+    nom (en són almenys dues) tenen cada lletra repetida.
+    """
+    tokens = nom.split()
+    if len(tokens) < 2 or not all(len(t) % 2 == 0 and t[0::2] == t[1::2] for t in tokens):
+        return nom
+    return " ".join(t[0::2] for t in tokens)
+
+
 def _es_enter(text: str) -> bool:
     return bool(_RE_ENTER.match(text))
 
@@ -452,7 +465,7 @@ def _fila_de_text(
     # «DAVID ZAPATA (23)»: un número entre parèntesis darrere del nom, que no diu res.
     while text and re.fullmatch(r"\(\d+\)", text[-1]):
         text = text[:-1]
-    nom = " ".join(text).strip()
+    nom = _desdobla_nom(" ".join(text).strip())
     if not nom:
         raise FormatDesconegut(f"Fila sense nom: {linia!r}")
     return Fila(
@@ -829,6 +842,42 @@ def temporada_de_carpeta(carpeta: str) -> str:
     return f"{inici}-{inici + 1}"
 
 
+#: «CE-Msc-3B-Sb17-Res-290910», «Inscritos_CE_3B-080612»: el dia (ddmmaa) al final del nom.
+_RE_DATA_AL_NOM = re.compile(r"(?:^|[-_])(\d{2})(\d{2})(\d{2})(?:$|[-_])")
+
+
+def data_del_nom(nom: str) -> date | None:
+    """El dia que porta el nom d'un fitxer de la web vella, escrit ddmmaa.
+
+    És el dia en què es va penjar el resultat, no el que comença el campionat:
+    serveix per saber a quina temporada és i res més.
+    """
+    for m in _RE_DATA_AL_NOM.finditer(nom):
+        dia, mes, any_ = (int(g) for g in m.groups())
+        try:
+            return date(2000 + any_, mes, dia)
+        except ValueError:
+            continue
+    return None
+
+
+def temporada_sense_data(carpeta: str, nom: str) -> str:
+    """La temporada d'un PDF que no diu quan es va jugar.
+
+    A `noticiasAAAA` la diu la carpeta. A qualsevol altra carpeta (`0HOME/PDF`,
+    on hi ha de tots els anys barrejats) només la pot dir el dia que porta el nom
+    del fitxer; si no en porta, no s'endevina: `FormatDesconegut`.
+    """
+    if re.fullmatch(r"noticias(\d{4})?", carpeta.rsplit("/", 1)[-1]):
+        return temporada_de_carpeta(carpeta)
+    dia = data_del_nom(nom)
+    if dia is None:
+        raise FormatDesconegut(
+            f"«{carpeta}/{nom}» no diu la temporada: ni la carpeta, ni el PDF, ni el nom porten data."
+        )
+    return temporada_de(dia)
+
+
 # ------------------------------------------------- modalitat, categoria, tipus
 
 _MODALITATS = (
@@ -845,10 +894,34 @@ _MODALITATS = (
 )
 _CATEGORIES = (
     ("femeni", re.compile(r"(?<![a-z])fem(?:enin[oa])?(?![a-z])", re.IGNORECASE)),
-    ("sub15", re.compile(r"sub[-'.\s]*15|(?<![a-z0-9])s15(?![a-z0-9])", re.IGNORECASE)),
-    ("sub17", re.compile(r"sub[-'.\s]*17|(?<![a-z0-9])s17(?![a-z0-9])", re.IGNORECASE)),
-    ("sub21", re.compile(r"sub[-'.\s]*21|(?<![a-z0-9])s21(?![a-z0-9])", re.IGNORECASE)),
-    ("sub25", re.compile(r"sub[-'.\s]*25|(?<![a-z0-9])s25(?![a-z0-9])", re.IGNORECASE)),
+    (
+        "sub15",
+        re.compile(
+            r"sub[-'.\s]*15|(?<![a-z])sb[-'.\s]*15(?![0-9])|(?<![a-z0-9])s15(?![a-z0-9])",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "sub17",
+        re.compile(
+            r"sub[-'.\s]*17|(?<![a-z])sb[-'.\s]*17(?![0-9])|(?<![a-z0-9])s17(?![a-z0-9])",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "sub21",
+        re.compile(
+            r"sub[-'.\s]*21|(?<![a-z])sb[-'.\s]*21(?![0-9])|(?<![a-z0-9])s21(?![a-z0-9])",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "sub25",
+        re.compile(
+            r"sub[-'.\s]*25|(?<![a-z])sb[-'.\s]*25(?![0-9])|(?<![a-z0-9])s25(?![a-z0-9])",
+            re.IGNORECASE,
+        ),
+    ),
     ("infantil", re.compile(r"infantil(?:es)?|(?<![a-z])inf(?![a-z])", re.IGNORECASE)),
     ("junior", re.compile(r"j[uú]nior(?:es)?|(?<![a-z])jr(?![a-z])", re.IGNORECASE)),
     ("senior", re.compile(r"s[eé]nior(?:es)?", re.IGNORECASE)),
@@ -1040,9 +1113,9 @@ def prova_de_pagines(
         temporada = temporada_de(ini)
         data_inici, data_fi = ini.isoformat(), fi.isoformat()
     else:
-        temporada = temporada_de(mes) if mes else temporada_de_carpeta(carpeta)
+        temporada = temporada_de(mes) if mes else temporada_sense_data(carpeta, nom)
         data_inici = data_fi = lloc = None
-        de_fases = _dates_del_campionat(pagines, germanes or [], temporada_de_carpeta(carpeta))
+        de_fases = _dates_del_campionat(pagines, germanes or [], temporada)
         if de_fases:
             temporada = temporada_de(de_fases[0])
             data_inici, data_fi = de_fases[0].isoformat(), de_fases[1].isoformat()

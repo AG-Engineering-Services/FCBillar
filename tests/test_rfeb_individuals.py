@@ -539,3 +539,47 @@ def test_nomes_les_fases_de_la_mateixa_prova_hi_compten():
     assert es_fase_de("res_gpe_3b_llinars", "res_gpe_3b_llinars_prov")
     assert not es_fase_de("res_ce_3b", "res_ce_3b_s15")
     assert not es_fase_de("res_gpe_3b_madrid", "res_gpe_3b_madrid_fem")
+
+
+# ------------------------------------------------------------ web vella, abans del 2012
+
+from fcbillar.rfeb_individuals import data_del_nom  # noqa: E402
+
+_SUB17_2010 = [
+    "Clasificación FINAL\n"
+    "Jugadores Fed Ptos Car Ent P.Gral SM Cls\n"
+    "1 ANDRÉS CARRIÓN VAL 10 149 217 0,687 4 1º\n"
+    "2 ABEL GARRRUCHO MUR 6 113 193 0,585 5 2º\n"
+    "3 J.ALBERTO DELGADO MUR 4 111 186 0,597 3 3º\n"
+]
+
+
+def test_el_dia_ddmmaa_del_nom_del_fitxer():
+    assert data_del_nom("CE-Msc-3B-Sb17-Res-290910") == date(2010, 9, 29)
+    assert data_del_nom("Inscritos_CE_3B-080612") == date(2012, 6, 8)
+    assert data_del_nom("res_ce_3b_s17") is None
+    # Un 31 de febrer no és cap dia.
+    assert data_del_nom("CE-Res-310210") is None
+
+
+def test_el_pdf_de_0home_diu_la_temporada_pel_dia_del_nom_i_la_categoria_per_sb17():
+    p = prova_de_pagines(_SUB17_2010, "0HOME/PDF", "CE-Msc-3B-Sb17-Res-290910")
+    assert (p.modalitat, p.categoria, p.tipus) == ("3b", "sub17", "ce")
+    assert p.temporada == "2010-2011"
+    # El dia del nom no és el d'inici del campionat: no es desa com a data.
+    assert (p.data_inici, p.data_fi) == (None, None)
+    assert p.files[0].jugador == "ANDRÉS CARRIÓN"
+
+
+def test_un_pdf_sense_cap_data_fora_de_noticias_no_s_endevina():
+    with pytest.raises(FormatDesconegut, match="no diu la temporada"):
+        prova_de_pagines(_SUB17_2010, "0HOME/PDF", "CE-Msc-3B-Sb17-Res")
+
+
+def test_el_nom_enganxat_i_duplicat_d_una_fila_es_desdobla():
+    cap = llegeix_capcalera("NOMBRE FED CAR ENT PROM")
+    f = llegeix_fila("3 JJoosséé AAllbbeerrtt TToorrnneerroo Val 509 100 5,09", cap)
+    assert (f.jugador, f.fed, f.caramboles, f.entrades) == ("José Albert Tornero", "VAL", 509, 100)
+    # Un nom amb una sola paraula repetida o amb paraules normals no es toca.
+    g = llegeix_fila("1 Jordi Garriga Comas Cat 580 99 5,86", cap)
+    assert g.jugador == "Jordi Garriga Comas"
