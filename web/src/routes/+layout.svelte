@@ -2,7 +2,8 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { afterNavigate } from '$app/navigation';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
+	import { updated } from '$app/state';
 	import { db } from '$lib/db';
 	import { theme, toggleTheme } from '$lib/theme';
 	let { children } = $props();
@@ -26,6 +27,24 @@
 			.select('fcb_division_id', { count: 'exact', head: true })
 			.gte('captured_at', since);
 		liveCount = count ?? 0;
+	});
+
+	// Versió nova desplegada: la PWA oberta la carrega sense que calgui tancar-la.
+	// En tornar a primer pla es recarrega de seguida; mentre s'usa, al següent canvi de pàgina.
+	beforeNavigate((nav) => {
+		if (updated.current && !nav.willUnload && nav.to) {
+			nav.cancel();
+			location.href = nav.to.url.href;
+		}
+	});
+	onMount(() => {
+		const enTornar = async () => {
+			if (document.visibilityState !== 'visible') return;
+			navigator.serviceWorker?.getRegistration().then((r) => r?.update());
+			if (await updated.check()) location.reload();
+		};
+		document.addEventListener('visibilitychange', enTornar);
+		return () => document.removeEventListener('visibilitychange', enTornar);
 	});
 
 	// En canviar de pàgina, torna a dalt. EXCEPCIÓ: en navegacions enrere/endavant
