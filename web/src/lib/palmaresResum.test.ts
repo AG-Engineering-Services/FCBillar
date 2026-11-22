@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LLINDAR_RESUM, resumMedalles } from './palmaresResum';
+import { LLINDAR_RESUM, resumMedalles, resumPerModalitat } from './palmaresResum';
 
 describe('resumMedalles', () => {
 	it('compta per lloc i per competició, amb la categoria no absoluta al nom', () => {
@@ -26,5 +26,19 @@ describe('resumMedalles', () => {
 
 	it('el llindar és de més de sis medalles', () => {
 		expect(LLINDAR_RESUM).toBe(6);
+	});
+});
+
+describe('resumPerModalitat', () => {
+	it('separa per modalitat i, a Catalunya, deixa només la categoria', () => {
+		const r = resumPerModalitat([
+			{ competicio: 'Tres bandes', categoria: 'honor', posicio: 1 },
+			{ competicio: 'Tres bandes', categoria: '1a', posicio: 2 },
+			{ competicio: 'Lliure', categoria: 'júnior', posicio: 1 },
+			{ competicio: "Campionat d'Europa tres bandes", categoria: 'absolut', posicio: 3 }
+		]);
+		expect(r.map((g) => g.modalitat)).toEqual(['Tres Bandes', 'Lliure']);
+		expect(r[0].resum.perCompeticio.map((f) => f.competicio)).toEqual(['honor', '1a', "Campionat d'Europa tres bandes"]);
+		expect(r[1].resum.perCompeticio[0].competicio).toBe('júnior');
 	});
 });
