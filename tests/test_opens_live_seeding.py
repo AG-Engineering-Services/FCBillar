@@ -96,8 +96,11 @@ def test_name_matching_is_case_and_whitespace_insensitive():
 
 def test_reorder_keeps_group_date():
     g = Group(
-        label="Grup A", url="", date="2026-11-22",
-        standings=(_st("B"), _st("A")), matches=(_match("A", "B", played=False),),
+        label="Grup A",
+        url="",
+        date="2026-11-22",
+        standings=(_st("B"), _st("A")),
+        matches=(_match("A", "B", played=False),),
     )
     out = _seed_unplayed_groups((g,), frozenset(), {"A": 1, "B": 2})
     assert _order(out[0]) == ["A", "B"]
@@ -113,7 +116,9 @@ def test_ranking_inicial_orders_players_without_opens_ranking():
     g = _group(["LOZANO HERRERO, MANUEL", "AMETLLER CONGOST, LLUIS", "MAGDALENO CARRENO, ANTONI"])
     state = OpenLiveState(
         structure=OpenStructure(division_id=223, name="OPEN", phase_id=1, phases=()),
-        phases=[PhaseDetail(ref=PhaseRef(label="PRE-PRE-PRÈVIA", kind="group", url=""), groups=(g,))],
+        phases=[
+            PhaseDetail(ref=PhaseRef(label="PRE-PRE-PRÈVIA", kind="group", url=""), groups=(g,))
+        ],
     )
     ri = [
         {"player_name": "AMETLLER CONGOST, LLUIS", "posicio": 95},
@@ -122,5 +127,7 @@ def test_ranking_inicial_orders_players_without_opens_ranking():
     ]
     assert _seed_unplayed_groups_by_ranking_inicial(state, ri)
     assert _order(state.phases[0].groups[0]) == [
-        "AMETLLER CONGOST, LLUIS", "LOZANO HERRERO, MANUEL", "MAGDALENO CARRENO, ANTONI",
+        "AMETLLER CONGOST, LLUIS",
+        "LOZANO HERRERO, MANUEL",
+        "MAGDALENO CARRENO, ANTONI",
     ]
