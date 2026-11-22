@@ -356,6 +356,312 @@ def llegeix_taules_rfeb(
 
 
 # ---------------------------------------------------------------------------
+# RFEB: proves del Gran Premi d'Espanya i seleccions autonòmiques
+# ---------------------------------------------------------------------------
+
+#: Historial de les proves del Gran Premi d'Espanya de tres bandes (des del 1988-89):
+#: una fila per prova amb campió, subcampió i els dos semifinalistes.
+FITXER_GP_RFEB = "Tres-Bandas-Pruebas-GP-Espana_2025_26-1.pdf"
+COMPETICIO_GP = "Gran Premi d'Espanya tres bandes"
+#: Historial del Campionat d'Espanya de seleccions autonòmiques de tres bandes (des del 1996).
+FITXER_SSAA_RFEB = "Tres-Bandas-SSAA.pdf"
+COMPETICIO_SSAA = "Seleccions autonòmiques tres bandes"
+
+_TEMPORADA = re.compile(r"^(\d{2})/(\d{2})$")
+_NEGRE = {(0,), (0.0,), (0, 0, 0), (0.0, 0.0, 0.0)}
+
+
+def _any_temporada(t: str) -> int | None:
+    """«00/01» -> 2000, «93/94» -> 1993: l'any en què comença la temporada."""
+    m = _TEMPORADA.match(t)
+    if not m:
+        return None
+    a = int(m.group(1))
+    return (1900 if a >= 50 else 2000) + a
+
+
+def _sense_superposat(pagina):
+    """La pàgina sense el text de color que cau damunt d'una cel·la amb text negre.
+
+    Les pàgines del Gran Premi a partir de la segona porten, a la primera fila, un
+    «LV CTO. DE ESPAÑA» blau que la plantilla ha deixat damunt del nom de la prova
+    i el barreja («LV CTIO T.O DREN…»). Les files del campionat d'Espanya són blaves
+    senceres i es queden: només es treu el color quan comparteix cel·la amb el negre.
+    """
+    treure = set()
+    for taula in pagina.find_tables():
+        for fila in taula.rows:
+            for cel in fila.cells:
+                if cel is None:
+                    continue
+                x0, top, x1, bottom = cel
+                dins = [
+                    c
+                    for c in pagina.chars
+                    if x0 <= c["x0"] < x1 and top <= c["top"] < bottom and c["text"].strip()
+                ]
+                negres = [c for c in dins if tuple(c.get("non_stroking_color") or (0,)) in _NEGRE]
+                if negres and len(negres) < len(dins):
+                    treure |= {
+                        (c["x0"], c["top"], c["text"])
+                        for c in dins
+                        if tuple(c.get("non_stroking_color") or (0,)) not in _NEGRE
+                    }
+    if not treure:
+        return pagina
+    return pagina.filter(
+        lambda o: o.get("object_type") != "char" or (o["x0"], o["top"], o["text"]) not in treure
+    )
+
+
+def llegeix_rfeb_gp(cami: str | Path) -> Informe:
+    """Llegeix l'historial de proves del Gran Premi d'Espanya. Vegeu `llegeix_taules_gp`."""
+    import pdfplumber
+
+    cami = Path(cami)
+    with pdfplumber.open(cami) as pdf:
+        pagines = []
+        for p in pdf.pages:
+            neta = _sense_superposat(p)
+            taules = []
+            for t in neta.find_tables():
+                files = t.extract()
+                # El nom de la prova, amb els espais que porta el PDF i prou: pdfplumber
+                # n'afegeix on una lletra tapada ha deixat un forat («TRO FEO»).
+                for fila, cels in zip(files, t.rows, strict=False):
+                    if len(fila) == 11 and cels.cells[1] is not None:
+                        fila[1] = _text_lletra_a_lletra(neta, cels.cells[1])
+                taules.append(files)
+            pagines.append(taules)
+    return llegeix_taules_gp(pagines, cami.name)
+
+
+def _text_lletra_a_lletra(pagina, cel) -> str:
+    """El text d'una cel·la tal com ve, línia a línia, sense inventar espais."""
+    x0, top, x1, bottom = cel
+    dins = sorted(
+        (c for c in pagina.chars if x0 <= c["x0"] < x1 and top <= c["top"] < bottom),
+        key=lambda c: (round(c["top"]), c["x0"]),
+    )
+    linies: dict[int, str] = {}
+    for c in dins:
+        linies[round(c["top"])] = linies.get(round(c["top"]), "") + c["text"]
+    return "\n".join(linies[k] for k in sorted(linies))
+
+
+def llegeix_taules_gp(pagines: list[list[list[list]]], fitxer: str = "") -> Informe:
+    """Les proves del Gran Premi: `temporada | prova | seu | ciutat | jugadors | campió |
+    mitjana | subcampió | mitjana | semifinalista | mitjana`, i una fila de continuació
+    amb el segon semifinalista.
+
+    Els campionats d'Espanya també hi surten, però ja es llegeixen del seu medaller
+    (amb l'any i la xifra romana de sempre) i aquí es deixen. Les taules de resum per
+    jugador del final no tenen temporada i no es llegeixen.
+    """
+    inf = Informe(fitxer=fitxer, font=FONT_RFEB)
+    vistes: set[str] = set()
+    actual: dict | None = None
+
+    def medalla(posicio: int, nom_cel, mit_cel, on: str) -> None:
+        nom = _neteja_nom(_text(nom_cel))
+        if not nom or actual is None:
+            return
+        mitjana, ok = _mitjana_rfeb(mit_cel)
+        if not ok:
+            inf.no_llegit.append((on, f"mitjana il·legible {_text(mit_cel)!r}"))
+        inf.medalles.append(
+            Medalla(
+                font=FONT_RFEB,
+                competicio=COMPETICIO_GP,
+                categoria="absolut",
+                edicio=actual["edicio"],
+                any_edicio=actual["any"],
+                lloc=actual["lloc"],
+                posicio=posicio,
+                jugador=nom,
+                mitjana=mitjana,
+            )
+        )
+
+    for taules in pagines:
+        for taula in taules:
+            for fila in taula:
+                if len(fila) != 11:
+                    continue
+                temporada = _text(fila[0])
+                if temporada:
+                    actual = None
+                    if not _TEMPORADA.match(temporada):
+                        continue  # capçalera
+                    prova = _neteja_nom(_text(fila[1]))
+                    on = f"{temporada} {prova}"
+                    if not prova:
+                        inf.no_llegit.append((on, "prova sense nom"))
+                        continue
+                    # El campionat d'Espanya («LX CTO. DE ESPAÑA / BILLAR A TRES BANDAS»):
+                    # en negreta, les lletres hi surten repetides i el «CTO» no s'hi llegeix.
+                    if "CTO. DE ESPAÑA" in prova.upper() or "BILLAR A TRES BANDAS" in prova.upper():
+                        continue
+                    edicio = prova if prova not in vistes else f"{prova} ({temporada})"
+                    vistes.add(edicio)
+                    lloc = ", ".join(
+                        x for x in (_neteja_nom(_text(fila[2])), _neteja_nom(_text(fila[3]))) if x
+                    )
+                    actual = {
+                        "edicio": edicio,
+                        "any": _any_temporada(temporada),
+                        "lloc": lloc or None,
+                    }
+                    inf.edicions += 1
+                    medalla(1, fila[5], fila[6], on)
+                    medalla(2, fila[7], fila[8], on)
+                    medalla(3, fila[9], fila[10], on)
+                elif actual is not None:
+                    medalla(3, fila[9], fila[10], f"{actual['edicio']} (2n semifinalista)")
+    return inf
+
+
+_MEDALLA_SSAA = {"ORO": 1, "PLATA": 2, "BRONCE": 3}
+_EDICIO_SSAA = re.compile(r"EDICI[OÓ]N\s+([IVXLC]+)")
+_TEMP_SSAA = re.compile(r"TEMP\.\s+(\d{2}/\d{2})")
+_SELECCIO = re.compile(r"^(.*?)\s*(?:\((\d+,\d+)\))?$", re.S)
+
+
+def _roman(n: int) -> str:
+    out = ""
+    for v, s in ((50, "L"), (40, "XL"), (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")):
+        while n >= v:
+            out, n = out + s, n - v
+    return out
+
+
+def _de_roman(s: str) -> int:
+    vals = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100}
+    total = 0
+    for a, b in zip(s, s[1:] + " ", strict=False):
+        v = vals[a]
+        total += -v if b in vals and vals[b] > v else v
+    return total
+
+
+def _jugadors_ssaa(text: str) -> list[str]:
+    """«Jordi Garriga. Ricardo García» i «Daniel Sánchez, Xavier Yeste,» -> noms.
+
+    El punt només separa quan tanca un cognom («Garriga.»), no una inicial («M.»).
+    """
+    noms = []
+    for tros in re.split(r",|\n", text):
+        parts = re.split(r"(?<=[a-zà-ÿ]{2})\.\s+", tros)
+        # «Manuel Glez. Castrillo» és un nom: només es parteix si tots dos costats ho són.
+        if len(parts) > 1 and all(len(x.split()) >= 2 for x in parts):
+            noms += parts
+        else:
+            noms.append(tros)
+    return [n for n in (_neteja_nom(t) for t in noms) if n]
+
+
+def llegeix_rfeb_ssaa(cami: str | Path) -> Informe:
+    """Llegeix l'historial de les seleccions autonòmiques. Vegeu `llegeix_taules_ssaa`."""
+    import pdfplumber
+
+    cami = Path(cami)
+    with pdfplumber.open(cami) as pdf:
+        pagines = [p.extract_tables() for p in pdf.pages]
+        text = "\n".join(p.extract_text() or "" for p in pdf.pages)
+    return llegeix_taules_ssaa(pagines, cami.name, text)
+
+
+#: L'or d'una edició partit pel salt de pàgina: la selecció i els primers noms al peu
+#: d'una pàgina, la mitjana i la resta al cap de la següent, tots dos fora de taula.
+_OR_PARTIT = re.compile(
+    r"^([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ. ]*?) ([A-ZÁÉÍÓÚÑ][a-zà-ÿ].*)\nORO\nCAMPEONATOS DE ESPAÑA SELECCIONES\n"
+    r"AUTONÓMICAS DE BILLAR TRES BANDAS\nORO\n\((\d+,\d+)\) (.*)$",
+    re.M,
+)
+
+
+def llegeix_taules_ssaa(
+    pagines: list[list[list[list]]], fitxer: str = "", text: str = ""
+) -> Informe:
+    """Una edició és un bloc de files `ORO | PLATA | BRONCE | BRONCE`, amb la selecció
+    (i la seva mitjana) i els jugadors; l'edició i la temporada són en una cel·la a part.
+
+    Quan una edició queda partida entre dues pàgines, l'edició o la temporada surten
+    en una taula sola: s'apliquen al bloc obert. Cada jugador de la selecció rep la
+    medalla, amb la selecció a `lloc` i la mitjana de l'equip. Una edició sense xifra
+    romana llegible pren la de l'anterior més u, i es diu a les notes. Un bloc que
+    comença per la plata ha perdut l'or pel salt de pàgina: es pren del `text`.
+    """
+    inf = Informe(fitxer=fitxer, font=FONT_RFEB)
+    blocs: list[dict] = []
+    darrera_medalla = None
+    for taules in pagines:
+        for taula in taules:
+            for fila in taula:
+                cels = [_text(c) if isinstance(c, str) else "" for c in fila]
+                crua = " ".join(c if isinstance(c, str) else "" for c in fila)
+                i_med = next((i for i, c in enumerate(cels) if c in _MEDALLA_SSAA), None)
+                if sum(c in _MEDALLA_SSAA for c in cels) > 1:
+                    i_med = None  # la capçalera del resum per seleccions
+                if i_med is not None:
+                    med = cels[i_med]
+                    nou = med == "ORO" and darrera_medalla != "ORO"
+                    nou = nou or (med == "PLATA" and darrera_medalla == "BRONCE")
+                    if nou or not blocs:
+                        blocs.append({"edicio": None, "temporada": None, "files": []})
+                    darrera_medalla = med
+                    sel = fila[i_med + 1] if i_med + 1 < len(fila) else ""
+                    jug = fila[i_med + 2] if i_med + 2 < len(fila) else ""
+                    blocs[-1]["files"].append((med, sel or "", jug or ""))
+                if not blocs:
+                    continue
+                if m := _EDICIO_SSAA.search(crua):
+                    blocs[-1]["edicio"] = m.group(1)
+                if m := _TEMP_SSAA.search(crua):
+                    blocs[-1]["temporada"] = m.group(1)
+    partits = iter(_OR_PARTIT.findall(text))
+    for b in blocs:
+        if b["files"] and b["files"][0][0] != "ORO":
+            trobat = next(partits, None)
+            if trobat is None:
+                inf.no_llegit.append((f"temporada {b['temporada']}", "l'or no es troba"))
+                b["files"] = []
+                continue
+            sel, noms1, mitjana, noms2 = trobat
+            b["files"].insert(0, ("ORO", f"{sel}\n({mitjana})", f"{noms1}, {noms2}"))
+    anterior = 0
+    for b in blocs:
+        edicio = b["edicio"]
+        if edicio is None:
+            edicio = _roman(anterior + 1)
+            inf.notes.append(f"temporada {b['temporada']}: sense xifra d'edició, es posa {edicio}")
+        anterior = _de_roman(edicio)
+        if b["temporada"] is None:
+            inf.no_llegit.append((f"edició {edicio}", "sense temporada: no es desa"))
+            continue
+        inf.edicions += 1
+        for med, sel, jug in b["files"]:
+            m = _SELECCIO.match(sel.strip())
+            seleccio = _neteja_nom(m.group(1)) if m else ""
+            mitjana = float(m.group(2).replace(",", ".")) if m and m.group(2) else None
+            for nom in _jugadors_ssaa(jug):
+                inf.medalles.append(
+                    Medalla(
+                        font=FONT_RFEB,
+                        competicio=COMPETICIO_SSAA,
+                        categoria="seleccions",
+                        edicio=edicio,
+                        any_edicio=_any_temporada(b["temporada"]),
+                        lloc=seleccio or None,
+                        posicio=_MEDALLA_SSAA[med],
+                        jugador=nom,
+                        mitjana=mitjana,
+                    )
+                )
+    return inf
+
+
+# ---------------------------------------------------------------------------
 # CEB
 # ---------------------------------------------------------------------------
 
@@ -503,7 +809,8 @@ def baixa(
     """
     arrel = Path(arrel)
     fallats = []
-    peticions = [(FONT_RFEB, n, URL_RFEB.format(n)) for n in _RFEB] + [
+    extres = (FITXER_GP_RFEB, FITXER_SSAA_RFEB)
+    peticions = [(FONT_RFEB, n, URL_RFEB.format(n)) for n in (*_RFEB, *extres)] + [
         (FONT_CEB, n, URL_CEB.format(n)) for n in _CEB
     ]
     for font, nom, url in peticions:
@@ -709,6 +1016,9 @@ def llegeix_carpeta(arrel: str | Path) -> list[Informe]:
             cami = arrel / font / nom
             if cami.exists():
                 informes.append(lector(cami))
+    for nom, lector in ((FITXER_GP_RFEB, llegeix_rfeb_gp), (FITXER_SSAA_RFEB, llegeix_rfeb_ssaa)):
+        if (arrel / FONT_RFEB / nom).exists():
+            informes.append(lector(arrel / FONT_RFEB / nom))
     for cami in sorted((arrel / FONT_FCB).glob("*.pdf")):
         informes.append(llegeix_fcb(cami))
     return informes

@@ -378,3 +378,140 @@ def test_quadre_honor_fcb_celles_combinades():
     assert ("Quadre 71/2", "2a", 1, "Alejandro López Balboa") in {
         (m.competicio, m.categoria, m.posicio, m.jugador) for m in m12
     }
+
+
+def test_gp_espanya_taules_sinteticas():
+    cap = [
+        "TEMP.",
+        "PRUEBA",
+        "LUGAR",
+        None,
+        "Nº JUG.",
+        "CAMPEÓN",
+        "PROM.",
+        "SUBCAMPEÓN",
+        "PROM.",
+        "SEMIFINALISTAS",
+        "PROM.",
+    ]
+    files = [
+        cap,
+        [
+            "00/01",
+            "XIV COPA PRESIDENTE\nDEL GOBIERNO",
+            "Sede R.F.E.B",
+            "Madrid",
+            "130",
+            "Ricardo García Alarcón",
+            "1,355",
+            "Alfonso Legazpi",
+            "1,187",
+            "Rafael Garrido",
+            "0,995",
+        ],
+        [None] * 9 + ["José Martín Vílchez", "1,070"],
+        [
+            "00/01",
+            "LXVII CTO. DE ESPAÑA\nBILLAR A TRES BANDAS",
+            "Stadium Casablanca",
+            "Zaragoza",
+            "144",
+            "Daniel Sánchez Gálvez",
+            "1,533",
+            "Enrique Peñalva",
+            "1,203",
+            "Rafael Garrido",
+            "1,019",
+        ],
+        [None] * 9 + ["Ricardo García Alarcón", "1,018"],
+    ]
+    inf = P.llegeix_taules_gp([[files]])
+    assert inf.edicions == 1  # el campionat d'Espanya ja ve del seu medaller
+    assert [(m.posicio, m.jugador, m.mitjana) for m in inf.medalles] == [
+        (1, "Ricardo García Alarcón", 1.355),
+        (2, "Alfonso Legazpi", 1.187),
+        (3, "Rafael Garrido", 0.995),
+        (3, "José Martín Vílchez", 1.070),
+    ]
+    m = inf.medalles[0]
+    assert (m.competicio, m.edicio, m.any_edicio, m.lloc) == (
+        P.COMPETICIO_GP,
+        "XIV COPA PRESIDENTE DEL GOBIERNO",
+        2000,
+        "Sede R.F.E.B, Madrid",
+    )
+
+
+def test_gp_espanya_pdf_real_sense_text_superposat():
+    from pathlib import Path
+
+    cami = Path(__file__).parents[1] / "fonts/palmares/rfeb" / P.FITXER_GP_RFEB
+    inf = P.llegeix_rfeb_gp(cami)
+    assert not inf.no_llegit
+    edicions = {m.edicio for m in inf.medalles}
+    # A la primera fila de cada pàgina hi havia un «LV CTO. DE ESPAÑA» blau damunt del nom.
+    assert "I TORNEO EUROQUINOA" in edicions
+    assert "I TROFEO COMUNIDAD DE MADRID" in edicions
+    assert not any("CTO" in e for e in edicions)
+    guanyades = sorted(
+        (m.any_edicio, m.edicio)
+        for m in inf.medalles
+        if m.posicio == 1 and m.jugador == "Ricardo García Alarcón"
+    )
+    assert guanyades == [
+        (1993, "V CIUDAD DE BARCELONA"),
+        (1996, "II MEMORIAL PEDRO NADAL (96/97)"),
+        (1998, "I TROFEO COMUNIDAD DE MADRID"),
+        (2000, "XIV COPA PRESIDENTE DEL GOBIERNO"),
+        (2001, "XV COPA PRESIDENTE DEL GOBIERNO"),
+        (2006, "III GRAN PREMIO CIUDAD DE VALLADOLID"),
+        (2016, 'III GRAN PRIX "LLINARS"'),
+    ]
+
+
+def test_seleccions_jugadors_amb_punts_i_abreviatures():
+    assert P._jugadors_ssaa(
+        "Xavier Minguell, Xavier Yeste de Pablo,\nJordi Garriga. Ricardo García"
+    ) == [
+        "Xavier Minguell",
+        "Xavier Yeste de Pablo",
+        "Jordi Garriga",
+        "Ricardo García",
+    ]
+    assert P._jugadors_ssaa("Manuel Glez. Castrillo, José M. Gómez Bravo") == [
+        "Manuel Glez. Castrillo",
+        "José M. Gómez Bravo",
+    ]
+
+
+def test_seleccions_pdf_real():
+    from pathlib import Path
+
+    cami = Path(__file__).parents[1] / "fonts/palmares/rfeb" / P.FITXER_SSAA_RFEB
+    inf = P.llegeix_rfeb_ssaa(cami)
+    assert not inf.no_llegit
+    ors_catalunya = {m.edicio for m in inf.medalles if m.posicio == 1 and m.lloc == "CATALUÑA"}
+    # El resum del mateix PDF: Catalunya, 14 ors.
+    assert len(ors_catalunya) == 14
+    # L'or de la IX edició queda partit pel salt de pàgina.
+    assert {m.jugador for m in inf.medalles if m.edicio == "IX" and m.posicio == 1} == {
+        "Armando Moreno",
+        "Sergio Jiménez",
+        "Josep Mª Mas",
+        "Iván Vives",
+        "Alejandro Pérez",
+        "Jordi Amell",
+    }
+    ricard = sorted(
+        (m.any_edicio, m.posicio) for m in inf.medalles if m.jugador.startswith("Ricardo Garc")
+    )
+    assert ricard == [
+        (1999, 1),
+        (2011, 3),
+        (2013, 2),
+        (2014, 3),
+        (2015, 1),
+        (2016, 1),
+        (2018, 2),
+        (2019, 3),
+    ]
