@@ -2899,9 +2899,15 @@ def umb_carrega_cmd(
     carpeta_antic: str = typer.Option(  # noqa: B008
         "data/cache/eb_antic", "--carpeta-antic", help="PDF del web vell d'eurobillard.org."
     ),
+    carpeta_kozoom: str = typer.Option(  # noqa: B008
+        "data/cache/kozoom", "--carpeta-kozoom", help="Còpies de Kozoom (`kozoom-descarrega`)."
+    ),
     detall: bool = typer.Option(False, "--detall", help="Els errors de cada PDF."),  # noqa: B008
 ) -> None:
     """Carrega a la BBDD local els resultats de la UMB baixats amb `umb-descarrega`.
+
+    Després de la UMB i la CEB, les proves de Kozoom: omplen les que no hi són i
+    afegeixen partides a les que només tenen classificació.
 
     Una prova es reemplaça sencera, no es duplica. Un PDF il·legible queda a la
     llista d'errors i no atura la resta.
@@ -2922,6 +2928,11 @@ def umb_carrega_cmd(
         from fcbillar.umb_carrega import carrega_ceb
 
         res += carrega_ceb(conn, Path(carpeta_ceb))
+    if (Path(carpeta_kozoom) / "proves.json").exists():
+        from fcbillar import kozoom_carrega
+
+        kz = Path(carpeta_kozoom)
+        res += kozoom_carrega.carrega(conn, kz, kozoom_carrega.seleccio(kz))
     console.print(dict(per_motiu(res)))
     for r in res:
         if r.estat == "buit":
@@ -2941,6 +2952,82 @@ def umb_carrega_cmd(
     console.print(taula)
     console.print(resum(conn))
     conn.close()
+
+
+@app.command("kozoom-descarrega")
+def kozoom_descarrega_cmd(
+    carpeta: str = typer.Option("data/cache/kozoom", "--carpeta"),  # noqa: B008
+    id_max: int = typer.Option(  # noqa: B008
+        0, "--id-max", help="Només proves fins a aquest id de Kozoom (17500 és de finals del 2016)."
+    ),
+) -> None:
+    """Baixa del Wayback les partides de les proves de Kozoom que interessen.
+
+    Primer l'inventari de totes les proves arxivades (hores, la primera vegada),
+    després les partides de les triades. Només es baixa el que falta.
+    """
+    from pathlib import Path
+
+    from fcbillar.kozoom_carrega import descarrega, inventaria, seleccio
+
+    cache = Path(carpeta)
+    inventaria(cache, id_max=id_max or None)
+    ids = seleccio(cache)
+    console.print(f"{len(ids)} proves triades")
+    console.print(descarrega(cache, ids))
+
+
+@app.command("kozoom-espanya")
+def kozoom_espanya_cmd(
+    carpeta: str = typer.Option("data/cache/kozoom", "--carpeta"),  # noqa: B008
+    noves: str = typer.Option(  # noqa: B008
+        "data/kozoom_espanya_noves.db", "--noves", help="Proves que la RFEB no té."
+    ),
+    partides: str = typer.Option(  # noqa: B008
+        "data/kozoom_espanya_partides.db",
+        "--partides",
+        help="Partides per a proves de la RFEB que no en tenen cap.",
+    ),
+    baixa: bool = typer.Option(False, "--baixa", help="Baixa abans les partides del Wayback."),  # noqa: B008
+) -> None:
+    """Les proves espanyoles de Kozoom, cap a les taules de la RFEB (àmbit Espanya).
+
+    Compara amb les proves de la RFEB del núvol i escriu dues bases que es
+    publiquen per separat: `--noves` amb `publish-rfeb-individuals` i
+    `publish-rfeb-partides`, i `--partides` només amb `publish-rfeb-partides`.
+    """
+    import sqlite3
+    from pathlib import Path
+
+    from fcbillar.cloud_sync import get_client
+    from fcbillar.kozoom_carrega import descarrega, seleccio_espanya
+    from fcbillar.kozoom_espanya import carrega
+
+    cache = Path(carpeta)
+    ids = seleccio_espanya(cache)
+    if baixa:
+        console.print(descarrega(cache, ids))
+    sb = get_client()
+
+    def _tot(taula: str, cols: str) -> list[dict]:
+        out: list[dict] = []
+        while True:
+            d = sb.table(taula).select(cols).range(len(out), len(out) + 999).execute().data
+            out += d
+            if len(d) < 1000:
+                return out
+
+    existents = _tot("rfeb_proves", "*")
+    compte: dict[str, int] = {}
+    for r in _tot("rfeb_partides", "prova_id"):
+        compte[r["prova_id"]] = compte.get(r["prova_id"], 0) + 1
+    for r in existents:
+        r["partides"] = compte.get(r["id"], 0)
+    for f in (noves, partides):
+        Path(f).unlink(missing_ok=True)
+    res = carrega(cache, ids, existents, sqlite3.connect(noves), sqlite3.connect(partides))
+    for r in res:
+        console.print(f"{r.pid:>6} {r.estat:<9} {r.nom} {r.detall}")
 
 
 @app.command("ceb-antic-descarrega")

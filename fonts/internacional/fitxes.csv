@@ -1,10 +1,52 @@
 validat,umb_id,jugador_umb,nacionalitat,proves,fcb_id,nom_cens,club_cens,motiu
-,x:cadillacjordi:ES,CADILLAC Jordi,ES,1,149,"CADILLAC JODAR, JORDI",C.B.PUNT D'ATAC,un cognom
-,x:garrigajorge:ES,GARRIGA Jorge,ES,1,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,un cognom
-,x:gassojordi:ES,GASSO Jordi,ES,1,266,"GASSÓ CHUMILLAS, JORDI",B.C.GRANOLLERS,un cognom
-,x:guerreromiguelangel:ES,GUERRERO Miguel Angel,ES,1,755,"GUERRERO GONZÁLEZ, MIQUEL A.",C.B.SANT ADRIÀ,un cognom
-,x:perezalejandro:ES,PEREZ Alejandro,ES,1,907,"PÉREZ ANDREU, ALEJANDRO",C.B.MATADEPERA,un cognom
-,x:vankesselmarkstefan:ES,VAN KESSEL Mark Stefan,ES,1,1027,"VAN KESSEL, MARK STEFAN",C.B.MATARÓ,exacte
+si,x:adriagarciaduenas:ES,ADRIA GARCIA DUENAS,ES,3,249,"GARCÍA DUEÑAS, ADRIÀ",,exacte
+si,x:amelljordi:ES,AMELL Jordi,ES,3,99,"AMELL AMELL, JORDI",S.B.LA GRAN PENYA,un cognom
+si,x:andreujaume:ES,ANDREU Jaume,ES,2,103,"ANDREU PÉREZ, JAUME",S.B.F.MOLINS,un cognom
+si,x:arnaupedro:ES,ARNAU Pedro,ES,2,600,"ARNAU CANALDA, PERE",C.B.TARRAGONA,un cognom
+si,x:barrientosjuanjose:ES,BARRIENTOS Juan Jose,ES,1,123,"BARRIENTOS CABALLERO, JOAN JOSEP",C.B.2000 CERDANYOLA,un cognom
+si,x:bosquedtoredavid:ES,BOSQUED TORE David,ES,1,144,"BOSQUED TORE, DAVID",C.B.SANT ADRIÀ,exacte
+si,x:bouterinjoan:ES,BOUTERIN Joan,ES,1,625,"BOUTERIN BOTE, JOAN",C.B.MOLLET,un cognom
+si,x:cadillacjordi:ES,CADILLAC Jordi,ES,1,149,"CADILLAC JODAR, JORDI",C.B.PUNT D'ATAC,un cognom
+si,x:campanagregori:ES,CAMPANA Gregori,ES,1,153,"CAMPAÑA COMINO, GREGORI",S.E.CASAL CERVERA,un cognom
+si,x:diezxavier:ES,DIEZ Xavier,ES,1,206,"DIEZ AYZA, XAVIER",S.B.P.E.CENTELLES,un cognom
+si,x:espinasajuan:ES,ESPINASA Juan,ES,14,211,"ESPINASA SÁNCHEZ, JOAN",B.C.GRANOLLERS,un cognom
+si,x:frodriguezmaiamario:ES,F. RODRIGUEZ MAIA Mario,ES,1,956,"RODRÍGUEZ MAIA, MARIO FELIPE",C.B.BANYOLES,exacte
+si,x:fernandezenrique:ES,FERNANDEZ Enrique,ES,1,221,"FERNÁNDEZ VELASCO, ENRIC",C.B.PUNT D'ATAC,un cognom
+si,x:garcesturmocarmelo:ES,GARCES TURMO Carmelo,ES,1,1218,"GARCÉS TURMO, CARMELO",C.B.LLEIDA,exacte
+si,x:garrigajorge:ES,GARRIGA Jorge,ES,1,262,"GARRIGA COMAS, JORDI",C.B.MATARÓ,un cognom
+si,x:gassojordi:ES,GASSO Jordi,ES,1,266,"GASSÓ CHUMILLAS, JORDI",B.C.GRANOLLERS,un cognom
+si,x:gomezantonio:ES,GOMEZ Antonio,ES,1,1303,"GÓMEZ LÁZARO, ANTONIO",,un cognom
+si,x:gomezlopezfrancisco:ES,GOMEZ LOPEZ Francisco,ES,1,56,"GOMEZ LOPEZ, FRANCISCO",C.B.BLANES,exacte
+si,x:gonzalezmanuel:ES,GONZALEZ Manuel,ES,1,287,"GONZÁLEZ CASTILLO, MANUEL",S.B.CORAL COLÓN,un cognom
+si,x:guerreromiguelangel:ES,GUERRERO Miguel Angel,ES,1,755,"GUERRERO GONZÁLEZ, MIQUEL A.",C.B.SANT ADRIÀ,un cognom
+si,x:joumoraferran:ES,JOU MORA Ferran,ES,2,776,"JOU MORA, FERRÀN",C.B.SANT BOI,exacte
+si,x:martijordi:ES,MARTI Jordi,ES,3,360,"MARTÍ SENDRA, JORDI",C.B.LLEIDA,un cognom
+si,x:martisalvador:ES,MARTI Salvador,ES,4,361,"MARTÍ TALAVERA, SALVADOR",C.B.LLEIDA,un cognom
+si,x:martinvilchezjose:ES,MARTIN VILCHEZ Jose,ES,2,832,"MARTÍN VÍLCHEZ, JOSEP",B.C.GRANOLLERS,exacte
+si,x:martinezalbert:ES,MARTINEZ Albert,ES,1,370,"MARTÍNEZ MATEU, ALBERT",S.E.CASAL CERVERA,un cognom
+si,x:martinezantonio:ES,MARTINEZ Antonio,ES,1,367,"MARTÍNEZ CARRILLO, ANTONI",C.B.LLINARS,un cognom
+si,x:martinicorenacesar:ES,MARTINICORENA César,ES,1,1835,"MARTINICORENA AGUILO, CÉSAR",,un cognom
+si,x:morcillojoan:ES,MORCILLO Joan,ES,1,1057,"MORCILLO MARIN, JUAN",C.B.MONT-ROIG,un cognom
+no,x:nadaljose:ES,NADAL José,ES,1,879,"NADAL FONT, JOSEP Mª",C.B.BANYOLES,un cognom
+si,x:ortaluis:ES,ORTA Luis,ES,1,420,"ORTA LÓPEZ, LUIS",C.B.SANT ADRIÀ,un cognom
+si,x:pareravaleria:ES,PARERA Valeria,ES,1,2529,"PARERA FERNÁNDEZ, VALERIÀ",B.C.GRANOLLERS,un cognom
+si,x:parerasjuancarlos:ES,PARERAS Juan Carlos,ES,7,432,"PARERAS MÉNDEZ, JOAN CARLES",B.C.GRANOLLERS,un cognom
+si,x:peralessanzjuan:ES,PERALES SANZ Juan,ES,1,441,"PERALES SANZ, JOAN",S.B.F.MOLINS,exacte
+si,x:perezalejandro:ES,PEREZ Alejandro,ES,1,907,"PÉREZ ANDREU, ALEJANDRO",C.B.MATADEPERA,un cognom
+si,x:plandolitmiquel:ES,PLANDOLIT Miquel,ES,1,922,"PLANDOLIT MARTÍN, MIQUEL",C.B.MATARÓ,un cognom
+si,x:planesjosep:ES,PLANES Josep,ES,2,456,"PLANES BLANCH, JOSEP",S.E.CASAL CERVERA,un cognom
+si,x:ramonmolinajose:ES,RAMON MOLINA Jose,ES,3,392,"MOLINA MASPOCH, JOSEP RAMÓN",S.B.F.MOLINS,un cognom
+si,x:rauletesteve:ES,RAULET Esteve,ES,1,470,"RAULET CLOS, ESTEVE",S.B.P.E.CENTELLES,un cognom
+si,x:robledoisidre:ES,ROBLEDO Isidre,ES,2,480,"ROBLEDO GONZÁLEZ, ISIDRE",C.B.TARRAGONA,un cognom
+si,x:rodriguezfernando:ES,RODRIGUEZ Fernando,ES,1,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,un cognom
+si,x:rodrigueznavarraferran:ES,RODRIGUEZ NAVARRA Ferran,ES,1,958,"RODRÍGUEZ NAVARRA, FERRÁN",C.B.BANYOLES,exacte
+si,x:rosesguitartantonio:ES,ROSES GUITART Antonio,ES,1,41,"ROSES GUITART, ANTONI",C.B.SANTS,exacte
+si,x:sayerasjosemaria:ES,SAYERAS José-Maria,ES,1,993,"SAYERAS GUITERAS, JOSEP Mª",C.B.MOLLET,un cognom
+si,x:serarolsjosep:ES,SERAROLS Josep,ES,1,520,"SERAROLS MONTES, JOSEP",S.E.CASAL CERVERA,un cognom
+si,x:serramitjanamarta:ES,SERRAMITJANA Marta,ES,2,1000,"SERRAMITJANA JUAN, MARTA",C.B.MATARÓ,un cognom
+si,x:tusetcarlos:ES,TUSET Carlos,ES,9,551,"TUSET MALLOL, CARLES",S.B.F.MOLINS,un cognom
+si,x:vankesselmarkstefan:ES,VAN KESSEL Mark Stefan,ES,1,1027,"VAN KESSEL, MARK STEFAN",C.B.MATARÓ,exacte
+si,x:vilajaume:ES,VILA Jaume,ES,3,564,"VILA PALAU, JAUME",C.B.LLINARS,un cognom
 si,x:aguilarsalaramon:ES,AGUILAR SALA Ramon,ES,1,84,"AGUILAR SALA, RAMÓN",C.B.BANYOLES,exacte
 si,x:apariciosergio:ES,APARICIO Sergio,ES,1,2542,"APARICIO ESCUDERO, SERGI",BILLAR EL MASNOU,un cognom
 si,x:arnauricard:ES,ARNAU Ricard,ES,1,109,"ARNAU FONT, RICARD",C.B.MONT-ROIG,un cognom
@@ -36,3 +78,4 @@ si,1980,PEREZ Rafael,ES,10,916,"PÉREZ ZORRILLA, RAFAEL",C.B.MOLLET,un cognom
 si,1173,PINEDA Juan Jose,ES,7,453,"PINEDA LAFUENTE, JOAN JOSEP",C.B.SANT ADRIÀ,un cognom
 si,x:ralitarosjuan:ES,RALITA ROS Juan,ES,1,468,"RALITA ROS, JOAN",C.B.BANYOLES,exacte
 si,x:torriscoenriquejose:ES,TORRISCO Enrique Jose,ES,4,323,"JOSÉ TORRISCO, ENRIQUE",C.B.LLIÇÀ D'AMUNT,exacte
+si,x:mataesteve:,Mata Esteve,,1,375,"MATA PARDO, ESTEVE",B.C.GRANOLLERS,validat per l'usuari (EC 1-Cushion 2008 sense país)

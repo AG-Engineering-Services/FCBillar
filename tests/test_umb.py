@@ -531,3 +531,32 @@ GARZON Cesar CO 33 31 33 31 1,064 0 5
     [p] = llegeix_partides(text, set(), "1/16")[0]
     assert (p.a.caramboles, p.a.entrades, p.a.sets, p.b.serie) == (40, 31, [], 5)
     assert text_sets(p.a.sets) is None
+
+
+def test_classificacio_del_web_vell_amb_punts_de_partida_en_forma_de_marcador():
+    """«12:2» són les partides guanyades i perdudes; el nom hi va com «Monique VAN EXTER»."""
+    from fcbillar.umb import llegeix_classificacio
+
+    text = (
+        "European Championship Ladies Libre\n"
+        "RANK Players NAT MP CAR INN AVERAGE HR\n"
+        "1 Monique VAN EXTER NL 12:2 938 103 9,11 64\n"
+        "3 Véronique ALES FR 4:8 377 108 3,49 27\n"
+    )
+    primera, tercera = llegeix_classificacio(text)
+    assert (primera.jugador, primera.nacionalitat, primera.punts) == ("VAN EXTER Monique", "NL", 12)
+    assert (primera.caramboles, primera.entrades, primera.mitjana, primera.serie1) == (
+        938,
+        103,
+        9.11,
+        64,
+    )
+    assert (tercera.posicio, tercera.jugador) == (3, "ALES Véronique")
+
+
+def test_un_jugador_que_es_diu_frank_no_es_una_fase():
+    # «Frank 3» contenia «rank 3» i la fila de Spruzina passava per títol de fase.
+    from fcbillar.umb import _fase_de_linia
+
+    assert _fase_de_linia("SPRUZINA Frank 3 13 4 16 7 29 0,241 0 -2 1") is None
+    assert _fase_de_linia("Pre-Qual Groups DEF") == "Pre-Qual Groups DEF"
