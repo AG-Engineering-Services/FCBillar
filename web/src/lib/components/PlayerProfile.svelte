@@ -32,6 +32,7 @@
 		modalitatRfeb,
 		modalitatsDe,
 		modalitatUmb,
+		MOD_ALTRES,
 		type Indicadors
 	} from '$lib/indicadorsAmbit';
 	import {
@@ -504,6 +505,8 @@
 	let selModAlt = $state<string | null>(null);
 	const modAlt = $derived(opcionsMod.some((o) => o.clau === selModAlt) ? selModAlt : (opcionsMod[0]?.clau ?? null));
 	const kpiAmbit = $derived(finestres(filtraModalitat(apsAmbit, modAlt)));
+	// «Altres» barreja modalitats (proves combinades, copes de clubs): s'hi veuen les partides, sense mitjanes.
+	const mitjanesBarrejades = $derived((veuEspanya || veuInternacional) && modAlt === MOD_ALTRES);
 	const ambitAnterior = $derived(kpiAmbit.anterior.n || kpiAmbit.anterior.nomesMitjana ? kpiAmbit.anterior : null);
 	const individualsLlista = $derived(modAlt == null ? individuals : individuals.filter((r) => modalitatRfeb(r.modalitat) === modAlt));
 	type TargetaKpi = Omit<Indicadors, 'nomesMitjana'> & { nomesMitjana?: number };
@@ -1506,7 +1509,11 @@
 	{:else}
 		<div class="profile-root lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start print:block">
 			<div class="min-w-0">
-			{#if veuEspanya || veuInternacional}
+			{#if mitjanesBarrejades}
+				<p class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 text-sm text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800">
+					Aquí hi ha les proves que barregen modalitats (pentatlons, triatlons i copes d'Europa de clubs). Les partides surten a la llista, però no es fan mitjanes, perquè no es poden comparar.
+				</p>
+			{:else if veuEspanya || veuInternacional}
 				{@render targetesIndicadors(kpiAmbit.historic, kpiAmbit.actual, ambitAnterior, false)}
 			{:else}
 				{@render targetesIndicadors(kpi, seasonKpi, prevSeasonKpi.n ? prevSeasonKpi : null, true)}
@@ -1757,7 +1764,7 @@
 			</div>
 		{/if}
 
-		{#if kpi.best != null && bestGames.length}
+		{#if !mitjanesBarrejades && kpi.best != null && bestGames.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					Millor partida{bestGames.length > 1 ? ` · ${bestGames.length}` : ''} · mitjana {kpi.best.toFixed(3)}
@@ -1964,7 +1971,7 @@
 			</div>
 		{/if}
 
-		{#if rollChart && roll15.length}
+		{#if !mitjanesBarrejades && rollChart && roll15.length}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-end justify-between">
 					<span class="text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Mitjana mòbil · 15 partides</span>
@@ -2011,7 +2018,7 @@
 			</div>
 		{/if}
 
-		{#if histo}
+		{#if !mitjanesBarrejades && histo}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
 				<div class="mb-1 flex items-end justify-between">
 					<div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">

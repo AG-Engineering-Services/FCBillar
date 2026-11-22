@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { agrupaUmb, resultatSets, resultatUmb, textSets, type UmbPartidaRow } from './internacional';
+import { agrupaUmb, disciplinaDeNom, resultatSets, resultatUmb, textSets, type UmbPartidaRow } from './internacional';
 
 function p(o: Partial<UmbPartidaRow>): UmbPartidaRow {
 	return {
@@ -48,5 +48,14 @@ describe('sets', () => {
 	it('sense punts, guanya qui guanya mes sets encara que faci menys caramboles', () => {
 		expect(resultatUmb({ punts: null, rival_punts: null, caramboles: 53, rival_caramboles: 59, ...sets })).toBe('G');
 		expect(resultatUmb({ punts: 0, rival_punts: 2, caramboles: 53, rival_caramboles: 59, ...sets })).toBe('P');
+	});
+});
+
+describe('disciplinaDeNom', () => {
+	it('reconeix el «(3C)» dels World Games i les proves de tres bandes que no ho diuen', () => {
+		expect(disciplinaDeNom('The World Games 2013 (3C)')).toBe('3 bandes');
+		expect(disciplinaDeNom('Lausanne Billard Masters')).toBe('3 bandes');
+		expect(disciplinaDeNom('International Invitation Tournament Crystal Kelly')).toBe('3 bandes');
+		expect(disciplinaDeNom('European Cup Final Club Team Carom Series')).toBeNull();
 	});
 });

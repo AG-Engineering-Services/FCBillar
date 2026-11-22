@@ -9,6 +9,7 @@ import {
 	finestres,
 	indicadors,
 	modalitatsDe,
+	modalitatUmb,
 	temporadaActual,
 	temporadaDeData,
 	efectivitatRfeb,
@@ -225,5 +226,17 @@ describe('partides o total oficial', () => {
 			rfeb({ prova_id: 'b', caramboles: 80, entrades: 60, jugades: 2 })
 		]);
 		expect([...set].sort()).toEqual(['a', 'full/x']);
+	});
+});
+
+describe('Altres', () => {
+	it('surt sempre l\'última, encara que tingui més partides', () => {
+		expect(modalitatsDe(['Altres', 'Altres', 'Altres', 'Quadre']).map((o) => o.clau)).toEqual(['Quadre', 'Altres']);
+	});
+
+	it('hi van les proves combinades i les que no tenen disciplina', () => {
+		expect(modalitatUmb('combinada')).toBe('Altres');
+		expect(modalitatUmb(null)).toBe('Altres');
+		expect(modalitatUmb('3 bandes')).toBe(MOD_TRES_BANDES);
 	});
 });

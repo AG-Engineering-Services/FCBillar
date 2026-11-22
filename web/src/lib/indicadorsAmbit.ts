@@ -79,8 +79,8 @@ const MOD_UMB: Record<string, string> = {
 	'5 quilles': 'Cinc quilles',
 	quadre: 'Quadre',
 	artistic: 'Artístic',
-	lliure: 'Lliure',
-	combinada: 'Combinada'
+	lliure: 'Lliure'
+	// Les proves combinades (pentatló, triatló) sumen modalitats: van a «Altres».
 };
 
 export function modalitatRfeb(modalitat: string): string {
@@ -257,7 +257,11 @@ export function modalitatsDe(claus: string[]): OpcioModalitat[] {
 	for (const c of claus) m.set(c, (m.get(c) ?? 0) + 1);
 	return [...m]
 		.map(([clau, n]) => ({ clau, n }))
-		.sort((a, b) => b.n - a.n || a.clau.localeCompare(b.clau));
+		.sort(
+			(a, b) =>
+				// «Altres» barreja modalitats: sempre l'última, i mai la triada per defecte.
+				+(a.clau === MOD_ALTRES) - +(b.clau === MOD_ALTRES) || b.n - a.n || a.clau.localeCompare(b.clau)
+		);
 }
 
 export function filtraModalitat(aps: Aportacio[], mod: string | null): Aportacio[] {

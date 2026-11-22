@@ -560,3 +560,12 @@ def test_un_jugador_que_es_diu_frank_no_es_una_fase():
 
     assert _fase_de_linia("SPRUZINA Frank 3 13 4 16 7 29 0,241 0 -2 1") is None
     assert _fase_de_linia("Pre-Qual Groups DEF") == "Pre-Qual Groups DEF"
+
+
+def test_disciplina_de_les_proves_de_tres_bandes_que_el_nom_no_diu():
+    from fcbillar.umb_carrega import disciplina_de
+
+    assert disciplina_de("The World Games 2017 (3C)") == "3 bandes"
+    assert disciplina_de("UMB Lausanne Billard Masters U25") == "3 bandes"
+    assert disciplina_de("International Invitation Tournament Crystal Kelly") == "3 bandes"
+    assert disciplina_de("European Cup Final Club Team Carom Series") is None

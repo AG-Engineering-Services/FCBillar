@@ -100,7 +100,7 @@ export function resultatUmb(
 }
 
 const DISCIPLINES: [RegExp, string][] = [
-	[/3[- ]?cushion|three[- ]?cushion|3[- ]?bandes/i, '3 bandes'],
+	[/3[- ]?cushion|three[- ]?cushion|3[- ]?bandes|\b3C\b|lausanne billard masters|crystal kelly/i, '3 bandes'],
 	[/1[- ]?cushion|one[- ]?cushion/i, '1 banda'],
 	[/5[- ]?pins?|five[- ]?pins?/i, '5 quilles'],
 	[/47[/-]?2|47\/1|71\/2|cadre|balkline/i, 'quadre'],
