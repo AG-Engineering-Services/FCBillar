@@ -703,7 +703,8 @@ export async function rfebPartidesDelJugador(fcbId: string): Promise<RfebPartida
 /** Una medalla del palmarès: campionats d'Espanya (RFEB) i d'Europa (CEB). */
 export interface PalmaresRow {
   fcb_id: string;
-  font: "rfeb" | "ceb";
+  /** «fcb»: el Quadre d'Honor de la Federació Catalana (el club és a `lloc`). */
+  font: "rfeb" | "ceb" | "fcb";
   competicio: string;
   categoria: string;
   edicio: string;
@@ -715,7 +716,7 @@ export interface PalmaresRow {
   mitjana: number | null;
 }
 
-/** Les medalles del jugador als campionats d'Espanya i d'Europa. */
+/** Les medalles del jugador: Quadre d'Honor de la FCB i campionats d'Espanya i d'Europa. */
 export async function palmaresDelJugador(fcbId: string): Promise<PalmaresRow[]> {
   const { data, error } = await db
     .from("palmares_fitxa")
