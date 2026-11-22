@@ -980,10 +980,7 @@ def _seed_unplayed_groups(
         if new_standings == g.standings:
             out.append(g)
             continue
-        out.append(Group(
-            label=g.label, url=g.url, venue=g.venue,
-            standings=new_standings, matches=g.matches,
-        ))
+        out.append(replace(g, standings=new_standings))
     return tuple(out)
 
 

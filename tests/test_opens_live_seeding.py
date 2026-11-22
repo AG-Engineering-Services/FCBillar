@@ -92,3 +92,42 @@ def test_name_matching_is_case_and_whitespace_insensitive():
     rank = {"MORENO CORTÉS, ARMAND": 1, "GARCÍA ALARCÓN, RICARDO": 5}
     out = _seed_unplayed_groups((g,), frozenset(), rank)
     assert _order(out[0]) == ["MORENO CORTÉS, ARMAND", "garcía  alarcón, ricardo"]
+
+
+def test_reorder_keeps_group_date():
+    g = Group(
+        label="Grup A",
+        url="",
+        date="2026-11-22",
+        standings=(_st("B"), _st("A")),
+        matches=(_match("A", "B", played=False),),
+    )
+    out = _seed_unplayed_groups((g,), frozenset(), {"A": 1, "B": 2})
+    assert _order(out[0]) == ["A", "B"]
+    assert out[0].date == "2026-11-22"
+
+
+def test_ranking_inicial_orders_players_without_opens_ranking():
+    # Sant Adrià, grup AL: cap dels tres té rànquing d'Opens i la federació els
+    # llistava Lozano (96), Ametller (95), Magdaleno (102).
+    from fcb_opens.scraper.open_live import OpenLiveState, OpenStructure, PhaseDetail, PhaseRef
+    from fcbillar.cloud_sync import _seed_unplayed_groups_by_ranking_inicial
+
+    g = _group(["LOZANO HERRERO, MANUEL", "AMETLLER CONGOST, LLUIS", "MAGDALENO CARRENO, ANTONI"])
+    state = OpenLiveState(
+        structure=OpenStructure(division_id=223, name="OPEN", phase_id=1, phases=()),
+        phases=[
+            PhaseDetail(ref=PhaseRef(label="PRE-PRE-PRÈVIA", kind="group", url=""), groups=(g,))
+        ],
+    )
+    ri = [
+        {"player_name": "AMETLLER CONGOST, LLUIS", "posicio": 95},
+        {"player_name": "LOZANO HERRERO, MANUEL", "posicio": 96},
+        {"player_name": "MAGDALENO CARREÑO, ANTONI", "posicio": 102},
+    ]
+    assert _seed_unplayed_groups_by_ranking_inicial(state, ri)
+    assert _order(state.phases[0].groups[0]) == [
+        "AMETLLER CONGOST, LLUIS",
+        "LOZANO HERRERO, MANUEL",
+        "MAGDALENO CARRENO, ANTONI",
+    ]
