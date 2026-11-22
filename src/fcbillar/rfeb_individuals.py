@@ -667,11 +667,17 @@ _ANY = r"(\d{4}|\d\.\d{3})"
 #: «del 26 Oct. al 01 de Noviembre 2015», «DEL 31 DE ENERO AL 3 DE FEBRERO DE 2013».
 _RE_DATA_RANG = re.compile(
     rf"(?<![\d/])(?:del\s+)?(\d{{1,2}})(?:\s+(?:de\s+)?{_MES})?\s*(?:y|al|a|-)\s*(\d{{1,2}})"
-    rf"\s+(?:de\s+)?{_MES}\s+(?:de\s+)?{_ANY}",
+    rf"\s+(?:de\s+)?{_MES}\s*(?:de\s+)?{_ANY}",
+    re.IGNORECASE,
+)
+#: Una llista de dies d'un sol mes: «19, 20 y 21 ENERO 2018», «24-25-26 FEB.2017».
+_RE_DATA_LLISTA = re.compile(
+    rf"(?<![\d/])(\d{{1,2}}(?:\s*(?:,|-|y|al|a)\s*\d{{1,2}}){{2,}})\s+(?:de\s+)?{_MES}\s*"
+    rf"(?:de\s+)?{_ANY}",
     re.IGNORECASE,
 )
 _RE_DATA_UNICA = re.compile(
-    rf"(?<![\d/])(\d{{1,2}})\s+(?:de\s+)?{_MES}\s+(?:de\s+)?{_ANY}", re.IGNORECASE
+    rf"(?<![\d/])(\d{{1,2}})\s+(?:de\s+)?{_MES}\s*(?:de\s+)?{_ANY}", re.IGNORECASE
 )
 
 
@@ -691,30 +697,101 @@ _RE_NO_ES_LA_DATA = re.compile(r"GRUP|FASE|RONDA|CALIFICACI|CLASS?IFICACI", re.I
 _RE_MES_I_ANY = re.compile(rf"^\W*{_MES}\W*(\d{{4}})\W*$", re.IGNORECASE)
 
 
+def _dates_de_linia(linia: str) -> tuple[date, date, str | None] | None:
+    """(inici, fi, lloc) si la línia diu uns dies concrets d'un mes i un any."""
+    m = _RE_DATA_LLISTA.search(linia)
+    if m:
+        dies, mes, a = m.groups()
+        nums = [int(d) for d in re.findall(r"\d+", dies)]
+        ini, fi = _data(nums[0], mes, _any(a)), _data(nums[-1], mes, _any(a))
+        if ini and fi and ini <= fi:
+            return ini, fi, _lloc(linia[: m.start()])
+        return None
+    m = _RE_DATA_RANG.search(linia)
+    if m:
+        d1, m1, d2, m2, a = m.groups()
+        fi = _data(int(d2), m2, _any(a))
+        ini = _data(int(d1), m1 or m2, _any(a))
+        if ini and fi:
+            if ini > fi:
+                # «del 30 de Diciembre al 2 de Enero de 2025»
+                ini = _data(int(d1), m1 or m2, _any(a) - 1)
+            if ini and ini <= fi:
+                return ini, fi, _lloc(linia[: m.start()])
+        return None
+    m = _RE_DATA_UNICA.search(linia)
+    if m:
+        d1, m1, a = m.groups()
+        dia = _data(int(d1), m1, _any(a))
+        if dia:
+            return dia, dia, _lloc(linia[: m.start()])
+    return None
+
+
 def cerca_dates(linies: list[str]) -> tuple[date, date, str | None] | None:
     """(inici, fi, lloc) de la primera línia que diu quan s'ha jugat."""
     for linia in linies:
         if _RE_NO_ES_LA_DATA.search(_sense_accents(linia)):
             continue
-        m = _RE_DATA_RANG.search(linia)
-        if m:
-            d1, m1, d2, m2, a = m.groups()
-            fi = _data(int(d2), m2, _any(a))
-            ini = _data(int(d1), m1 or m2, _any(a))
-            if ini and fi:
-                if ini > fi:
-                    # «del 30 de Diciembre al 2 de Enero de 2025»
-                    ini = _data(int(d1), m1 or m2, _any(a) - 1)
-                if ini and ini <= fi:
-                    return ini, fi, _lloc(linia[: m.start()])
-            continue
-        m = _RE_DATA_UNICA.search(linia)
-        if m:
-            d1, m1, a = m.groups()
-            dia = _data(int(d1), m1, _any(a))
-            if dia:
-                return dia, dia, _lloc(linia[: m.start()])
+        trobat = _dates_de_linia(linia)
+        if trobat:
+            return trobat
     return None
+
+
+_DIES_SETMANA = {
+    "lunes": 0,
+    "martes": 1,
+    "miercoles": 2,
+    "jueves": 3,
+    "viernes": 4,
+    "sabado": 5,
+    "domingo": 6,
+}
+#: «SABADO 17 DE OCTUBRE»: el dia de la setmana, sense any.
+_RE_DIA_SETMANA = re.compile(
+    rf"(?<![A-Za-z])(lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\s+"
+    rf"(\d{{1,2}})\s+(?:de\s+)?{_MES}(?![a-z])",
+    re.IGNORECASE,
+)
+
+
+def data_amb_dia_de_la_setmana(linia: str, temporada: str) -> date | None:
+    """«VIERNES 16 DE OCTUBRE» dins la temporada `2015-2016`: el dia del 2015.
+
+    L'any no hi és, però el dia de la setmana el confirma: només es dóna per bona
+    la data de la temporada que cau en aquell dia de la setmana. Si no hi cau, no
+    es diu res.
+    """
+    m = _RE_DIA_SETMANA.search(linia)
+    if not m:
+        return None
+    dia_setmana, d, mes = m.groups()
+    inici = int(temporada[:4])
+    mes_num = _MESOS[mes.lower()]
+    dia = _data(int(d), mes, inici if mes_num >= 8 else inici + 1)
+    clau = _sense_accents(dia_setmana).lower()
+    if dia is None or dia.weekday() != _DIES_SETMANA[clau]:
+        return None
+    return dia
+
+
+def dates_de_fases(linies: list[str], temporada: str) -> list[tuple[date, date]]:
+    """Els dies que diuen les línies d'una capçalera de fase («GRUPOS 12-15 ENERO 2017»).
+
+    A diferència de `cerca_dates`, aquí una línia de grups o de fase final SÍ és
+    bona: és el tros del campionat que ella cobreix.
+    """
+    out: list[tuple[date, date]] = []
+    for linia in linies:
+        trobat = _dates_de_linia(linia)
+        if trobat:
+            out.append((trobat[0], trobat[1]))
+            continue
+        dia = data_amb_dia_de_la_setmana(linia, temporada)
+        if dia:
+            out.append((dia, dia))
+    return out
 
 
 def cerca_mes_i_any(linies: list[str]) -> date | None:
@@ -900,8 +977,57 @@ def _capcalera_del_document(pagines: list[str]) -> list[str]:
     return out
 
 
-def prova_de_pagines(pagines: list[str], carpeta: str, nom: str) -> Prova:
-    """La prova d'un PDF ja llegit a text (separat de pdfplumber per provar-ho)."""
+#: Quants dies com a màxim pot durar un campionat: més que això vol dir que les
+#: dates de les fases són de coses diferents i no se'n treu cap.
+_MAX_DIES_DE_PROVA = 14
+
+#: Els sufixos dels fitxers de fase d'una prova (`_fp`, `_ff`, `_prov`…).
+_RE_FASE_GERMANA = re.compile(r"_(?:fp|ff|fc|q|pq|prov|all|cuad)(?:_[a-z]+)?$")
+
+
+def es_fase_de(nom_prova: str, nom_fitxer: str) -> bool:
+    """`res_ce_3b_s17_fp` és una fase de `res_ce_3b_s17`, però `res_ce_3b_s15` no."""
+    if not nom_fitxer.startswith(nom_prova + "_"):
+        return False
+    m = _RE_FASE_GERMANA.search(nom_fitxer[len(nom_prova) :])
+    return m is not None and m.start() == 0
+
+
+def _dates_del_campionat(
+    pagines: list[str], germanes: list[list[str]], temporada: str
+) -> tuple[date, date] | None:
+    """Els dies del campionat segons les capçaleres de les fases, quan el PDF principal no en té.
+
+    Es mira el principi de la primera pàgina del PDF i de cada fase germana: el
+    primer dia és el de la primera fase (grups) i l'últim el de la darrera (fase
+    final). Només es dona per bo si tot cap en el que pot durar un campionat; unes
+    dates que no hi caben són de coses diferents.
+    """
+    capcaleres = [_linies(pagines[0])[:10] if pagines else [], *germanes]
+    dates: list[tuple[date, date]] = []
+    for linies in capcaleres:
+        dates += dates_de_fases(linies, temporada)
+    if not dates:
+        return None
+    ini = min(d[0] for d in dates)
+    fi = max(d[1] for d in dates)
+    if (fi - ini).days > _MAX_DIES_DE_PROVA:
+        return None
+    return ini, fi
+
+
+def prova_de_pagines(
+    pagines: list[str],
+    carpeta: str,
+    nom: str,
+    germanes: list[list[str]] | None = None,
+) -> Prova:
+    """La prova d'un PDF ja llegit a text (separat de pdfplumber per provar-ho).
+
+    `germanes` són les primeres línies dels PDF de fase de la mateixa prova
+    (`_fp`, `_ff`…): molts campionats no diuen quan es van jugar al PDF de la
+    classificació, però sí a la capçalera de les fases.
+    """
     taula = llegeix_taula(pagines)
     # El títol i la data són a sobre de la taula; si la taula és a la segona
     # pàgina, a dalt de la primera.
@@ -916,6 +1042,10 @@ def prova_de_pagines(pagines: list[str], carpeta: str, nom: str) -> Prova:
     else:
         temporada = temporada_de(mes) if mes else temporada_de_carpeta(carpeta)
         data_inici = data_fi = lloc = None
+        de_fases = _dates_del_campionat(pagines, germanes or [], temporada_de_carpeta(carpeta))
+        if de_fases:
+            temporada = temporada_de(de_fases[0])
+            data_inici, data_fi = de_fases[0].isoformat(), de_fases[1].isoformat()
     return Prova(
         id=f"{carpeta}/{nom}",
         temporada=temporada,
@@ -938,4 +1068,14 @@ def llegeix_prova(cami: Path, arrel: Path) -> Prova:
     carpeta = cami.parent.relative_to(arrel).as_posix()
     with pdfplumber.open(str(cami)) as pdf:
         pagines = [p.extract_text() or "" for p in pdf.pages]
-    return prova_de_pagines(pagines, carpeta, cami.stem)
+    germanes: list[list[str]] = []
+    for fase in sorted(cami.parent.glob(f"{cami.stem}_*.pdf")):
+        if not es_fase_de(cami.stem, fase.stem):
+            continue
+        try:
+            with pdfplumber.open(str(fase)) as pdf:
+                germanes.append(_linies(pdf.pages[0].extract_text() or "")[:10])
+        except Exception:
+            # Una fase malmesa només es queda sense dates; la prova no en depèn.
+            continue
+    return prova_de_pagines(pagines, carpeta, cami.stem, germanes)

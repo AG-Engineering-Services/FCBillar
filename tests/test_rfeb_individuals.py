@@ -450,3 +450,92 @@ def test_cobertura_per_temporada_i_modalitat(conn, tmp_path):
         "2016-2017": {"banda": 1},
         "2018-2019": {"71_2": 1},
     }
+
+
+# ------------------------------------------------- dates que només diuen les fases
+
+from datetime import date  # noqa: E402
+
+from fcbillar.rfeb_individuals import (  # noqa: E402
+    cerca_dates,
+    data_amb_dia_de_la_setmana,
+    dates_de_fases,
+    es_fase_de,
+    prova_de_pagines,
+)
+
+_TAULA_S17 = [
+    "XXVII CAMPEONATO DE ESPAÑA SUB-17 DE\nBILLAR A TRES BANDAS\n"
+    "CLASIFICACIÓN FINAL\n"
+    "Clasif. Jugadores Federación T-Car. T.Entr. Pr.Gral. Ptos.\n"
+    "1 SERGIO MARTÍNEZ Catalana 146 212 0,689 10\n"
+    "2 LUIS MIRA Valenciana 146 201 0,726 8"
+]
+
+
+@pytest.mark.parametrize(
+    "linia, esperat",
+    [
+        ("GRUPOS 19, 20 y 21 ENERO 2018", (date(2018, 1, 19), date(2018, 1, 21))),
+        ("FASE FINAL 24-25-26 FEB.2017", (date(2017, 2, 24), date(2017, 2, 26))),
+        ("GRUPOS FECHA: 04 al 06 Marzo 2016", (date(2016, 3, 4), date(2016, 3, 6))),
+        ("GRUPOS 11 AL 14 DE JULIO 2019", (date(2019, 7, 11), date(2019, 7, 14))),
+        ("GRUPOS 12 y 13 DICIEMBRE 2019", (date(2019, 12, 12), date(2019, 12, 13))),
+    ],
+)
+def test_dates_de_les_capcaleres_de_fase(linia, esperat):
+    assert dates_de_fases([linia], "2017-2018") == [esperat]
+
+
+def test_una_linia_de_fase_no_es_la_data_del_campionat_sense_mirar_les_fases():
+    # `cerca_dates` continua ignorant «GRUPOS»: una fase sola no és tot el campionat.
+    assert cerca_dates(["GRUPOS 19, 20 y 21 ENERO 2018"]) is None
+    # Un mes sense dia («DIC. 2022») no és una data.
+    assert dates_de_fases(["DIC. 2022", "CLASIFICACIÓN DEL GRUPO FEB. 2022"], "2022-2023") == []
+
+
+def test_el_dia_de_la_setmana_confirma_l_any_que_falta():
+    assert data_amb_dia_de_la_setmana("SABADO 17 DE OCTUBRE", "2015-2016") == date(2015, 10, 17)
+    assert data_amb_dia_de_la_setmana("DOMINGO 14 DE FEBRERO", "2015-2016") == date(2016, 2, 14)
+    # El 17 d'octubre del 2016 no és dissabte: no s'endevina.
+    assert data_amb_dia_de_la_setmana("SABADO 17 DE OCTUBRE", "2016-2017") is None
+
+
+def test_les_dates_surten_de_les_fases_si_el_principal_no_en_diu_cap():
+    p = prova_de_pagines(
+        _TAULA_S17,
+        "noticias2017",
+        "res_ce_3b_s17",
+        germanes=[["XXVII CAMPEONATO", "GRUPOS 19, 20 y 21 ENERO 2018", "GRUPO Partidos"]],
+    )
+    assert (p.data_inici, p.data_fi) == ("2018-01-19", "2018-01-21")
+    assert p.temporada == "2017-2018"
+    assert p.lloc is None
+
+
+def test_les_dates_de_dues_fases_s_ajunten_de_la_primera_a_l_ultima():
+    p = prova_de_pagines(
+        _TAULA_S17,
+        "noticias2016",
+        "res_ce_3b_fem",
+        germanes=[["GRUPOS 24-25-26 FEBRERO 2017"], ["FASE FINAL 26 y 27 FEB.2017"]],
+    )
+    assert (p.data_inici, p.data_fi) == ("2017-02-24", "2017-02-27")
+
+
+def test_unes_dates_massa_separades_no_es_donen_per_bones():
+    p = prova_de_pagines(
+        _TAULA_S17,
+        "noticias2017",
+        "res_ce_3b_s17",
+        germanes=[["GRUPOS 19, 20 y 21 ENERO 2018"], ["FASE FINAL 13-14-15 ABR.2018"]],
+    )
+    assert p.data_inici is None
+    assert p.temporada == "2017-2018"
+
+
+def test_nomes_les_fases_de_la_mateixa_prova_hi_compten():
+    assert es_fase_de("res_ce_3b_s17", "res_ce_3b_s17_fp")
+    assert es_fase_de("res_gpe_3b_llinars", "res_gpe_3b_llinars_prov")
+    assert not es_fase_de("res_ce_3b", "res_ce_3b_s15")
+    assert not es_fase_de("res_gpe_3b_madrid", "res_gpe_3b_madrid_fem")
