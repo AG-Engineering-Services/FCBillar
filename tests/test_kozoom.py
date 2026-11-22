@@ -231,53 +231,6 @@ def test_la_classificacio_oficial_no_es_toca(tmp_path):
     assert noms == ["OFICIAL Un"]
 
 
-def test_el_text_de_les_pagines_velles_es_llegeix_com_a_latin_1():
-    import httpx
-
-    from fcbillar.kozoom_carrega import _text
-
-    assert _text(httpx.Response(200, content="Frédéric".encode("cp1252"))) == "Frédéric"
-    assert _text(httpx.Response(200, content="Frédéric".encode("utf-8"))) == "Frédéric"
-
-
-def test_les_pagines_amb_els_accents_perduts_es_tornen_a_baixar(tmp_path, monkeypatch):
-    import json
-
-    from fcbillar import kozoom_carrega as kc
-
-    (tmp_path / "proves.json").write_text(
-        json.dumps(
-            {
-                "5": {
-                    "id": "5",
-                    "titol": "x",
-                    "ts_rankings": "2020",
-                    "url_rankings": "http://www.kozoom.com/r5",
-                },
-                "6": {
-                    "id": "6",
-                    "titol": "x",
-                    "ts_rankings": "2020",
-                    "url_rankings": "http://www.kozoom.com/r6",
-                },
-            }
-        ),
-        encoding="utf-8",
-    )
-    (tmp_path / "5_rankings.html").write_text("Fr��ric", encoding="utf-8")
-    (tmp_path / "6_rankings.html").write_text("Frédéric", encoding="utf-8")
-    baixades = []
-
-    def _get(_c, url):
-        baixades.append(url)
-        return "Frédéric"
-
-    monkeypatch.setattr(kc, "_get", _get)
-    assert kc.repara_codificacio(tmp_path, ["5", "6"], espera=0) == 1
-    assert len(baixades) == 1 and baixades[0].endswith("/http://www.kozoom.com/r5")
-    assert (tmp_path / "5_rankings.html").read_text(encoding="utf-8") == "Frédéric"
-
-
 def test_la_classificacio_amb_la_bandera_en_una_cel_la_a_part():
     html = """<title>Carom Billiard Ranking - Artistic - World Championship - Schelle  (BEL) - 4/1/08 to 4/5/08 - Kozoom</title>
     <table class="listing"><thead><tr><th>Rank</th><th></th><th>Players</th></tr></thead><tbody>

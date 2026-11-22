@@ -59,20 +59,12 @@ _INTERNACIONAL = re.compile(
 )
 
 
-def _text(r: httpx.Response) -> str:
-    """El text d'una resposta; les pàgines velles de Kozoom són en Latin-1 sense dir-ho."""
-    try:
-        return r.content.decode("utf-8")
-    except UnicodeDecodeError:
-        return r.content.decode("cp1252", errors="replace")
-
-
 def _get(c: httpx.Client, url: str, intents: int = 4) -> str:
     for i in range(intents):
         try:
             r = c.get(url)
             if r.status_code == 200:
-                return _text(r)
+                return r.text
             if r.status_code == 404:
                 return ""
         except httpx.HTTPError:
@@ -252,44 +244,6 @@ def descarrega(cache: Path, ids: list[str], espera: float = 1.0) -> dict[str, in
                 time.sleep(espera)
             compte["amb_jugadors"] += 1
     return compte
-
-
-def _pagines_de(cache: Path, pid: str, p: dict, idx: dict) -> list[tuple[Path, str]]:
-    """Els fitxers de cache d'una prova amb l'adreça del Wayback d'on surten."""
-    out: list[tuple[Path, str]] = []
-    if "url_rankings" in p:
-        out.append((cache / f"{pid}_rankings.html", f"{WAYBACK}/web/{p['ts_rankings']}id_/{p['url_rankings']}"))
-    if "url_matches" in p:
-        base = f"{WAYBACK}/web/{p['ts_matches']}id_/{p['url_matches']}"
-        out.append((cache / f"{pid}_matches.html", base))
-        out += [(f, f"{base}?page={f.stem.rsplit('_p', 1)[1]}") for f in _fitxers_de_partides(cache, pid)[1:]]
-    for ts, url in idx.get(pid, []):
-        nom = re.search(r"/players/([^/]+)/", url).group(1)
-        out.append((cache / "jugadors" / pid / f"{nom}.html", f"{WAYBACK}/web/{ts}id_/{url}"))
-    return out
-
-
-def repara_codificacio(cache: Path, ids: list[str], espera: float = 1.0) -> int:
-    """Torna a baixar les pàgines desades amb els accents perduts (el caràcter U+FFFD).
-
-    Les primeres baixades llegien el Latin-1 de Kozoom com si fos UTF-8 i els accents
-    es feien malbé; `_text` ho fa bé. Torna quantes pàgines ha refet.
-    """
-    proves = _proves(cache)
-    idx_f = cache / "jugadors.json"
-    idx = json.loads(idx_f.read_text(encoding="utf-8")) if idx_f.exists() else {}
-    refetes = 0
-    with _client() as c:
-        for pid in ids:
-            for f, url in _pagines_de(cache, pid, proves[pid], idx):
-                if not f.exists() or "�" not in f.read_text(encoding="utf-8"):
-                    continue
-                nou = _get(c, url)
-                time.sleep(espera)
-                if nou:
-                    f.write_text(nou, encoding="utf-8")
-                    refetes += 1
-    return refetes
 
 
 def llegeix_prova(cache: Path, pid: str) -> tuple[Titol | None, Llegit]:
