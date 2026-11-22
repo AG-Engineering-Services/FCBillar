@@ -69,6 +69,8 @@ _RFEB: dict[str, tuple[str, str]] = {
     "rfeb-medallero-cuadro-47-1.pdf": ("Quadre 47/1", "absolut"),
     "rfeb-medallero-cuadro-71-2.pdf": ("Quadre 71/2", "absolut"),
     "rfeb-medallero-artistico.pdf": ("Artístic", "absolut"),
+    "Cuadro-47_2-1.pdf": ("Quadre 47/2", "absolut"),
+    "Ctos.-Espana-5-Quillas.pdf": ("5 quilles", "absolut"),
 }
 
 #: Fitxer -> (competició, categoria) del CEB. Els campionats per equips, els de
@@ -200,7 +202,10 @@ def _columnes_rfeb(taula: list[list]) -> dict[str, int] | None:
     sub = [_text(c).upper() for c in taula[1]]
     try:
         return {
-            "edicio": 0,
+            # El quadre 47/2 porta, a la primera pàgina, una columna de numeració al davant.
+            "edicio": cap.index("EDICIÓN") if "EDICIÓN" in cap else 0,
+            # Les 5 quilles no porten mitjana: el que hi ha al costat d'un nom és el nom següent.
+            "prom": 1 if "PROM." in cap else 0,
             "any": sub.index("AÑO"),
             "mes": sub.index("MES"),
             "sede": sub.index("SEDE"),
@@ -280,17 +285,27 @@ def llegeix_taules_rfeb(
                 if len(fila) <= max(cols.values()):
                     inf.no_llegit.append((on, f"fila curta {fila!r}"))
                     continue
-                nomes_primera = _text(fila[0])
-                resta = [_text(c) for c in fila[1:]]
+                ie = cols["edicio"]
+                amb_text = [i for i, c in enumerate(fila) if _text(c)]
                 if (
-                    fila[0] is not None
+                    len(amb_text) == 1
+                    and amb_text[0] not in (ie, cols["oro"], cols["plata"], cols["bronce"])
+                    and len(_text(fila[amb_text[0]])) > 30
+                ):
+                    # Una nota en una altra columna («HASTA 1946 SE DISPUTABA… 45/2»).
+                    inf.notes.append(_text(fila[amb_text[0]]))
+                    continue
+                nomes_primera = _text(fila[ie])
+                resta = [_text(c) for i, c in enumerate(fila) if i != ie]
+                if (
+                    fila[ie] is not None
                     and nomes_primera
                     and not any(resta)
                     and not _ROMANA.fullmatch(nomes_primera)
                 ):
                     inf.notes.append(nomes_primera)
                     continue
-                if fila[0] is not None:
+                if fila[ie] is not None:
                     # Una edició nova.
                     tanca()
                     inf.edicions += 1
@@ -326,7 +341,10 @@ def llegeix_taules_rfeb(
                         for i, c in enumerate(fila)
                         if _text(c)
                         and i not in (cols["oro"], cols["plata"], cols["bronce"])
-                        and i not in (cols["oro"] + 1, cols["plata"] + 1, cols["bronce"] + 1)
+                        and not (
+                            cols["prom"]
+                            and i in (cols["oro"] + 1, cols["plata"] + 1, cols["bronce"] + 1)
+                        )
                     ]
                     if fora:
                         inf.no_llegit.append((on, f"continuació amb dades estranyes {fila!r}"))
@@ -334,7 +352,9 @@ def llegeix_taules_rfeb(
                         continue
                 for posicio, clau in ((1, "oro"), (2, "plata"), (3, "bronce")):
                     nom = _text(fila[cols[clau]])
-                    mit_txt = fila[cols[clau] + 1] if cols[clau] + 1 < len(fila) else ""
+                    mit_txt = (
+                        fila[cols[clau] + 1] if cols["prom"] and cols[clau] + 1 < len(fila) else ""
+                    )
                     if not nom:
                         if _text(mit_txt):
                             inf.no_llegit.append((on, f"mitjana sense nom {mit_txt!r}"))
