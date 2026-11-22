@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { agrupaUmb, disciplinaDeNom, resultatSets, resultatUmb, textSets, type UmbPartidaRow } from './internacional';
+import { agrupaUmb, disciplinaDeNom, disciplinaDePartida, resultatSets, resultatUmb, textSets, type UmbPartidaRow } from './internacional';
 
 function p(o: Partial<UmbPartidaRow>): UmbPartidaRow {
 	return {
@@ -57,5 +57,20 @@ describe('disciplinaDeNom', () => {
 		expect(disciplinaDeNom('Lausanne Billard Masters')).toBe('3 bandes');
 		expect(disciplinaDeNom('International Invitation Tournament Crystal Kelly')).toBe('3 bandes');
 		expect(disciplinaDeNom('European Cup Final Club Team Carom Series')).toBeNull();
+	});
+});
+
+describe('disciplinaDePartida', () => {
+	it('a les proves que barregen modalitats, la treu de la fase', () => {
+		expect(disciplinaDePartida(null, 'Group A (47/2)')).toBe('quadre');
+		expect(disciplinaDePartida(null, 'C 71/2')).toBe('quadre');
+		expect(disciplinaDePartida(null, 'Semi Final (1-Cushion)')).toBe('1 banda');
+		expect(disciplinaDePartida(null, '1 Cushion')).toBe('1 banda');
+		expect(disciplinaDePartida(null, 'Semi Final')).toBeNull();
+		expect(disciplinaDePartida('combinada', 'Group D')).toBe('combinada');
+	});
+
+	it('si la prova ja té disciplina, la fase no la canvia', () => {
+		expect(disciplinaDePartida('3 bandes', 'Group A (47/2)')).toBe('3 bandes');
 	});
 });
