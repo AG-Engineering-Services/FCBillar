@@ -2779,6 +2779,46 @@ def rfeb_fases_cmd(
     )
 
 
+@app.command("rfeb-antiga")
+def rfeb_antiga_cmd(
+    carpeta: str = typer.Argument(  # noqa: B008
+        "data/cache/rfeb_antiga", help="On viuen (o es baixen) els PDF de `0HOME/PDF`."
+    ),
+    baixa: bool = typer.Option(  # noqa: B008
+        False, "--baixa", help="Baixa primer de Wayback els PDF de la llista que falten."
+    ),
+) -> None:
+    """Carrega les partides de la web de la RFEB d'abans del 2012 (2008-2011).
+
+    Només els PDF de la llista `PROVES` de `rfeb_antiga_partides`, amb la prova de
+    cadascun tal com la dóna el medaller. Tornar-ho a executar reemplaça cada prova.
+    """
+    from pathlib import Path
+
+    from fcbillar import rfeb_antiga_partides as A
+
+    arrel = Path(carpeta)
+    if baixa:
+        from fcbillar import rfeb_wayback as W
+
+        volguts = {f"0HOME/PDF/{rel}" for p in A.PROVES for rel, _, _ in p.fitxers}
+        captures = [c for c in W.llista("rfeb.org/0HOME/PDF/*") if W.ruta_local(c.url) in volguts]
+        for cami, estat in W.baixa(captures, arrel).items():
+            if estat != "ok":
+                console.print(f"[yellow]{cami}: {estat}[/]")
+    conn = ensure_schema(get_settings().db_path)
+    res = A.carrega(conn, arrel)
+    conn.commit()
+    conn.close()
+    for r in res:
+        color = "yellow" if r.motiu else "dim"
+        console.print(
+            f"[{color}]{r.prova} {r.fitxer}: {r.partides} partides, {r.descartats} descartats"
+            f"{' · ' + r.motiu if r.motiu else ''}[/]"
+        )
+    console.print(f"{sum(r.partides for r in res)} partides.")
+
+
 @app.command("publish-rfeb-partides")
 def publish_rfeb_partides_cmd() -> None:
     """Publica les partides una a una de les proves de la RFEB."""
