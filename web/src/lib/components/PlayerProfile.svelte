@@ -42,7 +42,7 @@
 	} from '$lib/nacional';
 	import { follows, toggleFollow } from '$lib/follows';
 	import { LLINDAR_RESUM, resumMedalles, type ResumMedalles } from '$lib/palmaresResum';
-	import { palmaresCatalunya, recomptePerMena, type MenaDePalmares } from '$lib/palmaresCatalunya';
+	import { deLaModalitat, palmaresCatalunya, recomptePerMena, type MenaDePalmares } from '$lib/palmaresCatalunya';
 	import RadarChart from '$lib/components/RadarChart.svelte';
 	import { theme } from '$lib/theme';
 	import { ADMIN_EMAIL, esAdminLocal, marcaAdmin } from '$lib/admin';
@@ -327,13 +327,23 @@
 		open: 'Opens',
 		torneig: 'Tornejos'
 	};
-	const palmaresCat = $derived(palmaresCatalunya(palmares, medalles.filter((m) => m.font === 'fcb')));
+	// De la modalitat triada; el que no té pestanya (chapó, quilles, trofeus) surt sempre.
+	const palmaresCat = $derived(
+		deLaModalitat(
+			palmaresCatalunya(palmares, medalles.filter((m) => m.font === 'fcb')),
+			selMod,
+			new Set(modalitats.map((m) => m.codi))
+		)
+	);
+	/** El campionat primer; la modalitat només quan no és la de la pestanya. */
+	const titolPalmares = (e: { tipus: MenaDePalmares; nom: string; modalitat: number | null }) =>
+		e.tipus !== 'campionat' ? e.nom : e.modalitat === selMod ? 'Campionat de Catalunya' : `Campionat de Catalunya · ${e.nom}`;
 	const recompteCat = $derived(recomptePerMena(palmaresCat));
 	const campionatsCat = $derived(
 		palmaresCat.flatMap((g) =>
 			g.entries
 				.filter((e) => e.tipus === 'campionat' && e.posicio <= 3)
-				.map((e) => ({ competicio: e.nom, categoria: e.categoria || 'absolut', posicio: e.posicio as 1 | 2 | 3 }))
+				.map((e) => ({ competicio: titolPalmares(e), categoria: e.categoria || 'absolut', posicio: e.posicio as 1 | 2 | 3 }))
 		)
 	);
 
@@ -1602,7 +1612,7 @@
 				</table>
 				{#if campionatsCat.length > LLINDAR_RESUM}
 					<details class="mt-2">
-						<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Campionats de Catalunya per modalitat</summary>
+						<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Campionats de Catalunya per categoria</summary>
 						{@render taulaResum(resumMedalles(campionatsCat))}
 					</details>
 				{/if}
@@ -1629,8 +1639,8 @@
 										<div class="min-w-0 flex-1">
 											<div class="mb-0.5 flex items-center gap-1.5">
 												<span class="shrink-0 rounded px-1 py-0.5 text-2xs font-bold uppercase tracking-wide {p.tipus === 'campionat' ? 'bg-blue-600 text-white' : p.tipus === 'open' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">{p.tipus === 'campionat' ? 'Camp. Catalunya' : p.tipus === 'open' ? 'Open' : 'Torneig'}</span>
-												{#if kiosk || p.openId == null}<span class="min-w-0 truncate font-medium">{p.nom}</span>
-												{:else}<a href="/opens/{p.openId}" class="min-w-0 truncate font-medium active:underline">{p.nom}</a>{/if}
+												{#if kiosk || p.openId == null}<span class="min-w-0 truncate font-medium">{titolPalmares(p)}</span>
+												{:else}<a href="/opens/{p.openId}" class="min-w-0 truncate font-medium active:underline">{titolPalmares(p)}</a>{/if}
 											</div>
 											{#if p.categoria}<div class="truncate text-2xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria · {p.categoria}</div>{/if}
 										</div>

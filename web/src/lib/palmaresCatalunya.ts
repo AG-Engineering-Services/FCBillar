@@ -34,6 +34,8 @@ export interface EntradaPalmares {
 	tipus: MenaDePalmares;
 	/** Modalitat del campionat, o nom de l'open o el torneig. */
 	nom: string;
+	/** Codi FCB de la modalitat; null per al chapó, les quilles, l'artístic i els trofeus. */
+	modalitat: number | null;
 	/** Buida quan és l'absoluta o no se sap. */
 	categoria: string;
 	posicio: number;
@@ -49,6 +51,10 @@ export const NOM_MODALITAT: Record<number, string> = {
 	4: 'Banda',
 	6: 'Quadre 71/2'
 };
+
+const CODI_MODALITAT: Record<string, number> = Object.fromEntries(
+	Object.entries(NOM_MODALITAT).map(([codi, nom]) => [nom.toLowerCase(), Number(codi)])
+);
 
 /** «2018-2019» → «2018-19»; la resta, tal com ve. */
 export const temporadaCurta = (t: string) => t.replace(/^(\d{4})-\d{2}(\d{2})$/, '$1-$2');
@@ -96,6 +102,7 @@ export function palmaresCatalunya(
 		posa(t, {
 			tipus: p.tipus,
 			nom,
+			modalitat: p.modalitat,
 			categoria: categoriaPlana(p.categoria) ? minuscules(p.categoria!) : '',
 			posicio: p.posicio,
 			club: p.club,
@@ -110,6 +117,7 @@ export function palmaresCatalunya(
 		posa(m.edicio, {
 			tipus: 'campionat',
 			nom: m.competicio,
+			modalitat: CODI_MODALITAT[m.competicio.toLowerCase()] ?? null,
 			categoria: cat ? m.categoria : '',
 			posicio: m.posicio,
 			club: m.lloc,
@@ -145,4 +153,23 @@ export function recomptePerMena(grups: { entries: EntradaPalmares[] }[]): Recomp
 			else if (e.posicio === 3) f.tercers++;
 		}
 	return r.filter((f) => f.primers + f.segons + f.tercers > 0);
+}
+
+/**
+ * El palmarès de la modalitat triada a la fitxa. El que no té pestanya (chapó, quilles,
+ * trofeus, o una modalitat on el jugador no té partides) surt sempre.
+ */
+export function deLaModalitat(
+	grups: { temporada: string; entries: EntradaPalmares[] }[],
+	triada: number | null,
+	ambPestanya: Set<number>
+): { temporada: string; entries: EntradaPalmares[] }[] {
+	return grups
+		.map((g) => ({
+			temporada: g.temporada,
+			entries: g.entries.filter(
+				(e) => e.modalitat === triada || e.modalitat == null || !ambPestanya.has(e.modalitat)
+			)
+		}))
+		.filter((g) => g.entries.length);
 }

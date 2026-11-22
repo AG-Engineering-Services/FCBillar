@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { palmaresCatalunya, recomptePerMena, type MedallaQH, type PodiWeb } from './palmaresCatalunya';
+import { deLaModalitat, palmaresCatalunya, recomptePerMena, type MedallaQH, type PodiWeb } from './palmaresCatalunya';
 
 const web = (p: Partial<PodiWeb>): PodiWeb => ({
 	openId: 1,
@@ -26,7 +26,7 @@ describe('palmaresCatalunya', () => {
 		const r = palmaresCatalunya([web({})], [qh({})]);
 		expect(r).toHaveLength(1);
 		expect(r[0].entries).toEqual([
-			{ tipus: 'campionat', nom: 'Tres bandes', categoria: 'honor', posicio: 1, club: 'C.B.VIC', openId: 1 }
+			{ tipus: 'campionat', nom: 'Tres bandes', modalitat: 1, categoria: 'honor', posicio: 1, club: 'C.B.VIC', openId: 1 }
 		]);
 	});
 
@@ -69,5 +69,16 @@ describe('recomptePerMena', () => {
 			{ tipus: 'campionat', primers: 1, segons: 1, tercers: 1 },
 			{ tipus: 'open', primers: 1, segons: 0, tercers: 0 }
 		]);
+	});
+});
+
+describe('deLaModalitat', () => {
+	it('deixa la modalitat triada i el que no té pestanya', () => {
+		const g = palmaresCatalunya(
+			[web({}), web({ modalitat: 2, openId: 2 })],
+			[qh({ competicio: 'Chapó', categoria: '1a' }), qh({ competicio: 'Quadre 47/2', categoria: '3a' })]
+		);
+		const r = deLaModalitat(g, 1, new Set([1, 2]));
+		expect(r[0].entries.map((e) => e.nom)).toEqual(['Chapó', 'Quadre 47/2', 'Tres bandes']);
 	});
 });
