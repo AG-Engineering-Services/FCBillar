@@ -94,19 +94,31 @@ def _cache(tmp_path, pid: str, ranking: str, titol: str):
 TITOL_EC = "Carom Billiard Ranking - Balk-Line 71/2 - European Championship - Antalya (TUR) - 4/12/23 to 4/13/23"
 
 
-def test_una_prova_nova_es_desa_amb_l_id_desplacat(tmp_path):
+def test_una_prova_nova_es_desa_amb_l_id_desplacat(tmp_path, monkeypatch):
+    from fcbillar import kozoom_carrega as kc
     from fcbillar.db.migrations import ensure_schema
-    from fcbillar.kozoom_carrega import carrega, seleccio
 
+    monkeypatch.setattr(kc, "ANY_MAX_NOVES", 2030)
     _cache(tmp_path, "712", "classificacio_ec_712_2023.html", TITOL_EC)
-    assert seleccio(tmp_path) == ["712"]
+    assert kc.seleccio(tmp_path) == ["712"]
     conn = ensure_schema(tmp_path / "t.db")
-    (r,) = carrega(conn, tmp_path, ["712"])
+    (r,) = kc.carrega(conn, tmp_path, ["712"])
     assert (r.esdeveniment, r.estat) == (300712, "desat")
     fila = conn.execute(
         "SELECT posicio, caramboles FROM umb_classificacions WHERE esdeveniment_id = 300712 AND jugador = 'MATA Esteve'"
     ).fetchone()
     assert tuple(fila) == (8, 317)
+
+
+def test_del_2017_enca_kozoom_no_crea_cap_prova(tmp_path):
+    from fcbillar.db.migrations import ensure_schema
+    from fcbillar.kozoom_carrega import carrega
+
+    _cache(tmp_path, "712", "classificacio_ec_712_2023.html", TITOL_EC)
+    conn = ensure_schema(tmp_path / "t.db")
+    (r,) = carrega(conn, tmp_path, ["712"])
+    assert r.estat == "fora_d_abast"
+    assert conn.execute("SELECT COUNT(*) FROM umb_esdeveniments").fetchone()[0] == 0
 
 
 def test_una_prova_que_la_umb_ja_te_amb_partides_no_es_duplica(tmp_path):
@@ -179,8 +191,14 @@ def test_la_seleccio_no_llegeix_la_classificacio_d_una_prova_internacional(tmp_p
     from fcbillar.kozoom_carrega import seleccio
 
     proves = {
-        "1": {"id": "1", "titol": "3-Cushion - European Championship - Brno (CZE) - 5/1/98 to 5/3/98"},
-        "2": {"id": "2", "titol": "3-Cushion - Dutch National Championship - Wijchen (NED) - 1/1/05 to 1/2/05"},
+        "1": {
+            "id": "1",
+            "titol": "3-Cushion - European Championship - Brno (CZE) - 5/1/98 to 5/3/98",
+        },
+        "2": {
+            "id": "2",
+            "titol": "3-Cushion - Dutch National Championship - Wijchen (NED) - 1/1/05 to 1/2/05",
+        },
         "3": {"id": "3", "titol": "text que no és un títol"},
     }
     (tmp_path / "proves.json").write_text(json.dumps(proves), encoding="utf-8")
@@ -227,7 +245,12 @@ def test_la_classificacio_oficial_no_es_toca(tmp_path):
     conn = ensure_schema(tmp_path / "t.db")
     _umb_amb_partides(conn, classificacio=True)
     carrega(conn, tmp_path, ["712"])
-    noms = [f[0] for f in conn.execute("SELECT jugador FROM umb_classificacions WHERE esdeveniment_id = 200050")]
+    noms = [
+        f[0]
+        for f in conn.execute(
+            "SELECT jugador FROM umb_classificacions WHERE esdeveniment_id = 200050"
+        )
+    ]
     assert noms == ["OFICIAL Un"]
 
 
@@ -238,7 +261,9 @@ def test_la_classificacio_amb_la_bandera_en_una_cel_la_a_part():
     <td><a href="/en/billiard-carom/players/caudron-frederic/matches.html">Frédéric CAUDRON</a></td></tr>
     </tbody></table>"""
     _t, files, _j = llegeix_classificacio(html)
-    assert [(f.posicio, f.jugador, f.nacionalitat) for f in files] == [(1, "CAUDRON Frédéric", "BE")]
+    assert [(f.posicio, f.jugador, f.nacionalitat) for f in files] == [
+        (1, "CAUDRON Frédéric", "BE")
+    ]
 
 
 def test_dos_europeus_de_quadre_la_mateixa_setmana_no_es_confonen(tmp_path):
@@ -272,7 +297,9 @@ def test_una_prova_antiga_sense_disciplina_es_reconeix_pel_nom(tmp_path):
         "INSERT INTO umb_esdeveniments (id, nom, disciplina, data_inici, font) "
         "VALUES (200153, 'European Championship Ladies -3- Cushion', NULL, '2007-10-05', 'x')"
     )
-    kozoom = Titol("3-Cushion", "European Championship Ladies", "Roeser (LUX)", date(2007, 10, 5), None)
+    kozoom = Titol(
+        "3-Cushion", "European Championship Ladies", "Roeser (LUX)", date(2007, 10, 5), None
+    )
     assert ja_hi_es(conn, kozoom).id == 200153
 
 
@@ -297,10 +324,33 @@ def test_l_inventari_s_atura_a_l_id_maxim(tmp_path, monkeypatch):
 
     def _get(_c, url):
         demanades.append(url)
-        return cdx if "cdx" in url else "<title>3-Cushion - World Cup - X (ESP) - 1/1/10 - Kozoom</title>"
+        return (
+            cdx
+            if "cdx" in url
+            else "<title>3-Cushion - World Cup - X (ESP) - 1/1/10 - Kozoom</title>"
+        )
 
     monkeypatch.setattr(kc, "_get", _get)
     monkeypatch.setattr(kc, "_client", lambda: contextlib.nullcontext())
     proves = kc.inventaria(tmp_path, espera=0, id_max=17500)
     assert list(proves) == ["100"]
     assert not any("/results/30000/" in u for u in demanades)
+
+
+def test_fora_d_abast_el_billar_america_les_lligues_i_els_nacionals():
+    from fcbillar.kozoom import Titol
+    from fcbillar.kozoom_carrega import fora_d_abast
+
+    def t(nom: str, disciplina: str = "3-Cushion") -> Titol:
+        return Titol(disciplina=disciplina, nom=nom, lloc="", inici=None, fi=None)
+
+    assert fora_d_abast(t("European Championship Women", "10-Ball"))
+    assert fora_d_abast(t("European Championship Women", "Straight"))
+    assert fora_d_abast(t("Buffalo League Round 12"))
+    assert fora_d_abast(t("Belgian National Championship Round 4"))
+    assert fora_d_abast(t("Spanish National Championship"))
+    assert fora_d_abast(t("Grand Prix of Spain"))
+    assert not fora_d_abast(t("World Cup"))
+    assert not fora_d_abast(t("European Championship National Team"))
+    assert not fora_d_abast(t("European Championship", "Balk-Line 71/2"))
+    assert not fora_d_abast(t("European Cup Final Club Team", "Carom Series"))

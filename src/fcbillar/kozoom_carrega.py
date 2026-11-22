@@ -10,8 +10,10 @@ La carpeta de cache té:
 
 Només es carreguen les proves que interessen: les internacionals (copes i
 campionats del món i d'Europa, grans premis, masters) i qualsevol altra on
-hagi jugat algú d'Espanya. Les lligues i campionats nacionals d'altres països
-sense cap jugador d'aquí es deixen.
+hagi jugat algú d'Espanya. Es deixen el billar americà, les lligues i els
+campionats nacionals (els d'Espanya són de la RFEB, i a la fitxa sortirien
+com a internacionals). Del 2017 ençà la UMB i la CEB ho tenen tot: Kozoom
+només completa les proves que ja hi són, no en crea cap.
 
 Una prova que la UMB o la CEB ja tenen amb partides no es torna a carregar. Si
 la tenen només amb la classificació (sense PDF de partides), les partides de
@@ -54,9 +56,18 @@ _CDX_JUGADORS = (
     WAYBACK + "/cdx/search/cdx?url=www.kozoom.com/en/billiard-carom/players/*"
     "&fl=timestamp,original&filter=statuscode:200&limit=200000"
 )
-_INTERNACIONAL = re.compile(
-    r"world|europ|grand prix|masters|cup|survival|spain|spanish|españa|copa", re.I
+_INTERNACIONAL = re.compile(r"world|europ|grand prix|masters|cup|survival", re.I)
+_FORA = re.compile(
+    r"\d+-ball|straight|pool|eurotour|snooker|national(?!\s*teams?)|league|bundesliga|round\s*\d"
+    r"|buffalo|spain|spanish|españa|copa|french|dutch|belgian|german|vietnam",
+    re.I,
 )
+#: L'últim any en què Kozoom pot crear una prova nova.
+ANY_MAX_NOVES = 2016
+
+
+def fora_d_abast(titol: Titol) -> bool:
+    return bool(_FORA.search(f"{titol.nom} {titol.disciplina}"))
 
 
 def _get(c: httpx.Client, url: str, intents: int = 4) -> str:
@@ -154,7 +165,7 @@ def _proves(cache: Path) -> dict[str, dict]:
 
 
 def interessa(titol: Titol | None, nacionalitats: set[str | None]) -> bool:
-    if titol is None:
+    if titol is None or fora_d_abast(titol):
         return False
     return "ES" in nacionalitats or bool(_INTERNACIONAL.search(titol.nom))
 
@@ -169,7 +180,7 @@ def seleccio(cache: Path) -> list[str]:
     triades = []
     for pid, p in _proves(cache).items():
         titol = llegeix_titol(p.get("titol", ""))
-        if titol is None:
+        if titol is None or fora_d_abast(titol):
             continue
         if _INTERNACIONAL.search(titol.nom):
             triades.append(pid)
@@ -189,9 +200,10 @@ def _ultima_pagina(html: str) -> int:
 
 def _fitxers_de_partides(cache: Path, pid: str) -> list[Path]:
     """`{id}_matches.html` i les pàgines següents (`{id}_matches_p2.html`…), per ordre."""
-    pags = [cache / f"{pid}_matches.html"] + sorted(
-        cache.glob(f"{pid}_matches_p*.html"), key=lambda f: int(f.stem.rsplit("_p", 1)[1])
-    )
+    pags = [
+        cache / f"{pid}_matches.html",
+        *sorted(cache.glob(f"{pid}_matches_p*.html"), key=lambda f: int(f.stem.rsplit("_p", 1)[1])),
+    ]
     return [f for f in pags if f.exists()]
 
 
@@ -300,7 +312,7 @@ class Firmes:
 
     def __init__(self, conn: sqlite3.Connection, excepte: int | None = None) -> None:
         self._idx: dict[tuple, list[tuple]] = {}
-        for ea, eb, ca, cb, ent, ini, fi, na, nb in conn.execute(
+        for _ea, _eb, ca, cb, ent, ini, fi, na, nb in conn.execute(
             "SELECT esdeveniment_id, 0, caramboles_a, caramboles_b, entrades_a, e.data_inici, "
             "e.data_fi, jugador_a, jugador_b FROM umb_partides p "
             "JOIN umb_esdeveniments e ON e.id = p.esdeveniment_id WHERE esdeveniment_id IS NOT ?",
@@ -486,7 +498,9 @@ def _completa_classificacio(conn: sqlite3.Connection, e_id: int, ll: Llegit) -> 
     return len(ll.classificacio)
 
 
-def falten_a(conn: sqlite3.Connection, firmes: Firmes, e_id: int, partides: list, titol: Titol) -> list:
+def falten_a(
+    conn: sqlite3.Connection, firmes: Firmes, e_id: int, partides: list, titol: Titol
+) -> list:
     """Les partides de Kozoom que de debò no són a la prova `e_id`.
 
     Una partida que no ha coincidit pot ser que no hi sigui (un grup que el PDF de la
@@ -524,7 +538,11 @@ def falten_a(conn: sqlite3.Connection, firmes: Firmes, e_id: int, partides: list
     millor: dict[tuple, object] = {}
     for p in noves:
         clau = (p.fase, frozenset((p.a.jugador, p.b.jugador)))
-        if clau not in millor or p.a.caramboles + p.b.caramboles > millor[clau].a.caramboles + millor[clau].b.caramboles:
+        if (
+            clau not in millor
+            or p.a.caramboles + p.b.caramboles
+            > millor[clau].a.caramboles + millor[clau].b.caramboles
+        ):
             millor[clau] = p
     return [p for p in noves if millor[(p.fase, frozenset((p.a.jugador, p.b.jugador)))] is p]
 
@@ -597,6 +615,9 @@ def carrega(conn: sqlite3.Connection, cache: Path, ids: list[str]) -> list[Resul
                     f"{len(ll.partides)} partides, {tretes} ja hi eren",
                 )
             )
+            continue
+        if fora_d_abast(titol) or (titol.inici and titol.inici.year > ANY_MAX_NOVES):
+            out.append(Resultat(DESPLACAMENT + int(pid), nom, "fora_d_abast"))
             continue
         ev = Esdeveniment(
             id=DESPLACAMENT + int(pid),
