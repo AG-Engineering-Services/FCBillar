@@ -286,8 +286,11 @@ def escriu_candidats(trobats: list[Candidat], cami: str | Path) -> tuple[int, in
     return len(files) - nous, nous
 
 
-def lligams_validats(cami: str | Path) -> dict[str, str]:
-    """`{nom a la RFEB: fcb_id}` dels lligams marcats amb «si»."""
+def lligams_validats(cami: str | Path, divisio: str | None = None) -> dict[str, str]:
+    """`{nom a la font: fcb_id}` dels lligams marcats amb «si».
+
+    Amb `divisio`, només els validats per a aquella divisió (p. ex. «palmares-fcb»).
+    """
     cami = Path(cami)
     if not cami.exists():
         return {}
@@ -295,5 +298,5 @@ def lligams_validats(cami: str | Path) -> dict[str, str]:
         return {
             r["jugador_rfeb"]: r["fcb_id"]
             for r in csv.DictReader(f)
-            if r["validat"].strip().lower() == "si"
+            if r["validat"].strip().lower() == "si" and (divisio is None or r["divisio"] == divisio)
         }

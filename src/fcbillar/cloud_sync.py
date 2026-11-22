@@ -7523,7 +7523,9 @@ def publish_rfeb_partides(
 def publish_palmares(
     db_path: Path | None = None, on_progress: Progress | None = None
 ) -> dict[str, int]:
-    """Puja el palmarès (`palmares_medalles`): medalles de la RFEB i del CEB.
+    """Puja el palmarès (`palmares_medalles`): medalles de la FCB, la RFEB i el CEB.
+
+    També puja `palmares_fitxes`, els lligams del Quadre d'Honor amb la fitxa.
 
     Es reemplaça per font, competició i categoria: una competició que es torna a
     llegir no deixa medalles de la lectura anterior. Aquí el reemplaçament és
@@ -7545,7 +7547,7 @@ def publish_palmares(
     if not files:
         return {}
     sb = get_client()
-    return {
+    counts = {
         "palmares_medalles": _publica_reemplaçant(
             sb,
             "palmares_medalles",
@@ -7556,6 +7558,29 @@ def publish_palmares(
             {(f["font"], f["competicio"], f["categoria"]) for f in files},
         )
     }
+    # Les medalles de la FCB només es lliguen amb els lligams validats per al
+    # Quadre d'Honor: un homònim validat en una altra font no hi compta.
+    from fcbillar.config import PROJECT_ROOT
+    from fcbillar.nacional_fitxes import lligams_validats
+
+    lligams = lligams_validats(PROJECT_ROOT / "fonts" / "nacional" / "fitxes.csv", "palmares-fcb")
+    if lligams:
+        counts["palmares_fitxes"] = publica_si_hi_es(
+            "palmares_fitxes",
+            lambda: {
+                "palmares_fitxes": _publica_reemplaçant(
+                    sb,
+                    "palmares_fitxes",
+                    [{"font": "fcb", "jugador": j, "fcb_id": f} for j, f in lligams.items()],
+                    ("font", "jugador"),
+                    ("font",),
+                    prog,
+                    {("fcb",)},
+                )
+            },
+            prog,
+        )["palmares_fitxes"]
+    return counts
 
 
 def publish_rfeb_individuals(
