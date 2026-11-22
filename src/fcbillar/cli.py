@@ -2977,6 +2977,59 @@ def kozoom_descarrega_cmd(
     console.print(descarrega(cache, ids))
 
 
+@app.command("kozoom-espanya")
+def kozoom_espanya_cmd(
+    carpeta: str = typer.Option("data/cache/kozoom", "--carpeta"),  # noqa: B008
+    noves: str = typer.Option(  # noqa: B008
+        "data/kozoom_espanya_noves.db", "--noves", help="Proves que la RFEB no té."
+    ),
+    partides: str = typer.Option(  # noqa: B008
+        "data/kozoom_espanya_partides.db",
+        "--partides",
+        help="Partides per a proves de la RFEB que no en tenen cap.",
+    ),
+    baixa: bool = typer.Option(False, "--baixa", help="Baixa abans les partides del Wayback."),  # noqa: B008
+) -> None:
+    """Les proves espanyoles de Kozoom, cap a les taules de la RFEB (àmbit Espanya).
+
+    Compara amb les proves de la RFEB del núvol i escriu dues bases que es
+    publiquen per separat: `--noves` amb `publish-rfeb-individuals` i
+    `publish-rfeb-partides`, i `--partides` només amb `publish-rfeb-partides`.
+    """
+    import sqlite3
+    from pathlib import Path
+
+    from fcbillar.cloud_sync import get_client
+    from fcbillar.kozoom_carrega import descarrega, seleccio_espanya
+    from fcbillar.kozoom_espanya import carrega
+
+    cache = Path(carpeta)
+    ids = seleccio_espanya(cache)
+    if baixa:
+        console.print(descarrega(cache, ids))
+    sb = get_client()
+
+    def _tot(taula: str, cols: str) -> list[dict]:
+        out: list[dict] = []
+        while True:
+            d = sb.table(taula).select(cols).range(len(out), len(out) + 999).execute().data
+            out += d
+            if len(d) < 1000:
+                return out
+
+    existents = _tot("rfeb_proves", "*")
+    compte: dict[str, int] = {}
+    for r in _tot("rfeb_partides", "prova_id"):
+        compte[r["prova_id"]] = compte.get(r["prova_id"], 0) + 1
+    for r in existents:
+        r["partides"] = compte.get(r["id"], 0)
+    for f in (noves, partides):
+        Path(f).unlink(missing_ok=True)
+    res = carrega(cache, ids, existents, sqlite3.connect(noves), sqlite3.connect(partides))
+    for r in res:
+        console.print(f"{r.pid:>6} {r.estat:<9} {r.nom} {r.detall}")
+
+
 @app.command("ceb-antic-descarrega")
 def ceb_antic_descarrega_cmd(
     carpeta: str = typer.Option("data/cache/eb_antic", "--carpeta"),  # noqa: B008

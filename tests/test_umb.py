@@ -545,7 +545,12 @@ def test_classificacio_del_web_vell_amb_punts_de_partida_en_forma_de_marcador():
     )
     primera, tercera = llegeix_classificacio(text)
     assert (primera.jugador, primera.nacionalitat, primera.punts) == ("VAN EXTER Monique", "NL", 12)
-    assert (primera.caramboles, primera.entrades, primera.mitjana, primera.serie1) == (938, 103, 9.11, 64)
+    assert (primera.caramboles, primera.entrades, primera.mitjana, primera.serie1) == (
+        938,
+        103,
+        9.11,
+        64,
+    )
     assert (tercera.posicio, tercera.jugador) == (3, "ALES Véronique")
 
 

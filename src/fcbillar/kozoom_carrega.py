@@ -41,6 +41,7 @@ from fcbillar.kozoom import (
     llegeix_partides,
     llegeix_titol,
 )
+from fcbillar.kozoom_espanya import es_espanyola
 from fcbillar.umb import Llegit
 from fcbillar.umb_carrega import (
     Resultat,
@@ -168,7 +169,7 @@ def _proves(cache: Path) -> dict[str, dict]:
 
 
 def interessa(titol: Titol | None, nacionalitats: set[str | None]) -> bool:
-    if titol is None or fora_d_abast(titol):
+    if titol is None or fora_d_abast(titol) or es_espanyola(titol):
         return False
     return "ES" in nacionalitats or bool(_INTERNACIONAL.search(titol.nom))
 
@@ -185,6 +186,8 @@ def seleccio(cache: Path) -> list[str]:
         titol = llegeix_titol(p.get("titol", ""))
         if titol is None or fora_d_abast(titol) or pid in PAGINES_ERRONIES:
             continue
+        if es_espanyola(titol):
+            continue  # van a la RFEB: `kozoom_espanya`
         if _INTERNACIONAL.search(titol.nom):
             triades.append(pid)
             continue
@@ -193,6 +196,16 @@ def seleccio(cache: Path) -> list[str]:
             _t, files, _j = llegeix_classificacio(f.read_text(encoding="utf-8"))
             if interessa(titol, {c.nacionalitat for c in files}):
                 triades.append(pid)
+    return sorted(triades, key=int)
+
+
+def seleccio_espanya(cache: Path) -> list[str]:
+    """Els ids de les proves espanyoles de l'inventari (van a la RFEB, no a la UMB)."""
+    triades = []
+    for pid, p in _proves(cache).items():
+        titol = llegeix_titol(p.get("titol", ""))
+        if titol is not None and pid not in PAGINES_ERRONIES and es_espanyola(titol):
+            triades.append(pid)
     return sorted(triades, key=int)
 
 
