@@ -2811,12 +2811,15 @@ def rfeb_antiga_cmd(
     conn.commit()
     conn.close()
     for r in res:
-        color = "yellow" if r.motiu else "dim"
+        classif = r.motiu.startswith("classificació")
+        color = "dim" if not r.motiu or (classif and r.partides) else "yellow"
         console.print(
-            f"[{color}]{r.prova} {r.fitxer}: {r.partides} partides, {r.descartats} descartats"
-            f"{' · ' + r.motiu if r.motiu else ''}[/]"
+            f"[{color}]{r.prova} {r.fitxer}: {r.partides} {'jugadors' if classif else 'partides'}, "
+            f"{r.descartats} descartats{' · ' + r.motiu if r.motiu else ''}[/]"
         )
-    console.print(f"{sum(r.partides for r in res)} partides.")
+    console.print(
+        f"{sum(r.partides for r in res if not r.motiu.startswith('classificació'))} partides."
+    )
 
 
 @app.command("publish-rfeb-partides")

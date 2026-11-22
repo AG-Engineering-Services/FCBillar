@@ -137,3 +137,30 @@ def test_seleccions_capcalera_que_no_es_pot_partir_no_s_endevina():
     partides, descartats = A.llegeix_seleccions(linies, "Fase de grups")
     assert partides == []
     assert descartats == 3
+
+
+def test_classificacio_certificat_ranquing_i_no_presentats():
+    linies = [
+        "Clas Clas",
+        "1 1 Daniel Sánchez Gálvez And 5 240 122 1,967 13 150",
+        "2 José-Antonio Carrasco Mur 10 383 443 0,865 8 140",
+        "1º Javier Palazón Sánchez Val 5 240 180 1,333 1,786 9 180",
+        "138º Angel Martínez Fernández Ast 1 15 50 0,300 … 2 15",
+        "16 24 José Martínez Fresneda Mad wo 0",
+        "112º José Serrano Canovas Cat Ret. indispuesto 18",
+        "141º David Cardo Soria Val W. O. …",
+        "3 3 Pere Puig Cat 4 186 154 1,500 10 130",  # la mitjana no quadra
+    ]
+    files, descartats = A.llegeix_classificacio(linies)
+    assert descartats == 1
+    assert [
+        (f.posicio, f.jugador, f.fed, f.caramboles, f.mitjana, f.punts, f.ronda) for f in files
+    ] == [
+        (1, "Daniel Sánchez Gálvez", "AND", 240, 1.967, 150, None),
+        (2, "José-Antonio Carrasco", "MUR", 383, 0.865, 140, None),
+        (1, "Javier Palazón Sánchez", "VAL", 240, 1.333, 180, None),
+        (138, "Angel Martínez Fernández", "AST", 15, 0.3, 15, None),
+        (16, "José Martínez Fresneda", "MAD", None, None, 0, "w.o."),
+        (112, "José Serrano Canovas", "CAT", None, None, 18, "retirat"),
+        (141, "David Cardo Soria", "VAL", None, None, None, "w.o."),
+    ]

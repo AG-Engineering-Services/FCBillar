@@ -41,6 +41,8 @@ class Prova:
     fi: str | None
     #: (camí dins de `0HOME/PDF`, fase, format)
     fitxers: tuple[tuple[str, str, str], ...] = field(default_factory=tuple)
+    #: La classificació final (certificat del director esportiu o rànquing), si n'hi ha.
+    classificacio: str | None = None
 
 
 #: Les proves de la web vella que es carreguen. La temporada, l'edició i la seu
@@ -78,6 +80,7 @@ PROVES: tuple[Prova, ...] = (
         "2010-07-05",
         "2010-07-11",
         (("asturias/PdA_FP10.pdf", "Fase prèvia i final", "jugadors"),),
+        classificacio="asturias/PdA_Rnk10.pdf",
     ),
     Prova(
         "0HOME/castalla_2009",
@@ -91,6 +94,19 @@ PROVES: tuple[Prova, ...] = (
             ("Castalla/Fase_Previa.pdf", "Fase prèvia", "jugadors"),
             ("Castalla/Fase_final.pdf", "Fase final", "jugadors"),
         ),
+        classificacio="Castalla/Clasif.pdf",
+    ),
+    Prova(
+        "0HOME/alcantarilla_2008",
+        "2007-2008",
+        "gpe",
+        'I Trofeo "Villa de Alcantarilla"',
+        'Pabellón Deportes "Magritas", Alcantarilla (Murcia)',
+        None,
+        "2008-05-11",
+        # Les fases (Alcantarilla_FP i _FF) són truncades a Wayback: només la classificació.
+        (),
+        classificacio="Alcantarilla_RK.pdf",
     ),
     Prova(
         "0HOME/lxxvi_ce_2010",
@@ -414,6 +430,119 @@ def llegeix_fitxer(cami: Path, fase: str, format_: str) -> tuple[list[PartidaFul
     return llegeix_jugadors(linies, fase)
 
 
+#: Certificat del director esportiu: `final [inici] Jugador Fed PJ Car Ent Mitjana SM Punts`.
+_CLAS_CERTIFICAT = re.compile(
+    r"^(?P<pos>\d{1,3})\s+(?:\d{1,3}\s+)?(?P<nom>[^\d]+?)\s+(?P<fed>[A-Z][A-Za-z\-]{1,4})\s+"
+    r"(?P<pj>\d{1,2})\s+(?P<car>\d{1,4})\s+(?P<ent>\d{1,4})\s+(?P<prom>\d,\d{3})\s+"
+    r"(?P<sm>\d{1,2})\s+(?P<pts>\d{1,3})$"
+)
+#: Rànquing de Gijón: `1º Jugador Fed J Car Ent Mitjana-general Mitjana-particular SM Punts`.
+_CLAS_RANQUING = re.compile(
+    r"^(?P<pos>\d{1,3})º\s+(?P<nom>[^\d]+?)\s+(?P<fed>[A-Z][A-Za-z\-]{1,4})\s+"
+    r"(?P<pj>\d{1,2})\s+(?P<car>\d{1,4})\s+(?P<ent>\d{1,4})\s+(?P<prom>\d,\d{3})\s+(?:\d,\d{3}|…)\s+"
+    r"(?P<sm>\d{1,2})\s+(?P<pts>\d{1,3})$"
+)
+
+
+#: No presentat («wo», «W. O.») o retirat («Ret. indispuesto»): posició sense xifres.
+_CLAS_SENSE_JUGAR = re.compile(
+    r"^(?P<pos>\d{1,3})º?\s+(?:\d{1,3}\s+)?(?P<nom>[^\d]+?)\s+(?P<fed>[A-Z][A-Za-z\-]{1,4})\s+"
+    r"(?P<motiu>wo|W\.\s*O\.|Ret\.[^\d…]*)\s*(?P<pts>\d{1,3}|…)?$"
+)
+
+
+@dataclass
+class Classificat:
+    posicio: int
+    jugador: str
+    fed: str | None
+    jugades: int | None
+    caramboles: int | None
+    entrades: int | None
+    mitjana: float | None
+    serie_major: int | None
+    punts: int | None
+    #: «w.o.» o «retirat» quan no hi ha xifres.
+    ronda: str | None = None
+
+
+def llegeix_classificacio(linies: list[str]) -> tuple[list[Classificat], int]:
+    """Les files de la classificació final i quantes s'han descartat (la mitjana no quadra).
+
+    Els que no es van presentar («W. O.») no tenen xifres i no hi surten.
+    """
+    from fcbillar.rfeb_individuals import normalitza_fed
+
+    out: list[Classificat] = []
+    descartats = 0
+    for text in linies:
+        if s := _CLAS_SENSE_JUGAR.match(text):
+            nom = s.group("nom").strip()
+            pts = s.group("pts")
+            out.append(
+                Classificat(
+                    posicio=int(s.group("pos")),
+                    jugador=nom.title() if nom.isupper() else nom,
+                    fed=normalitza_fed(s.group("fed")) or s.group("fed").upper(),
+                    jugades=None,
+                    caramboles=None,
+                    entrades=None,
+                    mitjana=None,
+                    serie_major=None,
+                    punts=int(pts) if pts and pts.isdigit() else None,
+                    ronda="retirat" if s.group("motiu").startswith("Ret") else "w.o.",
+                )
+            )
+            continue
+        m = _CLAS_CERTIFICAT.match(text) or _CLAS_RANQUING.match(text)
+        if not m:
+            continue
+        car, ent = int(m.group("car")), int(m.group("ent"))
+        prom = float(m.group("prom").replace(",", "."))
+        if not _quadra(car, ent, prom):
+            descartats += 1
+            continue
+        nom = m.group("nom").strip()
+        out.append(
+            Classificat(
+                posicio=int(m.group("pos")),
+                jugador=nom.title() if nom.isupper() else nom,
+                fed=normalitza_fed(m.group("fed")) or m.group("fed").upper(),
+                jugades=int(m.group("pj")),
+                caramboles=car,
+                entrades=ent,
+                mitjana=prom,
+                serie_major=int(m.group("sm")),
+                punts=int(m.group("pts")),
+            )
+        )
+    return out, descartats
+
+
+def _desa_classificacio(conn: sqlite3.Connection, prova_id: str, files: list[Classificat]) -> None:
+    conn.execute("DELETE FROM rfeb_classificacions WHERE prova_id = ?", (prova_id,))
+    conn.executemany(
+        "INSERT INTO rfeb_classificacions (prova_id, posicio, jugador, fed, ronda, jugades, "
+        "caramboles, entrades, mitjana, serie_major, punts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+            (
+                prova_id,
+                f.posicio,
+                f.jugador,
+                f.fed,
+                f.ronda,
+                f.jugades,
+                f.caramboles,
+                f.entrades,
+                f.mitjana,
+                f.serie_major,
+                f.punts,
+            )
+            for f in files
+        ],
+    )
+
+
 def carrega(conn: sqlite3.Connection, arrel: str | Path) -> list[Resultat]:
     """Crea cada prova de `PROVES` a `rfeb_proves` i hi desa les partides dels seus PDF.
 
@@ -436,8 +565,25 @@ def carrega(conn: sqlite3.Connection, arrel: str | Path) -> list[Resultat]:
                 )
             )
             totes.extend(partides)
-        if not totes:
+        classificats: list[Classificat] = []
+        if prova.classificacio:
+            cami = arrel / "0HOME" / "PDF" / prova.classificacio
+            if cami.exists():
+                classificats, descartats = llegeix_classificacio(_linies(cami))
+                resultats.append(
+                    Resultat(
+                        prova.id,
+                        prova.classificacio,
+                        len(classificats),
+                        descartats,
+                        "classificació" if classificats else "classificació sense files",
+                    )
+                )
+            else:
+                resultats.append(Resultat(prova.id, prova.classificacio, 0, 0, "no baixat"))
+        if not totes and not classificats:
             continue
+        font = prova.fitxers[0][0] if prova.fitxers else prova.classificacio
         conn.execute(
             "INSERT OR REPLACE INTO rfeb_proves (id, temporada, modalitat, categoria, tipus, titol, "
             "lloc, data_inici, data_fi, font) VALUES (?, ?, '3b', 'absolut', ?, ?, ?, ?, ?, ?)",
@@ -449,9 +595,11 @@ def carrega(conn: sqlite3.Connection, arrel: str | Path) -> list[Resultat]:
                 prova.lloc,
                 prova.inici,
                 prova.fi,
-                "https://web.archive.org/web/2011/http://www.rfeb.org/0HOME/PDF/"
-                + prova.fitxers[0][0],
+                "https://web.archive.org/web/2011/http://www.rfeb.org/0HOME/PDF/" + str(font),
             ),
         )
-        desa_partides(conn, prova.id, totes)
+        if totes:
+            desa_partides(conn, prova.id, totes)
+        if classificats:
+            _desa_classificacio(conn, prova.id, classificats)
     return resultats
