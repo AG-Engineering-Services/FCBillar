@@ -1,36 +1,63 @@
 """Tests del rendiment per nivell d'oponent (fcbillar.analytics).
 
-Franges per quantils (cada eix ~ el mateix nombre de partides) + indicadors
-(índex ponderat, creuament 50%)."""
+Franges d'igual amplada amb els extrems oberts + indicadors (índex ponderat,
+creuament 50%)."""
 
 from __future__ import annotations
 
 import sqlite3
+from itertools import pairwise
 
 from fcbillar.analytics import (
     _crossover,
-    _quantile_buckets,
+    _even_buckets,
     _weighted_index,
     rating_breakdown,
 )
 from fcbillar.db.migrations import ensure_schema
 
 
-def test_quantile_equal_counts() -> None:
-    # 16 partides amb mitjanes distintes → 8 franges de 2 partides cada una.
-    games = [(1 if i % 2 else -1, round(0.10 + i * 0.10, 2)) for i in range(16)]
-    buckets = _quantile_buckets(games, 8)
+def test_even_buckets_same_width_except_ends() -> None:
+    # Rivals de 0,30 a 1,40: les sis branques del mig fan totes el mateix salt i
+    # les dels extrems són obertes.
+    games = [(1 if i % 2 else -1, round(0.30 + i * 0.05, 2)) for i in range(23)]
+    buckets = _even_buckets(games, 8)
     assert len(buckets) == 8
-    assert all(b["wins"] + b["losses"] + b["draws"] == 2 for b in buckets)
-    assert buckets[0]["rating_min"] <= buckets[-1]["rating_max"]
+    assert buckets[0]["rating_min"] is None and buckets[-1]["rating_max"] is None
+    assert buckets[0]["label"].startswith("< ") and buckets[-1]["label"].startswith("≥ ")
+    amples = {round(b["rating_max"] - b["rating_min"], 4) for b in buckets[1:-1]}
+    assert len(amples) == 1
+    # Contigües: el màxim d'una és el mínim de la següent.
+    for a, b in pairwise(buckets):
+        assert a["rating_max"] == b["rating_min"]
+    assert sum(b["wins"] + b["losses"] + b["draws"] for b in buckets) == len(games)
 
 
-def test_quantile_keeps_equal_ratings_together() -> None:
-    # Sis rivals de 0,50 no es poden partir entre franges.
-    games = [(1, 0.5)] * 6 + [(-1, 0.9), (-1, 1.0)]
-    buckets = _quantile_buckets(games, 2)
-    assert buckets[0]["wins"] + buckets[0]["losses"] == 6  # tots els 0,50 junts
+def test_even_buckets_round_step_and_labels() -> None:
+    games = [(1, r) for r in (0.42, 0.50, 0.61, 0.70, 0.83, 0.95, 1.04, 1.12)]
+    buckets = _even_buckets(games, 8)
+    mig = buckets[1:-1]
+    pas = round(mig[0]["rating_max"] - mig[0]["rating_min"], 4)
+    assert round(pas / 0.05, 6).is_integer()  # pas rodó: múltiple de 0,05
+    assert mig[0]["label"] == f"{mig[0]['rating_min']:.2f}-{mig[0]['rating_max']:.2f}".replace(
+        ".", ","
+    )
+
+
+def test_even_buckets_edge_goes_up() -> None:
+    # Una mitjana just al límit va a la franja de dalt: [mínim, màxim).
+    games = [(1, 0.4), (1, 0.5), (1, 0.6), (1, 0.7), (1, 0.8), (1, 0.9), (1, 1.0)]
+    buckets = _even_buckets(games, 8)
+    for b in buckets[1:-1]:
+        dins = [r for _res, r in games if b["rating_min"] <= r < b["rating_max"]]
+        assert b["wins"] == len(dins)
+
+
+def test_even_buckets_all_same_rating() -> None:
+    buckets = _even_buckets([(1, 0.5)] * 3 + [(-1, 0.5)], 8)
+    assert len(buckets) == 1
     assert buckets[0]["label"] == "0,50"
+    assert (buckets[0]["wins"], buckets[0]["losses"]) == (3, 1)
 
 
 def test_weighted_index_rewards_beating_strong() -> None:
@@ -40,7 +67,7 @@ def test_weighted_index_rewards_beating_strong() -> None:
 
 def test_crossover_interpolates_50pct() -> None:
     games = [(1, 0.4)] * 4 + [(1, 0.7), (-1, 0.7)] * 2 + [(-1, 1.0)] * 4
-    cx = _crossover(_quantile_buckets(games, 3))
+    cx = _crossover(_even_buckets(games, 5))
     assert cx is not None and 0.5 <= cx <= 0.9
 
 
@@ -93,3 +120,12 @@ def test_rating_breakdown_end_to_end(tmp_path) -> None:
 def test_rating_breakdown_modality_without_games_is_empty(tmp_path) -> None:
     # El setup només té partides de Tres bandes; una modalitat sense partides → {}.
     assert rating_breakdown(_setup(tmp_path), 4, [1]) == {}
+
+
+def test_rank_ratings_by_game(tmp_path) -> None:
+    from fcbillar.analytics import rank_ratings_by_game
+
+    rr = rank_ratings_by_game(_setup(tmp_path), 1)
+    # La mitjana de rànquing del rival C (0,9) a la partida gC; P no té rànquing.
+    assert rr[("gC", 4)] == 0.9
+    assert ("gC", 1) not in rr

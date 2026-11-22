@@ -1208,10 +1208,19 @@ def publish_games(
             s2 = None
         return _norm_label(label, r["modalitat_codi"]), s1, s2
 
+    # Mitjana de rànquing de cada jugador quan es va jugar la partida (per al
+    # detall de les branques de l'aranya). Mateix càlcul que les franges.
+    from fcbillar.analytics import rank_ratings_by_game
+
+    rank_at: dict[tuple, float] = {}
+    for (codi,) in conn.execute("SELECT codi_fcb FROM modalitats"):
+        rank_at.update(rank_ratings_by_game(conn, codi))
+
     games = []
     for r in conn.execute(
         """
         SELECT g.id, g.data_partida, m.codi_fcb AS modalitat_codi,
+               g.player1_id, g.player2_id,
                comp.nom AS competicio, en.lliga_id AS lliga_id,
                ti.nom AS torneig_nom,
                p1.fcb_id AS player1_fcb_id, p1.nom AS player1_nom,
@@ -1246,6 +1255,8 @@ def publish_games(
                 "serie_max2": s2,
                 "entrades": r["entrades"],
                 "guanyador_fcb_id": r["guanyador_fcb_id"],
+                "mitjana_rank1": rank_at.get((r["id"], r["player1_id"])),
+                "mitjana_rank2": rank_at.get((r["id"], r["player2_id"])),
             }
         )
     n = _upsert(sb, "games", games, "id", prog)
@@ -1294,8 +1305,8 @@ def publish_rating_buckets(
 ) -> dict[str, int]:
     """Precomputa i puja el rendiment per nivell d'oponent (aranya de la fitxa).
 
-    Franges per quantils + indicadors (índex ponderat, creuament 50%), per a
-    **totes les modalitats** (els quantils s'adapten sols a cada escala). La
+    Franges d'igual amplada amb els extrems oberts + indicadors (índex ponderat,
+    creuament 50%), per a **totes les modalitats** (s'adapten soles a cada escala). La
     lògica viu a `fcbillar.analytics` perquè local (API) i núvol calculin idèntic."""
     from fcbillar.analytics import rating_breakdown
 
@@ -1324,6 +1335,8 @@ def publish_rating_buckets(
                         "bucket": f"b{b['order']}",
                         "bucket_order": b["order"],
                         "label": b["label"],
+                        "rating_min": b["rating_min"],
+                        "rating_max": b["rating_max"],
                         "wins": b["wins"],
                         "losses": b["losses"],
                         "draws": b["draws"],
