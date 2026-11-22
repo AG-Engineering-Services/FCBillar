@@ -6182,12 +6182,22 @@ def _autobuild_projection_payload(
                     phdict["groups"], winners_by_code[src], src
                 )
 
-    return projection_to_live_payload(
+    payload = projection_to_live_payload(
         proj,
         division_id=-abs(division_id),
         fetched_at=fetched_at,
         schedule_by_group=sched,
     )
+    # Quants millors 2ns passen de cada fase de grups (Art. IX.3), per posar-los
+    # al llistat de classificats abans que la federació publiqui el sorteig.
+    structure = proj.get("structure") or {}
+    qualifiers = proj.get("qualifiers") or {}
+    payload["best_seconds"] = {
+        code: n
+        for code in qualifiers
+        if (n := qualifiers.get(code, 0) - structure.get(code, 0)) > 0
+    }
+    return payload
 
 
 def _open_schedule_by_group(
@@ -6450,6 +6460,77 @@ def _seed_first_ko_by_projection(state, proj_phases: list[dict]) -> bool:
     state.seeding = seeding
     state.phases = _attach_ko_provisional_players(state.phases, state.reservats, seeding)
     return True
+
+
+def _add_best_seconds_to_qualifiers(state, best_seconds_by_code: dict[str, int]) -> bool:
+    """Afegeix els millors 2ns als classificats provisionals de cada fase de grups.
+    Muta `state` in-place; retorna si ha canviat res.
+
+    `fetch_live_state` només hi posa els 2ns quan ja surten al sorteig de la ronda
+    següent. Fins llavors el llistat es quedava amb els 1rs, encara que el
+    reglament ja digués que en passa un 2n: a Sant Adrià, la pre-pre-prèvia.
+    Com els 1rs, es comparen els 2ns dels grups que ja han començat; mentre la
+    fase no s'acaba, el millor 2n és provisional i pot canviar.
+    """
+    from dataclasses import replace
+
+    from fcb_opens.next_round import RoundWinner, rank_winners
+    from fcb_opens.scraper.open_live import (
+        ProvisionalQualifier,
+        _group_sm_by_player,
+        _is_regular_group,
+        _norm_name,
+    )
+
+    changed = False
+    new_phases = []
+    for ph in state.phases:
+        n = best_seconds_by_code.get(_phase_code(ph.ref.label, ph.ref.kind), 0)
+        if ph.ref.kind != "group" or n <= 0:
+            new_phases.append(ph)
+            continue
+        already = {_norm_name(q.player_name) for q in ph.provisional_qualifiers}
+        if sum(q.position_in_group > 1 for q in ph.provisional_qualifiers) >= n:
+            new_phases.append(ph)
+            continue
+        candidates = []
+        for g in ph.groups:
+            if not _is_regular_group(g.label) or len(g.standings) < 2:
+                continue
+            if not any(m.is_played for m in g.matches):
+                continue
+            sec = g.standings[1]
+            candidates.append(
+                RoundWinner(
+                    player_name=sec.player_name,
+                    club=sec.club,
+                    group_label=g.label,
+                    punts=sec.punts,
+                    mitjana=sec.mitjana,
+                    serie_major=_group_sm_by_player(g).get(sec.player_name, 0),
+                )
+            )
+        seconds = rank_winners(candidates)[:n]
+        extra = tuple(
+            ProvisionalQualifier(
+                group_label=w.group_label,
+                position_in_group=2,
+                player_name=w.player_name,
+                club=w.club,
+                punts=w.punts,
+                mitjana=w.mitjana,
+                serie_major=w.serie_major,
+            )
+            for w in seconds
+            if _norm_name(w.player_name) not in already
+        )
+        if extra:
+            changed = True
+            ph = replace(ph, provisional_qualifiers=ph.provisional_qualifiers + extra)
+        new_phases.append(ph)
+    if changed:
+        state.phases = new_phases
+    return changed
 
 
 def _seed_unplayed_groups_by_ranking_inicial(state, ranking_inicial: list[dict]) -> bool:
@@ -6973,6 +7054,8 @@ def publish_live_opens(
             _seed_first_ko_by_projection(state, auto_phases)
         if auto and auto.get("ranking_inicial"):
             _seed_unplayed_groups_by_ranking_inicial(state, auto["ranking_inicial"])
+        if auto and auto.get("best_seconds"):
+            _add_best_seconds_to_qualifiers(state, auto["best_seconds"])
 
         payload = _state_payload(state, fetched_at)
         _enrich_live_payload(payload, sb, open_name=state.structure.name, division_id=e.division_id)

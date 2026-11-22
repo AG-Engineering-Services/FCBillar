@@ -554,13 +554,13 @@
 					<ol class="space-y-0.5">
 						{#each quals as q, i}
 							{@const grp = phase.groups.find((gg) => gg.label === q.group_label)}
-							{@const sure = q.position_in_group > 1 || (!!grp && groupClosed(grp))}
+							{@const sure = q.position_in_group > 1 ? phaseComplete : !!grp && groupClosed(grp)}
 							<li class="flex items-center gap-2 text-sm {q.position_in_group > 1 ? '-mx-1 rounded bg-amber-50/70 dark:bg-amber-950/40 px-1' : ''}">
 								<span class="w-4 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400">{i + 1}</span>
 								<span class="w-6 shrink-0 rounded bg-white/70 dark:bg-slate-900/70 text-center font-mono text-2xs text-slate-500 dark:text-slate-400">{q.group_label.replace('Grup ', '')}</span>
 								<span class="flex min-w-0 flex-1 items-center gap-1">
 									{@render player(q.player_name, 'truncate ' + (sure ? 'font-bold' : ''))}
-									{#if q.position_in_group > 1}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1 text-2xs font-semibold uppercase text-amber-700 dark:text-amber-300" title="Millor 2n: classificat per omplir la següent ronda">2n</span>{/if}{#if sure}<span class="shrink-0 text-emerald-600 dark:text-emerald-400" title={q.position_in_group > 1 ? 'Classificat (millor 2n, col·locat per la federació)' : 'Classificació assegurada (grup acabat)'}>✓</span>{/if}
+									{#if q.position_in_group > 1}<span class="shrink-0 rounded bg-amber-100 dark:bg-amber-900/40 px-1 text-2xs font-semibold uppercase text-amber-700 dark:text-amber-300" title="Millor 2n: classificat per omplir la següent ronda">2n</span>{/if}{#if sure}<span class="shrink-0 text-emerald-600 dark:text-emerald-400" title={q.position_in_group > 1 ? 'Classificat com a millor 2n' : 'Classificació assegurada (grup acabat)'}>✓</span>{/if}
 								</span>
 								<!-- Estadístiques completes: només PC/tablet -->
 								<span class="hidden w-8 shrink-0 text-right font-mono text-[11px] text-slate-500 dark:text-slate-400 md:inline">{q.pj ?? 0}</span>
