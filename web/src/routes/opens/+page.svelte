@@ -184,11 +184,18 @@
 		return m;
 	}
 
-	// Noms (normalitzats) dels opens de la finestra de cada ronda.
+	// Noms (normalitzats) dels opens SENSE DATA de la finestra de cada ronda.
+	// Els noms es repeteixen cada temporada («OPEN TRES BANDES SANT ADRIA»):
+	// comparar només el nom amagava totes les edicions anteriors de l'slider.
+	// L'open en curs és l'únic que el PDF oficial llista sense data.
 	const rondaOpens = $derived.by(() => {
 		const m = new Map<number, string[]>();
 		for (const r of genRanking)
-			if (!m.has(r.ronda)) m.set(r.ronda, (r.detall ?? []).map((d: any) => norm(d.open ?? '')));
+			if (!m.has(r.ronda))
+				m.set(
+					r.ronda,
+					(r.detall ?? []).filter((d: any) => !d.data).map((d: any) => norm(d.open ?? ''))
+				);
 		return m;
 	});
 	const cdNorm = $derived(liveCD ? norm(liveCD.name) : null);
@@ -315,13 +322,18 @@
 			const { data, error: e } = await db.from('opens').select('*').order('nom');
 			if (e) throw e;
 			opens = (data ?? []) as Open[];
-			// open_ranking pot superar el límit de 1000 files: paginem.
+			// open_ranking pot superar el límit de 1000 files: paginem. L'ordre ha
+			// de ser total: només amb la ronda, dues pàgines es trepitjaven (files
+			// repetides i d'altres perdudes, i la ronda deixava de pintar-se).
 			const all: any[] = [];
 			for (let from = 0; ; from += 1000) {
 				const { data: rk } = await db
 					.from('open_ranking')
 					.select('*')
 					.order('ronda', { ascending: false })
+					.order('genere')
+					.order('posicio')
+					.order('player_fcb_id')
 					.range(from, from + 999);
 				if (!rk?.length) break;
 				all.push(...rk);
