@@ -260,3 +260,25 @@ def test_dos_europeus_de_quadre_la_mateixa_setmana_no_es_confonen(tmp_path):
     el_47 = Titol("Balk-Line 47/2", "European Championship", "Cervera (ESP)", mateixa_setmana, None)
     assert ja_hi_es(conn, el_71) is None
     assert ja_hi_es(conn, el_47).id == 100411
+
+
+def test_una_prova_antiga_sense_disciplina_es_reconeix_pel_nom(tmp_path):
+    from fcbillar.db.migrations import ensure_schema
+    from fcbillar.kozoom import Titol
+    from fcbillar.kozoom_carrega import ja_hi_es
+
+    conn = ensure_schema(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO umb_esdeveniments (id, nom, disciplina, data_inici, font) "
+        "VALUES (200153, 'European Championship Ladies -3- Cushion', NULL, '2007-10-05', 'x')"
+    )
+    kozoom = Titol("3-Cushion", "European Championship Ladies", "Roeser (LUX)", date(2007, 10, 5), None)
+    assert ja_hi_es(conn, kozoom).id == 200153
+
+
+def test_les_grafies_velles_de_la_disciplina():
+    from fcbillar.umb_carrega import disciplina_de
+
+    assert disciplina_de("European Championship Ladies -3- Cushion") == "3 bandes"
+    assert disciplina_de("European Championship Artistique") == "artistic"
+    assert disciplina_de("CMT-European Championship One Cushion") == "1 banda"

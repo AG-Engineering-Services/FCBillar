@@ -19,11 +19,11 @@ from fcbillar.umb import ID_SENSE_VALOR, Llegit, clau, llegeix_prova, text_sets
 from fcbillar.umb_descarrega import Esdeveniment, carrega_esdeveniments
 
 _DISCIPLINES = [
-    (r"3[- ]?cushion|three[- ]?cushion|3[- ]?bandes", "3 bandes"),
-    (r"1[- ]?cushion|one[- ]?cushion", "1 banda"),
+    (r"3[- ]{0,2}cushion|three[- ]?cushion|3[- ]?bandes", "3 bandes"),
+    (r"1[- ]{0,2}cushion|one[- ]?cushion", "1 banda"),
     (r"5[- ]?pins?|five[- ]?pins?", "5 quilles"),
-    (r"47[/-]?2|47/1|71/2|cadre|balkline", "quadre"),
-    (r"artistic", "artistic"),
+    (r"47[/-]?2|47/1|71/2|cadre|balk-?line", "quadre"),
+    (r"artisti(c|que)", "artistic"),
     (r"free|libre|straight", "lliure"),
     (r"pentathlon|biathlon|triathlon", "combinada"),
 ]

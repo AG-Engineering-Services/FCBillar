@@ -378,10 +378,11 @@ def ja_hi_es(conn: sqlite3.Connection, titol: Titol) -> Existent | None:
         return None
     disc = disciplina_de(titol.disciplina)
     marge = timedelta(days=4)
-    for id_, ini, nom in conn.execute(
-        "SELECT id, data_inici, nom FROM umb_esdeveniments WHERE disciplina IS ?", (disc,)
+    for id_, ini, nom, d_vella in conn.execute(
+        "SELECT id, data_inici, nom, disciplina FROM umb_esdeveniments"
     ):
-        if not ini:
+        # Les proves desades abans de conèixer una grafia («-3- Cushion») no en tenen.
+        if not ini or (d_vella or disciplina_de(nom)) != disc:
             continue
         try:
             d = date.fromisoformat(ini[:10])
