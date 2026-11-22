@@ -34,7 +34,7 @@ from datetime import date
 
 from bs4 import BeautifulSoup, Tag
 
-from fcbillar.umb import Classificat, Costat, Jugador, Llegit, Partida
+from fcbillar.umb import Classificat, Costat, Jugador, Llegit, Partida, nom_umb
 
 DESPLACAMENT = 300_000
 BASE = "https://www.kozoom.com/en/billiard-carom"
@@ -45,24 +45,6 @@ _RE_TITOL = re.compile(
     r"(?P<ini>\d{1,2}/\d{1,2}/\d{2})(?: to (?P<fi>\d{1,2}/\d{1,2}/\d{2}))?"
 )
 _RE_CLUB = re.compile(r"\s*\(([^()]*)\)\s*$")
-
-
-def nom_umb(nom: str) -> str:
-    """«Esteve MATA» -> «MATA Esteve»; «Michel VAN SILFHOUT» -> «VAN SILFHOUT Michel».
-
-    El cognom són les paraules en majúscules del final; el nom, les d'abans.
-    """
-    paraules = nom.split()
-    i = len(paraules)
-    while (
-        i > 0
-        and paraules[i - 1].upper() == paraules[i - 1]
-        and any(c.isalpha() for c in paraules[i - 1])
-    ):
-        i -= 1
-    if i == 0 or i == len(paraules):
-        return nom.strip()
-    return " ".join(paraules[i:] + paraules[:i])
 
 
 @dataclass

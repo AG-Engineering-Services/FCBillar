@@ -75,6 +75,24 @@ def separa_nom(nom: str) -> str:
     return f"{cognom} {resta}"
 
 
+def nom_umb(nom: str) -> str:
+    """«Esteve MATA» -> «MATA Esteve»; «Michel VAN SILFHOUT» -> «VAN SILFHOUT Michel».
+
+    El cognom són les paraules en majúscules del final; el nom, les d'abans.
+    """
+    paraules = nom.split()
+    i = len(paraules)
+    while (
+        i > 0
+        and paraules[i - 1].upper() == paraules[i - 1]
+        and any(c.isalpha() for c in paraules[i - 1])
+    ):
+        i -= 1
+    if i == 0 or i == len(paraules):
+        return nom.strip()
+    return " ".join(paraules[i:] + paraules[:i])
+
+
 # ------------------------------- dades llegides -------------------------------
 
 
@@ -436,6 +454,11 @@ def llegeix_classificacio(text: str) -> list[Classificat]:
     out: list[Classificat] = []
     vistos: set[tuple[int, str]] = set()
     for linia in text.splitlines():
+        # Els rànquings del web vell porten els punts de partida com a «12:2» (guanyades:perdudes)
+        # i el nom com «Monique VAN EXTER».
+        amb_marcador = bool(re.search(r"\s\d+:\d+\s", linia))
+        if amb_marcador:
+            linia = re.sub(r"(\s)(\d+):\d+(\s)", r"\g<1>\g<2>\g<3>", linia)
         t = linia.split()
         ronda = None
         if t and re.fullmatch(r"(MT|Q|PQ|PPQ|PPPQ|R\d+|[A-Z]{1,5})", t[0]) and len(t) > 2:
@@ -450,6 +473,8 @@ def llegeix_classificacio(text: str) -> list[Classificat]:
             continue
         nat = nom[-1][:2]
         nom_s = " ".join(nom[:-1])
+        if amb_marcador:
+            nom_s = nom_umb(nom_s)
         decs = [i for i, x in enumerate(nums) if _RE_DEC.match(x)]
         if not decs:
             continue
