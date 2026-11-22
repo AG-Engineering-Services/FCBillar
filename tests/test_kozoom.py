@@ -354,3 +354,17 @@ def test_fora_d_abast_el_billar_america_les_lligues_i_els_nacionals():
     assert not fora_d_abast(t("European Championship National Team"))
     assert not fora_d_abast(t("European Championship", "Balk-Line 71/2"))
     assert not fora_d_abast(t("European Cup Final Club Team", "Carom Series"))
+
+
+def test_youth_i_juniors_women_i_ladies_son_el_mateix_tipus():
+    from fcbillar.kozoom_carrega import _tipus
+
+    assert _tipus("European Championship Youth 3-Cushion") == _tipus(
+        "European Championship Juniors 3-Cushion"
+    )
+    assert _tipus("European Championship Women Free game") == _tipus(
+        "European Championship Ladies Free game"
+    )
+    assert _tipus("European Championship Juniors 3-Cushion") != _tipus(
+        "European Championship 3-Cushion"
+    )

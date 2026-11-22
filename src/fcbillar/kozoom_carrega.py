@@ -64,6 +64,9 @@ _FORA = re.compile(
 )
 #: L'últim any en què Kozoom pot crear una prova nova.
 ANY_MAX_NOVES = 2016
+#: Pàgines de Kozoom amb la classificació d'una altra prova (l'europeu júnior 2010
+#: d'Antalya porta la de la copa del món d'adults de la mateixa setmana).
+PAGINES_ERRONIES = {"7543"}
 
 
 def fora_d_abast(titol: Titol) -> bool:
@@ -180,7 +183,7 @@ def seleccio(cache: Path) -> list[str]:
     triades = []
     for pid, p in _proves(cache).items():
         titol = llegeix_titol(p.get("titol", ""))
-        if titol is None or fora_d_abast(titol):
+        if titol is None or fora_d_abast(titol) or pid in PAGINES_ERRONIES:
             continue
         if _INTERNACIONAL.search(titol.nom):
             triades.append(pid)
@@ -427,7 +430,8 @@ def _quadre(text: str) -> str | None:
 
 
 def _tipus(nom: str) -> str:
-    n = nom.lower()
+    # El web vell de la CEB diu «Youth» al que Kozoom diu «Juniors», i «Women» és «Ladies».
+    n = nom.lower().replace("youth", "junior").replace("women", "ladies")
     # Primer el que distingeix proves que es juguen juntes (el femení, el júnior i el
     # d'equips solen compartir dates i lloc amb l'absolut).
     for k in (
