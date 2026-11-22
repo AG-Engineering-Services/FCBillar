@@ -101,3 +101,19 @@ def test_si_n_hi_ha_un_d_exacte_no_es_busquen_variants():
         ("PUIG FERRER, JOAN", "exacte"),
         ("PUIG FERRES, JOAN", "falta"),
     ]
+
+
+def test_lligams_validats_per_divisio(tmp_path):
+    """El Quadre d'Honor només fa servir els lligams validats per a ell."""
+    from fcbillar.nacional_fitxes import lligams_validats
+
+    cami = tmp_path / "fitxes.csv"
+    cami.write_text(
+        "validat,jugador_rfeb,equip_rfeb,divisio,fcb_id,nom_cens,club_cens,motiu\n"
+        "si,Antonio Gómez,,partides,1303,,,\n"
+        "si,Luis Ametller,,palmares-fcb,591,,,\n"
+        "no,Lluís González,,palmares-fcb,286,,,\n",
+        encoding="utf-8",
+    )
+    assert lligams_validats(cami) == {"Antonio Gómez": "1303", "Luis Ametller": "591"}
+    assert lligams_validats(cami, "palmares-fcb") == {"Luis Ametller": "591"}
