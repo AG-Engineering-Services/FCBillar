@@ -41,6 +41,7 @@
 		type RfebPartidaRow
 	} from '$lib/nacional';
 	import { follows, toggleFollow } from '$lib/follows';
+	import { LLINDAR_RESUM, resumMedalles, type ResumMedalles } from '$lib/palmaresResum';
 	import RadarChart from '$lib/components/RadarChart.svelte';
 	import { theme } from '$lib/theme';
 	import { ADMIN_EMAIL, esAdminLocal, marcaAdmin } from '$lib/admin';
@@ -345,6 +346,8 @@
 		}
 		return [...grups].map(([any, entries]) => ({ any, entries }));
 	}
+	// El recompte de Catalunya és sobre el Quadre d'Honor sencer, també el que la llista no repeteix.
+	const medallesQuadreHonor = $derived(medalles.filter((m) => m.font === 'fcb'));
 	const medallesEsp = $derived(medalles.length ? medallesPerAny('rfeb') : []);
 	const medallesInt = $derived(medalles.length ? medallesPerAny('ceb') : []);
 	// Del Quadre d'Honor, les que el palmarès de la FCB ja mostra com a campionat
@@ -1589,25 +1592,31 @@
 				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					Palmarès individual · {veuEspanya ? "campionats d'Espanya" : 'campionats internacionals'} · {total}
 				</div>
-				<div class="space-y-3">
-					{#each grups as g}
-						<div>
-							<div class="mb-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{g.any}</div>
-							<ul class="space-y-1">
-								{#each g.entries as m}
-									<li class="flex items-center gap-2 px-1.5 py-1 text-sm">
-										<span class="w-6 shrink-0 text-center font-mono font-bold">{ordinal(m.posicio)}</span>
-										<div class="min-w-0 flex-1">
-											<div class="truncate font-medium">{m.competicio}{m.categoria !== 'absolut' ? ` · ${m.categoria}` : ''}</div>
-											<div class="truncate text-2xs text-slate-500 dark:text-slate-400">Edició {m.edicio}{m.lloc ? ` · ${m.lloc}` : ''}</div>
-										</div>
-										{#if m.mitjana != null}<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{m.mitjana.toLocaleString('ca', { maximumFractionDigits: 3 })}{m.competicio.startsWith('Art') ? ' %' : ''}</span>{/if}
-									</li>
-								{/each}
-							</ul>
-						</div>
-					{/each}
+				{#if total > LLINDAR_RESUM}
+					{@const r = resumMedalles(grups.flatMap((g) => g.entries))}
+					{@render recompteMedalles(r)}
+					<details class="mt-2">
+						<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Per competició i per anys</summary>
+						{@render taulaResum(r)}
+						{@render llistaMedalles(grups, false)}
+					</details>
+				{:else}
+					{@render llistaMedalles(grups, false)}
+				{/if}
+			</div>
+		{/if}
+
+		{#if !veuEspanya && !veuInternacional && medallesQuadreHonor.length > LLINDAR_RESUM}
+			{@const r = resumMedalles(medallesQuadreHonor)}
+			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+					Campionats de Catalunya · Quadre d'Honor de la FCB · {r.total}
 				</div>
+				{@render recompteMedalles(r)}
+				<details class="mt-2">
+					<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Per competició</summary>
+					{@render taulaResum(r)}
+				</details>
 			</div>
 		{/if}
 
@@ -1617,30 +1626,33 @@
 				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 					Palmarès individual · Quadre d'Honor de la FCB · {total}
 				</div>
-				<div class="space-y-3">
-					{#each medallesCat as g}
-						<div>
-							<div class="mb-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{g.entries[0].edicio}</div>
-							<ul class="space-y-1">
-								{#each g.entries as m}
-									<li class="flex items-center gap-2 px-1.5 py-1 text-sm">
-										<span class="w-6 shrink-0 text-center font-mono font-bold">{ordinal(m.posicio)}</span>
-										<div class="min-w-0 flex-1">
-											<div class="truncate font-medium">{m.competicio}{m.categoria !== 'absolut' ? ` · ${m.categoria}` : ''}</div>
-											{#if m.lloc}<div class="truncate text-2xs text-slate-500 dark:text-slate-400">{m.lloc}</div>{/if}
-										</div>
-									</li>
-								{/each}
-							</ul>
-						</div>
-					{/each}
-				</div>
+				{#if total > LLINDAR_RESUM}
+					<details>
+						<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Llista per anys</summary>
+						{@render llistaMedalles(medallesCat, true)}
+					</details>
+				{:else}
+					{@render llistaMedalles(medallesCat, true)}
+				{/if}
 			</div>
 		{/if}
 
 		{#if !veuEspanya && !veuInternacional && palmaresBySeason.length}
+			{@const totalCat = palmaresBySeason.reduce((n, s) => n + s.entries.length, 0)}
 			<div class="mb-4 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
-				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Palmarès individual</div>
+				<div class="mb-2 text-2xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Palmarès individual · {totalCat}</div>
+				{#if totalCat > LLINDAR_RESUM}
+					<details>
+						<summary class="min-h-11 cursor-pointer py-3 text-sm font-medium">Llista per temporades</summary>
+						{@render llistaPalmaresCat()}
+					</details>
+				{:else}
+					{@render llistaPalmaresCat()}
+				{/if}
+			</div>
+		{/if}
+
+		{#snippet llistaPalmaresCat()}
 				<div class="space-y-3">
 					{#each palmaresBySeason as season}
 						<div>
@@ -1664,8 +1676,7 @@
 						</div>
 					{/each}
 				</div>
-			</div>
-		{/if}
+		{/snippet}
 
 		{#if h2h.played.length || h2h.won.length || h2h.lost.length}
 			<div class="mb-4 space-y-2 rounded-xl bg-white dark:bg-slate-900 p-3 ring-1 ring-slate-200 dark:ring-slate-800">
@@ -2162,6 +2173,66 @@
 		</div>
 	{/if}
 {/if}
+
+{#snippet recompteMedalles(r: ResumMedalles)}
+	<dl class="grid grid-cols-3 gap-2 text-center">
+		{#each [['Primers', r.primers], ['Segons', r.segons], ['Tercers', r.tercers]] as [nom, n]}
+			<div class="rounded-lg bg-slate-50 dark:bg-slate-800/60 px-2 py-2">
+				<dt class="text-2xs text-slate-500 dark:text-slate-400">{nom} llocs</dt>
+				<dd class="font-mono text-xl font-bold tabular-nums">{n}</dd>
+			</div>
+		{/each}
+	</dl>
+{/snippet}
+
+{#snippet taulaResum(r: ResumMedalles)}
+	<table class="mb-3 w-full text-sm">
+		<thead>
+			<tr class="text-2xs text-slate-500 dark:text-slate-400">
+				<th scope="col" class="py-1 text-left font-medium">Competició</th>
+				<th scope="col" class="w-9 text-right font-medium">1r</th>
+				<th scope="col" class="w-9 text-right font-medium">2n</th>
+				<th scope="col" class="w-9 text-right font-medium">3r</th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each r.perCompeticio as f (f.competicio)}
+				<tr class="border-t border-slate-100 dark:border-slate-800">
+					<td class="max-w-0 truncate py-1 pr-2" title={f.competicio}>{f.competicio}</td>
+					{#each [f.primers, f.segons, f.tercers] as n}
+						<td class="text-right font-mono tabular-nums {n ? 'font-bold' : 'text-slate-500 dark:text-slate-400'}">{n}</td>
+					{/each}
+				</tr>
+			{/each}
+		</tbody>
+	</table>
+{/snippet}
+
+{#snippet llistaMedalles(grups: { any: string; entries: PalmaresRow[] }[], quadreHonor: boolean)}
+	<div class="space-y-3">
+		{#each grups as g}
+			<div>
+				<div class="mb-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">{quadreHonor ? g.entries[0].edicio : g.any}</div>
+				<ul class="space-y-1">
+					{#each g.entries as m}
+						<li class="flex items-center gap-2 px-1.5 py-1 text-sm">
+							<span class="w-6 shrink-0 text-center font-mono font-bold">{ordinal(m.posicio)}</span>
+							<div class="min-w-0 flex-1">
+								<div class="truncate font-medium">{m.competicio}{m.categoria !== 'absolut' ? ` · ${m.categoria}` : ''}</div>
+								{#if quadreHonor}
+									{#if m.lloc}<div class="truncate text-2xs text-slate-500 dark:text-slate-400">{m.lloc}</div>{/if}
+								{:else}
+									<div class="truncate text-2xs text-slate-500 dark:text-slate-400">Edició {m.edicio}{m.lloc ? ` · ${m.lloc}` : ''}</div>
+								{/if}
+							</div>
+							{#if !quadreHonor && m.mitjana != null}<span class="shrink-0 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{m.mitjana.toLocaleString('ca', { maximumFractionDigits: 3 })}{m.competicio.startsWith('Art') ? ' %' : ''}</span>{/if}
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/each}
+	</div>
+{/snippet}
 
 {#snippet selectorModalitat(opcions: { id: string | number | null; nom: string }[], triada: string | number | null, tria: (id: string | number | null) => void)}
 	<div class="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] print:hidden">
