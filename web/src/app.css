@@ -52,7 +52,7 @@
 	}
 
 	/* El focus es veu sempre, i amb l'accent d'acció. */
-	:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+	:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
 		outline: 2px solid var(--ag-focus);
 		outline-offset: 2px;
 		border-radius: var(--ag-radius);
