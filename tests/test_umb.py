@@ -443,6 +443,28 @@ def test_llista_d_esdeveniments_de_la_ceb():
     assert [es_individual(e) for e in evs] == [True, False]
 
 
+def test_modalitats_d_un_campionat_que_n_aplega_unes_quantes():
+    from fcbillar.ceb import DESPLACAMENT, es_individual, modalitats
+    from fcbillar.umb_descarrega import Esdeveniment
+
+    html = """
+    <a href="#" onClick="eventTab('455');return false;" title="European Championships Classics">
+    <a href="#" onClick="eventTab('490');return false;" title="European Championship 1-Cushion">
+    <a href="#" onClick="eventTab('492');return false;" title="European Championships  Balkline 71/2">
+    <a href="#" onClick="eventTab('493');return false;" title="European Championship 3-Cushion Teams">
+    """
+    ev = Esdeveniment(
+        id=DESPLACAMENT + 455, nom="European Championships Classics", lloc="Cervera (ESP)",
+        inici="2025-05-27", fi="2025-06-01", descripcio="", pdfs=[],
+        font="https://www.eurobillard.org/events/ec classics-455.html",
+    )  # fmt: skip
+    ms = modalitats(html, ev)
+    assert [m.id - DESPLACAMENT for m in ms] == [490, 492, 493]
+    assert ms[1].nom == "European Championships Balkline 71/2"
+    assert (ms[0].lloc, ms[0].inici, ms[0].fi, ms[0].font) == (ev.lloc, ev.inici, ev.fi, ev.font)
+    assert [es_individual(m) for m in ms] == [True, True, False]
+
+
 # --- partides a sets de 15 (fins al 2011) -----------------------------------------
 
 GRUPS_A_SETS = """SLUISKIL WORLD CUP / GRAND PRIX
