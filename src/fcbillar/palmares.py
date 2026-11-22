@@ -28,6 +28,13 @@ la té sense cel·la. Això és el que les distingeix, no la posició.
 El nom de la competició i la categoria no surten del PDF sinó del seu nom de
 fitxer (`_RFEB` i `_CEB`): és el que fa que una mateixa competició quedi igual
 d'un any a l'altre.
+
+- **FCB** (`fcbillar.cat`, «Històric Quadre d'Honor»): un PDF per temporada des
+  del 1961-62, amb una taula `modalitat | categoria | campió | club | subcampió |
+  club`. Només hi ha campió i subcampió. El club es desa a `lloc`. Les primeres
+  temporades (fins al 1964-65) tenen algunes competicions en format de llista
+  (`1r | jugador | club`). Es llegeixen les modalitats individuals de
+  carambola; les lligues, els interclubs, el pool i el snooker no.
 """
 
 from __future__ import annotations
@@ -518,8 +525,120 @@ def baixa(
     return fallats
 
 
+# ---------------------------------------------------------------------------
+# FCB: Quadre d'Honor
+# ---------------------------------------------------------------------------
+
+FONT_FCB = "fcb"
+
+#: Modalitat del PDF → competició. Les que no hi són (lligues, interclubs,
+#: copa, pool, snooker) no es llegeixen.
+_MODALITATS_FCB = [
+    (r"^LLIURE$", "Lliure"),
+    (r"^TRES BANDES$", "Tres bandes"),
+    (r"^QUADRE 47/2$", "Quadre 47/2"),
+    (r"^QUADRE 71/2$", "Quadre 71/2"),
+    (r"^QUADRE 47/1$", "Quadre 47/1"),
+    (r"^BANDA$", "Banda"),
+    (r"^ART[IÍ]STIC[O]?$", "Artístic"),
+    (r"^(CHAP[OÓ]|XAP[OÓ])$", "Chapó"),
+    (r"^5 QUILLES$", "5 quilles"),
+    (r"^5 QUILLES BIATHL[OÓ]$|^([IVX]+ )?BIATHL[OÓ]$", "Biatló"),
+    (r"^TROFEU CLAUDIO PUIGVERT$", "Trofeu Claudio Puigvert"),
+]
+_RE_TEMPORADA_FCB = re.compile(r"(\d{4})-(\d{4})")
+
+
+def _competicio_fcb(text: str) -> str | None:
+    for patro, nom in _MODALITATS_FCB:
+        if re.match(patro, text.strip(), re.I):
+            return nom
+    return None
+
+
+def _categoria_fcb(text: str) -> str:
+    t = " ".join(text.split()).replace("ª", "a")
+    if not t:
+        return "absolut"
+    if re.fullmatch(r"j[uú]nior", t, re.I):
+        return "júnior"
+    if re.fullmatch(r"(ct\.? )?catalunya|absolut", t, re.I):
+        return "absolut"
+    if t.lower() == "honor":
+        return "honor"
+    if t.lower() in {"femení", "juvenil"}:
+        return t.lower()
+    return t  # «1a», «2a A»…
+
+
+def _jugador_fcb(text: str) -> str | None:
+    t = " ".join(text.split())
+    if not t or "NO JUGAT" in t.upper() or "DESERT" in t.upper() or "/" in t:
+        return None  # sense campió, o una parella
+    return t
+
+
+def llegeix_fcb(cami: str | Path) -> Informe:
+    """Les medalles (campió i subcampió) d'un PDF del Quadre d'Honor de la FCB."""
+    import pdfplumber
+
+    cami = Path(cami)
+    inf = Informe(fitxer=cami.name, font=FONT_FCB)
+    m = _RE_TEMPORADA_FCB.search(cami.stem)
+    if not m:
+        inf.no_llegit.append(("fitxer", "sense temporada al nom"))
+        return inf
+    edicio = f"{m.group(1)}-{m.group(2)[2:]}"
+    any_fi = int(m.group(2))
+    with pdfplumber.open(str(cami)) as pdf:
+        taules = [t for pg in pdf.pages for t in pg.extract_tables()]
+    vistes: set[tuple[str, str]] = set()
+    for taula in taules:
+        modalitat: str | None = None
+        competicio: str | None = None
+        categoria_llista = "absolut"
+        for fila in taula:
+            cel = [" ".join((c or "").split()) for c in fila]
+            while len(cel) not in (4, 6) and len(cel) > 4 and not cel[-1]:
+                cel.pop()  # una columna buida de més al final
+            if not any(cel) or cel[0] == "MODALITAT" or cel[0].upper().startswith("QUADRE D'HONOR"):
+                continue
+            if cel[0]:
+                modalitat = cel[0]
+                competicio = _competicio_fcb(modalitat)
+            if competicio is None:
+                continue
+            if len(cel) == 6:
+                categoria = _categoria_fcb(cel[1])
+                vistes.add((competicio, categoria))
+                for posicio, nom, club in ((1, cel[2], cel[3]), (2, cel[4], cel[5])):
+                    jugador = _jugador_fcb(nom)
+                    if jugador:
+                        inf.medalles.append(
+                            Medalla(FONT_FCB, competicio, categoria, edicio, any_fi, club or None, posicio, jugador)
+                        )
+            elif len(cel) == 4:
+                # Format de llista (1961-1965): «1r | jugador | club».
+                if cel[1].upper().startswith("CLASSIF"):
+                    continue
+                pos = {"1r": 1, "2n": 2, "3r": 3}.get(cel[1].lower())
+                jugador = _jugador_fcb(cel[2])
+                if pos is None:
+                    inf.no_llegit.append((edicio, " | ".join(cel)))
+                    continue
+                vistes.add((competicio, categoria_llista))
+                if jugador:
+                    inf.medalles.append(
+                        Medalla(FONT_FCB, competicio, categoria_llista, edicio, any_fi, cel[3] or None, pos, jugador)
+                    )
+            else:
+                inf.no_llegit.append((edicio, " | ".join(cel)))
+    inf.edicions = len(vistes)
+    return inf
+
+
 def llegeix_carpeta(arrel: str | Path) -> list[Informe]:
-    """Llegeix tots els PDF coneguts de `arrel/rfeb` i `arrel/ceb`."""
+    """Llegeix tots els PDF coneguts de `arrel/rfeb` i `arrel/ceb`, i tots els de `arrel/fcb`."""
     arrel = Path(arrel)
     informes = []
     for font, noms, lector in (
@@ -530,6 +649,8 @@ def llegeix_carpeta(arrel: str | Path) -> list[Informe]:
             cami = arrel / font / nom
             if cami.exists():
                 informes.append(lector(cami))
+    for cami in sorted((arrel / FONT_FCB).glob("*.pdf")):
+        informes.append(llegeix_fcb(cami))
     return informes
 
 
@@ -586,8 +707,9 @@ def jugadors_per_candidats(conn: sqlite3.Connection) -> list[tuple[str, str, str
     return [
         (nom, comp, font)
         for nom, comp, font in conn.execute(
-            "SELECT jugador, MIN(competicio), font FROM palmares_medalles "
-            "WHERE font = 'rfeb' OR (font = 'ceb' AND pais = 'ES') "
+            "SELECT jugador, CASE WHEN font = 'fcb' THEN MAX(lloc) ELSE MIN(competicio) END, font "
+            "FROM palmares_medalles "
+            "WHERE font IN ('rfeb', 'fcb') OR (font = 'ceb' AND pais = 'ES') "
             "GROUP BY jugador, font ORDER BY jugador"
         )
     ]

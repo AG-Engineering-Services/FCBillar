@@ -306,3 +306,17 @@ def test_afegeix_candidats_va_al_final_i_no_reordena_ni_canvia_els_finals_de_lin
     assert linies[3] == ',Beta B,Tres bandes,palmares,12,"B B, BETA",C.B.X,un cognom'
     # Tornar-hi no duplica res.
     assert P.afegeix_candidats([nou], cami) == (3, 0)
+
+
+def test_quadre_honor_fcb_pdf_real():
+    from pathlib import Path
+
+    from fcbillar.palmares import llegeix_fcb
+
+    cami = Path(__file__).parents[1] / "fonts/palmares/fcb/quadrehonorfcb1985-1986.pdf"
+    inf = llegeix_fcb(cami)
+    assert inf.no_llegit == []
+    tb = [(m.categoria, m.posicio, m.jugador, m.lloc) for m in inf.medalles if m.competicio == "Tres bandes"]
+    assert ("1a", 1, "Claudio Nadal", "C.B. Barcelona") in tb
+    assert ("2a", 1, "Ferran Rodríguez", "C.B. Banyoles") in tb
+    assert all(m.edicio == "1985-86" and m.any_edicio == 1986 for m in inf.medalles)
