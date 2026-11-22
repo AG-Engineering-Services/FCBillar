@@ -86,9 +86,7 @@ def modalitats(html: str, ev: Esdeveniment) -> list[Esdeveniment]:
     for sid, nom in _RE_PESTANYA.findall(html):
         if int(sid) == propi:
             continue
-        out.append(
-            replace(ev, id=DESPLACAMENT + int(sid), nom=re.sub(r"\s+", " ", nom).strip())
-        )
+        out.append(replace(ev, id=DESPLACAMENT + int(sid), nom=re.sub(r"\s+", " ", nom).strip()))
     return out
 
 
