@@ -391,15 +391,18 @@ def ja_hi_es(conn: sqlite3.Connection, titol: Titol) -> Existent | None:
 
 def _tipus(nom: str) -> str:
     n = nom.lower()
+    # Primer el que distingeix proves que es juguen juntes (el femení, el júnior i el
+    # d'equips solen compartir dates i lloc amb l'absolut).
     for k in (
+        "team",
+        "junior",
+        "ladies",
+        "women",
         "world cup",
         "world championship",
         "europ",
         "grand prix",
         "masters",
-        "junior",
-        "ladies",
-        "women",
     ):
         if k in n:
             return k
@@ -415,7 +418,7 @@ def _afegeix_partides(conn: sqlite3.Connection, e_id: int, ll: Llegit) -> None:
     from fcbillar.umb import text_sets
 
     conn.executemany(
-        "INSERT OR REPLACE INTO umb_partides (esdeveniment_id, fase, grup, ordre, jugador_a, "
+        "INSERT OR IGNORE INTO umb_partides (esdeveniment_id, fase, grup, ordre, jugador_a, "
         "caramboles_a, entrades_a, mitjana_a, punts_a, serie_a, serie2_a, jugador_b, "
         "caramboles_b, entrades_b, mitjana_b, punts_b, serie_b, serie2_b, nacio_a, nacio_b, "
         "sets_a, sets_b) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -429,6 +432,56 @@ def _afegeix_partides(conn: sqlite3.Connection, e_id: int, ll: Llegit) -> None:
             for p in ll.partides
         ],
     )  # fmt: skip
+
+
+def falten_a(conn: sqlite3.Connection, firmes: Firmes, e_id: int, partides: list, titol: Titol) -> list:
+    """Les partides de Kozoom que de debò no són a la prova `e_id`.
+
+    Una partida que no ha coincidit pot ser que no hi sigui (un grup que el PDF de la
+    UMB no porta) però també una mànega d'un partit a sets (Kozoom en dona el marcador
+    de cada set) o un nom mal escrit a una de les dues fonts. Per això només es torna
+    si la parella no ha jugat mai a la prova i cap partida amb el mateix marcador, en
+    dates properes, no comparteix cap jugador.
+    """
+    parelles = [
+        (_mots(a), _mots(b))
+        for a, b in conn.execute(
+            "SELECT jugador_a, jugador_b FROM umb_partides WHERE esdeveniment_id = ?", (e_id,)
+        )
+    ]
+    marge = timedelta(days=7)
+    noves = []
+    for p in partides:
+        ma, mb = _mots(p.a.jugador), _mots(p.b.jugador)
+        if not ma or not mb or p.a.caramboles is None or p.b.caramboles is None:
+            continue
+        if any((x & ma and y & mb) or (x & mb and y & ma) for x, y in parelles):
+            continue
+        ca, cb = p.a.caramboles, p.b.caramboles
+        # `firmes` ja porta aquesta mateixa partida (es registra en llegir-la): es busca
+        # una altra amb el mateix marcador i algun jugador en comú.
+        if any(
+            (x | y) & (ma | mb) and {frozenset(x), frozenset(y)} != {frozenset(ma), frozenset(mb)}
+            for d0, _d1, (x, y) in firmes._idx.get((min(ca, cb), max(ca, cb), p.a.entrades), [])
+            if not (titol.inici and d0) or abs(d0 - titol.inici) <= 2 * marge
+        ):
+            continue
+        noves.append(p)
+    # En les proves a sets, Kozoom dona cada set i el total del partit amb la mateixa
+    # parella i fase: només es queda el total (el de més caramboles).
+    millor: dict[tuple, object] = {}
+    for p in noves:
+        clau = (p.fase, frozenset((p.a.jugador, p.b.jugador)))
+        if clau not in millor or p.a.caramboles + p.b.caramboles > millor[clau].a.caramboles + millor[clau].b.caramboles:
+            millor[clau] = p
+    return [p for p in noves if millor[(p.fase, frozenset((p.a.jugador, p.b.jugador)))] is p]
+
+
+def _nomes_les_que_falten(ll: Llegit, partides: list) -> None:
+    """Deixa a `ll` només aquestes partides i els jugadors que hi surten."""
+    ll.partides = partides
+    noms = {p.a.jugador for p in partides} | {p.b.jugador for p in partides}
+    ll.jugadors = [j for j in ll.jugadors if j.nom in noms]
 
 
 def carrega(conn: sqlite3.Connection, cache: Path, ids: list[str]) -> list[Resultat]:
@@ -450,13 +503,26 @@ def carrega(conn: sqlite3.Connection, cache: Path, ids: list[str]) -> list[Resul
         if tretes and tretes * 2 >= abans:
             # La majoria de partides ja hi són per una altra font (la RFEB, una altra
             # còpia de Kozoom): és la mateixa prova i no s'ha de crear una segona vegada.
-            out.append(
-                Resultat(DESPLACAMENT + int(pid), nom, "ja_hi_es", f"{tretes} de {abans} partides")
-            )
+            # Les que falten a la prova de la UMB (grups que el PDF no porta) s'hi afegeixen.
+            existent = ja_hi_es(conn, titol)
+            afegides = 0
+            if existent and ll.partides:
+                _nomes_les_que_falten(ll, falten_a(conn, firmes, existent.id, ll.partides, titol))
+                _afegeix_partides(conn, existent.id, ll)
+                afegides = len(ll.partides)
+            detall = f"{tretes} de {abans} partides"
+            if afegides:
+                detall += f", {afegides} afegides a {existent.id}"
+            out.append(Resultat(DESPLACAMENT + int(pid), nom, "ja_hi_es", detall))
             continue
         existent = ja_hi_es(conn, titol)
         if existent and existent.partides:
-            out.append(Resultat(existent.id, nom, "ja_hi_es", f"{existent.partides} partides"))
+            _nomes_les_que_falten(ll, falten_a(conn, firmes, existent.id, ll.partides, titol))
+            _afegeix_partides(conn, existent.id, ll)
+            detall = f"{existent.partides} partides"
+            if ll.partides:
+                detall += f", {len(ll.partides)} afegides"
+            out.append(Resultat(existent.id, nom, "ja_hi_es", detall))
             continue
         if existent:
             if not ll.partides:
