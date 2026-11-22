@@ -394,6 +394,8 @@ export interface OpenLiveProvQual {
   punts: number;
   mitjana: number;
   serie_major: number;
+  /** SM de cada partida jugada, de més gran a més petita (desempat: 2a, 3a...). */
+  series?: number[];
   pj?: number;
   caramboles?: number;
   entrades?: number;

@@ -19,8 +19,10 @@ from dataclasses import dataclass
 from .scraper.open_live import (
     Group,
     PhaseDetail,
+    _group_series_by_player,
     _group_sm_by_player,
     _is_regular_group,
+    series_key,
 )
 
 
@@ -34,6 +36,7 @@ class RoundWinner:
     punts: int
     mitjana: float
     serie_major: int
+    series: tuple[int, ...] = ()  # SM de cada partida, desc: 2a, 3a... desempaten
 
 
 def group_is_closed(group: Group) -> bool:
@@ -72,6 +75,7 @@ def secured_winners(phase: PhaseDetail) -> list[RoundWinner]:
                 punts=top.punts,
                 mitjana=top.mitjana,
                 serie_major=sm.get(top.player_name, 0),
+                series=_group_series_by_player(g).get(top.player_name, ()),
             )
         )
     return out
@@ -79,11 +83,17 @@ def secured_winners(phase: PhaseDetail) -> list[RoundWinner]:
 
 def rank_winners(winners: list[RoundWinner]) -> list[RoundWinner]:
     """Ordre de sembra a la ronda següent: **punts desc, mitjana desc, sèrie major
-    desc**, i nom com a últim desempat (determinisme). El k-è d'aquesta llista omple
-    el placeholder `<k>-<fase>`."""
+    desc**; si encara empaten, la 2a sèrie major, la 3a, i així. El nom és l'últim
+    desempat (determinisme). El k-è d'aquesta llista omple el placeholder `<k>-<fase>`."""
     return sorted(
         winners,
-        key=lambda w: (-w.punts, -w.mitjana, -w.serie_major, w.player_name),
+        key=lambda w: (
+            -w.punts,
+            -w.mitjana,
+            -w.serie_major,
+            series_key(w.series),
+            w.player_name,
+        ),
     )
 
 
@@ -114,6 +124,7 @@ def secured_qualifiers(phase: PhaseDetail, best_seconds: int = 0) -> list[RoundW
                 punts=sec.punts,
                 mitjana=sec.mitjana,
                 serie_major=sm.get(sec.player_name, 0),
+                series=_group_series_by_player(g).get(sec.player_name, ()),
             )
         )
     return firsts + rank_winners(seconds)[:best_seconds]

@@ -107,3 +107,18 @@ def test_tie_on_points_and_average_goes_to_the_best_serie():
     state = _state(grp("Grup AG", "SM3", 3), grp("Grup AH", "SM5", 5))
     assert _add_best_seconds_to_qualifiers(state, {"PPP": 1})
     assert _quals(state)[-1] == ("SM5", 2)
+
+
+def test_tie_on_best_serie_goes_to_the_second_best_serie():
+    # Mateixos punts, mitjana i sèrie major (5): passa qui té la 2a sèrie més alta.
+    def grp(label: str, second: str, sm2: int) -> Group:
+        g = _group(label, [(f"{label}1", 4, 0.9), (second, 2, 0.7), (f"{label}3", 0, 0.5)])
+        m0, m1, m2 = g.matches
+        m0 = MatchResult(**{**m0.__dict__, "serie_major_b": 5})
+        m2 = MatchResult(**{**m2.__dict__, "serie_major_a": sm2})
+        return Group(label=g.label, url="", standings=g.standings, matches=(m0, m1, m2))
+
+    state = _state(grp("Grup AG", "S2A", 2), grp("Grup AH", "S2B", 4))
+    assert _add_best_seconds_to_qualifiers(state, {"PPP": 1})
+    q = state.phases[0].provisional_qualifiers[-1]
+    assert (q.player_name, q.series) == ("S2B", (5, 4))

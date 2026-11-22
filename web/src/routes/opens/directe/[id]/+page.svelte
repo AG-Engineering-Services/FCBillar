@@ -69,6 +69,22 @@
 	let rankSeqs = $state<RankSeq[]>([]);
 	let selectedSeq = $state<number | null>(null);
 	let posByFcbId = $state<Map<string, number>>(new Map());
+	// Mitjana general del rànquing de la modalitat de l'open, per fcb_id. Per a
+	// tres bandes, la de la seqüència triada; per a la resta, la del darrer rànquing.
+	let mitjRankByFcbId = $state<Map<string, number>>(new Map());
+	const CODI_PER_MODALITAT: Record<string, number> = {
+		'Tres Bandes': 1, Lliure: 2, 'Quadre 47/2': 3, Banda: 4, 'Quadre 71/2': 6
+	};
+
+	// A igualtat de sèrie major, mana la 2a, després la 3a, i així.
+	function cmpSeries(a: number[] | undefined, b: number[] | undefined): number {
+		const n = Math.max(a?.length ?? 0, b?.length ?? 0);
+		for (let i = 0; i < n; i++) {
+			const d = (b?.[i] ?? 0) - (a?.[i] ?? 0);
+			if (d) return d;
+		}
+		return 0;
+	}
 	
 	const seqLabel = (s: RankSeq) =>
 		s.mes_pub && s.any_pub ? `${CA_MONTHS[(s.mes_pub - 1) % 12]} ${s.any_pub}` : `#${s.num_seq}`;
@@ -102,14 +118,45 @@
 	async function loadRankEntries(seq: number) {
 		const { data } = await db
 			.from('ranking_entries')
-			.select('player_fcb_id, posicio')
+			.select('player_fcb_id, posicio, mitjana_general')
 			.eq('modalitat_codi', 1)
 			.eq('num_seq', seq);
 		const m = new Map<string, number>();
-		for (const r of (data ?? []) as { player_fcb_id: string | null; posicio: number | null }[]) {
-			if (r.player_fcb_id != null && r.posicio != null) m.set(String(r.player_fcb_id), Number(r.posicio));
+		const mj = new Map<string, number>();
+		for (const r of (data ?? []) as { player_fcb_id: string | null; posicio: number | null; mitjana_general: number | null }[]) {
+			if (r.player_fcb_id == null) continue;
+			if (r.posicio != null) m.set(String(r.player_fcb_id), Number(r.posicio));
+			if (r.mitjana_general != null) mj.set(String(r.player_fcb_id), Number(r.mitjana_general));
 		}
 		posByFcbId = m;
+		mitjRankByFcbId = mj;
+	}
+
+	// Modalitats que no són tres bandes: mitjanes del darrer rànquing publicat.
+	async function loadRankMitjanes(codi: number) {
+		const { data: seqs } = await db
+			.from('rankings')
+			.select('num_seq')
+			.eq('modalitat_codi', codi)
+			.order('num_seq', { ascending: false })
+			.limit(1);
+		const seq = (seqs ?? [])[0]?.num_seq;
+		if (seq == null) return;
+		const { data } = await db
+			.from('ranking_entries')
+			.select('player_fcb_id, mitjana_general')
+			.eq('modalitat_codi', codi)
+			.eq('num_seq', seq);
+		const mj = new Map<string, number>();
+		for (const r of (data ?? []) as { player_fcb_id: string | null; mitjana_general: number | null }[]) {
+			if (r.player_fcb_id != null && r.mitjana_general != null) mj.set(String(r.player_fcb_id), Number(r.mitjana_general));
+		}
+		mitjRankByFcbId = mj;
+	}
+
+	function rankMitjana(name: string): number | null {
+		const id = payload?.player_ids?.[name];
+		return id != null ? (mitjRankByFcbId.get(String(id)) ?? null) : null;
 	}
 	
 	function onSelectSeq(seq: number) {
@@ -269,6 +316,9 @@
 			if (/TRES\s*BANDES|3\s*BANDES|3B/.test(nm3b) || row.modality === 'Tres Bandes') {
 				if (!rankSeqs.length) await loadRankSeqs();
 				if (selectedSeq != null && posByFcbId.size === 0) await loadRankEntries(selectedSeq);
+			} else if (mitjRankByFcbId.size === 0) {
+				const codi = CODI_PER_MODALITAT[row.modality ?? ''];
+				if (codi != null) loadRankMitjanes(codi);
 			}
 		}
 		// Marcadors en viu (OCR) — no bloqueja; es refresca a cada poll.
@@ -374,22 +424,35 @@
 
 <!-- Nom de jugador: enllaç a la fitxa si el podem resoldre, si no text pla. -->
 {#snippet player(name: string, cls: string)}
+	{@render playerWith(name, name, cls)}
+{/snippet}
+
+<!-- Nom (o el text que es passi) + mitjana general del rànquing, si en té. La
+     mitjana no s'escurça mai: si no hi cap, s'escurça el nom. -->
+{#snippet playerWith(name: string, label: string, cls: string)}
 	{@const href = playerHref(name)}
-	{#if href}
-		<a {href} class="{cls} hover:underline active:underline">{name}</a>
+	{@const rm = rankMitjana(name)}
+	{#if rm == null}
+		{#if href}
+			<a {href} class="{cls} hover:underline active:underline">{label}</a>
+		{:else}
+			<span class={cls}>{label}</span>
+		{/if}
 	{:else}
-		<span class={cls}>{name}</span>
+		<span class="{cls} inline-flex min-w-0 max-w-full items-baseline gap-1 {cls.includes('text-right') ? 'justify-end' : ''}">
+			{#if href}
+				<a {href} class="truncate hover:underline active:underline">{label}</a>
+			{:else}
+				<span class="truncate">{label}</span>
+			{/if}
+			<span class="shrink-0 font-mono text-[10px] font-normal text-slate-500 dark:text-slate-400" title="Mitjana general del rànquing">{rm.toFixed(3)}</span>
+		</span>
 	{/if}
 {/snippet}
 
 <!-- Igual que player() però mostra els dos COGNOMS, sense el nom (partides en directe). -->
 {#snippet playerShort(name: string, cls: string)}
-	{@const href = playerHref(name)}
-	{#if href}
-		<a {href} class="{cls} hover:underline active:underline">{surnamesOnly(name)}</a>
-	{:else}
-		<span class={cls}>{surnamesOnly(name)}</span>
-	{/if}
+	{@render playerWith(name, surnamesOnly(name), cls)}
 {/snippet}
 
 <!-- Una fila d'emparellament KO. `calc` = aparellament calculat (no publicat per la FCB). -->
@@ -527,7 +590,7 @@
 		{#if phase.kind === 'group'}
 			{@const quals = phase.provisional_qualifiers
 				.slice()
-				.sort((a, b) => a.position_in_group - b.position_in_group || b.punts - a.punts || b.mitjana - a.mitjana || b.serie_major - a.serie_major || a.player_name.localeCompare(b.player_name))}
+				.sort((a, b) => a.position_in_group - b.position_in_group || b.punts - a.punts || b.mitjana - a.mitjana || b.serie_major - a.serie_major || cmpSeries(a.series, b.series) || a.player_name.localeCompare(b.player_name))}
 			{@const nSeconds = quals.filter((q) => q.position_in_group > 1).length}
 			{@const phaseComplete = phase.groups.every(groupClosed)}
 			{#if quals.length}
