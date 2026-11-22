@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { tick } from 'svelte';
 	import { datesRanquing, ymDelRanquing, type DatesRanquing } from '$lib/dataRanquing';
 	import {
 		db,
@@ -883,8 +884,18 @@
 		clubRank = pos > 0 ? { posicio: pos, total: ranked.length } : null;
 	}
 
-	// Rendiment per nivell d'oponent (aranya, quantils) per a la modalitat seleccionada.
-	let ratingBuckets = $state<{ label: string; wins: number; losses: number; draws: number }[]>([]);
+	// Rendiment per nivell d'oponent (aranya) per a la modalitat seleccionada. Les
+	// branques del mig fan totes el mateix salt de nivell; la primera i l'última
+	// són obertes. `limits` = [min, max) de la franja (null = obert), o undefined
+	// si la BBDD encara no els té (migració 0044 sense aplicar).
+	type Franja = {
+		label: string;
+		wins: number;
+		losses: number;
+		draws: number;
+		limits?: { min: number | null; max: number | null };
+	};
+	let ratingBuckets = $state<Franja[]>([]);
 	let ratingIndex = $state<number | null>(null);
 	let ratingCrossover = $state<number | null>(null);
 	let radarMode = $state<'abs' | 'pct'>('abs');
@@ -901,7 +912,9 @@
 	async function loadRatingBuckets(id: string, mod: number) {
 		const { data } = await db
 			.from('player_rating_buckets')
-			.select('bucket_order, label, wins, losses, draws')
+			// '*' i no la llista de columnes: si la 0044 encara no hi és, la lectura
+			// no peta i l'aranya surt igual, sense el detall de les branques.
+			.select('*')
 			.eq('player_fcb_id', id)
 			.eq('modalitat_codi', mod)
 			.order('bucket_order', { ascending: true });
@@ -909,7 +922,8 @@
 			label: r.label,
 			wins: r.wins ?? 0,
 			losses: r.losses ?? 0,
-			draws: r.draws ?? 0
+			draws: r.draws ?? 0,
+			limits: 'rating_min' in r ? { min: r.rating_min ?? null, max: r.rating_max ?? null } : undefined
 		}));
 		const { data: idx } = await db
 			.from('player_rating_index')
@@ -919,6 +933,54 @@
 			.maybeSingle();
 		ratingIndex = idx?.weighted_index ?? null;
 		ratingCrossover = idx?.crossover ?? null;
+	}
+
+	// Detall d'una branca: les partides contra rivals d'aquella franja i la mitjana
+	// que tenia el rival. És la de rànquing en aquell moment; si encara no en
+	// tenia, la de la mateixa partida (el mateix criteri que fa les franges).
+	function nivellRival(g: GameRow): { v: number; deRanquing: boolean } | null {
+		const me1 = g.player1_fcb_id === fcbId;
+		const rk = me1 ? g.mitjana_rank2 : g.mitjana_rank1;
+		if (rk != null) return { v: rk, deRanquing: true };
+		const oppCar = me1 ? g.caramboles2 : g.caramboles1;
+		if (oppCar == null || !g.entrades) return null;
+		return { v: oppCar / g.entrades, deRanquing: false };
+	}
+	let franjaOberta = $state<number | null>(null);
+	let dlgFranja = $state<HTMLDialogElement>();
+	let obridorFranja: HTMLElement | null = null;
+	const franjaSel = $derived(franjaOberta != null ? ratingBuckets[franjaOberta] ?? null : null);
+	const partidesFranja = $derived.by(() => {
+		const lim = franjaSel?.limits;
+		if (!lim || selMod == null) return [];
+		return games
+			.filter((g) => g.modalitat_codi === selMod)
+			.map((g) => ({ g, p: persp(g), niv: nivellRival(g) }))
+			.filter(({ niv }) => {
+				if (!niv) return false;
+				// Arrodonit a 4 decimals, com els límits que calcula el servidor.
+				const r = Math.round(niv.v * 1e4) / 1e4;
+				return (lim.min == null || r >= lim.min) && (lim.max == null || r < lim.max);
+			});
+	});
+	function titolFranja(f: Franja): string {
+		const fmt = (v: number) => v.toFixed(2).replace('.', ',');
+		const l = f.limits;
+		if (!l || (l.min == null && l.max == null)) return `Rivals de ${f.label}`;
+		if (l.min == null) return `Rivals per sota de ${fmt(l.max!)}`;
+		if (l.max == null) return `Rivals de ${fmt(l.min)} o més`;
+		return `Rivals de ${fmt(l.min)} a ${fmt(l.max)}`;
+	}
+	async function obreFranja(i: number, ev: Event) {
+		obridorFranja = ev.currentTarget as HTMLElement;
+		franjaOberta = i;
+		await tick();
+		dlgFranja?.showModal();
+	}
+	function tancaFranja() {
+		franjaOberta = null;
+		obridorFranja?.focus();
+		obridorFranja = null;
 	}
 	// Marques de l'eix X (divisions) amb el número de rànquing de referència.
 	const xTicks = $derived.by(() => {
@@ -1728,7 +1790,7 @@
 						>
 					</div>
 				</div>
-				<RadarChart buckets={ratingBuckets} mode={radarMode} />
+				<RadarChart buckets={ratingBuckets} mode={radarMode} onselect={obreFranja} />
 				{#if ratingIndex != null || ratingCrossover != null}
 					<div class="mt-3 grid grid-cols-1 gap-2">
 						{#if ratingIndex != null}
@@ -2287,6 +2349,101 @@
 	{/if}
 {/snippet}
 
+<!-- Partides d'una branca de l'aranya. <dialog> natiu: tanca amb Escape. -->
+{#if franjaSel}
+	{@const nV = partidesFranja.filter((x) => x.p.won).length}
+	{@const nE = partidesFranja.filter((x) => x.p.tie).length}
+	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+	<dialog
+		bind:this={dlgFranja}
+		aria-labelledby="titol-franja"
+		onclose={tancaFranja}
+		onclick={(e) => e.target === e.currentTarget && dlgFranja?.close()}
+		class="mx-auto mb-0 mt-auto max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-0 text-slate-900 backdrop:bg-slate-900/50 dark:bg-slate-900 dark:text-slate-100 sm:m-auto sm:rounded-2xl"
+	>
+		<header
+			class="sticky top-0 flex items-start justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
+		>
+			<div class="min-w-0">
+				<h2 id="titol-franja" class="font-semibold text-slate-900 dark:text-slate-100">{titolFranja(franjaSel)}</h2>
+				{#if franjaSel.limits}
+					<p class="text-xs text-slate-500 dark:text-slate-400">
+						{nomModalitat(selMod) ?? ''}{nomModalitat(selMod) ? ' · ' : ''}{partidesFranja.length}
+						{partidesFranja.length === 1 ? 'partida' : 'partides'} ·
+						<span class="text-emerald-700 dark:text-emerald-400">{nV}V</span>
+						<span class="text-red-600 dark:text-red-400">{partidesFranja.length - nV - nE}D</span>{#if nE}
+							<span> {nE}E</span>{/if}
+					</p>
+				{/if}
+			</div>
+			<button
+				type="button"
+				onclick={() => dlgFranja?.close()}
+				class="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+				aria-label="Tanca">✕</button
+			>
+		</header>
+
+		{#if !franjaSel.limits}
+			<p class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+				El detall de les branques encara no s'ha publicat. Torna-hi després de la propera actualització de dades.
+			</p>
+		{:else if partidesFranja.length === 0}
+			<p class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+				No hi ha cap partida contra rivals d'aquest nivell.
+			</p>
+		{:else}
+			<div
+				class="flex items-center gap-2 border-b border-slate-100 px-4 py-1.5 text-2xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400"
+			>
+				<span class="w-5"></span>
+				<span class="flex-1">Rival</span>
+				<span class="w-16 text-right">Resultat</span>
+				<span class="w-16 text-right">Mitj. rival</span>
+			</div>
+			<ul>
+				{#each partidesFranja as { g, p, niv } (g.id)}
+					<li class="flex items-center gap-2 border-b border-slate-100 px-4 py-2 last:border-0 dark:border-slate-800">
+						<span
+							class="w-5 shrink-0 text-center text-xs font-bold {p.tie
+								? 'text-slate-500 dark:text-slate-400'
+								: p.won
+									? 'text-emerald-600 dark:text-emerald-400'
+									: 'text-red-500 dark:text-red-400'}"
+							title={p.tie ? 'Empat' : p.won ? 'Guanyada' : 'Perduda'}>{p.tie ? 'E' : p.won ? 'G' : 'P'}</span
+						>
+						<div class="min-w-0 flex-1">
+							{#if p.oppId && !kiosk}
+								<a
+									href="/jugador/{p.oppId}"
+									onclick={() => dlgFranja?.close()}
+									class="block truncate text-sm font-medium leading-tight underline-offset-2 hover:underline">{p.opp}</a
+								>
+							{:else}
+								<div class="truncate text-sm leading-tight">{p.opp}</div>
+							{/if}
+							<div class="truncate text-[11px] text-slate-500 dark:text-slate-400">
+								{fmtDate(p.date)}{#if p.comp} · {p.comp}{/if}
+							</div>
+						</div>
+						<div class="w-16 shrink-0 text-right">
+							<div class="font-mono text-sm tabular-nums">{p.myCar}–{p.oppCar}</div>
+							<div class="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{p.ent ? `${p.ent} ent.` : ''}</div>
+						</div>
+						<div class="w-16 shrink-0 text-right">
+							<div class="font-mono text-sm tabular-nums">{niv?.v.toFixed(3)}</div>
+							<div class="text-[11px] text-slate-500 dark:text-slate-400">{niv?.deRanquing ? 'rànquing' : 'partida'}</div>
+						</div>
+					</li>
+				{/each}
+			</ul>
+			<p class="px-4 py-3 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+				Mitj. rival: la del rànquing que tenia quan es va jugar la partida. Si encara no en tenia, la que va fer en
+				aquella partida (marcada «partida»).
+			</p>
+		{/if}
+	</dialog>
+{/if}
 
 <style>
 	/* A pantalla la capçalera no es veu, però el lector de pantalla hi troba els

@@ -165,6 +165,9 @@ export interface GameRow {
   serie_max2: number | null;
   entrades: number | null;
   guanyador_fcb_id: string | null;
+  /** Mitjana de rànquing de cada jugador quan es va jugar (NULL si no en tenia). */
+  mitjana_rank1?: number | null;
+  mitjana_rank2?: number | null;
 }
 
 export interface LligaGroup {
