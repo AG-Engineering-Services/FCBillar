@@ -18,8 +18,16 @@ from fcbillar.cloud_sync import _add_best_seconds_to_qualifiers
 
 def _match(a: str, b: str, *, played: bool = True) -> MatchResult:
     return MatchResult(
-        player_a=a, player_b=b, punts_a=0, punts_b=0, caramboles_a=0, caramboles_b=0,
-        serie_major_a=0, serie_major_b=0, entrades=10 if played else None, arbitre=None,
+        player_a=a,
+        player_b=b,
+        punts_a=0,
+        punts_b=0,
+        caramboles_a=0,
+        caramboles_b=0,
+        serie_major_a=0,
+        serie_major_b=0,
+        entrades=10 if played else None,
+        arbitre=None,
     )
 
 
@@ -31,15 +39,20 @@ def _group(label: str, rows: list[tuple[str, int, float]], *, closed: bool = Tru
         _match(names[1], names[2], played=closed),
     )
     return Group(
-        label=label, url="",
-        standings=tuple(GroupStanding(player_name=n, club="", punts=p, mitjana=m) for n, p, m in rows),
+        label=label,
+        url="",
+        standings=tuple(
+            GroupStanding(player_name=n, club="", punts=p, mitjana=m) for n, p, m in rows
+        ),
         matches=matches,
     )
 
 
 def _state(*groups: Group) -> OpenLiveState:
     ph = PhaseDetail(ref=PhaseRef(label="PRE-PRE-PRÈVIA", kind="group", url=""), groups=groups)
-    ph = PhaseDetail(ref=ph.ref, groups=groups, provisional_qualifiers=compute_provisional_qualifiers(ph))
+    ph = PhaseDetail(
+        ref=ph.ref, groups=groups, provisional_qualifiers=compute_provisional_qualifiers(ph)
+    )
     return OpenLiveState(
         structure=OpenStructure(division_id=223, name="OPEN", phase_id=1, phases=()),
         phases=[ph],
@@ -64,8 +77,14 @@ def test_best_second_joins_the_qualifiers_when_every_group_is_closed():
 def test_provisional_best_second_while_groups_are_still_playing():
     # Sant Adrià: AL acabat, AK a mig jugar, AG sense començar.
     state = _state(
-        _group("Grup AL", [("LOZANO", 2, 0.8676), ("MAGDALENO", 2, 0.6508), ("AMETLLER", 2, 0.6024)]),
-        _group("Grup AK", [("MUÑOZ", 2, 0.5), ("MARTÍNEZ", 2, 0.45), ("SISTANÉ", 0, 0.14)], closed=False),
+        _group(
+            "Grup AL", [("LOZANO", 2, 0.8676), ("MAGDALENO", 2, 0.6508), ("AMETLLER", 2, 0.6024)]
+        ),
+        _group(
+            "Grup AK",
+            [("MUÑOZ", 2, 0.5), ("MARTÍNEZ", 2, 0.45), ("SISTANÉ", 0, 0.14)],
+            closed=False,
+        ),
         Group(label="Grup AG", url="", standings=(), matches=()),
     )
     assert _add_best_seconds_to_qualifiers(state, {"PPP": 1})

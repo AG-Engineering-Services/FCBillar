@@ -6500,11 +6500,16 @@ def _add_best_seconds_to_qualifiers(state, best_seconds_by_code: dict[str, int])
             if not any(m.is_played for m in g.matches):
                 continue
             sec = g.standings[1]
-            candidates.append(RoundWinner(
-                player_name=sec.player_name, club=sec.club, group_label=g.label,
-                punts=sec.punts, mitjana=sec.mitjana,
-                serie_major=_group_sm_by_player(g).get(sec.player_name, 0),
-            ))
+            candidates.append(
+                RoundWinner(
+                    player_name=sec.player_name,
+                    club=sec.club,
+                    group_label=g.label,
+                    punts=sec.punts,
+                    mitjana=sec.mitjana,
+                    serie_major=_group_sm_by_player(g).get(sec.player_name, 0),
+                )
+            )
         seconds = rank_winners(candidates)[:n]
         extra = tuple(
             ProvisionalQualifier(
