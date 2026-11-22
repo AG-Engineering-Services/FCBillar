@@ -161,3 +161,28 @@ def test_la_pagina_mes_alta_de_partides():
     html = '<a href="/en/billiard-carom/results/9984/matches.html?page=2">2</a> <a href="?x"><a href="/en/billiard-carom/results/9984/matches.html?page=3">3</a>'
     assert _ultima_pagina(html) == 3
     assert _ultima_pagina("<p>sense paginació</p>") == 1
+
+
+def test_els_anys_de_dos_xifres_inclouen_l_historic_dels_europeus():
+    # Kozoom té també els europeus de 1947 o 1998: el «47» no és el 2047.
+    t = llegeix_titol("Balk-Line 47/2 - European Championship - Brno (CZE) - 5/1/98 to 5/3/98")
+    assert (t.inici, t.fi) == (date(1998, 5, 1), date(1998, 5, 3))
+    t = llegeix_titol("3-Cushion - European Championship - Brussel (BEL) - 4/5/47 to 4/8/47")
+    assert t.inici == date(1947, 4, 5)
+    t = llegeix_titol("3-Cushion - World Cup - Porto (POR) - 6/26/23 to 7/2/23")
+    assert t.inici == date(2023, 6, 26)
+
+
+def test_la_seleccio_no_llegeix_la_classificacio_d_una_prova_internacional(tmp_path):
+    import json
+
+    from fcbillar.kozoom_carrega import seleccio
+
+    proves = {
+        "1": {"id": "1", "titol": "3-Cushion - European Championship - Brno (CZE) - 5/1/98 to 5/3/98"},
+        "2": {"id": "2", "titol": "3-Cushion - Dutch National Championship - Wijchen (NED) - 1/1/05 to 1/2/05"},
+        "3": {"id": "3", "titol": "text que no és un títol"},
+    }
+    (tmp_path / "proves.json").write_text(json.dumps(proves), encoding="utf-8")
+    # Sense cap «rankings.html»: l'europeu entra pel títol, el nacional sense jugadors d'aquí no.
+    assert seleccio(tmp_path) == ["1"]

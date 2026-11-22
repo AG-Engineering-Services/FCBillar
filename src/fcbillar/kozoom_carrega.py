@@ -107,11 +107,12 @@ _CDX_PROVES = (
 )
 
 
-def inventaria(cache: Path, espera: float = 1.0) -> dict[str, dict]:
+def inventaria(cache: Path, espera: float = 1.0, id_max: int | None = None) -> dict[str, dict]:
     """Totes les proves arxivades: en baixa la classificació (o les partides) i en desa el títol.
 
     Triga hores (una pàgina per prova); es pot aturar i reprendre, perquè desa
-    sovint i no torna a baixar el que ja té.
+    sovint i no torna a baixar el que ja té. Amb `id_max` només s'arriba fins a
+    aquell id (els de Kozoom van creixent amb el temps: el 17000 és del 2016).
     """
     cache.mkdir(parents=True, exist_ok=True)
     sortida = cache / "proves.json"
@@ -131,7 +132,7 @@ def inventaria(cache: Path, espera: float = 1.0) -> dict[str, dict]:
             if parts[0] > p.get(f"ts_{m.group(2)}", ""):
                 p[f"ts_{m.group(2)}"], p[f"url_{m.group(2)}"] = parts[0], parts[1]
         for n, (pid, p) in enumerate(sorted(proves.items(), key=lambda kv: int(kv[0]))):
-            if fetes.get(pid, {}).get("titol"):
+            if fetes.get(pid, {}).get("titol") or (id_max is not None and int(pid) > id_max):
                 continue
             clau = "rankings" if "url_rankings" in p else "matches"
             html = _get(c, f"{WAYBACK}/web/{p['ts_' + clau]}id_/{p['url_' + clau]}")
@@ -159,17 +160,25 @@ def interessa(titol: Titol | None, nacionalitats: set[str | None]) -> bool:
 
 
 def seleccio(cache: Path) -> list[str]:
-    """Els ids de les proves de l'inventari que s'han de carregar."""
+    """Els ids de les proves de l'inventari que s'han de carregar.
+
+    Si el títol ja és d'una prova internacional no cal mirar la classificació
+    (llegir-les totes costa minuts); només es mira per a les altres, a la
+    recerca de jugadors d'Espanya.
+    """
     triades = []
     for pid, p in _proves(cache).items():
         titol = llegeix_titol(p.get("titol", ""))
+        if titol is None:
+            continue
+        if _INTERNACIONAL.search(titol.nom):
+            triades.append(pid)
+            continue
         f = cache / f"{pid}_rankings.html"
-        nats: set[str | None] = set()
         if f.exists():
             _t, files, _j = llegeix_classificacio(f.read_text(encoding="utf-8"))
-            nats = {c.nacionalitat for c in files}
-        if interessa(titol, nats):
-            triades.append(pid)
+            if interessa(titol, {c.nacionalitat for c in files}):
+                triades.append(pid)
     return sorted(triades, key=int)
 
 

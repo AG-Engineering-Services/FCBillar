@@ -78,7 +78,8 @@ def _data(text: str | None) -> date | None:
     if not text:
         return None
     m, d, a = (int(x) for x in text.split("/"))
-    return date(2000 + a if a < 70 else 1900 + a, m, d)
+    # Kozoom hi té també l'històric dels europeus (1925, 1947…): cap prova és posterior al 2024.
+    return date(2000 + a if a <= 24 else 1900 + a, m, d)
 
 
 def llegeix_titol(text: str) -> Titol | None:
