@@ -4,6 +4,11 @@ A diferència de la UMB, la CEB no penja PDF: cada pàgina d'esdeveniment porta
 dins del HTML les pestanyes de jugadors, partides i classificació. Els mundials
 de la llista de la CEB apunten als PDF de la UMB i no es llegeixen aquí.
 
+Els campionats que n'apleguen uns quants («European Championships 2023»,
+«Classics», «All-In-One») no porten resultats a la seva pàgina: cada modalitat
+és una pestanya que el web carrega per AJAX (`event-tabs`) i que no surt a la
+llista de la temporada.
+
 Els ids es desen com `100000 + id de la CEB` perquè no xoquin amb els de la UMB.
 """
 
@@ -12,7 +17,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import httpx
@@ -29,6 +34,8 @@ TEMPORADES = [10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14]
 _RE_EQUIPS = re.compile(r"(?i)team|coupe d.europe|euro-?league|assembly|club|biathlon|pentathlon")
 _RE_FILA = re.compile(r"<tr><td>(\d\d-\d\d-\d{4})<br>(\d\d-\d\d-\d{4})</td>(.*?)</tr>", re.S)
 _RE_ENLLAC = re.compile(r"<a href='(/events/([^']*?)-(\d+)\.html)'[^>]*>([^<]*)</a>")
+_RE_PESTANYA = re.compile(r"""eventTab\('(\d+)'\);\s*return false;"\s*title="([^"]*)\"""")
+AJAX = BASE + "/global/includes/ajax/functions.php"
 
 # Els països que la CEB escriu amb tres lletres als grups.
 _ISO3 = {
@@ -72,6 +79,30 @@ def es_individual(ev: Esdeveniment) -> bool:
     return not _RE_EQUIPS.search(ev.nom)
 
 
+def modalitats(html: str, ev: Esdeveniment) -> list[Esdeveniment]:
+    """Les modalitats d'un campionat que n'aplega unes quantes, amb el lloc i les dates d'aquest."""
+    propi = ev.id - DESPLACAMENT
+    out = []
+    for sid, nom in _RE_PESTANYA.findall(html):
+        if int(sid) == propi:
+            continue
+        out.append(
+            replace(ev, id=DESPLACAMENT + int(sid), nom=re.sub(r"\s+", " ", nom).strip())
+        )
+    return out
+
+
+def _post_pestanya(c: httpx.Client, sid: int) -> httpx.Response | None:
+    for i in range(3):
+        try:
+            r = c.post(AJAX, data={"action": "event-tabs", "id_event": str(sid)})
+            r.raise_for_status()
+            return r
+        except httpx.HTTPError:
+            time.sleep(2 * (i + 1))
+    return None
+
+
 def descobreix(cache: Path) -> list[Esdeveniment]:
     """Llista les temporades i baixa la pàgina de cada prova individual a `cache/{id}.html`."""
     cache.mkdir(parents=True, exist_ok=True)
@@ -85,14 +116,26 @@ def descobreix(cache: Path) -> list[Esdeveniment]:
             for e in llegeix_llista(r.text):
                 if es_individual(e):
                     vistos.setdefault(e.id, e)
-        for e in vistos.values():
+        for e in list(vistos.values()):
             dest = cache / f"{e.id - DESPLACAMENT}.html"
-            if dest.exists() and dest.stat().st_size > 0:
-                continue
-            r = _get(c, e.font.replace(" ", "%20"))
-            time.sleep(PAUSA)
-            if r is not None:
+            if not (dest.exists() and dest.stat().st_size > 0):
+                r = _get(c, e.font.replace(" ", "%20"))
+                time.sleep(PAUSA)
+                if r is None:
+                    continue
                 dest.write_bytes(r.content)
+            html = dest.read_text(encoding="utf-8", errors="replace")
+            for m in modalitats(html, e):
+                if m.id in vistos or not es_individual(m):
+                    continue
+                vistos[m.id] = m
+                sub = cache / f"{m.id - DESPLACAMENT}.html"
+                if sub.exists() and sub.stat().st_size > 0:
+                    continue
+                r = _post_pestanya(c, m.id - DESPLACAMENT)
+                time.sleep(PAUSA)
+                if r is not None:
+                    sub.write_bytes(r.content)
     evs = sorted(vistos.values(), key=lambda e: e.id)
     (cache / "esdeveniments.json").write_text(
         json.dumps([asdict(e) for e in evs], ensure_ascii=False, indent=1), encoding="utf-8"
