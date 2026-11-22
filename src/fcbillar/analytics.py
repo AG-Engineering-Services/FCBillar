@@ -125,6 +125,8 @@ def _crossover(buckets: list[dict]) -> float | None:
         dec = b["wins"] + b["losses"]
         if dec:
             lo, hi = b["rating_min"], b["rating_max"]
+            if lo is None and hi is None:
+                continue  # una sola franja sense límits: no hi ha nivell on situar-la
             rep = hi if lo is None else lo if hi is None else (lo + hi) / 2
             pts.append((rep, b["wins"] / dec))
     if not pts:

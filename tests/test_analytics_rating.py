@@ -58,6 +58,9 @@ def test_even_buckets_all_same_rating() -> None:
     assert len(buckets) == 1
     assert buckets[0]["label"] == "0,50"
     assert (buckets[0]["wins"], buckets[0]["losses"]) == (3, 1)
+    # Sense límits no hi ha nivell on situar el creuament (el 22/11 petava
+    # publish-cloud amb «NoneType doesn't define __round__»).
+    assert _crossover(buckets) is None
 
 
 def test_weighted_index_rewards_beating_strong() -> None:

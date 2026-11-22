@@ -932,12 +932,18 @@
 			.eq('player_fcb_id', id)
 			.eq('modalitat_codi', mod)
 			.order('bucket_order', { ascending: true });
-		ratingBuckets = (data ?? []).map((r) => ({
+		const files = data ?? [];
+		// Els límits hi són si alguna franja en té, o si només n'hi ha una (llavors
+		// és legítim que no en tingui). Unes quantes franges totes sense límits són
+		// franges velles, d'abans de publicar-los: sense detall.
+		const ambLimits =
+			files.length === 1 || files.some((r) => r.rating_min != null || r.rating_max != null);
+		ratingBuckets = files.map((r) => ({
 			label: r.label,
 			wins: r.wins ?? 0,
 			losses: r.losses ?? 0,
 			draws: r.draws ?? 0,
-			limits: 'rating_min' in r ? { min: r.rating_min ?? null, max: r.rating_max ?? null } : undefined
+			limits: ambLimits && 'rating_min' in r ? { min: r.rating_min ?? null, max: r.rating_max ?? null } : undefined
 		}));
 		const { data: idx } = await db
 			.from('player_rating_index')
