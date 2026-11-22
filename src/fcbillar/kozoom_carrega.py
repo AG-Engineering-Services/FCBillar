@@ -416,14 +416,16 @@ class Existent:
 
 
 def ja_hi_es(conn: sqlite3.Connection, titol: Titol) -> Existent | None:
-    """La prova de la UMB o la CEB que és la mateixa: mateixa disciplina i dates (±4 dies)."""
+    """La prova que ja hi ha (UMB, CEB o una altra còpia de Kozoom): mateixa disciplina i dates (±4 dies).
+
+    Kozoom té de vegades dues pàgines de la mateixa prova amb un dia de diferència.
+    """
     if titol.inici is None:
         return None
     disc = disciplina_de(titol.disciplina)
     marge = timedelta(days=4)
     for id_, ini, nom in conn.execute(
-        "SELECT id, data_inici, nom FROM umb_esdeveniments WHERE id < ? AND disciplina IS ?",
-        (DESPLACAMENT, disc),
+        "SELECT id, data_inici, nom FROM umb_esdeveniments WHERE disciplina IS ?", (disc,)
     ):
         if not ini:
             continue
@@ -437,11 +439,24 @@ def ja_hi_es(conn: sqlite3.Connection, titol: Titol) -> Existent | None:
         # campionat nacional, per exemple): han de ser del mateix tipus.
         if _tipus(nom) != _tipus(titol.nom):
             continue
+        # Els europeus de quadre 47/2 i de 71/2 es juguen sovint la mateixa setmana.
+        q_nou, q_vell = _quadre(f"{titol.disciplina} {titol.nom}"), _quadre(nom)
+        if q_nou and q_vell and q_nou != q_vell:
+            continue
         n = conn.execute(
             "SELECT count(*) FROM umb_partides WHERE esdeveniment_id = ?", (id_,)
         ).fetchone()[0]
         return Existent(id_, n)
     return None
+
+
+_RE_QUADRE = re.compile(r"(?<!\d)(45|47|71)\s*[/-]\s*([12])(?!\d)")
+
+
+def _quadre(text: str) -> str | None:
+    """«71/2», «47/2»…: la modalitat de quadre, que la BBDD desa només com a «quadre»."""
+    m = _RE_QUADRE.search(text)
+    return f"{m.group(1)}/{m.group(2)}" if m else None
 
 
 def _tipus(nom: str) -> str:

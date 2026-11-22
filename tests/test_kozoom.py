@@ -286,3 +286,24 @@ def test_la_classificacio_amb_la_bandera_en_una_cel_la_a_part():
     </tbody></table>"""
     _t, files, _j = llegeix_classificacio(html)
     assert [(f.posicio, f.jugador, f.nacionalitat) for f in files] == [(1, "CAUDRON Frédéric", "BE")]
+
+
+def test_dos_europeus_de_quadre_la_mateixa_setmana_no_es_confonen(tmp_path):
+    from fcbillar.db.migrations import ensure_schema
+    from fcbillar.kozoom import Titol
+    from fcbillar.kozoom_carrega import _quadre, ja_hi_es
+
+    assert (_quadre("European Championship Balkline 47/2"), _quadre("Balk-Line 71/2")) == (
+        "47/2",
+        "71/2",
+    )
+    conn = ensure_schema(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO umb_esdeveniments (id, nom, disciplina, data_inici, font) "
+        "VALUES (100411, 'European Championship Balkline 47/2', 'quadre', '2024-05-02', 'ceb')"
+    )
+    mateixa_setmana = date(2024, 5, 4)
+    el_71 = Titol("Balk-Line 71/2", "European Championship", "Cervera (ESP)", mateixa_setmana, None)
+    el_47 = Titol("Balk-Line 47/2", "European Championship", "Cervera (ESP)", mateixa_setmana, None)
+    assert ja_hi_es(conn, el_71) is None
+    assert ja_hi_es(conn, el_47).id == 100411
