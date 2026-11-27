@@ -2,7 +2,14 @@
 	import { onMount } from 'svelte';
 	import { db } from '$lib/db';
 	import { datesRanquing, ymDelRanquing, type DatesRanquing } from '$lib/dataRanquing';
-	import { follows, toggleFollow, clubFollows, toggleClubFollow } from '$lib/follows';
+	import {
+		follows,
+		toggleFollow,
+		clubFollows,
+		toggleClubFollow,
+		equipFollows,
+		toggleEquipFollow
+	} from '$lib/follows';
 	import { theme } from '$lib/theme';
 	import AvisError from '$lib/components/AvisError.svelte';
 	import { esAdminLocal } from '$lib/admin';
@@ -307,6 +314,53 @@
 	// Cercador de jugadors per nom o per club: es trien des de la llista, sense
 	// haver d'entrar a cada fitxa. Primer els que surten al rànquing, per posició.
 	let jugQ = $state('');
+
+	// Equips de la temporada (lliga i Lliga 4 Modalitats), per seguir-ne un sense
+	// seguir tot el club. Es llegeixen de la classificació de la lliga d'ara.
+	let equipQ = $state('');
+	let equipsTemporada = $state<{ equip: string; lligues: string[] }[]>([]);
+	let equipsError = $state(false);
+	onMount(async () => {
+		const perEquip = new Map<string, Set<string>>();
+		for (const [taula, nom] of [
+			['lliga_standings', 'Lliga'],
+			['lliga4m_standings', 'Lliga 4 Modalitats']
+		] as const) {
+			const { data: ultima, error: e1 } = await db
+				.from(taula)
+				.select('lliga_id')
+				.order('lliga_id', { ascending: false })
+				.limit(1);
+			if (e1) {
+				equipsError = true;
+				continue;
+			}
+			if (!ultima?.length) continue;
+			const { data, error: e2 } = await db
+				.from(taula)
+				.select('equip')
+				.eq('lliga_id', ultima[0].lliga_id);
+			if (e2) {
+				equipsError = true;
+				continue;
+			}
+			for (const r of data ?? []) {
+				if (!r.equip) continue;
+				if (!perEquip.has(r.equip)) perEquip.set(r.equip, new Set());
+				perEquip.get(r.equip)!.add(nom);
+			}
+		}
+		equipsTemporada = [...perEquip]
+			.map(([equip, l]) => ({ equip, lligues: [...l] }))
+			.sort((a, b) => a.equip.localeCompare(b.equip));
+	});
+	const equipMatches = $derived.by(() => {
+		const q = norm(equipQ.trim());
+		if (q.length < 2) return [];
+		return equipsTemporada
+			.filter((e) => norm(e.equip).includes(q) && !$equipFollows.includes(e.equip))
+			.slice(0, 20);
+	});
 	const jugMatches = $derived.by(() => {
 		const q = norm(jugQ.trim());
 		if (q.length < 2) return [];
@@ -470,6 +524,61 @@
 	{/each}
 	{#if $clubFollows.length === 0}
 		<p class="mb-4 text-[11px] text-slate-500 dark:text-slate-400">Cap club seguit. Cerca'n un a dalt.</p>
+	{/if}
+
+	<h2 class="mb-1 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Equips</h2>
+	<p class="mb-2 text-[11px] text-slate-500 dark:text-slate-400">
+		Per seguir un equip sense seguir tot el club. Els encontres arriben a la campana d'avisos.
+	</p>
+	<input
+		bind:value={equipQ}
+		type="search"
+		placeholder="Afegeix un equip…"
+		aria-label="Afegeix un equip"
+		class="mb-2 min-h-11 w-full rounded-lg border-slate-300 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
+	/>
+	{#if equipsError}
+		<p class="mb-2 text-[11px] text-red-700 dark:text-red-400">No s'han pogut carregar els equips d'aquesta temporada.</p>
+	{:else if equipQ.trim().length >= 2}
+		{#if equipMatches.length}
+			<ul class="mb-3 overflow-hidden rounded-lg bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+				{#each equipMatches as e (e.equip)}
+					<li class="border-b border-slate-100 last:border-0 dark:border-slate-800">
+						<button
+							type="button"
+							onclick={() => {
+								toggleEquipFollow(e.equip);
+								equipQ = '';
+							}}
+							class="flex min-h-11 w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm active:bg-slate-50 dark:active:bg-slate-800/50"
+						>
+							<span class="min-w-0">
+								<span class="block truncate">{e.equip}</span>
+								<span class="block truncate text-[11px] text-slate-500 dark:text-slate-400">{e.lligues.join(' · ')}</span>
+							</span>
+							<span class="shrink-0 text-slate-900 dark:text-slate-100">+ seguir</span>
+						</button>
+					</li>
+				{/each}
+			</ul>
+		{:else}
+			<p class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">Cap equip amb «{equipQ.trim()}» aquesta temporada.</p>
+		{/if}
+	{/if}
+	{#if $equipFollows.length}
+		<ul class="mb-3 overflow-hidden rounded-lg bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+			{#each $equipFollows as e (e)}
+				<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-1 last:border-0 dark:border-slate-800">
+					<span class="min-w-0 flex-1 truncate text-sm font-medium">{e}</span>
+					<button
+						type="button"
+						onclick={() => toggleEquipFollow(e)}
+						aria-label="Deixa de seguir {e}"
+						class="min-h-11 shrink-0 px-2 text-xs text-amber-700 dark:text-amber-400">★ treure</button
+					>
+				</li>
+			{/each}
+		</ul>
 	{/if}
 
 	<h2 class="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Jugadors</h2>

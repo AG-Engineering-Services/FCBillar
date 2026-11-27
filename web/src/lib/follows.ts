@@ -42,3 +42,40 @@ clubFollows.subscribe((v) => {
 export function toggleClubFollow(id: string): void {
 	clubFollows.update((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]));
 }
+
+// Seguiment d'EQUIPS (per dispositiu), pel nom que en dona la federació
+// («C.B.BANYOLES A»). Per als avisos dels encontres de lliga i de Copa.
+function llistaDesada(clau: string): string[] {
+	if (typeof localStorage === 'undefined') return [];
+	try {
+		const v = JSON.parse(localStorage.getItem(clau) || '[]');
+		return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : [];
+	} catch {
+		return [];
+	}
+}
+function llistaPersistent(clau: string) {
+	const s = writable<string[]>(llistaDesada(clau));
+	s.subscribe((v) => {
+		try {
+			if (typeof localStorage !== 'undefined') localStorage.setItem(clau, JSON.stringify(v));
+		} catch {
+			/* emmagatzematge bloquejat: la llista només dura la visita */
+		}
+	});
+	return s;
+}
+function commuta(s: ReturnType<typeof llistaPersistent>, id: string): void {
+	s.update((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]));
+}
+
+export const equipFollows = llistaPersistent('fcbillar_equip_follows');
+export function toggleEquipFollow(equip: string): void {
+	commuta(equipFollows, equip);
+}
+
+// Seguiment d'OPENS en directe, per `fcb_division_id`: totes les partides als avisos.
+export const openFollows = llistaPersistent('fcbillar_open_follows');
+export function toggleOpenFollow(id: string): void {
+	commuta(openFollows, id);
+}

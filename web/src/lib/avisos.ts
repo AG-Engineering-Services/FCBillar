@@ -1,6 +1,7 @@
 // Avisos de resultats. El servidor (`fcbillar avisa`, a GitHub Actions) envia
 // a cada subscripció només els tipus que hi té marcats; aquests identificadors
 // han de coincidir amb els de src/fcbillar/avisos.py.
+// Els tipus que porten seguiments diuen quants n'hi ha a la campana.
 export const TIPUS_AVIS = [
 	{
 		id: 'opens_3b',
@@ -8,29 +9,39 @@ export const TIPUS_AVIS = [
 		detall: 'Totes les partides acabades, agrupades cada pocs minuts.'
 	},
 	{
-		id: 'banyoles_lliga',
-		nom: 'Banyoles: lliga',
-		detall: "El resultat de cada encontre d'un equip del Banyoles."
+		id: 'opens_seguits',
+		nom: 'Opens seguits',
+		detall: 'Totes les partides dels opens que segueixes des de la seva pàgina en directe.'
 	},
 	{
-		id: 'banyoles_opens',
-		nom: 'Banyoles: opens',
-		detall: 'Partides de jugadors del Banyoles a opens de qualsevol modalitat.'
+		id: 'clubs_seguits',
+		nom: 'Clubs i equips seguits',
+		detall: 'El resultat de cada encontre de lliga i de Copa.'
 	},
 	{
-		id: 'banyoles_copa_camp',
-		nom: 'Banyoles: Copa i Camp. de Catalunya',
-		detall: 'Resultats del Banyoles i dels seus jugadors en aquestes competicions.'
-	},
-	{
-		// El detall el posa la campana: diu quants jugadors hi ha a ★ Seguits.
 		id: 'jugadors_seguits',
 		nom: 'Jugadors seguits',
-		detall: 'Les partides dels jugadors de ★ Seguits, de qualsevol competició.'
+		detall: 'Les seves partides als opens i als campionats de Catalunya.'
 	}
 ] as const;
 
 export type TipusAvis = (typeof TIPUS_AVIS)[number]['id'];
+
+// Llista de seguiments que va al servidor: «j:278», «c:C.B.BANYOLES»,
+// «e:C.B.BANYOLES A», «o:223» (vegeu src/fcbillar/avisos.py).
+export function seguiments(
+	jugadors: string[],
+	clubs: string[],
+	equips: string[],
+	opens: string[]
+): string[] {
+	return [
+		...jugadors.map((x) => `j:${x}`),
+		...clubs.map((x) => `c:${x}`),
+		...equips.map((x) => `e:${x}`),
+		...opens.map((x) => `o:${x}`)
+	];
+}
 
 // Clau pública VAPID: no és secreta, viatja al navegador per definició. La
 // privada és el secret VAPID_PRIVATE_KEY del repositori.

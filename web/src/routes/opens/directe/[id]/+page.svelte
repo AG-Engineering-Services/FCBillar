@@ -9,6 +9,7 @@
 
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { openFollows, toggleOpenFollow } from '$lib/follows';
 	import { page } from '$app/stores';
 	import { db, isWalkover, isDecided, type OpenLivePhase, type OpenLiveGroup, type OpenLiveMatch, type OpenLiveScore, type OpenLiveClassRow } from '$lib/db';
 
@@ -506,6 +507,21 @@
 		<p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
 			{#if projected}Sorteig <strong>projectat</strong> · encara no oficial{:else}Actualitzat {agoText(row.captured_at)} · es refresca sol{/if}
 		</p>
+		<!-- Seguir l'open sencer: totes les seves partides a la campana d'avisos. Una
+		     projecció té un id inventat que no rebrà mai cap partida: no es pot seguir. -->
+		{#if !projected}
+			{@const divId = String(row.fcb_division_id)}
+			<button
+				type="button"
+				onclick={() => toggleOpenFollow(divId)}
+				aria-pressed={$openFollows.includes(divId)}
+				class="mt-1 inline-flex min-h-11 items-center gap-1 rounded-sm px-2 text-sm font-medium {$openFollows.includes(divId)
+					? 'text-amber-700 dark:text-amber-400'
+					: 'text-slate-700 dark:text-slate-200'} hover:bg-slate-100 dark:hover:bg-slate-800"
+			>
+				{$openFollows.includes(divId) ? '★ Segueixes aquest open' : '☆ Segueix aquest open'}
+			</button>
+		{/if}
 	</div>
 
 	{#if projected}
