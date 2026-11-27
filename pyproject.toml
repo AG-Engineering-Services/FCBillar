@@ -25,6 +25,7 @@ dependencies = [
     "pdfplumber>=0.11",
     "supabase>=2.7",
     "boto3>=1.34",
+    "pywebpush>=2.0",
 ]
 
 [dependency-groups]

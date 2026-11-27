@@ -100,6 +100,7 @@ jobs:
       NEON_DATA_API_URL: ${{ secrets.NEON_DATA_API_URL }}
       NEON_C3B_DATA_API_URL: ${{ secrets.NEON_C3B_DATA_API_URL }}
       NEON_SERVICE_ROLE_TOKEN: ${{ secrets.NEON_SERVICE_ROLE_TOKEN }}
+      VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
       STATE_TAG: fcb-state
       # Buit vol dir «les copes que la federació té al llistat». Fins a
       # l'octubre de 2026 hi deia '7', l'edició de la 2025-26: es tornava a
@@ -349,6 +350,11 @@ jobs:
           # van esgotar els 5 GB del pla gratuït de Neon. Va sense cometes a
           # posta: buit no ha de ser un argument.
           run "publish-cloud"        uv run --no-dev fcbillar publish-cloud $LLEUGER
+
+          # Avisos push dels resultats nous del Banyoles (lliga, Copa i campionats)
+          # als dispositius subscrits. Fora de `run` a posta: no és cap pas de
+          # dades, i que falli no ha de pesar a `comprova-frescor`.
+          uv run --no-dev fcbillar avisa-reingesta             || echo "::warning::avisos de la reingesta NO enviats"
 
           # FORA de la passada diària des de l'octubre de 2026, per la mateixa
           # transferència:

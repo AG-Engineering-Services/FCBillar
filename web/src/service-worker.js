@@ -64,3 +64,44 @@ self.addEventListener('fetch', (event) => {
 		})()
 	);
 });
+
+// Avisos de resultats (fcbillar avisa, des de GitHub Actions). El missatge ja
+// porta el text sencer: el telèfon el pot ensenyar sense obrir l'app.
+self.addEventListener('push', (event) => {
+	let dades = {};
+	try {
+		dades = event.data ? event.data.json() : {};
+	} catch {
+		dades = { body: event.data ? event.data.text() : '' };
+	}
+	const title = dades.title || 'FCBillar';
+	event.waitUntil(
+		self.registration.showNotification(title, {
+			body: dades.body || '',
+			// La mateixa etiqueta substitueix l'avís anterior en lloc d'apilar-ne:
+			// només la fan servir els resums que es reescriuen.
+			tag: dades.tag || undefined,
+			icon: '/icon-192.png',
+			badge: '/icon-192.png',
+			data: { url: dades.url || '/' }
+		})
+	);
+});
+
+self.addEventListener('notificationclick', (event) => {
+	event.notification.close();
+	const desti = new URL(event.notification.data?.url || '/', self.location.origin).href;
+	event.waitUntil(
+		(async () => {
+			const finestres = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+			for (const f of finestres) {
+				if ('focus' in f) {
+					await f.focus();
+					if ('navigate' in f) await f.navigate(desti);
+					return;
+				}
+			}
+			await self.clients.openWindow(desti);
+		})()
+	);
+});
