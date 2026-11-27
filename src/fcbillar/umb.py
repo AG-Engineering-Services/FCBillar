@@ -303,7 +303,9 @@ def _fila_amb_sets(nom: str, nat: str | None, nums: list[str], k: int) -> _Fila 
 
 
 _RE_FASE = re.compile(
-    r"(?i)(qual|final|semi|quarter|round|groups?\b|\brank\s*\d|1/\d|\br\d+\b|main tournament)"
+    # «semi» sencer o «semifinal»: un jugador com SEMIZ no és cap títol de fase.
+    r"(?i)(qual|final|\bsemi(?:[ -]?finals?)?\b|quarter|round|groups?\b|\brank\s*\d|1/\d|\br\d+\b"
+    r"|main tournament)"
 )
 _RE_CAPCALERA = re.compile(r"(?i)^(group\s+match|match\s*players|players\s+nat|pena|lty|rank\s)")
 

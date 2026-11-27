@@ -562,6 +562,16 @@ def test_un_jugador_que_es_diu_frank_no_es_una_fase():
     assert _fase_de_linia("Pre-Qual Groups DEF") == "Pre-Qual Groups DEF"
 
 
+def test_un_jugador_que_es_diu_semiz_no_es_una_fase():
+    # «SEMIZ» començava per «semi» (Crystal Kelly 2009, partides a sets).
+    from fcbillar.umb import _fase_de_linia
+
+    assert _fase_de_linia("SEMIZ Ayhan 7 13 15 14 3 14 25 41 0,609 0 -1 5") is None
+    assert _fase_de_linia("SEMI FINAL") == "SEMI FINAL"
+    assert _fase_de_linia("Semi-Finals") == "Semi-Finals"
+    assert _fase_de_linia("Semifinal") == "Semifinal"
+
+
 def test_disciplina_de_les_proves_de_tres_bandes_que_el_nom_no_diu():
     from fcbillar.umb_carrega import disciplina_de
 
