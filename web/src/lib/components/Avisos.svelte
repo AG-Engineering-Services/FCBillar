@@ -2,7 +2,8 @@
 	import { onMount, tick } from 'svelte';
 	import { get } from 'svelte/store';
 	import { db } from '$lib/db';
-	import { follows } from '$lib/follows';
+	import { follows, toggleFollow } from '$lib/follows';
+	import { arreglaCodificacio } from '$lib/codificacio';
 	import {
 		TIPUS_AVIS,
 		type TipusAvis,
@@ -78,11 +79,43 @@
 		});
 	});
 
+	// Noms dels seguits, per ensenyar-los al panell. Es demanen en obrir-lo: la
+	// llista del dispositiu només guarda els números de fitxa.
+	type Seguit = { fcb_id: string; nom: string; club: string | null };
+	let seguitsInfo = $state<Seguit[]>([]);
+	let seguitsError = $state(false);
+	async function carregaSeguits() {
+		const ids = get(follows);
+		seguitsError = false;
+		if (!ids.length) {
+			seguitsInfo = [];
+			return;
+		}
+		const { data, error: e } = await db
+			.from('players')
+			.select('fcb_id, nom, club_fcb_id')
+			.in('fcb_id', ids);
+		if (e) {
+			seguitsError = true;
+			return;
+		}
+		seguitsInfo = (data ?? [])
+			.map((p) => ({
+				fcb_id: String(p.fcb_id),
+				nom: arreglaCodificacio(p.nom),
+				club: p.club_fcb_id
+			}))
+			.sort((a, b) => a.nom.localeCompare(b.nom));
+	}
+	// Els que es treuen des del panell desapareixen de la llista al moment.
+	const seguitsVisibles = $derived(seguitsInfo.filter((s) => $follows.includes(s.fcb_id)));
+
 	async function obre() {
 		obert = !obert;
 		missatge = '';
 		error = '';
 		if (obert) {
+			carregaSeguits();
 			await tick();
 			panell?.querySelector<HTMLElement>('input, button')?.focus();
 		}
@@ -281,6 +314,39 @@
 							</span>
 						</label>
 						{#if t.id === 'jugadors_seguits'}
+							{#if seguitsError}
+								<p class="ml-9 text-xs text-red-700 dark:text-red-400">
+									No s'han pogut carregar els noms dels seguits.
+								</p>
+							{:else if seguitsVisibles.length}
+								<ul
+									aria-label="Jugadors seguits"
+									class="ml-9 max-h-48 overflow-y-auto rounded-sm border border-slate-200 dark:border-slate-700"
+								>
+									{#each seguitsVisibles as s (s.fcb_id)}
+										<li class="flex items-center border-b border-slate-100 last:border-0 dark:border-slate-800">
+											<a
+												href="/jugador/{s.fcb_id}"
+												onclick={() => (obert = false)}
+												class="flex min-h-11 min-w-0 flex-1 flex-col justify-center px-2 hover:bg-slate-50 dark:hover:bg-slate-800"
+											>
+												<span class="truncate text-xs font-medium">{s.nom}</span>
+												{#if s.club}<span class="truncate text-[11px] text-slate-600 dark:text-slate-400"
+														>{s.club}</span
+													>{/if}
+											</a>
+											<button
+												type="button"
+												onclick={() => toggleFollow(s.fcb_id)}
+												aria-label="Deixa de seguir {s.nom}"
+												title="Deixa de seguir"
+												class="grid min-h-11 min-w-11 shrink-0 place-items-center text-amber-600 hover:bg-slate-50 dark:text-amber-400 dark:hover:bg-slate-800"
+												>★</button
+											>
+										</li>
+									{/each}
+								</ul>
+							{/if}
 							<a
 								href="/seguiment"
 								onclick={() => (obert = false)}
