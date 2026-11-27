@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
+	import { get } from 'svelte/store';
 	import { db } from '$lib/db';
+	import { follows } from '$lib/follows';
 	import {
 		TIPUS_AVIS,
 		type TipusAvis,
@@ -59,6 +61,23 @@
 		if (sub) desaAlNuvol(sub, [...triats]).catch(() => {});
 	});
 
+	// Seguir o deixar de seguir un jugador (★ a la fitxa) actualitza els avisos
+	// d'aquest dispositiu sense haver de tornar a la campana.
+	let nSeguits = $state(0);
+	onMount(() => {
+		let primer = true;
+		return follows.subscribe(async (llista) => {
+			nSeguits = llista.length;
+			if (primer) {
+				primer = false;
+				return;
+			}
+			if (estat !== 'actiu' || !triats.has('jugadors_seguits')) return;
+			const actual = await subscripcioActual();
+			if (actual) desaAlNuvol(actual, [...triats]).catch(() => {});
+		});
+	});
+
 	async function obre() {
 		obert = !obert;
 		missatge = '';
@@ -94,13 +113,20 @@
 
 	async function desaAlNuvol(sub: PushSubscription, tipus: TipusAvis[]) {
 		const j = sub.toJSON();
-		const { error: e } = await db.rpc('desa_subscripcio', {
+		const base = {
 			p_endpoint: sub.endpoint,
 			p_p256dh: j.keys?.p256dh,
 			p_auth: j.keys?.auth,
 			p_tipus: tipus,
 			p_dispositiu: navigator.userAgent.slice(0, 200)
-		});
+		};
+		let { error: e } = await db.rpc('desa_subscripcio', { ...base, p_jugadors: get(follows) });
+		// PGRST202: el servidor encara no té la funció amb `p_jugadors` (migració
+		// 0046 sense aplicar, o el Data API encara no la veu). Es desa la resta.
+		if (e?.code === 'PGRST202') {
+			const sense = tipus.filter((t) => t !== 'jugadors_seguits');
+			({ error: e } = await db.rpc('desa_subscripcio', { ...base, p_tipus: sense }));
+		}
 		if (e) throw new Error(`No s'ha pogut desar al núvol: ${e.message}`);
 	}
 
@@ -243,9 +269,25 @@
 							/>
 							<span>
 								<span class="block font-medium">{t.nom}</span>
-								<span class="block text-xs text-slate-600 dark:text-slate-400">{t.detall}</span>
+								<span class="block text-xs text-slate-600 dark:text-slate-400"
+									>{t.id === 'jugadors_seguits'
+										? nSeguits === 0
+											? 'Encara no en segueixes cap: marca’ls amb ★ a la seva fitxa.'
+											: nSeguits === 1
+												? 'Les partides del jugador de ★ Seguits, de qualsevol competició.'
+												: `Les partides dels ${nSeguits} jugadors de ★ Seguits, de qualsevol competició.`
+										: t.detall}</span
+								>
 							</span>
 						</label>
+						{#if t.id === 'jugadors_seguits'}
+							<a
+								href="/seguiment"
+								onclick={() => (obert = false)}
+								class="ml-9 inline-flex min-h-11 items-center text-xs font-medium text-sky-700 underline underline-offset-2 dark:text-sky-400"
+								>Tria'ls a ★ Seguits</a
+							>
+						{/if}
 					{/each}
 				</fieldset>
 				<div class="mt-3 flex flex-wrap gap-2">

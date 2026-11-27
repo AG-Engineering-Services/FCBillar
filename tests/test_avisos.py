@@ -223,3 +223,62 @@ def test_sense_clau_vapid_no_marca_res(monkeypatch):
 def test_la_clau_no_porta_caracters_que_trenquen_el_filtre_in():
     r = Resultat('copa:1:2:C.B.BLANES "B"|C.B.BANYOLES (A), x', frozenset(), "g", "t", "l", "/")
     assert r.clau == "copa:1:2:C.B.BLANES B|C.B.BANYOLES A x"
+
+
+# --- Jugadors seguits ------------------------------------------------------------
+
+
+def test_opens_d_altres_modalitats_pels_jugadors_seguits():
+    fila = _open(
+        400,
+        "OPEN LLIURE PUNT D'ATAC",
+        "Lliure",
+        [
+            _partida("GARRIGA COMAS, JORDI", "MAS CANADELL, JOSEP", 30, 25),
+            _partida("PUIG SOLER, JOAN", "MAS CANADELL, JOSEP", 30, 25),
+        ],
+        CLUBS,
+    )
+    fila["payload_json"]["player_ids"] = {"GARRIGA COMAS, JORDI": 11, "MAS CANADELL, JOSEP": 22}
+    assert resultats_opens([fila]) == []
+    rs = resultats_opens([fila], seguits={"11"})
+    assert len(rs) == 1 and rs[0].tipus == frozenset() and rs[0].jugadors == {"11"}
+
+
+def test_missatges_dels_seguits_nomes_amb_el_tipus_marcat():
+    r = _r("x", set())
+    r.jugadors = frozenset({"11"})
+    assert missatges(["opens_3b"], [r], {"11"}) == []
+    (m,) = missatges(["jugadors_seguits"], [r], {"11"})
+    assert m["body"] == "línia x"
+    assert missatges(["jugadors_seguits"], [r], {"99"}) == []
+
+
+def test_un_jugador_que_es_comenca_a_seguir_no_envia_el_que_ja_ha_jugat(monkeypatch):
+    enviats = []
+    monkeypatch.setattr(avisos, "_envia_un", lambda sub, m, clau: enviats.append(m) or None)
+    sub = {
+        "endpoint": "https://p/1",
+        "p256dh": "x",
+        "auth": "y",
+        "tipus": ["jugadors_seguits"],
+        "jugadors": ["11"],
+    }
+    db = _Db([sub])
+    db.enviats.add("base:reingesta")
+
+    def de(clau):
+        r = _r(clau, set())
+        r.jugadors = frozenset({"11"})
+        return r
+
+    def log(*_):
+        return None
+
+    avisos._avisa(db, "reingesta", lambda s: [de("vella")], log, max_nous=40, clau_privada="k")
+    assert enviats == [] and "base:reingesta:jugador:11" in db.enviats
+
+    avisos._avisa(
+        db, "reingesta", lambda s: [de("vella"), de("nova")], log, max_nous=40, clau_privada="k"
+    )
+    assert len(enviats) == 1 and enviats[0]["body"] == "línia nova"
