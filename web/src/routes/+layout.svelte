@@ -5,14 +5,20 @@
 	import { afterNavigate } from '$app/navigation';
 	import { db } from '$lib/db';
 	import { theme, toggleTheme } from '$lib/theme';
-	import { esAdminLocal } from '$lib/admin';
+	import { esAdminLocal, marcaAdmin } from '$lib/admin';
 	import Avisos from '$lib/components/Avisos.svelte';
+	import EntradaAdmin from '$lib/components/EntradaAdmin.svelte';
 	let { children } = $props();
 
 	// La campana només surt als dispositius marcats d'administració: els avisos
 	// són per a l'Albert, no per a la resta de qui té la PWA.
 	let admin = $state(false);
-	onMount(() => (admin = esAdminLocal($page.url)));
+	let entradaAdmin: EntradaAdmin | undefined = $state();
+	onMount(() => {
+		// `?admin` a l'adreça deixa la marca desada, no només per a aquella visita.
+		if ($page.url.searchParams.has('admin')) marcaAdmin();
+		admin = esAdminLocal($page.url);
+	});
 
 	// Punt vermell llampegant al costat d'"Opens" NOMÉS quan hi ha competició
 	// activa ara mateix. Ho lliguem a la frescor de open_live: el cron només
@@ -98,12 +104,17 @@
 				<circle cx="11.2" cy="22" r="1.8" fill="#fff" opacity="0.7" />
 				<circle cx="24.2" cy="22" r="1.8" fill="#fff" opacity="0.5" />
 			</svg>
-			<span class="text-base font-bold tracking-tight md:text-lg">FCBillar</span>
+			<!-- Cinc tocs seguits obren l'entrada d'administració (vegeu EntradaAdmin).
+			     És una drecera amagada a posta: no és cap control per a ningú més. -->
+			<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+			<span class="select-none text-base font-bold tracking-tight md:text-lg" onclick={() => entradaAdmin?.toc()}
+				>FCBillar</span
+			>
 			<span class="ag-et hidden sm:inline" title="Font de les dades"
 				>Federació Catalana de Billar</span
 			>
 			<span class="ml-auto"></span>
-			{#if admin}<Avisos />{/if}
+			{#if admin}<Avisos />{:else}<EntradaAdmin bind:this={entradaAdmin} onAdmin={() => (admin = true)} />{/if}
 			<button
 				type="button"
 				onclick={() => location.reload()}
