@@ -6,6 +6,7 @@
 	import { theme } from '$lib/theme';
 	import AvisError from '$lib/components/AvisError.svelte';
 	import { esAdminLocal } from '$lib/admin';
+	import { arreglaCodificacio } from '$lib/codificacio';
 
 	// Colors dels gràfics SVG reactius al tema (clar/fosc).
 	const cGrid = $derived($theme === 'dark' ? '#1e293b' : '#eef2f7');
@@ -101,7 +102,7 @@
 			loading = false;
 			return;
 		}
-		allPlayers = pl ?? [];
+		allPlayers = (pl ?? []).map((p) => ({ ...p, nom: arreglaCodificacio(p.nom) }));
 		allClubs = cl ?? [];
 		clubsMap = new Map((cl ?? []).map((c) => [c.fcb_id, c.nom]));
 		dates = datesRanquing(maxR ?? []);
@@ -303,6 +304,25 @@
 	function norm(s: string) {
 		return (s ?? '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 	}
+	// Cercador de jugadors per nom o per club: es trien des de la llista, sense
+	// haver d'entrar a cada fitxa. Primer els que surten al rànquing, per posició.
+	let jugQ = $state('');
+	const jugMatches = $derived.by(() => {
+		const q = norm(jugQ.trim());
+		if (q.length < 2) return [];
+		return allPlayers
+			.filter(
+				(p) =>
+					norm(p.nom).includes(q) ||
+					norm(clubsMap.get(p.club_fcb_id ?? '') ?? p.club_fcb_id ?? '').includes(q)
+			)
+			.map((p) => ({ ...p, rank: rankMap.get(p.fcb_id) }))
+			.sort(
+				(a, b) =>
+					(a.rank?.posicio ?? 1e9) - (b.rank?.posicio ?? 1e9) || a.nom.localeCompare(b.nom)
+			)
+			.slice(0, 40);
+	});
 	const clubMatches = $derived(
 		clubQ.trim()
 			? allClubs.filter((c) => norm(c.nom).includes(norm(clubQ.trim())) && !$clubFollows.includes(c.fcb_id)).slice(0, 8)
@@ -433,6 +453,15 @@
 									{/if}
 								</span>
 							{/if}
+							<button
+								type="button"
+								onclick={() => toggleFollow(String(p.fcb_id))}
+								aria-pressed={$follows.includes(String(p.fcb_id))}
+								aria-label="Segueix {p.nom}"
+								class="grid min-h-11 min-w-11 shrink-0 place-items-center text-base {$follows.includes(String(p.fcb_id))
+									? 'text-amber-600 dark:text-amber-400'
+									: 'text-slate-500 dark:text-slate-400'}">{$follows.includes(String(p.fcb_id)) ? '★' : '☆'}</button
+							>
 						</li>
 					{/each}
 				</ul>
@@ -444,6 +473,41 @@
 	{/if}
 
 	<h2 class="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Jugadors</h2>
+	<input
+		bind:value={jugQ}
+		type="search"
+		placeholder="Cerca per nom o club…"
+		aria-label="Cerca jugadors per nom o club"
+		class="mb-2 min-h-11 w-full rounded-lg border-slate-300 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
+	/>
+	{#if jugQ.trim().length >= 2}
+		{#if jugMatches.length}
+			<ul class="mb-3 overflow-hidden rounded-lg bg-white ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+				{#each jugMatches as p (p.fcb_id)}
+					{@const seguit = $follows.includes(String(p.fcb_id))}
+					<li class="flex items-center gap-2 border-b border-slate-100 px-3 py-1 last:border-0 dark:border-slate-800">
+						<span class="min-w-0 flex-1">
+							<span class="block truncate text-sm font-medium">{p.nom}</span>
+							<span class="block truncate text-[11px] text-slate-500 dark:text-slate-400"
+								>{clubsMap.get(p.club_fcb_id ?? '') ?? p.club_fcb_id ?? ''}{#if p.rank}{` · #${p.rank.posicio} · ${p.rank.mitjana?.toFixed(3)}`}{/if}</span
+							>
+						</span>
+						<button
+							type="button"
+							onclick={() => toggleFollow(String(p.fcb_id))}
+							aria-pressed={seguit}
+							aria-label="Segueix {p.nom}"
+							class="min-h-11 shrink-0 px-2 text-xs font-medium {seguit
+								? 'text-amber-700 dark:text-amber-400'
+								: 'text-slate-900 dark:text-slate-100'}">{seguit ? '★ seguit' : '+ seguir'}</button
+						>
+					</li>
+				{/each}
+			</ul>
+		{:else}
+			<p class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">Cap jugador amb «{jugQ.trim()}».</p>
+		{/if}
+	{/if}
 	{#if admin}
 		<form onsubmit={afegeixFitxes} class="mb-3">
 			<label for="fitxes" class="mb-1 block text-xs text-slate-600 dark:text-slate-300"
