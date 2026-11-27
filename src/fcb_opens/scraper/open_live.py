@@ -940,6 +940,56 @@ def _phase_player_names(phase: PhaseDetail) -> frozenset[str]:
     return frozenset(names)
 
 
+def _phase_player_names_all(details: Iterable[PhaseDetail]) -> frozenset[str]:
+    names: frozenset[str] = frozenset()
+    for d in details:
+        names = names | _phase_player_names(d)
+    return names
+
+
+def _clau_nom(nom: str) -> tuple[str, tuple[str, ...]]:
+    """(cognoms, paraules del nom) sense accents ni puntuació."""
+    sense = unicodedata.normalize("NFKD", nom.upper())
+    sense = "".join(c for c in sense if not unicodedata.combining(c))
+    cognoms, _, pila = sense.partition(",")
+    return (
+        " ".join(re.sub(r"[^A-Z0-9 ]", " ", cognoms).split()),
+        tuple(re.sub(r"[^A-Z0-9 ]", " ", pila).split()),
+    )
+
+
+def _concilia_noms_ranquing(
+    rank_by_name: dict[str, int], noms_open: Iterable[str]
+) -> dict[str, int]:
+    """Torna el rànquing amb els noms de l'open que no hi casen exactes.
+
+    Un nom de l'open (ja normalitzat amb `_norm_name`) es dona per trobat quan hi
+    ha UNA sola entrada del rànquing amb els mateixos cognoms (sense accents) i
+    amb un nom de pila que comença per les mateixes paraules que l'altre: la
+    federació escriu «CHUECOS ENRIQUEZ, LUIS» al grup i «CHUECOS ENRIQUEZ, LUIS
+    CARLOS» al rànquing. Si n'hi ha dues o cap, es deixa sense rànquing."""
+    per_cognoms: dict[str, list[tuple[tuple[str, ...], int]]] = {}
+    for nom, pos in rank_by_name.items():
+        cognoms, pila = _clau_nom(nom)
+        per_cognoms.setdefault(cognoms, []).append((pila, pos))
+
+    out = dict(rank_by_name)
+    for nom in noms_open:
+        if nom in out:
+            continue
+        cognoms, pila = _clau_nom(nom)
+        if not pila:
+            continue
+        candidats = {
+            pos
+            for altre, pos in per_cognoms.get(cognoms, ())
+            if altre and altre[: len(pila)] == pila or pila[: len(altre)] == altre
+        }
+        if len(candidats) == 1:
+            out[nom] = candidats.pop()
+    return out
+
+
 def _seed_unplayed_groups(
     groups: tuple[Group, ...],
     earlier_names: frozenset[str],
@@ -2525,6 +2575,13 @@ def fetch_live_state(
                     except Exception:  # noqa: BLE001
                         matches = ()
             details.append(PhaseDetail(ref=ref, ko_matches=matches))
+
+    # El rànquing d'Opens i les pàgines de l'open no sempre escriuen igual el
+    # mateix jugador. S'hi afegeixen els noms de l'open que no hi casen exactes.
+    if rank_by_name:
+        noms_open = set(_phase_player_names_all(details))
+        noms_open.update(_norm_name(s.player_name) for s in reservats_standings)
+        rank_by_name = _concilia_noms_ranquing(rank_by_name, noms_open)
 
     # 4) Second pass: compute provisional qualifiers per group phase.
     #    Rule (per the user): the 1st of every regular group advances, plus

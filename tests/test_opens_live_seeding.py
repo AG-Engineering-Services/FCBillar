@@ -131,3 +131,32 @@ def test_ranking_inicial_orders_players_without_opens_ranking():
         "LOZANO HERRERO, MANUEL",
         "MAGDALENO CARRENO, ANTONI",
     ]
+
+
+def test_nom_mes_curt_al_grup_que_al_ranquing_es_concilia() -> None:
+    # Sant Adrià 2026-11, pre-prèvia grup AC: el grup diu «LUIS» i el rànquing
+    # «LUIS CARLOS». Sense conciliar, Chuecos (85è) quedava darrere Bargallo (138è).
+    from fcb_opens.scraper.open_live import _concilia_noms_ranquing
+
+    rank = {
+        "GIL PÉREZ, ALBERT": 73,
+        "CHUECOS ENRIQUEZ, LUIS CARLOS": 85,
+        "BARGALLO JAUME, JOSEP": 138,
+    }
+    noms = ["BARGALLO JAUME, JOSEP", "GIL PÉREZ, ALBERT", "CHUECOS ENRIQUEZ, LUIS"]
+    rank = _concilia_noms_ranquing(rank, noms)
+    out = _seed_unplayed_groups((_group(noms),), frozenset(), rank)
+    assert [s.player_name for s in out[0].standings] == [
+        "GIL PÉREZ, ALBERT",
+        "CHUECOS ENRIQUEZ, LUIS",
+        "BARGALLO JAUME, JOSEP",
+    ]
+
+
+def test_conciliacio_ignora_accents_i_no_endevina_si_hi_ha_dubte() -> None:
+    from fcb_opens.scraper.open_live import _concilia_noms_ranquing
+
+    rank = {"GARCÍA LÓPEZ, JOAN": 10, "PUIG RIBA, JOSEP MARIA": 20, "PUIG RIBA, JOSEP LLUIS": 30}
+    out = _concilia_noms_ranquing(rank, ["GARCIA LOPEZ, JOAN", "PUIG RIBA, JOSEP"])
+    assert out["GARCIA LOPEZ, JOAN"] == 10
+    assert "PUIG RIBA, JOSEP" not in out
