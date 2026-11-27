@@ -7139,6 +7139,14 @@ def publish_live_opens(
 
     if rows:
         _upsert(sb, "open_live", rows, "fcb_division_id", prog)
+        # Avisos push de les partides acabades de nou. Les files ja són aquí: no
+        # cal tornar a llegir els payloads de Neon a cada passada de dos minuts.
+        try:
+            from fcbillar.avisos import avisa_opens
+
+            avisa_opens(sb, rows, prog)
+        except Exception as exc:
+            prog("warn", f"avisos dels opens NO enviats: {exc}")
 
     # Treu els Opens REALS que ja no són en curs (acabats o desapareguts del
     # llistat). Només toca ids POSITIUS: les projeccions (id sintètic negatiu,

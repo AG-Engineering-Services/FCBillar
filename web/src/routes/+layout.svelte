@@ -5,7 +5,14 @@
 	import { afterNavigate } from '$app/navigation';
 	import { db } from '$lib/db';
 	import { theme, toggleTheme } from '$lib/theme';
+	import { esAdminLocal } from '$lib/admin';
+	import Avisos from '$lib/components/Avisos.svelte';
 	let { children } = $props();
+
+	// La campana només surt als dispositius marcats d'administració: els avisos
+	// són per a l'Albert, no per a la resta de qui té la PWA.
+	let admin = $state(false);
+	onMount(() => (admin = esAdminLocal($page.url)));
 
 	// Punt vermell llampegant al costat d'"Opens" NOMÉS quan hi ha competició
 	// activa ara mateix. Ho lliguem a la frescor de open_live: el cron només
@@ -95,10 +102,12 @@
 			<span class="ag-et hidden sm:inline" title="Font de les dades"
 				>Federació Catalana de Billar</span
 			>
+			<span class="ml-auto"></span>
+			{#if admin}<Avisos />{/if}
 			<button
 				type="button"
 				onclick={() => location.reload()}
-				class="ml-auto grid h-11 w-11 shrink-0 place-items-center rounded-sm text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+				class="grid h-11 w-11 shrink-0 place-items-center rounded-sm text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
 				aria-label="Recarrega les dades"
 				title="Recarrega les dades"
 			>

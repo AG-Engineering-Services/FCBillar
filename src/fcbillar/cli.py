@@ -1791,6 +1791,25 @@ def publish_live_opens_cmd(
     console.print(f"[green]{pref}OK opens en directe publicats: {total}[/]")
 
 
+@app.command("avisa-reingesta")
+def avisa_reingesta_cmd() -> None:
+    """Avisos push dels resultats nous del Banyoles: lliga, Copa i campionats.
+
+    Va després de `publish-cloud`, a la reingesta. Llegeix de Neon el que s'hi
+    acaba de publicar i envia a cada dispositiu subscrit (la campana de la PWA)
+    els tipus que hi té marcats. Cal VAPID_PRIVATE_KEY a l'entorn. Els opens en
+    directe s'avisen des de `publish-live-opens`.
+    """
+    from fcbillar.avisos import avisa_reingesta
+    from fcbillar.cloud_sync import get_client
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"[dim]  {msg}[/]" if level == "ok" else f"[yellow]{msg}[/]")
+
+    counts = avisa_reingesta(get_client(), _prog)
+    console.print(f"[green]avisos: {', '.join(f'{k}={v}' for k, v in counts.items())}[/]")
+
+
 @app.command("project-open-ranking")
 def project_open_ranking_cmd(
     pdf: str = typer.Argument(..., help="PDF 'RÀNQUING INICIAL' de l'open"),

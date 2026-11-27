@@ -66,6 +66,8 @@ jobs:
           NEON_DATA_API_URL: ${{ secrets.NEON_DATA_API_URL }}
           NEON_C3B_DATA_API_URL: ${{ secrets.NEON_C3B_DATA_API_URL }}
           NEON_SERVICE_ROLE_TOKEN: ${{ secrets.NEON_SERVICE_ROLE_TOKEN }}
+          # Avisos push de les partides acabades (vegeu src/fcbillar/avisos.py).
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
         run: |
           END=$(( SECONDS + 18000 ))   # ~5 h: el bucle no acaba abans del següent tret (GitHub estrangula els crons; cancel-in-progress reinicia)
           i=0
