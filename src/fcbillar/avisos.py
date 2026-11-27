@@ -68,8 +68,20 @@ class Resultat:
         self.clau = re.sub(r'[",()]', "", self.clau)
 
 
+def arregla_codificacio(s: str) -> str:
+    """Desfà el doble codificat: «LEÃ“N» (UTF-8 llegit com a cp1252) → «LEÓN».
+
+    Molts noms de `players` i dels rànquings hi són així, i els de les partides
+    i les afiliacions no: sense això no casarien mai. Un nom que ja és bo no es
+    pot recodificar i es torna tal qual."""
+    try:
+        return s.encode("cp1252", errors="surrogateescape").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return s
+
+
 def _norm(s: str | None) -> str:
-    s = unicodedata.normalize("NFD", s or "")
+    s = unicodedata.normalize("NFD", arregla_codificacio(s or ""))
     s = "".join(c for c in s if not unicodedata.combining(c))
     return re.sub(r"\s+", " ", s).strip().upper()
 
@@ -607,7 +619,7 @@ def resultats_reingesta(sb, prog: Progress, seguits_ids: Iterable[str] = ()) -> 
     jugadors = _jugadors_per_id(sb, seguits_ids) if seguits_ids else []
     seguits = {_norm(f["nom"]): str(f["fcb_id"]) for f in jugadors}
     # Tal com els escriu la federació: el filtre de PostgREST és exacte.
-    noms = [f["nom"] for f in jugadors]
+    noms = [n for f in jugadors for n in {f["nom"], arregla_codificacio(f["nom"])}]
     fonts = [
         ("lliga", lambda: _resultats_lliga(sb, "lliga", "Lliga")),
         ("lliga4m", lambda: _resultats_lliga(sb, "lliga4m", "Lliga 4 Modalitats")),
