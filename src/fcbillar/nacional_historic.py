@@ -32,6 +32,8 @@ _RE_DIVISIO = re.compile(r"liga[-_]nal[-_](h|1|2)", re.IGNORECASE)
 #: `noticias2016`: la carpeta de la web vella on es publicava la temporada que
 #: començava aquell any (la 2016-2017).
 _RE_CARPETA_ANY = re.compile(r"noticias(\d{4})$", re.IGNORECASE)
+#: Play-offs, fases d'ascens, i els PDF de fotos i d'horaris («_fotos», «_desB»).
+_NO_ES_RESULTAT = re.compile(r"poff|ascper|_fotos|_des[A-D]?\.pdf", re.IGNORECASE)
 #: `liga_nal_1a_j3.pdf`: el grup A de Primera, en un PDF a part.
 _RE_GRUP_AL_NOM = re.compile(r"liga[-_]nal[-_][12]([a-d])[-_]j", re.IGNORECASE)
 
@@ -88,6 +90,10 @@ def _desa_una(
     if g and len(j.grups) == 1 and j.grups[0].grup is None:
         j = replace(j, grups=[replace(j.grups[0], grup=g.group(1).upper())])
     temporada = temporada_de(j.data) if j.data else temporada_carpeta
+    # La temporada 2020-21 va acabar l'1 d'agost del 2021 (Honor, jornades 21 i 22):
+    # a l'agost, la de la carpeta de la web vella mana sobre la de la data.
+    if j.data and j.data.month == 8 and temporada_carpeta == f"{j.data.year - 1}-{j.data.year}":
+        temporada = temporada_carpeta
     temporades[temporada] += 1
     if temporada >= abans_de:
         return [Resultat(str(f), "saltat", f"temporada {temporada}, en curs")]
@@ -111,7 +117,7 @@ def carrega(conn, carpetes: list[Path], abans_de: str) -> list[Resultat]:
         f
         for carpeta in carpetes
         for f in sorted(carpeta.rglob("*.pdf"))
-        if _divisio(f.name) and "poff" not in f.name and "ascper" not in f.name
+        if _divisio(f.name) and not _NO_ES_RESULTAT.search(f.name)
     ]
     with ProcessPoolExecutor() as pool:
         llegits = dict(zip(tots, pool.map(_llegeix, tots, chunksize=4), strict=True))
@@ -121,7 +127,12 @@ def carrega(conn, carpetes: list[Path], abans_de: str) -> list[Resultat]:
         for sub in sorted({f.parent for f in carpeta.rglob("*.pdf")}):
             temporades: Counter[str] = Counter()
             cjugs: list[tuple[Path, str]] = []
-            for f in sorted(sub.glob("*.pdf")):
+            # Les jornades soltes després de les concentracions: si una jornada és a
+            # tots dos, mana la que porta la classificació de la seva jornada.
+            ordenats = sorted(
+                sub.glob("*.pdf"), key=lambda f: (not RE_FITXER_CONCENTRAT.search(f.name), f.name)
+            )
+            for f in ordenats:
                 divisio = _divisio(f.name)
                 if divisio is None:
                     out.append(Resultat(str(f), "saltat", "no és de cap divisió"))
@@ -133,8 +144,8 @@ def carrega(conn, carpetes: list[Path], abans_de: str) -> list[Resultat]:
                         cjugs.append((f, divisio))
                     continue
                 if f not in llegits:
-                    # Play-offs i fases d'ascens: no es llegeixen (vegeu `tots`).
-                    out.append(Resultat(str(f), "saltat", "play-off o fase"))
+                    # Play-offs, fases d'ascens, fotos i horaris: no es llegeixen.
+                    out.append(Resultat(str(f), "saltat", "play-off, fase, fotos o horaris"))
                     continue
                 llegit = llegits[f]
                 if isinstance(llegit, FormatDesconegut):
