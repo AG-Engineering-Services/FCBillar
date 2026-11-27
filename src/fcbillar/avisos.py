@@ -1,12 +1,10 @@
 """Avisos push de resultats nous a la PWA (la campana de la capçalera).
 
 Cada dispositiu tria tipus i té una llista de seguiments amb prefix: «j:278»
-(jugador), «c:C.B.BANYOLES» (club), «e:C.B.BANYOLES A» (equip) i «o:223» (open
-en directe, per `fcb_division_id`). Els tipus (`TIPUS`, iguals que a
-web/src/lib/avisos.ts):
+(jugador), «c:C.B.BANYOLES» (club) i «e:C.B.BANYOLES A» (equip). Els tipus
+(`TIPUS`, iguals que a web/src/lib/avisos.ts):
 
-- `opens_3b`: totes les partides acabades dels opens de 3 bandes.
-- `opens_seguits`: totes les partides dels opens seguits.
+- `opens_3b`: totes les partides acabades de qualsevol open de 3 bandes.
 - `clubs_seguits`: el resultat dels encontres de lliga i de Copa dels clubs
   seguits (tots els seus equips) i dels equips seguits.
 - `jugadors_seguits`: les partides dels jugadors seguits a les competicions
@@ -36,10 +34,9 @@ import unicodedata
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 
-TIPUS = ("opens_3b", "opens_seguits", "clubs_seguits", "jugadors_seguits")
+TIPUS = ("opens_3b", "clubs_seguits", "jugadors_seguits")
 # Quins seguiments compten per a cada tipus.
 PREFIXOS_DEL_TIPUS = {
-    "opens_seguits": ("o:",),
     "clubs_seguits": ("c:", "e:"),
     "jugadors_seguits": ("j:",),
 }
@@ -66,7 +63,7 @@ class Resultat:
     linia: str
     url: str
     ordre: int = field(default=0, compare=False)
-    # Seguiments que hi intervenen («j:…», «c:…», «e:…», «o:…»). Un resultat
+    # Seguiments que hi intervenen («j:…», «c:…», «e:…»). Un resultat
     # sense cap `tipus` només arriba als dispositius que en segueixen algun.
     seguiments: frozenset[str] = field(default_factory=frozenset)
 
@@ -138,7 +135,7 @@ def _linia_partida(prefix: str, m: dict) -> str:
 
 def resultats_opens(files_open_live: Iterable[dict], seguits: Iterable[str] = ()) -> list[Resultat]:
     """Partides decidides dels opens en directe: les de 3 bandes, i les dels
-    opens o els jugadors que algú segueix (`seguits`, amb prefix)."""
+    jugadors que algú segueix (`seguits`, amb prefix) de qualsevol modalitat."""
     seguits = set(seguits)
     out: list[Resultat] = []
     for row in files_open_live:
@@ -159,8 +156,7 @@ def resultats_opens(files_open_live: Iterable[dict], seguits: Iterable[str] = ()
                     if not _decidida(m):
                         continue
                     a, b = m.get("player_a") or "", m.get("player_b") or ""
-                    seg = {f"o:{div}"} | {f"j:{ids[x]}" for x in (a, b) if ids.get(x)}
-                    seg &= seguits
+                    seg = {f"j:{ids[x]}" for x in (a, b) if ids.get(x)} & seguits
                     if not es3b and not seg:
                         continue
                     on = grup or fase
@@ -504,9 +500,8 @@ def missatges(
             per_grup.setdefault(r.grup, []).append(r)
 
     def destacat(r: Resultat) -> bool:
-        # Un jugador, un club o un equip seguit. Seguir l'open sencer no en
-        # destaca cap línia: les hi vol totes.
-        return any(not s.startswith("o:") for s in r.seguiments & els_seus)
+        # Un jugador, un club o un equip seguit: al davant i amb estrella.
+        return bool(r.seguiments & els_seus)
 
     out = []
     for rs in per_grup.values():

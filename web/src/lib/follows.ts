@@ -73,9 +73,3 @@ export const equipFollows = llistaPersistent('fcbillar_equip_follows');
 export function toggleEquipFollow(equip: string): void {
 	commuta(equipFollows, equip);
 }
-
-// Seguiment d'OPENS en directe, per `fcb_division_id`: totes les partides als avisos.
-export const openFollows = llistaPersistent('fcbillar_open_follows');
-export function toggleOpenFollow(id: string): void {
-	commuta(openFollows, id);
-}

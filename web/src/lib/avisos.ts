@@ -9,11 +9,6 @@ export const TIPUS_AVIS = [
 		detall: 'Totes les partides acabades, agrupades cada pocs minuts.'
 	},
 	{
-		id: 'opens_seguits',
-		nom: 'Opens seguits',
-		detall: 'Totes les partides dels opens que segueixes des de la seva pàgina en directe.'
-	},
-	{
 		id: 'clubs_seguits',
 		nom: 'Clubs i equips seguits',
 		detall: 'El resultat de cada encontre de lliga i de Copa.'
@@ -27,19 +22,13 @@ export const TIPUS_AVIS = [
 
 export type TipusAvis = (typeof TIPUS_AVIS)[number]['id'];
 
-// Llista de seguiments que va al servidor: «j:278», «c:C.B.BANYOLES»,
-// «e:C.B.BANYOLES A», «o:223» (vegeu src/fcbillar/avisos.py).
-export function seguiments(
-	jugadors: string[],
-	clubs: string[],
-	equips: string[],
-	opens: string[]
-): string[] {
+// Llista de seguiments que va al servidor: «j:278», «c:C.B.BANYOLES» i
+// «e:C.B.BANYOLES A» (vegeu src/fcbillar/avisos.py).
+export function seguiments(jugadors: string[], clubs: string[], equips: string[]): string[] {
 	return [
 		...jugadors.map((x) => `j:${x}`),
 		...clubs.map((x) => `c:${x}`),
-		...equips.map((x) => `e:${x}`),
-		...opens.map((x) => `o:${x}`)
+		...equips.map((x) => `e:${x}`)
 	];
 }
 

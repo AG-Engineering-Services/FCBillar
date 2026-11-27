@@ -8,9 +8,7 @@
 		clubFollows,
 		toggleClubFollow,
 		equipFollows,
-		toggleEquipFollow,
-		openFollows,
-		toggleOpenFollow
+		toggleEquipFollow
 	} from '$lib/follows';
 	import { arreglaCodificacio } from '$lib/codificacio';
 	import {
@@ -77,7 +75,7 @@
 		if (sub) desaAlNuvol(sub, [...triats]).catch(() => {});
 	});
 
-	// Seguir o deixar de seguir (★ a les fitxes, als clubs o als opens) actualitza
+	// Seguir o deixar de seguir (★ a les fitxes o a ★ Seguits) actualitza
 	// els avisos d'aquest dispositiu sense haver de tornar a la campana. S'espera
 	// mig segon per no desar cinc cops si se'n marquen cinc seguits.
 	let espera: ReturnType<typeof setTimeout> | undefined;
@@ -90,7 +88,7 @@
 		}, 500);
 	}
 	onMount(() => {
-		const baixes = [follows, clubFollows, equipFollows, openFollows].map((s) => {
+		const baixes = [follows, clubFollows, equipFollows].map((s) => {
 			let primer = true;
 			return s.subscribe(() => {
 				if (primer) primer = false;
@@ -105,22 +103,18 @@
 	type Seguit = { id: string; nom: string; detall?: string | null; href: string };
 	let nomsJugadors = $state<Map<string, Seguit>>(new Map());
 	let nomsClubs = $state<Map<string, string>>(new Map());
-	let nomsOpens = $state<Map<string, string>>(new Map());
 	let errorNoms = $state(false);
 	async function carregaNoms() {
 		errorNoms = false;
-		const [jug, clubs, opens] = await Promise.all([
+		const [jug, clubs] = await Promise.all([
 			get(follows).length
 				? db.from('players').select('fcb_id, nom, club_fcb_id').in('fcb_id', get(follows))
 				: Promise.resolve({ data: [], error: null }),
 			get(clubFollows).length
 				? db.from('clubs').select('fcb_id, nom').in('fcb_id', get(clubFollows))
-				: Promise.resolve({ data: [], error: null }),
-			get(openFollows).length
-				? db.from('open_live').select('fcb_division_id, name').in('fcb_division_id', get(openFollows))
 				: Promise.resolve({ data: [], error: null })
 		]);
-		if (jug.error || clubs.error || opens.error) errorNoms = true;
+		if (jug.error || clubs.error) errorNoms = true;
 		nomsJugadors = new Map(
 			(jug.data ?? []).map((p: any) => [
 				String(p.fcb_id),
@@ -133,7 +127,6 @@
 			])
 		);
 		nomsClubs = new Map((clubs.data ?? []).map((c: any) => [c.fcb_id, arreglaCodificacio(c.nom)]));
-		nomsOpens = new Map((opens.data ?? []).map((o: any) => [String(o.fcb_division_id), o.name]));
 	}
 	const perNom = (a: Seguit, b: Seguit) => a.nom.localeCompare(b.nom);
 	const llistaJugadors = $derived(
@@ -147,26 +140,14 @@
 			.sort(perNom),
 		...$equipFollows.map((e) => ({ id: `e:${e}`, nom: e, detall: 'Equip', href: '/seguiment' })).sort(perNom)
 	]);
-	const llistaOpens = $derived(
-		$openFollows
-			.map((id) => ({
-				id,
-				nom: nomsOpens.get(id) ?? `Open ${id}`,
-				detall: nomsOpens.has(id) ? 'En directe' : 'Ja no és en directe',
-				href: `/opens/directe/${id}`
-			}))
-			.sort(perNom)
-	);
 	function treu(tipus: TipusAvis, id: string) {
 		if (tipus === 'jugadors_seguits') toggleFollow(id);
-		else if (tipus === 'opens_seguits') toggleOpenFollow(id);
 		else if (id.startsWith('c:')) toggleClubFollow(id.slice(2));
 		else toggleEquipFollow(id.slice(2));
 	}
 	function llistaDe(tipus: TipusAvis): Seguit[] {
 		if (tipus === 'jugadors_seguits') return llistaJugadors;
 		if (tipus === 'clubs_seguits') return llistaClubsEquips;
-		if (tipus === 'opens_seguits') return llistaOpens;
 		return [];
 	}
 	// On es trien, per a l'enllaç de sota de cada llista.
@@ -179,11 +160,6 @@
 		clubs_seguits: {
 			href: '/seguiment',
 			text: "Tria'ls a ★ Seguits",
-			buit: 'Encara no en segueixes cap.'
-		},
-		opens_seguits: {
-			href: '/opens',
-			text: 'Tria’ls a Opens, a la pàgina de cada open en directe',
 			buit: 'Encara no en segueixes cap.'
 		}
 	};
@@ -230,7 +206,7 @@
 			p_auth: j.keys?.auth,
 			p_tipus: tipus,
 			p_dispositiu: navigator.userAgent.slice(0, 200),
-			p_seguiments: seguiments(get(follows), get(clubFollows), get(equipFollows), get(openFollows))
+			p_seguiments: seguiments(get(follows), get(clubFollows), get(equipFollows))
 		});
 		if (e) throw new Error(`No s'ha pogut desar al núvol: ${e.message}`);
 	}

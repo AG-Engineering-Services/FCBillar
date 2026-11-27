@@ -1,13 +1,11 @@
--- Avisos per seguiments: clubs (lliga i Copa), jugadors (competicions
--- individuals) i opens sencers. Substitueix els tipus del Banyoles de la 0045.
+-- Avisos per seguiments: clubs i equips (lliga i Copa) i jugadors (competicions
+-- individuals). Substitueix els tipus del Banyoles de la 0045.
 --
 -- No s'aplica automàticament: l'admin valida el SQL i l'executa amb `psql` i la
 -- connexió sense pool. El Data API pot trigar ~30 min a veure la funció nova.
 
--- Una sola llista amb prefix: «j:278» (jugador), «c:C.B.BANYOLES» (club),
--- «e:C.B.BANYOLES A» (equip), «o:223» (open en directe, per `fcb_division_id`).
--- La columna `jugadors` de la
--- 0046 queda sense ús.
+-- Una sola llista amb prefix: «j:278» (jugador), «c:C.B.BANYOLES» (club) i
+-- «e:C.B.BANYOLES A» (equip). La columna `jugadors` de la 0046 queda sense ús.
 alter table fcbillar.push_subscripcions
     add column if not exists seguiments text[] not null default '{}';
 
@@ -32,7 +30,7 @@ begin
         raise exception 'endpoint no vàlid';
     end if;
     if p_tipus is null or not (p_tipus <@ array[
-        'opens_3b', 'opens_seguits', 'clubs_seguits', 'jugadors_seguits'
+        'opens_3b', 'clubs_seguits', 'jugadors_seguits'
     ]::text[]) then
         raise exception 'tipus d''avís desconegut';
     end if;
@@ -41,7 +39,7 @@ begin
     end if;
     if exists (
         select 1 from unnest(coalesce(p_seguiments, '{}')) s
-        where s !~ '^[jceo]:.{1,80}$'
+        where s !~ '^[jce]:.{1,80}$'
     ) then
         raise exception 'seguiment no vàlid';
     end if;

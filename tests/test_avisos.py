@@ -57,7 +57,7 @@ def test_opens_3b_totes_les_acabades():
     assert rs[1].url == "/opens/directe/223"
 
 
-def test_opens_d_altres_modalitats_pels_jugadors_o_l_open_seguits():
+def test_opens_d_altres_modalitats_pels_jugadors_seguits():
     fila = _open(
         400,
         "OPEN LLIURE PUNT D'ATAC",
@@ -71,7 +71,6 @@ def test_opens_d_altres_modalitats_pels_jugadors_o_l_open_seguits():
     assert resultats_opens([fila]) == []
     rs = resultats_opens([fila], {"j:278"})
     assert len(rs) == 1 and rs[0].tipus == frozenset() and rs[0].seguiments == {"j:278"}
-    assert len(resultats_opens([fila], {"o:400"})) == 2
 
 
 def test_la_clau_no_depen_de_l_ordre_dels_jugadors():
@@ -98,7 +97,7 @@ def test_equips_dels_clubs_i_equips_seguits():
 
 
 def test_seguits_de_nomes_compta_els_tipus_marcats():
-    sub = {"tipus": ["clubs_seguits"], "seguiments": ["c:X", "e:X A", "j:1", "o:2"]}
+    sub = {"tipus": ["clubs_seguits"], "seguiments": ["c:X", "e:X A", "j:1"]}
     assert seguits_de(sub) == {"c:X", "e:X A"}
     assert seguits_de({"tipus": ["opens_3b"], "seguiments": ["j:1"]}) == set()
 
@@ -132,12 +131,6 @@ def test_missatges_filtra_per_tipus_i_seguiments_i_agrupa():
     assert len(tots) == 2
     open_ = next(m for m in tots if "2 resultats" in m["title"])
     assert open_["body"].splitlines() == ["★ línia 2", "línia 1"]  # el seguit al davant
-
-
-def test_seguir_un_open_no_destaca_cap_linia():
-    nous = [_r(str(i), (), "open:9", ordre=i, seguiments={"o:9"}) for i in range(3)]
-    (m,) = missatges(["opens_seguits"], nous, {"o:9"})
-    assert "★" not in m["body"]
 
 
 def test_missatges_retalla_les_llargues():
@@ -292,7 +285,7 @@ def test_un_seguiment_nou_no_envia_el_que_ja_s_ha_jugat(monkeypatch):
 
 def test_la_funcio_rep_els_seguiments_dels_tipus_marcats(monkeypatch):
     monkeypatch.setattr(avisos, "_envia_un", lambda *_: None)
-    db = _Db([_sub(["jugadors_seguits"], ["j:1", "c:X", "o:5"])])
+    db = _Db([_sub(["jugadors_seguits"], ["j:1", "c:X"])])
     vist = {}
 
     def fes(seguits):
