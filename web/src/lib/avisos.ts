@@ -21,6 +21,12 @@ export const TIPUS_AVIS = [
 		id: 'banyoles_copa_camp',
 		nom: 'Banyoles: Copa i Camp. de Catalunya',
 		detall: 'Resultats del Banyoles i dels seus jugadors en aquestes competicions.'
+	},
+	{
+		// El detall el posa la campana: diu quants jugadors hi ha a ★ Seguits.
+		id: 'jugadors_seguits',
+		nom: 'Jugadors seguits',
+		detall: 'Les partides dels jugadors de ★ Seguits, de qualsevol competició.'
 	}
 ] as const;
 
