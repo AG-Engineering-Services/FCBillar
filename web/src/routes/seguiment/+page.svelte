@@ -5,6 +5,7 @@
 	import { follows, toggleFollow, clubFollows, toggleClubFollow } from '$lib/follows';
 	import { theme } from '$lib/theme';
 	import AvisError from '$lib/components/AvisError.svelte';
+	import { esAdminLocal } from '$lib/admin';
 
 	// Colors dels gràfics SVG reactius al tema (clar/fosc).
 	const cGrid = $derived($theme === 'dark' ? '#1e293b' : '#eef2f7');
@@ -38,6 +39,34 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let clubQ = $state('');
+
+	// Afegir molts seguits de cop pel número de fitxa (només admin). La llista
+	// viu al dispositiu: és la manera de passar-n'hi una de feta sense tocar
+	// la ★ de cada fitxa.
+	let admin = $state(false);
+	onMount(() => (admin = esAdminLocal()));
+	let fitxesText = $state('');
+	let fitxesMsg = $state('');
+	async function afegeixFitxes(e: SubmitEvent) {
+		e.preventDefault();
+		const ids = [...new Set(fitxesText.match(/\d+/g) ?? [])];
+		if (!ids.length) return;
+		const { data, error: e2 } = await db.from('players').select('fcb_id').in('fcb_id', ids);
+		if (e2) {
+			fitxesMsg = `No s'han pogut comprovar les fitxes: ${e2.message}`;
+			return;
+		}
+		const coneguts = new Set((data ?? []).map((p) => String(p.fcb_id)));
+		const valids = ids.filter((id) => coneguts.has(id));
+		const nous = valids.filter((id) => !$follows.includes(id));
+		follows.update((l) => [...l, ...nous]);
+		const desconeguts = ids.filter((id) => !coneguts.has(id));
+		fitxesMsg =
+			`${nous.length} afegits` +
+			(valids.length > nous.length ? `, ${valids.length - nous.length} ja hi eren` : '') +
+			(desconeguts.length ? `. No existeixen: ${desconeguts.join(', ')}` : '.');
+		if (nous.length) fitxesText = '';
+	}
 	let collapsedClubs = $state(new Set<string>());
 	function toggleClubCollapse(id: string) {
 		const s = new Set(collapsedClubs);
@@ -46,8 +75,23 @@
 	}
 
 	onMount(async () => {
+		// `players` passa de les mil files que torna PostgREST d'un cop: paginat i
+		// amb ordre total, o als clubs seguits hi faltaven jugadors.
+		async function totsElsJugadors() {
+			const tots: { fcb_id: string; nom: string; club_fcb_id: string | null }[] = [];
+			for (let from = 0; ; from += 1000) {
+				const { data, error: e } = await db
+					.from('players')
+					.select('fcb_id, nom, club_fcb_id')
+					.order('fcb_id')
+					.range(from, from + 999);
+				if (e) return { data: null, error: e };
+				tots.push(...(data ?? []));
+				if (!data || data.length < 1000) return { data: tots, error: null };
+			}
+		}
 		const [{ data: pl, error: ep }, { data: cl, error: ec }, { data: maxR, error: er }] = await Promise.all([
-			db.from('players').select('fcb_id, nom, club_fcb_id'),
+			totsElsJugadors(),
 			db.from('clubs').select('fcb_id, nom').order('nom'),
 			db.from('rankings').select('num_seq, any_pub, mes_pub').eq('modalitat_codi', 1).order('num_seq', { ascending: false })
 		]);
@@ -400,6 +444,28 @@
 	{/if}
 
 	<h2 class="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Jugadors</h2>
+	{#if admin}
+		<form onsubmit={afegeixFitxes} class="mb-3">
+			<label for="fitxes" class="mb-1 block text-xs text-slate-600 dark:text-slate-300"
+				>Afegeix per número de fitxa (separats per comes o espais)</label
+			>
+			<div class="flex gap-2">
+				<input
+					id="fitxes"
+					bind:value={fitxesText}
+					inputmode="numeric"
+					placeholder="278, 591, 1310"
+					class="min-h-11 min-w-0 flex-1 rounded-lg border-slate-300 bg-white px-3 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
+				/>
+				<button
+					type="submit"
+					class="min-h-11 shrink-0 rounded-lg bg-sky-700 px-4 text-sm font-medium text-white hover:bg-sky-800 dark:bg-sky-600 dark:hover:bg-sky-500"
+					>Afegeix</button
+				>
+			</div>
+			<p class="mt-1 min-h-4 text-xs text-slate-600 dark:text-slate-300" role="status">{fitxesMsg}</p>
+		</form>
+	{/if}
 	{#if series.length === 0}
 		<div class="rounded-xl bg-white dark:bg-slate-900 p-5 text-center text-sm text-slate-500 dark:text-slate-400 ring-1 ring-slate-200 dark:ring-slate-800">
 			Cap jugador seguit. Entra a una fitxa i toca <b>☆ Seguir</b>.

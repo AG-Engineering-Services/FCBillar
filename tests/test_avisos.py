@@ -282,3 +282,10 @@ def test_un_jugador_que_es_comenca_a_seguir_no_envia_el_que_ja_ha_jugat(monkeypa
         db, "reingesta", lambda s: [de("vella"), de("nova")], log, max_nous=40, clau_privada="k"
     )
     assert len(enviats) == 1 and enviats[0]["body"] == "línia nova"
+
+
+def test_els_noms_mal_codificats_casen_amb_els_bons():
+    assert avisos.arregla_codificacio("LE\xc3“N PUIG, ESTEBAN") == "LEÓN PUIG, ESTEBAN"
+    assert avisos.arregla_codificacio("RODR\xc3\udc8dGUEZ MAIA") == "RODRÍGUEZ MAIA"
+    assert avisos.arregla_codificacio("GÓMEZ AMETLLER, ALBERT") == "GÓMEZ AMETLLER, ALBERT"
+    assert avisos._norm("LE\xc3“N PUIG, ESTEBAN") == avisos._norm("LEÓN PUIG, ESTEBAN")
