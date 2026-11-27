@@ -54,9 +54,11 @@ construeixi a sobre:
 from __future__ import annotations
 
 import re
+from contextlib import contextmanager
 from dataclasses import dataclass, field, replace
 from datetime import date
 from pathlib import Path
+from types import SimpleNamespace
 
 _MESOS = {
     "enero": 1,
@@ -186,6 +188,27 @@ class JugadorClassificat:
 
 
 # --------------------------- paraules i línies ---------------------------
+
+
+@dataclass(frozen=True)
+class _Pagines:
+    """Unes quantes pàgines d'un PDF, perquè es llegeixin com si fossin tot el PDF."""
+
+    cami: Path
+    indexos: tuple[int, ...]
+
+
+@contextmanager
+def _obre(cami: str | Path | _Pagines):
+    """El PDF de `pdfplumber`, o només les pàgines que s'han demanat."""
+    import pdfplumber
+
+    if isinstance(cami, _Pagines):
+        with pdfplumber.open(str(cami.cami)) as pdf:
+            yield SimpleNamespace(pages=[pdf.pages[i] for i in cami.indexos])
+    else:
+        with pdfplumber.open(str(cami)) as pdf:
+            yield pdf
 
 
 @dataclass(frozen=True)
@@ -354,6 +377,16 @@ def _encontre(paraules: list[_Paraula], on: str) -> EncontreNacional | None:
     if not paraules:
         return None
     enters = [p for p in paraules if _RE_ENTER.match(p.text)]
+    # Un encontre adjudicat per alineació indeguda no porta cap partida: només el
+    # resultat (8-0) i el rètol. No es va jugar i no es desa.
+    if len(enters) == 2 and any(p.text in {"ALINEACIÓN", "INDEBIDA"} for p in paraules):
+        return None
+    # Una partida «NO PRESENTADO» no té números ni un dels dos jugadors: la fila
+    # sencera es treu, i l'encontre queda amb les que s'han jugat.
+    ys = [p.y for p in paraules if p.text == "PRESENTADO"]
+    if ys:
+        paraules = [p for p in paraules if not any(abs(p.y - y) <= _TOLERANCIA_Y + 1.5 for y in ys)]
+        enters = [p for p in paraules if _RE_ENTER.match(p.text)]
     # Un encontre amb un equip retirat surt tot a zero i sense jugadors: no es va
     # jugar (Primera 2017-18, «C. DE ANTEQUERA RETIRADO»).
     if enters and all(p.text == "0" for p in enters):
@@ -505,7 +538,7 @@ def _millors_series(paraules: list[_Paraula], amplada: float) -> list[MillorSeri
 # --------------------------- entrades públiques ---------------------------
 
 
-def llegeix_jornada(cami: str | Path) -> Jornada:
+def llegeix_jornada(cami: str | Path | _Pagines) -> Jornada:
     """Llegeix el PDF d'una jornada, de qualsevol divisió.
 
     Cada divisió té la seva disposició i es proven per ordre: Primera, Honor i
@@ -525,13 +558,11 @@ def llegeix_jornada(cami: str | Path) -> Jornada:
     raise FormatDesconegut(" ".join(errors))
 
 
-def _llegeix_jornada_primera(cami: str | Path) -> Jornada:
-    import pdfplumber
-
+def _llegeix_jornada_primera(cami: str | Path | _Pagines) -> Jornada:
     grups: list[GrupDeJornada] = []
     series: list[MillorSerie] = []
     capcalera: tuple[int, date | None] | None = None
-    with pdfplumber.open(str(cami)) as pdf:
+    with _obre(cami) as pdf:
         for num, pagina in enumerate(pdf.pages, start=1):
             paraules = _paraules(pagina)
             if not paraules:
@@ -583,15 +614,26 @@ _RE_ENCONTRE_HONOR = re.compile(r"^(\D+?) (\d+) (\d+) (\D+)$")
 _RE_PARTIDA_HONOR = re.compile(r"^(\D+?) (\d+) (\d+) (\D+?) en (\d+)$")
 _RE_TOTALS_HONOR = re.compile(r"^(\d+,\d+) (\d+) (\d+) (\d+,\d+) (\d+)$")
 _RE_FILA_EQUIPS = re.compile(
-    r"^(\d+)º? (\D+?) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+,\d+) (\d+) (\d+)$"
+    r"^(?:[A-D] )?(\d+)º? (\D+?) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+,\d+) (\d+) (\d+)$"
 )
 _RE_SERIE = re.compile(r"^(\D+?) (\d+) \D+? \d+,\d+$")
+#: Una partida que un dels dos jugadors no ha jugat: «Nom NO PRESENTADO en»,
+#: «NO PRESENTADO 0 0 Nom en 0», «Nom 0 0 NO PRESENTADO en 0» o, quan un equip
+#: sencer no es presenta, «Nom 0 0 en 0». No porta caramboles ni entrades i no es
+#: desa; el qui es presenta guanya la partida a l'encontre.
+_RE_NO_PRESENTAT = re.compile(
+    r"^(?:\D+? NO PRESENTADO en(?: \d+)?|NO PRESENTADO (?:\d+ \d+ )?\D+? en(?: \d+)?"
+    r"|\D+? \d+ \d+ NO PRESENTADO en \d+|\D+? 0 0 en 0)$"
+)
 
 
-def _linies_de_text(cami: str | Path) -> list[str]:
-    import pdfplumber
+def _sense_jugar(text: str) -> bool:
+    """Una línia de relleny d'un encontre que no s'ha jugat (suspès, aplaçat, descans)."""
+    return text == "SUSPENDIDO" or text == "en 0" or text.endswith(" en 0")
 
-    with pdfplumber.open(str(cami)) as pdf:
+
+def _linies_de_text(cami: str | Path | _Pagines) -> list[str]:
+    with _obre(cami) as pdf:
         return [
             linia.strip()
             for pagina in pdf.pages
@@ -606,11 +648,11 @@ def _sense_accents(text: str) -> str:
     return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().upper()
 
 
-def llegeix_jornada_honor(cami: str | Path) -> Jornada:
+def llegeix_jornada_honor(cami: str | Path | _Pagines) -> Jornada:
     """Llegeix el PDF d'una jornada de la Divisió d'Honor."""
     linies = _linies_de_text(cami)
     capcalera = None
-    for text in linies[:4]:
+    for text in linies[:8]:
         m, d = _RE_JORNADA.search(text), _RE_DATA_NUMERICA.search(text)
         if m:
             quan = date(int(d.group(3)), int(d.group(2)), int(d.group(1))) if d else None
@@ -626,16 +668,23 @@ def llegeix_jornada_honor(cami: str | Path) -> Jornada:
     classificacio: list[FilaDeClassificacio] = []
     series_crues: list[tuple[str, int]] = []
     obert: tuple[re.Match, list[PartidaNacional]] | None = None
+    no_presentats = 0
+    per_decisio = False
     seccio = "encontres"
     for text in linies:
-        if text.startswith("CLASIFICACI"):
+        # Primera 2020-21 no porta «CLASIFICACIÓN»: la taula comença a «Nº EQUIPO».
+        if text.startswith(("CLASIFICACI", "Nº EQUIPO")):
             seccio = "classificacio"
             continue
         if text.startswith("MEJORES SERIES"):
-            seccio = "series"
+            # «… DE LAS JORNADAS»: les d'unes quantes jornades de cop, que no són
+            # de cap en particular.
+            seccio = "ignora" if "JORNADAS" in text else "series"
             continue
         if text.startswith("PRÓXIMA JORNADA"):
             break
+        if seccio == "ignora":
+            continue
         if (m := _RE_JORNADA.search(text)) and int(m.group(1)) != capcalera[0]:
             raise FormatDesconegut(_MES_D_UNA)
         if seccio == "classificacio":
@@ -665,12 +714,27 @@ def llegeix_jornada_honor(cami: str | Path) -> Jornada:
         if obert is None:
             if e := _RE_ENCONTRE_HONOR.match(text):
                 obert = (e, [])
+                no_presentats = 0
+                per_decisio = False
             continue
         capcal, partides = obert
+        if not partides and (text.endswith(" en") or "ALINEACI" in text):
+            # Alineació indeguda: l'encontre s'adjudica (8-0) sense partides ni
+            # totals, només els jugadors alineats. No es desa.
+            per_decisio = True
+            continue
+        if per_decisio and (e := _RE_ENCONTRE_HONOR.match(text)):
+            obert = (e, [])
+            no_presentats = 0
+            per_decisio = False
+            continue
+        if _RE_NO_PRESENTAT.match(text):
+            no_presentats += 1
+            continue
         if p := _RE_PARTIDA_HONOR.match(text):
             partides.append(
                 PartidaNacional(
-                    ordre=len(partides) + 1,
+                    ordre=len(partides) + no_presentats + 1,
                     jugador_local=p.group(1),
                     caramboles_local=int(p.group(2)),
                     jugador_visitant=p.group(4),
@@ -679,6 +743,15 @@ def llegeix_jornada_honor(cami: str | Path) -> Jornada:
                 )
             )
             continue
+        if not partides:
+            # Un encontre que no s'ha jugat (suspès, aplaçat, un equip que no es
+            # presenta) surt amb els números a zero: no es desa.
+            sense_jugar = capcal.group(2) == capcal.group(3) == "0" or no_presentats
+            if text == "0 0 0":
+                obert = None
+                continue
+            if sense_jugar and (_sense_jugar(text) or text == "NO PRESENTADO"):
+                continue
         t = _RE_TOTALS_HONOR.match(text)
         if t is None:
             raise FormatDesconegut(f"Línia inesperada dins d'un encontre: {text!r}")
@@ -706,7 +779,7 @@ def llegeix_jornada_honor(cami: str | Path) -> Jornada:
         )
         obert = None
 
-    if obert is not None:
+    if obert is not None and not per_decisio:
         raise FormatDesconegut(f"L'encontre de {obert[0].group(1)} no té línia de totals.")
     if not encontres:
         raise FormatDesconegut("No hi ha cap encontre amb el format de la Divisió d'Honor.")
@@ -754,6 +827,13 @@ def _series(crues: list[tuple[str, int]], equips: set[str]) -> list[MillorSerie]
 # entrades i caramboles del visitant. Les partides guanyades per cada equip van
 # al marge d'una de les files. Al final de cada grup, la seva classificació.
 
+#: Una partida sense jugar d'un encontre de Segona: el local es presenta i el
+#: visitant no («Nom NO PRESENTADO», «Nom 0 0 0 NO PRESENTADO») o no hi ha ningú
+#: a la columna del visitant («Nom 0 0 0»). No es desa; el local la guanya.
+_RE_NO_PRESENTAT_SEGONA = re.compile(r"^(\D+?)(?: 0 0(?: 0)?)? NO PRESENTADO$|^(\D+?) 0 0 0$")
+#: Una fila d'un encontre que no s'ha jugat: els números són zeros, i els punts de
+#: l'encontre (8-0) a l'extrem de la primera fila, com a «8 0 0 0 0».
+_RE_FILA_SENSE_JUGAR = re.compile(r"^(?:\d+ )?0 0 0(?: \d+)?$|^\d+ \d+$")
 _RE_TOTALS_SEGONA = re.compile(r"^(\d+,\d+) (\d+) (\d+) (\d+) (\d+,\d+)$")
 _RE_GRUP = re.compile(r"^GRUPO ([A-Z])$")
 
@@ -761,7 +841,7 @@ _RE_GRUP = re.compile(r"^GRUPO ([A-Z])$")
 _RE_PROM_GRAL = re.compile(r"Prom\. Gral: (\d+,\d+) Prom\. Gral: (\d+,\d+)")
 
 
-def llegeix_jornada_segona_dues_columnes(cami: str | Path) -> Jornada:
+def llegeix_jornada_segona_dues_columnes(cami: str | Path | _Pagines) -> Jornada:
     """Segona Divisió 2016-17: dos grups per PDF i cada grup a dues columnes.
 
     A l'esquerra la classificació del grup; a la dreta els encontres, amb el
@@ -772,9 +852,7 @@ def llegeix_jornada_segona_dues_columnes(cami: str | Path) -> Jornada:
     La classificació no es llegeix: a la base ja hi ha la final, de la pàgina de
     jugadors.
     """
-    import pdfplumber
-
-    with pdfplumber.open(str(cami)) as pdf:
+    with _obre(cami) as pdf:
         pagines = [(_paraules(p), float(p.width)) for p in pdf.pages]
     if not pagines:
         raise FormatDesconegut("El PDF no té cap pàgina.")
@@ -878,11 +956,9 @@ def llegeix_jornades_concentrades(cami: str | Path) -> list[Jornada]:
     compta com a jornada jugada per a l'equip que descansa. Totes les seus
     s'ajunten per jornada, que és com es desen.
     """
-    import pdfplumber
-
     per_jornada: dict[int, list[EncontreNacional]] = {}
     dates: dict[int, date | None] = {}
-    with pdfplumber.open(str(cami)) as pdf:
+    with _obre(cami) as pdf:
         for pagina in pdf.pages:
             linies = [li.strip() for li in (pagina.extract_text() or "").split("\n") if li.strip()]
             cap = next((m for t in linies[:4] if (m := _RE_JORNADES_CONCENTRADES.search(t))), None)
@@ -942,18 +1018,63 @@ def llegeix_jornades_concentrades(cami: str | Path) -> list[Jornada]:
                     dates.setdefault(jornada, quan)
                     obert = None
     if not per_jornada:
-        raise FormatDesconegut("No hi ha cap encontre de jornades concentrades.")
+        return _llegeix_jornades_per_pagines(cami)
     return [
         Jornada(numero=n, data=dates[n], grups=[GrupDeJornada(grup=None, encontres=e)])
         for n, e in sorted(per_jornada.items())
     ]
 
 
-def llegeix_jornada_segona(cami: str | Path) -> Jornada:
-    """Llegeix el PDF d'una jornada de la Segona Divisió (un o més grups)."""
-    import pdfplumber
+_RE_CAPCALERA_DE_PAGINA = re.compile(r"^JORNADA\s+(\d+)", re.IGNORECASE)
 
-    with pdfplumber.open(str(cami)) as pdf:
+
+def _llegeix_jornades_per_pagines(cami: str | Path) -> list[Jornada]:
+    """Unes quantes jornades de cop, cadascuna a les seves pàgines.
+
+    Primera 2020-21 i Honor/Segona 2020-2023: «JORNADA 3ª, 12-14/03/2021 - SEDE:
+    CAR» a dalt de cada pàgina, i si la jornada es juga a dues seus, les dues
+    pàgines porten el mateix número. Les pàgines sense «JORNADA n» a dalt (la
+    classificació i les millors sèries del final) són de l'última jornada, que és
+    després de la qual es calculen. Cada jornada es llegeix amb el lector de la
+    seva divisió, amb només les seves pàgines.
+    """
+    with _obre(cami) as pdf:
+        capcaleres = []
+        for pagina in pdf.pages:
+            linies = (pagina.extract_text() or "").splitlines()
+            capcaleres.append(
+                next(
+                    (
+                        int(m.group(1))
+                        for t in linies[:8]
+                        if (m := _RE_CAPCALERA_DE_PAGINA.match(t.strip()))
+                    ),
+                    None,
+                )
+            )
+    pagines: dict[int, list[int]] = {}
+    ultima = None
+    for i, n in enumerate(capcaleres):
+        if n is None:
+            if ultima is not None:
+                pagines[ultima].append(i)
+            continue
+        pagines.setdefault(n, []).append(i)
+        ultima = n
+    if not pagines:
+        raise FormatDesconegut("No hi ha cap encontre de jornades concentrades.")
+    out = []
+    for n, indexos in sorted(pagines.items()):
+        try:
+            out.append(llegeix_jornada(_Pagines(Path(cami), tuple(indexos))))
+        except FormatDesconegut as e:
+            raise FormatDesconegut(f"Jornada {n} de {Path(cami).name}: {e}") from e
+    return out
+
+
+def llegeix_jornada_segona(cami: str | Path | _Pagines) -> Jornada:
+    """Llegeix el PDF d'una jornada de la Segona Divisió (un o més grups)."""
+    with _obre(cami) as pdf:
         linies = [li for pagina in pdf.pages for li in _linies(_paraules(pagina))]
 
     capcalera = None
@@ -976,8 +1097,15 @@ def llegeix_jornada_segona(cami: str | Path) -> Jornada:
     salta = False
     series_crues: list[tuple[str, int]] = []
     a_les_series = False
+    sense_jugar = False
     for linia in linies:
         text = _text(linia)
+        if sense_jugar:
+            # Un encontre que no s'ha jugat (un equip retirat, l'acta no presentada)
+            # surt amb files de zeros: no es desa.
+            if _RE_FILA_SENSE_JUGAR.match(text) or text == "ACTA NO PRESENTADA":
+                continue
+            sense_jugar = False
         if text.startswith("MEJORES SERIES"):
             a_les_series = True
             continue
@@ -1004,6 +1132,12 @@ def llegeix_jornada_segona(cami: str | Path) -> Jornada:
         if text.startswith("DESCANSA"):
             # «DESCANSA» sol, amb l'equip a la línia següent, o «DESCANSA: equip».
             salta = text == "DESCANSA"
+            continue
+        if capcal is not None and not files and _RE_FILA_SENSE_JUGAR.match(text):
+            capcal, sense_jugar = None, True
+            continue
+        if capcal is not None and not files and text == "ACTA NO PRESENTADA":
+            capcal, sense_jugar = None, True
             continue
         if f := _RE_FILA_EQUIPS.match(text):
             pos, equip, *n = f.groups()
@@ -1091,7 +1225,11 @@ def _encontre_segona(
     partides: list[PartidaNacional] = []
     punts: list[int] = []
     x_visitant = None
+    no_presentats = 0
     for linia in files:
+        if _RE_NO_PRESENTAT_SEGONA.match(_text(linia)):
+            no_presentats += 1
+            continue
         paraules = list(linia)
         # Els punts de l'encontre, quan hi són, al principi i al final de la fila.
         if len(paraules) > 5 and _RE_ENTER.match(paraules[0].text):
@@ -1112,7 +1250,7 @@ def _encontre_segona(
         x_visitant = visitant[0].x0 if x_visitant is None else min(x_visitant, visitant[0].x0)
         partides.append(
             PartidaNacional(
-                ordre=len(partides) + 1,
+                ordre=len(partides) + no_presentats + 1,
                 jugador_local=_text(paraules[:idx]),
                 caramboles_local=int(paraules[idx].text),
                 jugador_visitant=_text(visitant),
@@ -1121,6 +1259,8 @@ def _encontre_segona(
             )
         )
     nom = _text(capcal)
+    if x_visitant is None:
+        raise FormatDesconegut(f"L'encontre «{nom}» no té cap partida jugada.")
     if len(punts) != 2:
         raise FormatDesconegut(f"No trobo el resultat de l'encontre «{nom}».")
     local = [p for p in capcal if p.x0 < x_visitant - 3]
