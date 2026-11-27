@@ -52,7 +52,11 @@
 			estat = 'bloquejat';
 			return;
 		}
-		estat = (await subscripcioActual()) ? 'actiu' : 'inactiu';
+		const sub = await subscripcioActual();
+		estat = sub ? 'actiu' : 'inactiu';
+		// La torna a desar en silenci: si l'alta al núvol havia fallat, o el
+		// navegador ha renovat les claus, el servidor ho sap sense que calgui fer res.
+		if (sub) desaAlNuvol(sub, [...triats]).catch(() => {});
 	});
 
 	async function obre() {
@@ -70,6 +74,15 @@
 	}
 	function alTeclat(e: KeyboardEvent) {
 		if (e.key === 'Escape' && obert) tanca();
+	}
+	// Clic fora del panell i de la campana: tanca. No és una capa a pantalla
+	// completa perquè el `backdrop-blur` de la capçalera la confinaria a la
+	// capçalera mateixa.
+	function alPremer(e: PointerEvent) {
+		if (!obert) return;
+		const on = e.target as Node;
+		if (panell?.contains(on) || boto?.contains(on)) return;
+		obert = false;
 	}
 
 	function commuta(id: TipusAvis) {
@@ -154,7 +167,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={alTeclat} />
+<svelte:window onkeydown={alTeclat} onpointerdown={alPremer} />
 
 <div class="relative">
 	<button
@@ -184,20 +197,14 @@
 	</button>
 
 	{#if obert}
-		<!-- Clic fora: tanca. És un botó a pantalla completa perquè també hi arribi el teclat. -->
-		<button
-			type="button"
-			class="fixed inset-0 z-20 cursor-default"
-			aria-label="Tanca els avisos"
-			tabindex="-1"
-			onclick={tanca}
-		></button>
+		<!-- Al mòbil, fix amb marges a tots dos costats: penjat de la campana, que
+		     no és a la vora, sortia tallat per l'esquerra. -->
 		<div
 			bind:this={panell}
 			id="panell-avisos"
 			role="dialog"
 			aria-labelledby="titol-avisos"
-			class="absolute right-0 top-12 z-30 w-[min(20rem,calc(100vw-2rem))] rounded-md border border-slate-200 bg-white p-4 text-sm shadow-lg dark:border-slate-700 dark:bg-slate-900"
+			class="fixed inset-x-4 top-14 z-30 rounded-md sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:w-80 border border-slate-200 bg-white p-4 text-sm shadow-lg dark:border-slate-700 dark:bg-slate-900"
 		>
 			<h2 id="titol-avisos" class="text-base font-semibold">Avisos de resultats</h2>
 
