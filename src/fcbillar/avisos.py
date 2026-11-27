@@ -53,6 +53,11 @@ class Resultat:
     destacat: bool = False  # hi juga el Banyoles: va al davant i amb estrella
     ordre: int = field(default=0, compare=False)
 
+    def __post_init__(self) -> None:
+        # Les claus van dins d'un filtre `in.(...)` de PostgREST, que no admet
+        # cometes als valors: «C.B.BLANES "B"» feia petar la passada sencera.
+        self.clau = re.sub(r'[",()]', "", self.clau)
+
 
 def _norm(s: str | None) -> str:
     s = unicodedata.normalize("NFD", s or "")

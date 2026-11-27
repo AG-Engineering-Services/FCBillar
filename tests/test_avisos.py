@@ -218,3 +218,8 @@ def test_sense_clau_vapid_no_marca_res(monkeypatch):
         db, "opens", [_r("a", {"opens_3b"})], lambda *_: None, max_nous=None, clau_privada=None
     )
     assert db.enviats == set()
+
+
+def test_la_clau_no_porta_caracters_que_trenquen_el_filtre_in():
+    r = Resultat('copa:1:2:C.B.BLANES "B"|C.B.BANYOLES (A), x', frozenset(), "g", "t", "l", "/")
+    assert r.clau == "copa:1:2:C.B.BLANES B|C.B.BANYOLES A x"
