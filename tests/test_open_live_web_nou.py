@@ -509,3 +509,88 @@ def test_classificat_provisional_surt_de_la_taula_refeta() -> None:
     fase = PhaseDetail(ref=PhaseRef(label="PRE-PRÈVIA", kind="group", url=""), groups=(refet,))
     (q,) = compute_provisional_qualifiers(fase)
     assert q.player_name == "GIL PÉREZ, ALBERT" and q.punts == 2
+
+
+def _grup_ac_federacio():
+    # Sant Adrià 2026-11-28, grup AC, tot «Finalitzada»: el portal dona 4 punts a
+    # Gil i 2 a Chuecos, amb un Chuecos 30 - Gil 29 a la llista de partides.
+    from fcb_opens.scraper.open_live import Group, GroupStanding, _resultats
+    from fcbillar.scraper.parsers import IndividualPartidaRow
+
+    def fila(local, cl, visitant, cv, entrades):
+        return IndividualPartidaRow(
+            local_nom=local,
+            local_serie_major=3,
+            local_caramboles=cl,
+            visitant_nom=visitant,
+            visitant_serie_major=4,
+            visitant_caramboles=cv,
+            entrades=entrades,
+            arbitre=None,
+            estat="Finalitzada",
+        )
+
+    b, c, g = "BARGALLO JAUME, JOSEP", "CHUECOS ENRIQUEZ, LUIS", "GIL PÉREZ, ALBERT"
+    partides = _resultats([fila(b, 27, c, 28, 50), fila(b, 17, g, 30, 35), fila(c, 30, g, 29, 50)])
+    taula = (
+        GroupStanding(player_name=g, club="", punts=4, mitjana=0.6941),
+        GroupStanding(player_name=c, club="", punts=2, mitjana=0.58),
+        GroupStanding(player_name=b, club="", punts=0, mitjana=0.5176),
+    )
+    return Group(label="Grup AC", url="", standings=taula, matches=partides)
+
+
+def test_taula_de_la_federacio_que_no_quadra_es_corregeix_fins_al_sorteig() -> None:
+    from fcb_opens.scraper.open_live import _seed_unplayed_groups
+
+    (corregit,) = _seed_unplayed_groups(
+        (_grup_ac_federacio(),), frozenset(), None, corregeix_taula=True
+    )
+    assert [(s.player_name.split(",")[0], s.punts) for s in corregit.standings] == [
+        ("CHUECOS ENRIQUEZ", 4),
+        ("GIL PÉREZ", 2),
+        ("BARGALLO JAUME", 0),
+    ]
+    assert corregit.taula_corregida
+    # Amb la ronda següent ja sortejada mana la federació.
+    (oficial,) = _seed_unplayed_groups(
+        (_grup_ac_federacio(),), frozenset(), None, corregeix_taula=False
+    )
+    assert oficial.standings[0].player_name == "GIL PÉREZ, ALBERT" and not oficial.taula_corregida
+
+
+def test_a_la_pre_previa_els_segons_son_eliminats_i_a_la_pre_pre_previa_no() -> None:
+    from fcb_opens.scraper.open_live import (
+        OpenLiveState,
+        OpenStructure,
+        PhaseDetail,
+        PhaseRef,
+        _seed_unplayed_groups,
+        compute_open_classification,
+        compute_provisional_qualifiers,
+    )
+
+    (grup,) = _seed_unplayed_groups(
+        (_grup_ac_federacio(),), frozenset(), None, corregeix_taula=True
+    )
+
+    def eliminats(fase: str) -> list[str]:
+        ref = PhaseRef(label=fase, kind="group", url="")
+        estat = OpenLiveState(
+            structure=OpenStructure(division_id=1, name="OPEN", phase_id=1, phases=(ref,)),
+            phases=[
+                PhaseDetail(
+                    ref=ref,
+                    groups=(grup,),
+                    provisional_qualifiers=compute_provisional_qualifiers(
+                        PhaseDetail(ref=ref, groups=(grup,))
+                    ),
+                )
+            ],
+        )
+        return [r.player_name.split(",")[0] for r in compute_open_classification(estat)]
+
+    # De la pre-prèvia només passen els 1rs.
+    assert eliminats("PRE-PRÈVIA") == ["GIL PÉREZ", "BARGALLO JAUME"]
+    # De la pre-pre-prèvia passen també els millors 2ns: fins al sorteig, pendents.
+    assert eliminats("PRE-PRE-PRÈVIA") == ["BARGALLO JAUME"]

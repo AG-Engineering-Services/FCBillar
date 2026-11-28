@@ -459,6 +459,9 @@ class Group:
     # posa el dia que comença la FASE, i un grup de diumenge hi surt amb la data
     # de dissabte. Ni hora ni billar: tot això només surt al PDF d'horaris.
     date: str | None = None
+    # La taula del portal no quadrava amb els marcadors de les seves partides i
+    # s'ha refet amb els marcadors (vegeu `_seed_unplayed_groups`).
+    taula_corregida: bool = False
 
 
 @dataclass(frozen=True)
@@ -1006,6 +1009,19 @@ def _concilia_noms_ranquing(
     return out
 
 
+def _taula_no_quadra(group: Group) -> bool:
+    """Els punts de la taula del portal no són els que surten dels marcadors de
+    les partides del mateix grup. Al grup AC de Sant Adrià (2026-11-28) el portal
+    donava 4 punts a Gil i 2 a Chuecos amb un Chuecos 30 - Gil 29."""
+    punts: dict[str, int] = {}
+    for m in group.matches:
+        if not (m.is_played or m.punts_a or m.punts_b):
+            continue
+        punts[m.player_a] = punts.get(m.player_a, 0) + m.punts_a
+        punts[m.player_b] = punts.get(m.player_b, 0) + m.punts_b
+    return any(punts.get(s.player_name, 0) != s.punts for s in group.standings)
+
+
 def _classificacio_de_les_partides(group: Group, rank_by_name: dict[str, int]) -> Group:
     """Refà la taula del grup amb les partides, quan n'hi ha alguna que el portal
     encara no ha tancat però ja té resultat (`pendent_amb_resultat`).
@@ -1018,7 +1034,7 @@ def _classificacio_de_les_partides(group: Group, rank_by_name: dict[str, int]) -
     car: dict[str, int] = {}
     entr: dict[str, int] = {}
     for m in group.matches:
-        if not m.is_played:
+        if not (m.is_played or m.punts_a or m.punts_b):
             continue
         for nom, p, c in ((m.player_a, m.punts_a, m.caramboles_a), (m.player_b, m.punts_b, m.caramboles_b)):
             punts[nom] = punts.get(nom, 0) + p
@@ -1045,6 +1061,7 @@ def _seed_unplayed_groups(
     groups: tuple[Group, ...],
     earlier_names: frozenset[str],
     rank_by_name: dict[str, int] | None = None,
+    corregeix_taula: bool = False,
 ) -> tuple[Group, ...]:
     """Ordena els jugadors dels grups encara NO jugats segons l'ordre de sorteig.
 
@@ -1061,11 +1078,14 @@ def _seed_unplayed_groups(
     Sense `rank_by_name` mantenim l'ordre de la federació i només recol·loquem
     els advancers al final (comportament anterior). Els grups ja començats es
     deixen tal qual: l'ordre ja reflecteix els resultats."""
-    if (
-        not rank_by_name
-        and not earlier_names
-        and not any(m.pendent_amb_resultat for g in groups for m in g.matches)
-    ):
+    def cal_refer(g: Group) -> bool:
+        # Partides «Pendent» que el portal encara no compta, o bé (mentre la ronda
+        # següent no sigui sortejada) una taula que no quadra amb els marcadors.
+        return any(m.pendent_amb_resultat for m in g.matches) or (
+            corregeix_taula and _taula_no_quadra(g)
+        )
+
+    if not rank_by_name and not earlier_names and not any(cal_refer(g) for g in groups):
         return groups
     big = 10**9
 
@@ -1074,8 +1094,9 @@ def _seed_unplayed_groups(
 
     out: list[Group] = []
     for g in groups:
-        if any(m.pendent_amb_resultat for m in g.matches):
-            out.append(_classificacio_de_les_partides(g, rank_by_name or {}))
+        if cal_refer(g):
+            refet = _classificacio_de_les_partides(g, rank_by_name or {})
+            out.append(replace(refet, taula_corregida=_taula_no_quadra(g)))
             continue
         if not g.standings or any(m.is_played for m in g.matches):
             out.append(g)
@@ -1849,6 +1870,12 @@ def _group_band_start(label: str) -> int | None:
     return _GROUP_ROUND_BAND_START.get(key)
 
 
+def _hi_passen_segons(label: str) -> bool:
+    """De la pre-pre-prèvia passen els 1rs i els millors 2ns. De la pre-prèvia i
+    de la prèvia, només els 1rs."""
+    return normalitza(label).startswith("pre-pre-")
+
+
 def compute_open_classification(
     state: "OpenLiveState",
 ) -> tuple[OpenClassificationRow, ...]:
@@ -1938,6 +1965,17 @@ def compute_open_classification(
                 elim = [
                     n for n in phase_stats[i]
                     if n in closed_players and n not in advancers and n not in later_known
+                ]
+            elif _hi_passen_segons(phase.ref.label):
+                # Fase FRONTERA de la qual passen també els millors 2ns (la
+                # pre-pre-prèvia; a Sant Adrià 2026 hi va passar el 2n del grup AH), i
+                # quants no se sap fins al sorteig. Només els 3rs i següents són fora
+                # segur. De la pre-prèvia i de la prèvia només passen els 1rs.
+                elim = [
+                    n for n in phase_stats[i]
+                    if n in closed_players
+                    and n not in advancers
+                    and position_lookup.get(n, 999) >= 3
                 ]
             else:
                 # Fase FRONTERA (KO encara no sortejat): TOTS els no-avançats d'un
@@ -2665,7 +2703,11 @@ def fetch_live_state(
         # (si el tenim) i amb els advancers de fase anterior sempre al final (3r
         # en grups de 3). Els classificats surten de la taula ja refeta: la del
         # portal no compta les partides «Pendent» i hi deixa el primer del sorteig.
-        groups = _seed_unplayed_groups(d.groups, earlier_names, rank_by_name)
+        # Si la federació s'equivoca a la taula, es corregeix amb els marcadors fins
+        # que sortegi la ronda següent: llavors mana qui hi hagi posat.
+        groups = _seed_unplayed_groups(
+            d.groups, earlier_names, rank_by_name, corregeix_taula=not next_names
+        )
         qualifiers = compute_provisional_qualifiers(replace(d, groups=groups), next_names)
         enriched.append(
             PhaseDetail(

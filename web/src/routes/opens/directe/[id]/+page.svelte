@@ -680,6 +680,11 @@
 								{/each}
 							</div>
 						{:else if g.venue}<div class="px-3 pt-1 text-2xs text-slate-500 dark:text-slate-400">{g.venue}</div>{/if}
+						{#if g.taula_corregida}
+							<p class="px-3 pt-1 text-2xs text-amber-700 dark:text-amber-300">
+								Taula calculada amb els marcadors: la de la federació no hi quadra.
+							</p>
+						{/if}
 						{#if g.standings.length}
 							<ol class="px-2 py-1">
 								{#each g.standings as s, idx}

@@ -385,6 +385,8 @@ export interface OpenLiveGroup {
   matches: OpenLiveMatch[];
   n_matches_played: number;
   n_matches_total: number;
+  /** La taula del portal no quadrava amb els marcadors i s'ha refet amb ells. */
+  taula_corregida?: boolean;
 }
 export interface OpenLiveProvQual {
   group_label: string;

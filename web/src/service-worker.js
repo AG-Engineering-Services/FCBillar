@@ -5,6 +5,7 @@
 // versionats. Les crides a orígens externs (la Data API de Neon) passen sense tocar.
 
 import { build, files, version } from '$service-worker';
+import { deMissatge, desa } from '$lib/avisosRebuts';
 
 const CACHE = `fcbillar-${version}`;
 const ASSETS = [...build, ...files];
@@ -76,17 +77,29 @@ self.addEventListener('push', (event) => {
 	}
 	const title = dades.title || 'FCBillar';
 	event.waitUntil(
-		self.registration.showNotification(title, {
-			body: dades.body || '',
-			// La mateixa etiqueta substitueix l'avís anterior en lloc d'apilar-ne:
-			// només la fan servir els resums que es reescriuen.
-			tag: dades.tag || undefined,
-			icon: '/icon-192.png',
-			badge: '/icon-192.png',
-			data: { url: dades.url || '/' }
-		})
+		Promise.all([
+			self.registration.showNotification(title, {
+				body: dades.body || '',
+				// La mateixa etiqueta substitueix l'avís anterior en lloc d'apilar-ne:
+				// només la fan servir els resums que es reescriuen.
+				tag: dades.tag || undefined,
+				icon: '/icon-192.png',
+				badge: '/icon-192.png',
+				data: { url: dades.url || '/' }
+			}),
+			// Per al modal de resultats recents: la notificació en mostra poques línies.
+			// Si no es pot desar, la notificació surt igualment.
+			desa(deMissatge(dades, Date.now()))
+				.then(avisaFinestres)
+				.catch(() => {})
+		])
 	);
 });
+
+async function avisaFinestres() {
+	const finestres = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+	for (const f of finestres) f.postMessage({ tipus: 'avis-rebut' });
+}
 
 self.addEventListener('notificationclick', (event) => {
 	event.notification.close();
