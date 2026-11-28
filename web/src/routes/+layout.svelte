@@ -8,6 +8,7 @@
 	import { esAdminLocal, marcaAdmin } from '$lib/admin';
 	import Avisos from '$lib/components/Avisos.svelte';
 	import EntradaAdmin from '$lib/components/EntradaAdmin.svelte';
+	import ResultatsRecents from '$lib/components/ResultatsRecents.svelte';
 	let { children } = $props();
 
 	// La campana només surt als dispositius marcats d'administració: els avisos
@@ -173,6 +174,7 @@
 	<main class="flex-1 px-3 py-3 md:px-6 md:py-5">
 		{@render children()}
 	</main>
+	{#if admin}<ResultatsRecents />{/if}
 	<footer
 		class="flex flex-col items-center gap-2 px-4 py-6 text-center text-[11px] text-slate-500 dark:text-slate-400"
 	>
