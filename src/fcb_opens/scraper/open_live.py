@@ -2072,6 +2072,12 @@ def compute_open_classification(
         if phase.ref.kind != "group":
             continue
         band = running + 1
+        if i == deepest_group and normalitza(phase.ref.label).startswith("pre-"):
+            # La fase de grups més avançada és una pre-prèvia: la prèvia encara no
+            # és publicada i ocupa els llocs que hi ha entre el KO i aquesta fase.
+            # Sense això els eliminats de la pre-prèvia sortien a partir del 33, el
+            # tram de la prèvia (Sant Adrià 2026-11-28).
+            band = max(band, _group_band_start(phase.ref.label) or band)
         # Els classificats d'una fase TANCADA (tots els grups decidits) són
         # DEFINITIUS; si encara hi ha grups oberts, la posició és provisional.
         phase_closed = bool(phase.groups) and all(_group_closed(g) for g in phase.groups)

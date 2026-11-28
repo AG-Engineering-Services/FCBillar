@@ -594,3 +594,37 @@ def test_a_la_pre_previa_els_segons_son_eliminats_i_a_la_pre_pre_previa_no() -> 
     assert eliminats("PRE-PRÈVIA") == ["GIL PÉREZ", "BARGALLO JAUME"]
     # De la pre-pre-prèvia passen també els millors 2ns: fins al sorteig, pendents.
     assert eliminats("PRE-PRE-PRÈVIA") == ["BARGALLO JAUME"]
+
+
+def test_eliminats_de_la_pre_previa_al_seu_tram_si_la_previa_no_es_publicada() -> None:
+    # Sant Adrià 2026-11-28: amb la prèvia encara sense publicar, els eliminats de
+    # la pre-prèvia sortien a partir del 33, el tram de la prèvia.
+    from fcb_opens.scraper.open_live import (
+        OpenLiveState,
+        OpenStructure,
+        PhaseDetail,
+        PhaseRef,
+        _seed_unplayed_groups,
+        compute_open_classification,
+        compute_provisional_qualifiers,
+    )
+
+    (grup,) = _seed_unplayed_groups(
+        (_grup_ac_federacio(),), frozenset(), None, corregeix_taula=True
+    )
+    ref = PhaseRef(label="PRE-PRÈVIA", kind="group", url="")
+    fase = PhaseDetail(
+        ref=ref,
+        groups=(grup,),
+        provisional_qualifiers=compute_provisional_qualifiers(PhaseDetail(ref=ref, groups=(grup,))),
+    )
+    estat = OpenLiveState(
+        structure=OpenStructure(division_id=1, name="OPEN", phase_id=1, phases=(ref,)),
+        phases=[fase],
+    )
+    assert [
+        (r.position, r.player_name.split(",")[0]) for r in compute_open_classification(estat)
+    ] == [
+        (65, "GIL PÉREZ"),
+        (66, "BARGALLO JAUME"),
+    ]
