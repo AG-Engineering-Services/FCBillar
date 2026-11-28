@@ -559,7 +559,7 @@ def test_taula_de_la_federacio_que_no_quadra_es_corregeix_fins_al_sorteig() -> N
     assert oficial.standings[0].player_name == "GIL PÉREZ, ALBERT" and not oficial.taula_corregida
 
 
-def test_a_la_pre_previa_els_segons_no_son_eliminats_abans_del_sorteig() -> None:
+def test_a_la_pre_previa_els_segons_son_eliminats_i_a_la_pre_pre_previa_no() -> None:
     from fcb_opens.scraper.open_live import (
         OpenLiveState,
         OpenStructure,
@@ -567,15 +567,30 @@ def test_a_la_pre_previa_els_segons_no_son_eliminats_abans_del_sorteig() -> None
         PhaseRef,
         _seed_unplayed_groups,
         compute_open_classification,
+        compute_provisional_qualifiers,
     )
 
     (grup,) = _seed_unplayed_groups(
         (_grup_ac_federacio(),), frozenset(), None, corregeix_taula=True
     )
-    ref = PhaseRef(label="PRE-PRÈVIA", kind="group", url="")
-    estat = OpenLiveState(
-        structure=OpenStructure(division_id=1, name="OPEN", phase_id=1, phases=(ref,)),
-        phases=[PhaseDetail(ref=ref, groups=(grup,))],
-    )
-    eliminats = [r.player_name for r in compute_open_classification(estat)]
-    assert eliminats == ["BARGALLO JAUME, JOSEP"]
+
+    def eliminats(fase: str) -> list[str]:
+        ref = PhaseRef(label=fase, kind="group", url="")
+        estat = OpenLiveState(
+            structure=OpenStructure(division_id=1, name="OPEN", phase_id=1, phases=(ref,)),
+            phases=[
+                PhaseDetail(
+                    ref=ref,
+                    groups=(grup,),
+                    provisional_qualifiers=compute_provisional_qualifiers(
+                        PhaseDetail(ref=ref, groups=(grup,))
+                    ),
+                )
+            ],
+        )
+        return [r.player_name.split(",")[0] for r in compute_open_classification(estat)]
+
+    # De la pre-prèvia només passen els 1rs.
+    assert eliminats("PRE-PRÈVIA") == ["GIL PÉREZ", "BARGALLO JAUME"]
+    # De la pre-pre-prèvia passen també els millors 2ns: fins al sorteig, pendents.
+    assert eliminats("PRE-PRE-PRÈVIA") == ["BARGALLO JAUME"]

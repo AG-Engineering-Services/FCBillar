@@ -1870,10 +1870,10 @@ def _group_band_start(label: str) -> int | None:
     return _GROUP_ROUND_BAND_START.get(key)
 
 
-def _alimenta_una_fase_de_grups(label: str) -> bool:
-    """La fase és una pre-prèvia (o pre-pre-prèvia): la següent és de grups, no
-    el quadre. La PRÈVIA és l'última de grups i alimenta el KO."""
-    return normalitza(label).startswith("pre-")
+def _hi_passen_segons(label: str) -> bool:
+    """De la pre-pre-prèvia passen els 1rs i els millors 2ns. De la pre-prèvia i
+    de la prèvia, només els 1rs."""
+    return normalitza(label).startswith("pre-pre-")
 
 
 def compute_open_classification(
@@ -1966,10 +1966,11 @@ def compute_open_classification(
                     n for n in phase_stats[i]
                     if n in closed_players and n not in advancers and n not in later_known
                 ]
-            elif _alimenta_una_fase_de_grups(phase.ref.label):
-                # Fase FRONTERA que alimenta una altra fase de grups (pre-prèvia →
-                # prèvia): hi passen els 1rs i els millors 2ns, i quants 2ns no se
-                # sap fins al sorteig. Només els 3rs i següents són fora segur.
+            elif _hi_passen_segons(phase.ref.label):
+                # Fase FRONTERA de la qual passen també els millors 2ns (la
+                # pre-pre-prèvia; a Sant Adrià 2026 hi va passar el 2n del grup AH), i
+                # quants no se sap fins al sorteig. Només els 3rs i següents són fora
+                # segur. De la pre-prèvia i de la prèvia només passen els 1rs.
                 elim = [
                     n for n in phase_stats[i]
                     if n in closed_players
