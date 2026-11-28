@@ -873,3 +873,63 @@ def avisa_reingesta(sb, prog: Progress, clau_privada: str | None = None) -> dict
         max_nous=MAX_NOUS_REINGESTA,
         clau_privada=clau_privada,
     )
+
+
+def avisa_prova(sb, prog: Progress, clau_privada: str | None = None) -> dict[str, int]:
+    """Envia un missatge de prova a cada dispositiu subscrit i en diu la resposta.
+
+    Serveix per saber si els avisos arriben quan no n'hi ha cap de real per
+    enviar. No toca `avisos_enviats`. Per cada dispositiu escriu el servei de
+    push (Apple, Google, Mozilla), els tipus marcats i el codi HTTP: 201 vol dir
+    que el servei l'ha acceptat; 404 o 410, que la subscripció ja no val (i es
+    retira); 403, que la clau VAPID no és la que es va fer servir en subscriure."""
+    from urllib.parse import urlparse
+
+    from pywebpush import WebPushException, webpush
+
+    compte = {"dispositius": 0, "acceptats": 0, "rebutjats": 0}
+    clau_privada = clau_privada or os.environ.get("VAPID_PRIVATE_KEY")
+    if not clau_privada:
+        prog("warn", "avisos: falta VAPID_PRIVATE_KEY; no s'envia res")
+        return compte
+    subs = _subscripcions(sb)
+    if not subs:
+        prog("warn", "avisos: cap dispositiu subscrit amb algun tipus marcat")
+        return compte
+    missatge = {
+        "title": "FCBillar · prova",
+        "body": "Si veus això, els avisos de resultats arriben a aquest dispositiu.",
+        "url": "/",
+        "tag": None,
+    }
+    for sub in subs:
+        compte["dispositius"] += 1
+        servei = urlparse(sub["endpoint"]).hostname or "?"
+        tipus = ",".join(sub.get("tipus") or [])
+        try:
+            resposta = webpush(
+                subscription_info={
+                    "endpoint": sub["endpoint"],
+                    "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]},
+                },
+                data=json.dumps(missatge, ensure_ascii=False),
+                vapid_private_key=clau_privada,
+                vapid_claims={"sub": VAPID_SUB},
+                ttl=3600,
+                timeout=20,
+            )
+            codi = getattr(resposta, "status_code", 201)
+            detall = ""
+        except WebPushException as exc:
+            codi = exc.response.status_code if exc.response is not None else -1
+            detall = (exc.response.text[:200] if exc.response is not None else str(exc)).strip()
+        if 200 <= codi < 300:
+            compte["acceptats"] += 1
+            prog("ok", f"avisos: {servei} [{tipus}] → {codi} acceptat")
+        else:
+            compte["rebutjats"] += 1
+            prog("warn", f"avisos: {servei} [{tipus}] → {codi} {detall}")
+            if codi in (404, 410):
+                sb.table("push_subscripcions").delete().eq("endpoint", sub["endpoint"]).execute()
+                prog("ok", "avisos: subscripció caducada retirada")
+    return compte

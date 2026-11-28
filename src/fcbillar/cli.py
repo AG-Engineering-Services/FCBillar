@@ -1810,6 +1810,23 @@ def avisa_reingesta_cmd() -> None:
     console.print(f"[green]avisos: {', '.join(f'{k}={v}' for k, v in counts.items())}[/]")
 
 
+@app.command("avisa-prova")
+def avisa_prova_cmd() -> None:
+    """Envia un avís de prova a cada dispositiu subscrit i diu què ha respost el
+    servei de push. Cal VAPID_PRIVATE_KEY a l'entorn. Es llança a mà des del
+    workflow «Avisos: prova d'enviament»."""
+    from fcbillar.avisos import avisa_prova
+    from fcbillar.cloud_sync import get_client
+
+    def _prog(level: str, msg: str) -> None:
+        console.print(f"[dim]  {msg}[/]" if level == "ok" else f"[yellow]{msg}[/]")
+
+    counts = avisa_prova(get_client(), _prog)
+    console.print(f"[green]avisos de prova: {', '.join(f'{k}={v}' for k, v in counts.items())}[/]")
+    if not counts["acceptats"]:
+        raise typer.Exit(1)
+
+
 @app.command("project-open-ranking")
 def project_open_ranking_cmd(
     pdf: str = typer.Argument(..., help="PDF 'RÀNQUING INICIAL' de l'open"),
