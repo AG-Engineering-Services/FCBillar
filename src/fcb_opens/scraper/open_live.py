@@ -1061,7 +1061,11 @@ def _seed_unplayed_groups(
     Sense `rank_by_name` mantenim l'ordre de la federació i només recol·loquem
     els advancers al final (comportament anterior). Els grups ja començats es
     deixen tal qual: l'ordre ja reflecteix els resultats."""
-    if not rank_by_name and not earlier_names:
+    if (
+        not rank_by_name
+        and not earlier_names
+        and not any(m.pendent_amb_resultat for g in groups for m in g.matches)
+    ):
         return groups
     big = 10**9
 
@@ -2657,11 +2661,12 @@ def fetch_live_state(
         next_names = (
             _phase_player_names(details[i + 1]) if i + 1 < len(details) else None
         )
-        qualifiers = compute_provisional_qualifiers(d, next_names)
         # Ordre de sorteig dels grups encara no jugats: per rànquing d'Opens
         # (si el tenim) i amb els advancers de fase anterior sempre al final (3r
-        # en grups de 3). No afecta els classificats: els grups no jugats no en tenen.
+        # en grups de 3). Els classificats surten de la taula ja refeta: la del
+        # portal no compta les partides «Pendent» i hi deixa el primer del sorteig.
         groups = _seed_unplayed_groups(d.groups, earlier_names, rank_by_name)
+        qualifiers = compute_provisional_qualifiers(replace(d, groups=groups), next_names)
         enriched.append(
             PhaseDetail(
                 ref=d.ref,

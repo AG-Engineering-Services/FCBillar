@@ -481,3 +481,31 @@ def test_grup_amb_partida_pendent_es_reordena_per_punts() -> None:
         ("BARGALLO JAUME, JOSEP", 0),
         ("GIL PÉREZ, ALBERT", 0),
     ]
+
+
+def test_classificat_provisional_surt_de_la_taula_refeta() -> None:
+    # Sant Adrià 2026-11-28, grup AC: Gil i Chuecos amb 2 punts, Bargallo amb 0,
+    # i el classificat provisional era Bargallo, primer a la taula del portal.
+    from fcb_opens.scraper.open_live import (
+        Group,
+        GroupStanding,
+        PhaseDetail,
+        PhaseRef,
+        _resultats,
+        _seed_unplayed_groups,
+        compute_provisional_qualifiers,
+    )
+
+    files = tuple(
+        GroupStanding(player_name=n, club="", punts=0, mitjana=0.0)
+        for n in ("BARGALLO JAUME, JOSEP", "GIL PÉREZ, ALBERT", "CHUECOS ENRIQUEZ, LUIS")
+    )
+    gil = _fila(17, 30, 35, "Pendent")
+    gil = type(gil)(**{**gil.__dict__, "visitant_nom": "GIL PÉREZ, ALBERT"})
+    partides = _resultats([_fila(27, 28, 50, "Pendent"), gil])
+    g = Group(label="Grup AC", url="", standings=files, matches=partides)
+    # Sense rànquing ni fase anterior la taula també s'ha de refer.
+    (refet,) = _seed_unplayed_groups((g,), frozenset(), None)
+    fase = PhaseDetail(ref=PhaseRef(label="PRE-PRÈVIA", kind="group", url=""), groups=(refet,))
+    (q,) = compute_provisional_qualifiers(fase)
+    assert q.player_name == "GIL PÉREZ, ALBERT" and q.punts == 2
