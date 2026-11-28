@@ -435,26 +435,30 @@ def _fila(car_a: int, car_b: int, entrades: int, estat: str):
     )
 
 
-def test_pendent_amb_les_entrades_esgotades_ja_es_resultat() -> None:
-    # Sant Adrià 2026-11-28: 27-28 a 50 entrades i encara «Pendent» al portal.
+def test_pendent_amb_marcador_ja_es_resultat() -> None:
+    # Sant Adrià 2026-11-28: el portal tenia «Pendent» i 0 punts a partides ja
+    # jugades. Només publica marcadors acabats; «Pendent» admet correccions.
     from fcb_opens.scraper.open_live import _resultats
 
-    (m,) = _resultats([_fila(27, 28, 50, "Pendent")])
-    assert m.is_played and m.tancada
-    assert (m.punts_a, m.punts_b) == (0, 2)
+    a_50, a_30, empat = _resultats(
+        [_fila(27, 28, 50, "Pendent"), _fila(23, 30, 38, "Pendent"), _fila(20, 20, 50, "Pendent")]
+    )
+    assert a_50.is_played and a_50.tancada and (a_50.punts_a, a_50.punts_b) == (0, 2)
+    assert a_30.is_played and (a_30.punts_a, a_30.punts_b) == (0, 2)
+    assert empat.is_played and (empat.punts_a, empat.punts_b) == (1, 1)
 
 
-def test_pendent_a_mitges_o_empatada_a_50_encara_no() -> None:
+def test_pendent_sense_marcador_o_empat_a_eliminatoria_encara_no() -> None:
     from fcb_opens.scraper.open_live import _resultats
 
-    a_mitges, empat = _resultats([_fila(23, 30, 38, "Pendent"), _fila(20, 20, 50, "Pendent")])
-    # A 30 caramboles l'altre pot tenir l'entrada d'igualar; l'empat a una
-    # eliminatòria es desfà amb un tie break que no es publica.
-    assert not a_mitges.is_played and not empat.is_played
-    assert (empat.punts_a, empat.punts_b) == (0, 0)
+    (sense,) = _resultats([_fila(0, 0, 0, "Pendent")])
+    assert not sense.is_played
+    # A les eliminatòries l'empat es desfà amb un tie break que no es publica.
+    (ko,) = _resultats([_fila(20, 20, 50, "Pendent")], punts_oficials={})
+    assert not ko.is_played and (ko.punts_a, ko.punts_b) == (0, 0)
 
 
-def test_grup_amb_partida_pendent_esgotada_es_reordena_per_punts() -> None:
+def test_grup_amb_partida_pendent_es_reordena_per_punts() -> None:
     # El portal encara té tothom a 0 punts i l'ordre del sorteig: Chuecos, que ha
     # guanyat, sortia tercer.
     from fcb_opens.scraper.open_live import (
