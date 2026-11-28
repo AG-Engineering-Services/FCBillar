@@ -157,6 +157,7 @@ def _state_payload(
                     "matches": [_match_payload(m) for m in g.matches],
                     "n_matches_played": played,
                     "n_matches_total": len(g.matches),
+                    "taula_corregida": getattr(g, "taula_corregida", False),
                 }
             )
         ko_out = [_match_payload(m) for m in detail.ko_matches]
