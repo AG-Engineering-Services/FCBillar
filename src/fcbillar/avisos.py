@@ -1,21 +1,28 @@
 """Avisos push de resultats nous a la PWA (la campana de la capçalera).
 
+Cada dispositiu tria tipus i té una llista de seguiments amb prefix: «j:278»
+(jugador), «c:C.B.BANYOLES» (club) i «e:C.B.BANYOLES A» (equip). Els tipus
+(`TIPUS`, iguals que a web/src/lib/avisos.ts):
+
+- `opens_3b`: totes les partides acabades de qualsevol open de 3 bandes.
+- `clubs_seguits`: el resultat dels encontres de lliga i de Copa dels clubs
+  seguits (tots els seus equips) i dels equips seguits.
+- `jugadors_seguits`: les partides dels jugadors seguits a les competicions
+  individuals (opens i campionats de Catalunya).
+
 Dues fonts, cadascuna enganxada on les dades ja són a la memòria:
 
 - `avisa_opens`: des de `publish_live_opens`, a cada passada de ~2 min del cap de
-  setmana. Partides acabades dels opens en directe: totes les de 3 bandes, i les
-  dels jugadors del Banyoles de qualsevol modalitat.
-- `avisa_reingesta`: després de `publish-cloud`, a la reingesta. Encontres de lliga
-  i de Copa del Banyoles, i partides dels seus jugadors als campionats de Catalunya.
+  setmana.
+- `avisa_reingesta`: després de `publish-cloud`, a la reingesta (encontres dels
+  clubs i equips seguits, i campionats dels jugadors seguits).
 
-Cada resultat té una clau estable. Les ja avisades es desen a `avisos_enviats`, i
-cada subscripció només rep els tipus que té marcats (els identificadors de
-`TIPUS` han de coincidir amb web/src/lib/avisos.ts). Un missatge per open o
-competició i per passada: en un open de 3 bandes hi ha massa partides per a una
-notificació cadascuna.
+Cada resultat té una clau estable; les ja avisades es desen a `avisos_enviats`.
+Un missatge per open o competició i per passada.
 
 La primera vegada que corre una font no envia res: marca com a avisat tot el que
-ja hi ha. Sense això, el primer tret hauria enviat tota la temporada.
+ja hi ha. El mateix per a cada seguiment nou: començar a seguir algú a mitja
+temporada no envia tot el que ja ha jugat.
 """
 
 from __future__ import annotations
@@ -27,13 +34,12 @@ import unicodedata
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 
-TIPUS = (
-    "opens_3b",
-    "banyoles_lliga",
-    "banyoles_opens",
-    "banyoles_copa_camp",
-    "jugadors_seguits",
-)
+TIPUS = ("opens_3b", "clubs_seguits", "jugadors_seguits")
+# Quins seguiments compten per a cada tipus.
+PREFIXOS_DEL_TIPUS = {
+    "clubs_seguits": ("c:", "e:"),
+    "jugadors_seguits": ("j:",),
+}
 
 # El `sub` del VAPID: els serveis de push (Apple, Google) hi escriuen si cal.
 # L'adreça del web i no un correu personal.
@@ -56,11 +62,10 @@ class Resultat:
     titol: str
     linia: str
     url: str
-    destacat: bool = False  # hi juga el Banyoles: va al davant i amb estrella
     ordre: int = field(default=0, compare=False)
-    # Ids dels jugadors SEGUITS que hi juguen. Un resultat sense cap `tipus` només
-    # arriba als dispositius que segueixen algun d'aquests jugadors.
-    jugadors: frozenset[str] = field(default_factory=frozenset)
+    # Seguiments que hi intervenen («j:…», «c:…», «e:…»). Un resultat
+    # sense cap `tipus` només arriba als dispositius que en segueixen algun.
+    seguiments: frozenset[str] = field(default_factory=frozenset)
 
     def __post_init__(self) -> None:
         # Les claus van dins d'un filtre `in.(...)` de PostgREST, que no admet
@@ -86,8 +91,10 @@ def _norm(s: str | None) -> str:
     return re.sub(r"\s+", " ", s).strip().upper()
 
 
-def es_banyoles(text: str | None) -> bool:
-    return "BANYOLES" in _norm(text)
+def compacte(s: str | None) -> str:
+    """«C.B. BANYOLES "A"» → «CBBANYOLESA»: per comparar equips i clubs, que la
+    federació escriu amb punts, espais i cometes diferents segons la pàgina."""
+    return re.sub(r"[^A-Z0-9]", "", _norm(s))
 
 
 def _curt(nom: str | None) -> str:
@@ -116,19 +123,6 @@ def _decidida(m: dict) -> bool:
     return bool(m.get("is_played")) or (m.get("punts_a") or 0) + (m.get("punts_b") or 0) > 0
 
 
-def _clubs_del_payload(payload: dict) -> dict[str, str]:
-    clubs: dict[str, str] = {}
-    for c in payload.get("classification") or []:
-        if c.get("player_name") and c.get("club"):
-            clubs[c["player_name"]] = c["club"]
-    for ph in payload.get("phases") or []:
-        for g in ph.get("groups") or []:
-            for s in g.get("standings") or []:
-                if s.get("player_name") and s.get("club"):
-                    clubs.setdefault(s["player_name"], s["club"])
-    return clubs
-
-
 def _linia_partida(prefix: str, m: dict) -> str:
     a, b = _curt(m.get("player_a")), _curt(m.get("player_b"))
     ca, cb = m.get("caramboles_a"), m.get("caramboles_b")
@@ -139,19 +133,10 @@ def _linia_partida(prefix: str, m: dict) -> str:
     return f"{prefix}{a} {ca}-{cb} {b}{cola}"
 
 
-def resultats_opens(
-    files_open_live: Iterable[dict],
-    banyoles_noms: set[str] = frozenset(),
-    banyoles_ids: set[str] = frozenset(),
-    seguits: set[str] = frozenset(),
-) -> list[Resultat]:
-    """Partides decidides dels opens en directe que interessen a algun tipus o
-    en què juga algun jugador seguit (`seguits`, ids).
-
-    El club del payload sovint ve buit (el portal no el dona a totes les fases):
-    per això també es mira si el jugador és als afiliats del Banyoles
-    (`banyoles_noms`, normalitzats) o si el seu id hi és (`banyoles_ids`).
-    """
+def resultats_opens(files_open_live: Iterable[dict], seguits: Iterable[str] = ()) -> list[Resultat]:
+    """Partides decidides dels opens en directe: les de 3 bandes, i les dels
+    jugadors que algú segueix (`seguits`, amb prefix) de qualsevol modalitat."""
+    seguits = set(seguits)
     out: list[Resultat] = []
     for row in files_open_live:
         div = row.get("fcb_division_id")
@@ -160,16 +145,7 @@ def resultats_opens(
         if isinstance(payload, str):
             payload = json.loads(payload)
         es3b = _es_3b(nom, row.get("modality"))
-        clubs = _clubs_del_payload(payload)
         ids = payload.get("player_ids") or {}
-
-        def del_banyoles(nom: str, clubs=clubs, ids=ids) -> bool:
-            return (
-                es_banyoles(clubs.get(nom))
-                or _norm(nom) in banyoles_noms
-                or str(ids.get(nom, "")) in banyoles_ids
-            )
-
         n = 0
         for ph in payload.get("phases") or []:
             fase = ph.get("label") or ""
@@ -180,34 +156,27 @@ def resultats_opens(
                     if not _decidida(m):
                         continue
                     a, b = m.get("player_a") or "", m.get("player_b") or ""
-                    banyoles = del_banyoles(a) or del_banyoles(b)
-                    tipus = set()
-                    if es3b:
-                        tipus.add("opens_3b")
-                    if banyoles:
-                        tipus.add("banyoles_opens")
-                    seg = {str(ids.get(x, "")) for x in (a, b)} & set(seguits)
-                    if not tipus and not seg:
+                    seg = {f"j:{ids[x]}" for x in (a, b) if ids.get(x)} & seguits
+                    if not es3b and not seg:
                         continue
                     on = grup or fase
                     n += 1
                     out.append(
                         Resultat(
                             clau=f"open:{div}:{fase}:{grup}:{'|'.join(sorted((a, b)))}",
-                            tipus=frozenset(tipus),
+                            tipus=frozenset({"opens_3b"}) if es3b else frozenset(),
                             grup=f"open:{div}",
                             titol=nom.title(),
                             linia=_linia_partida(f"{on}: " if on else "", m),
                             url=f"/opens/directe/{div}",
-                            destacat=banyoles,
                             ordre=n,
-                            jugadors=frozenset(seg),
+                            seguiments=frozenset(seg),
                         )
                     )
     return out
 
 
-# --- Reingesta: lliga, Copa i campionats --------------------------------------
+# --- Reingesta: encontres dels clubs i equips, campionats dels jugadors --------
 
 
 def _llegeix(fes: Callable[[], object]) -> list[dict]:
@@ -232,78 +201,6 @@ def _partides_guanyades(partides: list[dict]) -> tuple[int, int]:
     return gl, gv
 
 
-def _resultats_lliga(sb, prefix: str, nom_lliga: str) -> list[Resultat]:
-    taula = f"{prefix}_encontres"
-    files = _llegeix(
-        lambda: (
-            sb.table(taula)
-            .select(
-                "encontre_id,divisio_id,grup_id,data,equip_local,equip_visitant,gols_local,gols_visitant"
-            )
-            .or_("equip_local.ilike.*BANYOLES*,equip_visitant.ilike.*BANYOLES*")
-            .not_.is_("gols_local", "null")
-            .lt("encontre_id", 10_000_000)  # els de sota són els jugats; els altres, provisionals
-            .order("encontre_id")
-        )
-    )
-    if not files:
-        return []
-    tots_grups = _llegeix(
-        lambda: (
-            sb.table(f"{prefix}_groups")
-            .select("divisio_id,grup_id,divisio_nom,grup_nom,temporada")
-            .order("divisio_id")
-            .order("grup_id")
-        )
-    )
-    # La taula també guarda les temporades passades: només la d'ara.
-    actual = max((g.get("temporada") or "" for g in tots_grups), default="")
-    grups = {
-        (g["divisio_id"], g["grup_id"]): g
-        for g in tots_grups
-        if (g.get("temporada") or "") == actual
-    }
-    files = [f for f in files if (f["divisio_id"], f["grup_id"]) in grups]
-    if not files:
-        return []
-    ids = [f["encontre_id"] for f in files]
-    partides: dict[int, list[dict]] = {}
-    for i in range(0, len(ids), 200):
-        tros = ids[i : i + 200]
-        for p in _llegeix(
-            lambda tros=tros: (
-                sb.table(f"{prefix}_partides")
-                .select("encontre_id,ordre,caramboles_local,caramboles_visitant")
-                .in_("encontre_id", tros)
-                .order("encontre_id")
-                .order("ordre")
-            )
-        ):
-            partides.setdefault(p["encontre_id"], []).append(p)
-    out = []
-    for f in files:
-        g = grups.get((f["divisio_id"], f["grup_id"])) or {}
-        on = " ".join(x for x in (g.get("divisio_nom"), g.get("grup_nom")) if x).title()
-        pl, pv = _partides_guanyades(partides.get(f["encontre_id"], []))
-        marcador = f"{pl}-{pv}" if (pl or pv) else f"{f['gols_local']}-{f['gols_visitant']}"
-        punts = f" · {f['gols_local']}-{f['gols_visitant']} punts" if (pl or pv) else ""
-        out.append(
-            Resultat(
-                clau=f"{prefix}:{f['encontre_id']}",
-                tipus=frozenset({"banyoles_lliga"}),
-                grup=prefix,
-                titol=f"{nom_lliga}: encontres del Banyoles",
-                linia=(
-                    f"{on + ': ' if on else ''}{_equip(f['equip_local'])} {marcador} "
-                    f"{_equip(f['equip_visitant'])}{punts}"
-                ),
-                url="/lliga",
-                destacat=True,
-            )
-        )
-    return out
-
-
 def _grups_actuals(sb, prefix: str) -> dict[tuple, dict]:
     """Grups de la temporada d'ara: la taula també guarda les passades."""
     tots = _llegeix(
@@ -320,6 +217,148 @@ def _grups_actuals(sb, prefix: str) -> dict[tuple, dict]:
     }
 
 
+class Equips:
+    """Decideix quins seguiments toca un equip: el seu club, si se segueix, i
+    l'equip mateix, si se segueix."""
+
+    def __init__(self, clubs: Iterable[str], equips: Iterable[str], oficials: dict[str, str]):
+        # El més llarg primer: «C.B.SANT ADRIÀ» abans que un hipotètic «C.B.SANT».
+        self.clubs = sorted(clubs, key=lambda c: -len(compacte(c)))
+        self.equips = {compacte(e): e for e in equips}
+        # Equip compactat → club, segons la classificació de la federació.
+        self.oficials = oficials
+
+    def club(self, equip: str | None) -> str | None:
+        """El club seguit de l'equip: el que hi assigna la federació o, si no en
+        diu res, aquell pel nom del qual comença («C.B.BANYOLES A»)."""
+        oficial = self.oficials.get(compacte(equip))
+        if oficial is not None:
+            return next((c for c in self.clubs if compacte(c) == compacte(oficial)), None)
+        eq = compacte(equip)
+        return next((c for c in self.clubs if compacte(c) and eq.startswith(compacte(c))), None)
+
+    def seguiments(self, *equips: str | None) -> frozenset[str]:
+        out = set()
+        for e in equips:
+            if (c := self.club(e)) is not None:
+                out.add(f"c:{c}")
+            if (seguit := self.equips.get(compacte(e))) is not None:
+                out.add(f"e:{seguit}")
+        return frozenset(out)
+
+
+def _clubs_lliga(
+    sb, prefix: str, nom_lliga: str, clubs: set[str], equips: set[str]
+) -> list[Resultat]:
+    grups = _grups_actuals(sb, prefix)
+    if not grups:
+        return []
+    grup_ids = sorted({g for _, g in grups})
+    oficials = {
+        compacte(s["equip"]): s["club_fcb_id"]
+        for s in _llegeix(
+            lambda: (
+                sb.table(f"{prefix}_standings")
+                .select("divisio_id,grup_id,equip,club_fcb_id")
+                .in_("grup_id", grup_ids)
+                .order("divisio_id")
+                .order("grup_id")
+                .order("equip")
+            )
+        )
+        if s.get("equip") and s.get("club_fcb_id")
+    }
+    qui = Equips(clubs, equips, oficials)
+    encontres = []
+    for f in _llegeix(
+        lambda: (
+            sb.table(f"{prefix}_encontres")
+            .select(
+                "encontre_id,divisio_id,grup_id,equip_local,equip_visitant,gols_local,gols_visitant"
+            )
+            .in_("grup_id", grup_ids)
+            .not_.is_("gols_local", "null")
+            .lt("encontre_id", 10_000_000)  # els de sota són els jugats; els altres, provisionals
+            .order("encontre_id")
+        )
+    ):
+        if (f["divisio_id"], f["grup_id"]) not in grups:
+            continue
+        seg = qui.seguiments(f["equip_local"], f["equip_visitant"])
+        if seg:
+            encontres.append((f, seg))
+    ids = [f["encontre_id"] for f, _ in encontres]
+    partides: dict[int, list[dict]] = {}
+    for i in range(0, len(ids), 150):
+        tros = ids[i : i + 150]
+        for p in _llegeix(
+            lambda tros=tros: (
+                sb.table(f"{prefix}_partides")
+                .select("encontre_id,ordre,caramboles_local,caramboles_visitant")
+                .in_("encontre_id", tros)
+                .order("encontre_id")
+                .order("ordre")
+            )
+        ):
+            partides.setdefault(p["encontre_id"], []).append(p)
+    out = []
+    for f, seg in encontres:
+        g = grups[(f["divisio_id"], f["grup_id"])]
+        on = " ".join(x for x in (g.get("divisio_nom"), g.get("grup_nom")) if x).title()
+        pl, pv = _partides_guanyades(partides.get(f["encontre_id"], []))
+        marcador = f"{pl}-{pv}" if (pl or pv) else f"{f['gols_local']}-{f['gols_visitant']}"
+        punts = f" · {f['gols_local']}-{f['gols_visitant']} punts" if (pl or pv) else ""
+        out.append(
+            Resultat(
+                clau=f"{prefix}:{f['encontre_id']}",
+                tipus=frozenset(),
+                grup=prefix,
+                titol=f"{nom_lliga}: clubs i equips seguits",
+                linia=(
+                    f"{on + ': ' if on else ''}{_equip(f['equip_local'])} {marcador} "
+                    f"{_equip(f['equip_visitant'])}{punts}"
+                ),
+                url="/lliga",
+                seguiments=seg,
+            )
+        )
+    return out
+
+
+def _clubs_copa(sb, clubs: set[str], equips: set[str]) -> list[Resultat]:
+    # La Copa no diu de quin club és cada equip: pel nom.
+    qui = Equips(clubs, equips, {})
+    out = []
+    for f in _llegeix(
+        lambda: (
+            sb.table("copa_encontres")
+            .select("jornada,grup_id,grup_nom,equip_local,equip_visitant,gols_local,gols_visitant")
+            .not_.is_("gols_local", "null")
+            .order("encontre_id")
+        )
+    ):
+        seg = qui.seguiments(f["equip_local"], f["equip_visitant"])
+        if not seg:
+            continue
+        on = (f.get("grup_nom") or "").title()
+        out.append(
+            Resultat(
+                # `encontre_id` de la Copa és l'autoincrement de la base local: no és estable.
+                clau=f"copa:{f['jornada']}:{f['grup_id']}:{f['equip_local']}|{f['equip_visitant']}",
+                tipus=frozenset(),
+                grup="copa",
+                titol="Copa: clubs i equips seguits",
+                linia=(
+                    f"{on + ': ' if on else ''}{_equip(f['equip_local'])} "
+                    f"{f['gols_local']}-{f['gols_visitant']} {_equip(f['equip_visitant'])}"
+                ),
+                url="/copa",
+                seguiments=seg,
+            )
+        )
+    return out
+
+
 def _jugadors_per_id(sb, ids: Iterable[str]) -> list[dict]:
     ids = sorted({str(i) for i in ids})
     files: list[dict] = []
@@ -329,210 +368,9 @@ def _jugadors_per_id(sb, ids: Iterable[str]) -> list[dict]:
     return [f for f in files if f.get("nom")]
 
 
-def noms_dels_seguits(sb, ids: Iterable[str]) -> dict[str, str]:
-    """{nom normalitzat: id} dels jugadors seguits, per casar-los amb les
-    partides, que només porten el nom."""
-    return {_norm(f["nom"]): str(f["fcb_id"]) for f in _jugadors_per_id(sb, ids)}
-
-
-def _filtre_noms(noms: Iterable[str]) -> str:
-    """`or` de PostgREST: el jugador local o el visitant és un d'aquests noms.
-
-    Els noms porten comes («COGNOMS, NOM»): entre cometes dobles, que és com
-    PostgREST les accepta dins d'un `in`."""
-    llista = ",".join('"' + n.replace('"', "") + '"' for n in sorted(set(noms)))
-    return f"jugador_local.in.({llista}),jugador_visitant.in.({llista})"
-
-
-def _linia_individual(p: dict) -> str:
-    entr = p.get("entrades")
-    return (
-        f"{_curt(p.get('jugador_local'))} {p.get('caramboles_local')}-"
-        f"{p.get('caramboles_visitant')} {_curt(p.get('jugador_visitant'))}"
-        f"{f' ({entr} e.)' if entr else ''}"
-    )
-
-
-def _partides_dels_seguits(
-    sb, taula: str, encontres: dict[int, dict], noms: list[str], seguits: dict[str, str]
-):
-    """(partida, ids seguits que hi juguen) de les partides d'aquests encontres."""
-    ids = list(encontres)
-    for i in range(0, len(ids), 150):
-        tros = ids[i : i + 150]
-        for p in _llegeix(
-            lambda tros=tros: (
-                sb.table(taula)
-                .select(
-                    "encontre_id,ordre,jugador_local,caramboles_local,"
-                    "jugador_visitant,caramboles_visitant,entrades"
-                )
-                .in_("encontre_id", tros)
-                .or_(_filtre_noms(noms))
-                .order("encontre_id")
-                .order("ordre")
-            )
-        ):
-            jug = {seguits.get(_norm(p.get(k))) for k in ("jugador_local", "jugador_visitant")}
-            jug.discard(None)
-            if jug:
-                yield p, frozenset(jug)
-
-
-def _seguits_lliga(
-    sb, prefix: str, nom_lliga: str, seguits: dict[str, str], noms: list[str]
-) -> list[Resultat]:
-    grups = _grups_actuals(sb, prefix)
-    if not grups:
-        return []
-    grup_ids = sorted({g for _, g in grups})
-    encontres = {
-        f["encontre_id"]: f
-        for f in _llegeix(
-            lambda: (
-                sb.table(f"{prefix}_encontres")
-                .select("encontre_id,divisio_id,grup_id,equip_local,equip_visitant")
-                .in_("grup_id", grup_ids)
-                .not_.is_("gols_local", "null")
-                .lt("encontre_id", 10_000_000)
-                .order("encontre_id")
-            )
-        )
-        if (f["divisio_id"], f["grup_id"]) in grups
-    }
-    out = []
-    for p, jug in _partides_dels_seguits(sb, f"{prefix}_partides", encontres, noms, seguits):
-        e = encontres[p["encontre_id"]]
-        out.append(
-            Resultat(
-                clau=f"{prefix}p:{p['encontre_id']}:{p['ordre']}",
-                tipus=frozenset(),
-                grup=f"seguits:{prefix}",
-                titol=f"{nom_lliga}: jugadors seguits",
-                linia=(
-                    f"{_linia_individual(p)} · "
-                    f"{_equip(e['equip_local'])} - {_equip(e['equip_visitant'])}"
-                ),
-                url="/lliga",
-                jugadors=jug,
-            )
-        )
-    return out
-
-
-def _seguits_copa(sb, seguits: dict[str, str], noms: list[str]) -> list[Resultat]:
-    encontres = {
-        f["encontre_id"]: f
-        for f in _llegeix(
-            lambda: (
-                sb.table("copa_encontres")
-                .select("encontre_id,jornada,grup_id,grup_nom,equip_local,equip_visitant")
-                .not_.is_("gols_local", "null")
-                .order("encontre_id")
-            )
-        )
-    }
-    out = []
-    for p, jug in _partides_dels_seguits(sb, "copa_partides", encontres, noms, seguits):
-        e = encontres[p["encontre_id"]]
-        out.append(
-            Resultat(
-                # Sense `encontre_id`, que a la Copa és l'id de la base local.
-                clau=(
-                    f"copap:{e['jornada']}:{e['grup_id']}:{e['equip_local']}|"
-                    f"{e['equip_visitant']}:{p['ordre']}"
-                ),
-                tipus=frozenset(),
-                grup="seguits:copa",
-                titol="Copa: jugadors seguits",
-                linia=(
-                    f"{_linia_individual(p)} · "
-                    f"{_equip(e['equip_local'])} - {_equip(e['equip_visitant'])}"
-                ),
-                url="/copa",
-                jugadors=jug,
-            )
-        )
-    return out
-
-
-def _resultats_copa(sb) -> list[Resultat]:
-    files = _llegeix(
-        lambda: (
-            sb.table("copa_encontres")
-            .select("jornada,grup_id,grup_nom,equip_local,equip_visitant,gols_local,gols_visitant")
-            .or_("equip_local.ilike.*BANYOLES*,equip_visitant.ilike.*BANYOLES*")
-            .not_.is_("gols_local", "null")
-            .order("encontre_id")
-        )
-    )
-    out = []
-    for f in files:
-        # `encontre_id` de la Copa és l'autoincrement de la base local: no és estable.
-        clau = f"copa:{f['jornada']}:{f['grup_id']}:{f['equip_local']}|{f['equip_visitant']}"
-        on = (f.get("grup_nom") or "").title()
-        out.append(
-            Resultat(
-                clau=clau,
-                tipus=frozenset({"banyoles_copa_camp"}),
-                grup="copa",
-                titol="Copa: encontres del Banyoles",
-                linia=(
-                    f"{on + ': ' if on else ''}{_equip(f['equip_local'])} "
-                    f"{f['gols_local']}-{f['gols_visitant']} {_equip(f['equip_visitant'])}"
-                ),
-                url="/copa",
-                destacat=True,
-            )
-        )
-    return out
-
-
-def banyoles_de_la_temporada(sb) -> tuple[set[str], set[str]]:
-    """(noms normalitzats, ids) dels jugadors del Banyoles d'ara."""
-    noms: set[str] = set()
-    darrer = (
-        sb.table("afiliacions")
-        .select("temporada")
-        .order("temporada", desc=True)
-        .limit(1)
-        .execute()
-        .data
-    )
-    if darrer:
-        noms = _jugadors_banyoles(sb, darrer[0]["temporada"])
-    ids = {
-        str(f["fcb_id"])
-        for f in _llegeix(
-            lambda: (
-                sb.table("players")
-                .select("fcb_id")
-                .eq("club_fcb_id", "C.B.BANYOLES")
-                .order("fcb_id")
-            )
-        )
-    }
-    return noms, ids
-
-
-def _jugadors_banyoles(sb, temporada: str) -> set[str]:
-    """Noms normalitzats dels afiliats al Banyoles aquesta temporada."""
-    temporada_barra = temporada.replace("-", "/")
-    files = _llegeix(
-        lambda: (
-            sb.table("afiliacions")
-            .select("jugador")
-            .eq("temporada", temporada_barra)
-            .ilike("club", "*BANYOLES*")
-            .order("jugador")
-            .order("competicio")
-        )
-    )
-    return {_norm(f["jugador"]) for f in files if f.get("jugador")}
-
-
-def _resultats_campionats(sb, seguits: dict[str, str] | None = None) -> list[Resultat]:
-    seguits = seguits or {}
+def _campionats_jugadors(sb, seguits: dict[str, str]) -> list[Resultat]:
+    """Partides dels jugadors seguits (`seguits`: nom normalitzat → id) als
+    campionats de Catalunya d'aquesta temporada."""
     darrer = (
         sb.table("opens").select("temporada").order("temporada", desc=True).limit(1).execute().data
     )
@@ -553,9 +391,6 @@ def _resultats_campionats(sb, seguits: dict[str, str] | None = None) -> list[Res
     }
     if not campionats:
         return []
-    nostres = _jugadors_banyoles(sb, temporada)
-    if not nostres and not seguits:
-        return []
     ids = list(campionats)
     fases = {
         (f["open_id"], f["fase_id"]): f.get("nom") or ""
@@ -574,7 +409,8 @@ def _resultats_campionats(sb, seguits: dict[str, str] | None = None) -> list[Res
         lambda: (
             sb.table("open_partides")
             .select(
-                "open_id,fase_id,ordre,grup_nom,jugador_local,caramboles_local,jugador_visitant,caramboles_visitant,entrades"
+                "open_id,fase_id,ordre,grup_nom,jugador_local,caramboles_local,"
+                "jugador_visitant,caramboles_visitant,entrades"
             )
             .in_("open_id", ids)
             .order("open_id")
@@ -583,10 +419,9 @@ def _resultats_campionats(sb, seguits: dict[str, str] | None = None) -> list[Res
         )
     ):
         a, b = p.get("jugador_local") or "", p.get("jugador_visitant") or ""
-        banyoles = _norm(a) in nostres or _norm(b) in nostres
         jug = {seguits.get(_norm(x)) for x in (a, b)}
         jug.discard(None)
-        if not banyoles and not jug:
+        if not jug:
             continue
         camp = campionats[p["open_id"]]
         fase = fases.get((p["open_id"], p["fase_id"]), "")
@@ -599,7 +434,7 @@ def _resultats_campionats(sb, seguits: dict[str, str] | None = None) -> list[Res
                     f"camp:{camp['temporada']}:{camp['nom']}:{fase}:{p.get('grup_nom') or ''}:"
                     f"{'|'.join(sorted((a, b)))}"
                 ),
-                tipus=frozenset({"banyoles_copa_camp"}) if banyoles else frozenset(),
+                tipus=frozenset(),
                 grup=f"camp:{p['open_id']}",
                 titol=f"Camp. Catalunya: {camp['nom']}",
                 linia=(
@@ -607,34 +442,31 @@ def _resultats_campionats(sb, seguits: dict[str, str] | None = None) -> list[Res
                     f"{p.get('caramboles_visitant')} {_curt(b)}{f' ({entr} e.)' if entr else ''}"
                 ),
                 url="/campionats",
-                destacat=banyoles,
-                jugadors=frozenset(jug),
+                seguiments=frozenset(f"j:{j}" for j in jug),
             )
         )
     return out
 
 
-def resultats_reingesta(sb, prog: Progress, seguits_ids: Iterable[str] = ()) -> list[Resultat]:
-    out: list[Resultat] = []
-    jugadors = _jugadors_per_id(sb, seguits_ids) if seguits_ids else []
-    seguits = {_norm(f["nom"]): str(f["fcb_id"]) for f in jugadors}
-    # Tal com els escriu la federació: el filtre de PostgREST és exacte.
-    noms = [n for f in jugadors for n in {f["nom"], arregla_codificacio(f["nom"])}]
-    fonts = [
-        ("lliga", lambda: _resultats_lliga(sb, "lliga", "Lliga")),
-        ("lliga4m", lambda: _resultats_lliga(sb, "lliga4m", "Lliga 4 Modalitats")),
-        ("copa", lambda: _resultats_copa(sb)),
-        ("campionats", lambda: _resultats_campionats(sb, seguits)),
-    ]
-    if seguits:
+def resultats_reingesta(sb, prog: Progress, seguits: Iterable[str] = ()) -> list[Resultat]:
+    seguits = set(seguits)
+    clubs = {s[2:] for s in seguits if s.startswith("c:")}
+    equips = {s[2:] for s in seguits if s.startswith("e:")}
+    ids = {s[2:] for s in seguits if s.startswith("j:")}
+    per_nom = {_norm(f["nom"]): str(f["fcb_id"]) for f in _jugadors_per_id(sb, ids)} if ids else {}
+    fonts = []
+    if clubs or equips:
         fonts += [
-            ("lliga dels seguits", lambda: _seguits_lliga(sb, "lliga", "Lliga", seguits, noms)),
+            ("lliga", lambda: _clubs_lliga(sb, "lliga", "Lliga", clubs, equips)),
             (
-                "lliga 4M dels seguits",
-                lambda: _seguits_lliga(sb, "lliga4m", "Lliga 4 Modalitats", seguits, noms),
+                "lliga4m",
+                lambda: _clubs_lliga(sb, "lliga4m", "Lliga 4 Modalitats", clubs, equips),
             ),
-            ("copa dels seguits", lambda: _seguits_copa(sb, seguits, noms)),
+            ("copa", lambda: _clubs_copa(sb, clubs, equips)),
         ]
+    if per_nom:
+        fonts.append(("campionats", lambda: _campionats_jugadors(sb, per_nom)))
+    out: list[Resultat] = []
     for nom, font in fonts:
         # Una font que falla no ha d'impedir avisar de les altres.
         try:
@@ -647,20 +479,29 @@ def resultats_reingesta(sb, prog: Progress, seguits_ids: Iterable[str] = ()) -> 
 # --- Missatges i enviament ------------------------------------------------------
 
 
+def seguits_de(sub: dict) -> set[str]:
+    """Els seguiments d'una subscripció que compten pels tipus que té marcats."""
+    prefixos = tuple(p for t in sub.get("tipus") or [] for p in PREFIXOS_DEL_TIPUS.get(t, ()))
+    if not prefixos:
+        return set()
+    return {s for s in sub.get("seguiments") or [] if s.startswith(prefixos)}
+
+
 def missatges(
     tipus_subscrits: Iterable[str], nous: list[Resultat], seguits: Iterable[str] = ()
 ) -> list[dict]:
     """Un missatge per grup amb els resultats nous que toquen a aquesta subscripció:
-    pels tipus que té marcats o, si té «jugadors seguits», pels seus jugadors."""
+    pels tipus que té marcats o pels seus seguiments (`seguits`, ja filtrats)."""
     volguts = set(tipus_subscrits)
-    els_seus = set(seguits) if "jugadors_seguits" in volguts else set()
+    els_seus = set(seguits)
     per_grup: dict[str, list[Resultat]] = {}
     for r in nous:
-        if r.tipus & volguts or r.jugadors & els_seus:
+        if r.tipus & volguts or r.seguiments & els_seus:
             per_grup.setdefault(r.grup, []).append(r)
 
     def destacat(r: Resultat) -> bool:
-        return r.destacat or bool(r.jugadors & els_seus)
+        # Un jugador, un club o un equip seguit: al davant i amb estrella.
+        return bool(r.seguiments & els_seus)
 
     out = []
     for rs in per_grup.values():
@@ -719,8 +560,8 @@ def _envia_un(sub: dict, missatge: dict, clau_privada: str) -> int | None:
 
 
 def _subscripcions(sb) -> list[dict]:
-    """Els dispositius que volen algun avís. Sense la columna `jugadors` (abans de
-    la migració 0046, o mentre el Data API no la veu) es llegeixen sense."""
+    """Els dispositius que volen algun avís. Sense la columna `seguiments` (abans
+    de la migració 0047, o mentre el Data API no la veu) es llegeixen sense."""
 
     def llegeix(columnes: str) -> list[dict]:
         return (
@@ -728,17 +569,11 @@ def _subscripcions(sb) -> list[dict]:
         )
 
     try:
-        return llegeix("endpoint,p256dh,auth,tipus,jugadors")
+        return llegeix("endpoint,p256dh,auth,tipus,seguiments")
     except Exception as exc:
-        if "jugadors" not in str(exc):
+        if "seguiments" not in str(exc):
             raise
         return llegeix("endpoint,p256dh,auth,tipus")
-
-
-def _seguits_de(sub: dict) -> set[str]:
-    if "jugadors_seguits" not in (sub.get("tipus") or []):
-        return set()
-    return {str(j) for j in sub.get("jugadors") or []}
 
 
 def _avisa(
@@ -752,9 +587,9 @@ def _avisa(
 ) -> dict[str, int]:
     """Envia els resultats nous i els marca.
 
-    `resultats` pot ser la llista o una funció que la construeix a partir dels ids
-    dels jugadors seguits: les subscripcions es llegeixen primer perquè la
-    reingesta només vagi a buscar les partides dels jugadors que algú segueix.
+    `resultats` pot ser la llista o una funció que la construeix a partir dels
+    seguiments de tots els dispositius: les subscripcions es llegeixen primer
+    perquè només es vagi a buscar el que algú segueix.
     """
     from fcbillar.cloud_sync import esquema_encara_no_hi_es
 
@@ -772,42 +607,42 @@ def _avisa(
             )
             return compte
         raise
-    seguits = set().union(*(_seguits_de(s) for s in subs)) if subs else set()
+    seguits: set[str] = set().union(*(seguits_de(s) for s in subs)) if subs else set()
     if callable(resultats):
         resultats = resultats(seguits)
 
     base = f"base:{origen}"
-    # Una base per jugador seguit: el primer cop que surt, el que ja ha jugat es
+    # Una base per seguiment: el primer cop que surt, el que ja s'ha jugat es
     # marca sense enviar. Si no, seguir algú a mitja temporada enviaria tot el seu.
-    bases_jugador = {j: f"base:{origen}:jugador:{j}" for j in seguits}
+    bases = {s: f"base:{origen}:{s}" for s in seguits}
     claus = sorted({r.clau for r in resultats})
     try:
-        vistes = _ja_avisades(sb, [base, *bases_jugador.values(), *claus])
+        vistes = _ja_avisades(sb, [base, *bases.values(), *claus])
     except Exception as exc:
         if esquema_encara_no_hi_es(exc):
             prog("warn", "avisos: el Data API encara no veu `avisos_enviats`; no s'avisa de res")
             return compte
         raise
     if base not in vistes:
-        _marca(sb, [*claus, base, *bases_jugador.values()])
+        _marca(sb, [*claus, base, *bases.values()])
         prog(
             "ok", f"avisos ({origen}): primera passada, {len(claus)} resultats marcats sense avisar"
         )
         return compte
-    nous_jugadors = {j for j, b in bases_jugador.items() if b not in vistes}
+    nous_seguits = {s for s, b in bases.items() if b not in vistes}
 
     nous = [r for r in resultats if r.clau not in vistes]
     # Un mateix resultat pot sortir dues vegades a la llista: un sol avís.
     unics = list({r.clau: r for r in nous}.values())
-    # Els que només interessen per jugadors que s'acaben de començar a seguir.
-    silenciats = [r for r in unics if not r.tipus and r.jugadors and r.jugadors <= nous_jugadors]
+    # Els que només interessen per seguiments que s'acaben de començar.
+    silenciats = [r for r in unics if not r.tipus and r.seguiments and r.seguiments <= nous_seguits]
     enviables = [r for r in unics if r not in silenciats]
     compte["avisos_nous"] = len(enviables)
-    marcar = [r.clau for r in unics] + [bases_jugador[j] for j in nous_jugadors]
+    marcar = [r.clau for r in unics] + [bases[s] for s in nous_seguits]
     if silenciats:
         prog(
             "ok",
-            f"avisos ({origen}): {len(silenciats)} resultats de jugadors nous a seguir, "
+            f"avisos ({origen}): {len(silenciats)} resultats de seguiments nous, "
             "marcats sense avisar",
         )
     if not enviables:
@@ -823,7 +658,7 @@ def _avisa(
         )
         return compte
     for sub in subs:
-        for m in missatges(sub.get("tipus") or [], enviables, _seguits_de(sub)):
+        for m in missatges(sub.get("tipus") or [], enviables, seguits_de(sub)):
             codi = _envia_un(sub, m, clau_privada)
             if codi is None:
                 compte["avisos_enviats"] += 1
@@ -849,15 +684,10 @@ def _avisa(
 def avisa_opens(
     sb, files_open_live: list[dict], prog: Progress, clau_privada: str | None = None
 ) -> dict[str, int]:
-    try:
-        noms, ids = banyoles_de_la_temporada(sb)
-    except Exception as exc:
-        prog("warn", f"avisos: no s'han pogut llegir els jugadors del Banyoles: {exc}")
-        noms, ids = set(), set()
     return _avisa(
         sb,
         "opens",
-        lambda seguits: resultats_opens(files_open_live, noms, ids, seguits),
+        lambda seguits: resultats_opens(files_open_live, seguits),
         prog,
         max_nous=None,
         clau_privada=clau_privada,

@@ -2,12 +2,21 @@
 	import { onMount, tick } from 'svelte';
 	import { get } from 'svelte/store';
 	import { db } from '$lib/db';
-	import { follows } from '$lib/follows';
+	import {
+		follows,
+		toggleFollow,
+		clubFollows,
+		toggleClubFollow,
+		equipFollows,
+		toggleEquipFollow
+	} from '$lib/follows';
+	import { arreglaCodificacio } from '$lib/codificacio';
 	import {
 		TIPUS_AVIS,
 		type TipusAvis,
 		VAPID_PUBLIC_KEY,
-		base64UrlABytes
+		base64UrlABytes,
+		seguiments
 	} from '$lib/avisos';
 
 	// Estat del dispositiu, en l'ordre en què es comprova.
@@ -22,6 +31,7 @@
 	let boto: HTMLButtonElement | undefined = $state();
 
 	const DESAT = 'fcb_avisos_tipus';
+	const CONEGUTS = new Set<string>(TIPUS_AVIS.map((t) => t.id));
 
 	function esIos(): boolean {
 		return /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -40,8 +50,12 @@
 
 	onMount(async () => {
 		try {
+			// Els tipus antics del Banyoles ja no existeixen: només es recuperen els d'ara.
 			const desat = JSON.parse(localStorage.getItem(DESAT) ?? 'null');
-			if (Array.isArray(desat)) triats = new Set(desat);
+			if (Array.isArray(desat)) {
+				const bons = desat.filter((t) => CONEGUTS.has(t)) as TipusAvis[];
+				if (bons.length) triats = new Set(bons);
+			}
 		} catch {
 			/* sense preferència desada: tots marcats */
 		}
@@ -61,28 +75,101 @@
 		if (sub) desaAlNuvol(sub, [...triats]).catch(() => {});
 	});
 
-	// Seguir o deixar de seguir un jugador (★ a la fitxa) actualitza els avisos
-	// d'aquest dispositiu sense haver de tornar a la campana.
-	let nSeguits = $state(0);
-	onMount(() => {
-		let primer = true;
-		return follows.subscribe(async (llista) => {
-			nSeguits = llista.length;
-			if (primer) {
-				primer = false;
-				return;
-			}
-			if (estat !== 'actiu' || !triats.has('jugadors_seguits')) return;
+	// Seguir o deixar de seguir (★ a les fitxes o a ★ Seguits) actualitza
+	// els avisos d'aquest dispositiu sense haver de tornar a la campana. S'espera
+	// mig segon per no desar cinc cops si se'n marquen cinc seguits.
+	let espera: ReturnType<typeof setTimeout> | undefined;
+	function programaDesa() {
+		clearTimeout(espera);
+		espera = setTimeout(async () => {
+			if (estat !== 'actiu') return;
 			const actual = await subscripcioActual();
 			if (actual) desaAlNuvol(actual, [...triats]).catch(() => {});
+		}, 500);
+	}
+	onMount(() => {
+		const baixes = [follows, clubFollows, equipFollows].map((s) => {
+			let primer = true;
+			return s.subscribe(() => {
+				if (primer) primer = false;
+				else programaDesa();
+			});
 		});
+		return () => baixes.forEach((b) => b());
 	});
+
+	// Què se segueix, amb noms, per ensenyar-ho al panell. Es demana en obrir-lo:
+	// el dispositiu només guarda identificadors.
+	type Seguit = { id: string; nom: string; detall?: string | null; href: string };
+	let nomsJugadors = $state<Map<string, Seguit>>(new Map());
+	let nomsClubs = $state<Map<string, string>>(new Map());
+	let errorNoms = $state(false);
+	async function carregaNoms() {
+		errorNoms = false;
+		const [jug, clubs] = await Promise.all([
+			get(follows).length
+				? db.from('players').select('fcb_id, nom, club_fcb_id').in('fcb_id', get(follows))
+				: Promise.resolve({ data: [], error: null }),
+			get(clubFollows).length
+				? db.from('clubs').select('fcb_id, nom').in('fcb_id', get(clubFollows))
+				: Promise.resolve({ data: [], error: null })
+		]);
+		if (jug.error || clubs.error) errorNoms = true;
+		nomsJugadors = new Map(
+			(jug.data ?? []).map((p: any) => [
+				String(p.fcb_id),
+				{
+					id: String(p.fcb_id),
+					nom: arreglaCodificacio(p.nom),
+					detall: p.club_fcb_id,
+					href: `/jugador/${p.fcb_id}`
+				}
+			])
+		);
+		nomsClubs = new Map((clubs.data ?? []).map((c: any) => [c.fcb_id, arreglaCodificacio(c.nom)]));
+	}
+	const perNom = (a: Seguit, b: Seguit) => a.nom.localeCompare(b.nom);
+	const llistaJugadors = $derived(
+		$follows
+			.map((id) => nomsJugadors.get(id) ?? { id, nom: `Fitxa ${id}`, href: `/jugador/${id}` })
+			.sort(perNom)
+	);
+	const llistaClubsEquips = $derived([
+		...$clubFollows
+			.map((id) => ({ id: `c:${id}`, nom: nomsClubs.get(id) ?? id, detall: 'Tots els equips', href: '/seguiment' }))
+			.sort(perNom),
+		...$equipFollows.map((e) => ({ id: `e:${e}`, nom: e, detall: 'Equip', href: '/seguiment' })).sort(perNom)
+	]);
+	function treu(tipus: TipusAvis, id: string) {
+		if (tipus === 'jugadors_seguits') toggleFollow(id);
+		else if (id.startsWith('c:')) toggleClubFollow(id.slice(2));
+		else toggleEquipFollow(id.slice(2));
+	}
+	function llistaDe(tipus: TipusAvis): Seguit[] {
+		if (tipus === 'jugadors_seguits') return llistaJugadors;
+		if (tipus === 'clubs_seguits') return llistaClubsEquips;
+		return [];
+	}
+	// On es trien, per a l'enllaç de sota de cada llista.
+	const ON_ES_TRIEN: Partial<Record<TipusAvis, { href: string; text: string; buit: string }>> = {
+		jugadors_seguits: {
+			href: '/seguiment',
+			text: "Tria'ls a ★ Seguits",
+			buit: 'Encara no en segueixes cap.'
+		},
+		clubs_seguits: {
+			href: '/seguiment',
+			text: "Tria'ls a ★ Seguits",
+			buit: 'Encara no en segueixes cap.'
+		}
+	};
 
 	async function obre() {
 		obert = !obert;
 		missatge = '';
 		error = '';
 		if (obert) {
+			carregaNoms();
 			await tick();
 			panell?.querySelector<HTMLElement>('input, button')?.focus();
 		}
@@ -113,20 +200,14 @@
 
 	async function desaAlNuvol(sub: PushSubscription, tipus: TipusAvis[]) {
 		const j = sub.toJSON();
-		const base = {
+		const { error: e } = await db.rpc('desa_subscripcio', {
 			p_endpoint: sub.endpoint,
 			p_p256dh: j.keys?.p256dh,
 			p_auth: j.keys?.auth,
 			p_tipus: tipus,
-			p_dispositiu: navigator.userAgent.slice(0, 200)
-		};
-		let { error: e } = await db.rpc('desa_subscripcio', { ...base, p_jugadors: get(follows) });
-		// PGRST202: el servidor encara no té la funció amb `p_jugadors` (migració
-		// 0046 sense aplicar, o el Data API encara no la veu). Es desa la resta.
-		if (e?.code === 'PGRST202') {
-			const sense = tipus.filter((t) => t !== 'jugadors_seguits');
-			({ error: e } = await db.rpc('desa_subscripcio', { ...base, p_tipus: sense }));
-		}
+			p_dispositiu: navigator.userAgent.slice(0, 200),
+			p_seguiments: seguiments(get(follows), get(clubFollows), get(equipFollows))
+		});
 		if (e) throw new Error(`No s'ha pogut desar al núvol: ${e.message}`);
 	}
 
@@ -139,7 +220,7 @@
 			const permis = await Notification.requestPermission();
 			if (permis !== 'granted') {
 				estat = permis === 'denied' ? 'bloquejat' : 'inactiu';
-				throw new Error("El telèfon no ha donat permís per als avisos.");
+				throw new Error('El telèfon no ha donat permís per als avisos.');
 			}
 			const reg = await navigator.serviceWorker.ready;
 			const sub =
@@ -224,13 +305,14 @@
 
 	{#if obert}
 		<!-- Al mòbil, fix amb marges a tots dos costats: penjat de la campana, que
-		     no és a la vora, sortia tallat per l'esquerra. -->
+		     no és a la vora, sortia tallat per l'esquerra. Amb les llistes de
+		     seguits pot passar de l'alçada de la pantalla: llavors llisca. -->
 		<div
 			bind:this={panell}
 			id="panell-avisos"
 			role="dialog"
 			aria-labelledby="titol-avisos"
-			class="fixed inset-x-4 top-14 z-30 rounded-md sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:w-80 border border-slate-200 bg-white p-4 text-sm shadow-lg dark:border-slate-700 dark:bg-slate-900"
+			class="fixed inset-x-4 top-14 z-30 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-md border border-slate-200 bg-white p-4 text-sm shadow-lg sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:w-80 dark:border-slate-700 dark:bg-slate-900"
 		>
 			<h2 id="titol-avisos" class="text-base font-semibold">Avisos de resultats</h2>
 
@@ -260,7 +342,11 @@
 				<fieldset class="mt-3 space-y-1">
 					<legend class="sr-only">Tipus de resultats</legend>
 					{#each TIPUS_AVIS as t (t.id)}
-						<label class="flex min-h-11 cursor-pointer items-start gap-3 rounded-sm px-1 py-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+						{@const llista = llistaDe(t.id)}
+						{@const on = ON_ES_TRIEN[t.id]}
+						<label
+							class="flex min-h-11 cursor-pointer items-start gap-3 rounded-sm px-1 py-2 hover:bg-slate-50 dark:hover:bg-slate-800"
+						>
 							<input
 								type="checkbox"
 								class="mt-0.5 h-5 w-5 shrink-0 accent-sky-700"
@@ -268,24 +354,59 @@
 								onchange={() => commuta(t.id)}
 							/>
 							<span>
-								<span class="block font-medium">{t.nom}</span>
-								<span class="block text-xs text-slate-600 dark:text-slate-400"
-									>{t.id === 'jugadors_seguits'
-										? nSeguits === 0
-											? 'Encara no en segueixes cap: marca’ls amb ★ a la seva fitxa.'
-											: nSeguits === 1
-												? 'Les partides del jugador de ★ Seguits, de qualsevol competició.'
-												: `Les partides dels ${nSeguits} jugadors de ★ Seguits, de qualsevol competició.`
-										: t.detall}</span
+								<span class="block font-medium"
+									>{t.nom}{#if on}<span class="font-normal text-slate-600 dark:text-slate-400"
+											>{` · ${llista.length}`}</span
+										>{/if}</span
 								>
+								<span class="block text-xs text-slate-600 dark:text-slate-400">{t.detall}</span>
 							</span>
 						</label>
-						{#if t.id === 'jugadors_seguits'}
+						{#if on}
+							{#if errorNoms && llista.length}
+								<p class="ml-9 text-xs text-red-700 dark:text-red-400">
+									No s'han pogut carregar els noms; hi surten els números.
+								</p>
+							{/if}
+							{#if llista.length}
+								<ul
+									aria-label={t.nom}
+									class="ml-9 max-h-44 overflow-y-auto rounded-sm border border-slate-200 dark:border-slate-700"
+								>
+									{#each llista as s (s.id)}
+										<li
+											class="flex items-center border-b border-slate-100 last:border-0 dark:border-slate-800"
+										>
+											<a
+												href={s.href}
+												onclick={() => (obert = false)}
+												class="flex min-h-11 min-w-0 flex-1 flex-col justify-center px-2 hover:bg-slate-50 dark:hover:bg-slate-800"
+											>
+												<span class="truncate text-xs font-medium">{s.nom}</span>
+												{#if s.detall}<span
+														class="truncate text-[11px] text-slate-600 dark:text-slate-400"
+														>{s.detall}</span
+													>{/if}
+											</a>
+											<button
+												type="button"
+												onclick={() => treu(t.id, s.id)}
+												aria-label="Deixa de seguir {s.nom}"
+												title="Deixa de seguir"
+												class="grid min-h-11 min-w-11 shrink-0 place-items-center text-amber-600 hover:bg-slate-50 dark:text-amber-400 dark:hover:bg-slate-800"
+												>★</button
+											>
+										</li>
+									{/each}
+								</ul>
+							{:else}
+								<p class="ml-9 text-xs text-slate-600 dark:text-slate-400">{on.buit}</p>
+							{/if}
 							<a
-								href="/seguiment"
+								href={on.href}
 								onclick={() => (obert = false)}
 								class="ml-9 inline-flex min-h-11 items-center text-xs font-medium text-sky-700 underline underline-offset-2 dark:text-sky-400"
-								>Tria'ls a ★ Seguits</a
+								>{on.text}</a
 							>
 						{/if}
 					{/each}
@@ -313,7 +434,9 @@
 			{/if}
 
 			<p class="mt-2 min-h-5 text-xs" role="status">
-				{#if error}<span class="text-red-700 dark:text-red-400">{error}</span>{:else if missatge}<span class="text-emerald-700 dark:text-emerald-400">{missatge}</span>{/if}
+				{#if error}<span class="text-red-700 dark:text-red-400">{error}</span>{:else if missatge}<span
+						class="text-emerald-700 dark:text-emerald-400">{missatge}</span
+					>{/if}
 			</p>
 		</div>
 	{/if}
