@@ -1,0 +1,784 @@
+{
+  "id": "teoria-diamants-segona-banda",
+  "name": "Teoria de diamants: llegada a 2a banda llarga",
+  "group": "Teoria de diamants",
+  "attributed_to": "José Lazo",
+  "pages": [
+    279,
+    289
+  ],
+  "purpose": "Fer arribar la bola a la 2a banda (la llarga oposada) a l'altura que vulguis, variant l'efecte o el punt d'atac, per seguir després a la curta de dalt.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-L-K (o L-L-L)",
+    "effect": "de 4 a 0; cada punt d'efecte mou mig diamant la llegada",
+    "stroke": null,
+    "ball": "també amb bola primer"
+  },
+  "formula": "Llegada = Sortida − Atac (amb efecte 4; 0 = racó, cada −5 és mig diamant més avall)",
+  "steps": [
+    "Referència: amb efecte 4, atacant el mateix número que la sortida, la bola arriba al racó.",
+    "Opció 1: mateix atac i menys efecte (3, 2, 1, 0): cada punt d'efecte menys baixa la llegada mig diamant.",
+    "Opció 2: efecte 4 i atac més alt (55, 60, 65, 70 des de 50): cada 5 punts baixa la llegada mig diamant.",
+    "Les dues opcions arriben al mateix punt però amb angles diferents: efecte 4 dona lliscament a 2a banda i sortida vertical (per efecte contrari) a 3a; efecte 2 dona menys lliscament i menys verticalitat.",
+    "Tria segons on és la bola 3."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 50
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 70
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 25
+        }
+      ],
+      "note": "Només es rotulen les sortides dels exemples (50 a la cantonada de baix, 70 a la curta, 25 a la llarga esquerra); són les de la teoria de diamants. Dibuix ja vertical."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 2.5,
+          "v": 25
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 4,
+          "y": 5.25,
+          "v": 55
+        },
+        {
+          "x": 4,
+          "y": 5.5,
+          "v": 60
+        },
+        {
+          "x": 4,
+          "y": 5.75,
+          "v": 65
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 70
+        },
+        {
+          "x": 4,
+          "y": 6.25,
+          "v": 75
+        },
+        {
+          "x": 4,
+          "y": 6.5,
+          "v": 80
+        },
+        {
+          "x": 4,
+          "y": 6.75,
+          "v": 85
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 90
+        }
+      ],
+      "note": "Llarga dreta, de 5 en 5 com es rotula a les p281-286."
+    },
+    {
+      "name": "Llegada (2a banda)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 0.5,
+          "v": -5
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": -10
+        },
+        {
+          "x": 0,
+          "y": 1.5,
+          "v": -15
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": -20
+        }
+      ],
+      "note": "Llarga esquerra. Només el −5 està rotulat (p286); la resta es dedueix de les fletxes de les p280-281 (mig diamant per pas)."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "Sortida 50, atac 50: efecte 4 → racó; efectes 3, 2, 1, 0 → mig, un, un i mig i dos diamants del racó a la llarga esquerra. (Recorregut construït per a l'efecte 2.)",
+      "page": 280,
+      "path": [
+        {
+          "x": 1.2,
+          "y": 7.1
+        },
+        {
+          "x": 4,
+          "y": 5
+        },
+        {
+          "x": 0,
+          "y": 1
+        }
+      ],
+      "path_built": true
+    },
+    {
+      "text": "Sortida 50 amb efecte 4: atacs 50, 55, 60, 65, 70 → llegades a 0; 0,5; 1; 1,5 i 2 diamants del racó. (Recorregut construït per a l'atac 70.)",
+      "page": 281,
+      "path": [
+        {
+          "x": 1.2,
+          "y": 7.4
+        },
+        {
+          "x": 4,
+          "y": 6
+        },
+        {
+          "x": 0,
+          "y": 2
+        }
+      ],
+      "path_built": true
+    },
+    {
+      "text": "Efecte 4 atacant 60 des de 50: llegada a un diamant i sortida vertical cap a la curta.",
+      "page": 282,
+      "path": [
+        {
+          "x": 0.12,
+          "y": 7.92
+        },
+        {
+          "x": 4,
+          "y": 5.7
+        },
+        {
+          "x": 0,
+          "y": 1.07
+        },
+        {
+          "x": 0.64,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.06,
+          "y": 0.87,
+          "c": "red"
+        },
+        {
+          "x": 0.79,
+          "y": 0.98,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 2 atacant 50 des de 50: mateixa llegada amb menys lliscament.",
+      "page": 283,
+      "path": [
+        {
+          "x": 0.1,
+          "y": 7.9
+        },
+        {
+          "x": 4,
+          "y": 5.18
+        },
+        {
+          "x": 0,
+          "y": 1.02
+        },
+        {
+          "x": 0.97,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.43,
+          "y": 0.31,
+          "c": "red"
+        },
+        {
+          "x": 1.36,
+          "y": 0.51,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 4: línia sortida 50 – atac 60.",
+      "page": 284,
+      "path": [
+        {
+          "x": 1.96,
+          "y": 6.28
+        },
+        {
+          "x": 2.92,
+          "y": 6.33
+        },
+        {
+          "x": 4,
+          "y": 5.64
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 0.57,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.92,
+          "y": 6.33,
+          "c": "yellow"
+        },
+        {
+          "x": 0.77,
+          "y": 0.98,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 2: línia sortida 50 – atac 50.",
+      "page": 285,
+      "path": [
+        {
+          "x": 2.02,
+          "y": 5.94
+        },
+        {
+          "x": 2.91,
+          "y": 5.97
+        },
+        {
+          "x": 4,
+          "y": 5.18
+        },
+        {
+          "x": 0,
+          "y": 1.04
+        },
+        {
+          "x": 0.9,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.91,
+          "y": 5.97,
+          "c": "yellow"
+        },
+        {
+          "x": 1.09,
+          "y": 0.3,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 4: sortida 70, atac 75 → 70 − 75 = −5 (mig diamant del racó).",
+      "page": 286,
+      "path": [
+        {
+          "x": 3.02,
+          "y": 7.39
+        },
+        {
+          "x": 3.1,
+          "y": 6.95
+        },
+        {
+          "x": 4,
+          "y": 6.41
+        },
+        {
+          "x": 0,
+          "y": 0.55
+        },
+        {
+          "x": 0.25,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.1,
+          "y": 6.95,
+          "c": "yellow"
+        },
+        {
+          "x": 0.48,
+          "y": 0.83,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 1: sortida 50, atac 50 → un diamant i mig del racó.",
+      "page": 287,
+      "path": [
+        {
+          "x": 0.73,
+          "y": 7.71
+        },
+        {
+          "x": 0.89,
+          "y": 7.2
+        },
+        {
+          "x": 4,
+          "y": 5.15
+        },
+        {
+          "x": 0,
+          "y": 1.48
+        },
+        {
+          "x": 1.56,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.89,
+          "y": 7.2,
+          "c": "yellow"
+        },
+        {
+          "x": 1.92,
+          "y": 0.31,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 3, bola primer: sortida 25, atac 25 → mig diamant del racó.",
+      "page": 288,
+      "path": [
+        {
+          "x": 1.62,
+          "y": 3.46
+        },
+        {
+          "x": 2.6,
+          "y": 2.69
+        },
+        {
+          "x": 4,
+          "y": 2.55
+        },
+        {
+          "x": 0,
+          "y": 0.5
+        },
+        {
+          "x": 0.85,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.6,
+          "y": 2.69,
+          "c": "yellow"
+        },
+        {
+          "x": 1.52,
+          "y": 0.31,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 1, bola primer: sortida 25, atac 25 → un diamant i mig; la bola torna a la llarga dreta.",
+      "page": 289,
+      "path": [
+        {
+          "x": 0.6,
+          "y": 2.72
+        },
+        {
+          "x": 1.36,
+          "y": 2.89
+        },
+        {
+          "x": 4,
+          "y": 2.53
+        },
+        {
+          "x": 0,
+          "y": 1.5
+        },
+        {
+          "x": 4,
+          "y": 0.56
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.36,
+          "y": 2.89,
+          "c": "yellow"
+        },
+        {
+          "x": 2.05,
+          "y": 0.18,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Golpejant en l'ample de la taula, cada efecte suposa mig rombo de diferència a l'arribada.",
+    "La teoria de diamants normalment s'executa amb efecte 4 o 3 segons el jugador i la penetració."
+  ],
+  "quotes": [
+    "cada efecto supone medio rombo en la llegada"
+  ],
+  "uncertain": [
+    "El llibre no dona una taula de llegades a 2a banda: els valors 0, −5, −10... es dedueixen dels gràfics (només −5 està escrit).",
+    "Els efectes 4 a 0 només es mostren com a icones de bola (de lateral pur a dalt al centre); no es defineixen en text."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada (2a banda)",
+          "numbering": "Llegada (2a banda)"
+        },
+        "E": {
+          "label": "Efecte",
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "inputs": {
+        "S": [
+          25,
+          50,
+          70
+        ],
+        "A": [
+          25,
+          50,
+          55,
+          60,
+          65,
+          70,
+          75,
+          80,
+          85,
+          90
+        ],
+        "L": [
+          0,
+          -5,
+          -10,
+          -15,
+          -20
+        ],
+        "E": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "relations": [
+        {
+          "solve": "L",
+          "expr": "S - A - 5 * (4 - E)",
+          "label": "on arribarà"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L - 5 * (4 - E)",
+          "label": "trobar l'atac"
+        }
+      ],
+      "valid": "L <= 0 && L >= -20 && (A == 25 || (A >= 50 && A <= 90))",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Cada punt d'efecte per sota de 4 equival a −5 a la llegada (mig diamant). Regla deduïda dels gràfics."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 50, atac 50, efecte 4. On arriba la bola a la 2a banda?",
+        "options": [
+          "A mig diamant",
+          "A dos diamants",
+          "Al racó",
+          "A un diamant"
+        ],
+        "answer": 2,
+        "explain": "Atacant el mateix número que la sortida amb efecte 4 s'arriba al racó.",
+        "page": 280,
+        "path": [
+          {
+            "x": 1.2,
+            "y": 7.1
+          },
+          {
+            "x": 4,
+            "y": 5
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ]
+      },
+      {
+        "q": "Quant es mou la llegada per cada punt d'efecte?",
+        "options": [
+          "Dos diamants",
+          "Un quart de diamant",
+          "Mig diamant",
+          "Un diamant"
+        ],
+        "answer": 2,
+        "explain": "«cada efecto supone medio rombo en la llegada».",
+        "page": 279
+      },
+      {
+        "q": "Sortida 70, efecte 4, vols arribar a mig diamant del racó (−5). On ataques?",
+        "options": [
+          "70",
+          "80",
+          "75",
+          "65"
+        ],
+        "answer": 2,
+        "explain": "70 − 75 = −5.",
+        "page": 286,
+        "path": [
+          {
+            "x": 3.02,
+            "y": 7.39
+          },
+          {
+            "x": 3.1,
+            "y": 6.95
+          },
+          {
+            "x": 4,
+            "y": 6.41
+          },
+          {
+            "x": 0,
+            "y": 0.55
+          },
+          {
+            "x": 0.25,
+            "y": 0
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.1,
+            "y": 6.95,
+            "c": "yellow"
+          },
+          {
+            "x": 0.48,
+            "y": 0.83,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Vols lliscament a la 2a banda i sortida vertical a la 3a. Quin efecte?",
+        "options": [
+          "Efecte 4",
+          "Efecte 0",
+          "Efecte 1",
+          "Efecte 2"
+        ],
+        "answer": 0,
+        "explain": "Efecte 4: bon lliscament a 2a banda i sortida vertical (per efecte contrari) a 3a.",
+        "page": 282,
+        "path": [
+          {
+            "x": 0.12,
+            "y": 7.92
+          },
+          {
+            "x": 4,
+            "y": 5.7
+          },
+          {
+            "x": 0,
+            "y": 1.07
+          },
+          {
+            "x": 0.64,
+            "y": 0
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.06,
+            "y": 0.87,
+            "c": "red"
+          },
+          {
+            "x": 0.79,
+            "y": 0.98,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Vols arribar a un diamant del racó però sense tant lliscament ni verticalitat. Què fas?",
+        "options": [
+          "Efecte 0 atacant el 70",
+          "Efecte 4 atacant el 50",
+          "Efecte 4 atacant el 40",
+          "Efecte 2 atacant el 50"
+        ],
+        "answer": 3,
+        "explain": "Amb efecte 2 atacant el 50 s'arriba al mateix lloc que amb efecte 4 atacant el 60, però amb un altre angle.",
+        "page": 283,
+        "path": [
+          {
+            "x": 0.1,
+            "y": 7.9
+          },
+          {
+            "x": 4,
+            "y": 5.18
+          },
+          {
+            "x": 0,
+            "y": 1.02
+          },
+          {
+            "x": 0.97,
+            "y": 0
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.43,
+            "y": 0.31,
+            "c": "red"
+          },
+          {
+            "x": 1.36,
+            "y": 0.51,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 50, atac 50, efecte 1. On arriba?",
+        "options": [
+          "A un diamant i mig del racó",
+          "Al racó",
+          "A dos diamants i mig",
+          "A mig diamant"
+        ],
+        "answer": 0,
+        "explain": "Tres punts menys d'efecte = tres mitjos diamants.",
+        "page": 287,
+        "path": [
+          {
+            "x": 0.73,
+            "y": 7.71
+          },
+          {
+            "x": 0.89,
+            "y": 7.2
+          },
+          {
+            "x": 4,
+            "y": 5.15
+          },
+          {
+            "x": 0,
+            "y": 1.48
+          },
+          {
+            "x": 1.56,
+            "y": 0
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.89,
+            "y": 7.2,
+            "c": "yellow"
+          },
+          {
+            "x": 1.92,
+            "y": 0.31,
+            "c": "red"
+          }
+        ]
+      }
+    ]
+  }
+}

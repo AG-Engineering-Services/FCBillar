@@ -1,0 +1,622 @@
+{
+  "id": "van-kuyk-inclinacio",
+  "name": "Van Kuyk: valors d'inclinació (carambola al centre)",
+  "group": "Teoria de diamants",
+  "attributed_to": "José Lazo (extensió del sistema Van Kuyk)",
+  "pages": [
+    323,
+    328
+  ],
+  "purpose": "Trobar la línia d'arribada quan la zona de carambola és al centre de la taula, combinant VK10 i VK12.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-K-L (VK10) o L-K-L-K (VK12)",
+    "effect": "màxim favorable",
+    "stroke": "VK12 amb una mica més de velocitat",
+    "ball": null
+  },
+  "formula": "Inclinació = valor de la curta − valor de la llarga de la línia d'arribada (de diamant a diamant); després Atac = Sortida − Arribada (VK10 i VK12)",
+  "steps": [
+    "Mira el valor d'inclinació del punt de sortida (taula normal, que allarga o que quadra).",
+    "Busca una línia de la banda llarga a la banda curta, de diamant a diamant, que passi per la zona de carambola i on la diferència curta − llarga sigui el valor d'inclinació.",
+    "Llegeix on toca aquesta línia els vèrtexs de les bandes: l'arribada a la llarga (VK10) i a la curta (VK12).",
+    "Calcula l'atac amb VK10 (sortida VK10 − arribada a la llarga) i amb VK12 (sortida VK12 − arribada a la curta).",
+    "A prop de la llarga mana el VK10, a prop de la curta el VK12; al mig, valora tots dos."
+  ],
+  "numberings": [
+    {
+      "name": "Inclinació (taula normal)",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0,
+          "y": 3,
+          "v": -4
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": -3
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": -2
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": -1
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 4
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 6
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 7
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 8
+        }
+      ],
+      "note": "Dibuix ja vertical, sense girar. Valors als punts de sortida VK10: 25→−4, 30→−3, 35→−2, 40→−1, 45→0, 50→+1, 52→+2, 62→+4, 72→+6, 82→+7, 92→+8 (+1 i +2 són els dos diamants de la cantonada)."
+    },
+    {
+      "name": "Inclinació (taula que allarga)",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0,
+          "y": 3,
+          "v": -2
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": -1
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 1
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 2
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 3
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 4
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 6
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 8
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 9
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 10
+        }
+      ],
+      "note": "2 punts més que la taula normal."
+    },
+    {
+      "name": "Inclinació (taula que quadra)",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0,
+          "y": 3,
+          "v": -6
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": -5
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": -4
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": -3
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": -2
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": -1
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 4
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 5
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 6
+        }
+      ],
+      "note": "2 punts menys que la taula normal."
+    },
+    {
+      "name": "Escala de la llarga (arribada VK10)",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 45
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 60
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 70
+        },
+        {
+          "x": 0,
+          "y": 6.5,
+          "v": 80
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 90
+        }
+      ],
+      "note": "Llarga esquerra."
+    },
+    {
+      "name": "Escala de la curta (arribada VK12)",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 1,
+          "y": 8,
+          "v": 80
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 50
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 20
+        }
+      ],
+      "note": "Curta de baix (marques que surten als gràfics d'exemple)."
+    }
+  ],
+  "corrections": [
+    "Taula que allarga: +2 a tots els valors d'inclinació; taula que quadra: −2. Són valors orientatius segons quant allargui o quadri la taula."
+  ],
+  "examples": [
+    {
+      "text": "Sortida del diamant del rincó de la curta, inclinació +2. Línia 28-30 (diferència +2), que toca els vèrtexs a 34 a la llarga i a la curta. VK10: 52 − 34 = 18; VK12: 50 − 34 = 16; potser 17 és el bo.",
+      "page": 325,
+      "path": [
+        {
+          "x": 0.36,
+          "y": 7.84
+        },
+        {
+          "x": 4,
+          "y": 2.37
+        },
+        {
+          "x": 3.1,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3.42
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.15,
+          "y": 5.53,
+          "c": "yellow"
+        },
+        {
+          "x": 1.38,
+          "y": 5.49,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Inclinació +2. Línia 25-27: arribada 31 (VK10) i 29 (VK12). Atac 52 − 31 = 21 i 50 − 29 = 21.",
+      "page": 326,
+      "path": [
+        {
+          "x": 0.36,
+          "y": 7.76
+        },
+        {
+          "x": 4,
+          "y": 2.53
+        },
+        {
+          "x": 2.84,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3.07
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.26,
+          "y": 5.28,
+          "c": "yellow"
+        },
+        {
+          "x": 1.48,
+          "y": 5.18,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Inclinació +6. Línia 19-25: arribada 25 (VK10) i 27 (VK12). Atac 72 − 25 = 47 i 74 − 27 = 47.",
+      "page": 327,
+      "path": [
+        {
+          "x": 2.39,
+          "y": 7.81
+        },
+        {
+          "x": 4,
+          "y": 5.3
+        },
+        {
+          "x": 2.37,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.56
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.34,
+          "y": 5.05,
+          "c": "yellow"
+        },
+        {
+          "x": 1.55,
+          "y": 4.92,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "La línia d'arribada es busca sempre de diamant a diamant.",
+    "L'arribada canvia segons la posició inicial de sortida.",
+    "El VK12 demana una mica més de velocitat, per això els dos atacs poden diferir."
+  ],
+  "quotes": [
+    "se trata de buscar una línea de banda larga a banda corta (¡importante! Pasando por los rombos) de manera que la diferencia de ambas coincida con el valor adjudicado",
+    "Con respecto al billar normal se aumentan 2 puntos cuando el billar alarga o se restan 2 puntos cuando el billar cuadra."
+  ],
+  "uncertain": [
+    "El llibre no diu explícitament que la diferència sigui curta − llarga; es dedueix dels exemples (30 − 28 = +2, 27 − 25 = +2, 25 − 19 = +6).",
+    "Els valors +1 (sortida 50) i +2 (sortida 52) cauen tots dos a la cantonada (0,8).",
+    "No hi ha valors d'inclinació per a les sortides 15 i 20.",
+    "Els camins acaben a la 3a banda; després la bola va cap a la zona de carambola del centre.",
+    "Al calc, la sortida 15 i 20 no tenen inclinació; per això només es pregunta la relació línia llarga-curta."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "X": {
+          "label": "Valor a la llarga (diamant)",
+          "numbering": "Escala de la llarga (arribada VK10)"
+        },
+        "I": {
+          "label": "Inclinació",
+          "values": [
+            -4,
+            -3,
+            -2,
+            -1,
+            0,
+            1,
+            2,
+            4,
+            6,
+            7,
+            8
+          ]
+        },
+        "Y": {
+          "label": "Valor a la curta (diamant)",
+          "numbering": "Escala de la curta (arribada VK12)"
+        }
+      },
+      "inputs": {
+        "X": [
+          10,
+          15,
+          19,
+          20,
+          25,
+          28,
+          30
+        ],
+        "I": [
+          -2,
+          -1,
+          0,
+          1,
+          2,
+          4,
+          6,
+          7,
+          8
+        ],
+        "Y": [
+          20,
+          25,
+          27,
+          30
+        ]
+      },
+      "relations": [
+        {
+          "solve": "Y",
+          "expr": "X + I",
+          "label": "punt de la curta de la línia d'arribada"
+        },
+        {
+          "solve": "I",
+          "expr": "Y - X",
+          "label": "quina inclinació té aquesta línia"
+        }
+      ],
+      "valid": "Y >= 20 && Y <= 80 && X >= 10 && X <= 45",
+      "round": 1,
+      "path": [
+        "X",
+        "Y"
+      ],
+      "note": "Es dibuixa la línia d'arribada de diamant a diamant; l'atac surt després amb VK10 i VK12."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 52 (rincó de la curta) en taula normal. Valor d'inclinació?",
+        "options": [
+          "+1",
+          "0",
+          "+2",
+          "+4"
+        ],
+        "answer": 2,
+        "explain": "Quadres grocs de la p324.",
+        "page": 324
+      },
+      {
+        "q": "Inclinació +2: la línia 28-30 toca els vèrtexs a 34. Atac segons VK10?",
+        "options": [
+          "16",
+          "24",
+          "22",
+          "18"
+        ],
+        "answer": 3,
+        "explain": "52 − 34 = 18 (VK12: 50 − 34 = 16; potser 17).",
+        "page": 325,
+        "path": [
+          {
+            "x": 0.36,
+            "y": 7.84
+          },
+          {
+            "x": 4,
+            "y": 2.37
+          },
+          {
+            "x": 3.1,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 3.42
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.15,
+            "y": 5.53,
+            "c": "yellow"
+          },
+          {
+            "x": 1.38,
+            "y": 5.49,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Inclinació +6, línia 19-25: arribada 25 (VK10). Atac?",
+        "options": [
+          "47",
+          "53",
+          "45",
+          "41"
+        ],
+        "answer": 0,
+        "explain": "72 − 25 = 47 (VK12: 74 − 27 = 47).",
+        "page": 327,
+        "path": [
+          {
+            "x": 2.39,
+            "y": 7.81
+          },
+          {
+            "x": 4,
+            "y": 5.3
+          },
+          {
+            "x": 2.37,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 2.56
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.34,
+            "y": 5.05,
+            "c": "yellow"
+          },
+          {
+            "x": 1.55,
+            "y": 4.92,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Com canvien els valors d'inclinació si la taula allarga?",
+        "options": [
+          "−2 a tots",
+          "+2 a tots",
+          "No canvien",
+          "+5 a tots"
+        ],
+        "answer": 1,
+        "explain": "P328.",
+        "page": 328
+      },
+      {
+        "q": "Sortida 45 en taula que quadra. Inclinació?",
+        "options": [
+          "0",
+          "+2",
+          "−2",
+          "−4"
+        ],
+        "answer": 2,
+        "explain": "Normal 0, quadra −2.",
+        "page": 328
+      },
+      {
+        "q": "Com s'ha de traçar la línia d'arribada?",
+        "options": [
+          "De vèrtex a vèrtex",
+          "Des de la bola jugadora a la bola 2",
+          "Paral·lela a la banda llarga",
+          "De diamant a diamant, de la llarga a la curta, passant per la zona de carambola"
+        ],
+        "answer": 3,
+        "explain": "«¡importante! Pasando por los rombos».",
+        "page": 324
+      }
+    ]
+  }
+}

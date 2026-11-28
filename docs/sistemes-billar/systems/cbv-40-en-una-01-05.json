@@ -1,0 +1,1140 @@
+{
+ "id": "cbv-40-en-una-01-05",
+ "name": "Les 40 en una: posicions 1–5",
+ "group": "Les 40 en una",
+ "attributed_to": "PDF de Julio A",
+ "pages": null,
+ "source": "PDF «CUARENTA EN UNA 1-5», Club Billar València, pàg. 1–5",
+ "sort": 480,
+ "purpose": "Primeres cinc de quaranta posicions comentades: la sortida per l'esquerra i quatre posicions resoltes amb teoria de diamants, Plus i cabanyes, pensant també en la preparació.",
+ "shot": {
+  "first_cushion": "bola",
+  "cushions": "segons la posició (bola 2 - L - C - L a la sortida; fins a 5-6 bandes a les posicions 2 i 4)",
+  "effect": "natural, de 3 a màxim; desefecte −1 a la variant de la posició 3",
+  "stroke": "de velocitat justa a arribar fins a penetrat i ràpid (posició 5)",
+  "ball": "poca bola quan la 2 és prop de banda; mitja bola de referència a la sortida"
+ },
+ "formula": null,
+ "steps": [
+  "Sortida: surt per l'esquerra. Si després de la sortida queda una mala posició, pots triar entre jugar sobre la bola del rival o sobre la roja sense haver de canviar de mans.",
+  "Si surts per la dreta i queda una posició semblant, has de jugar amb les mans canviades, i això és una dificultat.",
+  "El que compta és sortir bé: la llegada a tercera banda és aproximadament 27,5 en una taula normal; pensa que la groga és en aquest punt.",
+  "Per teoria de diamants: sortida 29,5 (uns 30) − llegada 27,5 = atac 2, és a dir, la bola jugadora a la llarga dreta a mitja bola del racó.",
+  "Efecte aproximat 3: 4 amb drap gastat, 2 amb drap nou. No canviïs la presa de bola: se'n coneixen menys les conseqüències i canvia molt on va la bola 2.",
+  "Força justa per dur la groga cap a la zona del racó i la roja cap a la zona central (o una mica més amunt) a un diamant de la llarga."
+ ],
+ "numberings": [],
+ "corrections": [
+  "Posició 3 amb la roja enganxada a banda: atac a la banda just al costat de la roja (com si volguessis tocar totes dues a la vegada). Patró: bola 1 al diamant 1,5 de la curta; aquí és al diamant 1 i la llegada és una mica més que la d'efecte 0, per tant desefecte −1 o una mica més.",
+  "Posició 5 en doblet: efecte una mica superior a 1 per obrir dos diamants al llarg de la taula."
+ ],
+ "examples": [
+  {
+   "text": "Posició 1 (sortida per l'esquerra): sortida 29,5 − llegada 27,5 = atac 2, a la llarga dreta a mitja bola del racó. Efecte 3 a l'esquerra (4 drap gastat, 2 drap nou). Presa de bola de sempre. Força: groga cap al racó, roja cap al centre.",
+   "page": 1,
+   "path": [
+    {
+     "x": 1.49,
+     "y": 6.0
+    },
+    {
+     "x": 2.07,
+     "y": 2.17
+    },
+    {
+     "x": 4,
+     "y": 0.54
+    },
+    {
+     "x": 3.6,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 2.78
+    },
+    {
+     "x": 2.0,
+     "y": 6.0
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.0,
+     "y": 2.0,
+     "c": "red"
+    },
+    {
+     "x": 2.0,
+     "y": 6.0,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 2: bola 2 - L - C - L - L - C fins a la 3 (llegada L20, sortida S35). Dues zones de xoc 1-2. No arribis lent a la 3: a la cinquena banda podria no agafar efecte contrari, o la 2 taparia la 3. Separa la 1 i la 3 uns 20-30 cm. Efecte a l'esquerra una mica alt.",
+   "page": 2,
+   "path": [
+    {
+     "x": 2.34,
+     "y": 6.95
+    },
+    {
+     "x": 2.92,
+     "y": 2.57
+    },
+    {
+     "x": 4,
+     "y": 1.72
+    },
+    {
+     "x": 2.88,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 1.98
+    },
+    {
+     "x": 4,
+     "y": 7.54
+    },
+    {
+     "x": 3.69,
+     "y": 8
+    },
+    {
+     "x": 3.47,
+     "y": 7.27
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.87,
+     "y": 2.47,
+     "c": "red"
+    },
+    {
+     "x": 3.47,
+     "y": 7.27,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 2, opció per la banda curta: poca bola 2 perquè la 2 toqui primer la llarga i la 1 arribi a la 3 per la curta. Més controlat si la 2 és més avall a la taula. Compte amb el retruc.",
+   "page": 2,
+   "path": [
+    {
+     "x": 0.98,
+     "y": 6.55
+    },
+    {
+     "x": 1.06,
+     "y": 4.79
+    },
+    {
+     "x": 0,
+     "y": 3.26
+    },
+    {
+     "x": 2.13,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 1.8
+    },
+    {
+     "x": 0.79,
+     "y": 8
+    },
+    {
+     "x": 0.39,
+     "y": 7.58
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.06,
+     "y": 4.79,
+     "c": "yellow"
+    },
+    {
+     "x": 0.39,
+     "y": 7.58,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 2, segona solució: envia la 2 cap al 3r-4t diamant de la llarga, no cap al 2n (perill de retruc); per això no prenguis massa bola. No ofeguis la 1 i la 3 al racó. Efecte a l'esquerra una mica alt, poca bola.",
+   "page": 2,
+   "path": [
+    {
+     "x": 2.98,
+     "y": 7.38
+    },
+    {
+     "x": 2.99,
+     "y": 6.47
+    },
+    {
+     "x": 4,
+     "y": 4.96
+    },
+    {
+     "x": 1.29,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 1.2
+    },
+    {
+     "x": 3.73,
+     "y": 7.72
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.99,
+     "y": 6.47,
+     "c": "yellow"
+    },
+    {
+     "x": 3.73,
+     "y": 7.72,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 3 (Plus): sortida 35, llegada 65 → atac 30 a la curta de dalt. La 2 és molt prop de banda: poca bola (perill de corregut i de sortir lenta). Cop curt i ràpid per quadrar al racó de dalt a l'esquerra; un cop molt allargat porta la 1 cap al racó de baix a la dreta. Efecte a l'esquerra, alt.",
+   "page": 3,
+   "path": [
+    {
+     "x": 3.08,
+     "y": 7.21
+    },
+    {
+     "x": 3.85,
+     "y": 3.34
+    },
+    {
+     "x": 4,
+     "y": 3.45
+    },
+    {
+     "x": 1.0,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.85
+    },
+    {
+     "x": 4,
+     "y": 6.47
+    },
+    {
+     "x": 3.83,
+     "y": 6.42
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.85,
+     "y": 3.34,
+     "c": "red"
+    },
+    {
+     "x": 3.83,
+     "y": 6.42,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 3 amb la roja enganxada a banda: jugar sobre la roja amb banda abans, entrant al punt de banda més pròxim a la roja. Desefecte −1 o una mica més.",
+   "page": 3,
+   "path": [
+    {
+     "x": 3.09,
+     "y": 7.18
+    },
+    {
+     "x": 4,
+     "y": 3.22
+    },
+    {
+     "x": 3.89,
+     "y": 3.0
+    },
+    {
+     "x": 0.45,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.29
+    },
+    {
+     "x": 3.83,
+     "y": 6.55
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.89,
+     "y": 3.0,
+     "c": "red"
+    },
+    {
+     "x": 3.83,
+     "y": 6.55,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Patró per a la roja enganxada a banda (bola 1 al diamant 1,5 de la curta de dalt): segons l'efecte de 0 a 4 la llegada puja per la llarga; el marge de llegada entre efecte 0 i 4 s'estreny. Comprova-ho a cada taula. Dibuixat amb efecte 2.",
+   "page": 3,
+   "path": [
+    {
+     "x": 2.67,
+     "y": 7.74
+    },
+    {
+     "x": 4,
+     "y": 3.28
+    },
+    {
+     "x": 3.9,
+     "y": 2.98
+    },
+    {
+     "x": 0.07,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.05
+    },
+    {
+     "x": 4,
+     "y": 4.92
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.9,
+     "y": 2.98,
+     "c": "red"
+    }
+   ],
+   "path_built": true
+  },
+  {
+   "text": "Posició 4 (sortida S34, llegada L30, atac A4): sis bandes fins a la 3. Xoc probable 1-2 al centre: decideix qui passa primer. Si ha de passar la 1, poca bola i no pressionis el tac amb la mà del darrere; amb velocitat justa la 1 arriba abans a la sisena banda. Amb molta bola passa primer la 2, però la preparació és més difícil. Efecte a l'esquerra, a l'equador.",
+   "page": 4,
+   "path": [
+    {
+     "x": 2.84,
+     "y": 6.35
+    },
+    {
+     "x": 0.67,
+     "y": 6.65
+    },
+    {
+     "x": 0,
+     "y": 7.24
+    },
+    {
+     "x": 0.43,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 5.0
+    },
+    {
+     "x": 1.01,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.99
+    },
+    {
+     "x": 4,
+     "y": 6.82
+    },
+    {
+     "x": 3.66,
+     "y": 7.12
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.63,
+     "y": 6.56,
+     "c": "red"
+    },
+    {
+     "x": 3.66,
+     "y": 7.12,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 4, alternativa amb les mans canviades sobre la groga: cabanya curta. Limat curt i cop curt, just per arribar a la 3 i separar-la uns 15 cm. Evita el retruc, la preparació és molt factible i és més defensiva. Efecte a la dreta.",
+   "page": 4,
+   "path": [
+    {
+     "x": 2.85,
+     "y": 6.36
+    },
+    {
+     "x": 3.67,
+     "y": 7.12
+    },
+    {
+     "x": 4,
+     "y": 7.12
+    },
+    {
+     "x": 2.12,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 6.99
+    },
+    {
+     "x": 0.63,
+     "y": 6.56
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.67,
+     "y": 7.12,
+     "c": "yellow"
+    },
+    {
+     "x": 0.63,
+     "y": 6.56,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 5 (sortida S92, atac A2, llegada L50): cop penetrat i amb velocitat, sense arribar lent a la 3. El retrocés de la 1 surt de la velocitat; no cal cop baix. Preparació: la 2 a la llarga esquerra. Efecte a l'esquerra, fort.",
+   "page": 5,
+   "path": [
+    {
+     "x": 3.8,
+     "y": 7.64
+    },
+    {
+     "x": 3.21,
+     "y": 6.91
+    },
+    {
+     "x": 4,
+     "y": 3.92
+    },
+    {
+     "x": 3.29,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 4.54
+    },
+    {
+     "x": 1.97,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 6.02
+    },
+    {
+     "x": 0.9,
+     "y": 1.24
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.21,
+     "y": 6.91,
+     "c": "yellow"
+    },
+    {
+     "x": 0.9,
+     "y": 1.24,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 5, alternativa en doblet: sobre la groga tocant primer la curta de dalt: curta - curta - llarga esquerra - curta fins a la 3. La 3 es fa «més grossa» i la 2 queda més controlable. Efecte una mica superior a 1, alt.",
+   "page": 5,
+   "path": [
+    {
+     "x": 3.79,
+     "y": 7.64
+    },
+    {
+     "x": 3.19,
+     "y": 6.9
+    },
+    {
+     "x": 3.31,
+     "y": 0
+    },
+    {
+     "x": 1.16,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 2.04
+    },
+    {
+     "x": 0.73,
+     "y": 0
+    },
+    {
+     "x": 0.9,
+     "y": 1.24
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.19,
+     "y": 6.9,
+     "c": "yellow"
+    },
+    {
+     "x": 0.9,
+     "y": 1.24,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Amb la bola 2 prop de banda, poca bola: així la 1 surt neta i ràpida i evites el corregut.",
+  "Vigila les zones de xoc entre la 1 i la 2 (les estrelles dels dibuixos) i decideix abans qui ha de passar primer.",
+  "No ofeguis la 1 contra la 3: separa-les uns 15-30 cm segons la posició.",
+  "Mans canviades: els dos enemics són la precipitació (pren-t'ho amb calma, posa bé les mans, lima i cop decidit) i el desplaçament dels ulls (amb ull dominant dret, mou una mica el cap perquè l'ull quedi damunt del tac).",
+  "Que una solució sembli fàcil no vol dir que l'execució ho sigui: a la posició 5 la 2 és prop de la banda d'atac i qualsevol desviació de la sortida de la 1 es paga.",
+  "Si pots fer el doblet, fes-lo (posició 5)."
+ ],
+ "quotes": [
+  "Realmente lo que hay que hacer es salir bien y, entonces, da igual salir por la derecha o por la izquierda.",
+  "Si das un golpe muy alargado la bola 1 tomará mucha inercia hacia delante y acabará llegando próxima al rincón inferior derecho."
+ ],
+ "uncertain": [
+  "El PDF no diu qui n'és l'autor; «Julio A» és només a les metadades (pujador).",
+  "Els rètols S/L/A dels dibuixos 2, 4 i 5 (S35-L20-A1, S34-L30-A4, S92-A2-L50) no s'expliquen al text; es reprodueixen tal com surten.",
+  "L'efecte de cada posició, fora de la 1, de la variant de la 3 i del doblet, s'ha llegit de la icona de la bola (posició del punt), no del text.",
+  "La segona taula de la pàg. 1 (sortida per la dreta amb mans canviades) no s'ha convertit en exemple; només il·lustra el motiu de sortir per l'esquerra.",
+  "Al patró de la roja enganxada a banda, els punts de llegada EF.0-EF.4 s'han mesurat aproximadament (llarga dreta, de y≈6,0 a y≈3,9)."
+ ],
+ "trainer": {
+  "quiz": [
+   {
+    "q": "Posició 1 (sortida): amb sortida 29,5 i llegada 27,5, a quin atac va la bola jugadora?",
+    "options": [
+     "Atac 57, a la curta de dalt",
+     "Atac 27,5, al centre de la llarga",
+     "Atac 0, directament al racó",
+     "Atac 2, a la llarga dreta a mitja bola del racó"
+    ],
+    "answer": 3,
+    "explain": "Teoria de diamants: 29,5 − 27,5 = 2, a la llarga dreta a mitja bola del racó.",
+    "page": 1,
+    "path": [
+     {
+      "x": 1.49,
+      "y": 6.0
+     },
+     {
+      "x": 2.07,
+      "y": 2.17
+     },
+     {
+      "x": 4,
+      "y": 0.54
+     },
+     {
+      "x": 3.6,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 2.78
+     },
+     {
+      "x": 2.0,
+      "y": 6.0
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.0,
+      "y": 2.0,
+      "c": "red"
+     },
+     {
+      "x": 2.0,
+      "y": 6.0,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 1: quin efecte recomana, i com canvia segons el drap?",
+    "options": [
+     "3; 4 amb drap gastat i 2 amb drap nou",
+     "3; 2 amb drap gastat i 4 amb drap nou",
+     "Sense efecte en qualsevol drap",
+     "Màxim (4) sempre"
+    ],
+    "answer": 0,
+    "explain": "«El efecto es 3 aproximadamente… 4 (paño gastado) o 2 (paño nuevo).»",
+    "page": 1,
+    "path": [
+     {
+      "x": 1.49,
+      "y": 6.0
+     },
+     {
+      "x": 2.07,
+      "y": 2.17
+     },
+     {
+      "x": 4,
+      "y": 0.54
+     },
+     {
+      "x": 3.6,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 2.78
+     },
+     {
+      "x": 2.0,
+      "y": 6.0
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.0,
+      "y": 2.0,
+      "c": "red"
+     },
+     {
+      "x": 2.0,
+      "y": 6.0,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 1: s'ha de variar la presa de bola de la sortida?",
+    "options": [
+     "Indiferent, només compta l'efecte",
+     "No: se'n coneixen menys les conseqüències i canvia molt el recorregut de la 2",
+     "Sí, cal prendre molta bola per dur la roja al centre",
+     "Sí, cal prendre-la fina per evitar el retruc"
+    ],
+    "answer": 1,
+    "explain": "No recomana canviar la presa de bola: afecta molt el desplaçament de la bola 2.",
+    "page": 1,
+    "path": [
+     {
+      "x": 1.49,
+      "y": 6.0
+     },
+     {
+      "x": 2.07,
+      "y": 2.17
+     },
+     {
+      "x": 4,
+      "y": 0.54
+     },
+     {
+      "x": 3.6,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 2.78
+     },
+     {
+      "x": 2.0,
+      "y": 6.0
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.0,
+      "y": 2.0,
+      "c": "red"
+     },
+     {
+      "x": 2.0,
+      "y": 6.0,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 2: quin és el risc d'arribar lent a la 3, i quina separació busca?",
+    "options": [
+     "Que la 1 faci corregut; deixar-les enganxades",
+     "Cap risc; com més lent millor",
+     "A la 5a banda no agafa efecte contrari o la 2 tapa la 3; separar 1 i 3 uns 20-30 cm",
+     "Retruc amb la roja; separar-les 1 metre"
+    ],
+    "answer": 2,
+    "explain": "Amb poca velocitat la 1 pot no agafar efecte contrari a la cinquena banda; separa 1 i 3 uns 20-30 cm.",
+    "page": 2,
+    "path": [
+     {
+      "x": 2.34,
+      "y": 6.95
+     },
+     {
+      "x": 2.92,
+      "y": 2.57
+     },
+     {
+      "x": 4,
+      "y": 1.72
+     },
+     {
+      "x": 2.88,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 1.98
+     },
+     {
+      "x": 4,
+      "y": 7.54
+     },
+     {
+      "x": 3.69,
+      "y": 8
+     },
+     {
+      "x": 3.47,
+      "y": 7.27
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.87,
+      "y": 2.47,
+      "c": "red"
+     },
+     {
+      "x": 3.47,
+      "y": 7.27,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 2, segona solució: cap a on cal enviar la bola 2 per evitar el retruc?",
+    "options": [
+     "Cap al 2n diamant de dalt de la llarga, amb molta bola",
+     "Al racó de baix",
+     "Al centre de la curta de dalt",
+     "Cap al 3r-4t diamant de la llarga, sense prendre massa bola"
+    ],
+    "answer": 3,
+    "explain": "Perill de retruc si va al 2n diamant; cal enviar-la al 3r-4t diamant, sense massa bola.",
+    "page": 2,
+    "path": [
+     {
+      "x": 2.98,
+      "y": 7.38
+     },
+     {
+      "x": 2.99,
+      "y": 6.47
+     },
+     {
+      "x": 4,
+      "y": 4.96
+     },
+     {
+      "x": 1.29,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 1.2
+     },
+     {
+      "x": 3.73,
+      "y": 7.72
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.99,
+      "y": 6.47,
+      "c": "yellow"
+     },
+     {
+      "x": 3.73,
+      "y": 7.72,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 3 (Plus): sortida 35, llegada 65. On s'ataca i amb quin cop?",
+    "options": [
+     "Al 30 de la curta de dalt, cop curt i ràpid",
+     "Al 30 de la curta de dalt, cop molt allargat",
+     "Al 100, cop lent",
+     "Al 65, cop curt i fluix"
+    ],
+    "answer": 0,
+    "explain": "Plus: 65 − 35 = 30. Cop curt i ràpid per quadrar al racó de dalt a l'esquerra; allargat, la 1 va cap al racó de baix a la dreta.",
+    "page": 3,
+    "path": [
+     {
+      "x": 3.08,
+      "y": 7.21
+     },
+     {
+      "x": 3.85,
+      "y": 3.34
+     },
+     {
+      "x": 4,
+      "y": 3.45
+     },
+     {
+      "x": 1.0,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.85
+     },
+     {
+      "x": 4,
+      "y": 6.47
+     },
+     {
+      "x": 3.83,
+      "y": 6.42
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.85,
+      "y": 3.34,
+      "c": "red"
+     },
+     {
+      "x": 3.83,
+      "y": 6.42,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 3 amb la roja enganxada a banda, bola 1 al diamant 1 (no a l'1,5 del patró): quin efecte?",
+    "options": [
+     "Sense efecte, cop baix",
+     "Desefecte −1 o una mica més",
+     "Efecte +4",
+     "Efecte 2"
+    ],
+    "answer": 1,
+    "explain": "La 1 és més a prop que al patró i la llegada és una mica més que la d'efecte 0: desefecte −1 o més.",
+    "page": 3,
+    "path": [
+     {
+      "x": 3.09,
+      "y": 7.18
+     },
+     {
+      "x": 4,
+      "y": 3.22
+     },
+     {
+      "x": 3.89,
+      "y": 3.0
+     },
+     {
+      "x": 0.45,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.29
+     },
+     {
+      "x": 3.83,
+      "y": 6.55
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.89,
+      "y": 3.0,
+      "c": "red"
+     },
+     {
+      "x": 3.83,
+      "y": 6.55,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 4: si vols que al xoc central passi primer la bola 1, què has de fer?",
+    "options": [
+     "Cop baix amb retrocés",
+     "Efecte contrari màxim",
+     "Prendre poca bola i no pressionar el tac amb la mà del darrere",
+     "Prendre molta bola i cop fort"
+    ],
+    "answer": 2,
+    "explain": "«Si decides que pase primero la bola 1 entonces debes tomar poca bola…»",
+    "page": 4,
+    "path": [
+     {
+      "x": 2.84,
+      "y": 6.35
+     },
+     {
+      "x": 0.67,
+      "y": 6.65
+     },
+     {
+      "x": 0,
+      "y": 7.24
+     },
+     {
+      "x": 0.43,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 5.0
+     },
+     {
+      "x": 1.01,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.99
+     },
+     {
+      "x": 4,
+      "y": 6.82
+     },
+     {
+      "x": 3.66,
+      "y": 7.12
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.63,
+      "y": 6.56,
+      "c": "red"
+     },
+     {
+      "x": 3.66,
+      "y": 7.12,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 4, alternativa amb mans canviades sobre la groga (cabanya curta): quin cop?",
+    "options": [
+     "Cop llarg i penetrat",
+     "Cop sec amb molt efecte contrari",
+     "Massé",
+     "Limat curt i cop curt, just per arribar a la 3 i separar-la uns 15 cm"
+    ],
+    "answer": 3,
+    "explain": "«Es recomendable un limaje corto y un golpe corto justo a llegar a la 3 y separarla unos 15 cm.»",
+    "page": 4,
+    "path": [
+     {
+      "x": 2.85,
+      "y": 6.36
+     },
+     {
+      "x": 3.67,
+      "y": 7.12
+     },
+     {
+      "x": 4,
+      "y": 7.12
+     },
+     {
+      "x": 2.12,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 6.99
+     },
+     {
+      "x": 0.63,
+      "y": 6.56
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.67,
+      "y": 7.12,
+      "c": "yellow"
+     },
+     {
+      "x": 0.63,
+      "y": 6.56,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 5: cal tocar la 1 baixa per tenir retrocés després de la 2?",
+    "options": [
+     "No: el retrocés surt de la velocitat; cop penetrat i ràpid",
+     "Sí, cop molt baix i fluix",
+     "Sí, cop baix amb efecte contrari",
+     "Només si es juga el doblet"
+    ],
+    "answer": 0,
+    "explain": "Al ser un cop molt ràpid, el retrocés s'aconsegueix per la velocitat; no cal cop baix.",
+    "page": 5,
+    "path": [
+     {
+      "x": 3.8,
+      "y": 7.64
+     },
+     {
+      "x": 3.21,
+      "y": 6.91
+     },
+     {
+      "x": 4,
+      "y": 3.92
+     },
+     {
+      "x": 3.29,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 4.54
+     },
+     {
+      "x": 1.97,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 6.02
+     },
+     {
+      "x": 0.9,
+      "y": 1.24
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.21,
+      "y": 6.91,
+      "c": "yellow"
+     },
+     {
+      "x": 0.9,
+      "y": 1.24,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 5 en doblet (curta - curta - llarga): quin efecte per obrir dos diamants?",
+    "options": [
+     "Zero",
+     "Una mica superior a 1",
+     "Màxim 4",
+     "Desefecte −1"
+    ],
+    "answer": 1,
+    "explain": "«Con un efecto un poco superior al 1 para lograr una apertura de dos rombos en el largo del billar.»",
+    "page": 5,
+    "path": [
+     {
+      "x": 3.79,
+      "y": 7.64
+     },
+     {
+      "x": 3.19,
+      "y": 6.9
+     },
+     {
+      "x": 3.31,
+      "y": 0
+     },
+     {
+      "x": 1.16,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 2.04
+     },
+     {
+      "x": 0.73,
+      "y": 0
+     },
+     {
+      "x": 0.9,
+      "y": 1.24
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.19,
+      "y": 6.9,
+      "c": "yellow"
+     },
+     {
+      "x": 0.9,
+      "y": 1.24,
+      "c": "red"
+     }
+    ]
+   }
+  ]
+ }
+}

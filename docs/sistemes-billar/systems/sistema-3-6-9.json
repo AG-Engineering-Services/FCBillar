@@ -1,0 +1,732 @@
+{
+ "id": "sistema-3-6-9",
+ "name": "El sistema 3-6-9 (curta-curta)",
+ "group": "Altres",
+ "attributed_to": "Jean Verworst (exposat per José Lazo)",
+ "pages": [
+  73,
+  79
+ ],
+ "purpose": "Boles 2 i 3 a prop de la banda llarga: bricole a la banda curta, banda llarga per darrere de la 2, bola 2, banda llarga altra vegada i carambola.",
+ "shot": {
+  "first_cushion": "curta",
+  "cushions": "K-L-(bola 2)-L",
+  "effect": "sense efecte (variant amb efecte màxim i +5)",
+  "stroke": "suau i allargat",
+  "ball": "bricole; la bola 1 toca la banda llarga per darrere de la bola 2"
+ },
+ "formula": "Taula de valors memoritzats (Sortida, Llegada → Atac), interpolant proporcionalment",
+ "steps": [
+  "Sortida: traça la línia des del racó de dalt a la dreta, pel centre de la bola 1, fins a la banda curta de baix (a l'alçada dels diamants): 40, 30, 20, 10.",
+  "Llegada: amb la bola 2 separada una bola de la banda, intueix el punt de la segona banda (banda llarga dreta, valors 1 a 11) on ha de tocar la bola 1.",
+  "Busca l'atac a la taula i interpola per a sortides i llegades intermèdies.",
+  "Apunta a l'atac de la banda curta de dalt (30, 20, 10 comptant cap al racó dret) i juga sense efecte, suau i allargat."
+ ],
+ "numberings": [
+  {
+   "name": "Atac",
+   "role": "atac",
+   "points": [
+    {
+     "x": 1,
+     "y": 0,
+     "v": 30
+    },
+    {
+     "x": 2,
+     "y": 0,
+     "v": 20
+    },
+    {
+     "x": 3,
+     "y": 0,
+     "v": 10
+    },
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    }
+   ],
+   "note": "Dibuix ja en vertical; no cal girar. Banda curta de dalt, 10 punts per diamant cap al racó dret. El 0 al racó no hi és escrit; es dedueix de la graduació."
+  },
+  {
+   "name": "Sortida",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 0,
+     "y": 8,
+     "v": 40
+    },
+    {
+     "x": 1,
+     "y": 8,
+     "v": 30
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 20
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 10
+    }
+   ],
+   "note": "Banda curta de baix, a l'alçada dels diamants; línia des del racó (4,0) per la bola 1."
+  },
+  {
+   "name": "Llegada",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 4,
+     "y": 7.33,
+     "v": 1
+    },
+    {
+     "x": 4,
+     "y": 6.67,
+     "v": 2
+    },
+    {
+     "x": 4,
+     "y": 6,
+     "v": 3
+    },
+    {
+     "x": 4,
+     "y": 5.33,
+     "v": 4
+    },
+    {
+     "x": 4,
+     "y": 4.67,
+     "v": 5
+    },
+    {
+     "x": 4,
+     "y": 4,
+     "v": 6
+    },
+    {
+     "x": 4,
+     "y": 3.33,
+     "v": 7
+    },
+    {
+     "x": 4,
+     "y": 2.67,
+     "v": 8
+    },
+    {
+     "x": 4,
+     "y": 2,
+     "v": 9
+    },
+    {
+     "x": 4,
+     "y": 1.33,
+     "v": 10
+    },
+    {
+     "x": 4,
+     "y": 0.67,
+     "v": 11
+    }
+   ],
+   "note": "Banda llarga dreta, 3 unitats cada 2 diamants (3 = diamant 6 des de dalt, 6 = diamant 4, 9 = diamant 2). És el punt de segona banda de la bola 1."
+  }
+ ],
+ "corrections": [
+  "Taula Sortida/Llegada → Atac: 40: 3→17, 6→12, 9→7 (−5 cada vegada); 30: 3→12,5, 6→10, 9→5 (−5, excepte 12,5→10); 20: 3→8, 6→6, 9→4 (−2); 10: 3→4, 6→3, 9→2 (−1).",
+  "Per a sortides i llegades intermèdies, adapta proporcionalment.",
+  "Variant: suma +5 a l'atac i juga amb efecte màxim (com al sistema llarga-llarga)."
+ ],
+ "examples": [
+  {
+   "text": "Sortida 40: llegada 3 → atac 17; llegada 6 → 12; llegada 9 → 7",
+   "page": 75,
+   "path": [
+    {
+     "x": 0.28,
+     "y": 7.82
+    },
+    {
+     "x": 2.19,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 6
+    },
+    {
+     "x": 3.75,
+     "y": 6.3
+    },
+    {
+     "x": 4,
+     "y": 6.68
+    },
+    {
+     "x": 3.8,
+     "y": 6.84
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.75,
+     "y": 6.3,
+     "c": "yellow"
+    },
+    {
+     "x": 3.8,
+     "y": 6.84,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 30: llegada 3 → atac 12,5; llegada 6 → 10; llegada 9 → 5",
+   "page": 76,
+   "path": [
+    {
+     "x": 1.2,
+     "y": 7.73
+    },
+    {
+     "x": 2.88,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4
+    },
+    {
+     "x": 3.74,
+     "y": 4.29
+    },
+    {
+     "x": 4,
+     "y": 4.65
+    },
+    {
+     "x": 3.76,
+     "y": 4.84
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.74,
+     "y": 4.29,
+     "c": "yellow"
+    },
+    {
+     "x": 3.76,
+     "y": 4.84,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 20: llegada 3 → atac 8; llegada 6 → 6; llegada 9 → 4",
+   "page": 77,
+   "path": [
+    {
+     "x": 2.12,
+     "y": 7.82
+    },
+    {
+     "x": 3.35,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4
+    },
+    {
+     "x": 3.74,
+     "y": 4.29
+    },
+    {
+     "x": 4,
+     "y": 4.65
+    },
+    {
+     "x": 3.76,
+     "y": 4.84
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.74,
+     "y": 4.29,
+     "c": "yellow"
+    },
+    {
+     "x": 3.76,
+     "y": 4.84,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 10: llegada 3 → atac 4; llegada 6 → 3; llegada 9 → 2",
+   "page": 78,
+   "path": [
+    {
+     "x": 3.05,
+     "y": 7.82
+    },
+    {
+     "x": 3.75,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 2
+    },
+    {
+     "x": 3.73,
+     "y": 2.32
+    },
+    {
+     "x": 4,
+     "y": 2.66
+    },
+    {
+     "x": 3.76,
+     "y": 2.86
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.73,
+     "y": 2.32,
+     "c": "yellow"
+    },
+    {
+     "x": 3.76,
+     "y": 2.86,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 30, llegada 7,5 → atac 7,5 (meitat entre 10 i 5)",
+   "page": 74,
+   "path": [
+    {
+     "x": 1.38,
+     "y": 7
+    },
+    {
+     "x": 3.25,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 3
+    }
+   ],
+   "path_built": true
+  },
+  {
+   "text": "Sortida 25, llegada 6 → atac 8 (meitat entre 10 de sortida 30 i 6 de sortida 20)",
+   "page": 74,
+   "path": [
+    {
+     "x": 1.81,
+     "y": 7
+    },
+    {
+     "x": 3.2,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4
+    }
+   ],
+   "path_built": true
+  },
+  {
+   "text": "Variant efecte màxim: sortida 10, llegada 9 → 2 + 5 = atac 7",
+   "page": 79,
+   "path": [
+    {
+     "x": 3.06,
+     "y": 7.82
+    },
+    {
+     "x": 3.27,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 2
+    },
+    {
+     "x": 3.73,
+     "y": 2.3
+    },
+    {
+     "x": 4,
+     "y": 2.66
+    },
+    {
+     "x": 3.82,
+     "y": 3.02
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.73,
+     "y": 2.3,
+     "c": "yellow"
+    },
+    {
+     "x": 3.82,
+     "y": 3.02,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Per les moltes compensacions que caldria aplicar a les fórmules de llarga-llarga, és millor memoritzar la taula.",
+  "Els números d'atac s'assemblen als de l'article 'La física en el billar - La geometria-2'; tria el que et vagi millor."
+ ],
+ "quotes": [
+  "El golpe es sin efecto, suave y alargado.",
+  "es preferible retener en la memoria los siguientes datos"
+ ],
+ "uncertain": [
+  "La taula només dóna llegades 3, 6 i 9; les llegades 1, 2, 10 i 11 de la numeració no tenen valors d'atac.",
+  "A la p76 apareix també un '17' a la banda d'atac, sembla un residu del dibuix anterior (els traços van a 12,5, 10 i 5).",
+  "A la variant de +5 el dibuix mostra l'efecte lateral a la dreta; el text només diu 'efecto máximo'.",
+  "El títol 'Sistema 3-6-9' i el subtítol '2º.- Corta-corta' suggereixen que forma part d'una sèrie (el sistema llarga-llarga citat) que no és en aquest rang de pàgines; grup assignat a 'Altres'.",
+  "Les sortides 15/25/35 de la taula del calculador són interpolacions meves (proporcionals), no valors del llibre."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "S": {
+     "label": "Sortida",
+     "numbering": "Sortida"
+    },
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada"
+    },
+    "A": {
+     "label": "Atac",
+     "numbering": "Atac"
+    }
+   },
+   "inputs": {
+    "S": [
+     10,
+     15,
+     20,
+     25,
+     30,
+     35,
+     40
+    ],
+    "L": [
+     3,
+     4.5,
+     6,
+     7.5,
+     9
+    ]
+   },
+   "relations": [
+    {
+     "solve": "A",
+     "expr": "T.l3[S]",
+     "when": "L == 3",
+     "label": "llegada 3"
+    },
+    {
+     "solve": "A",
+     "expr": "(T.l3[S] + T.l6[S]) / 2",
+     "when": "L == 4.5",
+     "label": "llegada 4,5 (interpolada)"
+    },
+    {
+     "solve": "A",
+     "expr": "T.l6[S]",
+     "when": "L == 6",
+     "label": "llegada 6"
+    },
+    {
+     "solve": "A",
+     "expr": "(T.l6[S] + T.l9[S]) / 2",
+     "when": "L == 7.5",
+     "label": "llegada 7,5 (interpolada)"
+    },
+    {
+     "solve": "A",
+     "expr": "T.l9[S]",
+     "when": "L == 9",
+     "label": "llegada 9"
+    }
+   ],
+   "tables": {
+    "l3": {
+     "10": 4,
+     "15": 6,
+     "20": 8,
+     "25": 10.25,
+     "30": 12.5,
+     "35": 14.75,
+     "40": 17
+    },
+    "l6": {
+     "10": 3,
+     "15": 4.5,
+     "20": 6,
+     "25": 8,
+     "30": 10,
+     "35": 11,
+     "40": 12
+    },
+    "l9": {
+     "10": 2,
+     "15": 3,
+     "20": 4,
+     "25": 4.5,
+     "30": 5,
+     "35": 6,
+     "40": 7
+    }
+   },
+   "valid": "A >= 0 && A <= 30",
+   "round": 2,
+   "path": [
+    "S",
+    "A",
+    "L"
+   ],
+   "note": "Taula del llibre per a sortides 10/20/30/40 i llegades 3/6/9; les sortides 15/25/35 i les llegades 4,5/7,5 són interpolacions proporcionals, com demana el llibre (25/6 → 8 i 30/7,5 → 7,5 hi coincideixen). Joc sense efecte, suau i allargat."
+  },
+  "quiz": [
+   {
+    "q": "Quin cop demana el sistema 3-6-9?",
+    "options": [
+     "Sense efecte, suau i allargat",
+     "Efecte màxim i viu",
+     "Efecte contrari i sec",
+     "Retrocés i fort"
+    ],
+    "answer": 0,
+    "explain": "'El golpe es sin efecto, suave y alargado.'",
+    "page": 74
+   },
+   {
+    "q": "Com es determina la sortida?",
+    "options": [
+     "Línia des del racó, pel centre de la bola 1, fins a la banda de sortida a l'alçada dels diamants",
+     "Perpendicular de la bola 1 a la banda curta",
+     "Línia des de la bola 2 fins a la bola 1",
+     "Prolongant la línia d'atac per la bola 3"
+    ],
+    "answer": 0,
+    "explain": "Es traça des del racó, travessant la bola 1 pel centre, fins als diamants de la banda de sortida.",
+    "page": 74
+   },
+   {
+    "q": "Sortida 40, llegada 3. On ataques?",
+    "options": [
+     "17",
+     "12",
+     "7",
+     "12,5"
+    ],
+    "answer": 0,
+    "explain": "Taula: 40/3 → 17 (40/6 → 12, 40/9 → 7).",
+    "page": 75,
+    "path": [
+     {
+      "x": 0.28,
+      "y": 7.82
+     },
+     {
+      "x": 2.19,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 6
+     },
+     {
+      "x": 3.75,
+      "y": 6.3
+     },
+     {
+      "x": 4,
+      "y": 6.68
+     },
+     {
+      "x": 3.8,
+      "y": 6.84
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.75,
+      "y": 6.3,
+      "c": "yellow"
+     },
+     {
+      "x": 3.8,
+      "y": 6.84,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Sortida 20, llegada 6. On ataques?",
+    "options": [
+     "6",
+     "8",
+     "4",
+     "10"
+    ],
+    "answer": 0,
+    "explain": "Taula: 20/3 → 8, 20/6 → 6, 20/9 → 4 (−2 cada vegada).",
+    "page": 77,
+    "path": [
+     {
+      "x": 2.12,
+      "y": 7.82
+     },
+     {
+      "x": 3.35,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 4
+     },
+     {
+      "x": 3.74,
+      "y": 4.29
+     },
+     {
+      "x": 4,
+      "y": 4.65
+     },
+     {
+      "x": 3.76,
+      "y": 4.84
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.74,
+      "y": 4.29,
+      "c": "yellow"
+     },
+     {
+      "x": 3.76,
+      "y": 4.84,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Sortida 25, llegada 6. On ataques?",
+    "options": [
+     "8",
+     "6",
+     "10",
+     "7"
+    ],
+    "answer": 0,
+    "explain": "Sortida 30 → 10 i sortida 20 → 6; a mig camí, 8.",
+    "page": 74,
+    "path": [
+     {
+      "x": 1.81,
+      "y": 7
+     },
+     {
+      "x": 3.2,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 4
+     }
+    ]
+   },
+   {
+    "q": "Què és la llegada en aquest sistema?",
+    "options": [
+     "El punt de segona banda (banda llarga) on toca la bola 1",
+     "El punt on queda la bola 3",
+     "El primer toc a la banda curta",
+     "La posició de la bola 1"
+    ],
+    "answer": 0,
+    "explain": "Amb la bola 2 separada una bola de la banda, cal 'intuir' el punt de la segona banda on ha de tocar la bola 1 (valors 1 a 11).",
+    "page": 74
+   },
+   {
+    "q": "Variant amb efecte màxim: sortida 10, llegada 9. On ataques?",
+    "options": [
+     "7",
+     "2",
+     "5",
+     "12"
+    ],
+    "answer": 0,
+    "explain": "La taula dona 2; amb efecte màxim se suma +5 → 7.",
+    "page": 79,
+    "path": [
+     {
+      "x": 3.06,
+      "y": 7.82
+     },
+     {
+      "x": 3.27,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 2
+     },
+     {
+      "x": 3.73,
+      "y": 2.3
+     },
+     {
+      "x": 4,
+      "y": 2.66
+     },
+     {
+      "x": 3.82,
+      "y": 3.02
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.73,
+      "y": 2.3,
+      "c": "yellow"
+     },
+     {
+      "x": 3.82,
+      "y": 3.02,
+      "c": "red"
+     }
+    ]
+   }
+  ]
+ }
+}

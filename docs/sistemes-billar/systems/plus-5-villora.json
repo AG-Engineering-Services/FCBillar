@@ -1,0 +1,737 @@
+{
+  "id": "plus-5-villora",
+  "name": "Sistema Plus-5 (zona 4 segons Villora i Serralta)",
+  "group": "Sistema Plus",
+  "attributed_to": "Villora i Serralta (Billar a tres bandas - Sistemas)",
+  "pages": [
+    157,
+    165
+  ],
+  "purpose": "Plus amb sortides entre el 6è i el 8è diamant i llegada a la mateixa llarga, amb tres mètodes a triar segons el jugador.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-L",
+    "effect": "segons el mètode: a) variable, b) màxim, c) efecte 2",
+    "stroke": "a) suau i dolç; b) amb velocitat, cop sec sense penetració, aixecant una mica de darrere",
+    "ball": null
+  },
+  "formula": "a) cap fórmula (efecte = valor de la sortida); b) i c) Atac = Sortida − Llegada",
+  "steps": [
+    "a) Ataca el 0 (una mica abans, punt A). L'efecte que marca la sortida (1 a 4) torna al mateix punt; cada efecte de més porta la llegada mig diamant més amunt (cap a la banda d'atac); cada efecte de menys, mig diamant més avall.",
+    "b) Efecte màxim: sortida 28-32, llegada 0-40, atac 0-40 (0 = doble 00, el mateix racó). Atac = sortida − llegada.",
+    "c) Efecte 2: com b) però amb sortida 10-20 i el 0 d'atac és el 0 real, no el 00."
+  ],
+  "numberings": [
+    {
+      "name": "a) Efecte per tornar al mateix punt",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 5,
+          "v": 4
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 3
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 2
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 1
+        }
+      ],
+      "note": "Dibuix ja en vertical; cap rotació. Sortida a la banda llarga esquerra, atac a la curta superior. Atac sempre al 0 (racó dret superior). La sortida 50 del Plus val 4 en aquest sistema."
+    },
+    {
+      "name": "b) Sortida (efecte màxim)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 6,
+          "v": 32
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 28
+        }
+      ],
+      "note": "Indica la llegada si s'ataca el mateix racó (00)."
+    },
+    {
+      "name": "c) Sortida (efecte 2)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 6,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 10
+        }
+      ],
+      "note": null
+    },
+    {
+      "name": "Atac (b i c)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 2.5,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 40
+        }
+      ],
+      "note": "Al mètode b el 0 és el doble 00 (el mateix racó, a la cantonada exterior); al c és el 0 real. És la numeració pròpia de Villora i Serralta (p. 161–165): 10 punts per mig diamant (40 a x=2), no la del Plus de referència (40 a x=2,5, 20 a x=3,5)."
+    },
+    {
+      "name": "Llegada (b i c)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 40
+        }
+      ],
+      "note": null
+    }
+  ],
+  "corrections": [
+    "a) Cada efecte afegit: llegada mig diamant més amunt, cap a la banda d'atac (el llibre en diu 'disminuir la llegada'). Cada efecte tret: mig diamant més avall.",
+    "a) Ataca una mica abans del 0 (punt A) per no agafar el racó massa just."
+  ],
+  "examples": [
+    {
+      "text": "a) Sortida 3 amb efecte 2 en lloc de 3 → llegada mig diamant més avall",
+      "page": 159,
+      "path": [
+        {
+          "x": 0.32,
+          "y": 5.27
+        },
+        {
+          "x": 3.73,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.38
+        },
+        {
+          "x": 0,
+          "y": 6.54
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.49,
+          "y": 6.8,
+          "c": "yellow"
+        },
+        {
+          "x": 0.31,
+          "y": 6.9,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "a) Sortida 2 amb efecte 4 en lloc de 2 → llegada un diamant més amunt (al 3)",
+      "page": 160,
+      "path": [
+        {
+          "x": 0.67,
+          "y": 5.37
+        },
+        {
+          "x": 3.73,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.3
+        },
+        {
+          "x": 0,
+          "y": 6.06
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.18,
+          "y": 6.37,
+          "c": "yellow"
+        },
+        {
+          "x": 0.31,
+          "y": 6.23,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "b) Sortida 30, atac 00 → llegada 30 (30 − 00 = 30)",
+      "page": 162,
+      "path": [
+        {
+          "x": 0.22,
+          "y": 6.14
+        },
+        {
+          "x": 3.95,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.05
+        },
+        {
+          "x": 0,
+          "y": 5.0
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.17,
+          "y": 5.34,
+          "c": "yellow"
+        },
+        {
+          "x": 0.34,
+          "y": 5.28,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "b) Sortida 32, llegada 20 → atac 12 (32 − 12 = 20)",
+      "page": 163,
+      "path": [
+        {
+          "x": 0.31,
+          "y": 4.96
+        },
+        {
+          "x": 3.2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.7
+        },
+        {
+          "x": 0,
+          "y": 5.99
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.16,
+          "y": 6.33,
+          "c": "yellow"
+        },
+        {
+          "x": 0.37,
+          "y": 6.19,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "c) Sortida 20, llegada 20 → atac 0 (real), efecte 2",
+      "page": 165,
+      "path": [
+        {
+          "x": 0.25,
+          "y": 5.21
+        },
+        {
+          "x": 3.73,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.22
+        },
+        {
+          "x": 0,
+          "y": 6.02
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.17,
+          "y": 6.36,
+          "c": "yellow"
+        },
+        {
+          "x": 0.33,
+          "y": 6.24,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "b) Sortida 32, llegada 10 → 32 − 10 = atac 22, bricola amb efecte màxim (PDF Club Billar València, Sistema-Plus.pdf p. 4)",
+      "page": 4,
+      "path": [
+        {
+          "x": 0.44,
+          "y": 4.72
+        },
+        {
+          "x": 2.82,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.77
+        },
+        {
+          "x": 0,
+          "y": 7
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.28,
+          "y": 7.75,
+          "c": "yellow"
+        },
+        {
+          "x": 0.58,
+          "y": 7.72,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Controla molt la velocitat i el cop; davant la mateixa posició, tria el mètode que s'adapti millor a les teves característiques.",
+    "Per a les zones 1, 2 i 3 Villora i Serralta coincideixen amb Verworst."
+  ],
+  "quotes": [
+    "por cada efecto que añadimos, disminuimos la llegada en medio rombo y por cada efecto que restemos aumentamos la llegada en medio rombo"
+  ],
+  "uncertain": [
+    "Al mètode b, el doble 00 és un punt fora del drap (cantonada exterior) i el 0 cau gairebé al mateix racó; al marc comú tots dos són x=4.",
+    "La p. 158 repeteix un text de la zona 4 de Verworst ('El golpe es rápido y con máximo efecto...') que sembla un error de maquetació.",
+    "L'escala d'efectes 1-4 no es defineix (els dibuixos mostren el tac cada cop més a la dreta)."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida (efecte màxim)",
+          "numbering": "b) Sortida (efecte màxim)"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac (b i c)"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada (b i c)"
+        }
+      },
+      "inputs": {
+        "S": [
+          28,
+          29,
+          30,
+          31,
+          32
+        ],
+        "L": [
+          0,
+          5,
+          10,
+          15,
+          20,
+          25,
+          30
+        ],
+        "A": [
+          0,
+          5,
+          10,
+          12,
+          15,
+          20,
+          25,
+          30
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A"
+        }
+      ],
+      "valid": "A >= 0 && A <= 40 && L >= 0 && L <= 40",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Només el mètode b (efecte màxim, cop sec sense penetració, aixecant una mica de darrere). Atac 0 = doble 00, el mateix racó. Els mètodes a i c, al qüestionari."
+    },
+    "quiz": [
+      {
+        "q": "Mètode b: sortida 32, llegada 20. Atac?",
+        "options": [
+          "12",
+          "52",
+          "20",
+          "32"
+        ],
+        "answer": 0,
+        "explain": "Atac = sortida − llegada = 32 − 20 = 12.",
+        "page": 163,
+        "path": [
+          {
+            "x": 0.31,
+            "y": 4.96
+          },
+          {
+            "x": 3.2,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.7
+          },
+          {
+            "x": 0,
+            "y": 5.99
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.16,
+            "y": 6.33,
+            "c": "yellow"
+          },
+          {
+            "x": 0.37,
+            "y": 6.19,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Mètode b: sortida 30 atacant el doble 00. Llegada?",
+        "options": [
+          "30",
+          "0",
+          "28",
+          "60"
+        ],
+        "answer": 0,
+        "explain": "30 − 00 = 30.",
+        "page": 162,
+        "path": [
+          {
+            "x": 0.22,
+            "y": 6.14
+          },
+          {
+            "x": 3.95,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.05
+          },
+          {
+            "x": 0,
+            "y": 5.0
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.17,
+            "y": 5.34,
+            "c": "yellow"
+          },
+          {
+            "x": 0.34,
+            "y": 5.28,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Mètode a: surts del 3 atacant el 0. Quin efecte et torna al 3?",
+        "options": [
+          "Efecte 3",
+          "Efecte 1",
+          "Efecte 4",
+          "Efecte màxim"
+        ],
+        "answer": 0,
+        "explain": "Si salimos del 3, atacando al 0 volvemos a llegar al 3 con efecto 3.",
+        "page": 157
+      },
+      {
+        "q": "Mètode a: surts del 3 amb efecte 2 en lloc de 3. On arribes?",
+        "options": [
+          "Mig diamant més avall",
+          "Mig diamant més amunt",
+          "Al mateix punt",
+          "Un diamant més amunt"
+        ],
+        "answer": 0,
+        "explain": "Cada efecte de menys allarga la llegada mig rombe.",
+        "page": 159,
+        "path": [
+          {
+            "x": 0.32,
+            "y": 5.27
+          },
+          {
+            "x": 3.73,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.38
+          },
+          {
+            "x": 0,
+            "y": 6.54
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.49,
+            "y": 6.8,
+            "c": "yellow"
+          },
+          {
+            "x": 0.31,
+            "y": 6.9,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Mètode a: surts del 2 amb efecte 4. On arribes?",
+        "options": [
+          "Un diamant més amunt (al 3)",
+          "Al 2",
+          "Mig diamant més avall",
+          "Al 4"
+        ],
+        "answer": 0,
+        "explain": "Dos efectes de més: dos mitjos rombes (1 rombe) més amunt.",
+        "page": 160,
+        "path": [
+          {
+            "x": 0.67,
+            "y": 5.37
+          },
+          {
+            "x": 3.73,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.3
+          },
+          {
+            "x": 0,
+            "y": 6.06
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.18,
+            "y": 6.37,
+            "c": "yellow"
+          },
+          {
+            "x": 0.31,
+            "y": 6.23,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Mètode c (efecte 2): sortida 20, llegada 20. Atac?",
+        "options": [
+          "0 (el 0 real)",
+          "00",
+          "20",
+          "40"
+        ],
+        "answer": 0,
+        "explain": "20 − 20 = 0; al mètode c el zero és el 0 real, no el doble 00.",
+        "page": 165,
+        "path": [
+          {
+            "x": 0.25,
+            "y": 5.21
+          },
+          {
+            "x": 3.73,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.22
+          },
+          {
+            "x": 0,
+            "y": 6.02
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.17,
+            "y": 6.36,
+            "c": "yellow"
+          },
+          {
+            "x": 0.33,
+            "y": 6.24,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Per què s'ataca una mica abans del 0 (punt A) al mètode a?",
+        "options": [
+          "Per no agafar el racó massa just",
+          "Per tenir més efecte",
+          "Per arribar més amunt",
+          "Perquè ho diu Verworst"
+        ],
+        "answer": 0,
+        "explain": "Procuraremos atacar un poco antes del 0 con el fin de no tomar el rincón demasiado ajustado.",
+        "page": 157
+      },
+      {
+        "q": "Quin valor té la sortida 50 del Plus al mètode a?",
+        "options": [
+          "4",
+          "5",
+          "3",
+          "50"
+        ],
+        "answer": 0,
+        "explain": "Incluimos también la salida 50 que en este sistema tiene valor 4.",
+        "page": 157
+      },
+      {
+        "q": "Mètode b: sortida 32, llegada 10. Atac?",
+        "options": [
+          "22",
+          "42",
+          "10",
+          "12"
+        ],
+        "answer": 0,
+        "explain": "Atac = sortida − llegada = 32 − 10 = 22 (PDF Club Billar València, Sistema-Plus.pdf p. 4)",
+        "page": 4,
+        "path": [
+          {
+            "x": 0.44,
+            "y": 4.72
+          },
+          {
+            "x": 2.82,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.77
+          },
+          {
+            "x": 0,
+            "y": 7
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.28,
+            "y": 7.75,
+            "c": "yellow"
+          },
+          {
+            "x": 0.58,
+            "y": 7.72,
+            "c": "red"
+          }
+        ]
+      }
+    ]
+  }
+}

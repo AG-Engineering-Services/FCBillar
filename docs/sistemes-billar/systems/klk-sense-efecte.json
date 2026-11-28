@@ -1,0 +1,422 @@
+{
+  "id": "klk-sense-efecte",
+  "name": "Sistema KLK sense efecte",
+  "group": "Atacs a banda curta",
+  "attributed_to": "Villora i Serralta",
+  "pages": [
+    95,
+    96
+  ],
+  "purpose": "Bola 1 molt a prop de la banda curta d'atac i enganxada (o gairebé) a la banda llarga de sortida: curta-llarga-curta o curta-curta-llarga.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K (o K-K-L)",
+    "effect": "sense efecte, cop alt",
+    "stroke": null,
+    "ball": null
+  },
+  "formula": "Atac = Sortida × Llegada",
+  "steps": [
+    "Pren la sortida al punt exterior de la banda llarga (1 a 4).",
+    "Llegeix la llegada a la banda curta inferior: fila '2a banda' si hi arriba a la segona banda, fila '3a banda' si hi arriba a la tercera.",
+    "Multiplica sortida × llegada i ataca aquest número de la banda curta superior (0 a 40)."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": 1
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 2
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 3
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 4
+        }
+      ],
+      "note": "Dibuix ja en vertical. Es pren al punt exterior de la banda (alçada del diamant)."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0.5,
+          "y": 0,
+          "v": 5
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 40
+        }
+      ],
+      "note": "Banda curta superior, 10 punts per diamant comptant des del racó esquerre."
+    },
+    {
+      "name": "Llegada a 2a banda",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 1,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 4
+        }
+      ],
+      "note": "Quan la banda curta inferior és la segona banda (K-K-L)."
+    },
+    {
+      "name": "Llegada a 3a banda",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 1,
+          "y": 8,
+          "v": 8
+        },
+        {
+          "x": 1.7,
+          "y": 8,
+          "v": 7
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 6
+        },
+        {
+          "x": 3.3,
+          "y": 8,
+          "v": 5
+        }
+      ],
+      "note": "Quan la banda curta inferior és la tercera banda (K-L-K). Posicions del 7, 6 i 5 llegides a ull del dibuix."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "Sortida 1, llegada 6 (3a banda) → atac 6",
+      "page": 95,
+      "path": [
+        {
+          "x": 0.1,
+          "y": 1.0
+        },
+        {
+          "x": 0.6,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 4.7
+        },
+        {
+          "x": 2.5,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.2,
+          "y": 7.75,
+          "c": "yellow"
+        },
+        {
+          "x": 2.35,
+          "y": 7.6,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 2, llegada 3 (2a banda) → atac 6",
+      "page": 96,
+      "path": [
+        {
+          "x": 0.1,
+          "y": 2.0
+        },
+        {
+          "x": 0.6,
+          "y": 0
+        },
+        {
+          "x": 3.0,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 4.6
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.7,
+          "y": 4.1,
+          "c": "yellow"
+        },
+        {
+          "x": 3.9,
+          "y": 4.1,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [],
+  "quotes": [
+    "Aunque en realidad los mismos autores reconocen ciertas lagunas y que es un sistema aún por pulir."
+  ],
+  "uncertain": [
+    "La fila '3a banda' només mostra 8, 7, 6 i 5; no és clar si el 4 del racó dret també val per a la tercera banda.",
+    "Les posicions exactes del 7, 6 i 5 a la fila de 3a banda no cauen en diamants; són aproximades.",
+    "El llibre no indica velocitat ni presa de bola; el dibuix mostra el tac alt i sense efecte lateral."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada (3a banda)",
+          "numbering": "Llegada a 3a banda"
+        }
+      },
+      "inputs": {
+        "S": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "L": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "A": [
+          5,
+          6,
+          7,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          24,
+          28,
+          32
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S * L"
+        },
+        {
+          "solve": "L",
+          "expr": "A / S"
+        }
+      ],
+      "valid": "A >= 0 && A <= 40 && L >= 5 && L <= 8 && L == Math.round(L)",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Només la variant curta-llarga-curta (fila de 3a banda). La sortida es pren al punt exterior de la banda."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 1 i vols arribar al 6 de tercera banda. On ataques?",
+        "options": [
+          "Al 6",
+          "Al 5",
+          "Al 7",
+          "Al 60"
+        ],
+        "answer": 0,
+        "explain": "Atac = sortida × llegada = 1 × 6 = 6.",
+        "page": 95,
+        "path": [
+          {
+            "x": 0.1,
+            "y": 1.0
+          },
+          {
+            "x": 0.6,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 4.7
+          },
+          {
+            "x": 2.5,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.2,
+            "y": 7.75,
+            "c": "yellow"
+          },
+          {
+            "x": 2.35,
+            "y": 7.6,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 2, la bola toca la curta inferior com a segona banda al 3. Atac?",
+        "options": [
+          "6",
+          "5",
+          "1",
+          "8"
+        ],
+        "answer": 0,
+        "explain": "2 × 3 = 6, amb la fila de 2a banda.",
+        "page": 96,
+        "path": [
+          {
+            "x": 0.1,
+            "y": 2.0
+          },
+          {
+            "x": 0.6,
+            "y": 0
+          },
+          {
+            "x": 3.0,
+            "y": 8
+          },
+          {
+            "x": 4,
+            "y": 4.6
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.7,
+            "y": 4.1,
+            "c": "yellow"
+          },
+          {
+            "x": 3.9,
+            "y": 4.1,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quina operació fa servir el KLK sense efecte?",
+        "options": [
+          "Atac = sortida × llegada",
+          "Atac = sortida − llegada",
+          "Atac = llegada − sortida",
+          "Atac = sortida + llegada"
+        ],
+        "answer": 0,
+        "explain": "ATAQUE = SALIDA POR LLEGADA.",
+        "page": 95
+      },
+      {
+        "q": "On es pren la sortida en aquest sistema?",
+        "options": [
+          "Al punt exterior de la banda",
+          "Al punt interior del cautxú",
+          "A la bola 2",
+          "Al racó"
+        ],
+        "answer": 0,
+        "explain": "La salida se determina por el punto exterior de la banda.",
+        "page": 95
+      },
+      {
+        "q": "Quan s'utilitza?",
+        "options": [
+          "Bola 1 molt a prop de la banda d'atac i enganxada a la de sortida",
+          "Bola 1 al centre de la taula",
+          "Bola 1 enganxada a la curta inferior",
+          "Sempre que hi hagi tres bandes llargues"
+        ],
+        "answer": 0,
+        "explain": "Situacions amb la bola 1 molt a prop de la banda d'atac i pegada o gairebé a la de sortida.",
+        "page": 95
+      },
+      {
+        "q": "Què diuen els autors de la precisió del sistema?",
+        "options": [
+          "Que té llacunes i està per polir",
+          "Que és exacte",
+          "Que només falla amb efecte",
+          "Que és el més fiable del llibre"
+        ],
+        "answer": 0,
+        "explain": "Reconocen ciertas lagunas y que es un sistema aún por pulir.",
+        "page": 96
+      }
+    ]
+  }
+}

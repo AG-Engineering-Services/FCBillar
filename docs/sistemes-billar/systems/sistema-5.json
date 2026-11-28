@@ -1,0 +1,448 @@
+{
+  "id": "sistema-5",
+  "name": "Sistema 5",
+  "group": "Atacs a banda curta",
+  "attributed_to": null,
+  "pages": [
+    110,
+    112
+  ],
+  "purpose": "Bola 2 molt a prop de la banda curta: tocar-la fina i anar curta-llarga-curta; la suma atac + llegada + efecte sempre és 5.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K",
+    "effect": "variable (el que doni la fórmula)",
+    "stroke": null,
+    "ball": "fina, 1/8 aproximadament; l'atac el marca la tangent de la bola 2"
+  },
+  "formula": "Atac + Llegada + Efecte = 5",
+  "steps": [
+    "L'atac és el punt de la banda curta superior que marca la tangent a la bola 2 (0 a 4).",
+    "Tria la llegada a la banda curta inferior (0 a 4, mateixa numeració).",
+    "Efecte = 5 − atac − llegada.",
+    "Les boles 1 i 2 han d'estar gairebé en línia; si la bola 1 es desplaça, corregeix l'efecte."
+  ],
+  "numberings": [
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 1
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 2
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 4
+        }
+      ],
+      "note": "Dibuix ja en vertical. Banda curta superior, 1 per diamant des del racó esquerre."
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 4
+        }
+      ],
+      "note": "Banda curta inferior, mateixa numeració que l'atac."
+    }
+  ],
+  "corrections": [
+    "Si la bola 1 es desplaça respecte de la bola 2 (no en línia), aplica 1 efecte de variació per cada bola de desplaçament (a l'exemple, +1 → efecte 3)."
+  ],
+  "examples": [
+    {
+      "text": "Atac 1, llegada 3, efecte 1 → 1 + 3 + 1 = 5",
+      "page": 110,
+      "path": [
+        {
+          "x": 0.86,
+          "y": 0.6
+        },
+        {
+          "x": 1.0,
+          "y": 0.23
+        },
+        {
+          "x": 1.05,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.9
+        },
+        {
+          "x": 3,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.83,
+          "y": 0.18,
+          "c": "yellow"
+        },
+        {
+          "x": 2.7,
+          "y": 7.5,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Atac 0,5, llegada 2,5, efecte 2 → 0,5 + 2,5 + 2 = 5",
+      "page": 111,
+      "path": [
+        {
+          "x": 0.39,
+          "y": 0.55
+        },
+        {
+          "x": 0.5,
+          "y": 0.24
+        },
+        {
+          "x": 0.55,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 4.5
+        },
+        {
+          "x": 1.5,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.34,
+          "y": 0.18,
+          "c": "yellow"
+        },
+        {
+          "x": 1.1,
+          "y": 7.6,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Mateixa posició amb la bola 1 desplaçada una bola: efecte 3",
+      "page": 112,
+      "path": [
+        {
+          "x": 0.57,
+          "y": 0.55
+        },
+        {
+          "x": 0.49,
+          "y": 0.24
+        },
+        {
+          "x": 0.55,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 4.4
+        },
+        {
+          "x": 1.5,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.36,
+          "y": 0.17,
+          "c": "yellow"
+        },
+        {
+          "x": 1.1,
+          "y": 7.6,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [],
+  "quotes": [],
+  "uncertain": [
+    "Als exemples de les pàgines 111-112 el text diu llegada 2,5, però el dibuix toca la banda inferior al voltant de l'1,5. Pot ser un error del dibuix.",
+    "El llibre no indica la velocitat ni el costat de l'efecte; el dibuix mostra l'efecte cap a la dreta (a favor).",
+    "El calc fa servir els valors del text (llegada 2,5 als exemples de les p. 111-112), tot i que el dibuix toca la banda al voltant de l'1,5."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        },
+        "E": {
+          "label": "Efecte",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "inputs": {
+        "A": [
+          0,
+          0.5,
+          1,
+          1.5,
+          2
+        ],
+        "L": [
+          1,
+          1.5,
+          2,
+          2.5,
+          3,
+          3.5
+        ],
+        "E": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "relations": [
+        {
+          "solve": "E",
+          "expr": "5 - A - L"
+        },
+        {
+          "solve": "L",
+          "expr": "5 - A - E"
+        },
+        {
+          "solve": "A",
+          "expr": "5 - L - E"
+        }
+      ],
+      "valid": "A >= 0 && A <= 4 && L >= 0 && L <= 4 && E >= 1 && E <= 4",
+      "round": 1,
+      "path": [
+        "A",
+        "L"
+      ],
+      "note": "Bola 2 molt a prop de la curta; presa fina (1/8). L'atac el marca la tangent de la bola 2; boles 1 i 2 gairebé en línia."
+    },
+    "quiz": [
+      {
+        "q": "Atac 1 i vols llegada 3. Quin efecte?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "answer": 0,
+        "explain": "5 − 1 − 3 = 1.",
+        "page": 110,
+        "path": [
+          {
+            "x": 0.86,
+            "y": 0.6
+          },
+          {
+            "x": 1.0,
+            "y": 0.23
+          },
+          {
+            "x": 1.05,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 5.9
+          },
+          {
+            "x": 3,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.83,
+            "y": 0.18,
+            "c": "yellow"
+          },
+          {
+            "x": 2.7,
+            "y": 7.5,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Atac 0,5 i efecte 2. Llegada?",
+        "options": [
+          "2,5",
+          "3",
+          "1,5",
+          "2"
+        ],
+        "answer": 0,
+        "explain": "5 − 0,5 − 2 = 2,5.",
+        "page": 111,
+        "path": [
+          {
+            "x": 0.39,
+            "y": 0.55
+          },
+          {
+            "x": 0.5,
+            "y": 0.24
+          },
+          {
+            "x": 0.55,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 4.5
+          },
+          {
+            "x": 1.5,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.34,
+            "y": 0.18,
+            "c": "yellow"
+          },
+          {
+            "x": 1.1,
+            "y": 7.6,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "La bola 1 està desplaçada una bola respecte de la 2. Què fas?",
+        "options": [
+          "Hi afegeixes 1 efecte",
+          "Treus 1 efecte",
+          "Ataques mig diamant més enllà",
+          "Res"
+        ],
+        "answer": 0,
+        "explain": "Se aplica 1 efecto de variación por cada bola de desplazamiento (a l'exemple, de 2 a 3).",
+        "page": 112,
+        "path": [
+          {
+            "x": 0.57,
+            "y": 0.55
+          },
+          {
+            "x": 0.49,
+            "y": 0.24
+          },
+          {
+            "x": 0.55,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 4.4
+          },
+          {
+            "x": 1.5,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.36,
+            "y": 0.17,
+            "c": "yellow"
+          },
+          {
+            "x": 1.1,
+            "y": 7.6,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quina presa de bola demana el sistema 5?",
+        "options": [
+          "Fina, uns 1/8",
+          "Mitja bola",
+          "Plena",
+          "3/4"
+        ],
+        "answer": 0,
+        "explain": "La toma de bola es fina (1/8 aproximadamente).",
+        "page": 110
+      },
+      {
+        "q": "Quan s'executa?",
+        "options": [
+          "Bola 2 molt a prop de la banda curta",
+          "Bola 2 al centre",
+          "Bola 1 a la llarga contrària",
+          "Sempre de bricola"
+        ],
+        "answer": 0,
+        "explain": "Se ejecuta siempre cuando la bola 2 está muy cerca de banda corta.",
+        "page": 110
+      }
+    ]
+  }
+}

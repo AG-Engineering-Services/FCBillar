@@ -1,0 +1,383 @@
+{
+  "id": "sistema-7",
+  "name": "Sistema 7",
+  "group": "Atacs a banda curta",
+  "attributed_to": "Villora i Serralta",
+  "pages": [
+    107,
+    109
+  ],
+  "purpose": "Boles 1 i 2 entre el racó i el primer diamant de la banda curta: atac curt, segona banda llarga i tercera banda curta.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K (i 4a banda llarga)",
+    "effect": "efecte 1 mig alt",
+    "stroke": "tac pla",
+    "ball": "1/4 de bola"
+  },
+  "formula": "Tercera banda = Segona banda × 7",
+  "steps": [
+    "Tria la tercera banda a la curta inferior (40 a 0).",
+    "Divideix per 7 per saber on ha de tocar a la segona banda (banda llarga dreta, 1 a 4, llegida al diamant).",
+    "Ataca la curta a prop del racó de manera que la bola vagi a aquest punt de segona banda.",
+    "La quarta banda (llarga esquerra) és aproximada."
+  ],
+  "numberings": [
+    {
+      "name": "Segona banda",
+      "role": "altre",
+      "points": [
+        {
+          "x": 4,
+          "y": 7,
+          "v": 1
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 2
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 4
+        }
+      ],
+      "note": "Dibuix ja en vertical. Banda llarga dreta, llegida prolongant la trajectòria fins al diamant."
+    },
+    {
+      "name": "Tercera banda",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 40
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 30
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 0
+        }
+      ],
+      "note": "Banda curta inferior."
+    },
+    {
+      "name": "Quarta banda (aproximada)",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 0,
+          "y": 4.05,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 4.7,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 5.6,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 6.5,
+          "v": 30
+        }
+      ],
+      "note": "Banda llarga esquerra; el llibre la dona com a aproximada."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "Segona banda 4 → 7 × 4 = 28 a la tercera banda",
+      "page": 107,
+      "path": [
+        {
+          "x": 0.2,
+          "y": 0.55
+        },
+        {
+          "x": 0.3,
+          "y": 0.33
+        },
+        {
+          "x": 0.42,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.65
+        },
+        {
+          "x": 1.2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.13,
+          "y": 0.25,
+          "c": "yellow"
+        },
+        {
+          "x": 0.13,
+          "y": 6.3,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Segona banda 3 → 7 × 3 = 21 a la tercera banda",
+      "page": 109,
+      "path": [
+        {
+          "x": 0.2,
+          "y": 0.65
+        },
+        {
+          "x": 0.3,
+          "y": 0.4
+        },
+        {
+          "x": 0.45,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 4.65
+        },
+        {
+          "x": 1.9,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.15,
+          "y": 0.3,
+          "c": "yellow"
+        },
+        {
+          "x": 0.15,
+          "y": 5.85,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "En segona banda jugues d'esquena a l'atac: cal més concentració i 'sentir' les trajectòries."
+  ],
+  "quotes": [
+    "Se llama sistema 7 porque multiplicando la segunda banda por 7 nos da como resultado la tercera banda."
+  ],
+  "uncertain": [
+    "El llibre no numera l'atac: no diu com triar el punt de la curta per tocar un número concret de segona banda.",
+    "La quarta banda és aproximada segons el mateix llibre; les posicions són lectures del dibuix."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "K": {
+          "label": "Segona banda",
+          "numbering": "Segona banda"
+        },
+        "R": {
+          "label": "Tercera banda",
+          "numbering": "Tercera banda"
+        }
+      },
+      "inputs": {
+        "K": [
+          1,
+          1.5,
+          2,
+          2.5,
+          3,
+          3.5,
+          4
+        ],
+        "R": [
+          7,
+          10.5,
+          14,
+          17.5,
+          21,
+          24.5,
+          28
+        ]
+      },
+      "relations": [
+        {
+          "solve": "R",
+          "expr": "7 * K"
+        },
+        {
+          "solve": "K",
+          "expr": "R / 7"
+        }
+      ],
+      "valid": "K >= 1 && K <= 4 && R >= 0 && R <= 40",
+      "round": 1,
+      "path": [
+        "K",
+        "R"
+      ],
+      "note": "Boles 1 i 2 entre el racó i el primer diamant de la curta; 1/4 de bola, efecte 1 mig alt, tac pla. La segona banda es llegeix al diamant."
+    },
+    "quiz": [
+      {
+        "q": "La bola toca el 4 a la segona banda. On arriba a la tercera?",
+        "options": [
+          "Al 28",
+          "Al 11",
+          "Al 24",
+          "Al 40"
+        ],
+        "answer": 0,
+        "explain": "7 × 4 = 28.",
+        "page": 107,
+        "path": [
+          {
+            "x": 0.2,
+            "y": 0.55
+          },
+          {
+            "x": 0.3,
+            "y": 0.33
+          },
+          {
+            "x": 0.42,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3.65
+          },
+          {
+            "x": 1.2,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.13,
+            "y": 0.25,
+            "c": "yellow"
+          },
+          {
+            "x": 0.13,
+            "y": 6.3,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Vols arribar al 21 de tercera banda. On ha de tocar la segona?",
+        "options": [
+          "Al 3",
+          "Al 2",
+          "Al 4",
+          "Al 7"
+        ],
+        "answer": 0,
+        "explain": "21 / 7 = 3.",
+        "page": 109,
+        "path": [
+          {
+            "x": 0.2,
+            "y": 0.65
+          },
+          {
+            "x": 0.3,
+            "y": 0.4
+          },
+          {
+            "x": 0.45,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 4.65
+          },
+          {
+            "x": 1.9,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.15,
+            "y": 0.3,
+            "c": "yellow"
+          },
+          {
+            "x": 0.15,
+            "y": 5.85,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quan s'aplica el sistema 7?",
+        "options": [
+          "Boles 1 i 2 entre el racó i el primer diamant",
+          "Bola 1 al centre de la taula",
+          "Sortides del 6è diamant",
+          "Bola 2 a la llarga"
+        ],
+        "answer": 0,
+        "explain": "Posicions on les boles 1 i 2 són entre el racó i el primer diamant.",
+        "page": 107
+      },
+      {
+        "q": "Quina presa i efecte?",
+        "options": [
+          "1/4 de bola i efecte 1 mig alt",
+          "Mitja bola i efecte màxim",
+          "Fina i sense efecte",
+          "Plena i contrari"
+        ],
+        "answer": 0,
+        "explain": "Taco plano, 1/4 de bola y efecto 1 medio alto.",
+        "page": 107
+      },
+      {
+        "q": "Com són les llegades a la quarta banda?",
+        "options": [
+          "Aproximades",
+          "Exactes",
+          "El doble de la tercera",
+          "No n'hi ha"
+        ],
+        "answer": 0,
+        "explain": "Las llegadas desde tercera a cuarta banda son aproximadas.",
+        "page": 108
+      }
+    ]
+  }
+}

@@ -1,0 +1,437 @@
+{
+  "id": "diamants-mesa-petita",
+  "name": "Teoria de diamants a la «mesa petita» (mirall)",
+  "group": "Teoria de diamants",
+  "attributed_to": null,
+  "pages": [
+    290,
+    295
+  ],
+  "purpose": "Calcular el recorregut de la segona banda llarga a la tercera banda llarga quan la bola jugadora és molt ficada a la cabanya: curta-llarga-llarga.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-L",
+    "effect": "efecte favorable (el llibre no en dona el número)",
+    "stroke": "no especificat",
+    "ball": null
+  },
+  "formula": "Atac = Sortida − Arribada, aplicat a una mesa petita de 4×2 diamants (de la banda curta de dalt a la línia del diamant 2)",
+  "steps": [
+    "Imagina una mesa petita: la banda curta de dalt, les dues bandes llargues fins al diamant 2 i, com a quarta banda, la línia del diamant 2 (y=2). La bola en realitat no hi rebota: segueix recta.",
+    "Visualitza el punt A a la banda llarga esquerra, uns 2 o 3 punts per sota del segon diamant.",
+    "Mesura la distància des del centre de les boles 2 i 3 fins al punt A (a l'exemple, uns 10 punts).",
+    "Trasllada aquesta distància cap amunt des del diamant 2 real i imagina-hi les boles 2 i 3, com en un mirall.",
+    "Aplica la teoria de diamants a la mesa petita (numeració de sortida a la banda llarga esquerra entre y=0 i y=2, atac a la banda curta de dalt, arribada a la línia y=2) per portar la bola a les boles reflectides."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida (mesa petita)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 0.25,
+          "v": 100
+        },
+        {
+          "x": 0,
+          "y": 0.5,
+          "v": 90
+        },
+        {
+          "x": 0,
+          "y": 0.75,
+          "v": 80
+        },
+        {
+          "x": 0,
+          "y": 1.0,
+          "v": 70
+        },
+        {
+          "x": 0,
+          "y": 1.5,
+          "v": 60
+        },
+        {
+          "x": 0,
+          "y": 2.0,
+          "v": 50
+        }
+      ],
+      "note": "Dibuix en vertical com al llibre, sense girar. La mesa petita ocupa de y=0 a y=2; la sortida 74 de l'exemple cau a y≈0.9."
+    },
+    {
+      "name": "Atac (mesa petita)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 0.25,
+          "y": 0,
+          "v": 100
+        },
+        {
+          "x": 0.5,
+          "y": 0,
+          "v": 90
+        },
+        {
+          "x": 0.75,
+          "y": 0,
+          "v": 80
+        },
+        {
+          "x": 1.0,
+          "y": 0,
+          "v": 70
+        },
+        {
+          "x": 1.25,
+          "y": 0,
+          "v": 60
+        },
+        {
+          "x": 1.5,
+          "y": 0,
+          "v": 50
+        },
+        {
+          "x": 2.0,
+          "y": 0,
+          "v": 40
+        },
+        {
+          "x": 2.5,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 3.0,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 4.0,
+          "y": 0,
+          "v": 0
+        }
+      ],
+      "note": "A la banda curta de dalt; el 0 a la cantonada dreta. El dibuix també marca un «00» més enllà de la cantonada, sobre el diamant del rincó."
+    },
+    {
+      "name": "Arribada a la línia del diamant 2",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 0.5,
+          "y": 2,
+          "v": 100
+        },
+        {
+          "x": 0.75,
+          "y": 2,
+          "v": 90
+        },
+        {
+          "x": 1.0,
+          "y": 2,
+          "v": 80
+        },
+        {
+          "x": 1.25,
+          "y": 2,
+          "v": 70
+        },
+        {
+          "x": 1.5,
+          "y": 2,
+          "v": 60
+        },
+        {
+          "x": 1.75,
+          "y": 2,
+          "v": 50
+        },
+        {
+          "x": 2.0,
+          "y": 2,
+          "v": 40
+        },
+        {
+          "x": 2.5,
+          "y": 2,
+          "v": 30
+        },
+        {
+          "x": 3.0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 3.5,
+          "y": 2,
+          "v": 10
+        },
+        {
+          "x": 4.0,
+          "y": 2,
+          "v": 0
+        }
+      ],
+      "note": "Banda imaginària a y=2 (quarta banda de la mesa petita)."
+    },
+    {
+      "name": "Valors groc sota la línia y=2",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0.5,
+          "y": 2,
+          "v": 45
+        },
+        {
+          "x": 1.0,
+          "y": 2,
+          "v": 40
+        },
+        {
+          "x": 1.5,
+          "y": 2,
+          "v": 35
+        },
+        {
+          "x": 2.0,
+          "y": 2,
+          "v": 30
+        },
+        {
+          "x": 2.5,
+          "y": 2,
+          "v": 25
+        },
+        {
+          "x": 3.0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 3.5,
+          "y": 2,
+          "v": 15
+        }
+      ],
+      "note": "Apareixen al primer gràfic sota la línia del diamant 2; el text no explica per a què serveixen."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "Sortida 74, atac 4 → arribada 70 a la línia del diamant 2; la bola continua recta i arriba a la banda llarga esquerra a l'altura de les boles reals.",
+      "page": 295,
+      "path": [
+        {
+          "x": 1.27,
+          "y": 0.52
+        },
+        {
+          "x": 3.08,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.19
+        },
+        {
+          "x": 0,
+          "y": 2.77
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.26,
+          "y": 3.27,
+          "c": "red"
+        },
+        {
+          "x": 0.43,
+          "y": 3.15,
+          "c": "yellow"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Funciona acceptablement quan la bola jugadora és molt ficada a la cabanya.",
+    "L'autor diu que no n'és gaire partidari: els sistemes són referències i la visualització i la intuïció són essencials."
+  ],
+  "quotes": [
+    "VISUALIZA ESTE PUNTO A, MÁS O MENOS 2 o 3 PUNTOS A PARTIR DEL SEGUNDO ROMBO",
+    "Traslada esta distancia hacia arriba desde el rombo 2 real e imagina las bolas 2 y 3 en ese lugar como si de un espejo se tratara."
+  ],
+  "uncertain": [
+    "La unitat dels «10 punts» de distància no s'explica; al dibuix les boles són a uns 0,8 diamants per sota de y=2.",
+    "L'atac 4 cau a x≈3.8 (entre el 0 i el 10); la posició exacta és estimada.",
+    "La numeració d'atac de dalt d'aquest gràfic (70 a x=1, 60 a 1.25, 50 a 1.5) no coincideix amb la del gràfic de la pàgina 297 (60 a 1.5, 50 a 1.75).",
+    "No es diu quin efecte ni quina velocitat cal."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida (mesa petita)"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac (mesa petita)"
+        },
+        "L": {
+          "label": "Arribada a y=2",
+          "numbering": "Arribada a la línia del diamant 2"
+        }
+      },
+      "inputs": {
+        "S": [
+          50,
+          60,
+          70,
+          74,
+          80,
+          90,
+          100
+        ],
+        "A": [
+          0,
+          4,
+          10,
+          20,
+          30,
+          40
+        ],
+        "L": [
+          20,
+          30,
+          40,
+          50,
+          60,
+          70
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A"
+        }
+      ],
+      "valid": "A >= 0 && A <= 100 && L >= 0 && L <= 100",
+      "round": 0,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Diamants aplicats a la mesa petita (y de 0 a 2); entre l'atac i l'arribada la bola toca la llarga dreta."
+    },
+    "quiz": [
+      {
+        "q": "Quina línia fa de 4a banda imaginària de la mesa petita?",
+        "options": [
+          "La línia del diamant 2",
+          "La línia del diamant 4 (centre)",
+          "La banda curta de baix",
+          "La línia del diamant 1"
+        ],
+        "answer": 0,
+        "explain": "La mesa petita va de la banda curta de dalt fins al diamant 2.",
+        "page": 292
+      },
+      {
+        "q": "On es visualitza el punt A?",
+        "options": [
+          "Al centre de la banda curta de dalt",
+          "A la llarga esquerra, uns 2 o 3 punts per sota del segon diamant",
+          "A la cantonada de baix",
+          "Al diamant 4 de la llarga dreta"
+        ],
+        "answer": 1,
+        "explain": "«Visualiza este punto A, más o menos 2 o 3 puntos a partir del segundo rombo».",
+        "page": 292
+      },
+      {
+        "q": "Què fas amb la distància de les boles 2-3 al punt A?",
+        "options": [
+          "La sumes a l'atac",
+          "La restes de la sortida",
+          "La traslladeu cap amunt des del diamant 2 real, com un mirall",
+          "La dobles i la poses a la curta"
+        ],
+        "answer": 2,
+        "explain": "Les boles s'imaginen reflectides per damunt del diamant 2.",
+        "page": 294
+      },
+      {
+        "q": "A l'exemple, sortida 74 i atac 4. Quina arribada dona a la línia del diamant 2?",
+        "options": [
+          "78",
+          "66",
+          "74",
+          "70"
+        ],
+        "answer": 3,
+        "explain": "74 − 4 = 70.",
+        "page": 295,
+        "path": [
+          {
+            "x": 1.27,
+            "y": 0.52
+          },
+          {
+            "x": 3.08,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.19
+          },
+          {
+            "x": 0,
+            "y": 2.77
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.26,
+            "y": 3.27,
+            "c": "red"
+          },
+          {
+            "x": 0.43,
+            "y": 3.15,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Quan funciona acceptablement aquest recurs?",
+        "options": [
+          "Quan la bola jugadora és molt ficada a la cabanya",
+          "Quan la bola 2 és al centre",
+          "En jugades de retruc",
+          "Només amb taules que allarguen"
+        ],
+        "answer": 0,
+        "explain": "L'autor ho diu a la p296.",
+        "page": 296
+      }
+    ]
+  }
+}

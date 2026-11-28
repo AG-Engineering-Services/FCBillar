@@ -1,0 +1,372 @@
+{
+  "id": "plus-4-llegada-llarga",
+  "name": "Sistema Plus, zona 4 amb llegada a la llarga",
+  "group": "Sistema Plus",
+  "attributed_to": "Jean Verworst (Berekend Biljarten)",
+  "pages": [
+    137,
+    143
+  ],
+  "purpose": "Plus sortint del 6è diamant endavant (prop del racó inferior) amb tercera banda a la mateixa banda llarga.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-L (i prolongació a 4a banda)",
+    "effect": "efecte màxim",
+    "stroke": "cop ràpid",
+    "ball": null
+  },
+  "formula": null,
+  "steps": [
+    "En lloc de fórmula, aprèn les trajectòries mestres sortint del racó inferior (sortida 0).",
+    "Des del racó: atac 0 → llegada 20; atac 10 → llegada 10; atac 20 → llegada 0.",
+    "Comprova-ho a la teva taula: si atacant el 0 arribes al 22 en lloc del 20, ataca el 2 per arribar al 20."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida i llegada",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 20
+        }
+      ],
+      "note": "Dibuix ja en vertical; cap rotació. Sortida a la banda llarga esquerra, atac a la curta superior. Banda llarga esquerra des del racó inferior."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 20
+        }
+      ],
+      "note": "Curta superior, 0 al racó dret. A la p. 140 apareix el 2 a x ≈ 3,9. És la numeració pròpia d'aquest sistema (comprovat a les p. 137–141): 10 punts per mig diamant (20 al 3r diamant, 10 a x=3,5), no la del Plus de referència (20 a x=3,5, 10 a x=3,75)."
+    }
+  ],
+  "corrections": [
+    "Calibratge: si l'atac 0 des del racó dona llegada 22, ataca el 2 per obtenir 20."
+  ],
+  "examples": [
+    {
+      "text": "Comprovació: sortida 0, atac 0 → llegada 20",
+      "page": 138,
+      "path": [
+        {
+          "x": 0.45,
+          "y": 6.5
+        },
+        {
+          "x": 3.85,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.2
+        },
+        {
+          "x": 0,
+          "y": 6
+        }
+      ]
+    },
+    {
+      "text": "Comprovació: sortida 0, atac 10 → llegada 10",
+      "page": 141,
+      "path": [
+        {
+          "x": 0.3,
+          "y": 6.58
+        },
+        {
+          "x": 3.35,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.7
+        },
+        {
+          "x": 0,
+          "y": 7
+        }
+      ]
+    },
+    {
+      "text": "Amb bola 2: sortida 0, atac 0 → llegada 20",
+      "page": 142,
+      "path": [
+        {
+          "x": 0.81,
+          "y": 6.58
+        },
+        {
+          "x": 1.26,
+          "y": 6.2
+        },
+        {
+          "x": 3.81,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.3
+        },
+        {
+          "x": 0,
+          "y": 6.0
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.4,
+          "y": 6.3,
+          "c": "yellow"
+        },
+        {
+          "x": 0.83,
+          "y": 7.76,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Amb bola 2: sortida 0, atac 10 → llegada 10",
+      "page": 143,
+      "path": [
+        {
+          "x": 1.12,
+          "y": 7.17
+        },
+        {
+          "x": 0.89,
+          "y": 6.63
+        },
+        {
+          "x": 3.3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.54
+        },
+        {
+          "x": 0,
+          "y": 7.0
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.74,
+          "y": 6.53,
+          "c": "yellow"
+        },
+        {
+          "x": 0.46,
+          "y": 7.75,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Comprovació: sortida 0, atac 20 → llegada 0 (racó inferior)",
+      "page": 141,
+      "path": [
+        {
+          "x": 0.3,
+          "y": 6.58
+        },
+        {
+          "x": 2.83,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.98
+        },
+        {
+          "x": 0,
+          "y": 8
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Millor que una fórmula, conèixer les trajectòries mestres comprovant l'atac de racó a racó."
+  ],
+  "quotes": [
+    "Mejor que buscar una fórmula conocer las trayectorias maestras a partir de la comprobación de ataque desde rincón a rincón"
+  ],
+  "uncertain": [
+    "El llibre només mostra sortida 0; no explica com corregir per a sortides 10 o 20.",
+    "El calc interpola linealment entre les tres trajectòries mestres del llibre (0 → 20, 10 → 10, 20 → 0); el llibre no ho diu explícitament."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Sortida i llegada"
+        }
+      },
+      "inputs": {
+        "A": [
+          0,
+          5,
+          10,
+          15,
+          20
+        ],
+        "L": [
+          0,
+          5,
+          10,
+          15,
+          20
+        ]
+      },
+      "relations": [
+        {
+          "solve": "L",
+          "expr": "20 - A"
+        },
+        {
+          "solve": "A",
+          "expr": "20 - L"
+        }
+      ],
+      "valid": "A >= 0 && A <= 20 && L >= 0 && L <= 20",
+      "round": 1,
+      "path": [
+        "A",
+        "L"
+      ],
+      "note": "Sortida sempre des del racó inferior (0). Trajectòries mestres del llibre: 0 → 20, 10 → 10, 20 → 0; els valors intermedis s'interpolen."
+    },
+    "quiz": [
+      {
+        "q": "Des del racó inferior ataques el 0. On arribes?",
+        "options": [
+          "Al 20",
+          "Al 0",
+          "Al 10",
+          "Al 40"
+        ],
+        "answer": 0,
+        "explain": "Comprovació de racó a racó: atac 0 → llegada 20.",
+        "page": 138,
+        "path": [
+          {
+            "x": 0.45,
+            "y": 6.5
+          },
+          {
+            "x": 3.85,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.2
+          },
+          {
+            "x": 0,
+            "y": 6
+          }
+        ]
+      },
+      {
+        "q": "Atacant el 0 arribes al 22 en lloc del 20. Què fas?",
+        "options": [
+          "Atacar el 2",
+          "Atacar el 22",
+          "Treure efecte",
+          "Atacar el 20"
+        ],
+        "answer": 0,
+        "explain": "Deberá atacar al 2 para lograr alcanzar la llegada 20.",
+        "page": 139
+      },
+      {
+        "q": "Des del racó, atac 10. Llegada?",
+        "options": [
+          "10",
+          "20",
+          "0",
+          "30"
+        ],
+        "answer": 0,
+        "explain": "Atac 10 → llegada 10.",
+        "page": 141,
+        "path": [
+          {
+            "x": 0.3,
+            "y": 6.58
+          },
+          {
+            "x": 3.35,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.7
+          },
+          {
+            "x": 0,
+            "y": 7
+          }
+        ]
+      },
+      {
+        "q": "Quin cop i efecte demana?",
+        "options": [
+          "Cop ràpid i efecte màxim",
+          "Cop lent i efecte 2",
+          "Sense efecte",
+          "Cop retingut i contrari"
+        ],
+        "answer": 0,
+        "explain": "El golpe es rápido y con máximo efecto.",
+        "page": 138
+      },
+      {
+        "q": "Què recomana el llibre en lloc d'una fórmula?",
+        "options": [
+          "Conèixer les trajectòries mestres comprovant de racó a racó",
+          "Restar sempre 20",
+          "Fer servir la zona 1",
+          "Multiplicar per 2"
+        ],
+        "answer": 0,
+        "explain": "Mejor que buscar una fórmula conocer las trayectorias maestras.",
+        "page": 138
+      }
+    ]
+  }
+}

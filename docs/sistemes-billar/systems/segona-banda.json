@@ -1,0 +1,818 @@
+{
+  "id": "segona-banda",
+  "name": "Sistema de 2a banda",
+  "group": "Teoria de diamants",
+  "attributed_to": "Villora i Serralta",
+  "pages": [
+    310,
+    317
+  ],
+  "purpose": "Tres bandes bola-llarga-curta-llarga quan la bola 2 és molt a prop de la banda: apuntar al diamant de la 2a banda en lloc de la línia de sortida.",
+  "shot": {
+    "first_cushion": "bola",
+    "cushions": "bola-L-K-L",
+    "effect": "efecte 3 o 4 segons el jugador",
+    "stroke": "natural; o retingut, lent i amb màxima rotació (+5)",
+    "ball": "bola 2 molt a prop de la banda llarga"
+  },
+  "formula": "Punt de 2a banda = Arribada (3a banda) + valor de la zona (+5 si es juga retingut amb màxima rotació). Comprovació: Atac = Sortida − Arribada",
+  "steps": [
+    "Mira en quina de les cinc zones de la banda llarga esquerra toca la bola: +10, +5, 0, −2,5 o −5 (comptant des de la banda curta que farà de 2a banda).",
+    "Calcula l'arribada a la 3a banda (banda llarga dreta) que necessites.",
+    "Suma-hi el valor de la zona; si vols un cop retingut, lent i amb màxima rotació (per fer la bola 3 més grossa), suma-hi 5 més.",
+    "Apunta al diamant d'aquest número de la 2a banda com si fessis carambola a una banda amb aquell diamant: tocaràs la banda abans.",
+    "Juga amb efecte 3-4."
+  ],
+  "numberings": [
+    {
+      "name": "2a banda",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 60
+        },
+        {
+          "x": 0.25,
+          "y": 0,
+          "v": 50
+        },
+        {
+          "x": 0.5,
+          "y": 0,
+          "v": 40
+        },
+        {
+          "x": 0.75,
+          "y": 0,
+          "v": 35
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 1.25,
+          "y": 0,
+          "v": 27.5
+        },
+        {
+          "x": 1.5,
+          "y": 0,
+          "v": 25
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        }
+      ],
+      "note": "Dibuix ja vertical al llibre, sense girar. Banda curta de dalt; el número es pren al diamant, no al vèrtex de la banda. 25 i 27,5 surten als exemples."
+    },
+    {
+      "name": "Zones (valor a sumar)",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 1.5,
+          "v": 5
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": -2.5
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": -5
+        }
+      ],
+      "note": "Banda llarga esquerra: +10 de y=0 a 1, +5 de 1 a 2, 0 de 2 a 4, −2,5 de 4 a 6, −5 de 6 a 8. Si la 2a banda és la curta de baix, les zones es compten des de baix (exemple retingut de la p315: «zona +10» a baix)."
+    },
+    {
+      "name": "Arribada a 3a banda",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 4,
+          "y": 1.5,
+          "v": 15
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        }
+      ],
+      "note": "Banda llarga dreta: valors que surten als exemples (10 per diamant des de dalt)."
+    },
+    {
+      "name": "Atac (línies de comprovació)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "v": 5
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2.5,
+          "v": 25
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 70
+        }
+      ],
+      "note": "Banda llarga esquerra, per fora; valors que surten a les línies discontínues dels exemples."
+    },
+    {
+      "name": "Sortida (línies de comprovació)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 4,
+          "y": 3,
+          "v": 25
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 45
+        },
+        {
+          "x": 1.5,
+          "y": 8,
+          "v": 80
+        },
+        {
+          "x": 0.5,
+          "y": 8,
+          "v": 100
+        }
+      ],
+      "note": "Per fora a la llarga dreta i a la curta de baix; valors que surten als exemples."
+    }
+  ],
+  "corrections": [
+    "Zona +10: sumar 10 a l'arribada; zona +5: sumar 5; zona 0: 2a banda = arribada; zona −2,5: restar 2,5; zona −5: restar 5.",
+    "Cop retingut, lent i amb màxima rotació: sumar 5 punts més a la 2a banda."
+  ],
+  "examples": [
+    {
+      "text": "Zona 0, arribada 20 → 2a banda 20 (comprovació: sortida 45 − arribada 20 = atac 25).",
+      "page": 311,
+      "path": [
+        {
+          "x": 1.56,
+          "y": 3.52
+        },
+        {
+          "x": 0.62,
+          "y": 3.42
+        },
+        {
+          "x": 0,
+          "y": 2.83
+        },
+        {
+          "x": 1.87,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.97
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.62,
+          "y": 3.42,
+          "c": "yellow"
+        },
+        {
+          "x": 3.75,
+          "y": 2.49,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Zona 0, arribada 20, retingut amb molta rotació → 2a banda 25.",
+      "page": 312,
+      "path": [
+        {
+          "x": 1.36,
+          "y": 3.03
+        },
+        {
+          "x": 0.15,
+          "y": 3.1
+        },
+        {
+          "x": 0,
+          "y": 2.74
+        },
+        {
+          "x": 1.31,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.98
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.15,
+          "y": 3.1,
+          "c": "yellow"
+        },
+        {
+          "x": 3.82,
+          "y": 2.57,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Zona +5, arribada 15 → 2a banda 20 (sortida 25 − arribada 15 = atac 10).",
+      "page": 313,
+      "path": [
+        {
+          "x": 1.23,
+          "y": 1.42
+        },
+        {
+          "x": 0.41,
+          "y": 1.41
+        },
+        {
+          "x": 0,
+          "y": 1.1
+        },
+        {
+          "x": 1.5,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.41,
+          "y": 1.41,
+          "c": "yellow"
+        },
+        {
+          "x": 3.67,
+          "y": 2.04,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Zona +5, arribada 15, retingut i màxim efecte → 2a banda 25.",
+      "page": 314,
+      "path": [
+        {
+          "x": 0.84,
+          "y": 1.16
+        },
+        {
+          "x": 0.15,
+          "y": 1.31
+        },
+        {
+          "x": 0,
+          "y": 1.14
+        },
+        {
+          "x": 1.13,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.49
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.15,
+          "y": 1.31,
+          "c": "yellow"
+        },
+        {
+          "x": 3.85,
+          "y": 1.87,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Zona +10, arribada 20, cop natural → 2a banda 30 (sortida 25 − arribada 20 = atac 5).",
+      "page": 315,
+      "path": [
+        {
+          "x": 1.08,
+          "y": 0.99
+        },
+        {
+          "x": 0.48,
+          "y": 1.03
+        },
+        {
+          "x": 0,
+          "y": 0.66
+        },
+        {
+          "x": 0.63,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.03
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.48,
+          "y": 1.03,
+          "c": "yellow"
+        },
+        {
+          "x": 3.64,
+          "y": 2.51,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Mateixa jugada cap a la curta de baix, retingut: zona +10, arribada 20 → 2a banda 35.",
+      "page": 315,
+      "path": [
+        {
+          "x": 1.12,
+          "y": 7.42
+        },
+        {
+          "x": 0.44,
+          "y": 7.15
+        },
+        {
+          "x": 0,
+          "y": 7.33
+        },
+        {
+          "x": 0.47,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 6.0
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.44,
+          "y": 7.15,
+          "c": "yellow"
+        },
+        {
+          "x": 3.81,
+          "y": 5.65,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Zona −2,5, arribada 30, cop natural → 2a banda 27,5 (sortida 80 − arribada 30 = atac 50).",
+      "page": 316,
+      "path": [
+        {
+          "x": 1.04,
+          "y": 6.65
+        },
+        {
+          "x": 0.48,
+          "y": 6.59
+        },
+        {
+          "x": 0,
+          "y": 5.64
+        },
+        {
+          "x": 1.18,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.98
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.48,
+          "y": 6.59,
+          "c": "yellow"
+        },
+        {
+          "x": 3.7,
+          "y": 3.52,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Zona −5, arribada 30, retinguda i envoltada → 30 − 5 + 5 = 30 (sortida 100 − arribada 30 = atac 70).",
+      "page": 317,
+      "path": [
+        {
+          "x": 0.57,
+          "y": 7.67
+        },
+        {
+          "x": 0.18,
+          "y": 7.66
+        },
+        {
+          "x": 0,
+          "y": 6.98
+        },
+        {
+          "x": 0.97,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.96
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.18,
+          "y": 7.66,
+          "c": "yellow"
+        },
+        {
+          "x": 3.82,
+          "y": 3.37,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Concentra't en el diamant de la 2a banda i no en la 1a: és com jugar a una banda pensant que la vermella és al diamant de la banda curta.",
+    "Útil per a cabanyes i passes de bola, sobretot quan la bola 2 és enganxada a la banda.",
+    "A la zona 0, amb atac natural i efecte 3-4, els punts de 2a i 3a banda coincideixen."
+  ],
+  "quotes": [
+    "la referencia de la segunda banda no es el vértice de la misma sino el propio rombo",
+    "es como si jugara a una banda pensando que la roja está en el rombo de la banda corta."
+  ],
+  "uncertain": [
+    "Als camins el segon punt és el contacte amb la bola 2 (la bola jugadora toca primer la bola 2 i després la banda).",
+    "El llibre no diu explícitament si la zona es determina pel punt de 1a banda o per la posició de la bola 2; als dibuixos coincideixen.",
+    "Les numeracions de sortida i atac només surten als exemples; no hi ha gràfic complet."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "L": {
+          "label": "Arribada (3a banda)",
+          "numbering": "Arribada a 3a banda"
+        },
+        "Z": {
+          "label": "Zona",
+          "values": [
+            10,
+            5,
+            0,
+            -2.5,
+            -5
+          ]
+        },
+        "R": {
+          "label": "Retingut (+5) o natural (0)",
+          "values": [
+            0,
+            5
+          ]
+        },
+        "B": {
+          "label": "Diamant de 2a banda",
+          "numbering": "2a banda"
+        }
+      },
+      "inputs": {
+        "L": [
+          15,
+          20,
+          25,
+          30
+        ],
+        "Z": [
+          10,
+          5,
+          0,
+          -2.5,
+          -5
+        ],
+        "R": [
+          0,
+          5
+        ],
+        "B": [
+          20,
+          25,
+          27.5,
+          30,
+          35
+        ]
+      },
+      "relations": [
+        {
+          "solve": "B",
+          "expr": "L + Z + R"
+        },
+        {
+          "solve": "L",
+          "expr": "B - Z - R"
+        }
+      ],
+      "valid": "B >= 0 && B <= 60 && L >= 15 && L <= 30",
+      "round": 1,
+      "path": [
+        "B",
+        "L"
+      ],
+      "note": "Es dibuixa el tram de 2a a 3a banda; abans, bola 2 i 1a banda llarga esquerra dins la zona."
+    },
+    "quiz": [
+      {
+        "q": "Zona 0, arribada 20, cop natural. A quin diamant de 2a banda apuntes?",
+        "options": [
+          "25",
+          "15",
+          "30",
+          "20"
+        ],
+        "answer": 3,
+        "explain": "A la zona 0 coincideixen 2a i 3a banda.",
+        "page": 311,
+        "path": [
+          {
+            "x": 1.56,
+            "y": 3.52
+          },
+          {
+            "x": 0.62,
+            "y": 3.42
+          },
+          {
+            "x": 0,
+            "y": 2.83
+          },
+          {
+            "x": 1.87,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.97
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.62,
+            "y": 3.42,
+            "c": "yellow"
+          },
+          {
+            "x": 3.75,
+            "y": 2.49,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Zona +5, arribada 15, retingut amb màxim efecte. 2a banda?",
+        "options": [
+          "25",
+          "20",
+          "15",
+          "30"
+        ],
+        "answer": 0,
+        "explain": "15 + 5 + 5 = 25.",
+        "page": 314,
+        "path": [
+          {
+            "x": 0.84,
+            "y": 1.16
+          },
+          {
+            "x": 0.15,
+            "y": 1.31
+          },
+          {
+            "x": 0,
+            "y": 1.14
+          },
+          {
+            "x": 1.13,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.49
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.15,
+            "y": 1.31,
+            "c": "yellow"
+          },
+          {
+            "x": 3.85,
+            "y": 1.87,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Zona −2,5, arribada 30, cop natural. 2a banda?",
+        "options": [
+          "32,5",
+          "27,5",
+          "30",
+          "25"
+        ],
+        "answer": 1,
+        "explain": "30 − 2,5 = 27,5.",
+        "page": 316,
+        "path": [
+          {
+            "x": 1.04,
+            "y": 6.65
+          },
+          {
+            "x": 0.48,
+            "y": 6.59
+          },
+          {
+            "x": 0,
+            "y": 5.64
+          },
+          {
+            "x": 1.18,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.98
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.48,
+            "y": 6.59,
+            "c": "yellow"
+          },
+          {
+            "x": 3.7,
+            "y": 3.52,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Zona −5, arribada 30, retinguda i envoltada. 2a banda?",
+        "options": [
+          "25",
+          "35",
+          "30",
+          "20"
+        ],
+        "answer": 2,
+        "explain": "30 − 5 + 5 = 30.",
+        "page": 317,
+        "path": [
+          {
+            "x": 0.57,
+            "y": 7.67
+          },
+          {
+            "x": 0.18,
+            "y": 7.66
+          },
+          {
+            "x": 0,
+            "y": 6.98
+          },
+          {
+            "x": 0.97,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.96
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.18,
+            "y": 7.66,
+            "c": "yellow"
+          },
+          {
+            "x": 3.82,
+            "y": 3.37,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quina és la referència de la 2a banda?",
+        "options": [
+          "El vèrtex de la banda",
+          "El centre de la bola 2",
+          "El punt de 1a banda",
+          "El diamant, com si fessis carambola a una banda amb ell"
+        ],
+        "answer": 3,
+        "explain": "«no es el vértice de la misma sino el propio rombo».",
+        "page": 312
+      },
+      {
+        "q": "Quin efecte fa servir el sistema?",
+        "options": [
+          "3 o 4 segons el jugador",
+          "Sense efecte",
+          "Efecte contrari",
+          "1 o 2"
+        ],
+        "answer": 0,
+        "explain": "P311.",
+        "page": 311
+      },
+      {
+        "q": "Quan és especialment útil?",
+        "options": [
+          "Quan la bola 2 és al centre",
+          "Quan la bola 2 és molt a prop de la banda",
+          "En retrucs",
+          "En jugades de quatre bandes curtes"
+        ],
+        "answer": 1,
+        "explain": "Costa matisar la línia de sortida i es visualitza millor la 2a banda.",
+        "page": 310
+      }
+    ]
+  }
+}

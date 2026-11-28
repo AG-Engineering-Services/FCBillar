@@ -1,0 +1,286 @@
+{
+  "id": "efecte-4-bola-2",
+  "name": "Sistema efecte 4 atacant la bola 2",
+  "group": "Atacs a banda curta",
+  "attributed_to": "Villora i Serralta (coincideix amb el Plus 4 de Jean Verworst)",
+  "pages": [
+    98,
+    100
+  ],
+  "purpose": "Atacant la bola 2 cap a la banda curta, arribar al diamant central de la banda curta oposada sense calcular la sortida.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K",
+    "effect": "efecte màxim per sota de l'equador",
+    "stroke": "tac pla, cop retingut i de màxima rotació",
+    "ball": "atacant la bola 2"
+  },
+  "formula": null,
+  "steps": [
+    "Traça la paral·lela a la banda llarga des del punt de contacte amb la bola 2 fins a la banda curta.",
+    "Ataca mig diamant més enllà d'aquesta paral·lela (cap al costat de l'efecte).",
+    "Juga efecte màxim per sota de l'equador, tac pla i cop retingut: la bola arriba al diamant central de la banda curta oposada.",
+    "Per moure la llegada: cada mig diamant que avances o retrocedeixes l'atac mou la llegada un diamant en sentit contrari."
+  ],
+  "numberings": [],
+  "corrections": [
+    "Avançar l'atac mig diamant → llegada un diamant cap a l'altre costat respecte del diamant central (hipòtesi del llibre, pendent d'estudi)."
+  ],
+  "examples": [
+    {
+      "text": "Dues posicions diferents: atacant mig diamant a la dreta de la paral·lela, totes dues arriben al diamant central inferior",
+      "page": 98,
+      "path": [
+        {
+          "x": 0.52,
+          "y": 3.3
+        },
+        {
+          "x": 0.98,
+          "y": 3.0
+        },
+        {
+          "x": 1.45,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.4
+        },
+        {
+          "x": 2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.15,
+          "y": 3.0,
+          "c": "yellow"
+        },
+        {
+          "x": 1.5,
+          "y": 7.6,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Atac mig diamant més a la dreta → llegada un diamant a l'esquerra del central",
+      "page": 99,
+      "path": [
+        {
+          "x": 2.0,
+          "y": 2.05
+        },
+        {
+          "x": 2.48,
+          "y": 1.9
+        },
+        {
+          "x": 3.33,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.6
+        },
+        {
+          "x": 1.0,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.65,
+          "y": 1.95,
+          "c": "yellow"
+        },
+        {
+          "x": 0.1,
+          "y": 7.5,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Atac mig diamant més a l'esquerra → llegada un diamant a la dreta del central",
+      "page": 100,
+      "path": [
+        {
+          "x": 2.08,
+          "y": 2.05
+        },
+        {
+          "x": 2.5,
+          "y": 1.9
+        },
+        {
+          "x": 2.55,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.7
+        },
+        {
+          "x": 3.0,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.68,
+          "y": 1.95,
+          "c": "yellow"
+        },
+        {
+          "x": 2.55,
+          "y": 7.6,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Recorda que és un cop molt retingut."
+  ],
+  "quotes": [
+    "simplemente se trata de atacar medio rombo con respecto a la paralela a la banda larga"
+  ],
+  "uncertain": [
+    "La relació mig diamant d'atac = un diamant de llegada el llibre la presenta com a presumible, pendent d'estudis."
+  ],
+  "trainer": {
+    "quiz": [
+      {
+        "q": "Atacant la bola 2, on apuntes a la curta?",
+        "options": [
+          "Mig diamant més enllà de la paral·lela a la llarga",
+          "A la paral·lela exacta",
+          "Un diamant més enllà",
+          "Al racó"
+        ],
+        "answer": 0,
+        "explain": "Es tracta d'atacar mig rombe respecte de la paral·lela a la banda llarga.",
+        "page": 98,
+        "path": [
+          {
+            "x": 0.52,
+            "y": 3.3
+          },
+          {
+            "x": 0.98,
+            "y": 3.0
+          },
+          {
+            "x": 1.45,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.4
+          },
+          {
+            "x": 2,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.15,
+            "y": 3.0,
+            "c": "yellow"
+          },
+          {
+            "x": 1.5,
+            "y": 7.6,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "On arriba la bola amb l'atac base?",
+        "options": [
+          "Al diamant central de la curta inferior",
+          "Al racó inferior",
+          "Al primer diamant de la llarga",
+          "A la curta superior"
+        ],
+        "answer": 0,
+        "explain": "Alcanzamos el rombo central inferior en la tercera banda.",
+        "page": 98
+      },
+      {
+        "q": "Quin efecte i cop?",
+        "options": [
+          "Efecte màxim per sota de l'equador, tac pla i cop retingut",
+          "Efecte 1 alt i cop viu",
+          "Sense efecte, cop alt",
+          "Efecte contrari i cop fort"
+        ],
+        "answer": 0,
+        "explain": "Máximo efecto por debajo del ecuador y taco plano para un golpe retenido.",
+        "page": 98
+      },
+      {
+        "q": "Avances l'atac mig diamant. Què passa amb la llegada?",
+        "options": [
+          "Es mou un diamant cap a l'altre costat",
+          "Es mou mig diamant cap al mateix costat",
+          "No canvia",
+          "Es mou dos diamants"
+        ],
+        "answer": 0,
+        "explain": "Presumiblement mig rombe d'atac suposa un rombe de llegada (pendent d'estudi).",
+        "page": 99,
+        "path": [
+          {
+            "x": 2.0,
+            "y": 2.05
+          },
+          {
+            "x": 2.48,
+            "y": 1.9
+          },
+          {
+            "x": 3.33,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.6
+          },
+          {
+            "x": 1.0,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.65,
+            "y": 1.95,
+            "c": "yellow"
+          },
+          {
+            "x": 0.1,
+            "y": 7.5,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Depèn aquest mètode de la sortida?",
+        "options": [
+          "No, atacant la bola 2 no s'apliquen diferències per la sortida",
+          "Sí, cal restar la sortida",
+          "Només si la sortida és més gran que 50",
+          "Sí, cal multiplicar per 2"
+        ],
+        "answer": 0,
+        "explain": "En este caso no se aplican diferencias en función de la salida.",
+        "page": 98
+      }
+    ]
+  }
+}

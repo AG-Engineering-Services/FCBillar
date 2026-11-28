@@ -1,0 +1,952 @@
+{
+  "id": "tuzul-curta-curta",
+  "name": "Sistema Plus-6: mètode de Tüzül (1a part, sortida de banda curta)",
+  "group": "Sistema Plus",
+  "attributed_to": "Tüzül (exposat per José Lazo)",
+  "pages": [
+    166,
+    185
+  ],
+  "purpose": "Atac a la banda curta des de la banda curta oposada, amb tercera banda de nou a la curta de sortida (bricole o bola primer), adaptat al jugador i a la taula amb el 'valor de la mesa'.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K (curta, llarga, curta)",
+    "effect": "triat pel jugador: efecte 1, 2, 3 o 4 (4 = màxim), del costat de la segona banda",
+    "stroke": "bricole: cop ràpid sense exagerar i penetrat",
+    "ball": "si es toca primer la bola 2, la línia es pren a uns 3 cm de la bola 2 (aprox. el radi)"
+  },
+  "formula": "Valor de la mesa = Atac + Llegada − Sortida; per tant Atac = Valor de la mesa + Sortida − Llegada",
+  "steps": [
+    "Calibra el valor de la mesa: col·loca la bola a una sortida, ataca un punt conegut amb l'efecte triat i mira on arriba. Valor = Atac + Llegada − Sortida.",
+    "Valors d'exemple del llibre: efecte 4 → 15, efecte 2 → 10, efecte 1 → 5 (efecte 3 → 12,5). Cada jugador ha de trobar els seus.",
+    "Tria l'efecte segons la sortida de tercera banda que vulguis (4 o 3 obre l'angle; 1 la fa més vertical; 2 és el terme mitjà).",
+    "Llegeix la llegada desitjada i estima la sortida de la bola jugadora.",
+    "Calcula Atac = Valor + Sortida − Llegada i comprova que la línia sortida–atac passa pel centre de la bola jugadora (o a 3 cm de la bola 2). Si no, prova una altra sortida i recalcula."
+  ],
+  "numberings": [
+    {
+      "name": "Atac (banda curta superior)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 40
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        }
+      ],
+      "note": "El dibuix del llibre ja és vertical; no cal girar. 10 punts per diamant; valors intermedis per interpolació."
+    },
+    {
+      "name": "Sortida i llegada (banda curta inferior)",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 20
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 15
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 10
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 5
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 0
+        }
+      ],
+      "note": "La mateixa escala serveix de sortida i de llegada (tercera banda). 5 punts per diamant."
+    }
+  ],
+  "corrections": [
+    "La línia sortida–atac ha de passar exactament pel centre de la bola jugadora en un bricole, o a uns 3 cm de la bola 2 si s'hi ataca primer; si no hi passa, la sortida suposada és incorrecta (exemple: amb valor 15 i llegada 10, sortides 14 i 16 donen atac 19 i 21, però només la 15 → atac 20 queda alineada).",
+    "Els valors de la mesa (15/10/5) són hipotètics: depenen de l'execució de cada jugador i de l'estat de la taula; han de sortir constants, si no, el cop no és homogeni.",
+    "Requereix un cop homogeni: la mateixa posició i el mateix atac han de donar sempre el mateix recorregut."
+  ],
+  "examples": [
+    {
+      "text": "Calibratge efecte 4: sortida 10, atac 20, llegada 5 → valor 20 + 5 − 10 = 15",
+      "page": 168,
+      "path": [
+        {
+          "x": 2,
+          "y": 6.0
+        },
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.4
+        },
+        {
+          "x": 3,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "text": "Calibratge efecte 2: sortida 10, atac 20, llegada 0 (cantonada) → valor 10",
+      "page": 169,
+      "path": [
+        {
+          "x": 2,
+          "y": 6.0
+        },
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "text": "Calibratge efecte 1: sortida 5, atac 10, llegada 0 → valor 10 + 0 − 5 = 5",
+      "page": 170,
+      "path": [
+        {
+          "x": 3,
+          "y": 7.0
+        },
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "text": "Efecte 4 (valor 15): sortida 15, llegada 10 → atac 20 (14 o 16 no queden alineades)",
+      "page": 172,
+      "path": [
+        {
+          "x": 1.15,
+          "y": 7.07
+        },
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.56
+        },
+        {
+          "x": 2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.69,
+          "y": 7.69,
+          "c": "yellow"
+        },
+        {
+          "x": 1.88,
+          "y": 7.53,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 1 (valor 5): atac = 5 + 15 − 2 = 18",
+      "page": 173,
+      "path": [
+        {
+          "x": 1.08,
+          "y": 7.8
+        },
+        {
+          "x": 2.2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 6.46
+        },
+        {
+          "x": 3.6,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.29,
+          "y": 7.48,
+          "c": "yellow"
+        },
+        {
+          "x": 3.48,
+          "y": 7.36,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 2 (valor 10): atac = 10 + 18 − 12 = 16",
+      "page": 174,
+      "path": [
+        {
+          "x": 0.52,
+          "y": 7.76
+        },
+        {
+          "x": 2.4,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.72
+        },
+        {
+          "x": 1.6,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.26,
+          "y": 7.7,
+          "c": "yellow"
+        },
+        {
+          "x": 1.43,
+          "y": 7.57,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 1 (valor 5): atac = 5 + 20 − 10 = 15",
+      "page": 175,
+      "path": [
+        {
+          "x": 0.27,
+          "y": 7.43
+        },
+        {
+          "x": 2.5,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.89
+        },
+        {
+          "x": 2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.74,
+          "y": 7.58,
+          "c": "yellow"
+        },
+        {
+          "x": 1.92,
+          "y": 7.51,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 4 (valor 15): atac = 15 + 6 − 4 = 17",
+      "page": 176,
+      "path": [
+        {
+          "x": 2.72,
+          "y": 7.08
+        },
+        {
+          "x": 2.3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.6
+        },
+        {
+          "x": 3.2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.06,
+          "y": 7.6,
+          "c": "yellow"
+        },
+        {
+          "x": 2.89,
+          "y": 7.73,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 4: atac = 15 + 10 − 12 = 13 (el camí inclou el contacte amb la bola 2)",
+      "page": 177,
+      "path": [
+        {
+          "x": 1.66,
+          "y": 6.13
+        },
+        {
+          "x": 2.26,
+          "y": 5.32
+        },
+        {
+          "x": 2.7,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.0
+        },
+        {
+          "x": 1.6,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.4,
+          "y": 5.36,
+          "c": "yellow"
+        },
+        {
+          "x": 1.33,
+          "y": 7.62,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 2: atac = 10 + 10 − 15 = 5",
+      "page": 178,
+      "path": [
+        {
+          "x": 2.04,
+          "y": 2.64
+        },
+        {
+          "x": 3.19,
+          "y": 1.53
+        },
+        {
+          "x": 3.5,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.89
+        },
+        {
+          "x": 1,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.33,
+          "y": 1.58,
+          "c": "yellow"
+        },
+        {
+          "x": 0.18,
+          "y": 7.04,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 4: atac = 15 + 10 − 18 = 7 (quarta banda a la llarga esquerra cap a la bola 3)",
+      "page": 179,
+      "path": [
+        {
+          "x": 2.09,
+          "y": 2.12
+        },
+        {
+          "x": 3.02,
+          "y": 1.51
+        },
+        {
+          "x": 3.3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.8
+        },
+        {
+          "x": 0.4,
+          "y": 8
+        },
+        {
+          "x": 0,
+          "y": 7.68
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.19,
+          "y": 1.54,
+          "c": "yellow"
+        },
+        {
+          "x": 0.28,
+          "y": 7.12,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 1: atac = 5 + 10 − 2 = 13",
+      "page": 180,
+      "path": [
+        {
+          "x": 1.18,
+          "y": 6.13
+        },
+        {
+          "x": 2.28,
+          "y": 4.99
+        },
+        {
+          "x": 2.7,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 6.38
+        },
+        {
+          "x": 3.6,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.43,
+          "y": 4.99,
+          "c": "yellow"
+        },
+        {
+          "x": 3.18,
+          "y": 6.79,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 1: atac = 5 + 13 − 7 = 11 (la llegada 7 s'ha d'intuir)",
+      "page": 181,
+      "path": [
+        {
+          "x": 1.41,
+          "y": 3.52
+        },
+        {
+          "x": 2.34,
+          "y": 3.01
+        },
+        {
+          "x": 2.9,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.12
+        },
+        {
+          "x": 2.6,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.48,
+          "y": 3.04,
+          "c": "yellow"
+        },
+        {
+          "x": 0.18,
+          "y": 4.39,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 2: atac = 10 + 17 − 1 = 26",
+      "page": 182,
+      "path": [
+        {
+          "x": 0.8,
+          "y": 2.52
+        },
+        {
+          "x": 1.18,
+          "y": 1.91
+        },
+        {
+          "x": 1.4,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 7.3
+        },
+        {
+          "x": 3.8,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.36,
+          "y": 1.96,
+          "c": "yellow"
+        },
+        {
+          "x": 3.46,
+          "y": 7.39,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 2: atac = 10 + 10 − 8 = 12",
+      "page": 183,
+      "path": [
+        {
+          "x": 3.1,
+          "y": 6.89
+        },
+        {
+          "x": 2.27,
+          "y": 5.37
+        },
+        {
+          "x": 2.8,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.31
+        },
+        {
+          "x": 2.4,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.09,
+          "y": 5.37,
+          "c": "yellow"
+        },
+        {
+          "x": 1.81,
+          "y": 7.29,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 4: atac = 15 + 18 − 7 = 26",
+      "page": 184,
+      "path": [
+        {
+          "x": 2.21,
+          "y": 5.09
+        },
+        {
+          "x": 1.04,
+          "y": 2.52
+        },
+        {
+          "x": 1.4,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.19
+        },
+        {
+          "x": 2.6,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.89,
+          "y": 2.51,
+          "c": "yellow"
+        },
+        {
+          "x": 2.27,
+          "y": 7.66,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 4: atac = 15 + 20 − 5 = 30",
+      "page": 185,
+      "path": [
+        {
+          "x": 1.24,
+          "y": 3.59
+        },
+        {
+          "x": 0.67,
+          "y": 2.47
+        },
+        {
+          "x": 1.0,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.85
+        },
+        {
+          "x": 3,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.52,
+          "y": 2.49,
+          "c": "yellow"
+        },
+        {
+          "x": 0.18,
+          "y": 4.97,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Repeteix el calibratge fins aconseguir sempre la mateixa trajectòria abans de fiar-te del valor.",
+    "Al principi els càlculs poden ser confusos (bola jugadora o tangent de la bola 2 poc definides); amb l'experiència el tanteig es fa ràpid.",
+    "En bola primer, la sortida es llegeix prolongant la línia que va del punt d'atac, passant a 3 cm de la bola 2, fins a la banda inferior.",
+    "La diferència amb el mètode Verworst és que s'adapta a qualsevol jugador i a qualsevol taula o estat del drap."
+  ],
+  "quotes": [
+    "VALOR DE LA MESA = ATAQUE + LLEGADA - SALIDA",
+    "la línea que une el punto de salida y el de ataque debe pasar justo por el centro de la bola jugadora"
+  ],
+  "uncertain": [
+    "Els camins són aproximats, mesurats sobre els dibuixos; els punts d'atac i llegada són els valors rotulats.",
+    "El llibre no diu on exactament es col·loca la bola per al calibratge més enllà del dibuix (bola sobre la línia de sortida 10, a uns dos diamants de la banda inferior).",
+    "El llibre esmenta que Blomdahl i Sayginer avalen el mètode 'dicho en el propio libro' (el llibre de Tüzül), sense més referència."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida i llegada (banda curta inferior)"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac (banda curta superior)"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Sortida i llegada (banda curta inferior)"
+        },
+        "E": {
+          "label": "Efecte",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "inputs": {
+        "S": [
+          5,
+          7,
+          10,
+          12,
+          13,
+          15,
+          17,
+          18,
+          20
+        ],
+        "L": [
+          0,
+          1,
+          2,
+          4,
+          5,
+          7,
+          8,
+          10,
+          12,
+          15
+        ],
+        "E": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "A": [
+          5,
+          7,
+          10,
+          12,
+          13,
+          15,
+          16,
+          17,
+          18,
+          20,
+          26,
+          30
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "T.val[E] + S - L",
+          "label": "Trobar l'atac"
+        },
+        {
+          "solve": "L",
+          "expr": "T.val[E] + S - A",
+          "label": "On arribarà"
+        },
+        {
+          "solve": "S",
+          "expr": "A + L - T.val[E]",
+          "label": "Quina sortida cal"
+        }
+      ],
+      "tables": {
+        "val": {
+          "1": 5,
+          "2": 10,
+          "3": 12.5,
+          "4": 15
+        }
+      },
+      "valid": "A >= 0 && A <= 40 && L >= 0 && L <= 20 && S >= 0 && S <= 20",
+      "round": 1,
+      "note": "Valor de la mesa del jugador hipotètic del llibre: efecte 1 → 5, 2 → 10, 3 → 12,5, 4 → 15. El traç generat no es dibuixa: la segona banda no té numeració i una línia directa atac–llegada seria falsa."
+    },
+    "quiz": [
+      {
+        "q": "Calibratge amb efecte 4: sortida 10, atac 20, llegada 5. Quin és el valor de la mesa?",
+        "options": [
+          "10",
+          "25",
+          "15",
+          "5"
+        ],
+        "answer": 2,
+        "explain": "Valor = Atac + Llegada − Sortida = 20 + 5 − 10 = 15.",
+        "page": 169,
+        "path": [
+          {
+            "x": 2,
+            "y": 6.0
+          },
+          {
+            "x": 2,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 5.4
+          },
+          {
+            "x": 3,
+            "y": 8
+          }
+        ]
+      },
+      {
+        "q": "Efecte 4 (valor 15), bola a la zona de sortida 15, llegada 10. Quin atac és el correcte?",
+        "options": [
+          "19",
+          "21",
+          "25",
+          "20"
+        ],
+        "answer": 3,
+        "explain": "15 + 15 − 10 = 20; amb sortides 14 o 16 (atac 19 o 21) la línia no passa pel centre de la bola.",
+        "page": 171,
+        "path": [
+          {
+            "x": 1.15,
+            "y": 7.07
+          },
+          {
+            "x": 2,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3.56
+          },
+          {
+            "x": 2,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.69,
+            "y": 7.69,
+            "c": "yellow"
+          },
+          {
+            "x": 1.88,
+            "y": 7.53,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Com saps que la sortida que has suposat és bona?",
+        "options": [
+          "L'atac surt un nombre rodó",
+          "La línia sortida–atac passa pel centre de la bola jugadora (o a 3 cm de la bola 2)",
+          "L'atac cau en un diamant",
+          "La llegada és més petita que la sortida"
+        ],
+        "answer": 1,
+        "explain": "És la condició essencial del mètode; si no es compleix, cal tantejar una altra sortida.",
+        "page": 171
+      },
+      {
+        "q": "Vols que la bola surti més vertical de la tercera banda. Quin efecte recomana el llibre?",
+        "options": [
+          "Sense efecte",
+          "Efecte 3",
+          "Efecte 1",
+          "Efecte 4"
+        ],
+        "answer": 2,
+        "explain": "Efecte 4 o 3 obre l'angle a tercera banda; efecte 1 dona una sortida més vertical; el 2 és el terme mitjà.",
+        "page": 171
+      },
+      {
+        "q": "Efecte 2 (valor 10), sortida 18, llegada 12. On ataques?",
+        "options": [
+          "8",
+          "16",
+          "20",
+          "22"
+        ],
+        "answer": 1,
+        "explain": "10 + 18 − 12 = 16.",
+        "page": 174,
+        "path": [
+          {
+            "x": 0.52,
+            "y": 7.76
+          },
+          {
+            "x": 2.4,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.72
+          },
+          {
+            "x": 1.6,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.26,
+            "y": 7.7,
+            "c": "yellow"
+          },
+          {
+            "x": 1.43,
+            "y": 7.57,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Si ataques primer la bola 2, des d'on es traça la línia d'atac?",
+        "options": [
+          "Des del centre de la bola 2",
+          "Des de la bola 3",
+          "A uns 3 cm de la bola 2, més o menys el radi",
+          "Des del centre de la bola jugadora"
+        ],
+        "answer": 2,
+        "explain": "Precisió c) del llibre: les línies es determinen a partir de la bola 2 i a uns 3 cm d'aquesta.",
+        "page": 166
+      },
+      {
+        "q": "Quin cop demana el llibre per al bricole?",
+        "options": [
+          "Molt suau, a arribar",
+          "Retrocés",
+          "Molt fort i sec",
+          "Ràpid sense exagerar i penetrat"
+        ],
+        "answer": 3,
+        "explain": "Precisió b): cop ràpid (sense exagerar) i penetrat, perquè la suela estigui en contacte amb la bola el temps necessari.",
+        "page": 166
+      }
+    ]
+  }
+}

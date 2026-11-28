@@ -1,0 +1,934 @@
+{
+  "id": "pase-bola-klk",
+  "name": "Pase de bola per efectes K-L-K (Duarte)",
+  "group": "Pase bola",
+  "attributed_to": "Ricardo Duarte (capítols signats per ell, no per José Lazo)",
+  "pages": [
+    345,
+    356
+  ],
+  "purpose": "Carambola tocant primer la bola 2 a prop de la banda curta i fent curta-llarga-curta (i variants K-L-K-L, K-K-L, K-L-K-L-L), calculant l'efecte amb sortida, atac i arribada.",
+  "shot": {
+    "first_cushion": "bola",
+    "cushions": "K-L-K (variants K-L-K-L, K-K-L, K-L-K-L-L)",
+    "effect": "suma algebraica de les tres posicions",
+    "stroke": "cop de corrida, velocitat calculada per quedar còmode",
+    "ball": "una mica menys de bola quan cal anar a la 4a banda"
+  },
+  "formula": "Efecte = Sortida (bola 1) + Atac (bola 2) + Llegada (bola 3)",
+  "steps": [
+    "Posició mare: bola 2 a la curta de dalt al 1r diamant des del racó (3, 0); línia bola 2 → bola 1 tallant la llarga de sortida al 5è diamant (0, 5). Amb tot a 0 la bola 1 arriba al racó (4, 8).",
+    "Sortida: allarga la línia bola 2 → bola 1 fins a la llarga esquerra: 0 al 5è diamant, −1 per diamant cap amunt, +1 per diamant cap avall.",
+    "Atac: posició de la bola 2 a la curta: +1 per cada mig diamant cap al centre (+4 al diamant 1), −1 a mig diamant cap al racó. Resta 1 per cada 2 diamants que estigui separada de la curta.",
+    "Llegada: punt de la curta de baix on vols arribar (3a banda): 0 al racó, +1 per diamant fins a +4 a l'altre racó.",
+    "Suma les tres xifres amb el seu signe: és l'efecte a donar."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida (bola 1)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": -4
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": -3
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": -2
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": -1
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 1
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 2
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 3
+        }
+      ],
+      "note": "Orientació del Graf. 0. Els gràfics 2, 3 i 4 estan dibuixats en mirall (sortida a la llarga dreta) i s'han passat a aquesta orientació."
+    },
+    {
+      "name": "Atac (bola 2)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": -1
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 2.5,
+          "y": 0,
+          "v": 1
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 2
+        },
+        {
+          "x": 1.5,
+          "y": 0,
+          "v": 3
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 4
+        }
+      ],
+      "note": "Mig diamant per unitat a la meitat de la curta. Bola 2 separada de la curta: −1 cada 2 diamants (−0,5 per diamant)."
+    },
+    {
+      "name": "Llegada (3a banda curta)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 4,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 3
+        },
+        {
+          "x": 0.5,
+          "y": 8,
+          "v": 3.5
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 4
+        }
+      ],
+      "note": "Un diamant per unitat."
+    },
+    {
+      "name": "Llegada K-K-L (3a banda llarga)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 4,
+          "y": 6,
+          "v": -0.5
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": -1
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": -2
+        }
+      ],
+      "note": "Només al Graf. 7 (K-K-L); el 0 no està marcat."
+    }
+  ],
+  "corrections": [
+    "Sortida per sota del 0: l'angle resta avanç, cal sumar efecte; per sobre, l'angle suma avanç i cal restar efecte.",
+    "Bola 2 separada de la curta: −1 per cada 2 diamants (−0,5 per 1 diamant). Si no es resta, la bola obre un diamant a l'arribada.",
+    "Mig efecte de més (+½): afluixa una mica el taco perquè la bola obri; mig efecte de menys (−½): estreny una mica el taco o pega una mica més fort.",
+    "Per anar a 4a banda pren una mica menys de bola, perquè després de la 3a banda encara giri.",
+    "La projecció a 4a banda canvia en acabar-se la rotació de l'efecte (Graf. 1)."
+  ],
+  "examples": [
+    {
+      "text": "Posició mare: sortida 0, atac 0, llegada 0 → sense efecte, arriba al racó (Graf. 0).",
+      "page": 346,
+      "path": [
+        {
+          "x": 0.87,
+          "y": 3.57
+        },
+        {
+          "x": 3,
+          "y": 0.15
+        },
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 3,
+          "y": 0.15,
+          "c": "yellow"
+        },
+        {
+          "x": 3.37,
+          "y": 7.13,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola 1 −1, bola 2 −1 (separada 2 diamants), bola 3 +2 → efecte 0 (Graf. 2).",
+      "page": 349,
+      "path": [
+        {
+          "x": 0.75,
+          "y": 3.5
+        },
+        {
+          "x": 3.11,
+          "y": 2.05
+        },
+        {
+          "x": 3.15,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.6
+        },
+        {
+          "x": 2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.11,
+          "y": 2.05,
+          "c": "yellow"
+        },
+        {
+          "x": 1.73,
+          "y": 7.47,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola 1 −2,5, bola 2 +2 −1 = +1, bola 3 +2 → efecte +0,5 (Graf. 3). Si la bola 3 fos la groga, es juga passada per tornar a trobar la bola 2.",
+      "page": 350,
+      "path": [
+        {
+          "x": 0.76,
+          "y": 2.24
+        },
+        {
+          "x": 2.14,
+          "y": 1.9
+        },
+        {
+          "x": 2.34,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.9
+        },
+        {
+          "x": 2.06,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.14,
+          "y": 1.9,
+          "c": "yellow"
+        },
+        {
+          "x": 1.54,
+          "y": 7.26,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "K-L-K-L: bola 1 −2, bola 2 +2 −0,5 = +1,5, bola 3 +3 → efecte +2,5; menys bola per mantenir la rotació (Graf. 4).",
+      "page": 351,
+      "path": [
+        {
+          "x": 0.26,
+          "y": 2.66
+        },
+        {
+          "x": 2.1,
+          "y": 1.0
+        },
+        {
+          "x": 2.06,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.96
+        },
+        {
+          "x": 1,
+          "y": 8
+        },
+        {
+          "x": 0,
+          "y": 7.0
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.1,
+          "y": 1.0,
+          "c": "yellow"
+        },
+        {
+          "x": 0.18,
+          "y": 7.0,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola 1 −4, bola 2 +4, bola 3 0 → sense efecte, cop calculat per deixar preparació (Graf. 5).",
+      "page": 352,
+      "path": [
+        {
+          "x": 0.26,
+          "y": 0.68
+        },
+        {
+          "x": 1.05,
+          "y": 0.16
+        },
+        {
+          "x": 1.05,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 7.6
+        },
+        {
+          "x": 3.85,
+          "y": 8
+        }
+      ],
+      "path_built": true,
+      "balls": [
+        {
+          "x": 1.05,
+          "y": 0.16,
+          "c": "yellow"
+        },
+        {
+          "x": 3.4,
+          "y": 7.1,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola 1 −2, bola 2 0, bola 3 0 → efecte −2 (Graf. 6).",
+      "page": 353,
+      "path": [
+        {
+          "x": 0.66,
+          "y": 2.18
+        },
+        {
+          "x": 3.02,
+          "y": 0.16
+        },
+        {
+          "x": 3.02,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 7.4
+        },
+        {
+          "x": 3.8,
+          "y": 8
+        }
+      ],
+      "path_built": true,
+      "balls": [
+        {
+          "x": 3.02,
+          "y": 0.16,
+          "c": "yellow"
+        },
+        {
+          "x": 3.36,
+          "y": 7.12,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "K-K-L: −2 (sortida), +2 (atac), −0,5 (llegada a la llarga) → efecte −0,5 (Graf. 7).",
+      "page": 354,
+      "path": [
+        {
+          "x": 0.7,
+          "y": 2
+        },
+        {
+          "x": 2.09,
+          "y": 0.24
+        },
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 3.65,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 6
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.09,
+          "y": 0.24,
+          "c": "yellow"
+        },
+        {
+          "x": 3.86,
+          "y": 6.1,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "K-L-K-L: bola 1 −2, bola 2 +1 −1 = 0, bola 3 +2 → efecte 0; una mica menys de bola (Graf. 8).",
+      "page": 355,
+      "path": [
+        {
+          "x": 0.85,
+          "y": 2.59
+        },
+        {
+          "x": 2.48,
+          "y": 2.0
+        },
+        {
+          "x": 2.76,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 8
+        },
+        {
+          "x": 0,
+          "y": 6
+        },
+        {
+          "x": 3.65,
+          "y": 0.26
+        }
+      ],
+      "path_built": true,
+      "balls": [
+        {
+          "x": 2.48,
+          "y": 2.0,
+          "c": "yellow"
+        },
+        {
+          "x": 3.65,
+          "y": 0.26,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "K-L-K-L-L: bola 1 −2,5, bola 2 +2 −1 = +1, bola 3 +3,5 → efecte +2, amb dues posicions possibles de la bola 3 (Graf. 8 bis).",
+      "page": 356,
+      "path": [
+        {
+          "x": 0.96,
+          "y": 2.2
+        },
+        {
+          "x": 2.09,
+          "y": 1.9
+        },
+        {
+          "x": 2.29,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.38
+        },
+        {
+          "x": 0.5,
+          "y": 8
+        },
+        {
+          "x": 0,
+          "y": 7.6
+        }
+      ],
+      "path_built": true,
+      "balls": [
+        {
+          "x": 2.09,
+          "y": 1.9,
+          "c": "yellow"
+        },
+        {
+          "x": 0.36,
+          "y": 7.1,
+          "c": "red"
+        },
+        {
+          "x": 3.78,
+          "y": 1.45,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Concentra't en la velocitat de la bola 1 i de la bola 2 per deixar una bona posició següent.",
+    "Repassa els detalls del capítol L-K-L (estribo, taco horitzontal, balanceig, cop) i els exercicis de registre d'efectes.",
+    "Si diuen que el sistema falla, sol ser per no haver-lo entrenat ni estudiat prou."
+  ],
+  "quotes": [
+    "cada dos diamantes que se separe de la banda corta, es un efecto menos (-1)",
+    "por debajo del punto cero (0) el ángulo resta avance por ende se debe sumar efecto."
+  ],
+  "uncertain": [
+    "El text diu que a la sortida i a la llegada cada efecte val 1 diamant «en pase de bola larga corta larga LKL», però és dins el capítol K-L-K; probablement vol dir K-L-K.",
+    "Títol del capítol: posa «LARGA, CORTA, LARGA (K-L-K)», però el contingut és corta-llarga-corta.",
+    "Graf. 7 (K-K-L): el resum assigna +2 a la bola 1 i −2 a la bola 2, però pel dibuix la sortida és −2 i l'atac +2 (el total no canvia).",
+    "Al Graf. 4 el recorregut s'ha traçat només fins a la 3a banda; la 4a banda no és clara al dibuix.",
+    "Gràfics 5, 6, 8 i 8 bis: recorreguts construïts a partir dels valors i del dibuix aproximat (línies massa juntes o amb dues opcions)."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida (bola 1)"
+        },
+        "A": {
+          "label": "Atac (posició bola 2 a la curta)",
+          "numbering": "Atac (bola 2)"
+        },
+        "D": {
+          "label": "Separació bola 2 de la curta (diamants)",
+          "values": [
+            0,
+            1,
+            2,
+            4
+          ]
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada (3a banda curta)"
+        },
+        "E": {
+          "label": "Efecte",
+          "values": [
+            -4,
+            -3,
+            -2,
+            -1,
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "inputs": {
+        "S": [
+          -4,
+          -3,
+          -2.5,
+          -2,
+          -1,
+          0,
+          1,
+          2,
+          3
+        ],
+        "A": [
+          -1,
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "D": [
+          0,
+          0,
+          1,
+          2,
+          4
+        ],
+        "L": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "E": [
+          -4,
+          -3,
+          -2,
+          -1,
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "relations": [
+        {
+          "solve": "E",
+          "expr": "S + A - D/2 + L",
+          "label": "Quin efecte?"
+        },
+        {
+          "solve": "L",
+          "expr": "E - S - A + D/2",
+          "label": "On arriba amb aquest efecte?"
+        },
+        {
+          "solve": "S",
+          "expr": "E - A + D/2 - L",
+          "label": "Quina sortida cal?"
+        }
+      ],
+      "valid": "E >= -4 && E <= 4 && L >= 0 && L <= 4 && S >= -4 && S <= 3",
+      "round": 1,
+      "note": "Separació de la bola 2: −1 cada 2 diamants. Comprovat: Graf. 2 (−1 + 0 − 1 + 2 = 0), Graf. 3 (−2,5 + 2 − 1 + 2 = +0,5), Graf. 5 (−4 + 4 + 0 = 0), Graf. 6 (−2 + 0 + 0 = −2). Sense camí: la sortida és un punt de la línia, no un contacte."
+    },
+    "quiz": [
+      {
+        "q": "Posició mare K-L-K: on és la bola 2 i on talla la sortida?",
+        "options": [
+          "Bola 2 al 1r diamant de la curta; sortida al 5è diamant de la llarga",
+          "Bola 2 al centre de la curta; sortida al 4t diamant",
+          "Bola 2 al racó; sortida al 2n diamant",
+          "Bola 2 al 2n diamant de la llarga; sortida a la curta"
+        ],
+        "answer": 0,
+        "explain": "Graf. 0: bola blanca al 5è diamant des de dalt a la banda de sortida, groga al 1r diamant de la curta.",
+        "page": 346,
+        "path": [
+          {
+            "x": 0.87,
+            "y": 3.57
+          },
+          {
+            "x": 3,
+            "y": 0.15
+          },
+          {
+            "x": 3,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 3,
+            "y": 0.15,
+            "c": "yellow"
+          },
+          {
+            "x": 3.37,
+            "y": 7.13,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quant resta la bola 2 si està separada 2 diamants de la banda curta?",
+        "options": [
+          "−1",
+          "−2",
+          "−0,5",
+          "Res"
+        ],
+        "answer": 0,
+        "explain": "«cada dos diamantes que se separe de la banda corta, es un efecto menos (-1)».",
+        "page": 349,
+        "path": [
+          {
+            "x": 0.75,
+            "y": 3.5
+          },
+          {
+            "x": 3.11,
+            "y": 2.05
+          },
+          {
+            "x": 3.15,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.6
+          },
+          {
+            "x": 2,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.11,
+            "y": 2.05,
+            "c": "yellow"
+          },
+          {
+            "x": 1.73,
+            "y": 7.47,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Graf. 3: sortida −2,5, bola 2 al +2 separada 2 diamants, llegada +2. Efecte?",
+        "options": [
+          "+0,5",
+          "+1,5",
+          "−0,5",
+          "+2"
+        ],
+        "answer": 0,
+        "explain": "−2,5 + (2 − 1) + 2 = +0,5.",
+        "page": 350,
+        "path": [
+          {
+            "x": 0.76,
+            "y": 2.24
+          },
+          {
+            "x": 2.14,
+            "y": 1.9
+          },
+          {
+            "x": 2.34,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3.9
+          },
+          {
+            "x": 2.06,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.14,
+            "y": 1.9,
+            "c": "yellow"
+          },
+          {
+            "x": 1.54,
+            "y": 7.26,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida per sota del punt 0 de la llarga: què passa?",
+        "options": [
+          "L'angle resta avanç: cal sumar efecte",
+          "L'angle suma avanç: cal restar efecte",
+          "No canvia res",
+          "Cal jugar sense efecte"
+        ],
+        "answer": 0,
+        "explain": "«por debajo del punto cero (0) el ángulo resta avance por ende se debe sumar efecto».",
+        "page": 346
+      },
+      {
+        "q": "Quan busques la 4a banda (K-L-K-L), què fas amb la quantitat de bola?",
+        "options": [
+          "Prendre una mica menys de bola",
+          "Prendre més bola",
+          "Bola plena",
+          "No importa"
+        ],
+        "answer": 0,
+        "explain": "Menys bola perquè després de la 3a banda encara giri; si no, surt sense angle (Graf. 4).",
+        "page": 351,
+        "path": [
+          {
+            "x": 0.26,
+            "y": 2.66
+          },
+          {
+            "x": 2.1,
+            "y": 1.0
+          },
+          {
+            "x": 2.06,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.96
+          },
+          {
+            "x": 1,
+            "y": 8
+          },
+          {
+            "x": 0,
+            "y": 7.0
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.1,
+            "y": 1.0,
+            "c": "yellow"
+          },
+          {
+            "x": 0.18,
+            "y": 7.0,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Com dones mig efecte de més (+½) si et costa?",
+        "options": [
+          "Afluixant una mica el taco perquè la bola es relaxi",
+          "Estrenyent el taco",
+          "Pegant més fort",
+          "Jugant més baix"
+        ],
+        "answer": 0,
+        "explain": "«soltar levemente el taco»; per a −½, estrènyer-lo o pegar una mica més.",
+        "page": 350
+      },
+      {
+        "q": "Graf. 5: sortida −4, bola 2 al +4 (enganxada), llegada 0. Quin efecte?",
+        "options": [
+          "Sense efecte (0)",
+          "+4",
+          "−4",
+          "+8"
+        ],
+        "answer": 0,
+        "explain": "−4 + 4 + 0 = 0: «es sin efecto», cop calculat per deixar preparació.",
+        "page": 352,
+        "path": [
+          {
+            "x": 0.26,
+            "y": 0.68
+          },
+          {
+            "x": 1.05,
+            "y": 0.16
+          },
+          {
+            "x": 1.05,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 7.6
+          },
+          {
+            "x": 3.85,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.05,
+            "y": 0.16,
+            "c": "yellow"
+          },
+          {
+            "x": 3.4,
+            "y": 7.1,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "A la llegada (3a banda curta), quant val cada unitat?",
+        "options": [
+          "Un diamant",
+          "Mig diamant",
+          "Dos diamants",
+          "Un quart de diamant"
+        ],
+        "answer": 0,
+        "explain": "Sortida i llegada: 1 diamant per efecte; només a l'atac (meitat de la curta) és mig diamant.",
+        "page": 346
+      }
+    ]
+  }
+}

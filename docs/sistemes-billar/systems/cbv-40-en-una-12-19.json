@@ -1,0 +1,1185 @@
+{
+ "id": "cbv-40-en-una-12-19",
+ "name": "Les 40 en una: posicions 12–19",
+ "group": "Les 40 en una",
+ "attributed_to": "PDF de Julio A",
+ "pages": null,
+ "source": "PDF «CUARENTA EN UNA 12-19», Club Billar València, pàg. 1–5",
+ "sort": 482,
+ "purpose": "Posicions 12 a 19 de la sèrie de quaranta caramboles seguides, comentades: mans canviades, quatre bandes, atac vertical des de cabanya, cabanya central amb el mètode invers, atac a la meitat amb efecte 0, teoria de diamants i bricol.",
+ "shot": {
+  "first_cushion": "bola",
+  "cushions": "bola 2 - L - C - L (o L - L - C - L a la 13); abans banda a la 19",
+  "effect": "de 0 (12, 16) a favorable 3-4 (15); molt desenvolupament d'efecte (13, 14)",
+  "stroke": "velocitat justa (12); allargat (13, 14, 17); esmorteït i envoltant (14); allargat i ràpid (17)",
+  "ball": "presa natural (15); molta bola (14); poca bola al doblet alternatiu de la 12"
+ },
+ "formula": null,
+ "steps": [
+  "Mira el dibuix: bola 1 blanca, recorregut de la 1 en blanc, de la 2 en el seu color; les boles grises són on van quedar.",
+  "Decideix el tipus de solució que proposa el text (bola 2, abans banda, sistema) i on vol portar la 2 per a la preparació.",
+  "Tria l'efecte, la presa i el cop que indica el text per a aquella posició.",
+  "Repeteix-la fins que la carambola i la preparació surtin juntes."
+ ],
+ "numberings": [],
+ "corrections": [
+  "Atac vertical des de cabanya (pos. 14): atac + llegada ≈ 18, 19 o 20 segons l'estat del material; amb 18, sortida 7 → llegada 11.",
+  "Mètode invers (pos. 15): es fixa l'atac segur i es corregeix l'efecte: 1 efecte per cada mig rombo que la llegada real s'aparta de la calculada (llegada 15 → 0: efecte 4 − 3 = 1).",
+  "Atac a la meitat (pos. 16): des de qualsevol sortida de llarga, atac = sortida / 2 a la llarga contrària amb efecte 0 → racó (sortida 70 → atac 35).",
+  "Doblet alternatiu (pos. 12): l'efecte esquerre no serveix, és favorable a la primera banda i desfavorable a la segona."
+ ],
+ "examples": [
+  {
+   "text": "Posició 12 (mans canviades, jugada defensiva): bola 2 groga, tres bandes enganxades a la curta de dalt (llarga esquerra - curta - llarga dreta) fins a la vermella. Efecte zero o un punt d'efecte marcat per compensar el petit desefecte en tocar la 2; velocitat justa per arribar. Objectiu: la groga al racó de baix a l'esquerra (es va prendre menys bola i només va arribar al rombo 3 de la llarga).",
+   "page": 1,
+   "path": [
+    {
+     "x": 1.38,
+     "y": 0.6
+    },
+    {
+     "x": 0.85,
+     "y": 0.22
+    },
+    {
+     "x": 0,
+     "y": 0.21
+    },
+    {
+     "x": 3.3,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.1
+    },
+    {
+     "x": 2.27,
+     "y": 0.45
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.78,
+     "y": 0.15,
+     "c": "yellow"
+    },
+    {
+     "x": 2.2,
+     "y": 0.47,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 13: bola 2 vermella i quatre bandes (llarga esquerra, llarga dreta, curta de baix, llarga esquerra) buscant el racó de baix a la dreta i, en quarta banda, el rombo 3 de la llarga esquerra. La sortida real és intermèdia entre les referències; per una mica de quadratge no va entrar just al racó i va arribar al 2,5. Cop allargat i bon desenvolupament d'efecte, sobretot a partir de la segona banda, on és a favor.",
+   "page": 2,
+   "path": [
+    {
+     "x": 2.37,
+     "y": 0.45
+    },
+    {
+     "x": 1.75,
+     "y": 0.53
+    },
+    {
+     "x": 0,
+     "y": 2.35
+    },
+    {
+     "x": 4,
+     "y": 7.4
+    },
+    {
+     "x": 3.65,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.62
+    },
+    {
+     "x": 0.23,
+     "y": 5.33
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.63,
+     "y": 0.47,
+     "c": "red"
+    },
+    {
+     "x": 0.23,
+     "y": 5.33,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 14 (sistema que l'autor va veure al llibre de Villora-Serralta): atac vertical cap a la llarga des de la zona de cabanya. Atac + llegada ≈ 18, 19 o 20 segons el material; aquí 18: sortida 7 → llegada 11. Cop allargat, envoltant, molta bola i molt desenvolupament d'efecte, amb velocitat esmorteïda perquè la 1 arribi amb la màxima rotació.",
+   "page": 2,
+   "path": [
+    {
+     "x": 0.1,
+     "y": 4.85
+    },
+    {
+     "x": 2.33,
+     "y": 7.3
+    },
+    {
+     "x": 4,
+     "y": 7.3
+    },
+    {
+     "x": 2.9,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 6.9
+    },
+    {
+     "x": 1.0,
+     "y": 5.28
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.35,
+     "y": 7.4,
+     "c": "red"
+    },
+    {
+     "x": 1.0,
+     "y": 5.28,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 15 (cabanya central, mètode invers): primer es tria l'atac segur, amb la bola 1 encarada a la 2, presa natural i efecte favorable 3 o 4; després es fan els comptes. Sortida 45, atac 30 → llegada 15 amb efecte 4. La groga és pràcticament a la llegada 0: s'ataca igual al 30 però restant 3 efectes (1 per cada mig rombo de llegada).",
+   "page": 3,
+   "path": [
+    {
+     "x": 0.9,
+     "y": 3.65
+    },
+    {
+     "x": 3.05,
+     "y": 3.8
+    },
+    {
+     "x": 4,
+     "y": 4.65
+    },
+    {
+     "x": 0.62,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 7.62
+    },
+    {
+     "x": 1.8,
+     "y": 5.18
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.12,
+     "y": 3.73,
+     "c": "red"
+    },
+    {
+     "x": 1.8,
+     "y": 5.18,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 16 (sistema geomètric, angle d'incidència = angle de reflexió): des de qualsevol sortida de llarga, atacant a la meitat a la llarga contrària amb efecte 0 s'arriba sempre al racó. Aquí sortida 70 → atac 35, que és fàcil d'agafar. No arribar a la 3 amb velocitat justa (la vermella taparia la 1) i portar la groga al racó de baix a l'esquerra.",
+   "page": 4,
+   "path": [
+    {
+     "x": 1.63,
+     "y": 4.42
+    },
+    {
+     "x": 2.88,
+     "y": 4.46
+    },
+    {
+     "x": 4,
+     "y": 3.4
+    },
+    {
+     "x": 0.35,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.32
+    },
+    {
+     "x": 0.22,
+     "y": 0.65
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.92,
+     "y": 4.47,
+     "c": "yellow"
+    },
+    {
+     "x": 0.22,
+     "y": 0.65,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 17: teoria «coneguda per tothom» (al dibuix, referència 0 al racó de baix a l'esquerra i 40 a la llarga dreta). Bola 2 groga, la 1 entra pel racó de baix i fa la volta per la llarga dreta, la curta de dalt i la llarga esquerra. Cop ben allargat i ràpid perquè la 1 no es quadri i mantingui els efectes. Compte amb el retruc de la 1 amb la 2.",
+   "page": 4,
+   "path": [
+    {
+     "x": 1.22,
+     "y": 0.48
+    },
+    {
+     "x": 0.7,
+     "y": 6.75
+    },
+    {
+     "x": 0,
+     "y": 7.7
+    },
+    {
+     "x": 0.15,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 4.05
+    },
+    {
+     "x": 1.35,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 1.2
+    },
+    {
+     "x": 0.4,
+     "y": 1.78
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.75,
+     "y": 6.85,
+     "c": "yellow"
+    },
+    {
+     "x": 0.43,
+     "y": 1.87,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 18: la groga és al creuament de les dues llegades 20, tant jugant la vermella per la dreta com per l'esquerra. Es juga per l'esquerra de la vermella perquè el cop és natural; per la dreta caldria augmentar una mica l'atac (la 1 és obliqua respecte a la paral·lela a la llarga). Totes dues són delicades: no hi ha bandes de suport per a una solució a 5 bandes.",
+   "page": 5,
+   "path": [
+    {
+     "x": 0.33,
+     "y": 1.75
+    },
+    {
+     "x": 0.8,
+     "y": 3.38
+    },
+    {
+     "x": 4,
+     "y": 6.0
+    },
+    {
+     "x": 2.25,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 6.0
+    },
+    {
+     "x": 2.02,
+     "y": 2.95
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.73,
+     "y": 3.48,
+     "c": "red"
+    },
+    {
+     "x": 2.02,
+     "y": 2.95,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 19 (abans banda o bricol): la 1 fa tres bandes abans de tocar la vermella i, pel suport que té, també es pot fer a quatre bandes (com va passar: curta de dalt i groga). No cal tocar la vermella amb gaire finor. Rètols del dibuix: 40,5 (sortida), 12,5 (atac a la llarga esquerra) i 28 (llegada a la llarga dreta).",
+   "page": 5,
+   "path": [
+    {
+     "x": 3.03,
+     "y": 2.97
+    },
+    {
+     "x": 0,
+     "y": 6.35
+    },
+    {
+     "x": 0.85,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 5.15
+    },
+    {
+     "x": 1.85,
+     "y": 1.72
+    },
+    {
+     "x": 1.85,
+     "y": 0
+    },
+    {
+     "x": 1.66,
+     "y": 0.4
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.77,
+     "y": 1.8,
+     "c": "red"
+    },
+    {
+     "x": 1.63,
+     "y": 0.48,
+     "c": "yellow"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Amb mans canviades, el gran enemic és l'ansietat: pren-t'ho amb paciència, mira bé la jugada, lima el temps que calgui i colpeja decidit.",
+  "Una visualització fàcil no vol dir una execució fàcil (pos. 15): fins i tot els grans jugadors la fallen.",
+  "No arribis a la 3 amb velocitat exactament justa si això fa que la 2 tapi la 1 per a la següent (pos. 16).",
+  "Vigila el retruc de la 1 amb la 2 per excés de confiança (pos. 17).",
+  "El bricol no és recomanable en general, i encara menys en recorreguts llargs, però a vegades és la millor opció (pos. 19).",
+  "Prepara: a la 15, vermella al racó de dalt a l'esquerra (o més bola i menys efecte cap al de la dreta), mai al centre de la curta."
+ ],
+ "quotes": [
+  "No hay que confundir una visualización fácil con una ejecución fácil.",
+  "YA TENEMOS EL PUNTO DE ATAQUE ASEGURADO."
+ ],
+ "uncertain": [
+  "El PDF no diu qui n'és l'autor; «Julio A» és només a les metadades (pujador).",
+  "Coordenades llegides sobre una quadrícula ajustada al morro de les bandes (±0,1 diamants); el punt de contacte amb la bola 2 és aproximat. Les taules del PDF ja són en vertical; no s'ha girat res.",
+  "Les icones de presa d'efecte (cercle amb punt) no s'han interpretat: les preguntes i els textos només fan servir el que diu el text.",
+  "Pos. 12: el recorregut de la 1 frega la curta de dalt prop del rombo 3,3; al dibuix sembla un toc a la curta entre les dues llargues.",
+  "Pos. 14: el text remet a un «esquema de abajo» amb més exemples que no és al PDF; els rètols «1» i «7» del dibuix es llegeixen com a llegada 11 i sortida 7.",
+  "Pos. 17: els rètols 0 i 40 de la línia discontínua no s'expliquen al text («la teoría aquí aplicada… es conocida por todos»).",
+  "Pos. 18: rètols 3, 2 i 1 a les bandes (sortida 30?, llegada 20, atac 10?); el text només parla de les llegades 20.",
+  "Pos. 19: rètols 40,5, 12,5 i 2(8) llegits del dibuix i del text extret; el text no els explica."
+ ],
+ "trainer": {
+  "quiz": [
+   {
+    "q": "Posició 12: quin efecte demana el text?",
+    "options": [
+     "Retrocés amb efecte esquerre",
+     "Efecte zero o un punt d'efecte marcat",
+     "Efecte màxim contrari",
+     "Efecte 4 favorable"
+    ],
+    "answer": 1,
+    "explain": "«La jugada requiere efecto cero o un poco de efecto marcado para compensar el desefecto pequeño que sufre la bola 1 al golpear a la bola 2.»",
+    "page": 1,
+    "path": [
+     {
+      "x": 1.38,
+      "y": 0.6
+     },
+     {
+      "x": 0.85,
+      "y": 0.22
+     },
+     {
+      "x": 0,
+      "y": 0.21
+     },
+     {
+      "x": 3.3,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.1
+     },
+     {
+      "x": 2.27,
+      "y": 0.45
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.78,
+      "y": 0.15,
+      "c": "yellow"
+     },
+     {
+      "x": 2.2,
+      "y": 0.47,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 12: quina velocitat i quin enemic principal té aquesta jugada amb mans canviades?",
+    "options": [
+     "Molta força; la por al retruc",
+     "Cop sec i curt; el tac desviat",
+     "Velocitat lenta; la corba",
+     "Velocitat justa per arribar; l'ansietat que fa tirar massa ràpid"
+    ],
+    "answer": 3,
+    "explain": "Cal velocitat justa per arribar; amb mans canviades l'ansietat fa tirar massa de pressa.",
+    "page": 1,
+    "path": [
+     {
+      "x": 1.38,
+      "y": 0.6
+     },
+     {
+      "x": 0.85,
+      "y": 0.22
+     },
+     {
+      "x": 0,
+      "y": 0.21
+     },
+     {
+      "x": 3.3,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.1
+     },
+     {
+      "x": 2.27,
+      "y": 0.45
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.78,
+      "y": 0.15,
+      "c": "yellow"
+     },
+     {
+      "x": 2.2,
+      "y": 0.47,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 12: si s'opta pel doblet sobre la vermella, com cal fer-lo?",
+    "options": [
+     "Efecte esquerre per tenir-lo a favor a les dues bandes",
+     "Molt poca bola, com a màxim un efecte marcat i aixecant el tac per darrere",
+     "Molta bola i efecte esquerre",
+     "Bola plena i cop baix"
+    ],
+    "answer": 1,
+    "explain": "«Tomando muy poca bola y como mucho un efecto marcado y levantar el taco por detrás para desarrollar una pequeña curva.»",
+    "page": 1,
+    "path": [
+     {
+      "x": 1.38,
+      "y": 0.6
+     },
+     {
+      "x": 0.85,
+      "y": 0.22
+     },
+     {
+      "x": 0,
+      "y": 0.21
+     },
+     {
+      "x": 3.3,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.1
+     },
+     {
+      "x": 2.27,
+      "y": 0.45
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.78,
+      "y": 0.15,
+      "c": "yellow"
+     },
+     {
+      "x": 2.2,
+      "y": 0.47,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 13: com és el cop?",
+    "options": [
+     "Curt i sec, sense efecte",
+     "Retrocés amb màxim efecte",
+     "Massé",
+     "Allargat i amb bon desenvolupament d'efecte, important a partir de la segona banda"
+    ],
+    "answer": 3,
+    "explain": "«Es una jugada de golpe alargado y buen desarrollo de efecto que adquiere especial importancia a partir de la segunda banda donde es a favor.»",
+    "page": 2,
+    "path": [
+     {
+      "x": 2.37,
+      "y": 0.45
+     },
+     {
+      "x": 1.75,
+      "y": 0.53
+     },
+     {
+      "x": 0,
+      "y": 2.35
+     },
+     {
+      "x": 4,
+      "y": 7.4
+     },
+     {
+      "x": 3.65,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.62
+     },
+     {
+      "x": 0.23,
+      "y": 5.33
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.63,
+      "y": 0.47,
+      "c": "red"
+     },
+     {
+      "x": 0.23,
+      "y": 5.33,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 13: per què la 1 va arribar al 2,5 en lloc del rombo 3?",
+    "options": [
+     "Va tocar primer la groga",
+     "Massa velocitat",
+     "Una mica de quadratge: no va entrar just al racó de baix a la dreta",
+     "Massa efecte"
+    ],
+    "answer": 2,
+    "explain": "«Posiblemente se ha producido un poco de cuadraje y no se ha alcanzado justo el rincón inferior derecho.»",
+    "page": 2,
+    "path": [
+     {
+      "x": 2.37,
+      "y": 0.45
+     },
+     {
+      "x": 1.75,
+      "y": 0.53
+     },
+     {
+      "x": 0,
+      "y": 2.35
+     },
+     {
+      "x": 4,
+      "y": 7.4
+     },
+     {
+      "x": 3.65,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.62
+     },
+     {
+      "x": 0.23,
+      "y": 5.33
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.63,
+      "y": 0.47,
+      "c": "red"
+     },
+     {
+      "x": 0.23,
+      "y": 5.33,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 14: amb la suma atac + llegada = 18 i sortida 7, quina és la llegada?",
+    "options": [
+     "18",
+     "11",
+     "7",
+     "25"
+    ],
+    "answer": 1,
+    "explain": "7 + 11 = 18.",
+    "page": 2,
+    "path": [
+     {
+      "x": 0.1,
+      "y": 4.85
+     },
+     {
+      "x": 2.33,
+      "y": 7.3
+     },
+     {
+      "x": 4,
+      "y": 7.3
+     },
+     {
+      "x": 2.9,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 6.9
+     },
+     {
+      "x": 1.0,
+      "y": 5.28
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.35,
+      "y": 7.4,
+      "c": "red"
+     },
+     {
+      "x": 1.0,
+      "y": 5.28,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 14: quina presa i quina velocitat calen perquè la 1 arribi amb molta rotació?",
+    "options": [
+     "Bola plena i cop sec",
+     "Molta bola 2 i velocitat esmorteïda o lenta",
+     "Poca bola i velocitat alta",
+     "Mitja bola i velocitat justa"
+    ],
+    "answer": 1,
+    "explain": "La rotació es desenvolupa amb velocitat amortiguada o lenta, «lo cual casi siempre implica tomar mucha bola 2».",
+    "page": 2,
+    "path": [
+     {
+      "x": 0.1,
+      "y": 4.85
+     },
+     {
+      "x": 2.33,
+      "y": 7.3
+     },
+     {
+      "x": 4,
+      "y": 7.3
+     },
+     {
+      "x": 2.9,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 6.9
+     },
+     {
+      "x": 1.0,
+      "y": 5.28
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.35,
+      "y": 7.4,
+      "c": "red"
+     },
+     {
+      "x": 1.0,
+      "y": 5.28,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 15: amb el mètode invers, quin efecte cal si sortida 45 i atac 30 donen llegada 15 amb efecte 4 però la groga és a la llegada 0?",
+    "options": [
+     "Efecte 4",
+     "Efecte 2",
+     "Sense efecte",
+     "Efecte 1"
+    ],
+    "answer": 3,
+    "explain": "Es resten 3 efectes, un per cada mig rombo de llegada: 4 − 3 = 1, atacant igualment al 30.",
+    "page": 3,
+    "path": [
+     {
+      "x": 0.9,
+      "y": 3.65
+     },
+     {
+      "x": 3.05,
+      "y": 3.8
+     },
+     {
+      "x": 4,
+      "y": 4.65
+     },
+     {
+      "x": 0.62,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 7.62
+     },
+     {
+      "x": 1.8,
+      "y": 5.18
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.12,
+      "y": 3.73,
+      "c": "red"
+     },
+     {
+      "x": 1.8,
+      "y": 5.18,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 15: què es fixa primer en aquest mètode?",
+    "options": [
+     "La llegada a la groga",
+     "La sortida exacta",
+     "La velocitat",
+     "El punt d'atac segur, amb presa natural i efecte favorable 3 o 4"
+    ],
+    "answer": 3,
+    "explain": "Es fa «justamente al revés»: primer l'atac fàcil i segur, després els comptes.",
+    "page": 3,
+    "path": [
+     {
+      "x": 0.9,
+      "y": 3.65
+     },
+     {
+      "x": 3.05,
+      "y": 3.8
+     },
+     {
+      "x": 4,
+      "y": 4.65
+     },
+     {
+      "x": 0.62,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 7.62
+     },
+     {
+      "x": 1.8,
+      "y": 5.18
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.12,
+      "y": 3.73,
+      "c": "red"
+     },
+     {
+      "x": 1.8,
+      "y": 5.18,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 16: quin efecte demana el sistema de l'atac a la meitat?",
+    "options": [
+     "Efecte 0",
+     "Efecte 4 favorable",
+     "Efecte 2 contrari",
+     "Retrocés"
+    ],
+    "answer": 0,
+    "explain": "«Atacamos a la mitad de ataque en la banda larga contraria con efecto 0 alcanzamos siempre el rincón.»",
+    "page": 4,
+    "path": [
+     {
+      "x": 1.63,
+      "y": 4.42
+     },
+     {
+      "x": 2.88,
+      "y": 4.46
+     },
+     {
+      "x": 4,
+      "y": 3.4
+     },
+     {
+      "x": 0.35,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.32
+     },
+     {
+      "x": 0.22,
+      "y": 0.65
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.92,
+      "y": 4.47,
+      "c": "yellow"
+     },
+     {
+      "x": 0.22,
+      "y": 0.65,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 16: amb sortida 70, on s'ataca per arribar al racó?",
+    "options": [
+     "Al 50",
+     "Al 35",
+     "Al 70",
+     "Al 30"
+    ],
+    "answer": 1,
+    "explain": "La meitat de la sortida: 35, que a més és fàcil d'agafar.",
+    "page": 4,
+    "path": [
+     {
+      "x": 1.63,
+      "y": 4.42
+     },
+     {
+      "x": 2.88,
+      "y": 4.46
+     },
+     {
+      "x": 4,
+      "y": 3.4
+     },
+     {
+      "x": 0.35,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.32
+     },
+     {
+      "x": 0.22,
+      "y": 0.65
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.92,
+      "y": 4.47,
+      "c": "yellow"
+     },
+     {
+      "x": 0.22,
+      "y": 0.65,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 17: quin cop recomana el text?",
+    "options": [
+     "Suau i esmorteït",
+     "Curt i baix",
+     "Sec i sense efecte",
+     "Ben allargat i ràpid, perquè la 1 no es quadri i mantingui els efectes"
+    ],
+    "answer": 3,
+    "explain": "«Procura que sea un golpe bien alargado y rápido para que la bola 1 no se vaya cuadrando.»",
+    "page": 4,
+    "path": [
+     {
+      "x": 1.22,
+      "y": 0.48
+     },
+     {
+      "x": 0.7,
+      "y": 6.75
+     },
+     {
+      "x": 0,
+      "y": 7.7
+     },
+     {
+      "x": 0.15,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 4.05
+     },
+     {
+      "x": 1.35,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 1.2
+     },
+     {
+      "x": 0.4,
+      "y": 1.78
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.75,
+      "y": 6.85,
+      "c": "yellow"
+     },
+     {
+      "x": 0.43,
+      "y": 1.87,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 18: per què es juga la vermella per l'esquerra i no per la dreta?",
+    "options": [
+     "Per la dreta la groga queda tapada",
+     "Per l'esquerra el cop és natural; per la dreta caldria augmentar l'atac",
+     "Per la dreta hi ha retruc segur",
+     "Per l'esquerra es fa a 5 bandes"
+    ],
+    "answer": 1,
+    "explain": "Per la dreta la 1 és obliqua respecte a la paral·lela i cal augmentar una mica l'atac.",
+    "page": 5,
+    "path": [
+     {
+      "x": 0.33,
+      "y": 1.75
+     },
+     {
+      "x": 0.8,
+      "y": 3.38
+     },
+     {
+      "x": 4,
+      "y": 6.0
+     },
+     {
+      "x": 2.25,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 6.0
+     },
+     {
+      "x": 2.02,
+      "y": 2.95
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.73,
+      "y": 3.48,
+      "c": "red"
+     },
+     {
+      "x": 2.02,
+      "y": 2.95,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 19: quin tipus de solució és?",
+    "options": [
+     "Retrocés",
+     "Doblet de la vermella",
+     "Abans banda (bricol)",
+     "Pase bola"
+    ],
+    "answer": 2,
+    "explain": "«Se ha optado por una jugada de antes banda»; a Espanya en diuen bricol.",
+    "page": 5,
+    "path": [
+     {
+      "x": 3.03,
+      "y": 2.97
+     },
+     {
+      "x": 0,
+      "y": 6.35
+     },
+     {
+      "x": 0.85,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 5.15
+     },
+     {
+      "x": 1.85,
+      "y": 1.72
+     },
+     {
+      "x": 1.85,
+      "y": 0
+     },
+     {
+      "x": 1.66,
+      "y": 0.4
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.77,
+      "y": 1.8,
+      "c": "red"
+     },
+     {
+      "x": 1.63,
+      "y": 0.48,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 19: per què aquí el bricol és acceptable?",
+    "options": [
+     "Perquè la preparació és segura",
+     "Perquè no hi ha cap altra bola a prop",
+     "No cal tocar la vermella amb finor: la 1 té suport per fer-la també a quatre bandes",
+     "Perquè el recorregut és curt"
+    ],
+    "answer": 2,
+    "explain": "«No se requiere excesivamente tocar con finura la bola roja por el apoyo que tiene la bola jugadora para hacerla también a cuatro bandas.»",
+    "page": 5,
+    "path": [
+     {
+      "x": 3.03,
+      "y": 2.97
+     },
+     {
+      "x": 0,
+      "y": 6.35
+     },
+     {
+      "x": 0.85,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 5.15
+     },
+     {
+      "x": 1.85,
+      "y": 1.72
+     },
+     {
+      "x": 1.85,
+      "y": 0
+     },
+     {
+      "x": 1.66,
+      "y": 0.4
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.77,
+      "y": 1.8,
+      "c": "red"
+     },
+     {
+      "x": 1.63,
+      "y": 0.48,
+      "c": "yellow"
+     }
+    ]
+   }
+  ]
+ }
+}

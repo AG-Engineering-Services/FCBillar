@@ -1,0 +1,637 @@
+{
+  "id": "arguello-b2-b3",
+  "name": "Argüello amb doble numeració B2/B3 (de 2a a 3a banda)",
+  "group": "Teoria de diamants",
+  "attributed_to": "José Lazo, com a complement del sistema Argüello",
+  "pages": [
+    255,
+    260
+  ],
+  "purpose": "Saber on arriba a la 3a banda llarga una bola jugada amb el sistema Argüello (llegada a la 2a banda curta), i decidir entre Argüello i teoria de diamants segons on sigui la zona de carambola.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-K-L",
+    "effect": "3 o 4 (com Argüello)",
+    "stroke": "cop allargat",
+    "ball": null
+  },
+  "formula": "Atac = Sortida × B2; Llegada a 3a banda = Sortida × B3 (sortida en unitats)",
+  "steps": [
+    "Zona de carambola a prop de la banda curta: Atac = Sortida × llegada a 2a banda (numeració B2).",
+    "Zona a prop de la 3a banda llarga: Atac = Sortida − Llegada (teoria de diamants clàssica).",
+    "Zona intermèdia: la llegada a 3a banda val Sortida × B3; o al revés, B3 = Llegada ÷ Sortida, i el B2 del mateix punt dona l'atac (Sortida × B2).",
+    "Si la bola no és exactament a la sortida, tira per la paral·lela.",
+    "Amb xifres incòmodes (p. ex. sortida 6,3 i llegada 5,5), calcula els casos rodons del costat (7×5 = 35, 6×6 = 36) i pren un valor entremig (≈36)."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 1.5
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 2
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 2.5
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 3
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 3.5
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 4
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 4.5
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 5
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 6
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 7
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 8
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 9
+        },
+        {
+          "x": 3.5,
+          "y": 8,
+          "v": 10
+        }
+      ],
+      "note": "Com la teoria de diamants sense la desena. Dibuix ja vertical."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 4,
+          "y": 5.5,
+          "v": 60
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 70
+        },
+        {
+          "x": 4,
+          "y": 6.5,
+          "v": 80
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 90
+        },
+        {
+          "x": 4,
+          "y": 7.5,
+          "v": 100
+        }
+      ]
+    },
+    {
+      "name": "B2 (llegada a 2a banda)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0.85,
+          "y": 0,
+          "v": 9
+        },
+        {
+          "x": 1.45,
+          "y": 0,
+          "v": 8
+        },
+        {
+          "x": 2.05,
+          "y": 0,
+          "v": 7
+        },
+        {
+          "x": 2.35,
+          "y": 0,
+          "v": 6
+        },
+        {
+          "x": 2.7,
+          "y": 0,
+          "v": 5
+        },
+        {
+          "x": 3.0,
+          "y": 0,
+          "v": 4
+        },
+        {
+          "x": 3.25,
+          "y": 0,
+          "v": 3
+        },
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": 2
+        },
+        {
+          "x": 3.75,
+          "y": 0,
+          "v": 1
+        }
+      ],
+      "note": "Banda curta de dalt; és la mateixa numeració d'Argüello. Posicions mesurades al dibuix."
+    },
+    {
+      "name": "B3 (per a la llegada a 3a banda)",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0.85,
+          "y": 0,
+          "v": 1
+        },
+        {
+          "x": 1.45,
+          "y": 0,
+          "v": 2
+        },
+        {
+          "x": 2.05,
+          "y": 0,
+          "v": 3
+        },
+        {
+          "x": 2.35,
+          "y": 0,
+          "v": 4
+        },
+        {
+          "x": 2.7,
+          "y": 0,
+          "v": 5
+        },
+        {
+          "x": 3.0,
+          "y": 0,
+          "v": 6
+        },
+        {
+          "x": 3.25,
+          "y": 0,
+          "v": 7
+        },
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": 8
+        },
+        {
+          "x": 3.75,
+          "y": 0,
+          "v": 9
+        }
+      ],
+      "note": "Mateixes marques que B2 però numerades a l'inrevés (B2 + B3 = 10)."
+    },
+    {
+      "name": "Llegada (3a banda)",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 4.5,
+          "v": 50
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 60
+        },
+        {
+          "x": 0,
+          "y": 5.5,
+          "v": 70
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 80
+        },
+        {
+          "x": 0,
+          "y": 6.5,
+          "v": 90
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 100
+        }
+      ],
+      "note": "Numeració de llegada de la teoria de diamants a la llarga esquerra (els exemples donen 18 i 20)."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "Sortida 6, llegada a 2a banda 7: atac 6 × 7 = 42; llegada a 3a banda 6 × 3 (B3) = 18.",
+      "page": 255,
+      "path": [
+        {
+          "x": 2.24,
+          "y": 6.56
+        },
+        {
+          "x": 4,
+          "y": 4.58
+        },
+        {
+          "x": 2.04,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.18,
+          "y": 0.93,
+          "c": "red"
+        },
+        {
+          "x": 0.82,
+          "y": 1.48,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Llegada a 3a banda ≈20 i sortida ≈7: 20 ÷ 7 ≈ 3 (B3) = 7 a B2 → atac 7 × 7 = 49. Amb la teoria de diamants: 70 − 20 = 50; la bola és a ~68, es corregeixen un parell de punts.",
+      "page": 258,
+      "path": [
+        {
+          "x": 2.08,
+          "y": 7.66
+        },
+        {
+          "x": 4,
+          "y": 5.19
+        },
+        {
+          "x": 1.97,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1.59
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.64,
+          "y": 1.5,
+          "c": "red"
+        },
+        {
+          "x": 1.03,
+          "y": 1.94,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 6,3 i llegada 5,5: 7 × 5 = 35 i 6 × 6 = 36 → atac ≈36.",
+      "page": 260,
+      "path": [
+        {
+          "x": 2.25,
+          "y": 6.46
+        },
+        {
+          "x": 4,
+          "y": 3.6
+        },
+        {
+          "x": 2.53,
+          "y": 0
+        }
+      ],
+      "path_built": true
+    }
+  ],
+  "tips": [
+    "Les trajectòries de 2a a 3a banda són línies simètriques (paral·leles a 45° des de la curta).",
+    "No cal fer càlculs mil·limètrics: el gruix de les boles dona marge."
+  ],
+  "quotes": [
+    "ATAQUE = SALIDA POR LLEGADA A SEGUNDA BANDA"
+  ],
+  "uncertain": [
+    "Les posicions de les marques B2/B3 a la curta s'han mesurat al dibuix (0,85; 1,45; 2,05; 2,35; 2,7; 3,0; 3,25; 3,5; 3,75 diamants des de l'esquerra); poden diferir de les del fitxer arguello.json.",
+    "Al primer exemple el camí dibuixat toca la bola vermella abans de la 3a banda; el 18 és la prolongació.",
+    "El recorregut de l'exemple 6,3 × 5,5 és construït (sortida 6,3 a la curta de baix, atac 36, B2 5,5)."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "B": {
+          "label": "Llegada a 2a banda (B2)",
+          "numbering": "B2 (llegada a 2a banda)"
+        },
+        "L": {
+          "label": "Llegada a 3a banda",
+          "numbering": "Llegada (3a banda)"
+        }
+      },
+      "inputs": {
+        "S": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "B": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S * B",
+          "label": "atac (Sortida × B2)"
+        },
+        {
+          "solve": "L",
+          "expr": "S * (10 - B)",
+          "label": "llegada a 3a banda (Sortida × B3)"
+        }
+      ],
+      "valid": "A >= 0 && A <= 100 && L >= 0 && L <= 100",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "B",
+        "L"
+      ],
+      "note": "B3 = 10 − B2 (mateixes marques numerades a l'inrevés)."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 6, llegada a 2a banda 7. On ataques?",
+        "options": [
+          "18",
+          "42",
+          "13",
+          "60"
+        ],
+        "answer": 1,
+        "explain": "Atac = Sortida × B2 = 6 × 7 = 42.",
+        "page": 256,
+        "path": [
+          {
+            "x": 2.24,
+            "y": 6.56
+          },
+          {
+            "x": 4,
+            "y": 4.58
+          },
+          {
+            "x": 2.04,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.18,
+            "y": 0.93,
+            "c": "red"
+          },
+          {
+            "x": 0.82,
+            "y": 1.48,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Mateix cop (sortida 6, B2 = 7). On arriba a la 3a banda llarga?",
+        "options": [
+          "30",
+          "42",
+          "21",
+          "18"
+        ],
+        "answer": 3,
+        "explain": "B3 del 7 de B2 és 3 → 6 × 3 = 18.",
+        "page": 256
+      },
+      {
+        "q": "Zona de carambola a prop de la 3a banda llarga. Quina fórmula?",
+        "options": [
+          "Atac = Sortida − Llegada (teoria de diamants)",
+          "Atac = Sortida × B2",
+          "Atac = Llegada − Sortida",
+          "Atac = Sortida × B3"
+        ],
+        "answer": 0,
+        "explain": "A prop de la curta: Sortida × B2; a prop de la llarga: Sortida − Llegada; zones intermèdies, més aquesta última.",
+        "page": 260
+      },
+      {
+        "q": "Llegada a 3a banda ≈20 i sortida 7. Quin atac dona el mètode B2/B3?",
+        "options": [
+          "49",
+          "27",
+          "13",
+          "70"
+        ],
+        "answer": 0,
+        "explain": "20 ÷ 7 ≈ 3 (B3) → 7 a B2 → 7 × 7 = 49 (la teoria de diamants dona 70 − 20 = 50).",
+        "page": 258,
+        "path": [
+          {
+            "x": 2.08,
+            "y": 7.66
+          },
+          {
+            "x": 4,
+            "y": 5.19
+          },
+          {
+            "x": 1.97,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 1.59
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.64,
+            "y": 1.5,
+            "c": "red"
+          },
+          {
+            "x": 1.03,
+            "y": 1.94,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 6,3 i llegada 5,5 a la curta. Com ho simplifica Lazo?",
+        "options": [
+          "Fa 6,3 × 5,5 exactament",
+          "Arrodoneix a 6×5 = 30",
+          "Fa servir la sortida menys la llegada",
+          "Calcula 7×5 = 35 i 6×6 = 36 i pren ≈36"
+        ],
+        "answer": 3,
+        "explain": "Casos rodons del costat i un valor entremig.",
+        "page": 260,
+        "path": [
+          {
+            "x": 2.25,
+            "y": 6.46
+          },
+          {
+            "x": 4,
+            "y": 3.6
+          },
+          {
+            "x": 2.53,
+            "y": 0
+          }
+        ]
+      }
+    ]
+  }
+}

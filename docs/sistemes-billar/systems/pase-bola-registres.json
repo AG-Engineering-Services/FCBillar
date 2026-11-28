@@ -1,0 +1,374 @@
+{
+  "id": "pase-bola-registres",
+  "name": "Registres d'efecte (pase de bola, Duarte)",
+  "group": "Pase bola",
+  "attributed_to": "Ricardo Duarte (capítols signats per ell, no per José Lazo)",
+  "pages": [
+    329,
+    333
+  ],
+  "purpose": "Exercicis previs per mecanitzar quant obre cada grau d'efecte (de 0 a ±4) en L-L, L-K-L, K-K i K-L-K, base del pase de bola per efectes.",
+  "shot": {
+    "first_cushion": "llarga|curta",
+    "cushions": "L-L, L-K-L, K-K, K-L-K",
+    "effect": "de −4 a +4 (marques horitzontals a la bola)",
+    "stroke": "cop suau, penetrat i controlat; taco horitzontal",
+    "ball": "alçada segons la zona 1, 2 o 3 del gràfic de la bola"
+  },
+  "formula": null,
+  "steps": [
+    "Aprèn l'escala d'efecte de la bola: 0 al centre, −1…−4 a l'esquerra i +1…+4 a la dreta; tres zones d'alçada (zona 1 exterior, zona 3 a prop del centre).",
+    "Exercici 1 (L-L): bola tirada perpendicular a la banda llarga de davant; cada efecte obre mig diamant a la tornada.",
+    "Exercici 2 (L-K-L): atac al 1r diamant de la llarga; observa on arriba a la 3a banda amb cada efecte.",
+    "Exercici 3 (K-K): bola tirada recta de curta a curta; cada efecte obre un diamant.",
+    "Exercici 4 (K-L-K): des del 2n diamant de sortida al 1r de la curta de davant; mira on obre a la 3a banda.",
+    "Fes cada exercici cap a la dreta i cap a l'esquerra, si pot ser amb algú que et miri des de fora."
+  ],
+  "numberings": [
+    {
+      "name": "Ex. 1 L-L: tornada per efecte",
+      "role": "altre",
+      "points": [
+        {
+          "x": 4,
+          "y": 3,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 2.5,
+          "v": 1
+        },
+        {
+          "x": 4,
+          "y": 3.5,
+          "v": 1
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 2
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 2
+        },
+        {
+          "x": 4,
+          "y": 1.5,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 4.5,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 4
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 4
+        }
+      ],
+      "note": "Dibuix apaïsat girat: la llarga d'atac (dalt) passa a ser la banda esquerra (x=0) i la de tornada (baix) la dreta (x=4). Bola a uns (3.1, 3) tirada recta a (0, 3). Valors sense signe: cada efecte cap a un costat, mig diamant."
+    },
+    {
+      "name": "Ex. 2 L-K-L: arribada a 3a banda",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 0.45,
+          "v": 1
+        },
+        {
+          "x": 4,
+          "y": 0.8,
+          "v": 2
+        },
+        {
+          "x": 4,
+          "y": 1.0,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 1.35,
+          "v": 4
+        }
+      ],
+      "note": "Dibuix apaïsat girat (llarga de dalt → esquerra, curta esquerra → curta de dalt, llarga de baix → dreta). Bola a uns (3.1, 1.8) atacant (0, 1). Valors en diamants des del racó que dona el llibre: 0,45 · 0,80 · 1,00 · 1,35. No és una numeració de sistema sinó un registre: on cau cada efecte des d'una sola posició fixa (valors rotulats al Graf. 2), per això no coincideix amb l'escala de mig diamant per efecte de la posició mare de pase-bola-lkl."
+    },
+    {
+      "name": "Ex. 3 K-K: tornada per efecte",
+      "role": "altre",
+      "points": [
+        {
+          "x": 1,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 3
+        }
+      ],
+      "note": "Bola a (1, 7.3) tirada recta a (1, 0). L'efecte 4 surt per fora de la taula al dibuix (toca abans la llarga dreta)."
+    },
+    {
+      "name": "Ex. 4 K-L-K: arribada a 3a banda",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 4,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 2.55,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 1.9,
+          "y": 8,
+          "v": 3
+        },
+        {
+          "x": 1.45,
+          "y": 8,
+          "v": 4
+        }
+      ],
+      "note": "Bola a uns (2.1, 7.2) atacant (3, 0); 2a banda a la llarga dreta. Etiquetes del llibre: Ef 0 – 0, Ef 1 – 9, Ef 2 – 15, Ef 3 – 20, Ef 4 – 27."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "L-L: amb cop suau i controlat, cada efecte respon mig diamant (Graf. 1).",
+      "page": 331,
+      "path": [
+        {
+          "x": 3.1,
+          "y": 3
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 3
+        }
+      ]
+    },
+    {
+      "text": "K-K: cada efecte obre un diamant de curta a curta (Graf. 3).",
+      "page": 332,
+      "path": [
+        {
+          "x": 1,
+          "y": 7.3
+        },
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "text": "K-L-K: atac de (2, 7.2) a (3, 0); sense efecte va al racó (4, 8), amb efecte 1 a 4 obre fins a x≈1.45 (Graf. 4).",
+      "page": 333,
+      "path": [
+        {
+          "x": 2.1,
+          "y": 7.2
+        },
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 7.4
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Pont ferm i estribo (distància pont–bola) de 15 cm com a màxim: com més lluny, menys efectivitat.",
+    "Taco sempre horitzontal; balanceig acompassat i cop sense aturar-se, sense aixecar el taco de la taula.",
+    "La velocitat depèn de la distància entre bola 1 i bola 2: prou per arribar-hi amb el registre d'efecte correcte i quedar a prop de la bola 3.",
+    "Cada alçada (zona 1, 2, 3) afavoreix una distància o posició; entrena els registres bàsics en aquest ordre: L-L, K-K, L-K-L i K-L-K."
+  ],
+  "quotes": [
+    "Con un golpe suave, penetrado, controlado, cada efecto responde medio diamante.",
+    "Cada efecto abre un diamante de banda corta a corta"
+  ],
+  "uncertain": [
+    "Ex. 2 (L-K-L): no queda clar si 0,45/0,80/1,00/1,35 corresponen als efectes 1-4 (la posició de les etiquetes ho suggereix) o als efectes 0-3; tampoc es diu la unitat (s'ha suposat diamants des del racó).",
+    "Ex. 4 (K-L-K): no s'explica què volen dir els números 9, 15, 20, 27 que acompanyen cada efecte; les posicions x s'han llegit del dibuix (aprox.).",
+    "No es diu explícitament quina zona d'alçada correspon a cada distància."
+  ],
+  "trainer": {
+    "quiz": [
+      {
+        "q": "Exercici L-L amb cop suau i controlat: quant obre cada grau d'efecte a la tornada?",
+        "options": [
+          "Mig diamant",
+          "Un diamant",
+          "Un quart de diamant",
+          "Dos diamants"
+        ],
+        "answer": 0,
+        "explain": "El llibre: «cada efecto responde medio diamante» (Graf. 1).",
+        "page": 331,
+        "path": [
+          {
+            "x": 3.1,
+            "y": 3
+          },
+          {
+            "x": 0,
+            "y": 3
+          },
+          {
+            "x": 4,
+            "y": 4
+          }
+        ]
+      },
+      {
+        "q": "Exercici K-K, bola tirada recta de curta a curta: quant obre cada efecte?",
+        "options": [
+          "Un diamant",
+          "Mig diamant",
+          "Un diamant i mig",
+          "Dos diamants"
+        ],
+        "answer": 0,
+        "explain": "«Cada efecto abre un diamante de banda corta a corta» (Graf. 3).",
+        "page": 332,
+        "path": [
+          {
+            "x": 1,
+            "y": 7.3
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 3,
+            "y": 8
+          }
+        ]
+      },
+      {
+        "q": "Quina distància màxima recomana entre el pont i la bola (estribo)?",
+        "options": [
+          "15 cm",
+          "25 cm",
+          "30 cm",
+          "10 cm exactes"
+        ],
+        "answer": 0,
+        "explain": "«El estribo 15 ctm máximo»: com més lluny és el pont, menys efectivitat.",
+        "page": 329
+      },
+      {
+        "q": "Com ha d'estar el taco respecte a la taula?",
+        "options": [
+          "Horitzontal en tots els casos",
+          "Lleugerament aixecat",
+          "Aixecat amb massé",
+          "Depèn de l'efecte"
+        ],
+        "answer": 0,
+        "explain": "«El taco debe conservar la horizontalidad con respecto a la mesa en todos los casos».",
+        "page": 329
+      },
+      {
+        "q": "En quin ordre proposa entrenar els registres bàsics?",
+        "options": [
+          "L-L, K-K, L-K-L i K-L-K",
+          "K-L-K, L-K-L, L-L i K-K",
+          "L-K-L, L-L, K-K i K-L-K",
+          "Només L-K-L i K-L-K"
+        ],
+        "answer": 0,
+        "explain": "«larga a larga», «corta a corta», «larga corta larga» i per últim «corta larga corta».",
+        "page": 330
+      },
+      {
+        "q": "Exercici K-L-K: on arriba la bola sense efecte (Ef 0) atacant des del 2n diamant al 1r de la curta de davant?",
+        "options": [
+          "Al racó de la 3a banda",
+          "Al centre de la curta",
+          "A un diamant del racó",
+          "Torna a la sortida"
+        ],
+        "answer": 0,
+        "explain": "Al Graf. 4 l'Ef 0 cau al racó; amb Ef 1 a 4 obre cap a x≈3, 2.55, 1.9, 1.45.",
+        "page": 333,
+        "path": [
+          {
+            "x": 2.1,
+            "y": 7.2
+          },
+          {
+            "x": 3,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 7.4
+          }
+        ]
+      },
+      {
+        "q": "Què cal fer en acabar el cop?",
+        "options": [
+          "Seguir el compàs i no aixecar el taco de la taula",
+          "Aturar el taco just al tocar",
+          "Aixecar el taco ràpid",
+          "Retirar el taco enrere"
+        ],
+        "answer": 0,
+        "explain": "Cop penetrat i definit, «concluir el golpe sin levantar el taco de la mesa»; el balanceig no s'atura.",
+        "page": 329
+      }
+    ]
+  }
+}

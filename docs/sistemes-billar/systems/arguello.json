@@ -1,0 +1,479 @@
+{
+ "id": "arguello",
+ "name": "Sistema Argüello (llegada a 2a banda)",
+ "group": "Teoria de diamants",
+ "attributed_to": "Argüello (Lazo hi afegeix «si no me equivoco»)",
+ "pages": [
+  252,
+  254
+ ],
+ "purpose": "Treure el punt d'atac a la 1a banda llarga sabent la sortida i el punt de la banda curta (2a banda) on vols arribar.",
+ "shot": {
+  "first_cushion": "llarga",
+  "cushions": "L-K (i, si segueix, L)",
+  "effect": "3 o 4, segons el jugador",
+  "stroke": "cop allargat",
+  "ball": null
+ },
+ "formula": "Atac = Sortida × Llegada",
+ "steps": [
+  "Tria a quin punt de la banda curta de dalt vols arribar (de 0 a 10).",
+  "Llegeix la sortida allargant la línia atac → bola fins a la banda (numeració de diamants sense la desena).",
+  "Multiplica sortida per llegada: el resultat és el punt d'atac a la 1a banda.",
+  "Si la bola ha de seguir a 3a banda, la teoria de diamants dona l'arribada: sortida × 10 − atac."
+ ],
+ "numberings": [
+  {
+   "name": "Sortida",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 0,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 1,
+     "v": 1.5
+    },
+    {
+     "x": 0,
+     "y": 2,
+     "v": 2
+    },
+    {
+     "x": 0,
+     "y": 3,
+     "v": 2.5
+    },
+    {
+     "x": 0,
+     "y": 4,
+     "v": 3
+    },
+    {
+     "x": 0,
+     "y": 5,
+     "v": 3.5
+    },
+    {
+     "x": 0,
+     "y": 6,
+     "v": 4
+    },
+    {
+     "x": 0,
+     "y": 7,
+     "v": 4.5
+    },
+    {
+     "x": 0,
+     "y": 8,
+     "v": 5
+    },
+    {
+     "x": 1,
+     "y": 8,
+     "v": 6
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 7
+    },
+    {
+     "x": 2.5,
+     "y": 8,
+     "v": 8
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 9
+    },
+    {
+     "x": 3.5,
+     "y": 8,
+     "v": 10
+    }
+   ]
+  },
+  {
+   "name": "Atac",
+   "role": "atac",
+   "points": [
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 4,
+     "y": 1,
+     "v": 10
+    },
+    {
+     "x": 4,
+     "y": 2,
+     "v": 20
+    },
+    {
+     "x": 4,
+     "y": 3,
+     "v": 30
+    },
+    {
+     "x": 4,
+     "y": 4,
+     "v": 40
+    },
+    {
+     "x": 4,
+     "y": 5,
+     "v": 50
+    },
+    {
+     "x": 4,
+     "y": 5.5,
+     "v": 60
+    },
+    {
+     "x": 4,
+     "y": 6,
+     "v": 70
+    },
+    {
+     "x": 4,
+     "y": 6.5,
+     "v": 80
+    },
+    {
+     "x": 4,
+     "y": 7,
+     "v": 90
+    },
+    {
+     "x": 4,
+     "y": 7.5,
+     "v": 100
+    }
+   ]
+  },
+  {
+   "name": "Llegada (2a banda)",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 3.75,
+     "y": 0,
+     "v": 1
+    },
+    {
+     "x": 3.5,
+     "y": 0,
+     "v": 2
+    },
+    {
+     "x": 3.25,
+     "y": 0,
+     "v": 3
+    },
+    {
+     "x": 3,
+     "y": 0,
+     "v": 4
+    },
+    {
+     "x": 2.667,
+     "y": 0,
+     "v": 5
+    },
+    {
+     "x": 2.333,
+     "y": 0,
+     "v": 6
+    },
+    {
+     "x": 2,
+     "y": 0,
+     "v": 7
+    },
+    {
+     "x": 1.4,
+     "y": 0,
+     "v": 8
+    },
+    {
+     "x": 0.8,
+     "y": 0,
+     "v": 9
+    },
+    {
+     "x": 0.1,
+     "y": 0,
+     "v": 10
+    }
+   ],
+   "note": "Posicions mesurades al dibuix de la pàg. 27: del 0 al 4 cada quart de diamant, del 4 al 7 cada terç, i del 7 al 10 uns 0,6 diamants per número."
+  }
+ ],
+ "corrections": [
+  "Funciona més o menys bé quan la zona de caramboleig és a prop de la banda curta. Si és a prop de la llarga, la referència és la teoria de diamants."
+ ],
+ "examples": [
+  {
+   "text": "Sortida 4 × llegada 7 = atac 28. A 3a banda: 40 − 28 = 12",
+   "page": 253,
+   "path": [
+    {
+     "x": 0.9,
+     "y": 5.28
+    },
+    {
+     "x": 4,
+     "y": 2.8
+    },
+    {
+     "x": 2,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 1.2
+    }
+   ]
+  },
+  {
+   "text": "Sortida 6 × llegada 7 = atac 42. A 3a banda: 60 − 42 = 18",
+   "page": 253,
+   "path": [
+    {
+     "x": 2.2,
+     "y": 6.48
+    },
+    {
+     "x": 4,
+     "y": 4.2
+    },
+    {
+     "x": 2,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 1.8
+    }
+   ]
+  }
+ ],
+ "tips": [],
+ "quotes": [
+  "Se trata de una multiplicación: … ATAQUE = SALIDA POR LLEGADA"
+ ],
+ "uncertain": [
+  "Lazo pren la sortida «a la altura del vértice (al menos para mí)». Aquí es llegeix allargant la línia atac → bola, que reprodueix exactament els dos exemples."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "S": {
+     "label": "Sortida",
+     "numbering": "Sortida"
+    },
+    "A": {
+     "label": "Atac",
+     "numbering": "Atac"
+    },
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada (2a banda)"
+    }
+   },
+   "inputs": {
+    "S": [
+     1.5,
+     2,
+     2.5,
+     3,
+     3.5,
+     4,
+     4.5,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "L": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "A": [
+     10,
+     15,
+     20,
+     24,
+     28,
+     30,
+     36,
+     40,
+     42,
+     45,
+     50,
+     56,
+     60,
+     70,
+     80,
+     90
+    ]
+   },
+   "relations": [
+    {
+     "solve": "A",
+     "expr": "S * L"
+    },
+    {
+     "solve": "L",
+     "expr": "A / S"
+    },
+    {
+     "solve": "S",
+     "expr": "A / L"
+    }
+   ],
+   "valid": "A >= 0 && A <= 100 && L >= 0 && L <= 10 && Number.isInteger(L*2) && [1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,9,10].includes(S)",
+   "round": 1,
+   "path": [
+    "S",
+    "A",
+    "L"
+   ],
+   "note": "El recorregut generat va de la sortida a l'atac i a la llegada, sense la posició exacta de la bola."
+  },
+  "quiz": [
+   {
+    "q": "Quin efecte demana el sistema Argüello?",
+    "options": [
+     "Efecte 3 o 4, segons el jugador",
+     "Sense efecte",
+     "Efecte contrari",
+     "Efecte 1"
+    ],
+    "answer": 0,
+    "explain": "Golpe alargado con efecto 3 o 4 según cada jugador.",
+    "page": 252
+   },
+   {
+    "q": "Quina operació fa el sistema?",
+    "options": [
+     "Sortida − Llegada",
+     "Sortida × Llegada",
+     "Sortida + Llegada",
+     "Llegada − Sortida"
+    ],
+    "answer": 1,
+    "explain": "Se trata de una multiplicación: ataque = salida por llegada.",
+    "page": 253
+   },
+   {
+    "q": "Sortida 4 i vols arribar al 7 de la curta. On ataques?",
+    "options": [
+     "11",
+     "24",
+     "28",
+     "32"
+    ],
+    "answer": 2,
+    "explain": "4 × 7 = 28.",
+    "page": 253,
+    "path": [
+     {
+      "x": 0.9,
+      "y": 5.28
+     },
+     {
+      "x": 4,
+      "y": 2.8
+     },
+     {
+      "x": 2,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 1.2
+     }
+    ]
+   },
+   {
+    "q": "Sortida 6, llegada 7. Si la bola segueix a 3a banda, on arriba?",
+    "options": [
+     "12",
+     "18",
+     "24",
+     "42"
+    ],
+    "answer": 1,
+    "explain": "Atac 42; teoria de diamants: 60 − 42 = 18.",
+    "page": 254,
+    "path": [
+     {
+      "x": 2.2,
+      "y": 6.48
+     },
+     {
+      "x": 4,
+      "y": 4.2
+     },
+     {
+      "x": 2,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 1.8
+     }
+    ]
+   },
+   {
+    "q": "On cau el 4 de la banda curta?",
+    "options": [
+     "Al mig de la banda",
+     "Al 1r diamant des de la cantonada de l'atac",
+     "A la cantonada",
+     "A mig diamant"
+    ],
+    "answer": 1,
+    "explain": "Del 0 al 4 va de quart en quart de diamant.",
+    "page": 252
+   },
+   {
+    "q": "Quan funciona millor el sistema?",
+    "options": [
+     "Amb la zona de caramboleig prop de la banda curta",
+     "Amb la zona de caramboleig prop de la banda llarga",
+     "Amb la bola 3 al centre",
+     "Sempre igual"
+    ],
+    "answer": 0,
+    "explain": "Prop de la llarga, la referència és la teoria de diamants.",
+    "page": 254
+   }
+  ]
+ }
+}

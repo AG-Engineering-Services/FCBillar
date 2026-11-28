@@ -1,0 +1,1086 @@
+{
+ "id": "cbv-bola-efecte-cabanya-curta",
+ "name": "Bola-efecte: la cabanya curta",
+ "group": "Rodades i cabanyes",
+ "attributed_to": "PDF de Julio A",
+ "pages": null,
+ "source": "PDF «Sistemas Bola-Efecto», Club Billar València, pàg. 1–5",
+ "sort": 461,
+ "purpose": "Cabanya curta (bola 2 a prop de la llarga, bola 1 hi va per llarga-curta-llarga fins a la bola 3) resolta repartint un total entre quantitat de bola i efecte.",
+ "shot": {
+  "first_cushion": "bola",
+  "cushions": "bola 2 – L-K-L",
+  "effect": "Número d'efecte 2–9 de la roda (segons el total)",
+  "stroke": "Normal; +1 al total si cal velocitat (4 o 5 bandes o atac fort)",
+  "ball": "Quantitat de bola 1/12 a 12/12, repartida amb l'efecte"
+ },
+ "formula": "Total = Posició bola 2 (llarga) + Columna bola 2 (−1 a −3) + Desfase + Llegada (+1 si velocitat) = Bola + Efecte",
+ "steps": [
+  "Situa la bola 2: llegeix la seva altura a la llarga (0 al racó inferior, 2, 4, 6, 8 i després 9, 10, 11, 12 cap al racó superior) i la seva columna a la curta inferior (0 enganxada a la banda, −1, −2, −3 cap a dins).",
+  "Llegeix la llegada a la llarga contrària (on ha d'arribar la bola 1 per fer la bola 3): 0 al racó, 2, 4, 8, 12 diamant a diamant.",
+  "Mesura el desfase: la línia que uneix els centres de les boles 1 i 2, allargada fins a les dues llargues; cada mig diamant d'obertura val 1. Positiu si la bola 2 és més amunt que la bola 1, negatiu si és més avall.",
+  "Suma-ho tot (+1 si has de jugar fort) i reparteix el total entre bola (1–12) i efecte (2–9).",
+  "Entre les solucions possibles, tria la que evita el retruc o deixa millor la carambola següent."
+ ],
+ "numberings": [
+  {
+   "name": "Posició bola 2",
+   "role": "altre",
+   "points": [
+    {
+     "x": 4,
+     "y": 8,
+     "v": 0
+    },
+    {
+     "x": 4,
+     "y": 7,
+     "v": 2
+    },
+    {
+     "x": 4,
+     "y": 6.5,
+     "v": 3
+    },
+    {
+     "x": 4,
+     "y": 6,
+     "v": 4
+    },
+    {
+     "x": 4,
+     "y": 5.5,
+     "v": 5
+    },
+    {
+     "x": 4,
+     "y": 5,
+     "v": 6
+    },
+    {
+     "x": 4,
+     "y": 4.5,
+     "v": 7
+    },
+    {
+     "x": 4,
+     "y": 4,
+     "v": 8
+    },
+    {
+     "x": 4,
+     "y": 3,
+     "v": 9
+    },
+    {
+     "x": 4,
+     "y": 2,
+     "v": 10
+    },
+    {
+     "x": 4,
+     "y": 1,
+     "v": 11
+    },
+    {
+     "x": 4,
+     "y": 0,
+     "v": 12
+    }
+   ],
+   "note": "Dibuix ja en vertical, cap rotació. Llarga dreta: altura de la bola 2. El 3, el 5, el 7 i el 0 surten als exemples, no a la base."
+  },
+  {
+   "name": "Columna bola 2",
+   "role": "altre",
+   "points": [
+    {
+     "x": 4,
+     "y": 8,
+     "v": 0
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": -1
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": -2
+    },
+    {
+     "x": 1,
+     "y": 8,
+     "v": -3
+    }
+   ],
+   "note": "Curta inferior: distància de la bola 2 a la llarga dreta. El 0 (bola a tocar de la banda) surt als exemples."
+  },
+  {
+   "name": "Llegada",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 0,
+     "y": 8,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 7,
+     "v": 2
+    },
+    {
+     "x": 0,
+     "y": 6.5,
+     "v": 3
+    },
+    {
+     "x": 0,
+     "y": 6,
+     "v": 4
+    },
+    {
+     "x": 0,
+     "y": 5.5,
+     "v": 6
+    },
+    {
+     "x": 0,
+     "y": 5,
+     "v": 8
+    },
+    {
+     "x": 0,
+     "y": 4,
+     "v": 12
+    }
+   ],
+   "note": "Llarga esquerra: tercera banda de la bola 1. El 0, el 3 i el 6 surten als exemples."
+  }
+ ],
+ "corrections": [
+  "+1 al total quan cal jugar a 4 o 5 bandes o atacar fort.",
+  "Boles 1 i 2 molt juntes: el desfase es mesura per la línia que uneix les tangents interiors, no els centres.",
+  "Boles a prop d'un racó: si no es pot mesurar el desfase, fes servir una paral·lela auxiliar fins que es pugui llegir l'obertura entre les dues llargues (et pots ajudar amb el tac).",
+  "Posicions entre números: agafa el punt més proper; només compta quarts i mitjos si junts sumen una unitat o s'anul·len."
+ ],
+ "examples": [
+  {
+   "text": "Bola 2 al 8, sense columna ni desfase, llegada 6: 8 + 6 = 14 → bola 6 + efecte 8",
+   "page": 3,
+   "path": [
+    {
+     "x": 0.99,
+     "y": 4.0
+    },
+    {
+     "x": 3.75,
+     "y": 4.02
+    },
+    {
+     "x": 4,
+     "y": 4.27
+    },
+    {
+     "x": 2.34,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.46
+    },
+    {
+     "x": 0.45,
+     "y": 4.86
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.82,
+     "y": 4.0,
+     "c": "yellow"
+    },
+    {
+     "x": 0.45,
+     "y": 4.86,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Bola 2 al 5 i columna −1, desfase 0, llegada 0 (racó): 5 − 1 + 0 = 4 → bola 2 + efecte 2",
+   "page": 3,
+   "path": [
+    {
+     "x": 1.54,
+     "y": 5.52
+    },
+    {
+     "x": 2.92,
+     "y": 5.5
+    },
+    {
+     "x": 4,
+     "y": 5.95
+    },
+    {
+     "x": 0.05,
+     "y": 7.95
+    },
+    {
+     "x": 0.89,
+     "y": 7.22
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.0,
+     "y": 5.5,
+     "c": "yellow"
+    },
+    {
+     "x": 0.89,
+     "y": 7.22,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "7 − 1 + 4 (desfase) + 2 (llegada) = 12 → bola 3 + efecte 9: la solució bona",
+   "page": 4,
+   "path": [
+    {
+     "x": 1.0,
+     "y": 5.43
+    },
+    {
+     "x": 2.9,
+     "y": 4.55
+    },
+    {
+     "x": 4,
+     "y": 4.82
+    },
+    {
+     "x": 1.08,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 7.08
+    },
+    {
+     "x": 0.51,
+     "y": 6.52
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.98,
+     "y": 4.49,
+     "c": "yellow"
+    },
+    {
+     "x": 0.51,
+     "y": 6.52,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Mateixa posició amb bola 6 + efecte 6 (també 12): la bola 2 torna cap a la zona de carambola, perill de retruc",
+   "page": 4,
+   "path": [
+    {
+     "x": 0.98,
+     "y": 5.43
+    },
+    {
+     "x": 2.9,
+     "y": 4.55
+    },
+    {
+     "x": 4,
+     "y": 5.13
+    },
+    {
+     "x": 0.84,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 7.02
+    },
+    {
+     "x": 0.49,
+     "y": 6.52
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.97,
+     "y": 4.49,
+     "c": "yellow"
+    },
+    {
+     "x": 0.49,
+     "y": 6.52,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "7 − 1 − 3 (desfase) + 2 = 5 → bola 2 + efecte 3, l'opció recomanada (recorregut més natural)",
+   "page": 4,
+   "path": [
+    {
+     "x": 0.98,
+     "y": 3.88
+    },
+    {
+     "x": 2.92,
+     "y": 4.55
+    },
+    {
+     "x": 4,
+     "y": 5.53
+    },
+    {
+     "x": 0.88,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 7.0
+    },
+    {
+     "x": 0.49,
+     "y": 6.52
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.02,
+     "y": 4.58,
+     "c": "yellow"
+    },
+    {
+     "x": 0.49,
+     "y": 6.52,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Mateixa posició amb bola 3 + efecte 2 (també 5)",
+   "page": 4,
+   "path": [
+    {
+     "x": 1.02,
+     "y": 3.88
+    },
+    {
+     "x": 2.9,
+     "y": 4.55
+    },
+    {
+     "x": 4,
+     "y": 5.84
+    },
+    {
+     "x": 1.06,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 7.0
+    },
+    {
+     "x": 0.51,
+     "y": 6.52
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.98,
+     "y": 4.58,
+     "c": "yellow"
+    },
+    {
+     "x": 0.51,
+     "y": 6.52,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Més bandes: 4 − 0 − 1 + 8 + 1 (velocitat) = 12 → bola 4 + efecte 8",
+   "page": 5,
+   "path": [
+    {
+     "x": 1.74,
+     "y": 5.6
+    },
+    {
+     "x": 3.65,
+     "y": 5.83
+    },
+    {
+     "x": 4,
+     "y": 6.19
+    },
+    {
+     "x": 2.77,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 4.96
+    },
+    {
+     "x": 3.29,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.78
+    },
+    {
+     "x": 0,
+     "y": 6.67
+    },
+    {
+     "x": 0.24,
+     "y": 6.9
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.72,
+     "y": 5.85,
+     "c": "yellow"
+    },
+    {
+     "x": 0.24,
+     "y": 6.9,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "6 − 0 + 2 + 3 = 11 → bola 3 + efecte 8",
+   "page": 5,
+   "path": [
+    {
+     "x": 1.0,
+     "y": 5.42
+    },
+    {
+     "x": 3.6,
+     "y": 4.82
+    },
+    {
+     "x": 4,
+     "y": 5.03
+    },
+    {
+     "x": 1.45,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 6.56
+    },
+    {
+     "x": 0.29,
+     "y": 6.34
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.69,
+     "y": 4.8,
+     "c": "yellow"
+    },
+    {
+     "x": 0.29,
+     "y": 6.34,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Boles 1 i 2 molt juntes (desfase per les tangents interiors): 5 − 2 + 3 + 2 = 8 → bola 3 + efecte 5",
+   "page": 5,
+   "path": [
+    {
+     "x": 1.63,
+     "y": 5.67
+    },
+    {
+     "x": 1.75,
+     "y": 5.45
+    },
+    {
+     "x": 4,
+     "y": 5.73
+    },
+    {
+     "x": 1.0,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 6.99
+    },
+    {
+     "x": 0.31,
+     "y": 6.76
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.78,
+     "y": 5.38,
+     "c": "yellow"
+    },
+    {
+     "x": 0.31,
+     "y": 6.76,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Boles a prop del racó (desfase amb una paral·lela auxiliar): 3 − 0 + 6 + 6 = 15 → bola 6 + efecte 9",
+   "page": 5,
+   "path": [
+    {
+     "x": 2.24,
+     "y": 7.75
+    },
+    {
+     "x": 3.78,
+     "y": 6.65
+    },
+    {
+     "x": 4,
+     "y": 6.76
+    },
+    {
+     "x": 2.88,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.52
+    },
+    {
+     "x": 0.35,
+     "y": 5.24
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.84,
+     "y": 6.6,
+     "c": "yellow"
+    },
+    {
+     "x": 0.35,
+     "y": 5.24,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "El quadre de bola i efecte és comú a totes les famílies bola-efecte: és el que cal memoritzar.",
+  "Quantitat de bola N/12 i angles de sortida (α bola 1, β bola 2): 1/12 → 20°/70°; 2/12 → 35/55; 3/12 → 40/50; 4/12 → 45/45; 5/12 → 55/35; 6/12 → 60/30; 7/12 → 65/25; 8/12 → 70/20; 9/12 → 75/15; 10/12 → 80/10; 11/12 → 85/5; 12/12 → 90/0.",
+  "Roda d'efectes: 4 al centre; 5, 6 i 7 cada vegada més lateral a l'equador; 8 i 9 laterals i més baixos; 2 i 3 a dalt (3 sobre l'eix vertical, 2 una mica a l'altre costat).",
+  "La cabanya curta pot ser un 20–25 % de les jugades d'una partida a tres bandes.",
+  "Gairebé sempre hi ha més d'una manera de repartir el total: tria la més sensata per a la teva manera de jugar.",
+  "El PDF diu que funcionen en tota mena de taules, fins i tot de pool."
+ ],
+ "quotes": [
+  "Sumaremos todos los valores y el resultado obtenido lo “repartiremos” adecuadamente entre la cantidad de bola a tomar y el efecto",
+  "tendremos que añadir un punto más (+1) al total al golpear con más velocidad"
+ ],
+ "uncertain": [
+  "La roda no diu de quin costat és l'efecte: als dibuixos és lateral cap a la llarga on va la bola 1 (efecte a favor); no hi ha cap efecte 1.",
+  "Signe del desfase deduït de la figura (pàg. 3): −2 quan la bola 1 és un diamant més amunt que la bola 2, +2 quan és més avall.",
+  "Els valors 0, 3, 5 i 7 de la llarga i 0, 3 i 6 de la llegada surten només als exemples (posicions a mig diamant).",
+  "A l'exemple de 4 o 5 bandes (pàg. 5) el recorregut dibuixat toca sis bandes.",
+  "Cap autor citat; els rètols en anglès («The short box») fan pensar en una font anglesa que el PDF no nomena."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "P": {
+     "label": "Posició bola 2 (llarga)",
+     "numbering": "Posició bola 2"
+    },
+    "C": {
+     "label": "Columna bola 2",
+     "numbering": "Columna bola 2"
+    },
+    "D": {
+     "label": "Desfase",
+     "values": [
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      6
+     ]
+    },
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada"
+    },
+    "V": {
+     "label": "Velocitat (+1 si fort)",
+     "values": [
+      0,
+      1
+     ]
+    },
+    "B": {
+     "label": "Bola (dotzens)",
+     "values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ]
+    },
+    "E": {
+     "label": "Efecte",
+     "values": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ]
+    }
+   },
+   "inputs": {
+    "P": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "C": [
+     0,
+     -1,
+     -2,
+     -3
+    ],
+    "D": [
+     -3,
+     -2,
+     -1,
+     0,
+     1,
+     2,
+     3,
+     4,
+     6
+    ],
+    "L": [
+     0,
+     2,
+     3,
+     4,
+     6,
+     8,
+     12
+    ],
+    "V": [
+     0,
+     0,
+     0,
+     1
+    ],
+    "B": [
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "E": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   "relations": [
+    {
+     "solve": "E",
+     "expr": "P + C + D + L + V - B",
+     "label": "tria la bola, calcula l'efecte"
+    },
+    {
+     "solve": "B",
+     "expr": "P + C + D + L + V - E",
+     "label": "tria l'efecte, calcula la bola"
+    }
+   ],
+   "valid": "B >= 1 && B <= 12 && E >= 2 && E <= 9",
+   "round": 0,
+   "note": "El total és bola + efecte; el trainer en fixa una part i calcula l'altra. No hi ha recorregut automàtic: depèn de la posició de les boles."
+  },
+  "quiz": [
+   {
+    "q": "Bola 2 al 8, a tocar de la banda, sense desfase; llegada 6. Quin total i quin repartiment fa servir el PDF?",
+    "options": [
+     "14: bola 6 + efecte 8",
+     "14: bola 8 + efecte 8",
+     "12: bola 6 + efecte 6",
+     "8: bola 4 + efecte 4"
+    ],
+    "answer": 0,
+    "explain": "8 + 6 = 14, repartit com a bola 6 + efecte 8.",
+    "page": 3,
+    "path": [
+     {
+      "x": 0.99,
+      "y": 4.0
+     },
+     {
+      "x": 3.75,
+      "y": 4.02
+     },
+     {
+      "x": 4,
+      "y": 4.27
+     },
+     {
+      "x": 2.34,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.46
+     },
+     {
+      "x": 0.45,
+      "y": 4.86
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.82,
+      "y": 4.0,
+      "c": "yellow"
+     },
+     {
+      "x": 0.45,
+      "y": 4.86,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Total 7 − 1 + 4 + 2 = 12. Per què el PDF tria bola 3 + efecte 9 i no 6 + 6?",
+    "options": [
+     "Amb 6 + 6 la bola 2 torna cap a la zona de carambola (retruc)",
+     "6 + 6 no suma 12",
+     "Amb 6 + 6 la bola 1 no arriba a la 3a banda",
+     "L'efecte 9 no existeix"
+    ],
+    "answer": 0,
+    "explain": "Les dues sumen 12, però 6 + 6 té perill de retruc.",
+    "page": 4,
+    "path": [
+     {
+      "x": 0.98,
+      "y": 5.43
+     },
+     {
+      "x": 2.9,
+      "y": 4.55
+     },
+     {
+      "x": 4,
+      "y": 5.13
+     },
+     {
+      "x": 0.84,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 7.02
+     },
+     {
+      "x": 0.49,
+      "y": 6.52
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.97,
+      "y": 4.49,
+      "c": "yellow"
+     },
+     {
+      "x": 0.49,
+      "y": 6.52,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Quan cal afegir +1 al total?",
+    "options": [
+     "Quan juguem a 4 o 5 bandes o atacant fort",
+     "Quan la bola 2 és a tocar de la banda",
+     "Quan el desfase és negatiu",
+     "Sempre que la llegada és 0"
+    ],
+    "answer": 0,
+    "explain": "Més velocitat obre el recorregut: +1 al total.",
+    "page": 5,
+    "path": [
+     {
+      "x": 1.74,
+      "y": 5.6
+     },
+     {
+      "x": 3.65,
+      "y": 5.83
+     },
+     {
+      "x": 4,
+      "y": 6.19
+     },
+     {
+      "x": 2.77,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 4.96
+     },
+     {
+      "x": 3.29,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.78
+     },
+     {
+      "x": 0,
+      "y": 6.67
+     },
+     {
+      "x": 0.24,
+      "y": 6.9
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.72,
+      "y": 5.85,
+      "c": "yellow"
+     },
+     {
+      "x": 0.24,
+      "y": 6.9,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Les boles 1 i 2 són molt juntes. Com mesures el desfase?",
+    "options": [
+     "Per la línia que uneix les tangents interiors",
+     "Pels centres, com sempre",
+     "No es compta",
+     "Amb una paral·lela pel racó"
+    ],
+    "answer": 0,
+    "explain": "Casos particulars, pàg. 5: tangents interiors en comptes dels centres.",
+    "page": 5,
+    "path": [
+     {
+      "x": 1.63,
+      "y": 5.67
+     },
+     {
+      "x": 1.75,
+      "y": 5.45
+     },
+     {
+      "x": 4,
+      "y": 5.73
+     },
+     {
+      "x": 1.0,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 6.99
+     },
+     {
+      "x": 0.31,
+      "y": 6.76
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.78,
+      "y": 5.38,
+      "c": "yellow"
+     },
+     {
+      "x": 0.31,
+      "y": 6.76,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "La bola 1 és un diamant més amunt que la bola 2 (línia per les dues boles). Quin desfase?",
+    "options": [
+     "−2",
+     "+2",
+     "−1",
+     "+1"
+    ],
+    "answer": 0,
+    "explain": "Cada mig diamant d'obertura entre les llargues val 1; bola 1 més amunt = negatiu (figura de la pàg. 3).",
+    "page": 3,
+    "path": [
+     {
+      "x": 0,
+      "y": 3
+     },
+     {
+      "x": 4,
+      "y": 4
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.0,
+      "y": 3.25,
+      "c": "white"
+     },
+     {
+      "x": 3.2,
+      "y": 3.8,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Total 5 (7 − 1 − 3 + 2). Quina opció recomana el PDF?",
+    "options": [
+     "Bola 2 + efecte 3",
+     "Bola 3 + efecte 2",
+     "Bola 5 sense efecte",
+     "Bola 1 + efecte 4"
+    ],
+    "answer": 0,
+    "explain": "Recomana 2 + 3 (bola 2, efecte 3) perquè fa un recorregut més natural.",
+    "page": 4,
+    "path": [
+     {
+      "x": 0.98,
+      "y": 3.88
+     },
+     {
+      "x": 2.92,
+      "y": 4.55
+     },
+     {
+      "x": 4,
+      "y": 5.53
+     },
+     {
+      "x": 0.88,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 7.0
+     },
+     {
+      "x": 0.49,
+      "y": 6.52
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.02,
+      "y": 4.58,
+      "c": "yellow"
+     },
+     {
+      "x": 0.49,
+      "y": 6.52,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Segons el quadre, amb 6/12 de bola quins angles surten (bola 1 / bola 2)?",
+    "options": [
+     "60° / 30°",
+     "45° / 45°",
+     "30° / 60°",
+     "90° / 0°"
+    ],
+    "answer": 0,
+    "explain": "Quadre de la pàg. 2: 6/12 → α 60, β 30.",
+    "page": 2
+   },
+   {
+    "q": "Què val la bola 2 si és al racó superior de la llarga?",
+    "options": [
+     "12",
+     "8",
+     "0",
+     "10"
+    ],
+    "answer": 0,
+    "explain": "Numeració de la llarga: 2, 4, 6, 8 i després 9, 10, 11, 12 al racó superior.",
+    "page": 2
+   }
+  ]
+ }
+}

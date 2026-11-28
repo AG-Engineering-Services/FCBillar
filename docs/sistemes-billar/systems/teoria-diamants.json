@@ -1,0 +1,967 @@
+{
+  "id": "teoria-diamants",
+  "name": "Teoria de diamants: llegada a 3a banda",
+  "group": "Teoria de diamants",
+  "attributed_to": "José Lazo (exposició); cita el seu mestre Alejandro Muñoz",
+  "pages": [
+    221,
+    237
+  ],
+  "purpose": "Tres bandes de bricole (llarga-curta-llarga) sortint de la cantonada/banda curta de baix i arribant a la 3a banda llarga; i, prolongant, a 4a, 5a i 6a banda.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-K-L (i prolongacions K, L...)",
+    "effect": "efecte a favor (al dibuix, efecte lateral cap a l'esquerra, ~3-4)",
+    "stroke": "cop normal; la velocitat canvia segons les bandes que es volen fer",
+    "ball": "també amb bola primer (bricole sobre bola), veure exemples p234-237"
+  },
+  "formula": "Atac = Sortida − Llegada",
+  "steps": [
+    "Decideix la llegada: el punt de la 3a banda (llarga esquerra) on ha d'arribar la bola per fer carambola.",
+    "Llegeix la sortida de la bola jugadora: on talla la línia del tac la banda de sortida (llarga esquerra o curta de baix), mirant el vèrtex de la banda.",
+    "Resta: Sortida − Llegada = punt d'atac a la banda llarga dreta.",
+    "Si la bola no és a prop de la banda de sortida, no t'enganyis amb una sortida fixa: busca dues línies sortida-atac que donin la diferència buscada (p. ex. 60→35 i 65→40) i tira per la paral·lela que passa per la bola.",
+    "Apunta el punt d'atac cap al diamant (fora de la banda); sortida i llegada es prenen al vèrtex de la banda (on toca el drap)."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 25
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 35
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 45
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 50
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 60
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 70
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 80
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 90
+        },
+        {
+          "x": 3.5,
+          "y": 8,
+          "v": 100
+        }
+      ],
+      "note": "Dibuix ja vertical al llibre: sortida per fora a la llarga esquerra i a la curta de baix; la cantonada de baix a l'esquerra és 50."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 4,
+          "y": 5.5,
+          "v": 60
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 70
+        },
+        {
+          "x": 4,
+          "y": 6.5,
+          "v": 80
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 90
+        },
+        {
+          "x": 4,
+          "y": 7.5,
+          "v": 100
+        }
+      ],
+      "note": "Per fora a la llarga dreta. Hi ha també un «00» rotulat per sobre del 0, més enllà de la cantonada de dalt a la dreta."
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 4.5,
+          "v": 50
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 60
+        },
+        {
+          "x": 0,
+          "y": 5.5,
+          "v": 70
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 80
+        },
+        {
+          "x": 0,
+          "y": 6.5,
+          "v": 90
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 100
+        }
+      ],
+      "note": "Per dins a la llarga esquerra (3a banda)."
+    },
+    {
+      "name": "Prolongació a 4a banda",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 4,
+          "y": 6,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 30
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 40
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 50
+        },
+        {
+          "x": 1.7,
+          "y": 8,
+          "v": 60
+        },
+        {
+          "x": 1.4,
+          "y": 8,
+          "v": 70
+        },
+        {
+          "x": 1.2,
+          "y": 8,
+          "v": 80
+        },
+        {
+          "x": 0.95,
+          "y": 8,
+          "v": 90
+        },
+        {
+          "x": 0.7,
+          "y": 8,
+          "v": 100
+        }
+      ],
+      "note": "On arriba a la 4a banda la bola que ha entrat per cada llegada (v = valor de la llegada). Mesurat del gràfic de la p230; les línies de 40 a 100 s'acosten molt."
+    }
+  ],
+  "corrections": [
+    "Algunes posicions demanen correcció (vegeu el fitxer de correccions: Verworst i Villora-Serralta).",
+    "Bola jugadora molt a prop de la banda d'atac: tendeix a «cuadrar» i tancar l'angle. Ataca una mica més endavant o, millor, juga un cop més moderat.",
+    "Per a 5 o 6 bandes hi ha mètodes que ataquen una mica més endavant per compensar; Lazo prefereix mantenir el càlcul i educar la velocitat."
+  ],
+  "examples": [
+    {
+      "text": "Sortida 50 (cantonada), atac 40 → llegada 10.",
+      "page": 221,
+      "path": [
+        {
+          "x": 3.05,
+          "y": 5.3
+        },
+        {
+          "x": 4,
+          "y": 4.35
+        },
+        {
+          "x": 1.6,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.46,
+          "y": 1.79,
+          "c": "red"
+        },
+        {
+          "x": 0.68,
+          "y": 1.66,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Error típic: «surto de 63 i vull la llegada 25 → atac 38», però la bola no és realment a la sortida 63. (Recorregut construït amb atac 38 i llegada 25 tal com ho calcula el jugador.)",
+      "page": 226,
+      "path": [
+        {
+          "x": 2.83,
+          "y": 5.96
+        },
+        {
+          "x": 4,
+          "y": 3.8
+        },
+        {
+          "x": 1.59,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.5
+        }
+      ],
+      "path_built": true
+    },
+    {
+      "text": "Llegada 25; bola entre les sortides 60 i 65: línies 60→35 i 65→40. La bola és gairebé a la 65-40 → ataca una mica abans del 40 («a l'orella esquerra del rombo»).",
+      "page": 228,
+      "path": [
+        {
+          "x": 2.64,
+          "y": 6.0
+        },
+        {
+          "x": 4,
+          "y": 3.95
+        },
+        {
+          "x": 1.55,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.5
+        }
+      ],
+      "path_built": true,
+      "balls": [
+        {
+          "x": 0.36,
+          "y": 3.39,
+          "c": "red"
+        },
+        {
+          "x": 0.56,
+          "y": 3.24,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Llegada 40; bola entre sortides 50 i 45 → atacs 10 i 5; la bola és al mig → paral·lela entre les dues (≈7,5).",
+      "page": 229,
+      "path": [
+        {
+          "x": 1.16,
+          "y": 5.78
+        },
+        {
+          "x": 4,
+          "y": 0.75
+        },
+        {
+          "x": 3.37,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 4
+        }
+      ],
+      "path_built": true,
+      "balls": [
+        {
+          "x": 0.22,
+          "y": 4.19,
+          "c": "red"
+        },
+        {
+          "x": 0.39,
+          "y": 4.07,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 60, atac 30 → llegada 30; la mateixa línia segueix a 4a, 5a i 6a banda i resol moltes posicions diferents.",
+      "page": 232,
+      "path": [
+        {
+          "x": 1.14,
+          "y": 7.81
+        },
+        {
+          "x": 4,
+          "y": 3.5
+        },
+        {
+          "x": 2.5,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 2.98,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 7
+        },
+        {
+          "x": 0,
+          "y": 1.04
+        }
+      ]
+    },
+    {
+      "text": "Sortida 50, atac 30 → llegada 20.",
+      "page": 233,
+      "path": [
+        {
+          "x": 1.67,
+          "y": 6.02
+        },
+        {
+          "x": 4,
+          "y": 3.37
+        },
+        {
+          "x": 2.3,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.58,
+          "y": 2.65,
+          "c": "red"
+        },
+        {
+          "x": 0.34,
+          "y": 2.74,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 60, atac 50 → llegada 10.",
+      "page": 233,
+      "path": [
+        {
+          "x": 2.4,
+          "y": 6.73
+        },
+        {
+          "x": 4,
+          "y": 5.3
+        },
+        {
+          "x": 1.41,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.36,
+          "y": 2.81,
+          "c": "red"
+        },
+        {
+          "x": 1.12,
+          "y": 2.93,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer: sortida 45, atac 35 → llegada 10. Compte amb el retruc (amb 1/8 de bola la bola 1 fa el doble de recorregut que la 2).",
+      "page": 234,
+      "path": [
+        {
+          "x": 1.24,
+          "y": 6.4
+        },
+        {
+          "x": 1.39,
+          "y": 5.66
+        },
+        {
+          "x": 4,
+          "y": 3.7
+        },
+        {
+          "x": 1.44,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.39,
+          "y": 5.66,
+          "c": "yellow"
+        },
+        {
+          "x": 1.71,
+          "y": 3.54,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer: sortida 60, atac 10 → llegada 50, i la bola segueix a 4a banda (curta de baix).",
+      "page": 235,
+      "path": [
+        {
+          "x": 1.36,
+          "y": 4.81
+        },
+        {
+          "x": 2.89,
+          "y": 4.22
+        },
+        {
+          "x": 4,
+          "y": 1.83
+        },
+        {
+          "x": 3.5,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 4.43
+        },
+        {
+          "x": 2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.89,
+          "y": 4.22,
+          "c": "yellow"
+        },
+        {
+          "x": 3.81,
+          "y": 5.89,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer: sortida 55, atac 30 → llegada 25, i segueix per més bandes.",
+      "page": 236,
+      "path": [
+        {
+          "x": 1.36,
+          "y": 7.33
+        },
+        {
+          "x": 1.41,
+          "y": 6.65
+        },
+        {
+          "x": 4,
+          "y": 3.47
+        },
+        {
+          "x": 2.46,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.5
+        },
+        {
+          "x": 4,
+          "y": 7.53
+        },
+        {
+          "x": 3.48,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.41,
+          "y": 6.65,
+          "c": "yellow"
+        },
+        {
+          "x": 0.19,
+          "y": 1.42,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer: sortida 90, atac 0 → llegada 90, i segueix per més bandes.",
+      "page": 237,
+      "path": [
+        {
+          "x": 1.71,
+          "y": 6
+        },
+        {
+          "x": 3.42,
+          "y": 5.48
+        },
+        {
+          "x": 4,
+          "y": 2.03
+        },
+        {
+          "x": 3.6,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 6.4
+        },
+        {
+          "x": 0.98,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 4.97
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.42,
+          "y": 5.48,
+          "c": "yellow"
+        },
+        {
+          "x": 0.93,
+          "y": 0.23,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Molts jugadors prenen la sortida al rombo per on passa el tac, no al vèrtex: Lazo hi veu una contradicció (la mateixa bola donaria 47,5 per la curta i 52,5 per la llarga).",
+    "A cadascú li funciona «més o menys» segons el seu cop (efecte, penetració, velocitat): busca la teva fórmula.",
+    "Moltes solucions a 4, 5 o 6 bandes donen el mateix càlcul si la llegada és la mateixa; però cal més velocitat com més bandes.",
+    "Les llegades de 50 a 100 queden molt juntes en les prolongacions: les de 10-30 són delicades i les de més de 50 fan la solució «més gorda» (per això 5-6 bandes sovint és més fàcil).",
+    "Practica arribar a la bola 3 i separar-la 15-30 cm."
+  ],
+  "quotes": [
+    "SALIDA – LLEGADA = ATAQUE",
+    "A la oreja izquierda del rombo"
+  ],
+  "uncertain": [
+    "La posició exacta del «00» d'atac no està marcada sobre la taula (apareix rotulat per sobre del 0).",
+    "Les prolongacions a 5a i 6a banda (p231) només es mostren en un gràfic de línies; no s'han transcrit punt per punt.",
+    "Als camins, el contacte a la banda d'atac queda una mica més avall que el diamant d'atac perquè s'apunta al rombo (fora del drap)."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        }
+      },
+      "inputs": {
+        "S": [
+          40,
+          45,
+          50,
+          60,
+          70,
+          80,
+          90,
+          100
+        ],
+        "A": [
+          0,
+          10,
+          20,
+          30,
+          40,
+          50,
+          60,
+          70
+        ],
+        "L": [
+          0,
+          10,
+          20,
+          30,
+          40,
+          50,
+          60,
+          70,
+          80
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L",
+          "label": "trobar l'atac"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A",
+          "label": "on arribarà"
+        }
+      ],
+      "valid": "A >= 0 && A <= 100 && L >= 0 && L <= 100",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Sense correccions (vegeu el fitxer de correccions). Recorregut L-K-L: el contacte a la curta de dalt no es dibuixa amb la fórmula."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 50 i vols arribar a la llegada 10. On ataques?",
+        "options": [
+          "30",
+          "60",
+          "40",
+          "10"
+        ],
+        "answer": 2,
+        "explain": "Atac = Sortida − Llegada = 50 − 10 = 40.",
+        "page": 221,
+        "path": [
+          {
+            "x": 3.05,
+            "y": 5.3
+          },
+          {
+            "x": 4,
+            "y": 4.35
+          },
+          {
+            "x": 1.6,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.46,
+            "y": 1.79,
+            "c": "red"
+          },
+          {
+            "x": 0.68,
+            "y": 1.66,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Segons Lazo, cap a on s'apunta el punt d'atac?",
+        "options": [
+          "Al vèrtex de la banda, on toca el drap",
+          "Al centre del tram entre dos diamants",
+          "A la cantonada més propera",
+          "Cap al rombo (diamant), fora de la banda"
+        ],
+        "answer": 3,
+        "explain": "Atac: «hacia el rombo»; llegada i sortida: al vèrtex de la banda.",
+        "page": 222
+      },
+      {
+        "q": "La bola és a la zona de sortida 60-65 i vols la llegada 25. Què recomana Lazo?",
+        "options": [
+          "Fixar la sortida a 63 i atacar 38",
+          "Visualitzar les línies 60→35 i 65→40 i tirar per la paral·lela que passa per la bola",
+          "Atacar el 00",
+          "Atacar sempre 35"
+        ],
+        "answer": 1,
+        "explain": "Busca línies sortida-atac que donin la diferència 25 i tira per la paral·lela; la bola era gairebé a la 65-40.",
+        "page": 227,
+        "path": [
+          {
+            "x": 2.64,
+            "y": 6.0
+          },
+          {
+            "x": 4,
+            "y": 3.95
+          },
+          {
+            "x": 1.55,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 2.5
+          }
+        ]
+      },
+      {
+        "q": "Sortida 60, atac 30. A quina llegada arriba la bola?",
+        "options": [
+          "40",
+          "20",
+          "30",
+          "90"
+        ],
+        "answer": 2,
+        "explain": "Llegada = 60 − 30 = 30; la mateixa línia continua a 4a, 5a i 6a banda.",
+        "page": 232,
+        "path": [
+          {
+            "x": 1.14,
+            "y": 7.81
+          },
+          {
+            "x": 4,
+            "y": 3.5
+          },
+          {
+            "x": 2.5,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 3
+          }
+        ]
+      },
+      {
+        "q": "La bola jugadora és molt a prop de la banda d'atac. Què passa i què hi fas?",
+        "options": [
+          "No canvia res",
+          "Es tanca l'angle: cop més moderat o atacar una mica més endavant",
+          "S'obre l'angle: atacar més enrere",
+          "Cal més velocitat"
+        ],
+        "answer": 1,
+        "explain": "En arribar ràpid a la banda d'atac es produeix un cuadratge i es tanquen els angles.",
+        "page": 229
+      },
+      {
+        "q": "Per què una carambola a 5 o 6 bandes sovint és més fàcil que a 3?",
+        "options": [
+          "Perquè l'atac sempre és 0",
+          "Perquè la bola va més lenta",
+          "Les línies de llegada de 50 a 100 queden molt juntes en les prolongacions",
+          "Perquè es juga sense efecte"
+        ],
+        "answer": 2,
+        "explain": "Les llegades altes fan la solució «més gorda»; les de 10-30 són delicades.",
+        "page": 231
+      },
+      {
+        "q": "Bricole amb bola primer: sortida 45, atac 35. Llegada?",
+        "options": [
+          "80",
+          "20",
+          "35",
+          "10"
+        ],
+        "answer": 3,
+        "explain": "45 − 35 = 10. Compte amb el retruc.",
+        "page": 234,
+        "path": [
+          {
+            "x": 1.24,
+            "y": 6.4
+          },
+          {
+            "x": 1.39,
+            "y": 5.66
+          },
+          {
+            "x": 4,
+            "y": 3.7
+          },
+          {
+            "x": 1.44,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.39,
+            "y": 5.66,
+            "c": "yellow"
+          },
+          {
+            "x": 1.71,
+            "y": 3.54,
+            "c": "red"
+          }
+        ]
+      }
+    ]
+  }
+}

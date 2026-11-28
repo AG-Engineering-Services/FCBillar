@@ -1,0 +1,748 @@
+{
+ "id": "plus-4-llegada-curta",
+ "name": "Sistema Plus, zona 4 amb llegada a la curta",
+ "group": "Sistema Plus",
+ "attributed_to": "Jean Verworst (Berekend Biljarten)",
+ "pages": [
+  144,
+  156
+ ],
+ "purpose": "Plus sortint de prop del racó inferior (6è diamant endavant) amb tercera banda a la curta inferior (K-L-K).",
+ "shot": {
+  "first_cushion": "curta",
+  "cushions": "K-L-K",
+  "effect": "efecte màxim",
+  "stroke": "fort de bricola sortint de la llarga; més lent i penetrat amb la variant de punts reals",
+  "ball": null
+ },
+ "formula": "Sortint del racó: Atac = Llegada (després, correccions per la sortida)",
+ "steps": [
+  "Base: sortint del racó inferior esquerre, ataca el mateix número que la llegada.",
+  "Sortida a la curta inferior: resta 2,5 punts reals (1/4 de diamant) a l'atac per cada diamant que t'allunyes del racó.",
+  "Sortida a la llarga: suma 10 punts de valor per cada diamant que t'allunyes del racó.",
+  "Si l'angle d'atac va contra l'efecte, mesura l'obliqüitat i corregeix-ne la meitat."
+ ],
+ "numberings": [
+  {
+   "name": "Atac",
+   "role": "atac",
+   "points": [
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 3.75,
+     "y": 0,
+     "v": 10
+    },
+    {
+     "x": 3.5,
+     "y": 0,
+     "v": 20
+    },
+    {
+     "x": 3,
+     "y": 0,
+     "v": 30
+    },
+    {
+     "x": 2.5,
+     "y": 0,
+     "v": 40
+    },
+    {
+     "x": 2,
+     "y": 0,
+     "v": 50
+    },
+    {
+     "x": 1.75,
+     "y": 0,
+     "v": 60
+    },
+    {
+     "x": 1.5,
+     "y": 0,
+     "v": 70
+    },
+    {
+     "x": 1.25,
+     "y": 0,
+     "v": 80
+    },
+    {
+     "x": 1,
+     "y": 0,
+     "v": 90
+    },
+    {
+     "x": 0.75,
+     "y": 0,
+     "v": 100
+    },
+    {
+     "x": 0.5,
+     "y": 0,
+     "v": 110
+    },
+    {
+     "x": 0.25,
+     "y": 0,
+     "v": 120
+    }
+   ],
+   "note": "Dibuix ja en vertical; cap rotació. Sortida a la banda llarga esquerra, atac a la curta superior. Numeració bàsica del Plus."
+  },
+  {
+   "name": "Llegada",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 0,
+     "y": 8,
+     "v": 10
+    },
+    {
+     "x": 0.5,
+     "y": 8,
+     "v": 20
+    },
+    {
+     "x": 1,
+     "y": 8,
+     "v": 30
+    },
+    {
+     "x": 1.5,
+     "y": 8,
+     "v": 40
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 50
+    },
+    {
+     "x": 2.25,
+     "y": 8,
+     "v": 60
+    },
+    {
+     "x": 2.5,
+     "y": 8,
+     "v": 70
+    },
+    {
+     "x": 2.75,
+     "y": 8,
+     "v": 80
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 90
+    },
+    {
+     "x": 3.25,
+     "y": 8,
+     "v": 100
+    },
+    {
+     "x": 3.5,
+     "y": 8,
+     "v": 110
+    },
+    {
+     "x": 3.75,
+     "y": 8,
+     "v": 120
+    }
+   ],
+   "note": "Banda curta inferior; el racó de sortida és el 10 (x=0). És la numeració pròpia d'aquest sistema (p. 144–156): tota l'escala és a la curta inferior, amb el 10 al racó i fins al 120 a x=3,75, i no a la llarga esquerra (0–80) amb 90–120 a la curta com al Plus de referència."
+  }
+ ],
+ "corrections": [
+  "Sortida a la curta: −2,5 punts reals (1/4 de diamant) per diamant de distància al racó. Ex.: sortida a 1 diamant, llegada 60 → atac 50.",
+  "Sortida a 2,5 diamants: 2,5 × 2,5 = 6,25 punts reals (mig diamant i un quart més de mig) a restar.",
+  "Obliqüitat: si l'angle d'atac és contrari a l'efecte, mesura l'obliqüitat i rectifica'n la meitat.",
+  "Sortida a la llarga: +10 punts de valor per diamant. Alternativa amb cop més lent de bricola, penetrat sobre la bola 2 o per sota del centre i allargat: +5 punts reals per diamant."
+ ],
+ "examples": [
+  {
+   "text": "Sortida del racó, amb bola 2: llegada 50 → atac 50",
+   "page": 146,
+   "path": [
+    {
+     "x": 1.42,
+     "y": 5.64
+    },
+    {
+     "x": 1.07,
+     "y": 4.74
+    },
+    {
+     "x": 1.9,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 5.25
+    },
+    {
+     "x": 2.02,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.89,
+     "y": 4.67,
+     "c": "yellow"
+    },
+    {
+     "x": 1.63,
+     "y": 7.6,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida del racó, amb bola 2: llegada 80 → atac 80",
+   "page": 147,
+   "path": [
+    {
+     "x": 0.46,
+     "y": 2.62
+    },
+    {
+     "x": 0.98,
+     "y": 2.03
+    },
+    {
+     "x": 1.25,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 5.23
+    },
+    {
+     "x": 2.77,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.14,
+     "y": 2.07,
+     "c": "yellow"
+    },
+    {
+     "x": 2.23,
+     "y": 7.48,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida a 1 diamant del racó (curta), llegada 60 → 60 − 1/4 de diamant = atac 50",
+   "page": 148,
+   "path": [
+    {
+     "x": 1.17,
+     "y": 7.57
+    },
+    {
+     "x": 2.04,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4.67
+    },
+    {
+     "x": 2.3,
+     "y": 8
+    }
+   ]
+  },
+  {
+   "text": "Sortida 70, llegada 70: 70 − 6,25 punts reals; obliqüitat ≈ 0,8, se'n corregeix la meitat",
+   "page": 149,
+   "path": [
+    {
+     "x": 2.46,
+     "y": 7.36
+    },
+    {
+     "x": 2.16,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4.7
+    },
+    {
+     "x": 2.5,
+     "y": 8
+    }
+   ]
+  },
+  {
+   "text": "Sortida a 1 diamant amb bola 2, llegada 40 → atac 40 − 5 = 35 (1/4 de diamant = 5 punts)",
+   "page": 152,
+   "path": [
+    {
+     "x": 1.86,
+     "y": 5.2
+    },
+    {
+     "x": 1.73,
+     "y": 4.76
+    },
+    {
+     "x": 2.66,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 2.3
+    },
+    {
+     "x": 1.49,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.55,
+     "y": 4.73,
+     "c": "yellow"
+    },
+    {
+     "x": 1.21,
+     "y": 7.76,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida a 2 diamants, llegada 90: −1/2 diamant per la sortida i +1/4 per l'obliqüitat → atac ≈ 60",
+   "page": 153,
+   "path": [
+    {
+     "x": 1.29,
+     "y": 4.68
+    },
+    {
+     "x": 1.9,
+     "y": 3.74
+    },
+    {
+     "x": 1.78,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4.92
+    },
+    {
+     "x": 3.0,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.06,
+     "y": 3.81,
+     "c": "yellow"
+    },
+    {
+     "x": 2.56,
+     "y": 7.53,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida a la llarga a 1 diamant, llegada 50 → +10 = atac 60 (cop fort de bricola)",
+   "page": 154,
+   "path": [
+    {
+     "x": 0.22,
+     "y": 5.25
+    },
+    {
+     "x": 1.67,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 3.77
+    },
+    {
+     "x": 2.03,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.64,
+     "y": 7.67,
+     "c": "yellow"
+    },
+    {
+     "x": 1.77,
+     "y": 7.46,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida a la llarga a 2 diamants, llegada 60 → +2 × 5 punts reals: atac 1 diamant més enllà (≈100)",
+   "page": 155,
+   "path": [
+    {
+     "x": 0.57,
+     "y": 2.24
+    },
+    {
+     "x": 0.52,
+     "y": 1.54
+    },
+    {
+     "x": 0.74,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4.67
+    },
+    {
+     "x": 2.28,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.36,
+     "y": 1.52,
+     "c": "yellow"
+    },
+    {
+     "x": 1.96,
+     "y": 7.62,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida a la llarga a 3 diamants, llegada 50 → +1,5 diamants: atac 110; més a poc a poc, penetrat i baixant l'altura",
+   "page": 156,
+   "path": [
+    {
+     "x": 0.2,
+     "y": 2.24
+    },
+    {
+     "x": 0.51,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4.08
+    },
+    {
+     "x": 2.02,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.81,
+     "y": 7.41,
+     "c": "yellow"
+    },
+    {
+     "x": 1.63,
+     "y": 7.53,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Funciona força bé si tens molt entrenada la velocitat i l'efecte."
+ ],
+ "quotes": [
+  "saliendo desde el rincón el punto de llegada siempre coincide con el punto de ataque"
+ ],
+ "uncertain": [
+  "L'obliqüitat '0,8 aprox.' no té unitat clara al llibre; al dibuix sembla una franja d'uns 0,3-0,4 diamants a la banda d'atac.",
+  "A l'exemple de la p. 149 el text diu '6,25m' i 'medio rombo real y un cuarto más'; 6,25 punts reals són 0,625 diamants."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "A": {
+     "label": "Atac",
+     "numbering": "Atac"
+    },
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada"
+    },
+    "D": {
+     "label": "Diamants de sortida per la llarga des del racó",
+     "values": [
+      0,
+      1,
+      2,
+      3
+     ]
+    }
+   },
+   "inputs": {
+    "L": [
+     20,
+     30,
+     40,
+     50,
+     60,
+     70,
+     80,
+     90,
+     100
+    ],
+    "D": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "A": [
+     30,
+     40,
+     50,
+     60,
+     70,
+     80,
+     90,
+     100,
+     110
+    ]
+   },
+   "relations": [
+    {
+     "solve": "A",
+     "expr": "L + 10 * D",
+     "label": "sortida del racó o per la banda llarga (cop fort de bricola)"
+    },
+    {
+     "solve": "L",
+     "expr": "A - 10 * D",
+     "label": "sortida del racó o per la banda llarga"
+    }
+   ],
+   "valid": "A >= 0 && A <= 120 && L >= 10 && L <= 120",
+   "round": 1,
+   "path": [
+    "A",
+    "L"
+   ],
+   "note": "D = 0 és la base (sortida del racó: atac = llegada). +10 punts de valor per diamant de sortida per la llarga, efecte màxim i cop fort de bricola. La correcció per la banda curta (punts reals) va al qüestionari."
+  },
+  "quiz": [
+   {
+    "q": "Surts del racó inferior i vols llegada 80. Atac?",
+    "options": [
+     "80",
+     "70",
+     "90",
+     "40"
+    ],
+    "answer": 0,
+    "explain": "Saliendo desde el rincón el punto de llegada coincide con el de ataque.",
+    "page": 147,
+    "path": [
+     {
+      "x": 0.46,
+      "y": 2.62
+     },
+     {
+      "x": 0.98,
+      "y": 2.03
+     },
+     {
+      "x": 1.25,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 5.23
+     },
+     {
+      "x": 2.77,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.14,
+      "y": 2.07,
+      "c": "yellow"
+     },
+     {
+      "x": 2.23,
+      "y": 7.48,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Surts a 1 diamant del racó per la curta i vols llegada 60. Atac?",
+    "options": [
+     "50",
+     "60",
+     "70",
+     "55"
+    ],
+    "answer": 0,
+    "explain": "Es resten 2,5 punts reals (1/4 de diamant) per diamant: de 60 a 50.",
+    "page": 148,
+    "path": [
+     {
+      "x": 1.17,
+      "y": 7.57
+     },
+     {
+      "x": 2.04,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 4.67
+     },
+     {
+      "x": 2.3,
+      "y": 8
+     }
+    ]
+   },
+   {
+    "q": "Surts 1 diamant amunt per la banda llarga, llegada 50. Atac?",
+    "options": [
+     "60",
+     "50",
+     "40",
+     "55"
+    ],
+    "answer": 0,
+    "explain": "Per la llarga se sumen 10 punts de valor per diamant.",
+    "page": 154,
+    "path": [
+     {
+      "x": 0.22,
+      "y": 5.25
+     },
+     {
+      "x": 1.67,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 3.77
+     },
+     {
+      "x": 2.03,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.64,
+      "y": 7.67,
+      "c": "yellow"
+     },
+     {
+      "x": 1.77,
+      "y": 7.46,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "L'angle d'atac va contra l'efecte. Com corregeixes l'obliqüitat?",
+    "options": [
+     "Rectificant-ne la meitat",
+     "Doblant-la",
+     "Ignorant-la",
+     "Treient tot l'efecte"
+    ],
+    "answer": 0,
+    "explain": "La rectificación es dividir por la mitad dicha oblicuidad.",
+    "page": 151
+   },
+   {
+    "q": "Amb la variant de +5 punts reals per diamant (sortida per la llarga), quin cop?",
+    "options": [
+     "Més lent de bricola o penetrat sobre la bola 2",
+     "Molt fort i sec",
+     "Sense efecte",
+     "Massé"
+    ],
+    "answer": 0,
+    "explain": "Sumant 5 punts reals amb un cop més lent de bricola o penetrat sobre la bola 2.",
+    "page": 155,
+    "path": [
+     {
+      "x": 0.57,
+      "y": 2.24
+     },
+     {
+      "x": 0.52,
+      "y": 1.54
+     },
+     {
+      "x": 0.74,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 4.67
+     },
+     {
+      "x": 2.28,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.36,
+      "y": 1.52,
+      "c": "yellow"
+     },
+     {
+      "x": 1.96,
+      "y": 7.62,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Quina és la base de càlcul sortint del racó?",
+    "options": [
+     "Atac = llegada",
+     "Atac = llegada − sortida",
+     "Atac = 2 × llegada",
+     "Atac = llegada + 10"
+    ],
+    "answer": 0,
+    "explain": "Saliendo desde el rincón el punto de llegada siempre coincide con el punto de ataque.",
+    "page": 145
+   }
+  ]
+ }
+}

@@ -1,0 +1,513 @@
+{
+ "id": "van-kuyk-vk12",
+ "name": "Sistema Van Kuyk VK12",
+ "group": "Teoria de diamants",
+ "attributed_to": "Van Kuyk (amb canvis de José Lazo)",
+ "pages": [
+  321,
+  323
+ ],
+ "purpose": "Quatre bandes llarga-curta-llarga-curta amb arribada a la 4a banda curta, quan la zona de carambola és a prop de la banda curta.",
+ "shot": {
+  "first_cushion": "llarga",
+  "cushions": "L-K-L-K",
+  "effect": "màxim favorable (com al VK10)",
+  "stroke": "una mica més de velocitat que al VK10",
+  "ball": null
+ },
+ "formula": "Atac = Sortida − Arribada",
+ "steps": [
+  "Llegeix l'arribada a la 4a banda (banda curta de baix).",
+  "Busca la línia sortida → centre de la bola → atac que compleixi Atac = Sortida − Arribada.",
+  "Sortides de la llarga: 48 menys 6 per diamant; sortides de la curta: 50 més 12 per diamant."
+ ],
+ "numberings": [
+  {
+   "name": "Sortida (banda llarga)",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 0,
+     "y": 3,
+     "v": 18
+    },
+    {
+     "x": 0,
+     "y": 4,
+     "v": 24
+    },
+    {
+     "x": 0,
+     "y": 5,
+     "v": 30
+    },
+    {
+     "x": 0,
+     "y": 6,
+     "v": 36
+    },
+    {
+     "x": 0,
+     "y": 7,
+     "v": 42
+    },
+    {
+     "x": 0,
+     "y": 8,
+     "v": 48
+    }
+   ],
+   "note": "Dibuix ja vertical al llibre, sense girar. Per fora a la llarga esquerra; el 48 és el diamant del rincó de la banda llarga (2 menys que el 50)."
+  },
+  {
+   "name": "Sortida (banda curta)",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 0,
+     "y": 8,
+     "v": 50
+    },
+    {
+     "x": 1,
+     "y": 8,
+     "v": 62
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 74
+    },
+    {
+     "x": 2.5,
+     "y": 8,
+     "v": 86
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 98
+    }
+   ],
+   "note": "La base 50 és el diamant del rincó de la banda curta."
+  },
+  {
+   "name": "Atac",
+   "role": "atac",
+   "points": [
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 4,
+     "y": 1,
+     "v": 10
+    },
+    {
+     "x": 4,
+     "y": 2,
+     "v": 20
+    },
+    {
+     "x": 4,
+     "y": 3,
+     "v": 30
+    },
+    {
+     "x": 4,
+     "y": 4,
+     "v": 40
+    },
+    {
+     "x": 4,
+     "y": 5,
+     "v": 50
+    },
+    {
+     "x": 4,
+     "y": 5.5,
+     "v": 60
+    },
+    {
+     "x": 4,
+     "y": 6,
+     "v": 70
+    },
+    {
+     "x": 4,
+     "y": 6.5,
+     "v": 80
+    },
+    {
+     "x": 4,
+     "y": 7,
+     "v": 90
+    }
+   ],
+   "note": "Per fora a la llarga dreta, igual que al VK10."
+  },
+  {
+   "name": "Arribada (4a banda curta)",
+   "role": "arribada",
+   "points": [
+    {
+     "x": 1,
+     "y": 8,
+     "v": 80
+    },
+    {
+     "x": 1.33,
+     "y": 8,
+     "v": 70
+    },
+    {
+     "x": 1.67,
+     "y": 8,
+     "v": 60
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 50
+    },
+    {
+     "x": 2.5,
+     "y": 8,
+     "v": 40
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 30
+    },
+    {
+     "x": 4,
+     "y": 8,
+     "v": 20
+    }
+   ],
+   "note": "Banda curta de baix; de 80 a 50 cada terç de diamant."
+  }
+ ],
+ "corrections": [
+  "Sortides des de la banda curta a la zona aproximada de 85: les trajectòries surten sovint curtes; afegeix 2 punts a l'atac quan l'atac és entre 30 i 40 (cal provar-ho a la taula segons el mecanisme de cada jugador)."
+ ],
+ "examples": [
+  {
+   "text": "Sortida 42, arribada 30 → atac 12.",
+   "page": 322,
+   "path": [
+    {
+     "x": 0.41,
+     "y": 6.02
+    },
+    {
+     "x": 4,
+     "y": 1.6
+    },
+    {
+     "x": 3.2,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 3.0
+    },
+    {
+     "x": 2.9,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.73,
+     "y": 7.81,
+     "c": "yellow"
+    },
+    {
+     "x": 2.95,
+     "y": 7.68,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 62, arribada 30 → atac 32.",
+   "page": 322,
+   "path": [
+    {
+     "x": 1.69,
+     "y": 7.29
+    },
+    {
+     "x": 4,
+     "y": 3.7
+    },
+    {
+     "x": 2.41,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 3.17
+    },
+    {
+     "x": 2.9,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.73,
+     "y": 7.81,
+     "c": "yellow"
+    },
+    {
+     "x": 2.95,
+     "y": 7.68,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Aplica el VK12 quan la zona de carambola és a prop de la banda curta i el VK10 quan és a prop de la llarga."
+ ],
+ "quotes": [
+  "Los números de salida de la banda larga se obtienen sustrayendo 6 puntos por cada rombo a 48.",
+  "Los números de salida de la banda corta se obtienen sumando 12 puntos por cada rombo a 50."
+ ],
+ "uncertain": [
+  "El text diu +12 «per cada diamant» a la curta, però el gràfic posa 74, 86 i 98 a mig diamant de distància (x=2, 2.5, 3).",
+  "La posició de les arribades 70 i 60 (x≈1.33 i 1.67) és mesurada del gràfic.",
+  "Als exemples el punt de 4a banda és estimat (x≈2.9)."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "S": {
+     "label": "Sortida (llarga)",
+     "numbering": "Sortida (banda llarga)"
+    },
+    "A": {
+     "label": "Atac",
+     "numbering": "Atac"
+    },
+    "L": {
+     "label": "Arribada (4a banda)",
+     "numbering": "Arribada (4a banda curta)"
+    },
+    "K": {
+     "label": "Sortida (curta)",
+     "numbering": "Sortida (banda curta)"
+    }
+   },
+   "inputs": {
+    "S": [
+     18,
+     24,
+     30,
+     36,
+     42,
+     48
+    ],
+    "A": [
+     10,
+     20,
+     30,
+     40
+    ],
+    "L": [
+     20,
+     30,
+     40,
+     50,
+     60
+    ],
+    "K": [
+     50,
+     62,
+     74,
+     86,
+     98
+    ]
+   },
+   "relations": [
+    {
+     "solve": "A",
+     "expr": "S - L",
+     "label": "sortida de la llarga"
+    },
+    {
+     "solve": "A",
+     "expr": "K - L",
+     "label": "sortida de la curta",
+     "when": "!(K == 86 && K - L >= 30 && K - L <= 40)"
+    },
+    {
+     "solve": "A",
+     "expr": "K - L + 2",
+     "label": "sortida curta zona 85, atac entre 30 i 40",
+     "when": "K == 86 && K - L >= 30 && K - L <= 40"
+    },
+    {
+     "solve": "L",
+     "expr": "S - A",
+     "label": "on arribo"
+    }
+   ],
+   "valid": "A >= 0 && A <= 90 && L >= 20 && L <= 80",
+   "round": 0,
+   "path": [
+    "S",
+    "A",
+    "L"
+   ],
+   "note": "Entre l'atac i l'arribada la bola toca la curta de dalt i la llarga esquerra."
+  },
+  "quiz": [
+   {
+    "q": "Sortida 42, arribada 30. Atac?",
+    "options": [
+     "12",
+     "72",
+     "22",
+     "32"
+    ],
+    "answer": 0,
+    "explain": "42 − 30 = 12.",
+    "page": 322,
+    "path": [
+     {
+      "x": 0.41,
+      "y": 6.02
+     },
+     {
+      "x": 4,
+      "y": 1.6
+     },
+     {
+      "x": 3.2,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 3.0
+     },
+     {
+      "x": 2.9,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.73,
+      "y": 7.81,
+      "c": "yellow"
+     },
+     {
+      "x": 2.95,
+      "y": 7.68,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Sortida 62, arribada 30. Atac?",
+    "options": [
+     "92",
+     "32",
+     "30",
+     "22"
+    ],
+    "answer": 1,
+    "explain": "62 − 30 = 32.",
+    "page": 322,
+    "path": [
+     {
+      "x": 1.69,
+      "y": 7.29
+     },
+     {
+      "x": 4,
+      "y": 3.7
+     },
+     {
+      "x": 2.41,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 3.17
+     },
+     {
+      "x": 2.9,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.73,
+      "y": 7.81,
+      "c": "yellow"
+     },
+     {
+      "x": 2.95,
+      "y": 7.68,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Com s'obtenen les sortides de la banda llarga al VK12?",
+    "options": [
+     "50 més 12 per diamant",
+     "45 menys 5 per diamant",
+     "48 menys 6 per diamant",
+     "48 més 6 per diamant"
+    ],
+    "answer": 2,
+    "explain": "P321.",
+    "page": 321
+   },
+   {
+    "q": "Sortint de la curta cap al 85 amb atac entre 30 i 40, què recomana el llibre?",
+    "options": [
+     "Treure 2 punts a l'atac",
+     "Afegir 5 a la sortida",
+     "Res",
+     "Afegir 2 punts a l'atac"
+    ],
+    "answer": 3,
+    "explain": "Les trajectòries surten curtes.",
+    "page": 323
+   },
+   {
+    "q": "On és l'arribada al VK12?",
+    "options": [
+     "A la 4a banda, la curta",
+     "A la 3a banda llarga",
+     "A la 2a banda curta",
+     "A la 5a banda"
+    ],
+    "answer": 0,
+    "explain": "VK12 és per a arribades a 4a banda curta.",
+    "page": 318
+   },
+   {
+    "q": "Respecte al VK10, la velocitat al VK12 és...",
+    "options": [
+     "Una mica més baixa",
+     "Una mica més alta",
+     "Igual",
+     "Molt lenta, retinguda"
+    ],
+    "answer": 1,
+    "explain": "P325.",
+    "page": 325
+   }
+  ]
+ }
+}

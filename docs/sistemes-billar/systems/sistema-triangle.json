@@ -1,0 +1,368 @@
+{
+  "id": "sistema-triangle",
+  "name": "Sistema triangle",
+  "group": "Atacs a banda curta",
+  "attributed_to": null,
+  "pages": [
+    103,
+    106
+  ],
+  "purpose": "Bola 1 molt a prop del racó de la banda curta d'atac: atac curt a la curta per arribar a la banda curta oposada (K-L-K).",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K",
+    "effect": "efecte màxim per sobre de l'equador (1 mm més si el drap és molt gastat)",
+    "stroke": "atacar la bola 1 sense exagerar",
+    "ball": "bricola o tangent a la bola 2"
+  },
+  "formula": "Proporció: la posició de l'atac dins el tram A–B és la mateixa que la de la llegada dins la banda curta inferior (amb A i B permutats)",
+  "steps": [
+    "Busca en quin triangle és la bola 1 (o la tangent a la bola 2): les línies de referència van de la banda llarga a la curta d'atac.",
+    "A = perpendicular des de la bola a la banda curta d'atac. B = punt on la línia mestra d'aquest triangle talla la banda curta.",
+    "El tram A–B representa la banda curta d'arribada, però permutat: B correspon al racó esquerre inferior i A al racó dret inferior.",
+    "Ataca dins A–B a la mateixa proporció que la llegada desitjada (p. ex. meitat de la banda → meitat del tram)."
+  ],
+  "numberings": [
+    {
+      "name": "Línies mestres: extrem a la banda llarga",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": 1
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 2
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 3
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 4
+        }
+      ],
+      "note": "Dibuix ja en vertical. Cada línia k uneix el punt (0,k) de la banda llarga esquerra amb el punt B_k de la banda curta superior."
+    },
+    {
+      "name": "Línies mestres: punt B a la banda curta",
+      "role": "altre",
+      "points": [
+        {
+          "x": 1,
+          "y": 0,
+          "v": 1
+        },
+        {
+          "x": 1.5,
+          "y": 0,
+          "v": 2
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 3
+        },
+        {
+          "x": 2.5,
+          "y": 0,
+          "v": 4
+        }
+      ],
+      "note": "Punts B de les línies 1 a 4, llegits del dibuix."
+    },
+    {
+      "name": "Banda d'arribada (B → A)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 4
+        }
+      ],
+      "note": "B al racó esquerre (0), A al racó dret (4). v en quarts de banda des de B."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "Bola dins el triangle petit (B ≈ diamant 1): per arribar al centre X de la curta inferior, ataca el centre del tram A–B",
+      "page": 104,
+      "path": [
+        {
+          "x": 0.25,
+          "y": 0.4
+        },
+        {
+          "x": 0.6,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 4.6
+        },
+        {
+          "x": 2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.67,
+          "y": 7.7,
+          "c": "yellow"
+        },
+        {
+          "x": 1.8,
+          "y": 7.5,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola dins el segon triangle (B ≈ 1,5; tram de ~12 punts): per arribar a 1/4 des de B, ataca a 3 punts de B",
+      "page": 105,
+      "path": [
+        {
+          "x": 0.3,
+          "y": 1.0
+        },
+        {
+          "x": 1.2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.3
+        },
+        {
+          "x": 1,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.65,
+          "y": 7.75,
+          "c": "yellow"
+        },
+        {
+          "x": 0.8,
+          "y": 7.6,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Atacant la bola 2, bola al tercer triangle (B ≈ 2): llegada a 3/4 des de B, atac a 1/4 des de A",
+      "page": 106,
+      "path": [
+        {
+          "x": 0.83,
+          "y": 1.3
+        },
+        {
+          "x": 0.8,
+          "y": 1.0
+        },
+        {
+          "x": 1.0,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.9
+        },
+        {
+          "x": 3,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.65,
+          "y": 0.9,
+          "c": "yellow"
+        },
+        {
+          "x": 2.67,
+          "y": 7.65,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Amb drap molt gastat, augmenta l'efecte 1 mm."
+  ],
+  "quotes": [
+    "el tramo desde A hasta B representaría la banda corta inferior (banda de llegada) aunque fíjate bien que las letras están permutadas"
+  ],
+  "uncertain": [
+    "Les posicions dels extrems de les línies de referència (1; 1,5; 2; 2,5 a la curta) són lectures del dibuix; el text no les dona en números.",
+    "No és del tot clar quina és la 'línia mestra' de cada triangle; als exemples sembla la línia exterior de la franja on és la bola."
+  ],
+  "trainer": {
+    "quiz": [
+      {
+        "q": "Com es troba el punt A?",
+        "options": [
+          "Perpendicular des de la bola 1 (o la tangent a la 2) a la banda curta",
+          "On la línia mestra talla la curta",
+          "Al racó",
+          "Al diamant central"
+        ],
+        "answer": 0,
+        "explain": "Un vèrtex el determina la perpendicular a la banda corta des de la bola 1.",
+        "page": 103
+      },
+      {
+        "q": "El tram A–B representa la banda d'arribada. Com?",
+        "options": [
+          "Amb les lletres permutades: B és el racó esquerre i A el dret",
+          "A al racó esquerre i B al dret",
+          "Només la meitat de la banda",
+          "La banda llarga"
+        ],
+        "answer": 0,
+        "explain": "El tram A–B representa la curta inferior, però les lletres estan permutades.",
+        "page": 105
+      },
+      {
+        "q": "Vols arribar al centre de la curta inferior. On ataques?",
+        "options": [
+          "Al punt mitjà del tram A–B",
+          "Al punt A",
+          "Al punt B",
+          "Al centre de la curta superior"
+        ],
+        "answer": 0,
+        "explain": "Si volem arribar al punt mitjà X, ataquem el punt mitjà del tram.",
+        "page": 104,
+        "path": [
+          {
+            "x": 0.25,
+            "y": 0.4
+          },
+          {
+            "x": 0.6,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 4.6
+          },
+          {
+            "x": 2,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.67,
+            "y": 7.7,
+            "c": "yellow"
+          },
+          {
+            "x": 1.8,
+            "y": 7.5,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Tram de 12 punts i vols arribar a 1/4 de la banda des de B. A quants punts de B ataques?",
+        "options": [
+          "3",
+          "6",
+          "9",
+          "12"
+        ],
+        "answer": 0,
+        "explain": "Un quart de 12 són 3 punts des de B.",
+        "page": 105,
+        "path": [
+          {
+            "x": 0.3,
+            "y": 1.0
+          },
+          {
+            "x": 1.2,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3.3
+          },
+          {
+            "x": 1,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.65,
+            "y": 7.75,
+            "c": "yellow"
+          },
+          {
+            "x": 0.8,
+            "y": 7.6,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quin efecte demana?",
+        "options": [
+          "Màxim per sobre de l'equador",
+          "Sense efecte",
+          "Efecte 1 baix",
+          "Contrari"
+        ],
+        "answer": 0,
+        "explain": "Máximo efecto por encima del ecuador; 1 mm més si el drap és molt gastat.",
+        "page": 104
+      },
+      {
+        "q": "El drap és molt gastat. Què canvies?",
+        "options": [
+          "Augmentes l'efecte 1 mm",
+          "Treus efecte",
+          "Ataques mig diamant més enllà",
+          "Res"
+        ],
+        "answer": 0,
+        "explain": "Si estuviera muy gastado aumentaríamos el efecto 1 mm.",
+        "page": 104
+      }
+    ]
+  }
+}

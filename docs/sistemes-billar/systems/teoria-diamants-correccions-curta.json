@@ -1,0 +1,544 @@
+{
+  "id": "teoria-diamants-correccions-curta",
+  "name": "Correccions de la teoria de diamants (sortida de banda curta)",
+  "group": "Teoria de diamants",
+  "attributed_to": "Jean Verworst (Berekend Biljarten); Juan Villora i Toni Serralta (apunts SISTEMAS)",
+  "pages": [
+    238,
+    239
+  ],
+  "purpose": "Corregir el punt d'atac de la teoria de diamants quan se surt de la banda curta, segons sortida i llegada.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-K-L (llegada a 3a banda llarga) o fins a la 4a banda curta",
+    "effect": "com a la teoria de diamants",
+    "stroke": null,
+    "ball": null
+  },
+  "formula": "Atac = Sortida − Llegada + Compensació",
+  "steps": [
+    "Calcula Sortida − Llegada com sempre.",
+    "Busca la compensació a la taula (fila llegada, columna sortida) i suma-la (pot ser negativa).",
+    "Si la llegada és a la 4a banda curta, fes servir la taula de Villora-Serralta."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 50
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 60
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 70
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 80
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 90
+        }
+      ],
+      "note": "Sortides de la banda curta de baix (50 a 90) de la teoria de diamants, les columnes de la taula de Verworst."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 4,
+          "y": 5.5,
+          "v": 60
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 70
+        },
+        {
+          "x": 4,
+          "y": 6.5,
+          "v": 80
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 90
+        },
+        {
+          "x": 4,
+          "y": 7.5,
+          "v": 100
+        }
+      ]
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 4.5,
+          "v": 50
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 60
+        },
+        {
+          "x": 0,
+          "y": 5.5,
+          "v": 70
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 80
+        },
+        {
+          "x": 0,
+          "y": 6.5,
+          "v": 90
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 100
+        }
+      ],
+      "note": "3a banda llarga esquerra."
+    }
+  ],
+  "corrections": [
+    "Verworst, llegada 0: −5 per a sortides 50, 60, 70, 80 i 90.",
+    "Llegada 5: −7,5 per a sortides 50 a 90.",
+    "Llegada 10: −5 per a sortides 50 a 90.",
+    "Llegada 20: −2,5 (sortides 50, 60, 70, 80); −5 (sortida 90).",
+    "Llegada 30: −1,25 (sortida 50); +1,25 (sortida 80); −5 (sortida 90); 60 i 70 en blanc.",
+    "Llegada 40: +5 (sortides 50 i 60); +2,5 (80 i 90); 70 en blanc.",
+    "Llegada 50: +5 (50 i 60); +2,5 (70 i 80); 90 en blanc.",
+    "Llegada 60: +5 (60); +2,5 (70 i 80).",
+    "Llegada 70: +5 (70 i 80); +2,5 (90).",
+    "Llegada 80: +5 (80 i 90).",
+    "Llegada 90: +5 (90).",
+    "Villora-Serralta confirmen aquestes compensacions per a llegades a la 3a banda llarga.",
+    "Villora-Serralta, llegada a 4a banda curta: sortida 50 llegada 20/25 → −2,5; 60 i 20/25 → −2,5; 60 i 60 → −2,5; 70 i 20/25 → −5; 70 i 50 → −10; 70 i 70 → −10; 70 i 90 → −20; 80 i 20/25 → −5; 80 i 80 → −20; 90 i 20/25 → −5; 90 i 90 → −30.",
+    "Regla resumida de Lazo: llegades 0-20 → restar entre 5 (zona del racó) i 2,5 (zona del 20); llegada 30 → quasi sense compensació, tret de sortir de 90; llegades de 40 o més → sumar 5, però amb sortides 70, 80 o 90 només 2,5 (angle més obert)."
+  ],
+  "examples": [
+    {
+      "text": "Sortida 50, llegada 5: 50 − 5 − 7,5 = atac 37,5",
+      "page": 238,
+      "path": [
+        {
+          "x": 1.4,
+          "y": 6.51
+        },
+        {
+          "x": 4,
+          "y": 3.75
+        },
+        {
+          "x": 0.47,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0.5
+        }
+      ],
+      "path_built": true
+    },
+    {
+      "text": "Sortida 60, llegada 20: 60 − 20 − 2,5 = atac 37,5",
+      "page": 238,
+      "path": [
+        {
+          "x": 2.05,
+          "y": 6.51
+        },
+        {
+          "x": 4,
+          "y": 3.75
+        },
+        {
+          "x": 1.39,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2
+        }
+      ],
+      "path_built": true
+    },
+    {
+      "text": "Sortida 70, llegada 50: 70 − 50 + 2,5 = atac 22,5",
+      "page": 238,
+      "path": [
+        {
+          "x": 2.7,
+          "y": 5.99
+        },
+        {
+          "x": 4,
+          "y": 2.25
+        },
+        {
+          "x": 2.67,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 4.5
+        }
+      ],
+      "path_built": true
+    },
+    {
+      "text": "Sortida 90, llegada 70: 90 − 70 + 2,5 = atac 22,5",
+      "page": 238,
+      "path": [
+        {
+          "x": 3.35,
+          "y": 5.99
+        },
+        {
+          "x": 4,
+          "y": 2.25
+        },
+        {
+          "x": 2.84,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 5.5
+        }
+      ],
+      "path_built": true
+    }
+  ],
+  "tips": [
+    "Lazo creu que memoritzar totes les xifres és excessiu: n'hi ha prou amb les tres conclusions generals."
+  ],
+  "quotes": [
+    "Las llegadas iguales o superiores a 40 requieren normalmente sumar 5 al punto de ataque"
+  ],
+  "uncertain": [
+    "Les caselles en blanc de la taula de Verworst no tenen valor al llibre (no es diu si volen dir 0).",
+    "Al resum, Lazo diu que per a llegades ≥40 amb sortides 70, 80 o 90 cal sumar 2,5, però la taula dona +5 per a alguns d'aquests casos (p. ex. sortida 70 llegada 70, sortida 80 llegada 80).",
+    "Els recorreguts dels exemples són construïts: cantonada/curta de sortida → atac → curta de dalt → llegada."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        }
+      },
+      "inputs": {
+        "S": [
+          50,
+          60,
+          70,
+          80,
+          90
+        ],
+        "L": [
+          0,
+          5,
+          10,
+          20,
+          30,
+          40,
+          50,
+          60,
+          70,
+          80,
+          90
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L + T.c50[L]",
+          "when": "S == 50",
+          "label": "Verworst, sortida 50"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L + T.c60[L]",
+          "when": "S == 60",
+          "label": "Verworst, sortida 60"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L + T.c70[L]",
+          "when": "S == 70",
+          "label": "Verworst, sortida 70"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L + T.c80[L]",
+          "when": "S == 80",
+          "label": "Verworst, sortida 80"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L + T.c90[L]",
+          "when": "S == 90",
+          "label": "Verworst, sortida 90"
+        }
+      ],
+      "tables": {
+        "c50": {
+          "0": -5,
+          "5": -7.5,
+          "10": -5,
+          "20": -2.5,
+          "30": -1.25,
+          "40": 5,
+          "50": 5
+        },
+        "c60": {
+          "0": -5,
+          "5": -7.5,
+          "10": -5,
+          "20": -2.5,
+          "40": 5,
+          "50": 5,
+          "60": 5
+        },
+        "c70": {
+          "0": -5,
+          "5": -7.5,
+          "10": -5,
+          "20": -2.5,
+          "50": 2.5,
+          "60": 2.5,
+          "70": 5
+        },
+        "c80": {
+          "0": -5,
+          "5": -7.5,
+          "10": -5,
+          "20": -2.5,
+          "30": 1.25,
+          "40": 2.5,
+          "50": 2.5,
+          "60": 2.5,
+          "70": 5,
+          "80": 5
+        },
+        "c90": {
+          "0": -5,
+          "5": -7.5,
+          "10": -5,
+          "20": -5,
+          "30": -5,
+          "40": 2.5,
+          "70": 2.5,
+          "80": 5,
+          "90": 5
+        }
+      },
+      "valid": "!isNaN(A) && A >= 0 && A <= 100",
+      "round": 2,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Només les caselles plenes de la taula de Verworst (llegada a 3a banda llarga). Les caselles en blanc donen NaN i es descarten."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 50, llegada 5. Quin és l'atac amb la correcció de Verworst?",
+        "options": [
+          "50",
+          "37,5",
+          "42,5",
+          "45"
+        ],
+        "answer": 1,
+        "explain": "50 − 5 − 7,5 = 37,5.",
+        "page": 238,
+        "path": [
+          {
+            "x": 1.4,
+            "y": 6.51
+          },
+          {
+            "x": 4,
+            "y": 3.75
+          },
+          {
+            "x": 0.47,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0.5
+          }
+        ]
+      },
+      {
+        "q": "Sortida 70, llegada 50. Atac corregit?",
+        "options": [
+          "20",
+          "17,5",
+          "22,5",
+          "25"
+        ],
+        "answer": 2,
+        "explain": "70 − 50 + 2,5 = 22,5.",
+        "page": 238,
+        "path": [
+          {
+            "x": 2.7,
+            "y": 5.99
+          },
+          {
+            "x": 4,
+            "y": 2.25
+          },
+          {
+            "x": 2.67,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 4.5
+          }
+        ]
+      },
+      {
+        "q": "Regla resumida de Lazo per a llegades de 0 a 20:",
+        "options": [
+          "Sumar 5",
+          "Restar 10",
+          "No corregir",
+          "Restar entre 5 (racó) i 2,5 (zona del 20)"
+        ],
+        "answer": 3,
+        "explain": "Llegades 0-20: restar 5 a la zona del racó i 2,5 a la del 20.",
+        "page": 239
+      },
+      {
+        "q": "Quina llegada gairebé no té compensació (tret de sortir de 90)?",
+        "options": [
+          "80",
+          "30",
+          "10",
+          "50"
+        ],
+        "answer": 1,
+        "explain": "«La llegada 30 no tiene prácticamente compensación salvo si salimos desde 90.»",
+        "page": 239
+      },
+      {
+        "q": "Llegades de 40 o més: quina correcció general?",
+        "options": [
+          "Cap",
+          "Restar 5",
+          "Restar 2,5",
+          "Sumar 5 (només 2,5 amb sortides 70, 80 o 90)"
+        ],
+        "answer": 3,
+        "explain": "L'angle d'atac és més obert amb sortides altes.",
+        "page": 239
+      },
+      {
+        "q": "Villora-Serralta, llegada a 4a banda curta: sortida 90, llegada 90. Compensació?",
+        "options": [
+          "−10",
+          "−20",
+          "−30",
+          "−5"
+        ],
+        "answer": 2,
+        "explain": "Taula de la p238: 90 / 90 → −30.",
+        "page": 238
+      }
+    ]
+  }
+}

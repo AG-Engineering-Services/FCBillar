@@ -1,0 +1,779 @@
+{
+ "id": "cbv-bola-efecte-rodades",
+ "name": "Bola-efecte: rodades",
+ "group": "Rodades i cabanyes",
+ "attributed_to": "PDF de Julio A",
+ "pages": null,
+ "source": "PDF «Sistemas Bola-Efecto 4. Rodadas», Club Billar València, pàg. 1–6",
+ "sort": 462,
+ "purpose": "Rodades (bola 2 a prop de la llarga, bola 1 hi va per llarga-curta-llarga i baixa cap a la bola 3): calcular la calle de llegada i pujar-la o baixar-la canviant bola i efecte.",
+ "shot": {
+  "first_cushion": "bola",
+  "cushions": "bola 2 – L-K-L",
+  "effect": "Estàndard S: a l'equador, més o menys a la línia del quart de bola; S+1, S+2 més lateral; S−1, S−2, S−3 més avall",
+  "stroke": "Normal",
+  "ball": "Estàndard mitja bola (6); 3 = +1 calle; 1 = +2 calles"
+ },
+ "formula": "Calle = 6 − Posició llarga + Posició curta + Desfase (+ canvis d'efecte i de bola)",
+ "steps": [
+  "Llegeix la bola 2 a la llarga dreta (1 a 7, un número per diamant des de dalt) i a la curta superior (0 si és als dos diamants més propers a la banda dreta, 1 al tercer, 2 al quart).",
+  "Mesura el desfase: allarga la línia de les boles 1 i 2 fins a les dues curtes; la diferència en diamants entre on toca la curta inferior i on toca la superior és el desfase (+1, −2…).",
+  "Calcula 6 − llarga + curta + desfase: és la calle on arriba la bola 1 amb l'estàndard (mitja bola, efecte S).",
+  "Mira en quina calle és la bola 3. Si coincideix, tira. Si no, puja o baixa calles: menys bola o més efecte pugen calles; baixar l'efecte les baixa.",
+  "Evita, si pots, l'efecte màxim i la bola mínima: risc de pifiada o de quedar-te sense bola."
+ ],
+ "numberings": [
+  {
+   "name": "Posició bola 2 (llarga)",
+   "role": "altre",
+   "points": [
+    {
+     "x": 4,
+     "y": 1,
+     "v": 1
+    },
+    {
+     "x": 4,
+     "y": 2,
+     "v": 2
+    },
+    {
+     "x": 4,
+     "y": 3,
+     "v": 3
+    },
+    {
+     "x": 4,
+     "y": 4,
+     "v": 4
+    },
+    {
+     "x": 4,
+     "y": 5,
+     "v": 5
+    },
+    {
+     "x": 4,
+     "y": 6,
+     "v": 6
+    },
+    {
+     "x": 4,
+     "y": 7,
+     "v": 7
+    }
+   ],
+   "note": "Dibuix ja en vertical, cap rotació. Llarga dreta."
+  },
+  {
+   "name": "Posició bola 2 (curta)",
+   "role": "altre",
+   "points": [
+    {
+     "x": 0.5,
+     "y": 0,
+     "v": 2
+    },
+    {
+     "x": 1.5,
+     "y": 0,
+     "v": 1
+    },
+    {
+     "x": 3,
+     "y": 0,
+     "v": 0
+    }
+   ],
+   "note": "Curta superior per trams: 2 entre x=0 i 1, 1 entre 1 i 2, 0 entre 2 i 4. Punts al mig de cada tram."
+  },
+  {
+   "name": "Calles de llegada",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 0,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 1,
+     "v": 1
+    },
+    {
+     "x": 0,
+     "y": 2,
+     "v": 2
+    },
+    {
+     "x": 0,
+     "y": 3,
+     "v": 3
+    },
+    {
+     "x": 0,
+     "y": 4,
+     "v": 4
+    },
+    {
+     "x": 0,
+     "y": 4.5,
+     "v": 5
+    },
+    {
+     "x": 0,
+     "y": 5,
+     "v": 6
+    },
+    {
+     "x": 0,
+     "y": 5.5,
+     "v": 7
+    }
+   ],
+   "note": "Llarga esquerra (tercera banda de la bola 1)."
+  },
+  {
+   "name": "Final de la calle",
+   "role": "arribada",
+   "points": [
+    {
+     "x": 4,
+     "y": 6,
+     "v": 0
+    },
+    {
+     "x": 4,
+     "y": 6.9,
+     "v": 1
+    },
+    {
+     "x": 4,
+     "y": 8,
+     "v": 2
+    },
+    {
+     "x": 3.2,
+     "y": 8,
+     "v": 3
+    },
+    {
+     "x": 2.5,
+     "y": 8,
+     "v": 4
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 5
+    },
+    {
+     "x": 1.7,
+     "y": 8,
+     "v": 6
+    },
+    {
+     "x": 1.4,
+     "y": 8,
+     "v": 7
+    }
+   ],
+   "note": "On acaba cada línia de llegada (llarga dreta o curta inferior). La calle 2 acaba al racó inferior dret."
+  }
+ ],
+ "corrections": [
+  "Efecte: cada registre més lateral (S+1, S+2) puja una calle; cada registre més avall (S−1, S−2, S−3) en baixa una.",
+  "Bola: mitja bola (6) és l'estàndard; bola 3 = +1 calle; bola 1 = +2 calles.",
+  "Es poden combinar canvis de bola i d'efecte (p. ex. S+2 i bola 3 = +3 calles).",
+  "Bola 2 dins la falca fosca de la figura: calle 3 o més; dins la falca clara: calle 4 o més; al racó superior dret: bola 3 per anar a les calles 4–5."
+ ],
+ "examples": [
+  {
+   "text": "Rodada de presentació: bola 1 contra la bola 2 a la llarga dreta, llarga-curta-llarga i baixada cap a la vermella del racó",
+   "page": 1,
+   "path": [
+    {
+     "x": 3.51,
+     "y": 6.62
+    },
+    {
+     "x": 3.46,
+     "y": 3.1
+    },
+    {
+     "x": 4,
+     "y": 2.84
+    },
+    {
+     "x": 2.24,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 2.01
+    },
+    {
+     "x": 3.7,
+     "y": 7.68
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.46,
+     "y": 2.98,
+     "c": "yellow"
+    },
+    {
+     "x": 3.7,
+     "y": 7.68,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Bola 2 al 3, zona 0, sense desfase: 6 − 3 + 0 = calle 3 amb l'estàndard; la vermella és al racó (calle 2) → baixa un registre d'efecte (S−1)",
+   "page": 6,
+   "path": [
+    {
+     "x": 3.5,
+     "y": 6.66
+    },
+    {
+     "x": 3.45,
+     "y": 3.08
+    },
+    {
+     "x": 4,
+     "y": 2.72
+    },
+    {
+     "x": 1.97,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 2.0
+    },
+    {
+     "x": 3.79,
+     "y": 7.79
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.45,
+     "y": 3.0,
+     "c": "yellow"
+    },
+    {
+     "x": 3.79,
+     "y": 7.79,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Bola 2 al 4, zona 0, desfase −2: 6 − 4 + 0 − 2 = calle 0; amb S+1 → calle 1 (la bola fa una banda més abans de la vermella)",
+   "page": 6,
+   "path": [
+    {
+     "x": 1.64,
+     "y": 7.36
+    },
+    {
+     "x": 2.45,
+     "y": 3.98
+    },
+    {
+     "x": 4,
+     "y": 3.34
+    },
+    {
+     "x": 1.21,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.95
+    },
+    {
+     "x": 4,
+     "y": 6.9
+    },
+    {
+     "x": 3.45,
+     "y": 7.74
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.48,
+     "y": 3.93,
+     "c": "yellow"
+    },
+    {
+     "x": 3.45,
+     "y": 7.74,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Mateixa posició (calle 0) amb S+2 i bola 3 (+1) → calle 3",
+   "page": 6,
+   "path": [
+    {
+     "x": 1.59,
+     "y": 7.36
+    },
+    {
+     "x": 2.45,
+     "y": 3.98
+    },
+    {
+     "x": 4,
+     "y": 1.97
+    },
+    {
+     "x": 2.86,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 2.97
+    },
+    {
+     "x": 3.26,
+     "y": 8
+    },
+    {
+     "x": 3.41,
+     "y": 7.78
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.47,
+     "y": 3.93,
+     "c": "yellow"
+    },
+    {
+     "x": 3.41,
+     "y": 7.78,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Permet triar entre diverses combinacions de bola i efecte per col·locar millor la bola 2 i evitar retrucs.",
+  "Si la vermella és al racó inferior dret, és el mateix que la calle 2.",
+  "Sovint hi ha més d'una solució; als exemples, calle 1 (amb una banda més) o calle 3."
+ ],
+ "quotes": [
+  "Tomando menos bola alargamos o subimos calles, dando más efecto ganamos calles y bajando los registros del efecto, cerramos o bajamos calles",
+  "trataremos de no abusar del efecto máximo y la cantidad de bola mínima"
+ ],
+ "uncertain": [
+  "El PDF diu que l'efecte estàndard és «en el ecuador y aproximadamente sobre la visual del cuarto de bola»; a la roda, S és a l'equador, més o menys a mig radi, i les etiquetes S+1/S+2 i S−1/S−2/S−3 són borroses.",
+  "Falques de la pàg. 3 («≥3 line», «≥4 line», «3 to 4-5 lines»): el PDF no les explica; la interpretació és meva. Límits mesurats: de la cantonada superior dreta a la llarga esquerra a 3,4, 4,9 i 6,9; el quadre del racó, des de y=2,4 i x=2,6.",
+  "Signe del desfase deduït de les dues figures de la pàg. 4 (+1 i −2).",
+  "Final de cada calle mesurat a la figura (±0,1 diamant).",
+  "La figura de la pàg. 1 no porta números ni diu quina calle és; el recorregut s'ha mesurat directament."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "G": {
+     "label": "Bola 2 a la llarga",
+     "numbering": "Posició bola 2 (llarga)"
+    },
+    "K": {
+     "label": "Bola 2 a la curta",
+     "numbering": "Posició bola 2 (curta)"
+    },
+    "D": {
+     "label": "Desfase",
+     "values": [
+      -2,
+      -1,
+      0,
+      1,
+      2
+     ]
+    },
+    "E": {
+     "label": "Registre d'efecte (S−3 … S+2)",
+     "values": [
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2
+     ]
+    },
+    "Q": {
+     "label": "Canvi de bola (6 → 0, 3 → +1, 1 → +2)",
+     "values": [
+      0,
+      1,
+      2
+     ]
+    },
+    "C": {
+     "label": "Calle",
+     "numbering": "Calles de llegada"
+    }
+   },
+   "inputs": {
+    "G": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "K": [
+     0,
+     0,
+     1,
+     2
+    ],
+    "D": [
+     -2,
+     -1,
+     0,
+     0,
+     1,
+     2
+    ],
+    "E": [
+     -3,
+     -2,
+     -1,
+     0,
+     1,
+     2
+    ],
+    "Q": [
+     0,
+     0,
+     1,
+     2
+    ],
+    "C": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ]
+   },
+   "relations": [
+    {
+     "solve": "C",
+     "expr": "6 - G + K + D + E + Q",
+     "label": "calle amb aquests registres"
+    },
+    {
+     "solve": "E",
+     "expr": "C - (6 - G + K + D) - Q",
+     "label": "quin efecte per arribar a la calle de la bola 3"
+    }
+   ],
+   "valid": "C >= 0 && C <= 7 && E >= -3 && E <= 2 && Q >= 0 && Q <= 2",
+   "round": 0,
+   "path": [
+    "C"
+   ],
+   "note": "La calle base és amb mitja bola (6) i efecte estàndard S. Només es dibuixa el punt de la calle a la llarga esquerra."
+  },
+  "quiz": [
+   {
+    "q": "Bola 2 al 3 de la llarga, zona 0 de la curta, sense desfase. Quina calle dona l'estàndard?",
+    "options": [
+     "Calle 3",
+     "Calle 6",
+     "Calle 9",
+     "Calle 0"
+    ],
+    "answer": 0,
+    "explain": "6 − 3 + 0 + 0 = 3.",
+    "page": 6,
+    "path": [
+     {
+      "x": 3.5,
+      "y": 6.66
+     },
+     {
+      "x": 3.45,
+      "y": 3.08
+     },
+     {
+      "x": 4,
+      "y": 2.72
+     },
+     {
+      "x": 1.97,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 2.0
+     },
+     {
+      "x": 3.79,
+      "y": 7.79
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.45,
+      "y": 3.0,
+      "c": "yellow"
+     },
+     {
+      "x": 3.79,
+      "y": 7.79,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "La calle surt 3 però la vermella és al racó inferior dret. Què fas?",
+    "options": [
+     "Baixar un registre d'efecte (S−1) per anar a la calle 2",
+     "Prendre menys bola",
+     "Donar més efecte (S+1)",
+     "Jugar més fort"
+    ],
+    "answer": 0,
+    "explain": "El racó és la calle 2: cal baixar una calle, i el PDF ho fa baixant un registre d'efecte.",
+    "page": 6,
+    "path": [
+     {
+      "x": 3.5,
+      "y": 6.66
+     },
+     {
+      "x": 3.45,
+      "y": 3.08
+     },
+     {
+      "x": 4,
+      "y": 2.72
+     },
+     {
+      "x": 1.97,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 2.0
+     },
+     {
+      "x": 3.79,
+      "y": 7.79
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.45,
+      "y": 3.0,
+      "c": "yellow"
+     },
+     {
+      "x": 3.79,
+      "y": 7.79,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Què és l'estàndard del sistema?",
+    "options": [
+     "Mitja bola (6) i efecte S a l'equador",
+     "Bola plena i sense efecte",
+     "Bola 1 i efecte màxim",
+     "Bola 3 i efecte baix"
+    ],
+    "answer": 0,
+    "explain": "«media bola y efecto en el ecuador y aproximadamente sobre la visual del cuarto de bola».",
+    "page": 1
+   },
+   {
+    "q": "Què passa si prens menys bola?",
+    "options": [
+     "Puges calles (la bola s'allarga)",
+     "Baixes calles",
+     "No canvia res",
+     "Només canvia la velocitat"
+    ],
+    "answer": 0,
+    "explain": "«Tomando menos bola alargamos o subimos calles». Bola 3 = +1, bola 1 = +2.",
+    "page": 4
+   },
+   {
+    "q": "Bola 2 al 4, zona 0, desfase −2. Quina calle base surt?",
+    "options": [
+     "0",
+     "4",
+     "2",
+     "−2"
+    ],
+    "answer": 0,
+    "explain": "6 − 4 + 0 − 2 = 0.",
+    "page": 6,
+    "path": [
+     {
+      "x": 1.64,
+      "y": 7.36
+     },
+     {
+      "x": 2.45,
+      "y": 3.98
+     },
+     {
+      "x": 4,
+      "y": 3.34
+     },
+     {
+      "x": 1.21,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.95
+     },
+     {
+      "x": 4,
+      "y": 6.9
+     },
+     {
+      "x": 3.45,
+      "y": 7.74
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.48,
+      "y": 3.93,
+      "c": "yellow"
+     },
+     {
+      "x": 3.45,
+      "y": 7.74,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Amb calle base 0, quina combinació et porta a la calle 3?",
+    "options": [
+     "S+2 i bola 3",
+     "S+1 i mitja bola",
+     "S−1 i bola 1",
+     "S i bola 6"
+    ],
+    "answer": 0,
+    "explain": "S+2 dona +2 i bola 3 dona +1: 0 + 3 = 3.",
+    "page": 6,
+    "path": [
+     {
+      "x": 1.59,
+      "y": 7.36
+     },
+     {
+      "x": 2.45,
+      "y": 3.98
+     },
+     {
+      "x": 4,
+      "y": 1.97
+     },
+     {
+      "x": 2.86,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 2.97
+     },
+     {
+      "x": 3.26,
+      "y": 8
+     },
+     {
+      "x": 3.41,
+      "y": 7.78
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.47,
+      "y": 3.93,
+      "c": "yellow"
+     },
+     {
+      "x": 3.41,
+      "y": 7.78,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Com es mesura el desfase entre les boles 1 i 2?",
+    "options": [
+     "Allargant la línia de les dues boles fins a les curtes i comptant la diferència en diamants",
+     "Comptant els diamants que separen la bola 1 de la banda",
+     "Per l'altura de la bola 3",
+     "Amb la paral·lela al racó"
+    ],
+    "answer": 0,
+    "explain": "Figures de la pàg. 4: línia per les dues boles fins a les curtes; +1 o −2 segons on toca cada curta.",
+    "page": 4,
+    "path": [
+     {
+      "x": 4,
+      "y": 8
+     },
+     {
+      "x": 3,
+      "y": 0
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.72,
+      "y": 6.0,
+      "c": "white"
+     },
+     {
+      "x": 3.34,
+      "y": 3.0,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Què recomana el PDF sobre l'efecte màxim i la bola mínima?",
+    "options": [
+     "No abusar-ne: risc de pifiada o de quedar-se sense bola",
+     "Fer-los servir sempre per pujar calles",
+     "Són l'estàndard",
+     "Només amb taules lentes"
+    ],
+    "answer": 0,
+    "explain": "«trataremos de no abusar del efecto máximo y la cantidad de bola mínima».",
+    "page": 5
+   }
+  ]
+ }
+}

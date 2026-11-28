@@ -1,0 +1,383 @@
+{
+  "id": "efecte-3",
+  "name": "Sistema efecte 3",
+  "group": "Atacs a banda curta",
+  "attributed_to": "Villora i Serralta",
+  "pages": [
+    101,
+    102
+  ],
+  "purpose": "Sortint des de la banda curta, atacar la banda curta oposada amb efecte 3 per tornar a la banda curta de sortida (K-L-K).",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K",
+    "effect": "efecte 3",
+    "stroke": "tac pla molt penetrat, una mica més de velocitat que la justa",
+    "ball": "amb bola 2, millor menys de mitja bola (1/4 o fina)"
+  },
+  "formula": "Atac = Sortida − Llegada",
+  "steps": [
+    "Llegeix la sortida a la banda curta inferior, en projecció als diamants (40 a 20).",
+    "Tria la llegada al punt interior de la mateixa banda curta (30, 20, 10).",
+    "Resta sortida − llegada i ataca aquest número de la banda curta superior.",
+    "Amb bola 2 a 1/4 o fina, suma 5 punts a l'atac."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 40
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 35
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 30
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 25
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 20
+        }
+      ],
+      "note": "Dibuix ja en vertical. Banda curta inferior, presa en projecció als diamants."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 1,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        }
+      ],
+      "note": "Banda curta superior, en projecció als diamants."
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 1,
+          "y": 8,
+          "v": 30
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 10
+        }
+      ],
+      "note": "Punt interior (cautxú) de la banda curta inferior."
+    }
+  ],
+  "corrections": [
+    "Atacant la bola 2 amb menys de mitja bola (1/4 o fina): +5 punts a l'atac.",
+    "Si cal prendre més de mitja bola: treu un punt d'efecte per cada quart de bola de més (a mitja bola, efecte 2)."
+  ],
+  "examples": [
+    {
+      "text": "Sortida 35, llegada 20 → atac 15",
+      "page": 101,
+      "path": [
+        {
+          "x": 1.25,
+          "y": 7.5
+        },
+        {
+          "x": 2.5,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.3
+        },
+        {
+          "x": 2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.8,
+          "y": 7.75,
+          "c": "yellow"
+        },
+        {
+          "x": 1.95,
+          "y": 7.65,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Amb bola 2: 35 − 20 + 5 = 20; a mitja bola, efecte 2",
+      "page": 102,
+      "path": [
+        {
+          "x": 1.22,
+          "y": 4.9
+        },
+        {
+          "x": 1.65,
+          "y": 4.55
+        },
+        {
+          "x": 2.03,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.8
+        },
+        {
+          "x": 2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.82,
+          "y": 4.6,
+          "c": "yellow"
+        },
+        {
+          "x": 1.72,
+          "y": 7.5,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [],
+  "quotes": [],
+  "uncertain": [
+    "La numeració de llegada només mostra 30, 20 i 10; no hi ha valors per als racons."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        }
+      },
+      "inputs": {
+        "S": [
+          20,
+          25,
+          30,
+          35,
+          40
+        ],
+        "L": [
+          10,
+          20,
+          30
+        ],
+        "A": [
+          0,
+          5,
+          10,
+          15,
+          20,
+          25,
+          30
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L",
+          "label": "bricola"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A",
+          "label": "bricola"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L + 5",
+          "label": "atacant la bola 2 fina o a 1/4"
+        }
+      ],
+      "valid": "A >= 0 && A <= 30 && L >= 10 && L <= 30",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Efecte 3, tac pla molt penetrat. Sortida i atac en projecció als diamants; llegada al punt interior."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 35, llegada 20, de bricola. Atac?",
+        "options": [
+          "15",
+          "55",
+          "20",
+          "25"
+        ],
+        "answer": 0,
+        "explain": "35 − 20 = 15.",
+        "page": 101,
+        "path": [
+          {
+            "x": 1.25,
+            "y": 7.5
+          },
+          {
+            "x": 2.5,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3.3
+          },
+          {
+            "x": 2,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.8,
+            "y": 7.75,
+            "c": "yellow"
+          },
+          {
+            "x": 1.95,
+            "y": 7.65,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "La mateixa posició atacant la bola 2 a 1/4. Atac?",
+        "options": [
+          "20",
+          "15",
+          "10",
+          "25"
+        ],
+        "answer": 0,
+        "explain": "Amb bola 2 fina o a 1/4 se sumen 5 punts: 35 − 20 + 5 = 20.",
+        "page": 102,
+        "path": [
+          {
+            "x": 1.22,
+            "y": 4.9
+          },
+          {
+            "x": 1.65,
+            "y": 4.55
+          },
+          {
+            "x": 2.03,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3.8
+          },
+          {
+            "x": 2,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.82,
+            "y": 4.6,
+            "c": "yellow"
+          },
+          {
+            "x": 1.72,
+            "y": 7.5,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Si has de prendre mitja bola, quin efecte?",
+        "options": [
+          "Efecte 2",
+          "Efecte 3",
+          "Efecte 4",
+          "Sense efecte"
+        ],
+        "answer": 0,
+        "explain": "Es treu un punt d'efecte per cada quart de bola de més: a mitja bola, efecte 2.",
+        "page": 102
+      },
+      {
+        "q": "On es llegeix la llegada?",
+        "options": [
+          "Al punt interior de la banda",
+          "En projecció al diamant",
+          "A la banda llarga",
+          "Al racó"
+        ],
+        "answer": 0,
+        "explain": "La llegada es al punto interno de la banda.",
+        "page": 101
+      },
+      {
+        "q": "Quin cop demana?",
+        "options": [
+          "Tac pla molt penetrat i una mica més de velocitat que la justa",
+          "Cop sec retingut",
+          "Cop alt sense efecte",
+          "Massé"
+        ],
+        "answer": 0,
+        "explain": "Taco plano muy penetrado y con algo más de velocidad que la necesaria.",
+        "page": 101
+      }
+    ]
+  }
+}

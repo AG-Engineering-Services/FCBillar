@@ -1,0 +1,757 @@
+{
+  "id": "sense-efecte",
+  "name": "Sistema sense efecte",
+  "group": "Altres",
+  "attributed_to": null,
+  "pages": [
+    204,
+    211
+  ],
+  "purpose": "Tres bandes sense efecte curta-llarga-curta sortint de la curta, per arribar a la zona de la curta d'atac o de la llarga oposada; també aplicable a l'ample de la taula.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K (curta superior, llarga esquerra, curta inferior) i arribada a la curta superior o llarga dreta",
+    "effect": "sense efecte (bola al centre, una mica alta als dibuixos)",
+    "stroke": "velocitat adequada, execució molt delicada",
+    "ball": "si es toca primer la bola 2, compensar amb 1 mm d'efecte contrari"
+  },
+  "formula": "Atac = Sortida − Llegada / 2",
+  "steps": [
+    "Llegeix la sortida a la banda curta inferior (0–40) prolongant la línia per la bola jugadora.",
+    "Llegeix la llegada: a la curta superior (0–40) o a la llarga dreta (50, 55, 60, 70).",
+    "Calcula Atac = Sortida − Llegada/2 i ataca aquest punt de la curta superior sense efecte.",
+    "Variant d'ample: sortida a la llarga esquerra, atac i llegada a la llarga dreta, amb la mateixa fórmula."
+  ],
+  "numberings": [
+    {
+      "name": "Atac i llegada (banda curta superior)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 40
+        }
+      ],
+      "note": "Dibuix vertical, sense girar. La mateixa escala serveix d'atac i de llegada."
+    },
+    {
+      "name": "Llegada (banda llarga dreta)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 50
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 55
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 60
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 70
+        }
+      ],
+      "note": "Continuació de la llegada després de la cantonada. El 55 només apareix a l'exemple de la p. 208."
+    },
+    {
+      "name": "Sortida (banda curta inferior)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 10
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 40
+        }
+      ]
+    },
+    {
+      "name": "Ample: sortida (banda llarga esquerra)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        }
+      ],
+      "note": "Variant per a l'ample (p. 209–211): 10 punts per diamant des de la cantonada superior."
+    },
+    {
+      "name": "Ample: atac i llegada (banda llarga dreta)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        }
+      ],
+      "note": "Variant per a l'ample: la mateixa escala per a atac i llegada (als exemples es fan servir 2,5, 4, 5, 12, 15, 20)."
+    }
+  ],
+  "corrections": [
+    "Bola primer: tocant la bola 2 per l'esquerra, la bola 1 agafa una mica d'efecte esquerre; compensa amb 1 mm d'efecte a la dreta. Tocant-la per la dreta, compensa amb 1 mm d'efecte a l'esquerra."
+  ],
+  "examples": [
+    {
+      "text": "Esquema inicial: sortida 30, atac 10 (llegada aproximada a la cantonada, 40)",
+      "page": 204,
+      "path": [
+        {
+          "x": 2.78,
+          "y": 7.46
+        },
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 5.71
+        },
+        {
+          "x": 0.55,
+          "y": 8
+        },
+        {
+          "x": 3.76,
+          "y": 0.57
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.89,
+          "y": 0.49,
+          "c": "yellow"
+        },
+        {
+          "x": 3.68,
+          "y": 0.45,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 25, llegada 30 → atac 25 − 30/2 = 10 (el llibre escriu '= 15')",
+      "page": 205,
+      "path": [
+        {
+          "x": 2.39,
+          "y": 7.79
+        },
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 6.31
+        },
+        {
+          "x": 0.24,
+          "y": 8
+        },
+        {
+          "x": 2.91,
+          "y": 0.31
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.11,
+          "y": 0.16,
+          "c": "yellow"
+        },
+        {
+          "x": 2.88,
+          "y": 0.14,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 40, llegada 50 → atac 40 − 50/2 = 15",
+      "page": 206,
+      "path": [
+        {
+          "x": 3.78,
+          "y": 7.58
+        },
+        {
+          "x": 1.5,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 4.78
+        },
+        {
+          "x": 0.77,
+          "y": 8
+        },
+        {
+          "x": 3.89,
+          "y": 2.08
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.72,
+          "y": 1.9,
+          "c": "yellow"
+        },
+        {
+          "x": 3.89,
+          "y": 1.82,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer per l'esquerra (+1 mm efecte dret): sortida 35, llegada 60 → atac 35 − 60/2 = 5",
+      "page": 207,
+      "path": [
+        {
+          "x": 2.86,
+          "y": 7.29
+        },
+        {
+          "x": 2.92,
+          "y": 6.7
+        },
+        {
+          "x": 0.5,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.17
+        },
+        {
+          "x": 1.67,
+          "y": 8
+        },
+        {
+          "x": 3.84,
+          "y": 4.0
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.09,
+          "y": 6.68,
+          "c": "yellow"
+        },
+        {
+          "x": 3.84,
+          "y": 3.99,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer per la dreta (+1 mm efecte esquerre): sortida 32,5, llegada 55 → atac 32,5 − 55/2 = 5",
+      "page": 208,
+      "path": [
+        {
+          "x": 3.23,
+          "y": 7.43
+        },
+        {
+          "x": 2.81,
+          "y": 6.98
+        },
+        {
+          "x": 0.5,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3.19
+        },
+        {
+          "x": 0.92,
+          "y": 8
+        },
+        {
+          "x": 3.84,
+          "y": 2.9
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.64,
+          "y": 7.04,
+          "c": "yellow"
+        },
+        {
+          "x": 3.83,
+          "y": 2.9,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Ample: sortida 10, llegada 15 → atac 10 − 15/2 = 2,5",
+      "page": 209,
+      "path": [
+        {
+          "x": 0.23,
+          "y": 0.91
+        },
+        {
+          "x": 4,
+          "y": 0.25
+        },
+        {
+          "x": 0.61,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0.17
+        },
+        {
+          "x": 3.75,
+          "y": 1.48
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.89,
+          "y": 1.6,
+          "c": "yellow"
+        },
+        {
+          "x": 3.88,
+          "y": 1.41,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Ample, bola primer: sortida 15, llegada 20 → atac 15 − 20/2 = 5",
+      "page": 210,
+      "path": [
+        {
+          "x": 0.22,
+          "y": 1.13
+        },
+        {
+          "x": 0.78,
+          "y": 1.26
+        },
+        {
+          "x": 4,
+          "y": 0.5
+        },
+        {
+          "x": 0.83,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0.17
+        },
+        {
+          "x": 3.83,
+          "y": 1.97
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.82,
+          "y": 1.42,
+          "c": "yellow"
+        },
+        {
+          "x": 3.83,
+          "y": 1.97,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Ample, bola primer: sortida 10, llegada 12 → atac 10 − 12/2 = 4",
+      "page": 211,
+      "path": [
+        {
+          "x": 1.01,
+          "y": 0.92
+        },
+        {
+          "x": 1.42,
+          "y": 0.77
+        },
+        {
+          "x": 4,
+          "y": 0.4
+        },
+        {
+          "x": 0.33,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0.06
+        },
+        {
+          "x": 3.84,
+          "y": 1.18
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.39,
+          "y": 0.6,
+          "c": "yellow"
+        },
+        {
+          "x": 3.84,
+          "y": 1.18,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Totes les execucions sense efecte són molt delicades: entrena-les amb molta concentració i cuidant la velocitat."
+  ],
+  "quotes": [
+    "La fórmula es ATAQUE = SALIDA - (LLEGADA/2)",
+    "Todas las ejecuciones sin efecto son siempre muy delicadas."
+  ],
+  "uncertain": [
+    "P. 205: el rètol diu '25 - 30/2 = 15', però l'aritmètica i el dibuix (atac al 10) donen 10. Errata probable.",
+    "El primer esquema (p. 204) no porta números; sortida 30 i atac 10 es llegeixen del dibuix i la llegada (cantonada, 40) és una estimació.",
+    "Per a la variant d'ample el llibre només dona els dibuixos; no explica el recorregut ni la velocitat. Recorregut als dibuixos: llarga dreta, curta superior, llarga esquerra i arribada a la llarga dreta.",
+    "Camins aproximats, mesurats sobre els dibuixos."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida (banda curta inferior)"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac i llegada (banda curta superior)"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada (banda llarga dreta)"
+        }
+      },
+      "inputs": {
+        "S": [
+          20,
+          25,
+          27.5,
+          30,
+          32.5,
+          35,
+          37.5,
+          40
+        ],
+        "L": [
+          40,
+          50,
+          55,
+          60,
+          70
+        ],
+        "A": [
+          0,
+          5,
+          10,
+          15
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L / 2",
+          "label": "Trobar l'atac"
+        },
+        {
+          "solve": "L",
+          "expr": "2 * (S - A)",
+          "label": "On arribarà"
+        }
+      ],
+      "valid": "A >= 0 && A <= 40 && L >= 40 && L <= 70",
+      "round": 1,
+      "note": "Llegades a la llarga dreta (40–70). La segona i tercera banda (llarga esquerra i curta inferior) no tenen numeració, per això no es dibuixa el traç generat."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 40, llegada 50. On ataques?",
+        "options": [
+          "10",
+          "15",
+          "25",
+          "20"
+        ],
+        "answer": 1,
+        "explain": "40 − 50/2 = 15.",
+        "page": 206,
+        "path": [
+          {
+            "x": 3.78,
+            "y": 7.58
+          },
+          {
+            "x": 1.5,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 4.78
+          },
+          {
+            "x": 0.77,
+            "y": 8
+          },
+          {
+            "x": 3.89,
+            "y": 2.08
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.72,
+            "y": 1.9,
+            "c": "yellow"
+          },
+          {
+            "x": 3.89,
+            "y": 1.82,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 35, llegada 60. On ataques?",
+        "options": [
+          "0",
+          "25",
+          "15",
+          "5"
+        ],
+        "answer": 3,
+        "explain": "35 − 60/2 = 5.",
+        "page": 207,
+        "path": [
+          {
+            "x": 2.86,
+            "y": 7.29
+          },
+          {
+            "x": 2.92,
+            "y": 6.7
+          },
+          {
+            "x": 0.5,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 2.17
+          },
+          {
+            "x": 1.67,
+            "y": 8
+          },
+          {
+            "x": 3.84,
+            "y": 4.0
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.09,
+            "y": 6.68,
+            "c": "yellow"
+          },
+          {
+            "x": 3.84,
+            "y": 3.99,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Toques primer la bola 2 per l'esquerra. Què fas?",
+        "options": [
+          "1 mm d'efecte a la dreta",
+          "Ataques un punt més",
+          "1 mm d'efecte a l'esquerra",
+          "Res, és sense efecte"
+        ],
+        "answer": 0,
+        "explain": "La bola 1 agafa una mica d'efecte esquerre; es compensa amb 1 mm a la dreta (a l'inrevés si la toques per la dreta).",
+        "page": 207
+      },
+      {
+        "q": "Quina fórmula fa servir el sistema sense efecte?",
+        "options": [
+          "Atac = Sortida − Llegada",
+          "Atac = Sortida − Llegada/2",
+          "Atac = Valor + Sortida − Llegada",
+          "Atac = Sortida × Llegada"
+        ],
+        "answer": 1,
+        "explain": "El llibre: ATAQUE = SALIDA − (LLEGADA/2).",
+        "page": 204
+      },
+      {
+        "q": "Variant d'ample: sortida 10, llegada 15. On ataques a la llarga dreta?",
+        "options": [
+          "0",
+          "5",
+          "7,5",
+          "2,5"
+        ],
+        "answer": 3,
+        "explain": "10 − 15/2 = 2,5.",
+        "page": 209,
+        "path": [
+          {
+            "x": 0.23,
+            "y": 0.91
+          },
+          {
+            "x": 4,
+            "y": 0.25
+          },
+          {
+            "x": 0.61,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0.17
+          },
+          {
+            "x": 3.75,
+            "y": 1.48
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.89,
+            "y": 1.6,
+            "c": "yellow"
+          },
+          {
+            "x": 3.88,
+            "y": 1.41,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Què destaca el llibre de totes les execucions sense efecte?",
+        "options": [
+          "S'han de jugar molt fortes",
+          "Són molt delicades i cal cuidar la velocitat",
+          "Només serveixen en taules lentes",
+          "Perdonen errors de velocitat"
+        ],
+        "answer": 1,
+        "explain": "Cal entrenar-les amb molta concentració cuidant la velocitat adequada.",
+        "page": 205
+      }
+    ]
+  }
+}

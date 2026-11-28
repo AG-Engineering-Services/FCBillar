@@ -1,0 +1,160 @@
+[
+ {
+  "id": "fam-diamants",
+  "name": "Numeració de la teoria de diamants",
+  "what": "Atac a la llarga de 10 en 10 per diamant fins al 50 i, després, de 10 en 10 cada mig diamant fins al 100. Sortida 15–50 a la llarga (50 a la cantonada) i 60, 70, 80, 90 i 100 a la curta. Arribada a la 3a banda de 10 per diamant fins al 40 i de 10 cada mig diamant a partir d'aquí.",
+  "members": [
+   "teoria-diamants",
+   "teoria-diamants-correccions-curta",
+   "retruc",
+   "sistema-verworst",
+   "van-kuyk-vk10",
+   "van-kuyk-vk12",
+   "van-kuyk-inclinacio",
+   "arguello",
+   "cbv-contraefecte"
+  ],
+  "same": "L'atac coincideix punt per punt en totes aquestes fitxes. La sortida també, llevat de les variants que la canvien expressament.",
+  "diff": [
+   "Villora i Serralta (sortida i arribada a la llarga, i arribada a la curta) posen la cantonada de sortida a 47,5 en lloc de 50.",
+   "Van Kuyk VK10 posa 52 a la cantonada de la curta i canvia algunes arribades (el 40 passa a 45). VK12 compta 6 punts per diamant a la llarga i 12 a la curta.",
+   "Argüello fa servir la mateixa sortida sense la desena (50 → 5)."
+  ],
+  "also": [
+   "teoria-diamants-sortida-llarga",
+   "teoria-diamants-llarga-a-curta",
+   "teoria-diamants-tria-bandes",
+   "teoria-diamants-segona-banda",
+   "segona-banda",
+   "diamants-mesa-petita",
+   "diamants-linia-cabanya",
+   "base-30",
+   "cbv-40-en-una-01-05"
+  ]
+ },
+ {
+  "id": "fam-multiplica",
+  "name": "Sistemes de multiplicar (Atac = Sortida × Arribada)",
+  "what": "El punt d'atac s'obté multiplicant dos valors petits, en lloc de restar.",
+  "members": [
+   "arguello",
+   "arguello-b2-b3",
+   "zig-zag-567",
+   "klk-sense-efecte",
+   "cbv-antes-banda-dues-bandes"
+  ],
+  "same": "La mateixa operació. A l'Argüello, al zig-zag 567 i a l'antes banda, la sortida és un nombre d'una xifra.",
+  "diff": [
+   "Argüello: arribada a la 2a banda (curta) de 0 a 10.",
+   "Zig-zag 567: arribades 5, 5,5, 6 i 6,5 a la curta; al llarg de la taula, el 9 es converteix en 8,5.",
+   "Antes banda a dues bandes: amb efecte lateral, el valor de l'efecte se suma a la sortida."
+  ]
+ },
+ {
+  "id": "fam-resta-meitat",
+  "name": "Mitja arribada: sense efecte i contraefecte",
+  "what": "Dos sistemes que treballen amb la meitat de l'arribada, un restant-la i l'altre sumant-la.",
+  "members": [
+   "sense-efecte",
+   "cbv-contraefecte"
+  ],
+  "same": "Tots dos divideixen l'arribada per 2.",
+  "diff": [
+   "Sense efecte (llibre): Atac = Sortida − Arribada/2.",
+   "Contraefecte (Club Billar València): Atac = Sortida + Arribada/2, amb base 40 i efecte contrari màxim."
+  ]
+ },
+ {
+  "id": "fam-pase-arguello",
+  "name": "Pase bola d'Argüello i de Ricardo Duarte",
+  "what": "Duarte fa servir les mateixes numeracions que els dos patrons d'Argüello: la bola 1 a la llarga, la bola 2 sobre la banda i l'arribada en efectes. Efecte = suma de les contribucions de cada bola.",
+  "members": [
+   "pase-bola-arguello",
+   "pase-bola-klk",
+   "pase-bola-arguello-1",
+   "pase-bola-lkl",
+   "pase-bola-registres"
+  ],
+  "same": "K-L-K de Duarte = pase bola-2 d'Argüello: la bola 1 val 0 al 5è diamant i ±1 per diamant, la bola 2 val 0 al 3r diamant de la curta i +1 per mig diamant, i la separació resta ½ per diamant. L-K-L de Duarte = pase bola sobre banda llarga-1 d'Argüello: la bola 2 val 0 al 2n diamant i ±1 per mig diamant, l'arribada val +1 per mig diamant, i la separació resta 1 per diamant.",
+  "diff": [
+   "Els registres d'efecte de Duarte mesuren on cau cada efecte en una posició fixa: no són la numeració del sistema, i per això no coincideixen amb la de l'L-K-L.",
+   "Duarte divideix el total per 2 en espais estrets o en zig-zag; Argüello no ho diu."
+  ],
+  "also": [
+   "cbv-40-en-una-06-11"
+  ]
+ },
+ {
+  "id": "fam-tuzul",
+  "name": "Mètode de Tüzül (valor de la mesa)",
+  "what": "Valor de la mesa = Atac + Arribada − Sortida, calibrat per cada jugador i cada taula.",
+  "members": [
+   "tuzul-curta-curta",
+   "tuzul-sortida-llarga",
+   "tuzul-mol-curta-llarga",
+   "tuzul-quart-mesa"
+  ],
+  "same": "Atac a la curta 30, 20 i 10 (40 i 0 a les cantonades), i sortida i arribada 20, 15, 10, 5 i 0 a la curta. Els PDF «Tüzül I, II i III» del Club Billar València són el mateix text i els mateixos dibuixos que el llibre (pàg. 166–193).",
+  "diff": [
+   "Sortida de banda llarga: escala de 23 a 38, amb el 23 a la cantonada.",
+   "Tüzül/Mol (3a part): valor de la mesa 25 amb efecte 3, i numeració d'atac pròpia.",
+   "Un quart de taula: cop molt suau, a 10–20 cm."
+  ]
+ },
+ {
+  "id": "fam-plus",
+  "name": "Sistema Plus",
+  "what": "Atacs a la banda curta des de la llarga, amb un valor de la cantonada que canvia segons la sortida.",
+  "members": [
+   "plus-zona-1",
+   "plus-zona-2",
+   "plus-zona-3",
+   "plus-4-llegada-llarga",
+   "plus-4-llegada-curta",
+   "plus-5-villora",
+   "efecte-4-bola-2"
+  ],
+  "same": "El PDF «Sistema Plus» del Club Billar València resumeix les mateixes numeracions i els mateixos valors de la cantonada (17, 15, 10, 5 i 0), i la regla que la 4a banda és el doble de la 3a. Els seus 5 exemples nous són a les zones 1 i 2 i al mètode de Villora.",
+  "diff": [
+   "La zona 2 té numeració d'atac pròpia (del 35 al 20).",
+   "El mètode de Villora i el Plus-4 amb arribada a la llarga tenen escales d'atac diferents de la base del Plus: vegeu-ne les notes a cada fitxa.",
+   "Rodades del Plus sense efecte (Club Billar València): curta-llarga-curta sense efecte, amb Atac = Sortida − Arribada i una numeració de 3a banda que canvia segons la sortida."
+  ],
+  "also": [
+   "cbv-rodades-plus-sense-efecte",
+   "cbv-40-en-una-01-05",
+   "cbv-40-en-una-20-29"
+  ]
+ },
+ {
+  "id": "fam-verworst-efecte",
+  "name": "Efecte contrari i zig-zag de Verworst",
+  "what": "Sistemes amb efecte contrari o de tornada que es calculen per distàncies.",
+  "members": [
+   "renverse-verworst",
+   "acordeo",
+   "cbv-zigzag",
+   "sistema-3-6-9"
+  ],
+  "same": "El PDF «Renverse» del Club Billar València és idèntic, pàgina per pàgina, al renversé del llibre (pàg. 56–72). L'acordió i el zig-zag del club parteixen de la mateixa posició patró: amb 3 diamants de distància, l'atac és perpendicular.",
+  "diff": [
+   "Acordió: corregeix 2,5 punts per diamant. Zig-zag del club: 3 punts per diamant, amb distàncies de 0,4 a 8 diamants.",
+   "El 3-6-9 és una bricola de curta a curta sense efecte, amb una taula de valors pròpia."
+  ]
+ },
+ {
+  "id": "fam-base30",
+  "name": "La base 30",
+  "what": "Atacar al 30 de la llarga torna la bola a l'alçada de sortida. Cada 10 punts de diferència desplacen l'atac 7,5 punts.",
+  "members": [
+   "base-30"
+  ],
+  "same": "El PDF «Sistema 30» del Club Billar València és la mateixa regla, amb el mateix exemple (2 diamants de desplaçament, atac 15).",
+  "diff": [
+   "El club el proposa amb molta bola (5/8) i un cop fort perquè la bola 1 freni. El llibre proposa un cop allargat i dolç."
+  ],
+  "also": [
+   "cbv-40-en-una-20-29"
+  ]
+ }
+]

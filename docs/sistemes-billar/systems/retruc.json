@@ -1,0 +1,636 @@
+{
+  "id": "retruc",
+  "name": "El retruc (evitar el retruque)",
+  "group": "Teoria de diamants",
+  "attributed_to": null,
+  "pages": [
+    300,
+    309
+  ],
+  "purpose": "Evitar el retruc (topada de la bola jugadora amb la bola 2) en tres bandes llarga-curta-llarga amb bola primer, quan la bola 2 surt cap a la mateixa línia d'arribada.",
+  "shot": {
+    "first_cushion": "bola",
+    "cushions": "bola-L-K-L",
+    "effect": "efecte favorable; a les solucions B, menys efecte",
+    "stroke": "normal; a la solució A, cop més alt de semicorregut",
+    "ball": "Solució A: més bola; solució B: menys bola (més fina)"
+  },
+  "formula": "Atac = Sortida − Arribada (teoria de diamants clàssica)",
+  "steps": [
+    "Memoritza els carrers d'arribada de la 3a a la 4a banda (gràfic de la p300).",
+    "Calcula per quina arribada ha de venir la bola jugadora (ex.: 60 − 40 = 20).",
+    "Mira cap on anirà la bola 2: si va cap a la mateixa arribada (el 20), hi haurà perill de retruc.",
+    "Solució A: més bola i cop més alt de semicorregut perquè la bola 2 vagi directament a la banda curta.",
+    "Solució B: menys bola i treure una mica d'efecte perquè la bola 2 vagi cap al diamant 3 o 4 de la banda llarga esquerra (o més avall que l'arribada)."
+  ],
+  "numberings": [
+    {
+      "name": "Arribada a 3a banda",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 4.5,
+          "v": 50
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 60
+        },
+        {
+          "x": 0,
+          "y": 5.5,
+          "v": 70
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 80
+        },
+        {
+          "x": 0,
+          "y": 6.5,
+          "v": 90
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 100
+        }
+      ],
+      "note": "Dibuix ja vertical al llibre, sense girar. Per dins a la banda llarga esquerra."
+    },
+    {
+      "name": "Arribada a 4a banda (carrers)",
+      "role": "altre",
+      "points": [
+        {
+          "x": 4,
+          "y": 6,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 30
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 40
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 50
+        },
+        {
+          "x": 1.7,
+          "y": 8,
+          "v": 60
+        },
+        {
+          "x": 1.5,
+          "y": 8,
+          "v": 70
+        },
+        {
+          "x": 1.25,
+          "y": 8,
+          "v": 80
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 90
+        },
+        {
+          "x": 0.75,
+          "y": 8,
+          "v": 100
+        }
+      ],
+      "note": "On acaba a la 4a banda cada carrer (v = arribada de 3a banda). Mesurat del gràfic de la p300."
+    },
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 25
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 35
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 45
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 50
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 60
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 70
+        }
+      ],
+      "note": "Per fora. A la curta de baix el gràfic també rotula 80, 90 i 100, però les marques no queden clares."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 4,
+          "y": 5.5,
+          "v": 60
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 70
+        },
+        {
+          "x": 4,
+          "y": 6.5,
+          "v": 80
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 90
+        },
+        {
+          "x": 4,
+          "y": 7.5,
+          "v": 100
+        }
+      ],
+      "note": "Per fora a la llarga dreta; hi ha un «00» més enllà de la cantonada de dalt."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "Sortida 60, atac 40 → arribada 20. Si la bola 2 va cap al 20, retruc: cal enviar-la a la curta (A) o al diamant 3-4 de la llarga esquerra (B).",
+      "page": 301,
+      "path": [
+        {
+          "x": 2.7,
+          "y": 6.5
+        },
+        {
+          "x": 2.81,
+          "y": 5.7
+        },
+        {
+          "x": 4,
+          "y": 4.4
+        },
+        {
+          "x": 1.84,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.0
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.81,
+          "y": 5.7,
+          "c": "yellow"
+        },
+        {
+          "x": 3.81,
+          "y": 7.6,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 50, atac 20 → arribada 30. NO: la bola 2 va cap al 30. SÍ: més fina i treu una mica d'efecte.",
+      "page": 305,
+      "path": [
+        {
+          "x": 2.17,
+          "y": 6.2
+        },
+        {
+          "x": 2.2,
+          "y": 4.96
+        },
+        {
+          "x": 4,
+          "y": 2.58
+        },
+        {
+          "x": 3.03,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3.08
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.2,
+          "y": 4.96,
+          "c": "yellow"
+        },
+        {
+          "x": 3.0,
+          "y": 7.8,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 65, atac 55 → arribada 10. NO: la bola 2 va cap al 10. SÍ: menys bola i menys efecte.",
+      "page": 307,
+      "path": [
+        {
+          "x": 3.06,
+          "y": 6.85
+        },
+        {
+          "x": 3.13,
+          "y": 6.28
+        },
+        {
+          "x": 4,
+          "y": 5.49
+        },
+        {
+          "x": 1.24,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1.03
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.13,
+          "y": 6.28,
+          "c": "yellow"
+        },
+        {
+          "x": 3.79,
+          "y": 6.97,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Les posicions més perilloses: bola 2 a la cabanya de baix o com a molt fins al diamant 3, i bola jugadora una mica escorada cap a l'esquerra.",
+    "Practica aquestes posicions: són bones per resoldre i preparar.",
+    "La teva bola ha d'anar a l'arribada; la bola 2 no pot anar cap allà."
+  ],
+  "quotes": [
+    "siempre los mismos choques, siempre las mismas corbatas",
+    "la bola 2 no se puede dirigir hacia el 20 o en caso contrario estás provocando la posibilidad de retruque."
+  ],
+  "uncertain": [
+    "Als camins d'exemple el segon punt és el contacte amb la bola 2, no una banda.",
+    "Les marques de 80 i 100 a la banda curta de baix del gràfic de la p300 queden a x≈2.66 i x≈3.66, que no lliguen amb la numeració clàssica; s'han deixat fora."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Arribada",
+          "numbering": "Arribada a 3a banda"
+        }
+      },
+      "inputs": {
+        "S": [
+          40,
+          45,
+          50,
+          60,
+          70
+        ],
+        "A": [
+          20,
+          30,
+          40,
+          50,
+          60
+        ],
+        "L": [
+          10,
+          20,
+          30,
+          40
+        ]
+      },
+      "relations": [
+        {
+          "solve": "L",
+          "expr": "S - A",
+          "label": "on arriba la bola jugadora (la bola 2 no hi ha d'anar)"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L"
+        }
+      ],
+      "valid": "A >= 0 && A <= 90 && L >= 0 && L <= 100",
+      "round": 0,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Teoria de diamants clàssica; el retruc s'evita enviant la bola 2 lluny de l'arribada L."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 60, atac 40: per quina arribada ha de venir la teva bola?",
+        "options": [
+          "40",
+          "20",
+          "100",
+          "30"
+        ],
+        "answer": 1,
+        "explain": "60 − 40 = 20.",
+        "page": 302,
+        "path": [
+          {
+            "x": 2.7,
+            "y": 6.5
+          },
+          {
+            "x": 2.81,
+            "y": 5.7
+          },
+          {
+            "x": 4,
+            "y": 4.4
+          },
+          {
+            "x": 1.84,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 2.0
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.81,
+            "y": 5.7,
+            "c": "yellow"
+          },
+          {
+            "x": 3.81,
+            "y": 7.6,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "En aquesta jugada, cap on NO pot anar la bola 2?",
+        "options": [
+          "Cap a la banda curta de dalt",
+          "Cap al diamant 4 de la llarga esquerra",
+          "Cap a l'arribada 20",
+          "Cap a la cantonada de baix"
+        ],
+        "answer": 2,
+        "explain": "Si va cap al 20 provoca el retruc.",
+        "page": 302,
+        "path": [
+          {
+            "x": 2.7,
+            "y": 6.5
+          },
+          {
+            "x": 2.81,
+            "y": 5.7
+          },
+          {
+            "x": 4,
+            "y": 4.4
+          },
+          {
+            "x": 1.84,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 2.0
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.81,
+            "y": 5.7,
+            "c": "yellow"
+          },
+          {
+            "x": 3.81,
+            "y": 7.6,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Solució A per evitar el retruc:",
+        "options": [
+          "Menys bola i més efecte",
+          "Cop retingut i baix",
+          "Canviar l'atac a 50",
+          "Més bola i un cop més alt de semicorregut, bola 2 directa a la curta"
+        ],
+        "answer": 3,
+        "explain": "Variant A de la p303.",
+        "page": 303
+      },
+      {
+        "q": "Solució B per evitar el retruc:",
+        "options": [
+          "Menys bola i treure una mica d'efecte, bola 2 cap al diamant 3 o 4 de la llarga esquerra",
+          "Més bola i més efecte",
+          "Més velocitat sense canviar res",
+          "Tocar primer la banda"
+        ],
+        "answer": 0,
+        "explain": "Variant B de la p304.",
+        "page": 304
+      },
+      {
+        "q": "Sortida 65, atac 55, arribada 10: què fas perquè sigui «SÍ»?",
+        "options": [
+          "Més bola i més efecte",
+          "Menys bola i menys efecte",
+          "Cop massé",
+          "Res, no hi ha perill"
+        ],
+        "answer": 1,
+        "explain": "«Igual: menos bola y menos efecto».",
+        "page": 308,
+        "path": [
+          {
+            "x": 3.06,
+            "y": 6.85
+          },
+          {
+            "x": 3.13,
+            "y": 6.28
+          },
+          {
+            "x": 4,
+            "y": 5.49
+          },
+          {
+            "x": 1.24,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 1.03
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.13,
+            "y": 6.28,
+            "c": "yellow"
+          },
+          {
+            "x": 3.79,
+            "y": 6.97,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quines posicions són les més perilloses de retruc?",
+        "options": [
+          "Bola 2 al centre de la taula",
+          "Bola 2 a la cabanya de dalt",
+          "Bola 2 a la cabanya de baix (fins al diamant 3) i jugadora escorada a l'esquerra",
+          "Bola jugadora enganxada a la banda dreta"
+        ],
+        "answer": 2,
+        "explain": "Ho diu la p309.",
+        "page": 309
+      }
+    ]
+  }
+}

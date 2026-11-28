@@ -1,0 +1,1056 @@
+{
+ "id": "renverse-verworst",
+ "name": "Renversé (sistema de Verworst)",
+ "group": "Efecte contrari",
+ "attributed_to": "Verworst (exposat per José Lazo)",
+ "pages": [
+  56,
+  72
+ ],
+ "purpose": "Renversé: tres bandes llarga-curta-llarga amb efecte contrari, per caramboles a prop del racó o de la mateixa banda llarga d'atac.",
+ "shot": {
+  "first_cushion": "llarga",
+  "cushions": "L-K-L",
+  "effect": "efecte contrari (al dibuix, lateral a la dreta, a mitja alçada)",
+  "stroke": "molt delicat; la velocitat hi influeix molt",
+  "ball": "bricole (banda primer); variant atacant directament la bola 2"
+ },
+ "formula": "Atac = Sortida − Llegada",
+ "steps": [
+  "Llegeix la Sortida a la banda curta de baix (fila de diamants exterior: 60, 70, 80, 90, 100), allargant la línia atac → bola 1.",
+  "Llegeix la Llegada a la mateixa banda curta (valors interiors: 50 al racó, 60, 70, 80, 90).",
+  "Calcula Atac = Sortida − Llegada i apunta a aquest número de la banda llarga dreta (0 al racó de dalt, 10 per diamant fins a 50).",
+  "Aplica les correccions: sortida 60, llegades lluny del racó, atac sobre bola o llegada a la banda llarga.",
+  "Entrena la posició mare: sortida 70, atac 20, llegada 50 (racó)."
+ ],
+ "numberings": [
+  {
+   "name": "Atac",
+   "role": "atac",
+   "points": [
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 4,
+     "y": 1,
+     "v": 10
+    },
+    {
+     "x": 4,
+     "y": 2,
+     "v": 20
+    },
+    {
+     "x": 4,
+     "y": 3,
+     "v": 30
+    },
+    {
+     "x": 4,
+     "y": 4,
+     "v": 40
+    },
+    {
+     "x": 4,
+     "y": 5,
+     "v": 50
+    }
+   ],
+   "note": "Dibuix ja en vertical; no cal girar. Banda llarga dreta, comptant des del racó de dalt. El 0 surt als exemples (p65). Els números es llegeixen a la fila de diamants; al dibuix el contacte real amb la banda queda gairebé un diamant més avall."
+  },
+  {
+   "name": "Sortida",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 1,
+     "y": 8,
+     "v": 60
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 70
+    },
+    {
+     "x": 2.5,
+     "y": 8,
+     "v": 80
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 90
+    },
+    {
+     "x": 3.5,
+     "y": 8,
+     "v": 100
+    }
+   ],
+   "note": "Banda curta de baix, fila exterior de diamants. Entre 70 i 100 la graduació és de mig diamant per cada 10."
+  },
+  {
+   "name": "Llegada",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 4,
+     "y": 8,
+     "v": 50
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 60
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 70
+    },
+    {
+     "x": 1.5,
+     "y": 8,
+     "v": 80
+    },
+    {
+     "x": 1,
+     "y": 8,
+     "v": 90
+    }
+   ],
+   "note": "Banda curta de baix, valors interiors. El 50 és el racó."
+  },
+  {
+   "name": "Descompte per llegada a la banda llarga",
+   "role": "altre",
+   "points": [
+    {
+     "x": 4,
+     "y": 2,
+     "v": -3.75
+    },
+    {
+     "x": 4,
+     "y": 4,
+     "v": -2.5
+    },
+    {
+     "x": 4,
+     "y": 6,
+     "v": -1.25
+    }
+   ],
+   "note": "Quan la carambola és a la banda llarga dreta: es compta llegada 50 i es resta a més aquest valor segons la zona (p68)."
+  }
+ ],
+ "corrections": [
+  "Sortida a prop de 60 (amb llegada 50): resta 5 a l'atac per la dificultat de tornar a la banda llarga (60 − 50 = 10 → 5).",
+  "Llegades 60, 70, 80 i 90: resta 2,5 a l'atac per cada 10 punts (de numeració, no diamants reals) des del racó: 60 → −2,5; 70 → −5; 80 → −7,5; 90 → −10.",
+  "Atac directe sobre la bola 2 (no bricole): mateix càlcul però suma +5 a l'atac per la rotació extra que agafa la bola 1 en xocar amb la 2.",
+  "Llegada a la mateixa banda llarga: resta 50 (llegada 50) i un valor extra segons la zona: −1,25 (cap al diamant 6), −2,5 (diamant 4), −3,75 (diamant 2).",
+  "Les correccions se sumen: p. ex. sortida 60, sobre bola, llegada a banda llarga zona 40 → 10 − 5 + 5 − 2,5 = 7,5."
+ ],
+ "examples": [
+  {
+   "text": "Posició mare: sortida 70, llegada 50 → atac 20",
+   "page": 57,
+   "path": [
+    {
+     "x": 2.25,
+     "y": 7.6
+    },
+    {
+     "x": 4,
+     "y": 2.95
+    },
+    {
+     "x": 3.54,
+     "y": 0
+    },
+    {
+     "x": 3.9,
+     "y": 7.75
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.73,
+     "y": 7.87,
+     "c": "yellow"
+    },
+    {
+     "x": 3.88,
+     "y": 7.87,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 80, llegada 50 → atac 30",
+   "page": 58,
+   "path": [
+    {
+     "x": 2.71,
+     "y": 7.68
+    },
+    {
+     "x": 4,
+     "y": 3.97
+    },
+    {
+     "x": 3.33,
+     "y": 0
+    },
+    {
+     "x": 3.9,
+     "y": 7.75
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.73,
+     "y": 7.87,
+     "c": "yellow"
+    },
+    {
+     "x": 3.88,
+     "y": 7.87,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 90, llegada 50 → atac 40",
+   "page": 59,
+   "path": [
+    {
+     "x": 3.19,
+     "y": 7.75
+    },
+    {
+     "x": 4,
+     "y": 5.1
+    },
+    {
+     "x": 3.29,
+     "y": 0
+    },
+    {
+     "x": 3.92,
+     "y": 7.9
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.77,
+     "y": 7.9,
+     "c": "yellow"
+    },
+    {
+     "x": 3.92,
+     "y": 7.9,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 100, llegada 50 → atac 50",
+   "page": 60,
+   "balls": [
+    {
+     "x": 3.77,
+     "y": 7.9,
+     "c": "yellow"
+    },
+    {
+     "x": 3.92,
+     "y": 7.9,
+     "c": "red"
+    }
+   ],
+   "path": [
+    {
+     "x": 3.71,
+     "y": 7.52
+    },
+    {
+     "x": 4,
+     "y": 5
+    },
+    {
+     "x": 3.19,
+     "y": 0
+    },
+    {
+     "x": 3.92,
+     "y": 7.9
+    }
+   ],
+   "path_built": true
+  },
+  {
+   "text": "Sortida 60, llegada 50 → 10; correcció de sortida 60: 10 − 5 = atac 5",
+   "page": 61,
+   "path": [
+    {
+     "x": 1.25,
+     "y": 7.75
+    },
+    {
+     "x": 4,
+     "y": 1.3
+    },
+    {
+     "x": 3.61,
+     "y": 0
+    },
+    {
+     "x": 3.95,
+     "y": 7.87
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.77,
+     "y": 7.9,
+     "c": "yellow"
+    },
+    {
+     "x": 3.92,
+     "y": 7.9,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 70, llegada 60 → 10; 10 − 2,5 = atac 7,5",
+   "page": 62,
+   "path": [
+    {
+     "x": 2.21,
+     "y": 7.63
+    },
+    {
+     "x": 4,
+     "y": 2.0
+    },
+    {
+     "x": 3.57,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 2.7
+    },
+    {
+     "x": 3.09,
+     "y": 7.84
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.85,
+     "y": 7.84,
+     "c": "yellow"
+    },
+    {
+     "x": 3.1,
+     "y": 7.84,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 80, llegada 60 → 20; 20 − 2,5 = atac 17,5",
+   "page": 63,
+   "path": [
+    {
+     "x": 2.75,
+     "y": 7.42
+    },
+    {
+     "x": 4,
+     "y": 2.95
+    },
+    {
+     "x": 3.56,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 2.75
+    },
+    {
+     "x": 3.09,
+     "y": 7.84
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.85,
+     "y": 7.84,
+     "c": "yellow"
+    },
+    {
+     "x": 3.1,
+     "y": 7.84,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 90, llegada 80 → 10; 10 − 2,5 − 2,5 − 2,5 = atac 2,5",
+   "page": 64,
+   "path": [
+    {
+     "x": 3.07,
+     "y": 7.81
+    },
+    {
+     "x": 4,
+     "y": 1.0
+    },
+    {
+     "x": 3.67,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 2.3
+    },
+    {
+     "x": 1.62,
+     "y": 7.84
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.38,
+     "y": 7.84,
+     "c": "yellow"
+    },
+    {
+     "x": 1.62,
+     "y": 7.84,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 100, llegada 90 → 10; 10 − 4 × 2,5 = atac 0 (racó)",
+   "page": 65,
+   "path": [
+    {
+     "x": 3.56,
+     "y": 7.78
+    },
+    {
+     "x": 4,
+     "y": 0.53
+    },
+    {
+     "x": 3.76,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 3.5
+    },
+    {
+     "x": 1.11,
+     "y": 7.87
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.9,
+     "y": 7.87,
+     "c": "yellow"
+    },
+    {
+     "x": 1.11,
+     "y": 7.87,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sobre bola: sortida 70, llegada 50 → 20; 20 + 5 = atac 25",
+   "page": 66,
+   "path": [
+    {
+     "x": 3.68,
+     "y": 5.71
+    },
+    {
+     "x": 3.3,
+     "y": 4.71
+    },
+    {
+     "x": 4,
+     "y": 3.33
+    },
+    {
+     "x": 3.22,
+     "y": 0
+    },
+    {
+     "x": 3.96,
+     "y": 7.95
+    },
+    {
+     "x": 3.72,
+     "y": 7.19
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.3,
+     "y": 4.71,
+     "c": "yellow"
+    },
+    {
+     "x": 3.72,
+     "y": 7.19,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sobre bola: sortida 80, llegada 60 → 20; 20 − 2,5 = 17,5; 17,5 + 5 = atac 22,5",
+   "page": 67,
+   "balls": [
+    {
+     "x": 3.18,
+     "y": 5.56,
+     "c": "yellow"
+    },
+    {
+     "x": 3.0,
+     "y": 7.82,
+     "c": "red"
+    }
+   ],
+   "path": [
+    {
+     "x": 3.63,
+     "y": 6.58
+    },
+    {
+     "x": 3.18,
+     "y": 5.56
+    },
+    {
+     "x": 4,
+     "y": 3.35
+    },
+    {
+     "x": 3.33,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 2.6
+    },
+    {
+     "x": 3.0,
+     "y": 7.82
+    }
+   ]
+  },
+  {
+   "text": "Llegada a banda llarga: sortida 70 → 70 − 50 = 20; 20 − 1,25 = atac 18,75",
+   "page": 69,
+   "path": [
+    {
+     "x": 2.22,
+     "y": 7.67
+    },
+    {
+     "x": 4,
+     "y": 2.85
+    },
+    {
+     "x": 3.27,
+     "y": 0
+    },
+    {
+     "x": 3.9,
+     "y": 6.39
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.75,
+     "y": 6.39,
+     "c": "yellow"
+    },
+    {
+     "x": 3.92,
+     "y": 6.39,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Llegada a banda llarga: sortida 70 → 20; 20 − 2,5 = atac 17,5",
+   "page": 70,
+   "path": [
+    {
+     "x": 2.19,
+     "y": 7.8
+    },
+    {
+     "x": 4,
+     "y": 2.72
+    },
+    {
+     "x": 3.45,
+     "y": 0
+    },
+    {
+     "x": 3.9,
+     "y": 4.33
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.75,
+     "y": 4.3,
+     "c": "red"
+    },
+    {
+     "x": 3.9,
+     "y": 4.33,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Llegada a banda llarga: sortida 90 → 40; 40 − 3,75 = atac 36,25",
+   "page": 71,
+   "path": [
+    {
+     "x": 3.62,
+     "y": 6.03
+    },
+    {
+     "x": 4,
+     "y": 4.74
+    },
+    {
+     "x": 3.13,
+     "y": 0
+    },
+    {
+     "x": 3.9,
+     "y": 6.36
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.77,
+     "y": 6.29,
+     "c": "yellow"
+    },
+    {
+     "x": 3.92,
+     "y": 6.36,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Combinat: sortida 60 − 50 = 10; −5 per sortida 60 → 5; +5 per jugar sobre bola → 10; −2,5 per la llegada → atac 7,5",
+   "page": 72,
+   "balls": [
+    {
+     "x": 3.52,
+     "y": 2.31,
+     "c": "yellow"
+    },
+    {
+     "x": 3.84,
+     "y": 4.49,
+     "c": "red"
+    }
+   ],
+   "path": [
+    {
+     "x": 3.79,
+     "y": 2.88
+    },
+    {
+     "x": 3.52,
+     "y": 2.31
+    },
+    {
+     "x": 4,
+     "y": 1.57
+    },
+    {
+     "x": 3.5,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4.0
+    },
+    {
+     "x": 3.84,
+     "y": 4.49
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "És una jugada molt delicada sobretot per la influència de la velocitat.",
+  "Entrena la posició mare (sortida 70, atac 20, llegada 50) tantes vegades com calgui per assimilar l'efecte i la velocitat correctes."
+ ],
+ "quotes": [
+  "Es una jugada extremadamente delicada debido sobre todo a la influencia que puede ejercer la velocidad.",
+  "La fórmula general es ATAQUE = SALIDA - LLEGADA."
+ ],
+ "uncertain": [
+  "El text no diu la quantitat d'efecte ni l'alçada; només el dibuix de la bola mostra el punt lateral a la dreta, a mitja alçada.",
+  "Zones de descompte a la banda llarga: als exemples p69 i p71 les boles són a una alçada semblant (prop del diamant 6,4) però es resta −1,25 i −3,75 respectivament; no queda clar si la zona depèn de la posició de les boles, de la sortida o del punt on la bola 1 toca la banda llarga.",
+  "La correcció de sortida 60 només es diu per a 'prop de la sortida 60'; no s'indica a partir de quin valor deixa d'aplicar-se.",
+  "Recorreguts aproximats a partir dels dibuixos; el tram final cap al racó no sempre mostra clarament el tercer contacte.",
+  "Calculador: la correcció de sortida 60 s'aplica només a S = 60 exactament; el llibre diu 'prop de la sortida 60' sense límit."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "S": {
+     "label": "Sortida",
+     "numbering": "Sortida"
+    },
+    "A": {
+     "label": "Atac",
+     "numbering": "Atac"
+    },
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada"
+    }
+   },
+   "inputs": {
+    "S": [
+     60,
+     70,
+     80,
+     90,
+     100
+    ],
+    "L": [
+     50,
+     60,
+     70,
+     80,
+     90
+    ],
+    "A": [
+     0,
+     2.5,
+     5,
+     7.5,
+     10,
+     15,
+     17.5,
+     20,
+     25,
+     30,
+     40,
+     50
+    ]
+   },
+   "relations": [
+    {
+     "solve": "A",
+     "expr": "S - L - (L - 50) / 4",
+     "when": "S > 60",
+     "label": "bricole"
+    },
+    {
+     "solve": "A",
+     "expr": "S - L - (L - 50) / 4 - 5",
+     "when": "S == 60",
+     "label": "bricole, sortida 60 (−5)"
+    },
+    {
+     "solve": "A",
+     "expr": "S - L - (L - 50) / 4 + 5",
+     "when": "S > 60",
+     "label": "atac sobre bola 2 (+5)"
+    },
+    {
+     "solve": "L",
+     "expr": "(S - A + 12.5) / 1.25",
+     "when": "S > 60",
+     "label": "bricole: quina llegada dona aquest atac"
+    }
+   ],
+   "valid": "S >= 60 && S <= 100 && L >= 50 && L <= 90 && A >= 0 && A <= 50",
+   "round": 2,
+   "path": [
+    "S",
+    "A",
+    "L"
+   ],
+   "note": "Recorregut simplificat: de la sortida a l'atac (banda llarga) i a la llegada (banda curta); no dibuixa el toc a la banda curta de dalt. El −2,5 per cada 10 punts de llegada des del racó s'escriu (L − 50)/4. La llegada a la mateixa banda llarga (taula −1,25/−2,5/−3,75) queda fora del calculador."
+  },
+  "quiz": [
+   {
+    "q": "Quina és la fórmula general del renversé de Verworst?",
+    "options": [
+     "Atac = Sortida − Llegada",
+     "Atac = Sortida + Llegada",
+     "Llegada = Sortida + Atac",
+     "Atac = Llegada − Sortida"
+    ],
+    "answer": 0,
+    "explain": "El llibre: ATAQUE = SALIDA − LLEGADA.",
+    "page": 57
+   },
+   {
+    "q": "Posició mare: sortida 70, llegada 50 (racó). On ataques?",
+    "options": [
+     "20",
+     "30",
+     "10",
+     "25"
+    ],
+    "answer": 0,
+    "explain": "70 − 50 = 20. Cal entrenar-la fins assimilar efecte i velocitat.",
+    "page": 57,
+    "path": [
+     {
+      "x": 2.25,
+      "y": 7.6
+     },
+     {
+      "x": 4,
+      "y": 2.95
+     },
+     {
+      "x": 3.54,
+      "y": 0
+     },
+     {
+      "x": 3.9,
+      "y": 7.75
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.73,
+      "y": 7.87,
+      "c": "yellow"
+     },
+     {
+      "x": 3.88,
+      "y": 7.87,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Sortida 60, llegada 50. Quin atac?",
+    "options": [
+     "5",
+     "10",
+     "15",
+     "0"
+    ],
+    "answer": 0,
+    "explain": "60 − 50 = 10, però prop de la sortida 60 es resten 5 per la dificultat de tornar a la banda llarga: 10 − 5 = 5.",
+    "page": 61,
+    "path": [
+     {
+      "x": 1.25,
+      "y": 7.75
+     },
+     {
+      "x": 4,
+      "y": 1.3
+     },
+     {
+      "x": 3.61,
+      "y": 0
+     },
+     {
+      "x": 3.95,
+      "y": 7.87
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.77,
+      "y": 7.9,
+      "c": "yellow"
+     },
+     {
+      "x": 3.92,
+      "y": 7.9,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Sortida 90, llegada 80. Quin atac?",
+    "options": [
+     "2,5",
+     "10",
+     "7,5",
+     "5"
+    ],
+    "answer": 0,
+    "explain": "90 − 80 = 10; la llegada 80 és a 3 trams de 10 del racó: 10 − 3 × 2,5 = 2,5.",
+    "page": 64,
+    "path": [
+     {
+      "x": 3.07,
+      "y": 7.81
+     },
+     {
+      "x": 4,
+      "y": 1.0
+     },
+     {
+      "x": 3.67,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 2.3
+     },
+     {
+      "x": 1.62,
+      "y": 7.84
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.38,
+      "y": 7.84,
+      "c": "yellow"
+     },
+     {
+      "x": 1.62,
+      "y": 7.84,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Si ataques directament la bola 2 en lloc de fer bricole, què canvia?",
+    "options": [
+     "Sumes 5 a l'atac",
+     "Restes 5 a l'atac",
+     "Restes 2,5 a l'atac",
+     "No canvia res"
+    ],
+    "answer": 0,
+    "explain": "Mateix càlcul que el bricole + 5, per la rotació extra de la bola 1 en xocar amb la 2 (70 − 50 = 20 → 25).",
+    "page": 66,
+    "path": [
+     {
+      "x": 3.68,
+      "y": 5.71
+     },
+     {
+      "x": 3.3,
+      "y": 4.71
+     },
+     {
+      "x": 4,
+      "y": 3.33
+     },
+     {
+      "x": 3.22,
+      "y": 0
+     },
+     {
+      "x": 3.96,
+      "y": 7.95
+     },
+     {
+      "x": 3.72,
+      "y": 7.19
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.3,
+      "y": 4.71,
+      "c": "yellow"
+     },
+     {
+      "x": 3.72,
+      "y": 7.19,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Llegada a la mateixa banda llarga, zona del diamant 4. Sortida 70: quin atac?",
+    "options": [
+     "17,5",
+     "20",
+     "18,75",
+     "16,25"
+    ],
+    "answer": 0,
+    "explain": "Es compta llegada 50 (70 − 50 = 20) i es resta el valor de la zona: −2,5 → 17,5.",
+    "page": 70,
+    "path": [
+     {
+      "x": 2.19,
+      "y": 7.8
+     },
+     {
+      "x": 4,
+      "y": 2.72
+     },
+     {
+      "x": 3.45,
+      "y": 0
+     },
+     {
+      "x": 3.9,
+      "y": 4.33
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.75,
+      "y": 4.3,
+      "c": "red"
+     },
+     {
+      "x": 3.9,
+      "y": 4.33,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Què fa el renversé especialment delicat segons el llibre?",
+    "options": [
+     "La influència de la velocitat",
+     "La presa de bola",
+     "La posició de la bola 3",
+     "La tisa del tac"
+    ],
+    "answer": 0,
+    "explain": "'Es una jugada extremadamente delicada debido sobre todo a la influencia que puede ejercer la velocidad.'",
+    "page": 56
+   }
+  ]
+ }
+}

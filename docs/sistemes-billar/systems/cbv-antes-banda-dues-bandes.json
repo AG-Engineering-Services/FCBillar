@@ -1,0 +1,791 @@
+{
+  "id": "cbv-antes-banda-dues-bandes",
+  "name": "Abans de banda: dues bandes",
+  "group": "Bricol",
+  "attributed_to": "PDF de Julio A",
+  "pages": null,
+  "source": "PDF «ANTES BANDA: DOS BANDAS», Club Billar València, pàg. 1–4",
+  "sort": 430,
+  "purpose": "Abans de banda: la bola 1 fa dues bandes (curta i llarga, o llarga i curta) abans de tocar la bola 2, amb atac a la banda curta o a la llarga.",
+  "shot": {
+    "first_cushion": "curta o llarga",
+    "cushions": "K-L i bola (atac a banda curta) o L-K i bola (atac a banda llarga)",
+    "effect": "sense efecte de base; si cal, efecte lateral de 1 a 4 que se suma a la sortida",
+    "stroke": "bola alta, velocitat per obrir i arribar",
+    "ball": null
+  },
+  "formula": "Atac = Sortida × Llegada (amb efecte: Sortida = sortida + efecte)",
+  "steps": [
+    "Tria la variant: atac a la banda curta (K-L) o a la banda llarga (L-K).",
+    "Llegeix la sortida a la banda de darrere de la bola 1 (curta: de 0 a 4; llarga: mateixos valors cada mig diamant).",
+    "Llegeix la llegada a la segona banda, on ha d'arribar la bola davant la bola 2.",
+    "Multiplica: Atac = Sortida × Llegada. Juga sense efecte, bola alta i amb velocitat per obrir i arribar.",
+    "Si sense efecte no hi ha jugada (sortida 0, o l'atac queda tapat per les boles 2 i 3), suma a la sortida l'efecte que jugaràs (1 a 4) i torna a multiplicar."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida (atac a curta)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 4,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 3
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 4
+        }
+      ],
+      "note": "Dibuixos verticals, sense girar: sortida a la curta de baix, comptada des del racó dret (0) fins al racó esquerre (4), 1 per diamant."
+    },
+    {
+      "name": "Atac (atac a curta)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "v": 40
+        }
+      ],
+      "note": "Curta de dalt, 10 punts per diamant des del racó dret. El 40 del racó esquerre no surt rotulat."
+    },
+    {
+      "name": "Llegada (atac a curta)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 1
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 2
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 2.5
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 3.5
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 4
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 4.5
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 5
+        },
+        {
+          "x": 3.8,
+          "y": 8,
+          "v": 5.5
+        }
+      ],
+      "note": "Llarga dreta, des del racó de dalt: els valors de la sortida del sistema clàssic, però el primer diamant val 1. El 5,5 és passat el racó de baix (a la curta)."
+    },
+    {
+      "name": "Atac (atac a llarga)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 7.5,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 6.5,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 40
+        }
+      ],
+      "note": "Variant a banda llarga (pàg. 4, només la meitat de baix de la taula dibuixada): llarga esquerra des del racó de baix, 10 punts cada mig diamant."
+    },
+    {
+      "name": "Sortida (atac a llarga)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 4,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 7.5,
+          "v": 1
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 2
+        },
+        {
+          "x": 4,
+          "y": 6.5,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 4
+        },
+        {
+          "x": 4,
+          "y": 5.5,
+          "v": 5
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 6
+        }
+      ],
+      "note": "Llarga dreta des del racó de baix, 1 cada mig diamant."
+    },
+    {
+      "name": "Llegada (atac a llarga)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 0.5,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 1.5,
+          "y": 8,
+          "v": 2.5
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 3
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": 3.5
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 4
+        },
+        {
+          "x": 3.5,
+          "y": 8,
+          "v": 4.5
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 5
+        }
+      ],
+      "note": "Curta de baix des del racó esquerre: els mateixos valors de llegada repartits en la meitat de distància (mig diamant per pas)."
+    }
+  ],
+  "corrections": [
+    "Amb efecte: Sortida = valor de sortida (0 a 4) + efecte (1 a 4). Sortida 0 amb efecte 3 → 3; sortida 2 amb efecte 3 → 5.",
+    "Atac a banda llarga: com que la segona banda (la curta) és la meitat, les numeracions d'atac i de sortida també es redueixen a la meitat; la fórmula no canvia."
+  ],
+  "examples": [
+    {
+      "text": "A banda curta, sense efecte: sortida 3, llegada 2,5 → atac 3 × 2,5 = 7,5",
+      "page": 1,
+      "path": [
+        {
+          "x": 0.96,
+          "y": 7.8
+        },
+        {
+          "x": 3.25,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.05
+        },
+        {
+          "x": 3.6,
+          "y": 3.3
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.56,
+          "y": 3.4,
+          "c": "yellow"
+        },
+        {
+          "x": 3.6,
+          "y": 4.1,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "A banda curta: sortida 2, llegada 4 → atac 2 × 4 = 8. La bola 1 toca la 2 a prop de la llarga i torna per la curta de baix cap a la 3",
+      "page": 2,
+      "path": [
+        {
+          "x": 2.05,
+          "y": 7.0
+        },
+        {
+          "x": 3.15,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.45
+        },
+        {
+          "x": 3.85,
+          "y": 5.95
+        },
+        {
+          "x": 1.93,
+          "y": 8
+        },
+        {
+          "x": 1.68,
+          "y": 7.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.77,
+          "y": 6.0,
+          "c": "yellow"
+        },
+        {
+          "x": 1.65,
+          "y": 7.55,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "A banda curta: sortida 4 (racó), llegada 5,5 (passat el racó) → atac 4 × 5,5 = 22",
+      "page": 2,
+      "path": [
+        {
+          "x": 0.15,
+          "y": 7.76
+        },
+        {
+          "x": 1.75,
+          "y": 0
+        },
+        {
+          "x": 3.85,
+          "y": 8
+        },
+        {
+          "x": 3.62,
+          "y": 5.62
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.53,
+          "y": 5.53,
+          "c": "yellow"
+        },
+        {
+          "x": 3.74,
+          "y": 5.43,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "A banda curta amb efecte: sortida 0, llegada 4. Amb efecte 0 no hi ha jugada; amb efecte 3 la sortida val 0 + 3 = 3 → atac 3 × 4 = 12",
+      "page": 3,
+      "path": [
+        {
+          "x": 3.64,
+          "y": 7.78
+        },
+        {
+          "x": 2.82,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.85
+        },
+        {
+          "x": 3.7,
+          "y": 6.15
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.63,
+          "y": 6.27,
+          "c": "yellow"
+        },
+        {
+          "x": 3.7,
+          "y": 6.91,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "A banda llarga: sortida 3, llegada 3 → atac 3 × 3 = 9",
+      "page": 4,
+      "path": [
+        {
+          "x": 3.74,
+          "y": 6.6
+        },
+        {
+          "x": 0,
+          "y": 7.55
+        },
+        {
+          "x": 2,
+          "y": 8
+        },
+        {
+          "x": 2.3,
+          "y": 7.82
+        },
+        {
+          "x": 2.8,
+          "y": 8
+        },
+        {
+          "x": 3.12,
+          "y": 7.76
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.33,
+          "y": 7.74,
+          "c": "yellow"
+        },
+        {
+          "x": 3.16,
+          "y": 7.71,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "A banda llarga amb efecte: sortida 1 + efecte 4 = 5, llegada 2 → atac 5 × 2 = 10",
+      "page": 4,
+      "path": [
+        {
+          "x": 3.71,
+          "y": 7.6
+        },
+        {
+          "x": 0,
+          "y": 7.5
+        },
+        {
+          "x": 1,
+          "y": 8
+        },
+        {
+          "x": 1.25,
+          "y": 7.85
+        },
+        {
+          "x": 1.6,
+          "y": 8
+        },
+        {
+          "x": 1.9,
+          "y": 7.9
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.29,
+          "y": 7.87,
+          "c": "yellow"
+        },
+        {
+          "x": 1.94,
+          "y": 7.94,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Fes servir l'efecte quan la jugada sense efecte no existeix o quan l'atac quedaria tapat per les boles 2 i 3: tria el mínim efecte que deixi l'atac lliure.",
+    "El sistema té molts recursos: la llegada pot anar fins passat el racó (5,5) i la bola pot tocar la 2 i acabar amb una banda més cap a la 3."
+  ],
+  "quotes": [
+    "ATAQUE = SALIDA x LLEGADA",
+    "añadimos al valor de la salida (del 0 al 4), el valor del efecto utilizado (del 1 al 4)"
+  ],
+  "uncertain": [
+    "El PDF no diu qui és l'autor del sistema; «Julio A» és només l'autor del document.",
+    "La posició exacta del 5,5 de llegada: surt com un punt fora del dibuix, passat el racó; s'ha posat a la curta de baix, a x=3,8, on rebota la bola de l'exemple.",
+    "A la variant a banda llarga els rètols de llegada del dibuix no queden igual d'espaiats; s'ha pres mig diamant per pas, coherent amb 'la meitat'.",
+    "El costat de l'efecte dels exemples amb efecte 3 i 4 es veu a la dreta de la bola als dibuixos; el text no diu si és a favor o contrari.",
+    "Recorreguts mesurats a ull sobre els dibuixos (±0,2 diamants); al tercer exemple no es veu clar si la bola toca la llarga dreta abans d'arribar a les boles."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida (atac a curta)"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac (atac a curta)"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada (atac a curta)"
+        },
+        "E": {
+          "label": "Efecte",
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "inputs": {
+        "S": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "E": [
+          0,
+          0,
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "L": [
+          1,
+          2,
+          2.5,
+          3,
+          3.5,
+          4,
+          4.5,
+          5,
+          5.5
+        ],
+        "A": [
+          6,
+          7.5,
+          8,
+          9,
+          10,
+          12,
+          15,
+          16,
+          18,
+          20,
+          22,
+          24
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "(S + E) * L",
+          "label": "Trobar l'atac"
+        },
+        {
+          "solve": "L",
+          "expr": "A / (S + E)",
+          "label": "On arribarà"
+        },
+        {
+          "solve": "E",
+          "expr": "A / L - S",
+          "label": "Quin efecte cal"
+        }
+      ],
+      "valid": "S + E > 0 && A > 0 && A <= 40 && L >= 1 && L <= 5.5 && E >= 0 && E <= 4 && Math.abs(E - Math.round(E)) < 0.01",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Variant d'atac a la banda curta. Sense efecte (E = 0) és la jugada de base; amb efecte la sortida val sortida + efecte. La variant a banda llarga fa servir la mateixa fórmula amb les escales a la meitat."
+    },
+    "quiz": [
+      {
+        "q": "Atac a banda curta, sense efecte: sortida 3 i llegada 2,5. On ataques?",
+        "options": [
+          "5,5",
+          "7,5",
+          "0,5",
+          "10"
+        ],
+        "answer": 1,
+        "explain": "Atac = sortida × llegada = 3 × 2,5 = 7,5.",
+        "page": 1,
+        "path": [
+          {
+            "x": 0.96,
+            "y": 7.8
+          },
+          {
+            "x": 3.25,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3.05
+          },
+          {
+            "x": 3.6,
+            "y": 3.3
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.56,
+            "y": 3.4,
+            "c": "yellow"
+          },
+          {
+            "x": 3.6,
+            "y": 4.1,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 0 i llegada 4. Sense efecte l'atac és 0 i no hi ha jugada. Jugues amb efecte 3: on ataques?",
+        "options": [
+          "4",
+          "7",
+          "12",
+          "0"
+        ],
+        "answer": 2,
+        "explain": "La sortida passa a valer 0 + 3 = 3; atac = 3 × 4 = 12.",
+        "page": 3,
+        "path": [
+          {
+            "x": 3.64,
+            "y": 7.78
+          },
+          {
+            "x": 2.82,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 5.85
+          },
+          {
+            "x": 3.7,
+            "y": 6.15
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.63,
+            "y": 6.27,
+            "c": "yellow"
+          },
+          {
+            "x": 3.7,
+            "y": 6.91,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Si la sortida és 2 i jugues amb efecte 3, quin valor de sortida fas servir?",
+        "options": [
+          "2",
+          "6",
+          "5",
+          "1"
+        ],
+        "answer": 2,
+        "explain": "L'efecte se suma a la sortida: 2 + 3 = 5.",
+        "page": 2
+      },
+      {
+        "q": "Com s'ataca la jugada de base d'aquest sistema?",
+        "options": [
+          "Efecte 2, bola baixa, cop suau",
+          "Sense efecte, bola alta i velocitat per obrir i arribar",
+          "Efecte contrari màxim i cop fort",
+          "Bola al centre, velocitat justa"
+        ],
+        "answer": 1,
+        "explain": "El PDF diu: atacamos sin efecto, bola alta y velocidad para abrir y llegar.",
+        "page": 1
+      },
+      {
+        "q": "Atac a banda llarga: què canvia respecte de l'atac a banda curta?",
+        "options": [
+          "La fórmula passa a ser sortida − llegada",
+          "Les numeracions d'atac i sortida es redueixen a la meitat; la fórmula és la mateixa",
+          "Cal jugar sempre amb efecte 4",
+          "La llegada es compta a la banda llarga"
+        ],
+        "answer": 1,
+        "explain": "Com que la segona banda és la meitat, l'atac i la sortida també s'escurcen a la meitat; Atac = Sortida × Llegada.",
+        "page": 3
+      },
+      {
+        "q": "Atac a banda llarga: sortida 1, efecte 4, llegada 2. On ataques?",
+        "options": [
+          "2",
+          "8",
+          "10",
+          "5"
+        ],
+        "answer": 2,
+        "explain": "Sortida = 1 + 4 = 5; atac = 5 × 2 = 10.",
+        "page": 4,
+        "path": [
+          {
+            "x": 3.71,
+            "y": 7.6
+          },
+          {
+            "x": 0,
+            "y": 7.5
+          },
+          {
+            "x": 1,
+            "y": 8
+          },
+          {
+            "x": 1.25,
+            "y": 7.85
+          },
+          {
+            "x": 1.6,
+            "y": 8
+          },
+          {
+            "x": 1.9,
+            "y": 7.9
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.29,
+            "y": 7.87,
+            "c": "yellow"
+          },
+          {
+            "x": 1.94,
+            "y": 7.94,
+            "c": "red"
+          }
+        ]
+      }
+    ]
+  }
+}

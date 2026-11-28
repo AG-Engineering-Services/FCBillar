@@ -1,0 +1,532 @@
+{
+  "id": "teoria-diamants-tria-bandes",
+  "name": "Triar banda i nombre de bandes (3, 4 o 5) amb la teoria de diamants",
+  "group": "Teoria de diamants",
+  "attributed_to": "José Lazo",
+  "pages": [
+    263,
+    278
+  ],
+  "purpose": "Decidir, en un bricole o una bola primer, si atacar la banda esquerra o la dreta i si resoldre a 3, 4 o 5 bandes, comparant el marge d'error de cada solució.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-K-L (3 bandes) o prolongacions L-K-L-K(-L) (4-5 bandes)",
+    "effect": "com a la teoria de diamants",
+    "stroke": "cop homogeni",
+    "ball": "també amb bola primer (2a posició)"
+  },
+  "formula": "Atac = Sortida − Llegada (amb la numeració girada quan s'ataca la banda esquerra; +5 si s'ataca cap al 00)",
+  "steps": [
+    "Per a cada opció (banda esquerra/dreta, 3/4/5 bandes) calcula Sortida − Llegada amb la numeració de la teoria de diamants (de cara a la banda que ataques).",
+    "Descarta les impossibles (atac negatiu més enllà del 00).",
+    "Mira el marge: quants punts de llegada (i, per tant, d'atac) encara fan carambola.",
+    "Tria la que dona més marge amb un cop natural, evita retrucs, prepara millor i defensa millor si falles.",
+    "Abans de jugar, decideix: o a 3 o a 5 bandes, no les dues alhora."
+  ],
+  "numberings": [],
+  "corrections": [
+    "Atacant cap al 00 es pot sumar 5: 53 − 75 = −22 + 5 = −17, encara impossible.",
+    "Bola jugadora a prop de la banda d'atac: compte amb el cuadratge (vegeu teoria de diamants-1)."
+  ],
+  "examples": [
+    {
+      "text": "Posició 1, cas A (3 bandes atacant l'esquerra): llegada ≈50 → atac 53 − 50 = 3, una mica cap al 2. Marge: llegades 48-50 / atacs 3-5 (2 punts).",
+      "page": 264,
+      "path": [
+        {
+          "x": 3.16,
+          "y": 6.95
+        },
+        {
+          "x": 0,
+          "y": 1.05
+        },
+        {
+          "x": 0.45,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 4.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.33,
+          "y": 7.49,
+          "c": "red"
+        },
+        {
+          "x": 1.67,
+          "y": 7.49,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Posició 1, cas B (3 bandes atacant la dreta): atac 88 − 50 = 38. Marge: atacs 36-40 / llegades 48-52 (4 punts).",
+      "page": 266,
+      "path": [
+        {
+          "x": 3.2,
+          "y": 7
+        },
+        {
+          "x": 4,
+          "y": 4.77
+        },
+        {
+          "x": 2.82,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 4.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.65,
+          "y": 7.57,
+          "c": "yellow"
+        },
+        {
+          "x": 2.35,
+          "y": 7.57,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Posició 1, cas C (4 bandes atacant l'esquerra): 53 − 75 = −22 + 5 (al 00) = −17 → no és possible.",
+      "page": 268,
+      "path": [
+        {
+          "x": 3.19,
+          "y": 6.99
+        },
+        {
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "path_built": true,
+      "balls": [
+        {
+          "x": 2.32,
+          "y": 7.54,
+          "c": "red"
+        },
+        {
+          "x": 1.64,
+          "y": 7.56,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Posició 1, cas D (4 bandes atacant la dreta): atac 90 − 75 = 15. Marge: atacs 15-20 / llegades 70-75 (5 punts).",
+      "page": 269,
+      "path": [
+        {
+          "x": 3.19,
+          "y": 7
+        },
+        {
+          "x": 4,
+          "y": 3.14
+        },
+        {
+          "x": 3.46,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 5.75
+        },
+        {
+          "x": 1.34,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.63,
+          "y": 7.57,
+          "c": "yellow"
+        },
+        {
+          "x": 2.31,
+          "y": 7.57,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Posició 2 (bola primer), cas A (3 bandes atacant l'esquerra): atac 40 − 10 = 30. Marge: llegades 7-13 / atacs 27-33 (6 punts).",
+      "page": 271,
+      "path": [
+        {
+          "x": 2.86,
+          "y": 6.22
+        },
+        {
+          "x": 2.82,
+          "y": 5.08
+        },
+        {
+          "x": 0,
+          "y": 3.21
+        },
+        {
+          "x": 1.94,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.02
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.82,
+          "y": 5.08,
+          "c": "yellow"
+        },
+        {
+          "x": 1.26,
+          "y": 5.09,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Posició 2, cas B (3 bandes atacant la dreta): atac 60 − 30 = 30. Marge: 26,5-33,5 (7 punts).",
+      "page": 273,
+      "path": [
+        {
+          "x": 2.81,
+          "y": 6.14
+        },
+        {
+          "x": 2.79,
+          "y": 5.03
+        },
+        {
+          "x": 4,
+          "y": 3.46
+        },
+        {
+          "x": 2.62,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.98
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.79,
+          "y": 5.03,
+          "c": "yellow"
+        },
+        {
+          "x": 1.21,
+          "y": 5.07,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Posició 2, cas C (5 bandes atacant l'esquerra): atac 46 − 30 = 16. Marge: llegades 27-36 (9 punts), atacs 10-19.",
+      "page": 275,
+      "path": [
+        {
+          "x": 2.84,
+          "y": 6.14
+        },
+        {
+          "x": 2.71,
+          "y": 5.04
+        },
+        {
+          "x": 0,
+          "y": 1.98
+        },
+        {
+          "x": 1.17,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.96
+        },
+        {
+          "x": 0.97,
+          "y": 8
+        },
+        {
+          "x": 0,
+          "y": 6.9
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.71,
+          "y": 5.04,
+          "c": "yellow"
+        },
+        {
+          "x": 1.22,
+          "y": 5.07,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Línia crítica: del racó fins al rombo 2 de la banda llarga oposada. Bola 3 entre aquesta línia i la llarga del racó → es pot jugar a 3 o a 5; entre la línia i la llarga oposada → només a 3.",
+      "page": 278,
+      "path": [
+        {
+          "x": 0,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 2
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Les solucions a 5 o més bandes donen més marge que les de 3.",
+    "Si es pot igual per l'esquerra que per la dreta, sol haver-hi més marge atacant la banda que és més a prop.",
+    "Posició crítica: si jugues a 3 i falles, la bola no pot fer les 5; la bola que va pel racó torna per la mateixa línia.",
+    "Refranys: «Dudar es fallar»; jugar a 3 pensant que pot sortir a 5 redueix la concentració al 50%."
+  ],
+  "quotes": [
+    "Decídete: o la juegas a tres o la juegas a cinco, solo una de las dos intenciones será válida.",
+    "Dudar es fallar."
+  ],
+  "uncertain": [
+    "Quan s'ataca la banda esquerra el llibre gira la numeració (atac a l'esquerra, llegada a la dreta) però no la dibuixa sencera; només rotula els valors de cada exemple.",
+    "A la p276 el text diu atacs «desde 26,5 hasta 33,5», però el dibuix marca 10-16-19: sembla un error de còpia.",
+    "La sortida 46 de la p275 queda dibuixada a la llarga dreta a l'altura de ~6,5 diamants, que no encaixa amb la numeració base (40 a 6, 45 a 7).",
+    "Sense calc: el fitxer aplica la fórmula base amb numeracions girades segons la banda atacada, que el llibre no dibuixa senceres."
+  ],
+  "trainer": {
+    "quiz": [
+      {
+        "q": "Posició 1: 3 bandes atacant la dreta o la esquerra. Quina dona més marge?",
+        "options": [
+          "L'esquerra (4 punts contra 2)",
+          "Totes dues igual",
+          "La dreta (4 punts contra 2)",
+          "Cap: cal jugar a 5"
+        ],
+        "answer": 2,
+        "explain": "Esquerra: atac 3, marge 2 punts. Dreta: 88 − 50 = 38, marge 4 punts.",
+        "page": 267,
+        "path": [
+          {
+            "x": 3.2,
+            "y": 7
+          },
+          {
+            "x": 4,
+            "y": 4.77
+          },
+          {
+            "x": 2.82,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 4.5
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.65,
+            "y": 7.57,
+            "c": "yellow"
+          },
+          {
+            "x": 2.35,
+            "y": 7.57,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "4 bandes atacant l'esquerra: 53 − 75 = −22. Encara que s'ataqui el 00 (+5), queda −17. Què vol dir?",
+        "options": [
+          "Cal atacar el 17",
+          "Cal sumar 22",
+          "Aquesta llegada no és possible",
+          "Cal efecte contrari"
+        ],
+        "answer": 2,
+        "explain": "Un atac negatiu més enllà del 00 vol dir que no es pot arribar per aquí.",
+        "page": 268,
+        "path": [
+          {
+            "x": 3.19,
+            "y": 6.99
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ]
+      },
+      {
+        "q": "Posició 1, 4 bandes atacant la dreta: atac?",
+        "options": [
+          "15",
+          "3",
+          "38",
+          "25"
+        ],
+        "answer": 0,
+        "explain": "90 − 75 = 15; marge de 5 punts (atacs 15-20).",
+        "page": 269,
+        "path": [
+          {
+            "x": 3.19,
+            "y": 7
+          },
+          {
+            "x": 4,
+            "y": 3.14
+          },
+          {
+            "x": 3.46,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 5.75
+          },
+          {
+            "x": 1.34,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.63,
+            "y": 7.57,
+            "c": "yellow"
+          },
+          {
+            "x": 2.31,
+            "y": 7.57,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Posició 2 (bola primer): quina solució dona més marge?",
+        "options": [
+          "3 bandes per la dreta (7 punts)",
+          "3 bandes per l'esquerra (6 punts)",
+          "Totes igual",
+          "5 bandes atacant l'esquerra (9 punts)"
+        ],
+        "answer": 3,
+        "explain": "Les resolucions a 5 o més bandes permeten més marge d'error.",
+        "page": 276,
+        "path": [
+          {
+            "x": 2.84,
+            "y": 6.14
+          },
+          {
+            "x": 2.71,
+            "y": 5.04
+          },
+          {
+            "x": 0,
+            "y": 1.98
+          },
+          {
+            "x": 1.17,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.96
+          },
+          {
+            "x": 0.97,
+            "y": 8
+          },
+          {
+            "x": 0,
+            "y": 6.9
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.71,
+            "y": 5.04,
+            "c": "yellow"
+          },
+          {
+            "x": 1.22,
+            "y": 5.07,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Què és la línia crítica?",
+        "options": [
+          "La línia del racó fins al rombo 2 de la banda llarga oposada",
+          "La línia del racó al racó oposat",
+          "La línia de 30 a 30",
+          "La línia de la sortida a l'atac"
+        ],
+        "answer": 0,
+        "explain": "Bola 3 entre aquesta línia i la llarga del racó: 3 o 5 bandes; entre la línia i la llarga oposada: només 3.",
+        "page": 277,
+        "path": [
+          {
+            "x": 0,
+            "y": 8
+          },
+          {
+            "x": 4,
+            "y": 2
+          }
+        ]
+      },
+      {
+        "q": "Si es pot igual atacant l'esquerra o la dreta, quina sol donar més marge?",
+        "options": [
+          "La banda que és més a prop",
+          "Sempre la dreta",
+          "Sempre l'esquerra",
+          "La que és més lluny"
+        ],
+        "answer": 0,
+        "explain": "«hay un poco más de margen cuando atacamos sobre la que está más cerca».",
+        "page": 277
+      },
+      {
+        "q": "Quin consell dona Lazo sobre jugar a 3 o a 5 bandes?",
+        "options": [
+          "Decidir-ne una sola abans de jugar",
+          "Jugar sempre a 5",
+          "Jugar a 3 pensant que pot sortir a 5",
+          "Deixar-ho a l'atzar"
+        ],
+        "answer": 0,
+        "explain": "«Decídete: o la juegas a tres o la juegas a cinco».",
+        "page": 277
+      }
+    ]
+  }
+}

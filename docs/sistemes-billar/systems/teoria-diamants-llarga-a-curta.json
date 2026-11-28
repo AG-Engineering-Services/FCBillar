@@ -1,0 +1,526 @@
+{
+  "id": "teoria-diamants-llarga-a-curta",
+  "name": "Teoria de diamants: sortida de banda llarga i llegada a banda curta",
+  "group": "Teoria de diamants",
+  "attributed_to": "Juan Villora i Toni Serralta, exposat per José Lazo",
+  "pages": [
+    249,
+    251
+  ],
+  "purpose": "Sortint de la banda llarga, fer L-K-L i acabar a la 4a banda (curta de baix), amb compensació segons la zona de sortida.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-K-L-K",
+    "effect": "efecte 4",
+    "stroke": "cop dolç",
+    "ball": null
+  },
+  "formula": "Atac = Sortida − Llegada − Compensació (0, 2,5 o 5 segons la sortida)",
+  "steps": [
+    "Llegeix sortida i llegada amb les numeracions de sortida de banda llarga (teoria de diamants-3).",
+    "Cop dolç amb efecte 4.",
+    "Aplica la compensació de la zona de sortida (cas A, B o C).",
+    "La bola passa per la llegada de la 3a banda i baixa a la curta de baix."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 25
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 35
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 45
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 47.5
+        }
+      ],
+      "note": "Mateixa numeració que la sortida de banda llarga (p245)."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 2.5,
+          "v": 25
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        }
+      ]
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 40
+        }
+      ],
+      "note": "Per dins a la llarga esquerra; la bola segueix a la 4a banda curta."
+    }
+  ],
+  "corrections": [
+    "Cas A: sortides entre 40 i 47,5 → sense compensació, però cop molt penetrat.",
+    "Cas B: sortides entre 30 i 40 → restar 2,5 a l'atac.",
+    "Cas C: sortides menors de 30 → restar 5 a l'atac (zona molt delicada; la mínima variació d'efecte o velocitat hi influeix)."
+  ],
+  "examples": [
+    {
+      "text": "Cas A: sortida 47,5, atac 7,5 → llegada 40 i arribada a la curta de baix.",
+      "page": 249,
+      "path": [
+        {
+          "x": 0.25,
+          "y": 7
+        },
+        {
+          "x": 4,
+          "y": 1.29
+        },
+        {
+          "x": 3.09,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 2.48,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.86,
+          "y": 7.44,
+          "c": "yellow"
+        },
+        {
+          "x": 3.14,
+          "y": 7.54,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Cas B: sortida 35, llegada 30 → atac 35 − 30 − 2,5 = 2,5.",
+      "page": 250,
+      "path": [
+        {
+          "x": 1.23,
+          "y": 3.39
+        },
+        {
+          "x": 4,
+          "y": 0.63
+        },
+        {
+          "x": 3.43,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 2.98,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.17,
+          "y": 7.55,
+          "c": "yellow"
+        },
+        {
+          "x": 3.35,
+          "y": 7.55,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Cas C: sortida 30, llegada 25 → atac 30 − 25 − 5 = 0.",
+      "page": 251,
+      "path": [
+        {
+          "x": 1.33,
+          "y": 2.59
+        },
+        {
+          "x": 4,
+          "y": 0.32
+        },
+        {
+          "x": 3.77,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.5
+        },
+        {
+          "x": 3.48,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.71,
+          "y": 7.55,
+          "c": "yellow"
+        },
+        {
+          "x": 3.89,
+          "y": 7.76,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Per a sortides menors de 30, Villora i Serralta proposen altres mètodes que Lazo diu que exposarà més endavant."
+  ],
+  "quotes": [
+    "CASO C) SALIDAS MENORES A 30: es una zona muy delicada"
+  ],
+  "uncertain": [
+    "Al cas A el text no dona els números; s'han llegit del dibuix (atac 7,5, llegada 40, sortida ≈47,5).",
+    "El llibre no numera la banda curta d'arribada en aquests gràfics."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        }
+      },
+      "inputs": {
+        "S": [
+          20,
+          25,
+          30,
+          35,
+          40,
+          45,
+          47.5
+        ],
+        "A": [
+          0,
+          2.5,
+          5,
+          7.5,
+          10,
+          15,
+          20
+        ],
+        "L": [
+          10,
+          20,
+          25,
+          30,
+          40
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L",
+          "when": "S >= 40",
+          "label": "cas A (40-47,5)"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L - 2.5",
+          "when": "S >= 30 && S < 40",
+          "label": "cas B (30-40)"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L - 5",
+          "when": "S < 30",
+          "label": "cas C (< 30)"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A",
+          "when": "S >= 40",
+          "label": "cas A (40-47,5)"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A - 2.5",
+          "when": "S >= 30 && S < 40",
+          "label": "cas B (30-40)"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A - 5",
+          "when": "S < 30",
+          "label": "cas C (< 30)"
+        }
+      ],
+      "valid": "A >= 0 && A <= 40 && L >= 0 && L <= 40",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Cop dolç amb efecte 4; la bola segueix de la llegada a la curta de baix (no es dibuixa)."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 35, llegada 30, acabant a la banda curta. Atac?",
+        "options": [
+          "7,5",
+          "5",
+          "0",
+          "2,5"
+        ],
+        "answer": 3,
+        "explain": "Cas B (sortides 30-40): 35 − 30 − 2,5 = 2,5.",
+        "page": 250,
+        "path": [
+          {
+            "x": 1.23,
+            "y": 3.39
+          },
+          {
+            "x": 4,
+            "y": 0.63
+          },
+          {
+            "x": 3.43,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 3
+          },
+          {
+            "x": 2.98,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.17,
+            "y": 7.55,
+            "c": "yellow"
+          },
+          {
+            "x": 3.35,
+            "y": 7.55,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 30, llegada 25. Atac?",
+        "options": [
+          "0",
+          "2,5",
+          "5",
+          "10"
+        ],
+        "answer": 0,
+        "explain": "Cas C (sortides < 30): 30 − 25 − 5 = 0.",
+        "page": 251,
+        "path": [
+          {
+            "x": 1.33,
+            "y": 2.59
+          },
+          {
+            "x": 4,
+            "y": 0.32
+          },
+          {
+            "x": 3.77,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 2.5
+          },
+          {
+            "x": 3.48,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.71,
+            "y": 7.55,
+            "c": "yellow"
+          },
+          {
+            "x": 3.89,
+            "y": 7.76,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortides entre 40 i 47,5: quina compensació i quin cop?",
+        "options": [
+          "Restar 5, cop sec",
+          "Cap compensació, cop molt penetrat",
+          "Restar 2,5, sense efecte",
+          "Sumar 2, cop dolç"
+        ],
+        "answer": 1,
+        "explain": "Cas A: no hi ha compensació però el cop és molt penetrat.",
+        "page": 249,
+        "path": [
+          {
+            "x": 0.25,
+            "y": 7
+          },
+          {
+            "x": 4,
+            "y": 1.29
+          },
+          {
+            "x": 3.09,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 4
+          },
+          {
+            "x": 2.48,
+            "y": 8
+          }
+        ]
+      },
+      {
+        "q": "Quin efecte i quin cop es proposen per a sortida llarga i llegada curta?",
+        "options": [
+          "Cop dolç amb efecte 1",
+          "Cop sec amb efecte 2",
+          "Cop fort sense efecte",
+          "Cop dolç amb efecte 4"
+        ],
+        "answer": 3,
+        "explain": "«propone un golpe dulce con efecto 4».",
+        "page": 249
+      },
+      {
+        "q": "Per què la zona de sortides menors de 30 és delicada?",
+        "options": [
+          "Perquè cal atacar el 00",
+          "La mínima variació d'efecte o velocitat hi influeix",
+          "Perquè la bola toca primer la curta",
+          "Perquè no hi ha numeració"
+        ],
+        "answer": 1,
+        "explain": "Restar 5 és només una bona aproximació.",
+        "page": 251
+      }
+    ]
+  }
+}

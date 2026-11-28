@@ -1,0 +1,1193 @@
+{
+  "id": "cinc-minuts",
+  "name": "Els cinc minuts d'entrenament",
+  "group": "Altres",
+  "attributed_to": "José Lazo",
+  "pages": [
+    19,
+    39
+  ],
+  "purpose": "Rutina d'escalfament de 21 tirs per comprovar com respon la taula (drap, bandes, quadratge) abans de jugar.",
+  "shot": {
+    "first_cushion": "bola",
+    "cushions": "variat (3 i 5 bandes, doblet, pase bola, renversé)",
+    "effect": "variat: sense efecte, efecte 4, contraefecte",
+    "stroke": "variat",
+    "ball": "mitja bola, bola fina, quart de bola segons el tir"
+  },
+  "formula": null,
+  "steps": [
+    "Juga els 21 tirs en ordre; cadascun comprova una cosa de la taula.",
+    "Comença pel sistema de diamants (50/30, 70/40, 30/20) i les cinc bandes.",
+    "Fes els tirs sense efecte i de mitja bola per veure si la taula quadra o si la bola llisca.",
+    "Prova els contraefectes (inclòs el renversé), el doblet i el pase bola.",
+    "Acaba comprovant els mètodes Tüzül (valor de taula) i DPM, l'atac, la bola fina i la sortida."
+  ],
+  "numberings": [],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "1. Comprovar el sistema de diamants amb sortida/atac 50/30, 70/40 i 30/20 (angle natural, obert i tancat). Tres tirs que pugen per la llarga dreta, la curta de dalt i la llarga esquerra fins a baix. Efecte a la dreta.",
+      "page": 19,
+      "path": [
+        {
+          "x": 0.21,
+          "y": 7.74
+        },
+        {
+          "x": 4,
+          "y": 3.36
+        },
+        {
+          "x": 2.2,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1.97
+        },
+        {
+          "x": 3.9,
+          "y": 7.9
+        }
+      ]
+    },
+    {
+      "text": "2. Comprovació a cinc bandes amb la tercera bola al centre del billar; vigila la reacció al racó entre la 4a i la 5a banda. Efecte a l'esquerra.",
+      "page": 20,
+      "path": [
+        {
+          "x": 0.93,
+          "y": 3.27
+        },
+        {
+          "x": 1.78,
+          "y": 3.18
+        },
+        {
+          "x": 4,
+          "y": 0.86
+        },
+        {
+          "x": 3.39,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3.0
+        },
+        {
+          "x": 3.0,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 7.0
+        },
+        {
+          "x": 1.79,
+          "y": 3.7
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.78,
+          "y": 3.18,
+          "c": "yellow"
+        },
+        {
+          "x": 1.79,
+          "y": 3.7,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "3. Tir 'sense efecte' (centre alt): recorregut molt estable a qualsevol taula; amb drap nou la bola pot lliscar i potser cal una mica d'efecte.",
+      "page": 21,
+      "path": [
+        {
+          "x": 0.18,
+          "y": 3.69
+        },
+        {
+          "x": 2.76,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.58
+        },
+        {
+          "x": 0.5,
+          "y": 8
+        },
+        {
+          "x": 0.26,
+          "y": 7.39
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.1,
+          "y": 7.39,
+          "c": "yellow"
+        },
+        {
+          "x": 0.26,
+          "y": 7.39,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "4. Cabanya amb la bola 1 endarrerida: recorreguts que arriben a la 3a banda prop del racó. Efecte a la dreta.",
+      "page": 22,
+      "path": [
+        {
+          "x": 3.0,
+          "y": 0.98
+        },
+        {
+          "x": 1.0,
+          "y": 1.97
+        },
+        {
+          "x": 0,
+          "y": 1.45
+        },
+        {
+          "x": 3.57,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.31
+        },
+        {
+          "x": 3.02,
+          "y": 1.29
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.0,
+          "y": 1.97,
+          "c": "yellow"
+        },
+        {
+          "x": 3.02,
+          "y": 1.29,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "5. Mitja bola justa sense efecte i comprovar el quadratge de la 4a a la 5a banda (arribada a la curta de dalt entre els diamants 2 i 3).",
+      "page": 23,
+      "path": [
+        {
+          "x": 0.84,
+          "y": 4.0
+        },
+        {
+          "x": 2.0,
+          "y": 4.0
+        },
+        {
+          "x": 4,
+          "y": 5.63
+        },
+        {
+          "x": 1.28,
+          "y": 8
+        },
+        {
+          "x": 0,
+          "y": 7.36
+        },
+        {
+          "x": 4,
+          "y": 2.89
+        },
+        {
+          "x": 2.51,
+          "y": 0.11
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.0,
+          "y": 4.0,
+          "c": "yellow"
+        },
+        {
+          "x": 2.51,
+          "y": 0.11,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "6. Contraefecte; l'estat del drap hi influeix molt. Efecte a l'esquerra.",
+      "page": 24,
+      "path": [
+        {
+          "x": 3.77,
+          "y": 7.8
+        },
+        {
+          "x": 0,
+          "y": 4.29
+        },
+        {
+          "x": 4,
+          "y": 0.2
+        },
+        {
+          "x": 3.76,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.98
+        },
+        {
+          "x": 3.48,
+          "y": 7.36
+        }
+      ]
+    },
+    {
+      "text": "7. Un altre contraefecte, el renversé (prova aquesta posició o una altra que coneguis). Efecte a la dreta.",
+      "page": 25,
+      "path": [
+        {
+          "x": 3.16,
+          "y": 7.53
+        },
+        {
+          "x": 3.65,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.3
+        },
+        {
+          "x": 3.5,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "text": "8. Sense efecte: la línia blanca és el comportament normal (llarga esquerra prop del diamant 6, curta de baix prop del diamant 1); la vermella, el d'una taula que quadra (arriba més amunt a la llarga, prop de 5,5, i més lluny a la curta, prop de 1,3).",
+      "page": 26,
+      "path": [
+        {
+          "x": 0.11,
+          "y": 7.74
+        },
+        {
+          "x": 3.68,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.67
+        },
+        {
+          "x": 0,
+          "y": 5.97
+        },
+        {
+          "x": 0.97,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "text": "9. Mitja bola, sense efecte (bola 2 al diamant 3 del través i 2 de la llarga).",
+      "page": 27,
+      "path": [
+        {
+          "x": 0.09,
+          "y": 3.97
+        },
+        {
+          "x": 2.9,
+          "y": 1.95
+        },
+        {
+          "x": 3.66,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.03
+        },
+        {
+          "x": 2.01,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.0,
+          "y": 1.99,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "10. Efecte i atac a la tangent de la bola 2: el tac apunta a l'extrem esquerre de la bola 2. Efecte alt a la dreta.",
+      "page": 28,
+      "path": [
+        {
+          "x": 0.09,
+          "y": 7.0
+        },
+        {
+          "x": 0.85,
+          "y": 6.0
+        },
+        {
+          "x": 2.21,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.45
+        },
+        {
+          "x": 1.9,
+          "y": 8
+        },
+        {
+          "x": 0,
+          "y": 5.99
+        },
+        {
+          "x": 3.89,
+          "y": 0.2
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.99,
+          "y": 6.03,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "11. Doblet, efecte zero, apuntant a l'extrem dret de la bola 2: la bola 1 ha d'avançar mig diamant a la 2a banda si la diferència d'altura entre la 1 i la 2 és de 3 diamants.",
+      "page": 29,
+      "path": [
+        {
+          "x": 0.1,
+          "y": 3.97
+        },
+        {
+          "x": 3.8,
+          "y": 1.03
+        },
+        {
+          "x": 0,
+          "y": 0.7
+        },
+        {
+          "x": 4,
+          "y": 0.5
+        },
+        {
+          "x": 0.22,
+          "y": 0.21
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.89,
+          "y": 1.0,
+          "c": "yellow"
+        },
+        {
+          "x": 0.22,
+          "y": 0.21,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "12. Pase bola: poca bola amb efecte 4 (bola 2 enganxada a la curta al diamant 2; arribada al racó de baix a l'esquerra).",
+      "page": 30,
+      "path": [
+        {
+          "x": 0.15,
+          "y": 1.93
+        },
+        {
+          "x": 2.0,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.86
+        },
+        {
+          "x": 0.07,
+          "y": 7.92
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.0,
+          "y": 0.12,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "13. Posició de comprovació per a l'arribada a cinc bandes. Efecte a l'esquerra.",
+      "page": 31,
+      "path": [
+        {
+          "x": 1.12,
+          "y": 7.06
+        },
+        {
+          "x": 1.15,
+          "y": 6.4
+        },
+        {
+          "x": 4,
+          "y": 2.45
+        },
+        {
+          "x": 3.0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.95
+        },
+        {
+          "x": 3.0,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 7.0
+        },
+        {
+          "x": 0.09,
+          "y": 0.99
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.02,
+          "y": 6.3,
+          "c": "yellow"
+        },
+        {
+          "x": 0.09,
+          "y": 0.99,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "14. Igual que l'anterior (cinc bandes), sortint del centre de la taula. Efecte a l'esquerra.",
+      "page": 32,
+      "path": [
+        {
+          "x": 1.0,
+          "y": 4.03
+        },
+        {
+          "x": 1.73,
+          "y": 3.95
+        },
+        {
+          "x": 4,
+          "y": 1.7
+        },
+        {
+          "x": 3.39,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.95
+        },
+        {
+          "x": 2.99,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 6.97
+        },
+        {
+          "x": 0.09,
+          "y": 1.21
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.87,
+          "y": 4.03,
+          "c": "yellow"
+        },
+        {
+          "x": 0.09,
+          "y": 1.21,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "15. Efecte màxim (esquerra) enviant la bola 1 en vertical cap a la banda curta.",
+      "page": 33,
+      "path": [
+        {
+          "x": 3.17,
+          "y": 6.27
+        },
+        {
+          "x": 2.72,
+          "y": 5.66
+        },
+        {
+          "x": 2.63,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 5.72
+        },
+        {
+          "x": 1.16,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 5.0
+        },
+        {
+          "x": 1.01,
+          "y": 0.13
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.57,
+          "y": 5.72,
+          "c": "yellow"
+        },
+        {
+          "x": 1.01,
+          "y": 0.13,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "16. Comprovar el mètode Tüzül i trobar el valor de taula: bola al diamant 2 del través i 6 de la llarga, tir vertical a la curta amb efecte a la dreta.",
+      "page": 34,
+      "path": [
+        {
+          "x": 2.0,
+          "y": 6.0
+        },
+        {
+          "x": 2.0,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 4.46
+        },
+        {
+          "x": 3.02,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "text": "17. Comprovar la cabanya pel mètode DPM: quart de bola i efecte 4 clàssic (7 DPM).",
+      "page": 35,
+      "path": [
+        {
+          "x": 3.66,
+          "y": 3.02
+        },
+        {
+          "x": 0.33,
+          "y": 2.97
+        },
+        {
+          "x": 0,
+          "y": 2.58
+        },
+        {
+          "x": 1.33,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.02
+        },
+        {
+          "x": 3.73,
+          "y": 2.43
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.21,
+          "y": 3.01,
+          "c": "yellow"
+        },
+        {
+          "x": 3.73,
+          "y": 2.43,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "18. Assajar l'atac. Efecte baix a l'esquerra.",
+      "page": 36,
+      "path": [
+        {
+          "x": 2.11,
+          "y": 5.0
+        },
+        {
+          "x": 1.55,
+          "y": 2.15
+        },
+        {
+          "x": 4,
+          "y": 1.03
+        },
+        {
+          "x": 2.96,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.37
+        },
+        {
+          "x": 3.71,
+          "y": 7.62
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.48,
+          "y": 2.07,
+          "c": "yellow"
+        },
+        {
+          "x": 3.71,
+          "y": 7.62,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "19. Assajar bola fina (sense efecte lateral).",
+      "page": 37,
+      "path": [
+        {
+          "x": 1.84,
+          "y": 7.4
+        },
+        {
+          "x": 3.0,
+          "y": 0.25
+        },
+        {
+          "x": 3.26,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.89
+        },
+        {
+          "x": 0.56,
+          "y": 8
+        },
+        {
+          "x": 0.2,
+          "y": 7.45
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.03,
+          "y": 0.19,
+          "c": "yellow"
+        },
+        {
+          "x": 0.2,
+          "y": 7.45,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "20. Assajar bola fina. Efecte alt a l'esquerra.",
+      "page": 38,
+      "path": [
+        {
+          "x": 1.72,
+          "y": 5.17
+        },
+        {
+          "x": 3.82,
+          "y": 3.0
+        },
+        {
+          "x": 4,
+          "y": 1.28
+        },
+        {
+          "x": 3.59,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 5.88
+        },
+        {
+          "x": 1.0,
+          "y": 7.85
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.86,
+          "y": 3.05,
+          "c": "yellow"
+        },
+        {
+          "x": 1.0,
+          "y": 7.85,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "21. Assajar la sortida (la 'salida', tir d'obertura): la bola 1 toca primer la vermella al centre de la taula (diamant 2, 2), després la llarga dreta i la curta de dalt prop del racó, la llarga esquerra i torna a la groga. Efecte alt a l'esquerra.",
+      "page": 39,
+      "path": [
+        {
+          "x": 1.46,
+          "y": 6.0
+        },
+        {
+          "x": 2.02,
+          "y": 2.05
+        },
+        {
+          "x": 4,
+          "y": 0.2
+        },
+        {
+          "x": 3.83,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2.9
+        },
+        {
+          "x": 1.95,
+          "y": 5.85
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.02,
+          "y": 2.0,
+          "c": "red"
+        },
+        {
+          "x": 2.02,
+          "y": 6.0,
+          "c": "yellow"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Amb drap nou les boles llisquen: en el tir sense efecte potser caldrà una mica d'efecte.",
+    "En els contraefectes, l'estat del drap hi influeix molt.",
+    "A la comprovació a cinc bandes, vigila la reacció del racó entre la 4a i la 5a banda.",
+    "Al doblet (tir 11), la bola 1 avança mig diamant a la 2a banda si la 1 i la 2 estan separades 3 diamants d'altura."
+  ],
+  "quotes": [
+    "Comprobar el sistema de diamantes con salidas/ataque: 50/30, 70/40 y 30/20.",
+    "la línea blanca debería ser el comportamiento normal y la línea roja para una mesa que cuadra."
+  ],
+  "uncertain": [
+    "Els recorreguts s'han llegit dels dibuixos i són aproximats (±0,1-0,2 diamants).",
+    "Al tir 1 no es diu quina numeració de sortida/atac correspon a cada recorregut; es remet al sistema de diamants explicat en una altra part del llibre.",
+    "Tir 6 i 7: l'ordre exacte de bandes és difícil de llegir al dibuix; el tir 6 té una zona ombrejada de dispersió.",
+    "Tir 21: les línies discontínues mostren on van la vermella, la groga i la blanca després del tir; no s'han convertit en coordenades.",
+    "El llibre no explica els mètodes Tüzül ni DPM en aquestes pàgines."
+  ],
+  "trainer": {
+    "quiz": [
+      {
+        "q": "Quines tres combinacions sortida/atac proposa el tir 1 per comprovar el sistema de diamants?",
+        "options": [
+          "50/30, 70/40 i 30/20",
+          "50/20, 60/30 i 40/10",
+          "30/30, 50/50 i 70/70",
+          "40/20, 60/40 i 80/50"
+        ],
+        "answer": 0,
+        "explain": "Un angle natural (50/30), un d'obert (70/40) i un de tancat (30/20).",
+        "page": 19,
+        "path": [
+          {
+            "x": 0.21,
+            "y": 7.74
+          },
+          {
+            "x": 4,
+            "y": 3.36
+          },
+          {
+            "x": 2.2,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 1.97
+          },
+          {
+            "x": 3.9,
+            "y": 7.9
+          }
+        ]
+      },
+      {
+        "q": "A la comprovació a cinc bandes (tir 2), on cal posar especial atenció?",
+        "options": [
+          "A la reacció del racó entre la 4a i la 5a banda",
+          "Al primer contacte amb la bola 2",
+          "A la 1a banda",
+          "A la velocitat de la bola 2"
+        ],
+        "answer": 0,
+        "explain": "El llibre: 'poner especial atención en la reacción del rincón 4ª y 5ª banda'.",
+        "page": 20,
+        "path": [
+          {
+            "x": 0.93,
+            "y": 3.27
+          },
+          {
+            "x": 1.78,
+            "y": 3.18
+          },
+          {
+            "x": 4,
+            "y": 0.86
+          },
+          {
+            "x": 3.39,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 3.0
+          },
+          {
+            "x": 3.0,
+            "y": 8
+          },
+          {
+            "x": 4,
+            "y": 7.0
+          },
+          {
+            "x": 1.79,
+            "y": 3.7
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.78,
+            "y": 3.18,
+            "c": "yellow"
+          },
+          {
+            "x": 1.79,
+            "y": 3.7,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Al tir sense efecte (tir 3) amb drap nou, què pot passar?",
+        "options": [
+          "La bola llisca i potser cal una mica d'efecte",
+          "La bola queda curta i cal més força",
+          "Cal canviar a efecte 4",
+          "No canvia res"
+        ],
+        "answer": 0,
+        "explain": "En drap nou 'nos pueden sorprender los deslizamientos de la bola y quizás se requiera marcar un poquito de efecto'.",
+        "page": 21,
+        "path": [
+          {
+            "x": 0.18,
+            "y": 3.69
+          },
+          {
+            "x": 2.76,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.58
+          },
+          {
+            "x": 0.5,
+            "y": 8
+          },
+          {
+            "x": 0.26,
+            "y": 7.39
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.1,
+            "y": 7.39,
+            "c": "yellow"
+          },
+          {
+            "x": 0.26,
+            "y": 7.39,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Al tir 8 (sense efecte), què indica la línia vermella respecte a la blanca?",
+        "options": [
+          "El recorregut d'una taula que quadra",
+          "El recorregut amb efecte 4",
+          "Un error d'execució",
+          "El recorregut de la bola 2"
+        ],
+        "answer": 0,
+        "explain": "La blanca és el comportament normal; la vermella, una taula que quadra.",
+        "page": 26,
+        "path": [
+          {
+            "x": 0.11,
+            "y": 7.74
+          },
+          {
+            "x": 3.68,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.67
+          },
+          {
+            "x": 0,
+            "y": 5.97
+          },
+          {
+            "x": 0.97,
+            "y": 8
+          }
+        ]
+      },
+      {
+        "q": "Al doblet del tir 11, quant ha d'avançar la bola 1 a la 2a banda si entre la 1 i la 2 hi ha 3 diamants d'altura?",
+        "options": [
+          "Mig diamant",
+          "Un diamant",
+          "Un quart de diamant",
+          "Dos diamants"
+        ],
+        "answer": 0,
+        "explain": "'La bola 1 debería avanzar medio rombo en la segunda banda siempre que la diferencia de altura... sean tres rombos.'",
+        "page": 29,
+        "path": [
+          {
+            "x": 0.1,
+            "y": 3.97
+          },
+          {
+            "x": 3.8,
+            "y": 1.03
+          },
+          {
+            "x": 0,
+            "y": 0.7
+          },
+          {
+            "x": 4,
+            "y": 0.5
+          },
+          {
+            "x": 0.22,
+            "y": 0.21
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.89,
+            "y": 1.0,
+            "c": "yellow"
+          },
+          {
+            "x": 0.22,
+            "y": 0.21,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Com es juga el pase bola del tir 12?",
+        "options": [
+          "Poca bola amb efecte 4",
+          "Mitja bola sense efecte",
+          "Molta bola amb contraefecte",
+          "Quart de bola amb efecte 2"
+        ],
+        "answer": 0,
+        "explain": "'Pasebola, tomar poca bola con efecto 4.'",
+        "page": 30,
+        "path": [
+          {
+            "x": 0.15,
+            "y": 1.93
+          },
+          {
+            "x": 2.0,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.86
+          },
+          {
+            "x": 0.07,
+            "y": 7.92
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.0,
+            "y": 0.12,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Com es comprova la cabanya pel mètode DPM al tir 17?",
+        "options": [
+          "Quart de bola i efecte 4 clàssic (7 DPM)",
+          "Mitja bola sense efecte",
+          "Bola fina i efecte 2",
+          "Molta bola i cop baix"
+        ],
+        "answer": 0,
+        "explain": "'cuarto de bola y efecto 4 clásico o 7 DPM'.",
+        "page": 35,
+        "path": [
+          {
+            "x": 3.66,
+            "y": 3.02
+          },
+          {
+            "x": 0.33,
+            "y": 2.97
+          },
+          {
+            "x": 0,
+            "y": 2.58
+          },
+          {
+            "x": 1.33,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.02
+          },
+          {
+            "x": 3.73,
+            "y": 2.43
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.21,
+            "y": 3.01,
+            "c": "yellow"
+          },
+          {
+            "x": 3.73,
+            "y": 2.43,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "De què depèn molt el resultat del contraefecte del tir 6?",
+        "options": [
+          "De l'estat del drap",
+          "De la presa de bola",
+          "De la posició de la bola 2",
+          "Del valor de taula"
+        ],
+        "answer": 0,
+        "explain": "'Un contra efecto, el estado del paño tiene mucha influencia.'",
+        "page": 24,
+        "path": [
+          {
+            "x": 3.77,
+            "y": 7.8
+          },
+          {
+            "x": 0,
+            "y": 4.29
+          },
+          {
+            "x": 4,
+            "y": 0.2
+          },
+          {
+            "x": 3.76,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 2.98
+          },
+          {
+            "x": 3.48,
+            "y": 7.36
+          }
+        ]
+      }
+    ]
+  }
+}

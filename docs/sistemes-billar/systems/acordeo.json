@@ -1,0 +1,921 @@
+{
+ "id": "acordeo",
+ "name": "El sistema acordió",
+ "group": "Efecte contrari",
+ "attributed_to": "Jean Verworst (Berekend Biljarten), exposat per José Lazo",
+ "pages": [
+  80,
+  91
+ ],
+ "purpose": "Boles 2 i 3 juntes a la banda i bola 1 que ataca la banda contrària: anada i tornada en zig-zag amb efecte contrari.",
+ "shot": {
+  "first_cushion": "llarga",
+  "cushions": "L-L-L (variants a 4 bandes, K-K-K avall i K-K-L amunt)",
+  "effect": "efecte ¾ contrari, lleugerament baix (aprox. efecte 2 baix)",
+  "stroke": "velocitat per arribar, però no justa; més viva a 4 bandes i al llarg de la taula",
+  "ball": null
+ },
+ "formula": "Patró: 3 diamants de distància → atac perpendicular; per cada diamant menys, retarda l'atac 2,5 punts (5 punts al llarg de la taula)",
+ "steps": [
+  "Mesura la distància entre la bola 1 i la zona de carambola, al llarg de la banda.",
+  "Amb 3 diamants (30 punts) de distància, ataca perpendicularment a la banda contrària.",
+  "Per cada diamant (10 punts) menys de distància, retarda l'atac 2,5 punts (cap a l'allunyament de la zona de carambola): 20 → 2,5; 10 → 5; 0 → 7,5.",
+  "Al llarg de la taula (curta-curta-avall), en lloc de 2,5 resta 5 punts per diamant: 20 → 5; 10 → 10; 0 → 15 des de la vertical.",
+  "Curta-curta-amunt cap a la zona de carambola: mateix mètode però corregint 2,5 punts cap al costat de la zona (a la dreta si la zona és a la dreta)."
+ ],
+ "numberings": [],
+ "corrections": [
+  "Llarga (3 bandes): per cada 10 punts menys de distància, −2,5 punts a l'atac respecte a la perpendicular.",
+  "4 bandes atacant la mateixa banda on hi ha la zona de carambola: es manté −2,5 per diamant; només cal més velocitat.",
+  "Curta-curta-curta avall: −5 punts per diamant de distància menys (des dels 3 diamants); més velocitat, i això fa créixer una mica els quadratges, que disminueixen quan baixa la velocitat.",
+  "Curta-curta-amunt (acabant a la banda llarga): mateix mètode amb correcció de 2,5 punts cap a la zona de carambola en tots els casos (dreta o esquerra segons on sigui), perquè els angles no es tanquin tant. Ex.: distància 20 → 5 − 2,5; 10 → 10 − 2,5; 0 → 15 − 2,5."
+ ],
+ "examples": [
+  {
+   "text": "Posició patró: 3 diamants entre bola 1 i zona de carambola → atac perpendicular a la banda llarga",
+   "page": 80,
+   "path": [
+    {
+     "x": 0.38,
+     "y": 5.94
+    },
+    {
+     "x": 4,
+     "y": 5.94
+    },
+    {
+     "x": 0,
+     "y": 4.8
+    },
+    {
+     "x": 4,
+     "y": 3.86
+    },
+    {
+     "x": 0.13,
+     "y": 3.07
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.13,
+     "y": 2.86,
+     "c": "yellow"
+    },
+    {
+     "x": 0.13,
+     "y": 3.07,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Distància 20 → retarda 2,5",
+   "page": 81,
+   "path": [
+    {
+     "x": 0.15,
+     "y": 2.0
+    },
+    {
+     "x": 4,
+     "y": 2.22
+    },
+    {
+     "x": 0,
+     "y": 1.3
+    },
+    {
+     "x": 4,
+     "y": 0.63
+    },
+    {
+     "x": 0.15,
+     "y": 0.1
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.15,
+     "y": 0.08,
+     "c": "yellow"
+    },
+    {
+     "x": 0.23,
+     "y": 0.23,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Distància 10 → retarda 5",
+   "page": 81,
+   "path": [
+    {
+     "x": 0.15,
+     "y": 4.04
+    },
+    {
+     "x": 4,
+     "y": 4.5
+    },
+    {
+     "x": 0,
+     "y": 3.7
+    },
+    {
+     "x": 4,
+     "y": 3.4
+    },
+    {
+     "x": 0.13,
+     "y": 3.05
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.15,
+     "y": 2.88,
+     "c": "yellow"
+    },
+    {
+     "x": 0.11,
+     "y": 3.1,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Distància 0 → retarda 7,5",
+   "page": 81,
+   "path": [
+    {
+     "x": 0.85,
+     "y": 6.18
+    },
+    {
+     "x": 4,
+     "y": 6.7
+    },
+    {
+     "x": 0,
+     "y": 6.45
+    },
+    {
+     "x": 4,
+     "y": 6.35
+    },
+    {
+     "x": 0.25,
+     "y": 6.1
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.16,
+     "y": 5.94,
+     "c": "red"
+    },
+    {
+     "x": 0.11,
+     "y": 6.19,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "4 bandes, mateixa banda que la zona de carambola, 3 diamants → perpendicular",
+   "page": 82,
+   "path": [
+    {
+     "x": 0.38,
+     "y": 5.97
+    },
+    {
+     "x": 4,
+     "y": 5.97
+    },
+    {
+     "x": 0,
+     "y": 5.04
+    },
+    {
+     "x": 4,
+     "y": 4.21
+    },
+    {
+     "x": 0,
+     "y": 3.57
+    },
+    {
+     "x": 3.87,
+     "y": 3.0
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.89,
+     "y": 2.89,
+     "c": "yellow"
+    },
+    {
+     "x": 3.89,
+     "y": 3.13,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "4 bandes, distància 20 → retarda 2,5 (també 10 → 5 i 0 → 7,5)",
+   "page": 83,
+   "path": [
+    {
+     "x": 0.15,
+     "y": 3.01
+    },
+    {
+     "x": 4,
+     "y": 3.23
+    },
+    {
+     "x": 0,
+     "y": 2.33
+    },
+    {
+     "x": 4,
+     "y": 1.73
+    },
+    {
+     "x": 0,
+     "y": 1.3
+    },
+    {
+     "x": 3.72,
+     "y": 1.01
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.89,
+     "y": 0.86,
+     "c": "yellow"
+    },
+    {
+     "x": 3.9,
+     "y": 1.1,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Curta-curta-curta avall, 3 diamants → atac vertical",
+   "page": 84,
+   "path": [
+    {
+     "x": 1.0,
+     "y": 7.85
+    },
+    {
+     "x": 1.0,
+     "y": 0
+    },
+    {
+     "x": 2.6,
+     "y": 8
+    },
+    {
+     "x": 3.3,
+     "y": 0
+    },
+    {
+     "x": 3.86,
+     "y": 7.0
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.75,
+     "y": 7.0,
+     "c": "yellow"
+    },
+    {
+     "x": 3.92,
+     "y": 7.0,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Avall, distància 20 → 5 punts a l'esquerra de la vertical",
+   "page": 85,
+   "path": [
+    {
+     "x": 1.96,
+     "y": 7.8
+    },
+    {
+     "x": 1.51,
+     "y": 0
+    },
+    {
+     "x": 2.52,
+     "y": 8
+    },
+    {
+     "x": 3.3,
+     "y": 0
+    },
+    {
+     "x": 3.8,
+     "y": 6.9
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.71,
+     "y": 6.94,
+     "c": "yellow"
+    },
+    {
+     "x": 3.87,
+     "y": 6.94,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Avall, distància 10 → 10 punts de la vertical",
+   "page": 86,
+   "path": [
+    {
+     "x": 2.91,
+     "y": 7.8
+    },
+    {
+     "x": 2.01,
+     "y": 0
+    },
+    {
+     "x": 2.73,
+     "y": 8
+    },
+    {
+     "x": 3.46,
+     "y": 0
+    },
+    {
+     "x": 3.87,
+     "y": 7.0
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.73,
+     "y": 7.0,
+     "c": "yellow"
+    },
+    {
+     "x": 3.91,
+     "y": 7.0,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Avall, distància 0 → 15 punts de la vertical",
+   "page": 87,
+   "path": [
+    {
+     "x": 3.85,
+     "y": 7.64
+    },
+    {
+     "x": 2.53,
+     "y": 0
+    },
+    {
+     "x": 2.99,
+     "y": 8
+    },
+    {
+     "x": 3.5,
+     "y": 0
+    },
+    {
+     "x": 3.8,
+     "y": 5.06
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.67,
+     "y": 5.1,
+     "c": "yellow"
+    },
+    {
+     "x": 3.9,
+     "y": 5.04,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Curta-curta-amunt, 3 diamants → vertical + 2,5 cap a la zona",
+   "page": 88,
+   "path": [
+    {
+     "x": 1.0,
+     "y": 7.85
+    },
+    {
+     "x": 1.23,
+     "y": 0
+    },
+    {
+     "x": 3.04,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 1.87
+    },
+    {
+     "x": 3.9,
+     "y": 1.14
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.75,
+     "y": 1.16,
+     "c": "yellow"
+    },
+    {
+     "x": 3.9,
+     "y": 1.13,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Amunt, distància 20 → 5 a l'esquerra, rectificat 2,5 a la dreta",
+   "page": 89,
+   "path": [
+    {
+     "x": 1.96,
+     "y": 7.75
+    },
+    {
+     "x": 1.74,
+     "y": 0
+    },
+    {
+     "x": 2.78,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 1.23
+    },
+    {
+     "x": 3.87,
+     "y": 0.42
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.74,
+     "y": 0.4,
+     "c": "yellow"
+    },
+    {
+     "x": 3.89,
+     "y": 0.4,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Amunt, distància 10 → 10 a l'esquerra, rectificat 2,5 a la dreta",
+   "page": 90,
+   "path": [
+    {
+     "x": 2.92,
+     "y": 7.82
+    },
+    {
+     "x": 2.29,
+     "y": 0
+    },
+    {
+     "x": 2.99,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 1.73
+    },
+    {
+     "x": 3.87,
+     "y": 1.04
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.78,
+     "y": 1.14,
+     "c": "yellow"
+    },
+    {
+     "x": 3.89,
+     "y": 0.99,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Amunt, distància 0 → 15 a l'esquerra, rectificat 2,5 a la dreta",
+   "page": 91,
+   "path": [
+    {
+     "x": 3.9,
+     "y": 7.65
+    },
+    {
+     "x": 2.8,
+     "y": 0
+    },
+    {
+     "x": 3.6,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 1.68
+    },
+    {
+     "x": 3.85,
+     "y": 1.0
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.78,
+     "y": 1.14,
+     "c": "yellow"
+    },
+    {
+     "x": 3.89,
+     "y": 0.97,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "El paràmetre clau és la distància entre la sortida de la bola 1 i la zona de carambola.",
+  "A partir de la tercera banda la bola 1 surt gairebé recta, encara més si es juga viva; per això les trajectòries a 4 bandes no es desvirtuen gaire.",
+  "La versió al llarg de la taula no és la millor solució (es pot atacar la banda llarga amb la teoria de diamants), però serveix per entrenar un tipus d'efecte i velocitat."
+ ],
+ "quotes": [
+  "por cada rombo ( 10 puntos) menos de distancia entre la bola 1 y la zona de caramboleo retrasamos 2,5 puntos al ataque",
+  "velocidad a llegar pero no justa y efecto ¾ y ligeramente bajo (más o menos un efecto 2 bajo)"
+ ],
+ "uncertain": [
+  "No hi ha numeració fixa a les bandes: els valors són desplaçaments relatius (10 punts = 1 diamant) respecte a la perpendicular des de la bola 1.",
+  "El dibuix de la bola mostra l'efecte baix a l'esquerra (a les pàgines amb atac a la banda llarga) i baix a la dreta (al llarg de la taula); el text no detalla el costat.",
+  "Recorreguts aproximats a partir dels dibuixos, sobretot els de distància 0, on els traços se superposen."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "D": {
+     "label": "Distància bola 1 – zona de carambola (punts)",
+     "values": [
+      0,
+      10,
+      20,
+      30
+     ]
+    },
+    "V": {
+     "label": "Variant (1 = llarga, 2 = curta-curta avall, 3 = curta-curta amunt)",
+     "values": [
+      1,
+      2,
+      3
+     ]
+    },
+    "R": {
+     "label": "Desplaçament de l'atac respecte a la perpendicular (punts, cap a fora de la zona)",
+     "values": [
+      -2.5,
+      0,
+      2.5,
+      5,
+      7.5,
+      10,
+      12.5,
+      15
+     ]
+    }
+   },
+   "inputs": {
+    "D": [
+     0,
+     10,
+     20,
+     30
+    ],
+    "V": [
+     1,
+     2,
+     3
+    ]
+   },
+   "relations": [
+    {
+     "solve": "R",
+     "expr": "(30 - D) / 4",
+     "when": "V == 1",
+     "label": "atac a la banda llarga (3 o 4 bandes): 2,5 per diamant"
+    },
+    {
+     "solve": "R",
+     "expr": "(30 - D) / 2",
+     "when": "V == 2",
+     "label": "curta-curta avall: 5 per diamant"
+    },
+    {
+     "solve": "R",
+     "expr": "(30 - D) / 2 - 2.5",
+     "when": "V == 3",
+     "label": "curta-curta amunt: 5 per diamant, rectificat 2,5 cap a la zona"
+    }
+   ],
+   "valid": "D >= 0 && D <= 30",
+   "round": 2,
+   "note": "Sense numeració de banda: el resultat és un desplaçament relatiu (10 punts = 1 diamant). A la variant 3, amb D = 30 surt −2,5, és a dir 2,5 punts cap a la zona."
+  },
+  "quiz": [
+   {
+    "q": "Quin efecte i velocitat demana la posició patró?",
+    "options": [
+     "Efecte ¾ lleugerament baix, velocitat per arribar però no justa",
+     "Sense efecte, suau i allargat",
+     "Efecte màxim alt i molt viu",
+     "Retrocés sec"
+    ],
+    "answer": 0,
+    "explain": "'velocidad a llegar pero no justa y efecto ¾ y ligeramente bajo (más o menos un efecto 2 bajo)'.",
+    "page": 80
+   },
+   {
+    "q": "Bola 1 a 3 diamants de la zona de carambola. On ataques?",
+    "options": [
+     "Perpendicular a la banda llarga",
+     "2,5 punts retardat",
+     "7,5 punts retardat",
+     "5 punts avançat"
+    ],
+    "answer": 0,
+    "explain": "És la posició patró: atac perpendicular des de la bola 1.",
+    "page": 80,
+    "path": [
+     {
+      "x": 0.38,
+      "y": 5.94
+     },
+     {
+      "x": 4,
+      "y": 5.94
+     },
+     {
+      "x": 0,
+      "y": 4.8
+     },
+     {
+      "x": 4,
+      "y": 3.86
+     },
+     {
+      "x": 0.13,
+      "y": 3.07
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.13,
+      "y": 2.86,
+      "c": "yellow"
+     },
+     {
+      "x": 0.13,
+      "y": 3.07,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Distància 10 punts (1 diamant). Quant retardes l'atac a la banda llarga?",
+    "options": [
+     "5 punts",
+     "2,5 punts",
+     "7,5 punts",
+     "10 punts"
+    ],
+    "answer": 0,
+    "explain": "2,5 per cada diamant menys des dels 3: dos diamants menys → 5.",
+    "page": 81,
+    "path": [
+     {
+      "x": 0.15,
+      "y": 4.04
+     },
+     {
+      "x": 4,
+      "y": 4.5
+     },
+     {
+      "x": 0,
+      "y": 3.7
+     },
+     {
+      "x": 4,
+      "y": 3.4
+     },
+     {
+      "x": 0.13,
+      "y": 3.05
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.15,
+      "y": 2.88,
+      "c": "yellow"
+     },
+     {
+      "x": 0.11,
+      "y": 3.1,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "A 4 bandes, atacant la mateixa banda que la zona de carambola, què canvia?",
+    "options": [
+     "Només cal més velocitat; es manté el −2,5",
+     "Es resten 5 per diamant",
+     "S'ataca sempre perpendicular",
+     "Cal jugar sense efecte"
+    ],
+    "answer": 0,
+    "explain": "La sostracció de 2,5 punts es manté; l'única variació és més velocitat.",
+    "page": 82,
+    "path": [
+     {
+      "x": 0.38,
+      "y": 5.97
+     },
+     {
+      "x": 4,
+      "y": 5.97
+     },
+     {
+      "x": 0,
+      "y": 5.04
+     },
+     {
+      "x": 4,
+      "y": 4.21
+     },
+     {
+      "x": 0,
+      "y": 3.57
+     },
+     {
+      "x": 3.87,
+      "y": 3.0
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.89,
+      "y": 2.89,
+      "c": "yellow"
+     },
+     {
+      "x": 3.89,
+      "y": 3.13,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Curta-curta-curta avall, distància 10. Quant t'aparts de la vertical?",
+    "options": [
+     "10 punts",
+     "5 punts",
+     "2,5 punts",
+     "15 punts"
+    ],
+    "answer": 0,
+    "explain": "Al llarg de la taula es resten 5 per diamant: 3 → 0, 2 → 5, 1 → 10, 0 → 15.",
+    "page": 86,
+    "path": [
+     {
+      "x": 2.91,
+      "y": 7.8
+     },
+     {
+      "x": 2.01,
+      "y": 0
+     },
+     {
+      "x": 2.73,
+      "y": 8
+     },
+     {
+      "x": 3.46,
+      "y": 0
+     },
+     {
+      "x": 3.87,
+      "y": 7.0
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.73,
+      "y": 7.0,
+      "c": "yellow"
+     },
+     {
+      "x": 3.91,
+      "y": 7.0,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Curta-curta-amunt, distància 20 (zona a la dreta). On ataques?",
+    "options": [
+     "2,5 punts a l'esquerra de la vertical",
+     "5 punts a l'esquerra",
+     "2,5 a la dreta",
+     "Vertical"
+    ],
+    "answer": 0,
+    "explain": "5 punts a l'esquerra (com avall) i rectificat 2,5 a la dreta: queda a 2,5 a l'esquerra.",
+    "page": 89,
+    "path": [
+     {
+      "x": 1.96,
+      "y": 7.75
+     },
+     {
+      "x": 1.74,
+      "y": 0
+     },
+     {
+      "x": 2.78,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 1.23
+     },
+     {
+      "x": 3.87,
+      "y": 0.42
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.74,
+      "y": 0.4,
+      "c": "yellow"
+     },
+     {
+      "x": 3.89,
+      "y": 0.4,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Quan l'autor diu que la versió al llarg de la taula no és la millor opció, què proposa en lloc d'ella?",
+    "options": [
+     "Atacar la banda llarga dreta amb la teoria clàssica de diamants",
+     "Jugar un renversé",
+     "Fer massé",
+     "Jugar a quatre bandes curtes"
+    ],
+    "answer": 0,
+    "explain": "'no es la mejor forma ... pudiendo atacar por ejemplo sobre la banda larga derecha aplicando la teoría clásica de diamantes'.",
+    "page": 84
+   }
+  ]
+ }
+}

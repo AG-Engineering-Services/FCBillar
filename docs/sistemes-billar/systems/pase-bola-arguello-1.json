@@ -1,0 +1,1185 @@
+{
+ "id": "pase-bola-arguello-1",
+ "name": "Pase bola sobre banda llarga (patró d'Argüello, llarga-curta-llarga)",
+ "group": "Pase bola",
+ "attributed_to": "Argüello",
+ "pages": null,
+ "source": "PDF «Pasebola Argüello», Club Billar València, pàg. 1–11",
+ "purpose": "Pase bola amb la bola 2 a prop de la banda llarga (posició mare: 2n diamant): bola 1 a la llarga, curta de dalt i llarga dreta; diu quin efecte cal per arribar a la 3a banda.",
+ "shot": {
+  "first_cushion": "bola",
+  "cushions": "bola 2 - L (llarga esquerra) - C (curta de dalt) - L (llarga dreta), i 4a banda a la llarga esquerra",
+  "effect": "efectes alts 0, 1, 2, 3 i el 4 (màxim); mates només per tancar la bola",
+  "stroke": "atac suau i allargat, amb força perquè les boles 1 i 3 quedin a uns 20 cm",
+  "ball": "poca bola: en general un quart de bola, perquè la bola 1 surti perpendicular a la primera banda"
+ },
+ "formula": "Efecte = Llegada + Bola 2 (posició + separació) + Bola 1",
+ "steps": [
+  "Posició mare: bola 2 enganxada a la llarga esquerra al 2n diamant (valor 0) i línia de tir de la bola 1 que, allargada enrere, surt del racó de baix a la dreta (valor 0). Amb efecte 0 la bola 1 va al racó de dalt a la dreta i torna al 4t diamant de la llarga esquerra (obertura de 2 diamants).",
+  "Llegada: tria on vols tocar la llarga dreta (3a banda). Cada efecte hi afegeix mig diamant des del racó: 0 al racó, 1 a 0,5, 2 a 1, 3 a 1,5, 4 a 2.",
+  "Bola 2 sobre la llarga: −1 efecte per cada mig diamant que puja des del 2n diamant, +1 per cada mig diamant que baixa.",
+  "Bola 2 separada de la llarga: −1 efecte per cada diamant de separació (la vertical de la bola dona el valor de posició).",
+  "Bola 1: si la línia de tir surt de la curta de baix més a l'esquerra del racó, −1 per diamant; si surt de la llarga dreta més amunt del racó, +1 per diamant.",
+  "Suma-ho tot: el resultat és l'efecte (pot sortir mig efecte, p. ex. 2,5)."
+ ],
+ "numberings": [
+  {
+   "name": "Llegada (3a banda)",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 4,
+     "y": 0.5,
+     "v": 1
+    },
+    {
+     "x": 4,
+     "y": 1,
+     "v": 2
+    },
+    {
+     "x": 4,
+     "y": 1.5,
+     "v": 3
+    },
+    {
+     "x": 4,
+     "y": 2,
+     "v": 4
+    }
+   ],
+   "note": "El dibuix del PDF ja és vertical i no s'ha girat: bola 2 a la llarga esquerra (x=0), 1a banda la llarga esquerra, 2a la curta de dalt (y=0), 3a la llarga dreta (x=4). Els números de pàgina dels exemples són pàgines d'aquest PDF (1–17), no del llibre gran. Valors intermedis als exemples: 0,5 a y=0,25 i 1,5 a y=0,75."
+  },
+  {
+   "name": "Bola 2 sobre la llarga",
+   "role": "altre",
+   "points": [
+    {
+     "x": 0,
+     "y": 0.5,
+     "v": -3
+    },
+    {
+     "x": 0,
+     "y": 1,
+     "v": -2
+    },
+    {
+     "x": 0,
+     "y": 1.5,
+     "v": -1
+    },
+    {
+     "x": 0,
+     "y": 2,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 2.5,
+     "v": 1
+    },
+    {
+     "x": 0,
+     "y": 3,
+     "v": 2
+    },
+    {
+     "x": 0,
+     "y": 3.5,
+     "v": 3
+    },
+    {
+     "x": 0,
+     "y": 4,
+     "v": 4
+    }
+   ],
+   "note": "Posició de la bola 2 al llarg de la banda llarga esquerra; un valor per cada mig diamant."
+  },
+  {
+   "name": "Separació de la bola 2",
+   "role": "altre",
+   "points": [
+    {
+     "x": 0.5,
+     "y": 0,
+     "v": -0.5
+    },
+    {
+     "x": 1,
+     "y": 0,
+     "v": -1
+    },
+    {
+     "x": 1.5,
+     "y": 0,
+     "v": -1.5
+    },
+    {
+     "x": 2,
+     "y": 0,
+     "v": -2
+    }
+   ],
+   "note": "Distància de la bola 2 a la llarga esquerra, llegida a la curta de dalt (com la fletxa dels dibuixos). El PDF només mostra −1 i −1,5; la resta surt de la regla."
+  },
+  {
+   "name": "Bola 1 (línia de tir)",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 2,
+     "y": 8,
+     "v": -2
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": -1
+    },
+    {
+     "x": 4,
+     "y": 8,
+     "v": 0
+    },
+    {
+     "x": 4,
+     "y": 7,
+     "v": 1
+    },
+    {
+     "x": 4,
+     "y": 6,
+     "v": 2
+    },
+    {
+     "x": 4,
+     "y": 5,
+     "v": 3
+    }
+   ],
+   "note": "Punt on la línia bola 1 → bola 2, allargada enrere, toca la banda. El PDF mostra −1, 0, +1 i +2; −2 i +3 surten de la regla."
+  },
+  {
+   "name": "Obertura a la 4a banda (posició mare)",
+   "role": "arribada",
+   "points": [
+    {
+     "x": 0,
+     "y": 4,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 5,
+     "v": 1
+    },
+    {
+     "x": 0,
+     "y": 5.6,
+     "v": 2
+    },
+    {
+     "x": 0,
+     "y": 6.3,
+     "v": 3
+    },
+    {
+     "x": 0,
+     "y": 7,
+     "v": 4
+    }
+   ],
+   "note": "Valor = efecte. Obertures respecte a la bola 2: 2, 3, 3,6, 4,3 i 5 diamants. Dibuixat per a la bola 2 al 2n diamant; si la bola 2 es mou, l'escala es desplaça amb ella."
+  },
+  {
+   "name": "Llegada de doblet (2a banda llarga dreta)",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 4,
+     "y": 0.5,
+     "v": -1
+    },
+    {
+     "x": 4,
+     "y": 1,
+     "v": -2
+    }
+   ],
+   "note": "Variant de doblet: la bola 1 va de la llarga esquerra directament a la llarga dreta; −1 efecte per cada mig diamant des del racó."
+  }
+ ],
+ "corrections": [
+  "Llegada: +1 efecte per cada mig diamant de la 3a banda (llarga dreta) comptat des del racó de dalt.",
+  "Bola 2 a la llarga: −1 per cada mig diamant cap amunt, +1 per cada mig diamant cap avall des del 2n diamant; l'obertura de 2 diamants a la 4a banda es manté.",
+  "Bola 2 separada de la llarga: −1 efecte per cada diamant de separació; les obertures a la 4a banda no canvien.",
+  "Bola 1: −1 per cada diamant cap a l'esquerra per la curta de baix; +1 per cada diamant cap amunt per la llarga dreta.",
+  "4a banda: obertura de 2 diamants amb efecte 0, 3 amb efecte 1, 3,6 amb efecte 2, 4,3 amb efecte 3 i 5 amb efecte 4.",
+  "Doblet (llarga esquerra → llarga dreta → curta): −1 efecte per cada mig diamant de llegada des del racó.",
+  "Bola 2 lluny de la banda: encara que el càlcul doni efecte 0 alt, baixa el punt d'atac (fins i tot cop mat) per evitar el semicorregut."
+ ],
+ "examples": [
+  {
+   "text": "Posició mare: bola 2 al 2n diamant (0), bola 1 des del racó (0), efecte 0 → racó de dalt a la dreta i 4a banda al 4t diamant de la llarga esquerra.",
+   "page": 2,
+   "path": [
+    {
+     "x": 3.84,
+     "y": 7.74
+    },
+    {
+     "x": 0.06,
+     "y": 1.98
+    },
+    {
+     "x": 0,
+     "y": 1.95
+    },
+    {
+     "x": 3.74,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.1
+    },
+    {
+     "x": 0,
+     "y": 4
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.11,
+     "y": 1.91,
+     "c": "yellow"
+    },
+    {
+     "x": 1.73,
+     "y": 2.09,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Bola 2 pujada un diamant (−2), llegada 0 → efecte −2; continua arribant al racó.",
+   "page": 3,
+   "path": [
+    {
+     "x": 3.83,
+     "y": 7.72
+    },
+    {
+     "x": 0.06,
+     "y": 0.98
+    },
+    {
+     "x": 0,
+     "y": 0.98
+    },
+    {
+     "x": 3.8,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.1
+    },
+    {
+     "x": 1.46,
+     "y": 1.73
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.13,
+     "y": 0.92,
+     "c": "yellow"
+    },
+    {
+     "x": 1.46,
+     "y": 1.73,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Bola 2 baixada un diamant (+2), llegada 0 → efecte +2; 4a banda 2 diamants per sota de la bola 2.",
+   "page": 4,
+   "path": [
+    {
+     "x": 3.81,
+     "y": 7.7
+    },
+    {
+     "x": 0.06,
+     "y": 2.95
+    },
+    {
+     "x": 0,
+     "y": 2.93
+    },
+    {
+     "x": 3.67,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.09
+    },
+    {
+     "x": 1.8,
+     "y": 2.57
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.13,
+     "y": 2.93,
+     "c": "yellow"
+    },
+    {
+     "x": 1.8,
+     "y": 2.57,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició mare amb efecte 2: 3a banda a 1 diamant del racó; 4a banda a 3,6 diamants de la bola 2.",
+   "page": 5,
+   "path_built": true,
+   "path": [
+    {
+     "x": 3.82,
+     "y": 7.72
+    },
+    {
+     "x": 0.06,
+     "y": 1.97
+    },
+    {
+     "x": 0,
+     "y": 1.95
+    },
+    {
+     "x": 2.9,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 1
+    },
+    {
+     "x": 0,
+     "y": 5.6
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.11,
+     "y": 1.92,
+     "c": "yellow"
+    },
+    {
+     "x": 1.86,
+     "y": 3.29,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Bola 2 separada 1 diamant de la llarga a l'altura del 0, llegada 0, bola 1 a 0 → efecte −1.",
+   "page": 6,
+   "path": [
+    {
+     "x": 3.82,
+     "y": 7.74
+    },
+    {
+     "x": 0.9,
+     "y": 1.97
+    },
+    {
+     "x": 0,
+     "y": 1.91
+    },
+    {
+     "x": 3.73,
+     "y": 0
+    },
+    {
+     "x": 3.96,
+     "y": 0.1
+    },
+    {
+     "x": 2.86,
+     "y": 1.09
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.99,
+     "y": 1.91,
+     "c": "yellow"
+    },
+    {
+     "x": 2.86,
+     "y": 1.09,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Bola 1 desplaçada un diamant a l'esquerra per la curta de baix (−1), llegada 0 → efecte −1.",
+   "page": 7,
+   "path": [
+    {
+     "x": 2.71,
+     "y": 7.71
+    },
+    {
+     "x": 0.03,
+     "y": 1.99
+    },
+    {
+     "x": 0,
+     "y": 1.98
+    },
+    {
+     "x": 3.69,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.1
+    },
+    {
+     "x": 1.82,
+     "y": 2.0
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.1,
+     "y": 1.91,
+     "c": "yellow"
+    },
+    {
+     "x": 1.82,
+     "y": 2.0,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Bola 1 desplaçada dos diamants amunt per la llarga dreta (+2), llegada 0 → efecte +2.",
+   "page": 7,
+   "path": [
+    {
+     "x": 3.81,
+     "y": 5.52
+    },
+    {
+     "x": 0.03,
+     "y": 1.99
+    },
+    {
+     "x": 0,
+     "y": 1.98
+    },
+    {
+     "x": 3.69,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.1
+    },
+    {
+     "x": 1.82,
+     "y": 2.0
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.1,
+     "y": 1.91,
+     "c": "yellow"
+    },
+    {
+     "x": 1.82,
+     "y": 2.0,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Llegada 1,5; bola 2 +1 (mig diamant avall) −1 (separada 1 diamant); bola 1 +1 → efecte 1,5 + 1 − 1 + 1 = 2,5.",
+   "page": 8,
+   "path": [
+    {
+     "x": 3.59,
+     "y": 6.0
+    },
+    {
+     "x": 0.9,
+     "y": 2.47
+    },
+    {
+     "x": 0,
+     "y": 2.17
+    },
+    {
+     "x": 3.06,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.76
+    },
+    {
+     "x": 2.19,
+     "y": 2.6
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.97,
+     "y": 2.45,
+     "c": "yellow"
+    },
+    {
+     "x": 2.19,
+     "y": 2.6,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Llegada 3; bola 2 −2; bola 1 −1 → efecte 3 − 2 − 1 = 0 (marca una mica per compensar el desefecte).",
+   "page": 9,
+   "path": [
+    {
+     "x": 2.52,
+     "y": 7.16
+    },
+    {
+     "x": 0.06,
+     "y": 0.98
+    },
+    {
+     "x": 0,
+     "y": 0.98
+    },
+    {
+     "x": 1.67,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 1.51
+    },
+    {
+     "x": 1.86,
+     "y": 3.87
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.13,
+     "y": 0.91,
+     "c": "yellow"
+    },
+    {
+     "x": 1.86,
+     "y": 3.87,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Doblet: bola 2 i bola 1 a 0, llegada a la llarga dreta mig diamant sota el racó → efecte −1.",
+   "page": 10,
+   "path": [
+    {
+     "x": 3.65,
+     "y": 7.4
+    },
+    {
+     "x": 0.06,
+     "y": 1.95
+    },
+    {
+     "x": 0,
+     "y": 1.9
+    },
+    {
+     "x": 4,
+     "y": 0.5
+    },
+    {
+     "x": 2.54,
+     "y": 0
+    },
+    {
+     "x": 1.82,
+     "y": 0.19
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.12,
+     "y": 1.9,
+     "c": "yellow"
+    },
+    {
+     "x": 1.82,
+     "y": 0.19,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Llegada 0,5; bola 2 −1 (mig diamant amunt) −1,5 (separada 1,5 diamants); bola 1 +2 → efecte 0,5 − 1 − 1,5 + 2 = 0, jugat baix o mat (línia vermella).",
+   "page": 11,
+   "path": [
+    {
+     "x": 3.61,
+     "y": 4.83
+    },
+    {
+     "x": 1.42,
+     "y": 1.47
+    },
+    {
+     "x": 0,
+     "y": 1.2
+    },
+    {
+     "x": 2.56,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.24
+    },
+    {
+     "x": 2.68,
+     "y": 1.53
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.49,
+     "y": 1.4,
+     "c": "yellow"
+    },
+    {
+     "x": 2.68,
+     "y": 1.53,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Pren sempre poca bola per no arriscar un corregut o semicorregut; la bola 1 ha de sortir viva.",
+  "Ataca la bola 2 per l'esquerra amb efecte a la dreta, o per la dreta amb efecte a l'esquerra: la direcció del tac queda prop del punt de contacte.",
+  "Força justa perquè després de la carambola les boles 1 i 3 quedin a uns 20 cm, amb opcions de preparació.",
+  "Amb efecte 0, marca una mica per compensar el desefecte que la bola 1 agafa en tocar la 2.",
+  "Si la bola 2 és lluny de la banda, costa que la bola 1 surti perpendicular: no t'hi obstinis, i baixa el punt d'atac (fins a mat) perquè la trajectòria no s'obri.",
+  "Mates (per tancar la bola): 0m coincideix amb 0a, 2m és com 1,5 alt i 3m gairebé com 2a."
+ ],
+ "quotes": [
+  "Como norma general, salvo que busquemos una solución más artística, es tomar siempre poca bola para no arriesgarnos en un posible corrido o semicorrido.",
+  "por cada efecto que aumentemos se logran medio rombo más de llegada."
+ ],
+ "uncertain": [
+  "Els números de pàgina (page) són de les 17 pàgines d'aquest PDF; aquest sistema ocupa les pàgines 1–11. Les pàgines 12–17 són el pase bola corta-llarga-corta, que ja és a pase-bola-arguello.json.",
+  "El text diu que 1m és 'aproximadamente medio efecto máximo': no queda clar si vol dir la meitat de l'efecte màxim o un altre valor.",
+  "Els efectes negatius es dibuixen amb el punt del tac a l'altre costat (esquerra del centre); el text no ho explica.",
+  "A la pàgina 9 l'esfera d'efecte porta l'etiqueta '2,5' però el punt és al centre de dalt i el text diu efecte 0: sembla una etiqueta que s'ha quedat de la pàgina anterior.",
+  "A la pàgina 8 la bola 2 és mig diamant per sota del 2n (y≈2,45) i l'escala de 4a banda es dibuixa igual que a la posició mare; el text diu que les obertures es compten des de la bola 2.",
+  "Els punts de la curta de dalt a l'exemple de la pàgina 5 són aproximats (el feix de línies és dens): recorregut construït.",
+  "Valors de bola 1 més enllà de −1 i +2, i de separació diferents de −1 i −1,5, surten de la regla, no dels dibuixos.",
+  "Al calculador, la línia U → B → L és un esquema: entre la bola 2 i la llegada la bola 1 passa per la curta de dalt."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada (3a banda)"
+    },
+    "B": {
+     "label": "Bola 2 sobre la llarga",
+     "numbering": "Bola 2 sobre la llarga"
+    },
+    "U": {
+     "label": "Bola 1",
+     "numbering": "Bola 1 (línia de tir)"
+    },
+    "P": {
+     "label": "Separació de la bola 2",
+     "values": [
+      0,
+      -0.5,
+      -1,
+      -1.5
+     ]
+    },
+    "E": {
+     "label": "Efecte",
+     "values": [
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+     ]
+    }
+   },
+   "inputs": {
+    "L": [
+     0,
+     0.5,
+     1,
+     1.5,
+     2,
+     2.5,
+     3,
+     3.5,
+     4
+    ],
+    "B": [
+     -3,
+     -2,
+     -1,
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "U": [
+     -2,
+     -1,
+     0,
+     1,
+     2,
+     3
+    ],
+    "P": [
+     0,
+     0,
+     0,
+     -0.5,
+     -1,
+     -1.5
+    ],
+    "E": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ]
+   },
+   "relations": [
+    {
+     "solve": "E",
+     "expr": "L + B + P + U",
+     "label": "quin efecte cal"
+    },
+    {
+     "solve": "L",
+     "expr": "E - B - P - U",
+     "label": "on arribarà a la 3a banda amb aquest efecte"
+    }
+   ],
+   "valid": "E >= -2 && E <= 4 && L >= 0 && L <= 4",
+   "round": 0.5,
+   "path": [
+    "U",
+    "B",
+    "L"
+   ],
+   "note": "Esquema: punt de la línia de tir de la bola 1, bola 2 a la llarga esquerra i llegada a la llarga dreta; s'omet la curta de dalt. Amb separació P ≠ 0 la bola 2 no és enganxada a la banda."
+  },
+  "quiz": [
+   {
+    "q": "Quina presa de bola recomana en general aquest pase bola?",
+    "options": [
+     "Un quart de bola (poca bola)",
+     "Mitja bola",
+     "Bola plena",
+     "Tres quarts de bola"
+    ],
+    "answer": 0,
+    "explain": "Poca bola per no arriscar un corregut; en general un quart de bola perquè la bola 1 surti perpendicular a la primera banda.",
+    "page": 1
+   },
+   {
+    "q": "Posició mare (bola 2 al 2n diamant, bola 1 des del racó). Amb efecte 0, on va la bola 1?",
+    "options": [
+     "Al racó de dalt a la dreta i torna al 4t diamant de la llarga esquerra",
+     "Al 2n diamant de la llarga dreta",
+     "Al centre de la curta de dalt",
+     "Al racó de baix a l'esquerra"
+    ],
+    "answer": 0,
+    "explain": "Amb efecte 0 arriba just al racó superior i continua cap al 4t diamant: obertura de 2 diamants.",
+    "page": 2,
+    "path": [
+     {
+      "x": 3.84,
+      "y": 7.74
+     },
+     {
+      "x": 0.06,
+      "y": 1.98
+     },
+     {
+      "x": 0,
+      "y": 1.95
+     },
+     {
+      "x": 3.74,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.1
+     },
+     {
+      "x": 0,
+      "y": 4
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.11,
+      "y": 1.91,
+      "c": "yellow"
+     },
+     {
+      "x": 1.73,
+      "y": 2.09,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Pugem la bola 2 un diamant sencer per la llarga. Quina correcció?",
+    "options": [
+     "−2 efectes",
+     "−1 efecte",
+     "+2 efectes",
+     "Cap"
+    ],
+    "answer": 0,
+    "explain": "−1 per cada mig diamant cap amunt: un diamant són −2 (exemple de la pàg. 3).",
+    "page": 3,
+    "path": [
+     {
+      "x": 3.83,
+      "y": 7.72
+     },
+     {
+      "x": 0.06,
+      "y": 0.98
+     },
+     {
+      "x": 0,
+      "y": 0.98
+     },
+     {
+      "x": 3.8,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.1
+     },
+     {
+      "x": 1.46,
+      "y": 1.73
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.13,
+      "y": 0.92,
+      "c": "yellow"
+     },
+     {
+      "x": 1.46,
+      "y": 1.73,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Vols tocar la llarga dreta a 1 diamant del racó de dalt (posició mare). Quin efecte?",
+    "options": [
+     "Efecte 2",
+     "Efecte 1",
+     "Efecte 4",
+     "Efecte 3"
+    ],
+    "answer": 0,
+    "explain": "Cada efecte afegeix mig diamant de llegada: 1 diamant = efecte 2.",
+    "page": 5,
+    "path": [
+     {
+      "x": 3.82,
+      "y": 7.72
+     },
+     {
+      "x": 0.06,
+      "y": 1.97
+     },
+     {
+      "x": 0,
+      "y": 1.95
+     },
+     {
+      "x": 2.9,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 1
+     },
+     {
+      "x": 0,
+      "y": 5.6
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.11,
+      "y": 1.92,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "La bola 2 està separada 1 diamant de la banda llarga. Quina correcció?",
+    "options": [
+     "−1 efecte",
+     "−0,5 efectes",
+     "−2 efectes",
+     "+1 efecte"
+    ],
+    "answer": 0,
+    "explain": "−1 efecte per cada diamant de separació; les obertures a la 4a banda no canvien.",
+    "page": 6,
+    "path": [
+     {
+      "x": 3.82,
+      "y": 7.74
+     },
+     {
+      "x": 0.9,
+      "y": 1.97
+     },
+     {
+      "x": 0,
+      "y": 1.91
+     },
+     {
+      "x": 3.73,
+      "y": 0
+     },
+     {
+      "x": 3.96,
+      "y": 0.1
+     },
+     {
+      "x": 2.86,
+      "y": 1.09
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.99,
+      "y": 1.91,
+      "c": "yellow"
+     },
+     {
+      "x": 2.86,
+      "y": 1.09,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "La línia de tir de la bola 1 surt de la llarga dreta 2 diamants per sobre del racó de baix. Quina correcció?",
+    "options": [
+     "+2 efectes",
+     "−2 efectes",
+     "+1 efecte",
+     "−1 efecte"
+    ],
+    "answer": 0,
+    "explain": "Desplaçament per la llarga dreta: +1 per diamant; per la curta de baix cap a l'esquerra: −1 per diamant.",
+    "page": 7,
+    "path": [
+     {
+      "x": 3.81,
+      "y": 5.52
+     },
+     {
+      "x": 0.03,
+      "y": 1.99
+     },
+     {
+      "x": 0,
+      "y": 1.98
+     },
+     {
+      "x": 3.69,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.1
+     },
+     {
+      "x": 1.82,
+      "y": 2.0
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.1,
+      "y": 1.91,
+      "c": "yellow"
+     },
+     {
+      "x": 1.82,
+      "y": 2.0,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Llegada 1,5; bola 2 a +1 però separada 1 diamant; bola 1 a +1. Quin efecte?",
+    "options": [
+     "2,5",
+     "3,5",
+     "1,5",
+     "0,5"
+    ],
+    "answer": 0,
+    "explain": "1,5 + 1 − 1 + 1 = 2,5 (pàg. 8).",
+    "page": 8,
+    "path": [
+     {
+      "x": 3.59,
+      "y": 6.0
+     },
+     {
+      "x": 0.9,
+      "y": 2.47
+     },
+     {
+      "x": 0,
+      "y": 2.17
+     },
+     {
+      "x": 3.06,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.76
+     },
+     {
+      "x": 2.19,
+      "y": 2.6
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.97,
+      "y": 2.45,
+      "c": "yellow"
+     },
+     {
+      "x": 2.19,
+      "y": 2.6,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "El càlcul dona efecte 0 però la bola 2 és lluny de la banda. Què recomana?",
+    "options": [
+     "Baixar el punt d'atac, fins i tot cop mat",
+     "Pujar més el punt d'atac",
+     "Jugar més fort",
+     "Prendre més bola"
+    ],
+    "answer": 0,
+    "explain": "Amb la bola 2 lluny hi ha risc de semicorregut i la trajectòria s'obre; cal baixar l'atac (línia vermella, pàg. 11).",
+    "page": 11,
+    "path": [
+     {
+      "x": 3.61,
+      "y": 4.83
+     },
+     {
+      "x": 1.42,
+      "y": 1.47
+     },
+     {
+      "x": 0,
+      "y": 1.2
+     },
+     {
+      "x": 2.56,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.24
+     },
+     {
+      "x": 2.68,
+      "y": 1.53
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.49,
+      "y": 1.4,
+      "c": "yellow"
+     },
+     {
+      "x": 2.68,
+      "y": 1.53,
+      "c": "red"
+     }
+    ]
+   }
+  ]
+ },
+ "sort": 39.5
+}

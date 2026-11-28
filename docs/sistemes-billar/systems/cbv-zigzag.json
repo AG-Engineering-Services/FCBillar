@@ -1,0 +1,818 @@
+{
+  "id": "cbv-zigzag",
+  "name": "Sistema zigzag (bricol entre llargues)",
+  "group": "Bricol",
+  "attributed_to": "PDF de Julio A",
+  "pages": null,
+  "source": "PDF «SISTEMA ZIGZAG», Club Billar València, pàg. 1–3",
+  "sort": 431,
+  "purpose": "Bricol en zig-zag entre les dues llargues (L-L-L) per arribar a la mateixa banda llarga de sortida; complement del sistema acordió, amb fórmula pròpia (3 × diferencial − 9) i diferent del zig-zag 567 (L-L-K).",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-L-L (llarga oposada, llarga de sortida, llarga oposada) i arribada a la llarga de sortida",
+    "effect": "efecte 2 de base (als dibuixos, a l'esquerra a l'altura del centre); presa de bola per dins efecte 1, per fora efecte 3",
+    "stroke": "F6 als gràfics",
+    "ball": "Bricol de base; també amb presa de bola (per dins o per fora)"
+  },
+  "formula": "Atac = 3 × Diferencial − 9 (diferencial en diamants; en unitats de 1/10 de diamant: 3 × unitats / 10 − 9)",
+  "steps": [
+    "Mesura el diferencial a la banda llarga entre la sortida i la llegada (en diamants o en unitats de 1/10 de diamant).",
+    "Calcula: Atac = 3 × diferencial − 9 (amb unitats, divideix entre 10 el producte abans de restar 9).",
+    "A la llarga oposada, el 0 és el reflex del punt de sortida (just davant); compta 10 punts per diamant.",
+    "Atac positiu: avançat, cap al costat de la llegada. Atac negatiu: atrassat, cap al costat contrari.",
+    "Juga amb efecte 2; amb presa de bola, efecte 1 si la bola 2 es pren per dins i efecte 3 si es pren per fora."
+  ],
+  "numberings": [
+    {
+      "name": "Diferencial (llarga de sortida)",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0,
+          "y": 5,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 1
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 2
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 3
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 4
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "v": 5
+        }
+      ],
+      "note": "Dibuixos verticals, sense girar. Escala relativa: aquí amb la sortida al 5è diamant (primer gràfic) i la llegada cap amunt; es desplaça amb la sortida."
+    },
+    {
+      "name": "Atac (llarga oposada)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 6,
+          "v": -10
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 20
+        }
+      ],
+      "note": "10 punts per diamant; el 0 és just davant la sortida, positiu cap a la llegada (amunt), negatiu cap avall (atac atrassat)."
+    }
+  ],
+  "corrections": [
+    "Diferencial que no és de diamants sencers: compta'l en unitats (1/10 de diamant) i divideix entre 10 el resultat de multiplicar per 3. Ex.: 6 unitats → 18/10 − 9 = −7,2.",
+    "Presa de bola per dins: resta un efecte (efecte 1 en lloc de 2). Ex.: diferencial 7 → atac 12 amb efecte 1.",
+    "Presa de bola per fora: suma un efecte (efecte 3). Ex.: diferencial 8 → atac 15 amb efecte 3."
+  ],
+  "examples": [
+    {
+      "text": "Diferencial 2 diamants: (3 × 2) − 9 = −3 → atac 3 punts per darrere del reflex de la sortida. Efecte 2",
+      "page": 1,
+      "path": [
+        {
+          "x": 0.47,
+          "y": 5.0
+        },
+        {
+          "x": 4,
+          "y": 5.3
+        },
+        {
+          "x": 0,
+          "y": 4.17
+        },
+        {
+          "x": 4,
+          "y": 3.56
+        },
+        {
+          "x": 0.3,
+          "y": 3.15
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.22,
+          "y": 3.19,
+          "c": "red"
+        },
+        {
+          "x": 0.36,
+          "y": 2.89,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Diferencial 6 unitats (0,6 diamants): (3 × 6) / 10 − 9 = −7,2",
+      "page": 1,
+      "path": [
+        {
+          "x": 0.25,
+          "y": 4.89
+        },
+        {
+          "x": 4,
+          "y": 5.5
+        },
+        {
+          "x": 0,
+          "y": 5.05
+        },
+        {
+          "x": 4,
+          "y": 4.7
+        },
+        {
+          "x": 0.3,
+          "y": 4.42
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.2,
+          "y": 4.4,
+          "c": "red"
+        },
+        {
+          "x": 0.36,
+          "y": 4.15,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Diferencial 12 unitats: (3 × 12) / 10 − 9 = −5,4",
+      "page": 2,
+      "path": [
+        {
+          "x": 0.45,
+          "y": 4.06
+        },
+        {
+          "x": 4,
+          "y": 4.55
+        },
+        {
+          "x": 0,
+          "y": 3.83
+        },
+        {
+          "x": 4,
+          "y": 3.5
+        },
+        {
+          "x": 0.3,
+          "y": 3.05
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.21,
+          "y": 3.03,
+          "c": "red"
+        },
+        {
+          "x": 0.34,
+          "y": 2.74,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Diferencial 2 diamants amb les boles al racó: (3 × 2) − 9 = −3",
+      "page": 2,
+      "path": [
+        {
+          "x": 0.46,
+          "y": 2.05
+        },
+        {
+          "x": 4,
+          "y": 2.3
+        },
+        {
+          "x": 0,
+          "y": 1.35
+        },
+        {
+          "x": 4,
+          "y": 0.97
+        },
+        {
+          "x": 0.5,
+          "y": 0.42
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.57,
+          "y": 0.4,
+          "c": "red"
+        },
+        {
+          "x": 0.27,
+          "y": 0.16,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Diferencial 16 unitats: (3 × 16) / 10 − 9 = −4,2",
+      "page": 2,
+      "path": [
+        {
+          "x": 0.48,
+          "y": 4.0
+        },
+        {
+          "x": 4,
+          "y": 4.42
+        },
+        {
+          "x": 0,
+          "y": 3.6
+        },
+        {
+          "x": 4,
+          "y": 3.06
+        },
+        {
+          "x": 0.35,
+          "y": 2.55
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.32,
+          "y": 2.52,
+          "c": "red"
+        },
+        {
+          "x": 0.35,
+          "y": 2.22,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Diferencial 10 unitats (1 diamant): (3 × 10) / 10 − 9 = −6",
+      "page": 2,
+      "path": [
+        {
+          "x": 0.4,
+          "y": 1.67
+        },
+        {
+          "x": 4,
+          "y": 2.2
+        },
+        {
+          "x": 0,
+          "y": 1.3
+        },
+        {
+          "x": 4,
+          "y": 1.0
+        },
+        {
+          "x": 0.3,
+          "y": 0.82
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.27,
+          "y": 0.8,
+          "c": "red"
+        },
+        {
+          "x": 0.24,
+          "y": 0.5,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Diferencial 7 diamants, presa de bola per dins: (3 × 7) − 9 = 12; es treu un efecte i es juga amb efecte 1",
+      "page": 3,
+      "path": [
+        {
+          "x": 0.91,
+          "y": 6.21
+        },
+        {
+          "x": 2.1,
+          "y": 6.35
+        },
+        {
+          "x": 4,
+          "y": 5.85
+        },
+        {
+          "x": 0,
+          "y": 4.35
+        },
+        {
+          "x": 4,
+          "y": 2.4
+        },
+        {
+          "x": 0.3,
+          "y": 0.38
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.26,
+          "y": 6.48,
+          "c": "red"
+        },
+        {
+          "x": 0.26,
+          "y": 0.35,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Diferencial 4 unitats: (3 × 4) / 10 − 9 = −7,8",
+      "page": 3,
+      "path": [
+        {
+          "x": 0.46,
+          "y": 2.57
+        },
+        {
+          "x": 4,
+          "y": 3.16
+        },
+        {
+          "x": 0,
+          "y": 2.75
+        },
+        {
+          "x": 4,
+          "y": 2.4
+        },
+        {
+          "x": 0.3,
+          "y": 2.3
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.24,
+          "y": 2.28,
+          "c": "red"
+        },
+        {
+          "x": 0.22,
+          "y": 1.98,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Diferencial 8 diamants, presa de bola per fora: (3 × 8) − 9 = 15; s'afegeix un efecte i es juga amb efecte 3",
+      "page": 3,
+      "path": [
+        {
+          "x": 1.66,
+          "y": 7.6
+        },
+        {
+          "x": 2.25,
+          "y": 7.05
+        },
+        {
+          "x": 4,
+          "y": 6.55
+        },
+        {
+          "x": 0,
+          "y": 4.45
+        },
+        {
+          "x": 4,
+          "y": 2.6
+        },
+        {
+          "x": 0.38,
+          "y": 0.3
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.36,
+          "y": 6.95,
+          "c": "red"
+        },
+        {
+          "x": 0.36,
+          "y": 0.27,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Diferencial 4 diamants: (3 × 4) − 9 = 3 → atac 3 punts per davant del reflex de la sortida",
+      "page": 3,
+      "path": [
+        {
+          "x": 0.73,
+          "y": 6.01
+        },
+        {
+          "x": 4,
+          "y": 5.74
+        },
+        {
+          "x": 0,
+          "y": 4.5
+        },
+        {
+          "x": 4,
+          "y": 3.29
+        },
+        {
+          "x": 0.35,
+          "y": 2.36
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.32,
+          "y": 2.34,
+          "c": "red"
+        },
+        {
+          "x": 0.32,
+          "y": 2.02,
+          "c": "yellow"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Amb 3 diamants de diferencial l'atac és 0: just davant la sortida. Per sota de 3 l'atac és atrassat; per sobre, avançat (3 punts per diamant).",
+    "No és el zig-zag 567 del llibre (L-L-K, atac = sortida × llegada): aquest acaba a la mateixa llarga de sortida i es calcula amb la diferència sortida-llegada.",
+    "S'assembla a l'acordió de Verworst (3 diamants → atac perpendicular), però corregeix 3 punts per diamant en lloc de 2,5 i també es fa servir amb diferencials grans i presa de bola."
+  ],
+  "quotes": [
+    "Este diferencial se multiplica por un fijo que es 3 y al resultado se le resta otro fijo que es 9",
+    "Como base del sistema, en posición de bricole, se utiliza el efecto 2."
+  ],
+  "uncertain": [
+    "El PDF no diu qui és l'autor del sistema; «Julio A» és només l'autor del document.",
+    "«F6» surt a tots els gràfics al costat de la bola; deu ser la força o velocitat, però el PDF no n'explica l'escala.",
+    "Els dibuixos posen l'efecte a l'esquerra de la bola, a l'altura del centre, i la primera banda és a la dreta: seria efecte contrari, però el text no ho diu.",
+    "Recorreguts mesurats a ull (±0,2 diamants); als exemples de diferencial petit (4 i 6 unitats) els traços se superposen i el punt de la segona i tercera banda és aproximat."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "D": {
+          "label": "Diferencial (diamants)",
+          "values": [
+            0.4,
+            0.6,
+            1,
+            1.2,
+            1.6,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ]
+        },
+        "A": {
+          "label": "Atac (punts des del reflex de la sortida)",
+          "values": [
+            -9,
+            -7.8,
+            -7.2,
+            -6,
+            -5.4,
+            -4.2,
+            -3,
+            0,
+            3,
+            6,
+            9,
+            12,
+            15
+          ]
+        }
+      },
+      "inputs": {
+        "D": [
+          0.4,
+          0.6,
+          1,
+          1.2,
+          1.6,
+          2,
+          2.5,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "A": [
+          -7.8,
+          -7.2,
+          -6,
+          -5.4,
+          -4.2,
+          -3,
+          0,
+          3,
+          6,
+          9,
+          12,
+          15
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "3 * D - 9",
+          "label": "Trobar l'atac"
+        },
+        {
+          "solve": "D",
+          "expr": "(A + 9) / 3",
+          "label": "Quin diferencial correspon"
+        }
+      ],
+      "valid": "D >= 0 && D <= 8 && A >= -9 && A <= 15",
+      "round": 1,
+      "note": "Escala relativa: l'atac es compta des del punt just davant la sortida (0), positiu cap a la llegada. No es dibuixa el traç generat perquè depèn d'on és la sortida."
+    },
+    "quiz": [
+      {
+        "q": "Sortida i llegada a 2 diamants de distància. On ataques?",
+        "options": [
+          "+3",
+          "−3",
+          "−6",
+          "0"
+        ],
+        "answer": 1,
+        "explain": "3 × 2 − 9 = −3: atac atrassat, 3 punts per darrere del reflex de la sortida.",
+        "page": 1,
+        "path": [
+          {
+            "x": 0.47,
+            "y": 5.0
+          },
+          {
+            "x": 4,
+            "y": 5.3
+          },
+          {
+            "x": 0,
+            "y": 4.17
+          },
+          {
+            "x": 4,
+            "y": 3.56
+          },
+          {
+            "x": 0.3,
+            "y": 3.15
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.22,
+            "y": 3.19,
+            "c": "red"
+          },
+          {
+            "x": 0.36,
+            "y": 2.89,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "El diferencial és de 6 unitats (0,6 diamants). Quin atac dona el sistema?",
+        "options": [
+          "−7,2",
+          "9",
+          "−3",
+          "−1,8"
+        ],
+        "answer": 0,
+        "explain": "(3 × 6) / 10 − 9 = 1,8 − 9 = −7,2.",
+        "page": 1,
+        "path": [
+          {
+            "x": 0.25,
+            "y": 4.89
+          },
+          {
+            "x": 4,
+            "y": 5.5
+          },
+          {
+            "x": 0,
+            "y": 5.05
+          },
+          {
+            "x": 4,
+            "y": 4.7
+          },
+          {
+            "x": 0.3,
+            "y": 4.42
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.2,
+            "y": 4.4,
+            "c": "red"
+          },
+          {
+            "x": 0.36,
+            "y": 4.15,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Amb quin diferencial s'ataca just davant de la sortida (atac 0)?",
+        "options": [
+          "0 diamants",
+          "9 diamants",
+          "3 diamants",
+          "1 diamant"
+        ],
+        "answer": 2,
+        "explain": "3 × 3 − 9 = 0.",
+        "page": 1
+      },
+      {
+        "q": "Què vol dir un atac negatiu?",
+        "options": [
+          "Atac avançat, cap a la llegada",
+          "Atac atrassat, cap al costat contrari de la llegada",
+          "Que la jugada no es pot fer",
+          "Que cal jugar a la banda curta"
+        ],
+        "answer": 1,
+        "explain": "En zona negativa l'atac és atrassat respecte del reflex de la sortida.",
+        "page": 1
+      },
+      {
+        "q": "Diferencial 7 diamants i prens la bola 2 per dins. Atac i efecte?",
+        "options": [
+          "Atac 12, efecte 1",
+          "Atac 12, efecte 3",
+          "Atac 21, efecte 2",
+          "Atac 15, efecte 1"
+        ],
+        "answer": 0,
+        "explain": "3 × 7 − 9 = 12; per dins es resta un efecte: d'efecte 2 a efecte 1.",
+        "page": 3,
+        "path": [
+          {
+            "x": 0.91,
+            "y": 6.21
+          },
+          {
+            "x": 2.1,
+            "y": 6.35
+          },
+          {
+            "x": 4,
+            "y": 5.85
+          },
+          {
+            "x": 0,
+            "y": 4.35
+          },
+          {
+            "x": 4,
+            "y": 2.4
+          },
+          {
+            "x": 0.3,
+            "y": 0.38
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.26,
+            "y": 6.48,
+            "c": "red"
+          },
+          {
+            "x": 0.26,
+            "y": 0.35,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Diferencial 8 diamants i prens la bola 2 per fora. Atac i efecte?",
+        "options": [
+          "Atac 15, efecte 1",
+          "Atac 15, efecte 3",
+          "Atac 24, efecte 2",
+          "Atac 12, efecte 3"
+        ],
+        "answer": 1,
+        "explain": "3 × 8 − 9 = 15; per fora s'afegeix un efecte: efecte 3.",
+        "page": 3,
+        "path": [
+          {
+            "x": 1.66,
+            "y": 7.6
+          },
+          {
+            "x": 2.25,
+            "y": 7.05
+          },
+          {
+            "x": 4,
+            "y": 6.55
+          },
+          {
+            "x": 0,
+            "y": 4.45
+          },
+          {
+            "x": 4,
+            "y": 2.6
+          },
+          {
+            "x": 0.38,
+            "y": 0.3
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.36,
+            "y": 6.95,
+            "c": "red"
+          },
+          {
+            "x": 0.36,
+            "y": 0.27,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Quin efecte és la base del sistema en posició de bricol?",
+        "options": [
+          "Sense efecte",
+          "Efecte 1",
+          "Efecte 2",
+          "Efecte 4"
+        ],
+        "answer": 2,
+        "explain": "El PDF fa servir l'efecte 2 com a base en bricol.",
+        "page": 1
+      }
+    ]
+  }
+}

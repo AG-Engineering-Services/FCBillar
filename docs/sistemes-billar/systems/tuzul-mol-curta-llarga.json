@@ -1,0 +1,789 @@
+{
+  "id": "tuzul-mol-curta-llarga",
+  "name": "Sistema Plus-8: mètode de Tüzül/Mol (3a part)",
+  "group": "Sistema Plus",
+  "attributed_to": "Tüzül / Mol (exposat per José Lazo)",
+  "pages": [
+    194,
+    203
+  ],
+  "purpose": "Atac a la banda curta per arribar a la banda llarga de sortida, sortint des d'aquesta llarga o des de la curta oposada.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-L (curta, llarga dreta, llarga esquerra) o K-L-K quan la llegada passa a la curta",
+    "effect": "efecte 3 a l'assaig, del costat de la segona banda",
+    "stroke": null,
+    "ball": "en bola primer, línia a uns 3 cm de la bola 2"
+  },
+  "formula": "Valor de la mesa = Atac + Llegada − Sortida; Atac = Valor de la mesa + Sortida − Llegada (valor 25 amb efecte 3)",
+  "steps": [
+    "Calibra: des de la cantonada (sortida 0) ataca la cantonada superior dreta (atac 0) amb efecte 3; si arriba al 25 de llegada, valor = 0 + 25 − 0 = 25.",
+    "Llegeix la sortida a la llarga esquerra (0–25) o a la curta inferior (valors negatius −5, −15, −25).",
+    "Llegeix la llegada a la llarga esquerra (0–50, escala interior del drap) o a la curta inferior (−10, −20).",
+    "Calcula Atac = 25 + Sortida − Llegada, respectant els signes negatius."
+  ],
+  "numberings": [
+    {
+      "name": "Atac (banda curta superior)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 1.5,
+          "y": 0,
+          "v": 50
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 40
+        },
+        {
+          "x": 2.5,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        }
+      ],
+      "note": "Dibuix vertical, sense girar. 20 punts per diamant, començant a la cantonada superior dreta. És la numeració pròpia d'aquest mètode (p. 194–203): 10 punts per mig diamant, del 0 al racó dret fins al 50 a x=1,5, i no la del Tüzül de referència (10 per diamant, 40 al racó esquerre)."
+    },
+    {
+      "name": "Sortida (banda llarga esquerra)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 2.5
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 7.5
+        },
+        {
+          "x": 0,
+          "y": 5.5,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 12.5
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 17.5
+        },
+        {
+          "x": 0,
+          "y": 3.5,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 25
+        }
+      ],
+      "note": "Escala exterior (diamants). El 10 només apareix rotulat en dos exemples (p. 202–203)."
+    },
+    {
+      "name": "Sortida (banda curta inferior)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 1,
+          "y": 8,
+          "v": -5
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": -15
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": -25
+        }
+      ],
+      "note": "Valors negatius; el 0 és la cantonada inferior esquerra."
+    },
+    {
+      "name": "Llegada (banda llarga esquerra, escala interior)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 6.5,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 5.5,
+          "v": 25
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4.5,
+          "v": 35
+        },
+        {
+          "x": 0,
+          "y": 4.25,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 45
+        },
+        {
+          "x": 0,
+          "y": 3.75,
+          "v": 50
+        }
+      ],
+      "note": "Rètol 'Números de llegada' al drap. El 15 no està rotulat a l'esquema, però els exemples hi arriben (a mig camí entre 10 i 20)."
+    },
+    {
+      "name": "Llegada (banda curta inferior, escala interior)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 1.5,
+          "y": 8,
+          "v": -10
+        },
+        {
+          "x": 2.5,
+          "y": 8,
+          "v": -20
+        }
+      ]
+    }
+  ],
+  "corrections": [
+    "Assaig amb efecte 3: valor 25. En taules que 'quadren' es pot arribar a 27 o 28, i en taules que 'allarguen' a uns 23."
+  ],
+  "examples": [
+    {
+      "text": "Calibratge efecte 3: sortida 0, atac 0, llegada 25 → valor 25",
+      "page": 195,
+      "path": [
+        {
+          "x": 0,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 5.5
+        }
+      ]
+    },
+    {
+      "text": "Atac = 25 + 20 − 15 = 30",
+      "page": 196,
+      "path": [
+        {
+          "x": 0.23,
+          "y": 2.78
+        },
+        {
+          "x": 2.5,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.04
+        },
+        {
+          "x": 0,
+          "y": 6.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.17,
+          "y": 6.84,
+          "c": "yellow"
+        },
+        {
+          "x": 0.34,
+          "y": 6.77,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Atac = 25 + 25 − 35 = 15",
+      "page": 197,
+      "path": [
+        {
+          "x": 0.32,
+          "y": 2.53
+        },
+        {
+          "x": 3.25,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.63
+        },
+        {
+          "x": 0,
+          "y": 4.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.22,
+          "y": 4.82,
+          "c": "yellow"
+        },
+        {
+          "x": 0.4,
+          "y": 4.75,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida de la curta: atac = 25 − 5 − 10 = 10 (sortida −5, llegada 10)",
+      "page": 198,
+      "path": [
+        {
+          "x": 1.29,
+          "y": 7.36
+        },
+        {
+          "x": 3.5,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.43
+        },
+        {
+          "x": 0,
+          "y": 7
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.14,
+          "y": 7.32,
+          "c": "yellow"
+        },
+        {
+          "x": 0.29,
+          "y": 7.2,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer: atac = 25 + 25 − 30 = 20",
+      "page": 199,
+      "path": [
+        {
+          "x": 1.01,
+          "y": 1.99
+        },
+        {
+          "x": 1.13,
+          "y": 1.54
+        },
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.78
+        },
+        {
+          "x": 0,
+          "y": 5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.99,
+          "y": 1.43,
+          "c": "yellow"
+        },
+        {
+          "x": 0.23,
+          "y": 5.39,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer: atac = 25 + 12,5 − 20 = 17,5",
+      "page": 200,
+      "path": [
+        {
+          "x": 2.5,
+          "y": 7.31
+        },
+        {
+          "x": 2.36,
+          "y": 0.89
+        },
+        {
+          "x": 3.125,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.89
+        },
+        {
+          "x": 0,
+          "y": 6
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.19,
+          "y": 0.8,
+          "c": "yellow"
+        },
+        {
+          "x": 1.03,
+          "y": 7.8,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer: atac = 25 + 20 − 20 = 25",
+      "page": 201,
+      "path": [
+        {
+          "x": 1.46,
+          "y": 1.73
+        },
+        {
+          "x": 1.68,
+          "y": 1.23
+        },
+        {
+          "x": 2.75,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.86
+        },
+        {
+          "x": 0,
+          "y": 6
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.54,
+          "y": 0.86,
+          "c": "yellow"
+        },
+        {
+          "x": 0.3,
+          "y": 6.58,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, llegada a la curta: atac = 25 + 10 + 10 = 45 (sortida 10, llegada −10)",
+      "page": 202,
+      "path": [
+        {
+          "x": 0.62,
+          "y": 4.64
+        },
+        {
+          "x": 0.6,
+          "y": 3.71
+        },
+        {
+          "x": 1.75,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 3.09
+        },
+        {
+          "x": 1.5,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.42,
+          "y": 2.91,
+          "c": "yellow"
+        },
+        {
+          "x": 1.1,
+          "y": 7.56,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer: atac = 25 + 25 − 15 = 35",
+      "page": 203,
+      "path": [
+        {
+          "x": 0.29,
+          "y": 1.5
+        },
+        {
+          "x": 0.89,
+          "y": 1.43
+        },
+        {
+          "x": 2.25,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.3
+        },
+        {
+          "x": 0,
+          "y": 6.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.03,
+          "y": 1.53,
+          "c": "yellow"
+        },
+        {
+          "x": 0.29,
+          "y": 6.97,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Com en tots els mètodes de Tüzül, primer es calcula el valor de la mesa."
+  ],
+  "quotes": [
+    "EN MESAS QUE CUADREN SE PUEDEN ALCANZAR 27 O 28, Y EN MESAS QUE ALARGUEN APROXIMADAMENTE 23"
+  ],
+  "uncertain": [
+    "El llibre no explica el cop (velocitat) ni dona valors de mesa per a altres efectes, només per a l'efecte 3.",
+    "El rètol 'Números de llegada' apunta a l'escala interior del drap; que −10/−20 de la curta inferior siguin llegades es dedueix de l'exemple de la p. 202.",
+    "No s'explica qui és 'Mol'. Camins aproximats, mesurats sobre els dibuixos."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida (banda llarga esquerra)"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac (banda curta superior)"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada (banda llarga esquerra, escala interior)"
+        }
+      },
+      "inputs": {
+        "S": [
+          0,
+          2.5,
+          7.5,
+          10,
+          12.5,
+          17.5,
+          20,
+          25
+        ],
+        "L": [
+          0,
+          10,
+          15,
+          20,
+          25,
+          30,
+          35,
+          40,
+          45,
+          50
+        ],
+        "A": [
+          0,
+          10,
+          15,
+          17.5,
+          20,
+          25,
+          30,
+          35,
+          40,
+          45,
+          50
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "25 + S - L",
+          "label": "Trobar l'atac"
+        },
+        {
+          "solve": "L",
+          "expr": "25 + S - A",
+          "label": "On arribarà"
+        }
+      ],
+      "valid": "A >= 0 && A <= 50 && L >= 0 && L <= 50",
+      "round": 1,
+      "note": "Valor de la mesa 25 (efecte 3). Només sortides i llegades de la llarga esquerra; les negatives de la curta queden fora del generador. El traç generat no es dibuixa: la segona banda no té numeració i una línia directa atac–llegada seria falsa."
+    },
+    "quiz": [
+      {
+        "q": "Assaig amb efecte 3 des de la cantonada (sortida 0) a l'atac 0, arribada al 25. Valor de la mesa?",
+        "options": [
+          "12,5",
+          "50",
+          "25",
+          "0"
+        ],
+        "answer": 2,
+        "explain": "0 + 25 − 0 = 25.",
+        "page": 195,
+        "path": [
+          {
+            "x": 0,
+            "y": 8
+          },
+          {
+            "x": 4,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 5.5
+          }
+        ]
+      },
+      {
+        "q": "En una taula que 'quadra', quin valor pot donar aquest assaig?",
+        "options": [
+          "Uns 23",
+          "35",
+          "27 o 28",
+          "15"
+        ],
+        "answer": 2,
+        "explain": "El llibre: en taules que quadren 27 o 28, i en taules que allarguen uns 23.",
+        "page": 195
+      },
+      {
+        "q": "Sortida 20, llegada 15. On ataques?",
+        "options": [
+          "10",
+          "40",
+          "20",
+          "30"
+        ],
+        "answer": 3,
+        "explain": "25 + 20 − 15 = 30.",
+        "page": 196,
+        "path": [
+          {
+            "x": 0.23,
+            "y": 2.78
+          },
+          {
+            "x": 2.5,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.04
+          },
+          {
+            "x": 0,
+            "y": 6.5
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.17,
+            "y": 6.84,
+            "c": "yellow"
+          },
+          {
+            "x": 0.34,
+            "y": 6.77,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida −5 (curta inferior), llegada 10. On ataques?",
+        "options": [
+          "10",
+          "20",
+          "30",
+          "0"
+        ],
+        "answer": 0,
+        "explain": "25 + (−5) − 10 = 10.",
+        "page": 198,
+        "path": [
+          {
+            "x": 1.29,
+            "y": 7.36
+          },
+          {
+            "x": 3.5,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.43
+          },
+          {
+            "x": 0,
+            "y": 7
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.14,
+            "y": 7.32,
+            "c": "yellow"
+          },
+          {
+            "x": 0.29,
+            "y": 7.2,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 10, llegada −10 a la curta inferior. On ataques?",
+        "options": [
+          "45",
+          "35",
+          "25",
+          "5"
+        ],
+        "answer": 0,
+        "explain": "25 + 10 − (−10) = 45.",
+        "page": 202,
+        "path": [
+          {
+            "x": 0.62,
+            "y": 4.64
+          },
+          {
+            "x": 0.6,
+            "y": 3.71
+          },
+          {
+            "x": 1.75,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3.09
+          },
+          {
+            "x": 1.5,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.42,
+            "y": 2.91,
+            "c": "yellow"
+          },
+          {
+            "x": 1.1,
+            "y": 7.56,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "A quina banda arriba la bola en aquesta 3a part?",
+        "options": [
+          "Sempre a la curta inferior",
+          "A la banda llarga de sortida",
+          "A la curta d'atac",
+          "A la llarga d'atac"
+        ],
+        "answer": 1,
+        "explain": "S'ataca la curta per arribar a la banda llarga, sortint d'aquesta o de la curta oposada.",
+        "page": 194
+      }
+    ]
+  }
+}

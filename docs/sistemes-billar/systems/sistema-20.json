@@ -1,0 +1,347 @@
+{
+  "id": "sistema-20",
+  "name": "Sistema 20",
+  "group": "Atacs a banda curta",
+  "attributed_to": "Villora i Serralta",
+  "pages": [
+    97,
+    97
+  ],
+  "purpose": "Atac a banda curta sortint de la banda llarga per arribar a la banda curta oposada amb efecte 1 (K-L-K).",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K",
+    "effect": "efecte 1, ben marcat",
+    "stroke": "cop viu per mantenir l'efecte",
+    "ball": "amb bola 2: funciona amb les boles 1 i 2 tangents"
+  },
+  "formula": "Atac = Llegada + Sortida",
+  "steps": [
+    "Llegeix la sortida a la banda llarga esquerra (25 a −10).",
+    "Tria la llegada a la banda curta inferior (0 a 30).",
+    "Suma llegada + sortida i ataca aquest número de la banda curta superior.",
+    "Juga amb efecte 1 ben marcat i cop viu."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": 25
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 5
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": -5
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": -10
+        }
+      ],
+      "note": "Dibuix ja en vertical. Banda llarga esquerra; el −10 és el racó inferior."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 1,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        }
+      ],
+      "note": "Banda curta superior, 0 al racó dret."
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 10
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 25
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 30
+        }
+      ],
+      "note": "Banda curta inferior; fixa't que del 20 al 30 només hi ha 5 punts per diamant."
+    }
+  ],
+  "corrections": [
+    "Atacant la bola 2 amb les boles enfrontades (no tangents), el punt d'atac es desplaça: juga sense efecte o amb un matís de contrari, desplaçant l'atac 5 o 10 punts."
+  ],
+  "examples": [
+    {
+      "text": "Sortida 5, llegada 10 → atac 15",
+      "page": 97,
+      "path": [
+        {
+          "x": 0.15,
+          "y": 4.0
+        },
+        {
+          "x": 2.3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.5
+        },
+        {
+          "x": 1,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.75,
+          "y": 7.75,
+          "c": "yellow"
+        },
+        {
+          "x": 0.9,
+          "y": 7.6,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Efecte ben marcat perquè la bola no giri massa de pressa."
+  ],
+  "quotes": [],
+  "uncertain": [
+    "El text no diu cap a quin costat va el desplaçament de 5 o 10 punts amb boles enfrontades."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        }
+      },
+      "inputs": {
+        "S": [
+          -10,
+          -5,
+          0,
+          5,
+          10,
+          15,
+          20,
+          25
+        ],
+        "L": [
+          0,
+          10,
+          20,
+          25,
+          30
+        ],
+        "A": [
+          0,
+          5,
+          10,
+          15,
+          20,
+          25,
+          30
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "L + S"
+        },
+        {
+          "solve": "L",
+          "expr": "A - S"
+        }
+      ],
+      "valid": "A >= 0 && A <= 30 && L >= 0 && L <= 30",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Efecte 1 ben marcat i cop viu."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 5, llegada 10. Atac?",
+        "options": [
+          "15",
+          "5",
+          "−5",
+          "50"
+        ],
+        "answer": 0,
+        "explain": "Atac = llegada + sortida = 10 + 5 = 15.",
+        "page": 97,
+        "path": [
+          {
+            "x": 0.15,
+            "y": 4.0
+          },
+          {
+            "x": 2.3,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.5
+          },
+          {
+            "x": 1,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.75,
+            "y": 7.75,
+            "c": "yellow"
+          },
+          {
+            "x": 0.9,
+            "y": 7.6,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quin efecte demana el sistema 20?",
+        "options": [
+          "Efecte 1 ben marcat",
+          "Sense efecte",
+          "Efecte màxim",
+          "Efecte contrari"
+        ],
+        "answer": 0,
+        "explain": "Se desarrolla con efecto 1, bien marcado.",
+        "page": 97
+      },
+      {
+        "q": "Quin cop?",
+        "options": [
+          "Viu, per mantenir l'efecte",
+          "Molt retingut",
+          "Massé",
+          "Lent i penetrat"
+        ],
+        "answer": 0,
+        "explain": "El golpe vivo para mantener el efecto.",
+        "page": 97
+      },
+      {
+        "q": "Atacant la bola 2 amb les boles enfrontades, què fas?",
+        "options": [
+          "Sense efecte o matís de contrari, desplaçant l'atac 5 o 10 punts",
+          "Afegeixes efecte màxim",
+          "Res, el sistema no canvia",
+          "Ataques sempre el racó"
+        ],
+        "answer": 0,
+        "explain": "Per desplaçament del punt d'atac, sense efecte o matís de contrari i 5 o 10 punts.",
+        "page": 97
+      },
+      {
+        "q": "Sortida −10 (racó inferior) i vols llegada 30. Atac?",
+        "options": [
+          "20",
+          "40",
+          "−40",
+          "10"
+        ],
+        "answer": 0,
+        "explain": "30 + (−10) = 20.",
+        "page": 97
+      },
+      {
+        "q": "Quina és la llegada que val 25?",
+        "options": [
+          "El 3r diamant de la curta inferior",
+          "El centre de la curta inferior",
+          "El racó dret",
+          "El 1r diamant"
+        ],
+        "answer": 0,
+        "explain": "La llegada va 0, 10, 20, 25, 30: el 25 és al 3r diamant.",
+        "page": 97
+      }
+    ]
+  }
+}

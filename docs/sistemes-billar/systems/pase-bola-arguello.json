@@ -1,0 +1,753 @@
+{
+ "id": "pase-bola-arguello",
+ "name": "Pase bola pel llarg (patró d'Argüello)",
+ "group": "Pase bola",
+ "attributed_to": "Argüello",
+ "pages": [
+  40,
+  45
+ ],
+ "purpose": "Pase bola (bola fina a la bola 2 enganxada a la banda curta) que fa el viatge pel llarg de la taula fins a la banda curta oposada; diu quin efecte cal.",
+ "shot": {
+  "first_cushion": "bola",
+  "cushions": "bola 2 - C (curta de dalt) - L (llarga dreta) - C (curta de baix)",
+  "effect": "efectes clàssics 0, 1, 2, 3 i 4 alts (el 4 no tant alt)",
+  "stroke": "cop suau i allargat",
+  "ball": "sempre bola fina"
+ },
+ "formula": "Efecte = Llegada + correcció bola 1 + correcció bola 2",
+ "steps": [
+  "Posició patró: bola 2 enganxada a la banda curta de dalt al diamant 3 (valor 0); la bola 1 apunta (allargant la línia de tir) al diamant 5 de la llarga esquerra (valor 0).",
+  "Mira on vols arribar a la banda curta de baix: el valor de llegada és l'efecte del patró (Ef.4 al racó esquerre, Ef.3, Ef.2, Ef.1, Ef.0 al racó dret, un diamant cada efecte).",
+  "1a rectificació: allarga la línia bola 1 → bola 2 fins a la llarga esquerra i llegeix el valor (−1 per cada diamant cap amunt, +1 per cada diamant cap avall des del diamant 5).",
+  "2a rectificació: si la bola 2 no és al diamant 3 de la curta, suma +1 per cada mig diamant que l'allunyes del racó dret i resta 1 per cada mig diamant que l'hi acostes.",
+  "3a rectificació: si la bola 2 està separada de la curta, resta 1 efecte per cada 2 diamants de separació (−0,5 per 1 diamant).",
+  "Suma els valors: el resultat és l'efecte a donar (pot sortir mig efecte, p. ex. +1,5)."
+ ],
+ "numberings": [
+  {
+   "name": "Llegada (efecte del patró)",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 0,
+     "y": 8,
+     "v": 4
+    },
+    {
+     "x": 1,
+     "y": 8,
+     "v": 3
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 2
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 1
+    },
+    {
+     "x": 4,
+     "y": 8,
+     "v": 0
+    }
+   ],
+   "note": "El dibuix ja és vertical: no s'ha girat. La bola 2 és a la curta de dalt (y=0) i la bola 1 arriba a la curta de baix (y=8). Al llibre surten com a Ef.4 ... Ef.0."
+  },
+  {
+   "name": "Bola 1 (1a rectificació)",
+   "role": "altre",
+   "points": [
+    {
+     "x": 0,
+     "y": 2,
+     "v": -3
+    },
+    {
+     "x": 0,
+     "y": 3,
+     "v": -2
+    },
+    {
+     "x": 0,
+     "y": 4,
+     "v": -1
+    },
+    {
+     "x": 0,
+     "y": 5,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 6,
+     "v": 1
+    },
+    {
+     "x": 0,
+     "y": 7,
+     "v": 2
+    },
+    {
+     "x": 0,
+     "y": 8,
+     "v": 3
+    }
+   ],
+   "note": "Punt on la línia bola 1 → bola 2, allargada cap enrere, toca la llarga esquerra."
+  },
+  {
+   "name": "Bola 2 sobre la curta (2a rectificació)",
+   "role": "altre",
+   "points": [
+    {
+     "x": 1,
+     "y": 0,
+     "v": 4
+    },
+    {
+     "x": 1.5,
+     "y": 0,
+     "v": 3
+    },
+    {
+     "x": 2,
+     "y": 0,
+     "v": 2
+    },
+    {
+     "x": 2.5,
+     "y": 0,
+     "v": 1
+    },
+    {
+     "x": 3,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 3.5,
+     "y": 0,
+     "v": -1
+    }
+   ],
+   "note": "Posició de la bola 2 enganxada a la curta de dalt; un valor per cada mig diamant."
+  },
+  {
+   "name": "Separació de la bola 2 (3a rectificació)",
+   "role": "altre",
+   "points": [
+    {
+     "x": 4,
+     "y": 1,
+     "v": -0.5
+    },
+    {
+     "x": 4,
+     "y": 2,
+     "v": -1
+    }
+   ],
+   "note": "Distància de la bola 2 a la curta de dalt, llegida a la llarga dreta. Amb la bola separada, el valor de la 2a rectificació es llegeix a la vertical de la bola."
+  }
+ ],
+ "corrections": [
+  "Bola 1: −1 efecte per cada diamant que la línia puja per sobre del diamant 5 de la llarga esquerra; +1 per cada diamant que baixa (de −3 al diamant 2 fins a +3 al racó de baix).",
+  "Bola 2 a la curta: +1 per cada mig diamant que s'allunya del racó dret, −1 per cada mig diamant que s'hi acosta (de +4 al diamant 1 fins a −1 al diamant 3,5).",
+  "Bola 2 separada de la curta: −1 per cada 2 diamants de separació (−0,5 a 1 diamant, −1 a 2 diamants)."
+ ],
+ "examples": [
+  {
+   "text": "Patró: bola 2 al diamant 3 de la curta, bola 1 a 0. Amb Ef.0 la bola 1 arriba al racó de baix a la dreta; amb Ef.4, al racó de baix a l'esquerra.",
+   "page": 40,
+   "path": [
+    {
+     "x": 0.25,
+     "y": 4.1
+    },
+    {
+     "x": 2.95,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 1.4
+    },
+    {
+     "x": 0.1,
+     "y": 7.9
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.06,
+     "y": 0.13,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "1a rectificació: llegada 0 (racó dret). Bola 1 a −2 → efecte −2; bola 1 a +1 → efecte +1. Totes dues arriben al mateix lloc.",
+   "page": 41,
+   "path": [
+    {
+     "x": 0.17,
+     "y": 2.6
+    },
+    {
+     "x": 2.94,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 7.4
+    },
+    {
+     "x": 3.9,
+     "y": 8
+    },
+    {
+     "x": 3.42,
+     "y": 6.92
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.07,
+     "y": 0.21,
+     "c": "yellow"
+    },
+    {
+     "x": 3.42,
+     "y": 6.92,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "2a rectificació: llegada 0, bola 1 a 0. Bola 2 a +2 → efecte +2; bola 2 a +1 → efecte +1.",
+   "page": 42,
+   "path": [
+    {
+     "x": 0.39,
+     "y": 3.47
+    },
+    {
+     "x": 1.94,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 7.95
+    },
+    {
+     "x": 3.42,
+     "y": 6.92
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.09,
+     "y": 0.19,
+     "c": "yellow"
+    },
+    {
+     "x": 2.6,
+     "y": 0.19,
+     "c": "yellow"
+    },
+    {
+     "x": 3.42,
+     "y": 6.92,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "3a rectificació: bola 2 a la vertical del 0 i separada 2 diamants (−1); bola 1 a 0, llegada 0 → efecte −1.",
+   "page": 43,
+   "path": [
+    {
+     "x": 0.3,
+     "y": 4.4
+    },
+    {
+     "x": 2.85,
+     "y": 2.0
+    },
+    {
+     "x": 3.0,
+     "y": 0
+    },
+    {
+     "x": 3.9,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 7.4
+    },
+    {
+     "x": 3.42,
+     "y": 6.94
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.0,
+     "y": 2.02,
+     "c": "yellow"
+    },
+    {
+     "x": 3.42,
+     "y": 6.94,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Llegada +2, bola 1 −1, bola 2 +1 → efecte = +2 − 1 + 1 = +2.",
+   "page": 44,
+   "path": [
+    {
+     "x": 0.17,
+     "y": 3.28
+    },
+    {
+     "x": 2.47,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 3.6
+    },
+    {
+     "x": 2,
+     "y": 8
+    },
+    {
+     "x": 1.5,
+     "y": 7.47
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.58,
+     "y": 0.17,
+     "c": "yellow"
+    },
+    {
+     "x": 1.5,
+     "y": 7.47,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Llegada +3, bola 1 −1,5, bola 2 +1 − 1 (separada 2 diamants) = 0 → efecte = +3 − 1,5 + 0 = +1,5.",
+   "page": 45,
+   "path": [
+    {
+     "x": 0.24,
+     "y": 3.16
+    },
+    {
+     "x": 2.33,
+     "y": 2.0
+    },
+    {
+     "x": 3.13,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 1.93
+    },
+    {
+     "x": 1.0,
+     "y": 8
+    },
+    {
+     "x": 0.19,
+     "y": 6.94
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.5,
+     "y": 2.0,
+     "c": "yellow"
+    },
+    {
+     "x": 0.19,
+     "y": 6.94,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Sempre bola fina, cop suau i allargat.",
+  "Cada efecte desplaça l'arribada un diamant a la curta de baix.",
+  "Aquest és el pase bola pel llarg; el llibre diu que abans ja havia vist un patró d'Argüello pel través (ample) de la taula.",
+  "Norma general (PDF del Club Billar València): pren sempre poca bola per no arriscar-te a un corregut o semicorregut."
+ ],
+ "quotes": [
+  "Siempre se toma bola fina con golpe suave y alargado.",
+  "por cada medio rombo de desplazamiento de la bola 2 sobre la banda corta sumar un efecto si la alejamos del rincón o restar si la acercamos."
+ ],
+ "uncertain": [
+  "El pase bola d'Argüello «en l'ample» que el llibre dona per vist no és al recull; és al PDF «Pasebola Argüello» del Club Billar València (fitxa «Pase bola sobre banda llarga-1»).",
+  "El llibre no diu què vol dir un efecte negatiu (p. ex. −2 a la p41); probablement contraefecte, però no ho explica.",
+  "La p40 diu 'efectos 0, 1, 2, 3 y 4 altos menos el 4 lógicamente'; s'interpreta que l'efecte 4 no es pot donar tan alt.",
+  "Els punts de la 2a banda (llarga dreta) de cada efecte al patró de la p40 són aproximats (aprox. y=1,4 per Ef.4, 2,0 per Ef.3, 2,8 per Ef.2, 4,5 per Ef.1, prop del racó per Ef.0).",
+  "A la 3a rectificació, el valor de la bola 2 separada es llegeix a la vertical de la bola sobre l'escala de la curta (exemple de la p45: +1 − 1); el text no ho diu, es dedueix del dibuix.",
+  "Al calculador, la línia U → D → L és un esquema: el recorregut real passa per la llarga dreta, que el sistema no numera."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada (efecte del patró)"
+    },
+    "U": {
+     "label": "Bola 1",
+     "numbering": "Bola 1 (1a rectificació)"
+    },
+    "D": {
+     "label": "Bola 2 sobre la curta",
+     "numbering": "Bola 2 sobre la curta (2a rectificació)"
+    },
+    "P": {
+     "label": "Separació de la bola 2",
+     "values": [
+      0,
+      -0.5,
+      -1
+     ]
+    },
+    "E": {
+     "label": "Efecte",
+     "values": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+     ]
+    }
+   },
+   "inputs": {
+    "L": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "U": [
+     -3,
+     -2,
+     -1,
+     0,
+     1,
+     2,
+     3
+    ],
+    "D": [
+     4,
+     3,
+     2,
+     1,
+     0,
+     -1
+    ],
+    "P": [
+     0,
+     0,
+     0,
+     -0.5,
+     -1
+    ],
+    "E": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ]
+   },
+   "relations": [
+    {
+     "solve": "E",
+     "expr": "L + U + D + P",
+     "label": "quin efecte cal"
+    },
+    {
+     "solve": "L",
+     "expr": "E - U - D - P",
+     "label": "on arribarà amb aquest efecte"
+    }
+   ],
+   "valid": "E >= -1 && E <= 4 && L >= 0 && L <= 4",
+   "round": 0.5,
+   "path": [
+    "U",
+    "D",
+    "L"
+   ],
+   "note": "El dibuix va del punt de la bola 1 a la llarga esquerra (línia de tir allargada) a la bola 2 i a la llegada; s'omet la 2a banda (llarga dreta). Amb separació P ≠ 0 la bola 2 no és enganxada a la curta."
+  },
+  "quiz": [
+   {
+    "q": "Quina presa i quin cop demana sempre aquest pase bola?",
+    "options": [
+     "Bola fina, cop suau i allargat",
+     "Mitja bola, cop sec",
+     "Molta bola, cop baix",
+     "Quart de bola, cop fort"
+    ],
+    "answer": 0,
+    "explain": "El llibre: 'Siempre se toma bola fina con golpe suave y alargado'.",
+    "page": 40
+   },
+   {
+    "q": "Posició patró (bola 1 a 0, bola 2 a 0). Vols arribar al diamant 2 de la curta de baix. Quin efecte?",
+    "options": [
+     "Efecte 2",
+     "Efecte 0",
+     "Efecte 4",
+     "Efecte 1"
+    ],
+    "answer": 0,
+    "explain": "Cada efecte és un diamant a la curta de baix: Ef.2 arriba al diamant 2.",
+    "page": 40,
+    "path": [
+     {
+      "x": 0.25,
+      "y": 4.1
+     },
+     {
+      "x": 2.95,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 2.8
+     },
+     {
+      "x": 2,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.06,
+      "y": 0.13,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "La línia de la bola 1 toca la llarga esquerra 2 diamants per sobre del patró. Quina correcció?",
+    "options": [
+     "−2 efectes",
+     "+2 efectes",
+     "−1 efecte",
+     "Cap"
+    ],
+    "answer": 0,
+    "explain": "1a rectificació: −1 per cada diamant cap amunt, +1 cap avall.",
+    "page": 41,
+    "path": [
+     {
+      "x": 0.17,
+      "y": 2.6
+     },
+     {
+      "x": 2.94,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 7.4
+     },
+     {
+      "x": 3.9,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.07,
+      "y": 0.21,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Movem la bola 2 mig diamant a la curta, allunyant-la del racó. Què fem?",
+    "options": [
+     "Sumar 1 efecte",
+     "Restar 1 efecte",
+     "Sumar 2 efectes",
+     "Restar mig efecte"
+    ],
+    "answer": 0,
+    "explain": "2a rectificació: +1 per cada mig diamant que l'allunyes del racó, −1 si l'hi acostes.",
+    "page": 42,
+    "path": [
+     {
+      "x": 0.45,
+      "y": 3.5
+     },
+     {
+      "x": 2.44,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 7.95
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.6,
+      "y": 0.19,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "La bola 2 està separada 2 diamants de la banda curta. Quina correcció?",
+    "options": [
+     "−1 efecte",
+     "+1 efecte",
+     "−2 efectes",
+     "−0,5 efectes"
+    ],
+    "answer": 0,
+    "explain": "3a rectificació: −1 efecte per cada 2 diamants de separació.",
+    "page": 43,
+    "path": [
+     {
+      "x": 0.3,
+      "y": 4.4
+     },
+     {
+      "x": 2.85,
+      "y": 2.0
+     },
+     {
+      "x": 3.0,
+      "y": 0
+     },
+     {
+      "x": 3.9,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.0,
+      "y": 2.02,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Llegada +2, bola 1 −1, bola 2 +1. Quin efecte?",
+    "options": [
+     "+2",
+     "+4",
+     "+1",
+     "0"
+    ],
+    "answer": 0,
+    "explain": "+2 − 1 + 1 = +2 (exemple del llibre).",
+    "page": 44,
+    "path": [
+     {
+      "x": 0.17,
+      "y": 3.28
+     },
+     {
+      "x": 2.47,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 3.6
+     },
+     {
+      "x": 2,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.58,
+      "y": 0.17,
+      "c": "yellow"
+     },
+     {
+      "x": 1.5,
+      "y": 7.47,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Llegada +3, bola 1 −1,5, bola 2 a +1 però separada 2 diamants. Quin efecte?",
+    "options": [
+     "+1,5",
+     "+2,5",
+     "+3",
+     "+0,5"
+    ],
+    "answer": 0,
+    "explain": "Bola 2: +1 − 1 = 0. Efecte = +3 − 1,5 + 0 = +1,5.",
+    "page": 45,
+    "path": [
+     {
+      "x": 0.24,
+      "y": 3.16
+     },
+     {
+      "x": 2.33,
+      "y": 2.0
+     },
+     {
+      "x": 3.13,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 1.93
+     },
+     {
+      "x": 1.0,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.5,
+      "y": 2.0,
+      "c": "yellow"
+     },
+     {
+      "x": 0.19,
+      "y": 6.94,
+      "c": "red"
+     }
+    ]
+   }
+  ]
+ }
+}

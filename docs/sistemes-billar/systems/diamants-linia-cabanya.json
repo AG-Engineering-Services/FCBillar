@@ -1,0 +1,339 @@
+{
+  "id": "diamants-linia-cabanya",
+  "name": "Arribada per la línia de cabanya",
+  "group": "Teoria de diamants",
+  "attributed_to": null,
+  "pages": [
+    296,
+    299
+  ],
+  "purpose": "Alternativa ràpida a la mesa petita: llegir l'arribada on la línia d'arribada imaginada creua la línia de cabanya (diamant 2) en un curta-llarga-llarga des de la cabanya.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-L",
+    "effect": "efecte favorable (no especificat)",
+    "stroke": "no especificat",
+    "ball": null
+  },
+  "formula": "Atac = Sortida − Arribada (arribada llegida a la línia de cabanya)",
+  "steps": [
+    "Posa't més o menys a l'altura de les boles 2 i 3 i visualitza la línia d'arribada que creus correcta.",
+    "Mira on creua aquesta línia la línia de cabanya (la del diamant 2, y=2) i llegeix-ne el número d'arribada (a l'exemple, gairebé 65).",
+    "Torna a la bola jugadora i busca la línia sortida menys atac que dona aquesta arribada (70 − 5 = 65).",
+    "Col·loca't, apunta i tira a l'atac (el 5)."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 0.5,
+          "v": 90
+        },
+        {
+          "x": 0,
+          "y": 0.75,
+          "v": 80
+        },
+        {
+          "x": 0,
+          "y": 1.0,
+          "v": 70
+        },
+        {
+          "x": 0,
+          "y": 1.5,
+          "v": 60
+        },
+        {
+          "x": 0,
+          "y": 2.0,
+          "v": 50
+        }
+      ],
+      "note": "Dibuix en vertical com al llibre, sense girar."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 1.5,
+          "y": 0,
+          "v": 60
+        },
+        {
+          "x": 1.75,
+          "y": 0,
+          "v": 50
+        },
+        {
+          "x": 2.0,
+          "y": 0,
+          "v": 40
+        },
+        {
+          "x": 2.5,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 3.0,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 3.75,
+          "y": 0,
+          "v": 5
+        },
+        {
+          "x": 4.0,
+          "y": 0,
+          "v": 0
+        }
+      ],
+      "note": "Banda curta de dalt; el 5 només surt a les pàgines 298-299."
+    },
+    {
+      "name": "Arribada a la línia de cabanya",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 1.25,
+          "y": 2,
+          "v": 70
+        },
+        {
+          "x": 1.5,
+          "y": 2,
+          "v": 60
+        },
+        {
+          "x": 1.75,
+          "y": 2,
+          "v": 50
+        },
+        {
+          "x": 2.0,
+          "y": 2,
+          "v": 40
+        },
+        {
+          "x": 2.5,
+          "y": 2,
+          "v": 30
+        },
+        {
+          "x": 3.0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 3.5,
+          "y": 2,
+          "v": 10
+        }
+      ],
+      "note": "Línia imaginària a y=2."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "La línia d'arribada creua la línia de cabanya a 65 → sortida 70, atac 5 (70 − 5 = 65).",
+      "page": 299,
+      "path": [
+        {
+          "x": 1.22,
+          "y": 0.53
+        },
+        {
+          "x": 2.74,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.27
+        },
+        {
+          "x": 0,
+          "y": 2.93
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.23,
+          "y": 3.37,
+          "c": "red"
+        },
+        {
+          "x": 0.38,
+          "y": 3.24,
+          "c": "yellow"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Pel ritme del joc no val la pena perdre temps mesurant distàncies que acaben sent mil·límetres: millor visualitzar i imaginar.",
+    "Si no convenç, hi ha el sistema plus i les posicions patró."
+  ],
+  "quotes": [
+    "miro el punto de cruce de esa línea con la línea de cabaña, en este caso prácticamente es 65.",
+    "Te colocas, limas y disparas al 5."
+  ],
+  "uncertain": [
+    "L'arribada 65 cau entre 60 (x=1.5) i 70 (x=1.25); el punt exacte del creuament és estimat a x≈1.4.",
+    "La numeració d'atac d'aquest gràfic (60 a x=1.5, 50 a 1.75) difereix de la del gràfic de la pàgina 290."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Arribada a la línia de cabanya",
+          "numbering": "Arribada a la línia de cabanya"
+        }
+      },
+      "inputs": {
+        "S": [
+          50,
+          60,
+          70,
+          80,
+          90
+        ],
+        "A": [
+          0,
+          5,
+          10,
+          20,
+          30
+        ],
+        "L": [
+          10,
+          20,
+          30,
+          40,
+          50,
+          60,
+          65,
+          70
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A"
+        }
+      ],
+      "valid": "A >= 0 && A <= 60 && L >= 10 && L <= 70",
+      "round": 0,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Entre l'atac i la línia de cabanya la bola toca la llarga dreta."
+    },
+    "quiz": [
+      {
+        "q": "A quina altura és la «línia de cabanya»?",
+        "options": [
+          "Al diamant 4 (centre)",
+          "Al diamant 2 de les bandes llargues",
+          "Al diamant 1",
+          "Al diamant 6"
+        ],
+        "answer": 1,
+        "explain": "La línia vermella passa pel 50 de sortida, al diamant 2.",
+        "page": 297
+      },
+      {
+        "q": "La línia d'arribada imaginada creua la línia de cabanya a 65. Quina combinació tries?",
+        "options": [
+          "Sortida 60, atac 5",
+          "Sortida 70, atac 15",
+          "Sortida 70, atac 5",
+          "Sortida 80, atac 5"
+        ],
+        "answer": 2,
+        "explain": "70 − 5 = 65.",
+        "page": 298,
+        "path": [
+          {
+            "x": 1.22,
+            "y": 0.53
+          },
+          {
+            "x": 2.74,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.27
+          },
+          {
+            "x": 0,
+            "y": 2.93
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.23,
+            "y": 3.37,
+            "c": "red"
+          },
+          {
+            "x": 0.38,
+            "y": 3.24,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Per què l'autor prefereix aquest mètode al de la mesa petita?",
+        "options": [
+          "Perquè és més exacte",
+          "Perquè no necessita efecte",
+          "Perquè serveix per al retruc",
+          "Per no perdre temps mesurant distàncies de mil·límetres"
+        ],
+        "answer": 3,
+        "explain": "Ho diu pel bé del ritme del joc.",
+        "page": 296
+      },
+      {
+        "q": "Des d'on visualitzes la línia d'arribada?",
+        "options": [
+          "Posat més o menys a l'altura de les boles 2 i 3",
+          "Des de darrere la bola jugadora",
+          "Des de la banda curta de baix",
+          "Des de la cantonada de dalt a la dreta"
+        ],
+        "answer": 0,
+        "explain": "«me pongo más o menos donde está dibujado el jugador».",
+        "page": 297
+      }
+    ]
+  }
+}

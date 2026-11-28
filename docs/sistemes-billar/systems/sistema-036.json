@@ -1,0 +1,472 @@
+{
+  "id": "sistema-036",
+  "name": "Sistema 036 (atac a banda curta)",
+  "group": "Atacs a banda curta",
+  "attributed_to": "Villora i Serralta (Billar a tres bandas - Sistemas)",
+  "pages": [
+    92,
+    94
+  ],
+  "purpose": "Atacar primer la banda curta sortint de la banda llarga per arribar a la banda curta oposada (K-L-K).",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K",
+    "effect": "sense efecte, cop alt",
+    "stroke": "velocitat justa per arribar a la tercera banda, tac pla i cop dolç",
+    "ball": null
+  },
+  "formula": "Atac = Sortida − Llegada",
+  "steps": [
+    "Llegeix la sortida a la banda llarga esquerra prolongant la línia de la bola 1 (2 a 8).",
+    "Tria la llegada a la banda curta inferior (0 a 8).",
+    "Resta: atac = sortida − llegada i apunta a aquest número de la banda curta superior.",
+    "Juga sense efecte, cop alt i velocitat justa."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 2,
+          "v": 2
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 3
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 4
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 5
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 6
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 7
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 8
+        }
+      ],
+      "note": "Dibuix ja en vertical; cap rotació. Banda llarga esquerra, el 8 és el racó inferior."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 2,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 3
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 6
+        }
+      ],
+      "note": "Banda curta superior: 0 al diamant central, 6 al racó dret; 1 punt = 1/3 de diamant."
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 0
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 2
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 4
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 6
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 8
+        }
+      ],
+      "note": "Banda curta inferior, de 0 (racó esquerre) a 8 (racó dret)."
+    }
+  ],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "Sortida 7, llegada 4 → atac 3 (bricola)",
+      "page": 92,
+      "path": [
+        {
+          "x": 0.35,
+          "y": 6.2
+        },
+        {
+          "x": 2.9,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.6
+        },
+        {
+          "x": 2,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.68,
+          "y": 7.6,
+          "c": "yellow"
+        },
+        {
+          "x": 1.9,
+          "y": 7.5,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 5, llegada 5 → atac 0 (atacant primer la bola 2)",
+      "page": 93,
+      "path": [
+        {
+          "x": 0.45,
+          "y": 3.8
+        },
+        {
+          "x": 0.45,
+          "y": 3.15
+        },
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 4.0
+        },
+        {
+          "x": 2.5,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.35,
+          "y": 3.05,
+          "c": "yellow"
+        },
+        {
+          "x": 2.2,
+          "y": 7.4,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 7, llegada 3 → atac 4 (atacant la bola 2)",
+      "page": 94,
+      "path": [
+        {
+          "x": 0.45,
+          "y": 4.45
+        },
+        {
+          "x": 1.1,
+          "y": 4.05
+        },
+        {
+          "x": 3.2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.9
+        },
+        {
+          "x": 1.5,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.25,
+          "y": 4.2,
+          "c": "yellow"
+        },
+        {
+          "x": 1.25,
+          "y": 7.45,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Amb bola 2, la sortida es llegeix prolongant fins a la banda la línia que surt de la bola 2 cap a l'atac."
+  ],
+  "quotes": [
+    "Se juega con velocidad justa para llegar a la tercera banda, taco plano y golpe dulce, golpe sin efecto y alto."
+  ],
+  "uncertain": [
+    "El llibre no diu si la sortida es pren al diamant o al punt de la banda; els dibuixos la marquen al diamant."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        }
+      },
+      "inputs": {
+        "S": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "L": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "A": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A"
+        }
+      ],
+      "valid": "A >= 0 && A <= 6 && L >= 0 && L <= 8",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Sense efecte, cop alt i velocitat justa. El tram entre l'atac i la llegada passa per la banda llarga dreta."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 7 i vols arribar al 4 de la curta inferior. On ataques?",
+        "options": [
+          "Al 3",
+          "Al 11",
+          "Al 4",
+          "Al 0"
+        ],
+        "answer": 0,
+        "explain": "Atac = sortida − llegada = 7 − 4 = 3.",
+        "page": 92,
+        "path": [
+          {
+            "x": 0.35,
+            "y": 6.2
+          },
+          {
+            "x": 2.9,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.6
+          },
+          {
+            "x": 2,
+            "y": 8
+          }
+        ]
+      },
+      {
+        "q": "Quin efecte demana el sistema 036?",
+        "options": [
+          "Sense efecte i cop alt",
+          "Efecte màxim a favor",
+          "Efecte 1 baix",
+          "Efecte contrari"
+        ],
+        "answer": 0,
+        "explain": "El llibre diu golpe sin efecto y alto, tac pla i cop dolç.",
+        "page": 92
+      },
+      {
+        "q": "Sortida 5 atacant el 0. On arriba la bola?",
+        "options": [
+          "Al 5",
+          "Al 0",
+          "Al 8",
+          "Al 3"
+        ],
+        "answer": 0,
+        "explain": "Llegada = sortida − atac = 5 − 0 = 5.",
+        "page": 93,
+        "path": [
+          {
+            "x": 0.45,
+            "y": 3.8
+          },
+          {
+            "x": 0.45,
+            "y": 3.15
+          },
+          {
+            "x": 2,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 4.0
+          },
+          {
+            "x": 2.5,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.35,
+            "y": 3.05,
+            "c": "yellow"
+          },
+          {
+            "x": 2.2,
+            "y": 7.4,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quina velocitat cal?",
+        "options": [
+          "Justa per arribar a la tercera banda",
+          "Molt forta",
+          "La que doni cinc bandes",
+          "Lenta, que mori a la segona banda"
+        ],
+        "answer": 0,
+        "explain": "Velocidad justa para llegar a la tercera banda.",
+        "page": 92
+      },
+      {
+        "q": "On és el 0 de la numeració d'atac?",
+        "options": [
+          "Al diamant central de la curta superior",
+          "Al racó dret",
+          "Al racó esquerre",
+          "Al primer diamant"
+        ],
+        "answer": 0,
+        "explain": "L'atac va de 0 (diamant central) a 6 (racó dret).",
+        "page": 92
+      },
+      {
+        "q": "Sortida 7, atac 4. Llegada?",
+        "options": [
+          "3",
+          "11",
+          "4",
+          "7"
+        ],
+        "answer": 0,
+        "explain": "7 − 4 = 3: la llegada és el 3.",
+        "page": 94,
+        "path": [
+          {
+            "x": 0.45,
+            "y": 4.45
+          },
+          {
+            "x": 1.1,
+            "y": 4.05
+          },
+          {
+            "x": 3.2,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.9
+          },
+          {
+            "x": 1.5,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.25,
+            "y": 4.2,
+            "c": "yellow"
+          },
+          {
+            "x": 1.25,
+            "y": 7.45,
+            "c": "red"
+          }
+        ]
+      }
+    ]
+  }
+}

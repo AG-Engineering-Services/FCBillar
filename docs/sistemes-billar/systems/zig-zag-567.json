@@ -1,0 +1,609 @@
+{
+  "id": "zig-zag-567",
+  "name": "Sistema Zig-zag 567",
+  "group": "Altres",
+  "attributed_to": null,
+  "pages": [
+    217,
+    220
+  ],
+  "purpose": "Atac des d'una banda llarga cap a la llarga oposada, tornada a la llarga de sortida i arribada a la banda curta (zig-zag); també jugable al llarg de la taula.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-L-K (llarga, llarga, curta)",
+    "effect": "sense efecte (bola tocada al centre-dalt als dibuixos); en bola primer, un lleuger efecte de compensació",
+    "stroke": "velocitat justa per arribar",
+    "ball": "si es toca primer la bola 2, la bola 1 agafa efecte cap al costat on s'ha tocat la bola 2"
+  },
+  "formula": "Atac = Sortida × Llegada",
+  "steps": [
+    "Llegeix la sortida (1–8) a la banda llarga des d'on surt la bola, prolongant la línia per la bola jugadora.",
+    "Llegeix la llegada (5–6,5) a la banda curta on ha d'arribar.",
+    "Multiplica: Atac = Sortida × Llegada i ataca aquest punt de la llarga oposada (escala 10–50).",
+    "Juga amb la velocitat justa per arribar."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida (llarga de sortida)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": 1
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 2
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 3
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 4
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 5
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 6
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 7
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 8
+        }
+      ],
+      "note": "Dibuix original apaïsat; girat 90° en sentit horari: la curta d'arribada (esquerra) passa a ser la curta superior, la llarga d'atac (superior) passa a la llarga dreta i la llarga de sortida (inferior) a la llarga esquerra. 1 punt per diamant; el 8 és a la cantonada."
+    },
+    {
+      "name": "Atac (llarga oposada)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        }
+      ],
+      "note": "10 punts per diamant."
+    },
+    {
+      "name": "Llegada (banda curta)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 5
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 5.5
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 6
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 6.5
+        }
+      ],
+      "note": "0,5 per diamant; el 5 és a la cantonada del costat de la sortida."
+    },
+    {
+      "name": "Al llarg: atac (curta superior)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 5
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 15
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 20
+        }
+      ],
+      "note": "Variant al llarg de la taula (p. 219), dibuix vertical sense girar."
+    },
+    {
+      "name": "Al llarg: sortida (curta inferior)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 1,
+          "y": 8,
+          "v": 0.5
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 1
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 1.5
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 2
+        }
+      ]
+    },
+    {
+      "name": "Al llarg: llegada (llarga esquerra)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 7
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 6.5
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 6
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 5.5
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 5
+        }
+      ]
+    }
+  ],
+  "corrections": [
+    "Si cal una mica més de velocitat (drap lent, per exemple), ataca un punt menys (21 en lloc de 22) o posa un efecte lleugeríssim.",
+    "Bola primer: tocant la bola 2 per la dreta la bola 1 agafa efecte dret i es compensa amb un lleuger efecte esquerre; tocant-la per l'esquerra, a l'inrevés.",
+    "Al llarg de la taula el recorregut és més llarg i obliga a jugar més fort: normalment cal desplaçar l'atac un 'punt real' menys (de 9 a 8,5). Comprova-ho, perquè l'estat del material hi influeix."
+  ],
+  "examples": [
+    {
+      "text": "Sortida 4, llegada 5,5 → atac 4 × 5,5 = 22",
+      "page": 217,
+      "path": [
+        {
+          "x": 0.48,
+          "y": 3.79
+        },
+        {
+          "x": 4,
+          "y": 2.2
+        },
+        {
+          "x": 0,
+          "y": 0.44
+        },
+        {
+          "x": 1,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.61,
+          "y": 0.15,
+          "c": "yellow"
+        },
+        {
+          "x": 1.51,
+          "y": 0.37,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer (lleuger efecte esquerre per compensar): sortida 3, llegada 6 → atac 18",
+      "page": 218,
+      "path": [
+        {
+          "x": 1.52,
+          "y": 2.86
+        },
+        {
+          "x": 1.82,
+          "y": 2.5
+        },
+        {
+          "x": 4,
+          "y": 1.8
+        },
+        {
+          "x": 0,
+          "y": 0.63
+        },
+        {
+          "x": 2,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.78,
+          "y": 2.35,
+          "c": "yellow"
+        },
+        {
+          "x": 2.4,
+          "y": 0.15,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer (lleuger efecte dret per compensar): sortida 3, llegada 5,5 → atac 16,5",
+      "page": 218,
+      "path": [
+        {
+          "x": 1.93,
+          "y": 2.18
+        },
+        {
+          "x": 2.45,
+          "y": 2.23
+        },
+        {
+          "x": 4,
+          "y": 1.65
+        },
+        {
+          "x": 0,
+          "y": 0.38
+        },
+        {
+          "x": 1,
+          "y": 0
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.49,
+          "y": 2.39,
+          "c": "yellow"
+        },
+        {
+          "x": 1.51,
+          "y": 0.15,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Al llarg: sortida 1,5, llegada 6 → atac 9; a la pràctica es juga al 8,5",
+      "page": 219,
+      "path": [
+        {
+          "x": 2.93,
+          "y": 7.63
+        },
+        {
+          "x": 1.8,
+          "y": 0
+        },
+        {
+          "x": 0.75,
+          "y": 8
+        },
+        {
+          "x": 0,
+          "y": 4
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.23,
+          "y": 3.59,
+          "c": "yellow"
+        },
+        {
+          "x": 0.1,
+          "y": 3.44,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Encara que es jugui sense efecte, la bola jugadora agafa un lleuger efecte en tocar la bola 2, cap al costat per on s'ha tocat."
+  ],
+  "quotes": [
+    "El ataque se deduce multiplicando la salida por la llegada"
+  ],
+  "uncertain": [
+    "P. 219: el requadre repeteix 'Salida = 3, Llegada = 5,5, Ataque = 16,5' de l'exemple anterior, però el dibuix mostra sortida 1,5, llegada 6 i atac 9 (1,5 × 6 = 9), coherent amb el text de la p. 220 (atacar al 8,5). S'ha pres el dibuix.",
+    "L'origen del nom '567' no l'explica el llibre; és una deducció a partir de l'escala de llegada.",
+    "L'autor diu que ja n'havia parlat en un article sobre la física del billar; aquí no es diu a qui s'atribueix el sistema.",
+    "Camins aproximats, mesurats sobre els dibuixos i girats al marc vertical."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida (llarga de sortida)"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac (llarga oposada)"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada (banda curta)"
+        }
+      },
+      "inputs": {
+        "S": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "L": [
+          5,
+          5.5,
+          6,
+          6.5
+        ],
+        "A": [
+          15,
+          16.5,
+          18,
+          20,
+          22,
+          24,
+          27,
+          30,
+          33,
+          36,
+          39
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S * L",
+          "label": "Trobar l'atac"
+        },
+        {
+          "solve": "S",
+          "expr": "A / L",
+          "label": "Quina sortida cal"
+        },
+        {
+          "solve": "L",
+          "expr": "A / S",
+          "label": "On arribarà"
+        }
+      ],
+      "valid": "A >= 5 && A <= 50 && S >= 1 && S <= 8 && L >= 5 && L <= 6.5",
+      "round": 1,
+      "note": "Versió a l'ample de la taula, sense efecte, velocitat justa per arribar. La segona banda (tornada a la llarga de sortida) no té numeració, per això no es dibuixa el traç generat."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 4, llegada 5,5. On ataques?",
+        "options": [
+          "9,5",
+          "22",
+          "20",
+          "24"
+        ],
+        "answer": 1,
+        "explain": "4 × 5,5 = 22.",
+        "page": 217,
+        "path": [
+          {
+            "x": 0.48,
+            "y": 3.79
+          },
+          {
+            "x": 4,
+            "y": 2.2
+          },
+          {
+            "x": 0,
+            "y": 0.44
+          },
+          {
+            "x": 1,
+            "y": 0
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.61,
+            "y": 0.15,
+            "c": "yellow"
+          },
+          {
+            "x": 1.51,
+            "y": 0.37,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "El drap és lent i has de jugar una mica més fort. Què indica el llibre?",
+        "options": [
+          "Jugar amb retrocés",
+          "Atacar un punt més",
+          "Multiplicar per la sortida més 1",
+          "Atacar un punt menys (21 en lloc de 22) o un efecte lleugeríssim"
+        ],
+        "answer": 3,
+        "explain": "Amb més velocitat cal atacar quizás un punt menys o imprimir un lleugeríssim efecte.",
+        "page": 217
+      },
+      {
+        "q": "Sortida 3, toques la bola 2 per la dreta i vols arribar al 6. Què fas?",
+        "options": [
+          "Atac 18 amb un lleuger efecte esquerre",
+          "Atac 9 sense efecte",
+          "Atac 18 amb un lleuger efecte dret",
+          "Atac 16,5 sense efecte"
+        ],
+        "answer": 0,
+        "explain": "3 × 6 = 18; la bola 1 agafa efecte dret en tocar la bola 2 per la dreta i es compensa amb un lleuger efecte esquerre.",
+        "page": 218,
+        "path": [
+          {
+            "x": 1.52,
+            "y": 2.86
+          },
+          {
+            "x": 1.82,
+            "y": 2.5
+          },
+          {
+            "x": 4,
+            "y": 1.8
+          },
+          {
+            "x": 0,
+            "y": 0.63
+          },
+          {
+            "x": 2,
+            "y": 0
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.78,
+            "y": 2.35,
+            "c": "yellow"
+          },
+          {
+            "x": 2.4,
+            "y": 0.15,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Al llarg de la taula, el càlcul dona atac 9. On jugues normalment?",
+        "options": [
+          "9",
+          "9,5",
+          "8,5",
+          "10"
+        ],
+        "answer": 2,
+        "explain": "El recorregut és més llarg i cal jugar més fort: es desplaça un punt real menys, al 8,5.",
+        "page": 220,
+        "path": [
+          {
+            "x": 2.93,
+            "y": 7.63
+          },
+          {
+            "x": 1.8,
+            "y": 0
+          },
+          {
+            "x": 0.75,
+            "y": 8
+          },
+          {
+            "x": 0,
+            "y": 4
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.23,
+            "y": 3.59,
+            "c": "yellow"
+          },
+          {
+            "x": 0.1,
+            "y": 3.44,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quina és la fórmula del zig-zag 567?",
+        "options": [
+          "Atac = Sortida − Llegada",
+          "Atac = Valor + Sortida − Llegada",
+          "Atac = Sortida × Llegada",
+          "Atac = Sortida − Llegada/2"
+        ],
+        "answer": 2,
+        "explain": "L'atac es dedueix multiplicant la sortida per la llegada.",
+        "page": 217
+      }
+    ]
+  }
+}

@@ -1,0 +1,653 @@
+{
+  "id": "tuzul-sortida-llarga",
+  "name": "Sistema Plus-7: mètode de Tüzül (2a part, sortida de banda llarga)",
+  "group": "Sistema Plus",
+  "attributed_to": "Tüzül (exposat per José Lazo)",
+  "pages": [
+    186,
+    193
+  ],
+  "purpose": "Atac a la banda curta per arribar a la curta oposada, sortint des de la banda llarga, amb la mateixa fórmula de Tüzül.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-K (curta, llarga, curta)",
+    "effect": "efecte 1, 2 o 4 segons la tercera banda desitjada, del costat de la segona banda",
+    "stroke": "igual que la 1a part (bricole ràpid i penetrat)",
+    "ball": "en bola primer, línia a uns 3 cm de la bola 2"
+  },
+  "formula": "Atac = Valor de la mesa + Sortida − Llegada (valor 15 amb efecte 4, 10 amb efecte 2, 5 amb efecte 1)",
+  "steps": [
+    "Fes servir el valor de la mesa calibrat a la 1a part (15/10/5 per als efectes 4/2/1 a l'exemple del llibre).",
+    "Llegeix la sortida a la banda llarga esquerra (escala 23–38) prolongant la línia d'atac per la bola jugadora.",
+    "Llegeix la llegada a la banda curta inferior (0–20).",
+    "Calcula Atac = Valor + Sortida − Llegada i comprova que la línia sortida–atac passa pel centre de la bola (o a 3 cm de la bola 2)."
+  ],
+  "numberings": [
+    {
+      "name": "Atac (banda curta superior)",
+      "role": "atac",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 40
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        }
+      ],
+      "note": "El dibuix del llibre ja és vertical; no cal girar. 10 punts per diamant; valors intermedis per interpolació."
+    },
+    {
+      "name": "Sortida (banda llarga esquerra)",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": 38
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 35
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 32
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 28
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 26
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 24
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 23
+        }
+      ],
+      "note": "Dibuix vertical, sense girar. El 23 és a la cantonada inferior esquerra. L'escala no és lineal: 3 punts per diamant a dalt, 2 al mig, 1 a baix."
+    },
+    {
+      "name": "Llegada (banda curta inferior)",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 8,
+          "v": 20
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 15
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 10
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 5
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 0
+        }
+      ]
+    }
+  ],
+  "corrections": [
+    "Igual que a la 1a part: si la línia sortida–atac no passa pel centre de la bola jugadora (o a 3 cm de la bola 2), cal tornar a estimar la sortida.",
+    "Els valors de la mesa són els del jugador hipotètic; cadascú ha de calibrar els seus."
+  ],
+  "examples": [
+    {
+      "text": "Efecte 4 (valor 15): sortida 24, llegada 15 → atac 24",
+      "page": 187,
+      "path": [
+        {
+          "x": 0.23,
+          "y": 4.74
+        },
+        {
+          "x": 1.6,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.28
+        },
+        {
+          "x": 1,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.71,
+          "y": 7.72,
+          "c": "yellow"
+        },
+        {
+          "x": 0.87,
+          "y": 7.59,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 1 (valor 5): atac = 5 + 23 − 3 = 25",
+      "page": 188,
+      "path": [
+        {
+          "x": 0.11,
+          "y": 5.92
+        },
+        {
+          "x": 1.5,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 6.39
+        },
+        {
+          "x": 3.4,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.93,
+          "y": 7.23,
+          "c": "yellow"
+        },
+        {
+          "x": 3.13,
+          "y": 7.12,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Efecte 2 (valor 10): atac = 10 + 24 − 16 = 18",
+      "page": 189,
+      "path": [
+        {
+          "x": 0.1,
+          "y": 5.64
+        },
+        {
+          "x": 2.2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.0
+        },
+        {
+          "x": 0.8,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.42,
+          "y": 7.67,
+          "c": "yellow"
+        },
+        {
+          "x": 0.63,
+          "y": 7.5,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 2: atac = 10 + 26 − 8 = 28",
+      "page": 190,
+      "path": [
+        {
+          "x": 2.12,
+          "y": 4.19
+        },
+        {
+          "x": 0.86,
+          "y": 1.01
+        },
+        {
+          "x": 1.2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 4.06
+        },
+        {
+          "x": 2.4,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.69,
+          "y": 0.98,
+          "c": "yellow"
+        },
+        {
+          "x": 0.23,
+          "y": 5.4,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 1: atac = 5 + 24 − 15 = 14",
+      "page": 191,
+      "path": [
+        {
+          "x": 2.97,
+          "y": 5.31
+        },
+        {
+          "x": 2.19,
+          "y": 0.74
+        },
+        {
+          "x": 2.6,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.12
+        },
+        {
+          "x": 1,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.01,
+          "y": 0.67,
+          "c": "yellow"
+        },
+        {
+          "x": 0.19,
+          "y": 6.99,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 4: atac = 15 + 23 − 17 = 21",
+      "page": 192,
+      "path": [
+        {
+          "x": 0.22,
+          "y": 2.41
+        },
+        {
+          "x": 1.42,
+          "y": 1.39
+        },
+        {
+          "x": 1.9,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2.12
+        },
+        {
+          "x": 0.6,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.57,
+          "y": 1.44,
+          "c": "yellow"
+        },
+        {
+          "x": 0.17,
+          "y": 7.42,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola primer, efecte 1: atac = 5 + 24 − 3 = 26",
+      "page": 193,
+      "path": [
+        {
+          "x": 0.36,
+          "y": 1.72
+        },
+        {
+          "x": 1.09,
+          "y": 0.86
+        },
+        {
+          "x": 1.4,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 6.05
+        },
+        {
+          "x": 3.4,
+          "y": 8
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.24,
+          "y": 0.94,
+          "c": "yellow"
+        },
+        {
+          "x": 3.03,
+          "y": 7.09,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "El sistema funciona igual que sortint de banda curta; només canvia l'escala de sortida."
+  ],
+  "quotes": [
+    "el sistema funciona igual (misma fórmula) que cuando salimos desde banda corta"
+  ],
+  "uncertain": [
+    "A la pàgina 187 el requadre diu 'ATAQUE = 14 + 24 - 15 = 24' amb valor de mesa 15; el càlcul correcte és 15 + 24 − 15 = 24 (errata del 14).",
+    "Camins aproximats, mesurats sobre els dibuixos."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida (banda llarga esquerra)"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac (banda curta superior)"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada (banda curta inferior)"
+        },
+        "E": {
+          "label": "Efecte",
+          "values": [
+            1,
+            2,
+            4
+          ]
+        }
+      },
+      "inputs": {
+        "S": [
+          23,
+          24,
+          26,
+          28,
+          30,
+          32,
+          35,
+          38
+        ],
+        "L": [
+          0,
+          3,
+          5,
+          8,
+          10,
+          15,
+          16,
+          17,
+          20
+        ],
+        "E": [
+          1,
+          2,
+          4
+        ],
+        "A": [
+          14,
+          18,
+          21,
+          24,
+          25,
+          26,
+          28,
+          30
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "T.val[E] + S - L",
+          "label": "Trobar l'atac"
+        },
+        {
+          "solve": "L",
+          "expr": "T.val[E] + S - A",
+          "label": "On arribarà"
+        }
+      ],
+      "tables": {
+        "val": {
+          "1": 5,
+          "2": 10,
+          "4": 15
+        }
+      },
+      "valid": "A >= 0 && A <= 40 && L >= 0 && L <= 20",
+      "round": 1,
+      "note": "Valors de mesa 15/10/5 per als efectes 4/2/1, com al llibre. El traç generat no es dibuixa: la segona banda no té numeració i una línia directa atac–llegada seria falsa."
+    },
+    "quiz": [
+      {
+        "q": "En què canvia la 2a part respecte de la 1a?",
+        "options": [
+          "No hi ha valor de la mesa",
+          "Només la sortida, que es llegeix a la banda llarga",
+          "L'atac es fa a la banda llarga",
+          "La fórmula passa a ser una multiplicació"
+        ],
+        "answer": 1,
+        "explain": "El sistema funciona igual (mateixa fórmula); la sortida es llegeix a la llarga, escala 23–38.",
+        "page": 187
+      },
+      {
+        "q": "Quina sortida té la cantonada inferior de la banda llarga?",
+        "options": [
+          "20",
+          "0",
+          "23",
+          "38"
+        ],
+        "answer": 2,
+        "explain": "L'escala de sortida de la llarga va de 38 (1r diamant) a 23 (cantonada).",
+        "page": 186
+      },
+      {
+        "q": "Efecte 1 (valor 5), sortida 23, llegada 3. On ataques?",
+        "options": [
+          "21",
+          "31",
+          "15",
+          "25"
+        ],
+        "answer": 3,
+        "explain": "5 + 23 − 3 = 25.",
+        "page": 188,
+        "path": [
+          {
+            "x": 0.11,
+            "y": 5.92
+          },
+          {
+            "x": 1.5,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 6.39
+          },
+          {
+            "x": 3.4,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.93,
+            "y": 7.23,
+            "c": "yellow"
+          },
+          {
+            "x": 3.13,
+            "y": 7.12,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Efecte 2 (valor 10), sortida 26, llegada 8. On ataques?",
+        "options": [
+          "44",
+          "28",
+          "24",
+          "18"
+        ],
+        "answer": 1,
+        "explain": "10 + 26 − 8 = 28; la línia passa a 3 cm de la bola 2.",
+        "page": 190,
+        "path": [
+          {
+            "x": 2.12,
+            "y": 4.19
+          },
+          {
+            "x": 0.86,
+            "y": 1.01
+          },
+          {
+            "x": 1.2,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 4.06
+          },
+          {
+            "x": 2.4,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.69,
+            "y": 0.98,
+            "c": "yellow"
+          },
+          {
+            "x": 0.23,
+            "y": 5.4,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Efecte 4 (valor 15), sortida 23, llegada 17. On ataques?",
+        "options": [
+          "19",
+          "25",
+          "11",
+          "21"
+        ],
+        "answer": 3,
+        "explain": "15 + 23 − 17 = 21.",
+        "page": 192,
+        "path": [
+          {
+            "x": 0.22,
+            "y": 2.41
+          },
+          {
+            "x": 1.42,
+            "y": 1.39
+          },
+          {
+            "x": 1.9,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 2.12
+          },
+          {
+            "x": 0.6,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.57,
+            "y": 1.44,
+            "c": "yellow"
+          },
+          {
+            "x": 0.17,
+            "y": 7.42,
+            "c": "red"
+          }
+        ]
+      }
+    ]
+  }
+}

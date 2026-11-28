@@ -1,0 +1,824 @@
+{
+  "id": "plus-zona-2",
+  "name": "Sistema Plus, zona 2 (sortides del 0 al 20, llegades fins al 40)",
+  "group": "Sistema Plus",
+  "attributed_to": "Jean Verworst (Berekend Biljarten)",
+  "pages": [
+    121,
+    128
+  ],
+  "purpose": "Plus amb sortides entre el racó i el 2n diamant i llegades fins al 4t diamant de la llarga.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-L (i prolongació a 4a banda)",
+    "effect": "efecte màxim, lleugerament per sota de l'equador",
+    "stroke": "vivacitat sense exagerar: arribar a la 3 i separar-la uns 30 cm",
+    "ball": null
+  },
+  "formula": "Atac = Llegada − Sortida",
+  "steps": [
+    "Llegeix la sortida a la banda llarga (0 a 20, de 5 en 5).",
+    "Tria la llegada (fins a 40, de 5 en 5).",
+    "Resta llegada − sortida i ataca aquest número de la numeració d'atac de la zona 2 (35 a 20; 15 = el mateix racó, 00).",
+    "La quarta banda (llarga dreta) és sempre el doble de la tercera."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida i llegada",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 0.0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 0.5,
+          "v": 5
+        },
+        {
+          "x": 0,
+          "y": 1.0,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 1.5,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 2.0,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 2.5,
+          "v": 25
+        },
+        {
+          "x": 0,
+          "y": 3.0,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 3.5,
+          "v": 35
+        },
+        {
+          "x": 0,
+          "y": 4.0,
+          "v": 40
+        }
+      ],
+      "note": "Dibuix ja en vertical; cap rotació. Sortida a la banda llarga esquerra, atac a la curta superior. Mateixa escala per a sortida i llegada (banda llarga esquerra)."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 1.5,
+          "y": 0,
+          "v": 35
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 2.5,
+          "y": 0,
+          "v": 27.5
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 25
+        },
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": 22.5
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "v": 20
+        }
+      ],
+      "note": "Banda curta superior. El 15 és el 'doble 00': atacar el mateix racó, una mica més enllà del 20."
+    },
+    {
+      "name": "Quarta banda",
+      "role": "arribada",
+      "points": [
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 60
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 70
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 80
+        }
+      ],
+      "note": "Banda llarga dreta: llegada 20 → 40, 25 → 50, 30 → 60, 35 → 70, 40 → 80."
+    }
+  ],
+  "corrections": [
+    "Sortida 20: el racó val 17 (frontera amb la zona 1); tirant al racó s'arriba a 37. Per arribar a 40 cal atacar el 23 (única excepció de la zona).",
+    "Atac al mateix racó (doble 00): resta 5 punts a la llegada, valor bàsic 15. Efecte màxim i molta vivacitat.",
+    "Tocant la bola 2 per la dreta potser no cal efecte màxim (un mil·límetre menys); per l'esquerra, efecte màxim."
+  ],
+  "examples": [
+    {
+      "text": "Sortida 20, atac 23 → llegada 40 (i quarta banda 80); atacant el racó (17) arribaria a 37",
+      "page": 122,
+      "path": [
+        {
+          "x": 0.25,
+          "y": 1.7
+        },
+        {
+          "x": 2.85,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.5
+        },
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 4,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "text": "Sortida 15, llegada 35 → atac 20 (racó)",
+      "page": 123,
+      "path": [
+        {
+          "x": 0.5,
+          "y": 1.1
+        },
+        {
+          "x": 3.2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.35
+        },
+        {
+          "x": 0,
+          "y": 3.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.55,
+          "y": 4.1,
+          "c": "yellow"
+        },
+        {
+          "x": 0.7,
+          "y": 3.95,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 10, llegada 35 → atac 25, tocant la bola 2 per la dreta",
+      "page": 124,
+      "path": [
+        {
+          "x": 0.64,
+          "y": 0.84
+        },
+        {
+          "x": 0.93,
+          "y": 0.52
+        },
+        {
+          "x": 2.04,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.6
+        },
+        {
+          "x": 0,
+          "y": 3.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.87,
+          "y": 0.36,
+          "c": "yellow"
+        },
+        {
+          "x": 2.13,
+          "y": 5.33,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 5, llegada 30 → atac 25, tocant la bola 2 per l'esquerra, efecte màxim",
+      "page": 125,
+      "path": [
+        {
+          "x": 0.28,
+          "y": 0.18
+        },
+        {
+          "x": 0.58,
+          "y": 0.25
+        },
+        {
+          "x": 1.23,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.38
+        },
+        {
+          "x": 0,
+          "y": 2.97
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.63,
+          "y": 0.42,
+          "c": "yellow"
+        },
+        {
+          "x": 3.73,
+          "y": 5.82,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 5, atac al mateix racó (00 = 15) → llegada 20",
+      "page": 126,
+      "path": [
+        {
+          "x": 0.3,
+          "y": 0.41
+        },
+        {
+          "x": 3.95,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.05
+        },
+        {
+          "x": 0,
+          "y": 2.02
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.39,
+          "y": 2.08,
+          "c": "yellow"
+        },
+        {
+          "x": 0.28,
+          "y": 2.31,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 15, atac 00 (15) → llegada 30, amb bola 2",
+      "page": 127,
+      "path": [
+        {
+          "x": 1.4,
+          "y": 1.18
+        },
+        {
+          "x": 1.74,
+          "y": 0.74
+        },
+        {
+          "x": 3.7,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.13
+        },
+        {
+          "x": 0,
+          "y": 2.97
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.69,
+          "y": 0.59,
+          "c": "yellow"
+        },
+        {
+          "x": 0.47,
+          "y": 3.33,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 15, llegada 40 → atac 25 (quarta banda 80)",
+      "page": 128,
+      "path": [
+        {
+          "x": 1.19,
+          "y": 0.84
+        },
+        {
+          "x": 1.48,
+          "y": 0.49
+        },
+        {
+          "x": 2.2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.55
+        },
+        {
+          "x": 0,
+          "y": 3.98
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.38,
+          "y": 0.33,
+          "c": "yellow"
+        },
+        {
+          "x": 3.76,
+          "y": 7.7,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola 2 primer: sortida 5, llegada 32,5 → 32,5 − 5 = atac 27,5; la quarta banda seria el 65 (el doble de 32,5) (PDF Club Billar València, Sistema-Plus.pdf p. 4)",
+      "page": 4,
+      "path": [
+        {
+          "x": 0.21,
+          "y": 0.15
+        },
+        {
+          "x": 0.92,
+          "y": 0.2
+        },
+        {
+          "x": 1.78,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.72
+        },
+        {
+          "x": 0,
+          "y": 3.25
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.06,
+          "y": 0.34,
+          "c": "yellow"
+        },
+        {
+          "x": 2.77,
+          "y": 4.8,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Hi ha poques rectificacions, però una petita variació de velocitat o efecte canvia molt la trajectòria, sobretot atacant a prop del racó: cal entrenar-lo a fons.",
+    "Atacant la bola 2 en lloc de bricola, la bola 1 agafa un lleu efecte cap al costat per on toques la bola 2: compensa-ho amb l'efecte."
+  ],
+  "quotes": [
+    "Puedes comprobar que la cuarta banda es siempre el doble que la tercera banda."
+  ],
+  "uncertain": [
+    "El 23 és fora de la numeració dibuixada; es col·loca entre el 25 i el 22,5 (x ≈ 3,4)."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida i llegada"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Sortida i llegada"
+        }
+      },
+      "inputs": {
+        "S": [
+          0,
+          5,
+          10,
+          15,
+          20
+        ],
+        "L": [
+          20,
+          25,
+          30,
+          35,
+          40
+        ],
+        "A": [
+          20,
+          22.5,
+          25,
+          27.5,
+          30,
+          35
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "L - S",
+          "when": "S < 20"
+        },
+        {
+          "solve": "A",
+          "expr": "L - 17",
+          "when": "S == 20",
+          "label": "sortida 20: el racó val 17"
+        },
+        {
+          "solve": "L",
+          "expr": "S + A",
+          "when": "S < 20"
+        },
+        {
+          "solve": "L",
+          "expr": "A + 17",
+          "when": "S == 20",
+          "label": "sortida 20: el racó val 17"
+        }
+      ],
+      "valid": "A >= 20 && A <= 35 && L >= 0 && L <= 40",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Efecte màxim lleugerament per sota de l'equador. La quarta banda (llarga dreta) és el doble de la llegada."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 15, llegada 40. Atac?",
+        "options": [
+          "25",
+          "55",
+          "15",
+          "40"
+        ],
+        "answer": 0,
+        "explain": "40 − 15 = 25; la quarta banda arriba al 80.",
+        "page": 128,
+        "path": [
+          {
+            "x": 1.19,
+            "y": 0.84
+          },
+          {
+            "x": 1.48,
+            "y": 0.49
+          },
+          {
+            "x": 2.2,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.55
+          },
+          {
+            "x": 0,
+            "y": 3.98
+          },
+          {
+            "x": 4,
+            "y": 8
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.38,
+            "y": 0.33,
+            "c": "yellow"
+          },
+          {
+            "x": 3.76,
+            "y": 7.7,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 20 i vols arribar al 40. On ataques?",
+        "options": [
+          "Al 23",
+          "Al 20 (racó)",
+          "Al 25",
+          "Al 17"
+        ],
+        "answer": 0,
+        "explain": "Per a la sortida 20 el racó val 17 i s'arriba al 37; per arribar al 40 cal el 23 (única excepció).",
+        "page": 122,
+        "path": [
+          {
+            "x": 0.25,
+            "y": 1.7
+          },
+          {
+            "x": 2.85,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.5
+          },
+          {
+            "x": 0,
+            "y": 4
+          },
+          {
+            "x": 4,
+            "y": 8
+          }
+        ]
+      },
+      {
+        "q": "Atacant el mateix racó (doble 00), quin valor té?",
+        "options": [
+          "15",
+          "20",
+          "0",
+          "17"
+        ],
+        "answer": 0,
+        "explain": "El doble 00 resta 5 punts: valor bàsic 15.",
+        "page": 126,
+        "path": [
+          {
+            "x": 0.3,
+            "y": 0.41
+          },
+          {
+            "x": 3.95,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.05
+          },
+          {
+            "x": 0,
+            "y": 2.02
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.39,
+            "y": 2.08,
+            "c": "yellow"
+          },
+          {
+            "x": 0.28,
+            "y": 2.31,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "La llegada és el 30. On anirà la quarta banda?",
+        "options": [
+          "Al 60 de la llarga dreta",
+          "Al 30",
+          "Al 45",
+          "Al 90"
+        ],
+        "answer": 0,
+        "explain": "La quarta banda és sempre el doble de la tercera.",
+        "page": 122
+      },
+      {
+        "q": "Quin efecte demana la zona 2?",
+        "options": [
+          "Màxim, lleugerament per sota de l'equador",
+          "Efecte 3",
+          "Sense efecte",
+          "Efecte 1 alt"
+        ],
+        "answer": 0,
+        "explain": "El efecto es máximo pero ligeramente por debajo del ecuador.",
+        "page": 123
+      },
+      {
+        "q": "Toques la bola 2 per la dreta. Quin ajust?",
+        "options": [
+          "Potser un mil·límetre menys d'efecte",
+          "Un efecte més",
+          "Ataques 5 punts més",
+          "Cap"
+        ],
+        "answer": 0,
+        "explain": "La bola 1 adquireix un efecte dret complementari; probablement un mil·límetre menys.",
+        "page": 124,
+        "path": [
+          {
+            "x": 0.64,
+            "y": 0.84
+          },
+          {
+            "x": 0.93,
+            "y": 0.52
+          },
+          {
+            "x": 2.04,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.6
+          },
+          {
+            "x": 0,
+            "y": 3.5
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.87,
+            "y": 0.36,
+            "c": "yellow"
+          },
+          {
+            "x": 2.13,
+            "y": 5.33,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quines posicions són de la zona 2?",
+        "options": [
+          "Sortides del 0 al 20 amb llegades fins al 40",
+          "Sortides del 20 al 60",
+          "Sortides del 0 al 20 amb llegades més enllà del 40",
+          "Sortides del 60 endavant"
+        ],
+        "answer": 0,
+        "explain": "Zona 2: salidas desde el 0 hasta el segundo rombo con llegadas hasta el 4º rombo.",
+        "page": 121
+      },
+      {
+        "q": "Sortida 5, llegada 32,5. Atac?",
+        "options": [
+          "27,5",
+          "37,5",
+          "32,5",
+          "22,5"
+        ],
+        "answer": 0,
+        "explain": "32,5 − 5 = 27,5 (PDF Club Billar València, Sistema-Plus.pdf p. 4)",
+        "page": 4,
+        "path": [
+          {
+            "x": 0.21,
+            "y": 0.15
+          },
+          {
+            "x": 0.92,
+            "y": 0.2
+          },
+          {
+            "x": 1.78,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.72
+          },
+          {
+            "x": 0,
+            "y": 3.25
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.06,
+            "y": 0.34,
+            "c": "yellow"
+          },
+          {
+            "x": 2.77,
+            "y": 4.8,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "La llegada a tercera banda és el 32,5. On arriba la quarta banda?",
+        "options": [
+          "Al 65",
+          "Al 32,5",
+          "Al 50",
+          "Al 80"
+        ],
+        "answer": 0,
+        "explain": "La quarta banda és el doble de la llegada: 2 × 32,5 = 65 (PDF Club Billar València, Sistema-Plus.pdf p. 4)",
+        "page": 4,
+        "path": [
+          {
+            "x": 0.21,
+            "y": 0.15
+          },
+          {
+            "x": 0.92,
+            "y": 0.2
+          },
+          {
+            "x": 1.78,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.72
+          },
+          {
+            "x": 0,
+            "y": 3.25
+          },
+          {
+            "x": 4,
+            "y": 6.5
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.06,
+            "y": 0.34,
+            "c": "yellow"
+          }
+        ]
+      }
+    ]
+  }
+}

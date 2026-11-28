@@ -1,0 +1,551 @@
+{
+  "id": "sistema-verworst",
+  "name": "Sistema Verworst (llarga a llarga)",
+  "group": "Teoria de diamants",
+  "attributed_to": "Jean Verworst",
+  "pages": [
+    261,
+    262
+  ],
+  "purpose": "Sortida de la banda llarga i llegada a la banda llarga (4a banda, la llarga dreta) després de L-K-L, amb un número corrector per a cada sortida.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-K-L-L",
+    "effect": null,
+    "stroke": null,
+    "ball": null
+  },
+  "formula": "Atac = Sortida − Llegada − Correcció",
+  "steps": [
+    "Llegeix la sortida a la llarga esquerra (mateixos números que la teoria de diamants).",
+    "Llegeix la correcció que hi ha al costat d'aquesta sortida.",
+    "Tria la llegada a la llarga dreta (números de dins, de −20 a 30).",
+    "Atac = Sortida − Llegada − Correcció, a la mateixa banda llarga dreta."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 25
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 35
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 45
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 50
+        }
+      ],
+      "note": "Dibuix ja vertical: sortida per fora a la llarga esquerra."
+    },
+    {
+      "name": "Correcció",
+      "role": "altre",
+      "points": [
+        {
+          "x": 0,
+          "y": 1,
+          "v": 12.5
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 12.5
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 7.5
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 5
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 2.5
+        }
+      ],
+      "note": "Números dins de fletxes al costat de cada sortida."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 4,
+          "y": 5.5,
+          "v": 60
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 70
+        },
+        {
+          "x": 4,
+          "y": 6.5,
+          "v": 80
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 90
+        },
+        {
+          "x": 4,
+          "y": 7.5,
+          "v": 100
+        }
+      ],
+      "note": "Per fora a la llarga dreta, com a la teoria de diamants; «00» més enllà de la cantonada de dalt."
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 4,
+          "y": 4,
+          "v": -20
+        },
+        {
+          "x": 4,
+          "y": 4.5,
+          "v": -15
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": -10
+        },
+        {
+          "x": 4,
+          "y": 5.5,
+          "v": -5
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 6.5,
+          "v": 5
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 7.5,
+          "v": 15
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "v": 20
+        },
+        {
+          "x": 3.5,
+          "y": 8,
+          "v": 25
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "v": 30
+        }
+      ],
+      "note": "Per dins a la llarga dreta (4a banda) i, a partir del 20, a la curta de baix."
+    }
+  ],
+  "corrections": [
+    "Correcció per sortida: 15→12,5; 20→15; 25→15; 30→12,5; 35→10; 40→7,5; 45→5; 50→2,5."
+  ],
+  "examples": [
+    {
+      "text": "Sortida 50, llegada 0, correcció 2,5: atac 50 − 0 − 2,5 = 47,5.",
+      "page": 261,
+      "path": [
+        {
+          "x": 1.09,
+          "y": 6.97
+        },
+        {
+          "x": 4,
+          "y": 4.95
+        },
+        {
+          "x": 0.71,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0.55
+        },
+        {
+          "x": 4,
+          "y": 6
+        }
+      ]
+    },
+    {
+      "text": "Sortida 20, llegada −10, correcció 15: atac 20 + 10 − 15 = 15.",
+      "page": 262,
+      "path": [
+        {
+          "x": 1.13,
+          "y": 1.89
+        },
+        {
+          "x": 4,
+          "y": 1.54
+        },
+        {
+          "x": 1.1,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0.53
+        },
+        {
+          "x": 4,
+          "y": 5
+        }
+      ]
+    },
+    {
+      "text": "Sortida 35, llegada 5, correcció 10: atac 35 − 5 − 10 = 20.",
+      "page": 262,
+      "path": [
+        {
+          "x": 1.38,
+          "y": 3.86
+        },
+        {
+          "x": 4,
+          "y": 2.22
+        },
+        {
+          "x": 1.71,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1.54
+        },
+        {
+          "x": 4,
+          "y": 6.5
+        }
+      ]
+    }
+  ],
+  "tips": [],
+  "quotes": [
+    "ATAQUE = SALIDA – LLEGADA – CORRECCIÓN"
+  ],
+  "uncertain": [
+    "A la p262 els dos camins es creuen; l'assignació de cada contacte a la curta i a la llarga esquerra a cada exemple és aproximada.",
+    "El llibre no indica efecte ni cop per a aquest sistema.",
+    "No hi ha correcció rotulada per a la sortida 0."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        }
+      },
+      "inputs": {
+        "S": [
+          15,
+          20,
+          25,
+          30,
+          35,
+          40,
+          45,
+          50
+        ],
+        "A": [
+          10,
+          15,
+          20,
+          25,
+          30,
+          35,
+          40,
+          45,
+          50
+        ],
+        "L": [
+          -20,
+          -15,
+          -10,
+          -5,
+          0,
+          5,
+          10,
+          15,
+          20,
+          25,
+          30
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L - T.corr[S]",
+          "label": "trobar l'atac"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A - T.corr[S]",
+          "label": "on arribarà"
+        }
+      ],
+      "tables": {
+        "corr": {
+          "15": 12.5,
+          "20": 15,
+          "25": 15,
+          "30": 12.5,
+          "35": 10,
+          "40": 7.5,
+          "45": 5,
+          "50": 2.5
+        }
+      },
+      "valid": "A >= 0 && A <= 100 && L >= -20 && L <= 30",
+      "round": 1,
+      "note": "Recorregut L-K-L-L: entre l'atac i la llegada la bola toca la curta de dalt i la llarga esquerra, per això no es dibuixa amb la fórmula."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 50, llegada 0. Atac amb Verworst?",
+        "options": [
+          "50",
+          "47,5",
+          "52,5",
+          "45"
+        ],
+        "answer": 1,
+        "explain": "Correcció de la sortida 50: 2,5 → 50 − 0 − 2,5 = 47,5.",
+        "page": 262,
+        "path": [
+          {
+            "x": 1.09,
+            "y": 6.97
+          },
+          {
+            "x": 4,
+            "y": 4.95
+          },
+          {
+            "x": 0.71,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0.55
+          },
+          {
+            "x": 4,
+            "y": 6
+          }
+        ]
+      },
+      {
+        "q": "Sortida 20, llegada −10. Atac?",
+        "options": [
+          "25",
+          "30",
+          "5",
+          "15"
+        ],
+        "answer": 3,
+        "explain": "20 − (−10) − 15 = 15.",
+        "page": 262,
+        "path": [
+          {
+            "x": 1.13,
+            "y": 1.89
+          },
+          {
+            "x": 4,
+            "y": 1.54
+          },
+          {
+            "x": 1.1,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0.53
+          },
+          {
+            "x": 4,
+            "y": 5
+          }
+        ]
+      },
+      {
+        "q": "Quin número corrector té la sortida 35?",
+        "options": [
+          "10",
+          "7,5",
+          "12,5",
+          "15"
+        ],
+        "answer": 0,
+        "explain": "Fletxes: 15→12,5; 20→15; 25→15; 30→12,5; 35→10; 40→7,5; 45→5; 50→2,5.",
+        "page": 261
+      },
+      {
+        "q": "On es llegeixen els números de llegada en el sistema Verworst?",
+        "options": [
+          "Al mateix lloc que la sortida",
+          "A la llarga esquerra",
+          "A la banda llarga dreta (4a banda), per dins",
+          "A la curta de dalt"
+        ],
+        "answer": 2,
+        "explain": "«En la banda larga derecha puedes ver los números de llegada».",
+        "page": 262
+      },
+      {
+        "q": "Sortida 35, llegada 5. Atac?",
+        "options": [
+          "30",
+          "10",
+          "20",
+          "25"
+        ],
+        "answer": 2,
+        "explain": "35 − 5 − 10 = 20.",
+        "page": 262,
+        "path": [
+          {
+            "x": 1.38,
+            "y": 3.86
+          },
+          {
+            "x": 4,
+            "y": 2.22
+          },
+          {
+            "x": 1.71,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 1.54
+          },
+          {
+            "x": 4,
+            "y": 6.5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,869 @@
+{
+  "id": "posicions-11-20",
+  "name": "Posicions de preparació Nº 11-20",
+  "group": "Altres",
+  "attributed_to": null,
+  "pages": [
+    46,
+    55
+  ],
+  "purpose": "Deu posicions de tres bandes on, a més de fer el punt, es prepara la següent deixant la bola 2 en una zona marcada.",
+  "shot": {
+    "first_cushion": "bola",
+    "cushions": "majoritàriament bola 2 - L - C - L (o bola 2 - L - K - L curt prop de la curta de baix)",
+    "effect": "segons la posició",
+    "stroke": "suau i dolç en general; Nº 20 viu i baix",
+    "ball": "de molt fina (Nº 14, 19) a molta bola (Nº 20)"
+  },
+  "formula": null,
+  "steps": [
+    "Mira la zona ombrejada: és on ha d'acabar la bola 2 (línia groga discontínua).",
+    "Tria la presa de bola i l'efecte dels icones del costat (cercles superposats i punt al tac).",
+    "Concentra't primer a fer el punt; en moltes posicions la preparació surt sola si la velocitat és bona.",
+    "Mesura la velocitat per no ofegar la bola 1 amb la 3 (separar-les uns 15-20 cm) i evitar el retruc 1-2."
+  ],
+  "numberings": [],
+  "corrections": [],
+  "examples": [
+    {
+      "text": "Nº 11: Bola 1 més encarada a la 2 que a la Nº 10. Perill: portar la 2 al centre de la curta de dalt (com a la Nº 5). Millor separar-se una mica més de la 3 amb prou velocitat per dur la 2 al racó de dalt a l'esquerra. Presa: aprox. 1/2. Efecte: alt a l'esquerra. Bola 2 cap a: racó de dalt a l'esquerra. Número gran al dibuix: 3.",
+      "page": 46,
+      "path": [
+        {
+          "x": 1.24,
+          "y": 6.67
+        },
+        {
+          "x": 0.45,
+          "y": 6.55
+        },
+        {
+          "x": 0,
+          "y": 6.81
+        },
+        {
+          "x": 1.71,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 6.91
+        },
+        {
+          "x": 3.59,
+          "y": 6.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.39,
+          "y": 6.5,
+          "c": "yellow"
+        },
+        {
+          "x": 3.59,
+          "y": 6.5,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Nº 12: Fer el punt és fàcil, però cal mesurar bé la velocitat: massa força porta la 2 al centre de la curta de dalt o al racó de dalt a la dreta. Sol haver-hi retruc de la 1 amb la 2. La 1 ha de tocar la 3 per davant (no ho juguis a 4 o 5 bandes). Presa: aprox. 2/5. Efecte: a la dreta, una mica alt. Bola 2 cap a: llarga esquerra entre els diamants 2 i 5. Número gran al dibuix: 1.",
+      "page": 47,
+      "path": [
+        {
+          "x": 1.22,
+          "y": 6.66
+        },
+        {
+          "x": 0.33,
+          "y": 6.45
+        },
+        {
+          "x": 0,
+          "y": 5.99
+        },
+        {
+          "x": 2.96,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.11
+        },
+        {
+          "x": 0.14,
+          "y": 7.4
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.23,
+          "y": 6.5,
+          "c": "yellow"
+        },
+        {
+          "x": 0.14,
+          "y": 7.52,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Nº 13: La preparació està gairebé garantida; concentra't a fer el punt. Fins i tot amb menys bola la 2 queda al centre del billar. Mesura la velocitat per separar la 1 i la 3 uns 15-20 cm. No prenguis massa bola. Presa: aprox. 1/2. Efecte: a la dreta, una mica alt. Bola 2 cap a: centre de la taula (zona dreta). Número gran al dibuix: 2.",
+      "page": 48,
+      "path": [
+        {
+          "x": 2.49,
+          "y": 7.75
+        },
+        {
+          "x": 1.55,
+          "y": 7.7
+        },
+        {
+          "x": 0,
+          "y": 6.0
+        },
+        {
+          "x": 3.14,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.93
+        },
+        {
+          "x": 3.6,
+          "y": 1.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.5,
+          "y": 7.75,
+          "c": "yellow"
+        },
+        {
+          "x": 3.6,
+          "y": 1.5,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Nº 14: Es podria jugar a cinc bandes, però així es controla millor la preparació: la 3 surt cap al centre en lloc d'arraconar-la. Presa molt fina per deixar la 2 al racó de baix a l'esquerra. Afluixa una mica la mà de darrere. Presa: molt fina (aprox. 1/5). Efecte: gairebé centrat, lleugerament a la dreta. Bola 2 cap a: racó de baix a l'esquerra. Número gran al dibuix: 1.",
+      "page": 49,
+      "path": [
+        {
+          "x": 2.15,
+          "y": 7.16
+        },
+        {
+          "x": 1.6,
+          "y": 6.93
+        },
+        {
+          "x": 0,
+          "y": 5.55
+        },
+        {
+          "x": 3.18,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.8
+        },
+        {
+          "x": 3.59,
+          "y": 1.49
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.5,
+          "y": 6.98,
+          "c": "yellow"
+        },
+        {
+          "x": 3.59,
+          "y": 1.49,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Nº 15: Millor que el pase bola si volem preparar. Concentra't en fer el punt: amb la velocitat bona la preparació surt sola. Poca bola perquè la 1 passi abans que la 2 i no hi hagi retruc. Presa: poca (aprox. 1/3). Efecte: baix a la dreta. Bola 2 cap a: racó de dalt a l'esquerra. Número gran al dibuix: 2.",
+      "page": 50,
+      "path": [
+        {
+          "x": 1.99,
+          "y": 7.6
+        },
+        {
+          "x": 1.53,
+          "y": 7.65
+        },
+        {
+          "x": 0,
+          "y": 5.96
+        },
+        {
+          "x": 3.45,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.55
+        },
+        {
+          "x": 3.68,
+          "y": 0.98
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.48,
+          "y": 7.77,
+          "c": "yellow"
+        },
+        {
+          "x": 3.68,
+          "y": 0.98,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Nº 16: Preparació fàcil i natural: calcula velocitat, presa i efecte per dur la 2 al centre de la llarga i no ofegar la 1 amb la 3. Poca bola, efecte favorable, cop dolç sense allargar massa. Presa: poca (aprox. 1/4). Efecte: baix a la dreta. Bola 2 cap a: centre de la llarga esquerra. Número gran al dibuix: 1.",
+      "page": 51,
+      "path": [
+        {
+          "x": 3.32,
+          "y": 7.91
+        },
+        {
+          "x": 2.94,
+          "y": 7.8
+        },
+        {
+          "x": 0,
+          "y": 4.51
+        },
+        {
+          "x": 2.31,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.69
+        },
+        {
+          "x": 0.23,
+          "y": 7.65
+        }
+      ],
+      "balls": [
+        {
+          "x": 3.0,
+          "y": 7.91,
+          "c": "yellow"
+        },
+        {
+          "x": 0.23,
+          "y": 7.75,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Nº 17: Com la Nº 11 però amb la 1 una mica endarrerida respecte a la 2. Objectiu: la 2 al racó de dalt a la dreta o a prop de la llarga dreta a dalt. No t'ofeguis amb la 3: millor una mica més de velocitat encara que la 2 vagi al centre. No la prenguis massa fina o la 2 anirà al centre de la curta de dalt. Presa: aprox. 1/2. Efecte: a l'esquerra. Bola 2 cap a: racó de dalt a la dreta / part alta de la llarga dreta. Número gran al dibuix: 2.",
+      "page": 52,
+      "path": [
+        {
+          "x": 1.5,
+          "y": 7.0
+        },
+        {
+          "x": 1.08,
+          "y": 6.86
+        },
+        {
+          "x": 0,
+          "y": 7.23
+        },
+        {
+          "x": 1.1,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 6.79
+        },
+        {
+          "x": 3.6,
+          "y": 6.51
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.0,
+          "y": 6.76,
+          "c": "yellow"
+        },
+        {
+          "x": 3.6,
+          "y": 6.51,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Nº 18: Com la Nº 17 però amb les boles 1 i 2 un diamant més amunt: ara la 2 no arriba al racó de dalt. Es tracta de portar-la a la llarga dreta, a prop de les altres dues. Mateixa execució, amb el cop una mica més baix i molt dolç. Presa: una mica més de mitja. Efecte: baix a l'esquerra. Bola 2 cap a: llarga dreta, a mitja altura (prop de les altres boles). Número gran al dibuix: 2.",
+      "page": 53,
+      "path": [
+        {
+          "x": 1.5,
+          "y": 6.25
+        },
+        {
+          "x": 1.06,
+          "y": 6.1
+        },
+        {
+          "x": 0,
+          "y": 6.68
+        },
+        {
+          "x": 1.53,
+          "y": 8
+        },
+        {
+          "x": 4,
+          "y": 6.8
+        },
+        {
+          "x": 3.59,
+          "y": 6.51
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.99,
+          "y": 6.02,
+          "c": "yellow"
+        },
+        {
+          "x": 3.59,
+          "y": 6.51,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Nº 19: Cop suau, presa tirant a fina (afluixa la mà de darrere). Si cal, menys bola i una mica més d'efecte per evitar el retruc. L'arribada a la 3 és natural; la 2 pot anar a la llarga dreta o al centre. La 1 ha de passar abans. Presa: fina (aprox. 1/5). Efecte: alt, gairebé centrat. Bola 2 cap a: centre de la taula o llarga dreta. Número gran al dibuix: 2.",
+      "page": 54,
+      "path": [
+        {
+          "x": 1.41,
+          "y": 3.99
+        },
+        {
+          "x": 0.34,
+          "y": 2.94
+        },
+        {
+          "x": 0,
+          "y": 1.51
+        },
+        {
+          "x": 0.81,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.35
+        },
+        {
+          "x": 2.49,
+          "y": 7.74
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.25,
+          "y": 2.99,
+          "c": "yellow"
+        },
+        {
+          "x": 2.49,
+          "y": 7.74,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Nº 20: S'assembla a la Nº 19 però l'execució és diferent: molta bola i cop baix per enviar la 1 a la llarga esquerra a prop del racó, amb efecte favorable i molt viva. La 2 fa doblet i s'ha d'aturar prop del centre de la llarga dreta o al centre. La 2 ha de passar per la zona ratllada abans que la 1. Presa: molta (aprox. 2/3). Efecte: baix a la dreta. Bola 2 cap a: centre de la taula / centre de la llarga dreta (doblet). Número gran al dibuix: 2.",
+      "page": 55,
+      "path": [
+        {
+          "x": 2.0,
+          "y": 3.3
+        },
+        {
+          "x": 0.23,
+          "y": 2.95
+        },
+        {
+          "x": 0,
+          "y": 0.76
+        },
+        {
+          "x": 0.15,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 5.76
+        },
+        {
+          "x": 2.99,
+          "y": 7.75
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.15,
+          "y": 2.99,
+          "c": "yellow"
+        },
+        {
+          "x": 2.99,
+          "y": 7.75,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "No t'ofeguis: més val una mica més de velocitat i separar la 1 de la 3, encara que la 2 quedi menys ben col·locada.",
+    "Amb poca bola la 1 passa abans que la 2 i s'evita el retruc.",
+    "Per prendre fina, afluixa una mica la mà de darrere.",
+    "La 1 ha de tocar la 3 per davant per no tapar-la."
+  ],
+  "quotes": [
+    "ES PREFERIBLE ALGO MÁS DE VELOCIDAD Y SEPARARLAS ALGO MÁS AUNQUE IMPLIQUE LLEVAR LA BOLA 2 A LA ZONA CENTRAL DEL BILLAR.",
+    "PROCURA QUE LA 1 GOLPEE A LA 3 POR DELANTE PARA NO TAPARLA"
+  ],
+  "uncertain": [
+    "Cada dibuix té un número gran (3, 1, 2, 1, 2, 1, 2, 2, 2, 2 per a les Nº 11-20) que el llibre no explica en aquestes pàgines; potser és la velocitat o la dificultat.",
+    "La presa de bola s'ha estimat a partir del solapament dels dos cercles de l'icona; és aproximada.",
+    "Les posicions Nº 1-10 (a les quals es fa referència: Nº 5, Nº 10) no són dins d'aquest rang de pàgines.",
+    "Coordenades llegides de la quadrícula del dibuix (±0,1 diamants); el punt de contacte amb la bola 2 és aproximat."
+  ],
+  "trainer": {
+    "quiz": [
+      {
+        "q": "Nº 11: on cal portar la bola 2?",
+        "options": [
+          "Al racó de dalt a l'esquerra",
+          "Al centre de la curta de dalt",
+          "Al racó de dalt a la dreta",
+          "Al centre de la taula"
+        ],
+        "answer": 0,
+        "explain": "Cal evitar el centre de la curta de dalt; millor separar-se de la 3 i dur la 2 al racó de dalt a l'esquerra.",
+        "page": 46,
+        "path": [
+          {
+            "x": 1.24,
+            "y": 6.67
+          },
+          {
+            "x": 0.45,
+            "y": 6.55
+          },
+          {
+            "x": 0,
+            "y": 6.81
+          },
+          {
+            "x": 1.71,
+            "y": 8
+          },
+          {
+            "x": 4,
+            "y": 6.91
+          },
+          {
+            "x": 3.59,
+            "y": 6.5
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.39,
+            "y": 6.5,
+            "c": "yellow"
+          },
+          {
+            "x": 3.59,
+            "y": 6.5,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Nº 12: com ha de tocar la bola 1 la 3?",
+        "options": [
+          "Per davant, sense jugar-la a 4 o 5 bandes",
+          "Per darrere, a cinc bandes",
+          "De ple, amb força",
+          "Indiferent"
+        ],
+        "answer": 0,
+        "explain": "'Procura que la 1 golpee a la 3 por delante para no taparla, es decir, no la juegues a cuatro o cinco bandas.'",
+        "page": 47,
+        "path": [
+          {
+            "x": 1.22,
+            "y": 6.66
+          },
+          {
+            "x": 0.33,
+            "y": 6.45
+          },
+          {
+            "x": 0,
+            "y": 5.99
+          },
+          {
+            "x": 2.96,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.11
+          },
+          {
+            "x": 0.14,
+            "y": 7.4
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.23,
+            "y": 6.5,
+            "c": "yellow"
+          },
+          {
+            "x": 0.14,
+            "y": 7.52,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Nº 13: quina separació final entre la 1 i la 3 recomana el llibre?",
+        "options": [
+          "Uns 15-20 cm",
+          "Uns 5 cm",
+          "Mig metre",
+          "Un diamant exacte"
+        ],
+        "answer": 0,
+        "explain": "'Medir bien las velocidades para separar la 1 y la 3 unos 15-20 cm y no ahogarse.'",
+        "page": 48,
+        "path": [
+          {
+            "x": 2.49,
+            "y": 7.75
+          },
+          {
+            "x": 1.55,
+            "y": 7.7
+          },
+          {
+            "x": 0,
+            "y": 6.0
+          },
+          {
+            "x": 3.14,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.93
+          },
+          {
+            "x": 3.6,
+            "y": 1.5
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.5,
+            "y": 7.75,
+            "c": "yellow"
+          },
+          {
+            "x": 3.6,
+            "y": 1.5,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Nº 14: quina presa de bola cal?",
+        "options": [
+          "Molt fina, afluixant la mà de darrere",
+          "Mitja bola",
+          "Molta bola amb cop baix",
+          "Bola plena"
+        ],
+        "answer": 0,
+        "explain": "'Se trata de una toma de bola muy fina para dejar la bola 2 en el rincón inferior izquierdo.'",
+        "page": 49,
+        "path": [
+          {
+            "x": 2.15,
+            "y": 7.16
+          },
+          {
+            "x": 1.6,
+            "y": 6.93
+          },
+          {
+            "x": 0,
+            "y": 5.55
+          },
+          {
+            "x": 3.18,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.8
+          },
+          {
+            "x": 3.59,
+            "y": 1.49
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.5,
+            "y": 6.98,
+            "c": "yellow"
+          },
+          {
+            "x": 3.59,
+            "y": 1.49,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Nº 15: per què cal prendre poca bola?",
+        "options": [
+          "Perquè la 1 passi abans que la 2 i no hi hagi retruc",
+          "Per dur la 2 a la curta de baix",
+          "Per guanyar velocitat",
+          "Per fer el punt a cinc bandes"
+        ],
+        "answer": 0,
+        "explain": "'Debe ser más bien poca para lograr que la bola 1 pase antes que la 2 y no haya retruque.'",
+        "page": 50,
+        "path": [
+          {
+            "x": 1.99,
+            "y": 7.6
+          },
+          {
+            "x": 1.53,
+            "y": 7.65
+          },
+          {
+            "x": 0,
+            "y": 5.96
+          },
+          {
+            "x": 3.45,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.55
+          },
+          {
+            "x": 3.68,
+            "y": 0.98
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.48,
+            "y": 7.77,
+            "c": "yellow"
+          },
+          {
+            "x": 3.68,
+            "y": 0.98,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Nº 16: on ha d'acabar la bola 2?",
+        "options": [
+          "Al centre de la llarga esquerra",
+          "Al racó de baix a la dreta",
+          "A la curta de dalt",
+          "Al racó de dalt a l'esquerra"
+        ],
+        "answer": 0,
+        "explain": "Cal portar la 2 al centre de la banda llarga amb poca bola, efecte favorable i cop dolç.",
+        "page": 51,
+        "path": [
+          {
+            "x": 3.32,
+            "y": 7.91
+          },
+          {
+            "x": 2.94,
+            "y": 7.8
+          },
+          {
+            "x": 0,
+            "y": 4.51
+          },
+          {
+            "x": 2.31,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.69
+          },
+          {
+            "x": 0.23,
+            "y": 7.65
+          }
+        ],
+        "balls": [
+          {
+            "x": 3.0,
+            "y": 7.91,
+            "c": "yellow"
+          },
+          {
+            "x": 0.23,
+            "y": 7.75,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Nº 17: si dubtes de la velocitat, què és preferible?",
+        "options": [
+          "Una mica més de velocitat, encara que la 2 vagi al centre",
+          "Velocitat justa per no moure la 3",
+          "Prendre-la molt fina",
+          "Jugar-la a cinc bandes"
+        ],
+        "answer": 0,
+        "explain": "'Es preferible algo más de velocidad y separarlas algo más aunque implique llevar la bola 2 a la zona central.'",
+        "page": 52,
+        "path": [
+          {
+            "x": 1.5,
+            "y": 7.0
+          },
+          {
+            "x": 1.08,
+            "y": 6.86
+          },
+          {
+            "x": 0,
+            "y": 7.23
+          },
+          {
+            "x": 1.1,
+            "y": 8
+          },
+          {
+            "x": 4,
+            "y": 6.79
+          },
+          {
+            "x": 3.6,
+            "y": 6.51
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.0,
+            "y": 6.76,
+            "c": "yellow"
+          },
+          {
+            "x": 3.6,
+            "y": 6.51,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Nº 20: com s'executa, a diferència de la Nº 19?",
+        "options": [
+          "Molta bola i cop baix, bola 1 molt viva",
+          "Bola fina i cop suau",
+          "Sense efecte i cop alt",
+          "Mitja bola amb contraefecte"
+        ],
+        "answer": 0,
+        "explain": "La Nº 20 es juga 'mucha bola y golpe bajo', efecte favorable i molt viva; la 2 fa doblet.",
+        "page": 55,
+        "path": [
+          {
+            "x": 2.0,
+            "y": 3.3
+          },
+          {
+            "x": 0.23,
+            "y": 2.95
+          },
+          {
+            "x": 0,
+            "y": 0.76
+          },
+          {
+            "x": 0.15,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 5.76
+          },
+          {
+            "x": 2.99,
+            "y": 7.75
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.15,
+            "y": 2.99,
+            "c": "yellow"
+          },
+          {
+            "x": 2.99,
+            "y": 7.75,
+            "c": "red"
+          }
+        ]
+      }
+    ]
+  }
+}

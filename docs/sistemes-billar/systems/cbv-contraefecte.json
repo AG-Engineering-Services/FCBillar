@@ -1,0 +1,253 @@
+{
+  "id": "cbv-contraefecte",
+  "name": "El contraefecte",
+  "group": "Efecte contrari",
+  "attributed_to": null,
+  "pages": null,
+  "source": "PDF «El contraefecto», Club Billar València, pàg. 1–4",
+  "sort": 440,
+  "purpose": "Tres bandes llarga-llarga-curta amb efecte contrari màxim, com a últim recurs quan cap sistema d'efecte natural veu clara la jugada.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-L-K",
+    "effect": "efecte contrari màxim (4 al dibuix, lateral a la dreta)",
+    "stroke": "sistema molt delicat; el PDF no diu la velocitat",
+    "ball": "als exemples, bricole des del racó o atac directe a la bola 2"
+  },
+  "formula": "Atac = Sortida + Llegada / 2 (més compensació)",
+  "steps": [
+    "Llegeix la Sortida allargant la línia atac → bola 1 fins a la banda de sortida: banda llarga esquerra (15 a 40, base 40 al racó de baix) o banda curta de baix (42 al racó, 50, 60, 70, 80, 90).",
+    "Llegeix la Llegada a la banda curta de dalt (10, 20, 30 per diamant des del racó esquerre): és la tercera banda, d'on la bola va cap a la carambola.",
+    "Calcula Atac = Sortida + Llegada / 2 i apunta a aquest número de la banda llarga dreta (10 per diamant fins a 50; després 60, 70, 80, 90 cada mig diamant).",
+    "Compensa: resta 1 a l'atac per cada diamant que la sortida s'allunya del racó per la banda llarga; suma 1 per cada desena que s'allunya per la banda curta.",
+    "Juga sempre amb efecte màxim, contrari al gir natural."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        { "x": 0, "y": 3, "v": 15 },
+        { "x": 0, "y": 4, "v": 20 },
+        { "x": 0, "y": 5, "v": 25 },
+        { "x": 0, "y": 6, "v": 30 },
+        { "x": 0, "y": 7, "v": 35 },
+        { "x": 0, "y": 8, "v": 40 },
+        { "x": 0.1, "y": 8, "v": 42 },
+        { "x": 1, "y": 8, "v": 50 },
+        { "x": 2, "y": 8, "v": 60 },
+        { "x": 2.5, "y": 8, "v": 70 },
+        { "x": 3, "y": 8, "v": 80 },
+        { "x": 3.5, "y": 8, "v": 90 }
+      ],
+      "note": "Dibuixos ja en vertical; no cal girar. Base 40 al racó de baix a l'esquerra: 5 per diamant a la banda llarga. El 42 és el diamant del racó del costat de la banda curta (dibuixat al mateix racó; aquí desplaçat 0,1 perquè no se solapi amb el 40). A la banda curta, 60-90 van cada mig diamant."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        { "x": 4, "y": 1, "v": 10 },
+        { "x": 4, "y": 2, "v": 20 },
+        { "x": 4, "y": 3, "v": 30 },
+        { "x": 4, "y": 4, "v": 40 },
+        { "x": 4, "y": 5, "v": 50 },
+        { "x": 4, "y": 5.5, "v": 60 },
+        { "x": 4, "y": 6, "v": 70 },
+        { "x": 4, "y": 6.5, "v": 80 },
+        { "x": 4, "y": 7, "v": 90 }
+      ],
+      "note": "Banda llarga dreta, des del racó de dalt. A partir de 50 la graduació és de 10 cada mig diamant."
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        { "x": 1, "y": 0, "v": 10 },
+        { "x": 2, "y": 0, "v": 20 },
+        { "x": 3, "y": 0, "v": 30 }
+      ],
+      "note": "Banda curta de dalt, des del racó esquerre (el PDF només numera 10, 20 i 30)."
+    }
+  ],
+  "corrections": [
+    "Sortida per la banda llarga: resta 1 punt a l'atac per cada diamant de desplaçament (exemple: sortida 30, dos diamants per sobre del racó 40 → −2).",
+    "Sortida per la banda curta: suma 1 punt a l'atac per cada desena de desplaçament (exemple: sortida 70 → +3)."
+  ],
+  "examples": [
+    {
+      "text": "Sortida 40 (racó), llegada 10: 40 + 10/2 = atac 45",
+      "page": 3,
+      "path": [
+        { "x": 1.19, "y": 6.88 },
+        { "x": 4, "y": 4.6 },
+        { "x": 0, "y": 1.04 },
+        { "x": 1, "y": 0 },
+        { "x": 2.26, "y": 0.98 }
+      ],
+      "balls": [
+        { "x": 2.26, "y": 0.98, "c": "yellow" },
+        { "x": 2.17, "y": 1.22, "c": "red" }
+      ]
+    },
+    {
+      "text": "Atac directe a la bola 2. Sortida 30, llegada 16: 30 + 16/2 − 2 (sortida a la banda llarga) = atac 36",
+      "page": 4,
+      "path": [
+        { "x": 1.48, "y": 6.16 },
+        { "x": 2.2, "y": 4.5 },
+        { "x": 4, "y": 3.62 },
+        { "x": 0, "y": 1.16 },
+        { "x": 1.61, "y": 0 },
+        { "x": 2.91, "y": 0.82 }
+      ],
+      "balls": [
+        { "x": 2.2, "y": 4.5, "c": "yellow" },
+        { "x": 2.91, "y": 0.82, "c": "red" }
+      ]
+    },
+    {
+      "text": "Atac directe a la bola 2. Sortida 70, llegada 20: 70 + 20/2 + 3 (sortida a la banda curta) = atac 83",
+      "page": 4,
+      "path": [
+        { "x": 2.19, "y": 7.77 },
+        { "x": 3.15, "y": 7.75 },
+        { "x": 4, "y": 6.77 },
+        { "x": 0, "y": 2.96 },
+        { "x": 1.99, "y": 0 },
+        { "x": 3.49, "y": 1.49 }
+      ],
+      "balls": [
+        { "x": 3.15, "y": 7.75, "c": "yellow" },
+        { "x": 3.49, "y": 1.49, "c": "red" }
+      ]
+    }
+  ],
+  "tips": [
+    "És un sistema molt delicat: les boles solen estar en posicions complicades.",
+    "Fes-lo servir com a última opció, quan no vegis clara la jugada amb cap mètode d'efecte natural.",
+    "Juga sempre amb efecte màxim."
+  ],
+  "quotes": [
+    "Ataque= Salida + Llegada/2",
+    "Por cada rombo que nos desplacemos por banda larga, se restará un punto en el ataque; por cada decena que nos desplacemos en banda corta sumaremos un punto al ataque."
+  ],
+  "uncertain": [
+    "El PDF no diu des d'on es compta el desplaçament de les compensacions; els dos exemples encaixen comptant des del racó de sortida (40): 30 → −2, 70 → +3.",
+    "No hi ha autor indicat dins el PDF (a les metadades només surt l'usuari que el va pujar, «Julio A»).",
+    "No es diu la velocitat ni l'alçada del cop; el dibuix només marca efecte 4 a la dreta, a mitja alçada.",
+    "El 42 del racó de la banda curta no s'explica; no es fa servir als exemples.",
+    "Els dibuixos mostren unes línies d'ajuda «3'25 Diamonds/Diamantes» (paral·lela des del racó de dalt i distància bola–primera banda) que el text no explica.",
+    "La Llegada només està numerada fins a 30; no es diu què passa més enllà.",
+    "Recorreguts mesurats als dibuixos (±0,1 diamant); el contacte a la primera banda queda una mica per sota del número d'atac, com és habitual."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": { "label": "Sortida", "numbering": "Sortida" },
+        "A": { "label": "Atac", "numbering": "Atac" },
+        "L": { "label": "Llegada", "numbering": "Llegada" }
+      },
+      "inputs": {
+        "S": [15, 20, 25, 30, 35, 40, 50, 60, 70, 80],
+        "L": [0, 5, 10, 15, 16, 20, 25, 30],
+        "A": [20, 25, 30, 36, 40, 45, 50, 60, 70, 80, 83, 90]
+      },
+      "relations": [
+        { "solve": "A", "expr": "S + L / 2 - (40 - S) / 5", "when": "S <= 40", "label": "sortida per la banda llarga (−1 per diamant)" },
+        { "solve": "A", "expr": "S + L / 2 + (S - 40) / 10", "when": "S >= 50", "label": "sortida per la banda curta (+1 per desena)" },
+        { "solve": "L", "expr": "2 * (A - S + (40 - S) / 5)", "when": "S <= 40", "label": "quina llegada dona aquest atac (banda llarga)" },
+        { "solve": "L", "expr": "2 * (A - S - (S - 40) / 10)", "when": "S >= 50", "label": "quina llegada dona aquest atac (banda curta)" }
+      ],
+      "valid": "A >= 10 && A <= 90 && L >= 0 && L <= 30",
+      "round": 1,
+      "path": ["S", "A", "L"],
+      "note": "Compensació comptada des del racó 40 (deduïda dels exemples). El recorregut generat no dibuixa el toc a la banda llarga esquerra entre l'atac i la llegada."
+    },
+    "quiz": [
+      {
+        "q": "Quina és la fórmula del contraefecte?",
+        "options": ["Atac = Sortida + Llegada / 2", "Atac = Sortida − Llegada / 2", "Atac = Sortida − Llegada", "Atac = Sortida + Llegada"],
+        "answer": 0,
+        "explain": "El PDF: «Ataque = Salida + Llegada/2», amb base 40 a la banda de sortida.",
+        "page": 1
+      },
+      {
+        "q": "Quin efecte s'hi fa servir?",
+        "options": ["Efecte màxim, contrari", "Efecte 2 natural", "Sense efecte", "Efecte 1 contrari"],
+        "answer": 0,
+        "explain": "«Jugaremos siempre con efecto máximo»; els dibuixos marquen efecte 4.",
+        "page": 1
+      },
+      {
+        "q": "Sortida 40 (racó), llegada 10. On ataques?",
+        "options": ["45", "35", "50", "40"],
+        "answer": 0,
+        "explain": "40 + 10/2 = 45; des del racó no hi ha compensació.",
+        "page": 3,
+        "path": [
+          { "x": 1.19, "y": 6.88 },
+          { "x": 4, "y": 4.6 },
+          { "x": 0, "y": 1.04 },
+          { "x": 1, "y": 0 },
+          { "x": 2.26, "y": 0.98 }
+        ],
+        "balls": [
+          { "x": 2.26, "y": 0.98, "c": "yellow" },
+          { "x": 2.17, "y": 1.22, "c": "red" }
+        ]
+      },
+      {
+        "q": "Sortida 30 a la banda llarga, llegada 16. On ataques?",
+        "options": ["36", "38", "40", "33"],
+        "answer": 0,
+        "explain": "30 + 16/2 = 38; la sortida és 2 diamants per sobre del racó a la banda llarga: −2 → 36.",
+        "page": 4,
+        "path": [
+          { "x": 1.48, "y": 6.16 },
+          { "x": 2.2, "y": 4.5 },
+          { "x": 4, "y": 3.62 },
+          { "x": 0, "y": 1.16 },
+          { "x": 1.61, "y": 0 },
+          { "x": 2.91, "y": 0.82 }
+        ],
+        "balls": [
+          { "x": 2.2, "y": 4.5, "c": "yellow" },
+          { "x": 2.91, "y": 0.82, "c": "red" }
+        ]
+      },
+      {
+        "q": "Sortida 70 a la banda curta, llegada 20. On ataques?",
+        "options": ["83", "80", "77", "90"],
+        "answer": 0,
+        "explain": "70 + 20/2 = 80; 3 desenes per la banda curta: +3 → 83.",
+        "page": 4,
+        "path": [
+          { "x": 2.19, "y": 7.77 },
+          { "x": 3.15, "y": 7.75 },
+          { "x": 4, "y": 6.77 },
+          { "x": 0, "y": 2.96 },
+          { "x": 1.99, "y": 0 },
+          { "x": 3.49, "y": 1.49 }
+        ],
+        "balls": [
+          { "x": 3.15, "y": 7.75, "c": "yellow" },
+          { "x": 3.49, "y": 1.49, "c": "red" }
+        ]
+      },
+      {
+        "q": "Com es compensa quan la sortida es desplaça per la banda curta?",
+        "options": ["+1 a l'atac per cada desena", "−1 a l'atac per cada desena", "−1 a l'atac per cada diamant", "+5 a l'atac"],
+        "answer": 0,
+        "explain": "Banda curta: +1 per desena. Banda llarga: −1 per diamant.",
+        "page": 3
+      },
+      {
+        "q": "Quan convé fer servir el contraefecte?",
+        "options": ["Com a última opció, si cap sistema d'efecte natural veu clara la jugada", "Sempre que la bola 2 sigui al racó", "Per a totes les jugades de banda curta", "Quan cal jugar fluix i sense efecte"],
+        "answer": 0,
+        "explain": "És molt delicat i les boles solen estar en posició complicada: «lo utilizaremos como última opción».",
+        "page": 1
+      }
+    ]
+  }
+}

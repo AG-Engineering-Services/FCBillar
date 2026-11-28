@@ -1,0 +1,935 @@
+{
+  "id": "plus-zona-1",
+  "name": "Sistema Plus, zona 1 (sortides del 20 al 60)",
+  "group": "Sistema Plus",
+  "attributed_to": "Jean Verworst (Berekend Biljarten)",
+  "pages": [
+    113,
+    120
+  ],
+  "purpose": "Tres bandes curta-llarga-llarga amb efecte a favor sortint de la banda llarga entre el 2n i el 6è diamant.",
+  "shot": {
+    "first_cushion": "curta",
+    "cushions": "K-L-L (i prolongació a 4a banda)",
+    "effect": "efecte a favor, entre 3 i 4 segons la mecànica de cada jugador",
+    "stroke": "velocitat moderada: arribar a la tercera banda i separar-se de la bola 3 uns 30 cm",
+    "ball": null
+  },
+  "formula": "Atac = Llegada − Sortida",
+  "steps": [
+    "Llegeix la sortida al diamant de la banda llarga (20 a 60), com fa Verworst.",
+    "Tria la llegada a la mateixa banda llarga (0 a 80, i 90-120 a la curta inferior).",
+    "Resta llegada − sortida i ataca aquest número de la curta superior.",
+    "El racó no val 0: el seu valor depèn de la sortida (vegeu correccions)."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 60
+        }
+      ],
+      "note": "Dibuix ja en vertical; cap rotació. Sortida a la banda llarga esquerra, atac a la curta superior. Es pren al diamant (Verworst); l'autor personalment fa servir el vèrtex de la banda a l'alçada del diamant."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 2,
+          "y": 0,
+          "v": 50
+        },
+        {
+          "x": 2.5,
+          "y": 0,
+          "v": 40
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "v": 30
+        },
+        {
+          "x": 3.5,
+          "y": 0,
+          "v": 20
+        },
+        {
+          "x": 3.67,
+          "y": 0,
+          "v": 19
+        },
+        {
+          "x": 3.83,
+          "y": 0,
+          "v": 18
+        }
+      ],
+      "note": "El racó (x=4) té valor variable segons la sortida. El 19 i el 18 només per a sortida 20 (tram 20-racó dividit en tres)."
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 50
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 60
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 70
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 80
+        },
+        {
+          "x": 0.5,
+          "y": 8,
+          "v": 90
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "v": 100
+        },
+        {
+          "x": 1.5,
+          "y": 8,
+          "v": 110
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "v": 120
+        }
+      ],
+      "note": "Numeració bàsica del Plus: banda llarga esquerra de 0 a 80 i curta inferior de 90 a 120."
+    }
+  ],
+  "corrections": [
+    "Valor del racó segons la sortida: sortida 20 → 17; 30 → 15; 40 → 10; 50 → 5; 60 → 0. La resta de números no canvien.",
+    "Sortida 20: l'atac 10 no existeix; tirant al racó (17) s'arriba a 37, no es pot arribar a 30.",
+    "Sortida 20: entre el racó (17) i el 20 el tram es divideix en tres per obtenir 18 i 19.",
+    "Atacant la bola 2 per la dreta, efecte 3; per l'esquerra, efecte 4 (compensa l'efecte que dona la bola 2)."
+  ],
+  "examples": [
+    {
+      "text": "Sistema simple: la distància de sortida a llegada (3 diamants) dividida per 2 (1,5) és l'atac mesurat des del racó (figura apaïsada girada a vertical)",
+      "page": 113,
+      "path": [
+        {
+          "x": 0.3,
+          "y": 2.7
+        },
+        {
+          "x": 2.5,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.05
+        },
+        {
+          "x": 0,
+          "y": 6
+        }
+      ]
+    },
+    {
+      "text": "Sortida 20, atac al racó (val 17) → llegada 37",
+      "page": 116,
+      "path": [
+        {
+          "x": 0.6,
+          "y": 1.75
+        },
+        {
+          "x": 3.3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.3
+        },
+        {
+          "x": 0,
+          "y": 3.7
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.3,
+          "y": 4.2,
+          "c": "yellow"
+        },
+        {
+          "x": 0.54,
+          "y": 4.1,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 30, llegada 45 → 45 − 30 = 15 (el racó)",
+      "page": 117,
+      "path": [
+        {
+          "x": 0.25,
+          "y": 2.6
+        },
+        {
+          "x": 3.6,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.45
+        },
+        {
+          "x": 0,
+          "y": 4.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.23,
+          "y": 5.1,
+          "c": "yellow"
+        },
+        {
+          "x": 0.42,
+          "y": 4.95,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 40, llegada 50 → 50 − 40 = 10 (el racó)",
+      "page": 118,
+      "path": [
+        {
+          "x": 0.25,
+          "y": 3.35
+        },
+        {
+          "x": 3.65,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.4
+        },
+        {
+          "x": 0,
+          "y": 5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.43,
+          "y": 5.4,
+          "c": "yellow"
+        },
+        {
+          "x": 0.25,
+          "y": 5.55,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 40, llegada 70 → 70 − 40 = 30",
+      "page": 118,
+      "path": [
+        {
+          "x": 0.2,
+          "y": 3.55
+        },
+        {
+          "x": 2.75,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1.4
+        },
+        {
+          "x": 0,
+          "y": 7
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.48,
+          "y": 7.55,
+          "c": "yellow"
+        },
+        {
+          "x": 0.28,
+          "y": 7.7,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 30, llegada 50 → atac 20; tocant la bola 2 per la dreta, efecte 3",
+      "page": 119,
+      "path": [
+        {
+          "x": 1.29,
+          "y": 2.14
+        },
+        {
+          "x": 1.44,
+          "y": 1.49
+        },
+        {
+          "x": 2.97,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.8
+        },
+        {
+          "x": 0,
+          "y": 4.98
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.32,
+          "y": 1.35,
+          "c": "yellow"
+        },
+        {
+          "x": 0.42,
+          "y": 5.45,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 30, llegada 50 → atac 20; tocant la bola 2 per l'esquerra, efecte 4",
+      "page": 120,
+      "path": [
+        {
+          "x": 0.68,
+          "y": 1.72
+        },
+        {
+          "x": 1.41,
+          "y": 1.48
+        },
+        {
+          "x": 2.94,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.83
+        },
+        {
+          "x": 0,
+          "y": 4.95
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.52,
+          "y": 1.6,
+          "c": "yellow"
+        },
+        {
+          "x": 0.4,
+          "y": 5.46,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bricola (sense tocar primer la bola 2): sortida 30, llegada 50 → 50 − 30 = atac 20 (PDF Club Billar València, Sistema-Plus.pdf p. 2)",
+      "page": 2,
+      "path": [
+        {
+          "x": 0.59,
+          "y": 2.29
+        },
+        {
+          "x": 3.3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.66
+        },
+        {
+          "x": 0,
+          "y": 5
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.28,
+          "y": 5.71,
+          "c": "yellow"
+        },
+        {
+          "x": 0.55,
+          "y": 5.56,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola 2 primer: sortida 30, llegada 45 → 45 − 30 = 15, que és el racó (amb sortida 30 el racó val 15) (PDF Club Billar València, Sistema-Plus.pdf p. 3)",
+      "page": 3,
+      "path": [
+        {
+          "x": 1.14,
+          "y": 2.71
+        },
+        {
+          "x": 1.48,
+          "y": 1.65
+        },
+        {
+          "x": 3.85,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.2
+        },
+        {
+          "x": 0,
+          "y": 4.5
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.44,
+          "y": 1.57,
+          "c": "yellow"
+        },
+        {
+          "x": 1.31,
+          "y": 5.91,
+          "c": "red"
+        }
+      ]
+    },
+    {
+      "text": "Bola 2 primer: sortida 40, llegada 60 → 60 − 40 = atac 20 (PDF Club Billar València, Sistema-Plus.pdf p. 3)",
+      "page": 3,
+      "path": [
+        {
+          "x": 0.98,
+          "y": 1.9
+        },
+        {
+          "x": 2.11,
+          "y": 1.43
+        },
+        {
+          "x": 3.34,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0.64
+        },
+        {
+          "x": 0,
+          "y": 6
+        }
+      ],
+      "balls": [
+        {
+          "x": 2.2,
+          "y": 1.52,
+          "c": "yellow"
+        },
+        {
+          "x": 1.0,
+          "y": 7.88,
+          "c": "red"
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Hi ha poques rectificacions, però una petita variació de velocitat o efecte canvia molt la trajectòria, sobretot atacant a prop del racó: cal entrenar-lo a fons.",
+    "Atacant la bola 2 en lloc de bricola, la bola 1 agafa un lleu efecte cap al costat per on toques la bola 2: compensa-ho amb l'efecte.",
+    "Sistema simple (d'un jugador de baix promig): mesura la distància a la banda de sortida a llegada, divideix per 2 i ataca aquesta distància a la curta, des del racó. Funciona força bé amb sortides i llegades del 3r diamant endavant.",
+    "No et refiïs gaire de la sortida 20: és la frontera amb la zona 2 i cal practicar-la més."
+  ],
+  "quotes": [
+    "si tiras al rincón desde la salida 20 obtienes la llegada 20 + 17 = 37"
+  ],
+  "uncertain": [
+    "La numeració d'atac de la zona 1 només mostra 50 a 20 i el racó; per a atacs més enllà del 50 se suposa la numeració bàsica del Plus (p. 114).",
+    "El llibre parla d'efecte 3 i 4 sense definir l'escala (probablement en quarts de l'efecte màxim)."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        }
+      },
+      "inputs": {
+        "S": [
+          20,
+          30,
+          40,
+          50,
+          60
+        ],
+        "L": [
+          40,
+          45,
+          50,
+          55,
+          60,
+          65,
+          70,
+          75,
+          80
+        ],
+        "A": [
+          20,
+          25,
+          30,
+          35,
+          40,
+          45,
+          50
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "L - S"
+        },
+        {
+          "solve": "L",
+          "expr": "S + A"
+        }
+      ],
+      "tables": {
+        "raco": {
+          "20": 17,
+          "30": 15,
+          "40": 10,
+          "50": 5,
+          "60": 0
+        }
+      },
+      "valid": "A >= 20 && A <= 50 && L <= 80 && A >= T.raco[S]",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Efecte a favor 3-4 i velocitat moderada. Els atacs al racó (valor segons la sortida) es treballen al qüestionari."
+    },
+    "quiz": [
+      {
+        "q": "Sortida 40, llegada 70. Atac?",
+        "options": [
+          "30",
+          "110",
+          "40",
+          "10"
+        ],
+        "answer": 0,
+        "explain": "Atac = llegada − sortida = 70 − 40 = 30.",
+        "page": 118,
+        "path": [
+          {
+            "x": 0.2,
+            "y": 3.55
+          },
+          {
+            "x": 2.75,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.4
+          },
+          {
+            "x": 0,
+            "y": 7
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.48,
+            "y": 7.55,
+            "c": "yellow"
+          },
+          {
+            "x": 0.28,
+            "y": 7.7,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 20, tires al racó. On arribes?",
+        "options": [
+          "Al 37",
+          "Al 20",
+          "Al 40",
+          "Al 30"
+        ],
+        "answer": 0,
+        "explain": "Des de la sortida 20 el racó val 17: 20 + 17 = 37.",
+        "page": 116,
+        "path": [
+          {
+            "x": 0.6,
+            "y": 1.75
+          },
+          {
+            "x": 3.3,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.3
+          },
+          {
+            "x": 0,
+            "y": 3.7
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.3,
+            "y": 4.2,
+            "c": "yellow"
+          },
+          {
+            "x": 0.54,
+            "y": 4.1,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Quant val el racó amb sortida 50?",
+        "options": [
+          "5",
+          "0",
+          "10",
+          "15"
+        ],
+        "answer": 0,
+        "explain": "Valors del racó: 20→17, 30→15, 40→10, 50→5, 60→0.",
+        "page": 115
+      },
+      {
+        "q": "Sortida 30, llegada 45. On ataques?",
+        "options": [
+          "Al racó (val 15)",
+          "Al 20",
+          "Al 45",
+          "Al 30"
+        ],
+        "answer": 0,
+        "explain": "45 − 30 = 15, que per a sortida 30 és el racó.",
+        "page": 117,
+        "path": [
+          {
+            "x": 0.25,
+            "y": 2.6
+          },
+          {
+            "x": 3.6,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.45
+          },
+          {
+            "x": 0,
+            "y": 4.5
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.23,
+            "y": 5.1,
+            "c": "yellow"
+          },
+          {
+            "x": 0.42,
+            "y": 4.95,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Toques la bola 2 per la dreta per atacar el 20 des de la sortida 30. Quin efecte?",
+        "options": [
+          "Efecte 3",
+          "Efecte 4",
+          "Efecte màxim",
+          "Sense efecte"
+        ],
+        "answer": 0,
+        "explain": "La bola 1 agafa un lleu efecte dret, per això efecte 3; si no, es tanquen els angles al racó.",
+        "page": 119,
+        "path": [
+          {
+            "x": 1.29,
+            "y": 2.14
+          },
+          {
+            "x": 1.44,
+            "y": 1.49
+          },
+          {
+            "x": 2.97,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.8
+          },
+          {
+            "x": 0,
+            "y": 4.98
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.32,
+            "y": 1.35,
+            "c": "yellow"
+          },
+          {
+            "x": 0.42,
+            "y": 5.45,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Amb sortida 20 pots arribar a la llegada 30?",
+        "options": [
+          "No: el mínim és 37 (racó)",
+          "Sí, atacant el 10",
+          "Sí, atacant el 17",
+          "Només amb efecte contrari"
+        ],
+        "answer": 0,
+        "explain": "Des de la sortida 20 l'atac 10 no existeix.",
+        "page": 116
+      },
+      {
+        "q": "Quines sortides cobreix la zona 1?",
+        "options": [
+          "Del 2n al 6è diamant (20 a 60)",
+          "Del 0 al 20",
+          "Més enllà del 60",
+          "Només el 40"
+        ],
+        "answer": 0,
+        "explain": "Zona 1: salidas desde el 2º al 6º rombo.",
+        "page": 113
+      },
+      {
+        "q": "Sistema simple del p. 113: sortida i llegada separades 3 diamants. Atac des del racó?",
+        "options": [
+          "1,5 diamants",
+          "3 diamants",
+          "6 diamants",
+          "0,75 diamants"
+        ],
+        "answer": 0,
+        "explain": "Es divideix per 2 la distància de sortida a llegada.",
+        "page": 113,
+        "path": [
+          {
+            "x": 0.3,
+            "y": 2.7
+          },
+          {
+            "x": 2.5,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 1.05
+          },
+          {
+            "x": 0,
+            "y": 6
+          }
+        ]
+      },
+      {
+        "q": "Sortida 40, llegada 60, tocant primer la bola 2. Atac?",
+        "options": [
+          "20",
+          "100",
+          "40",
+          "10"
+        ],
+        "answer": 0,
+        "explain": "Atac = llegada − sortida = 60 − 40 = 20 (PDF Club Billar València, Sistema-Plus.pdf p. 3)",
+        "page": 3,
+        "path": [
+          {
+            "x": 0.98,
+            "y": 1.9
+          },
+          {
+            "x": 2.11,
+            "y": 1.43
+          },
+          {
+            "x": 3.34,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.64
+          },
+          {
+            "x": 0,
+            "y": 6
+          }
+        ],
+        "balls": [
+          {
+            "x": 2.2,
+            "y": 1.52,
+            "c": "yellow"
+          },
+          {
+            "x": 1.0,
+            "y": 7.88,
+            "c": "red"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 30, bricola directa sense tocar la bola 2, llegada 50. On ataques?",
+        "options": [
+          "Al 20",
+          "Al racó (15)",
+          "Al 30",
+          "Al 50"
+        ],
+        "answer": 0,
+        "explain": "50 − 30 = 20; la fórmula és la mateixa amb bricola o amb bola 2 (PDF Club Billar València, Sistema-Plus.pdf p. 2)",
+        "page": 2,
+        "path": [
+          {
+            "x": 0.59,
+            "y": 2.29
+          },
+          {
+            "x": 3.3,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0.66
+          },
+          {
+            "x": 0,
+            "y": 5
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.28,
+            "y": 5.71,
+            "c": "yellow"
+          },
+          {
+            "x": 0.55,
+            "y": 5.56,
+            "c": "red"
+          }
+        ]
+      }
+    ]
+  }
+}

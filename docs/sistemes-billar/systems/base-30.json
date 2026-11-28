@@ -1,0 +1,956 @@
+{
+ "id": "base-30",
+ "name": "La base 30",
+ "group": "Altres",
+ "attributed_to": "Jean Verworst (Berekend Biljarten); exposat i adaptat per José Lazo",
+ "pages": [
+  1,
+  18
+ ],
+ "purpose": "Tres bandes des d'una banda llarga atacant la llarga oposada, passant per curta i tornant a la llarga oposada, amb arribada a prop del racó inferior (no al centre de la taula).",
+ "shot": {
+  "first_cushion": "llarga",
+  "cushions": "L-K-L-L (primera banda: la llarga oposada al punt 30; volta al racó curta-llarga de dalt; arribada a la llarga oposada)",
+  "effect": "Favorable (cap al racó). Bricole: efecte 1-2. Bola 2 per dins: efecte 2. Bola 2 per fora: menys efecte, d'1 fins a 0.",
+  "stroke": "Cop suau i allargat sense exagerar, velocitat moderada per arribar a la banda d'arribada sense gaire força. Si la 1 i la 2 són gairebé paral·leles a la llarga: cop sec, sense efecte i sense excés de força.",
+  "ball": "Bricole, o bé bola 2 presa per dins ('rodada') o per fora ('cabanyes projectades'); vigilar el retruc de la 1 amb la 2."
+ },
+ "formula": "Atac = 30 − 0,75 × (Llegada − Sortida). Distàncies en punts, 10 punts per diamant, comptats de dalt cap avall a cada banda llarga (escales Sortida i Llegada). Si la llegada és davant la sortida, Atac = 30.",
+ "steps": [
+  "Decideix el punt de llegada a la banda llarga de la dreta (la d'atac).",
+  "Traça una perpendicular des d'aquest punt fins a la banda llarga de sortida: és la sortida que correspon a atacar la base 30.",
+  "Des d'aquest punt traça la línia fins a la base 30 (tercer diamant de la banda d'atac). Comprova si és tangent a la bola 2 o si hi és la bola 1 (bricole).",
+  "Si la bola queda més amunt o més avall, desplaça la línia: 10 punts a la banda de sortida per cada 7,5 punts a la banda d'atac, fins que la línia toqui la bola 2 (o passi per la bola 1). Aquell és el punt d'atac.",
+  "Tria efecte i cop segons el tipus de presa (bricole, per dins o per fora de la bola 2)."
+ ],
+ "numberings": [
+  {
+   "name": "Atac (base 30 i correccions)",
+   "role": "atac",
+   "points": [
+    {
+     "x": 4,
+     "y": 0.75,
+     "v": 7.5
+    },
+    {
+     "x": 4,
+     "y": 1.5,
+     "v": 15
+    },
+    {
+     "x": 4,
+     "y": 2.25,
+     "v": 22.5
+    },
+    {
+     "x": 4,
+     "y": 3,
+     "v": 30
+    },
+    {
+     "x": 4,
+     "y": 3.75,
+     "v": 37.5
+    }
+   ],
+   "note": "Els dibuixos del llibre ja són verticals: sortida a la banda llarga esquerra (x=0), atac a la llarga dreta (x=4), racó de la volta a dalt. Només el 30 surt rotulat; la resta són la base 30 desplaçada de 7,5 en 7,5 tal com es veu als gràfics (el llibre cita explícitament 37,5)."
+  },
+  {
+   "name": "Sortida",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 0,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 1,
+     "v": 10
+    },
+    {
+     "x": 0,
+     "y": 2,
+     "v": 20
+    },
+    {
+     "x": 0,
+     "y": 3,
+     "v": 30
+    },
+    {
+     "x": 0,
+     "y": 4,
+     "v": 40
+    },
+    {
+     "x": 0,
+     "y": 5,
+     "v": 50
+    },
+    {
+     "x": 0,
+     "y": 6,
+     "v": 60
+    },
+    {
+     "x": 0,
+     "y": 7,
+     "v": 70
+    },
+    {
+     "x": 0,
+     "y": 8,
+     "v": 80
+    }
+   ],
+   "note": "El sistema no numera la sortida: només compta distàncies, 10 punts per diamant. Aquesta escala (0 a dalt, 80 a baix) és per mesurar diferències; no és del llibre."
+  },
+  {
+   "name": "Llegada",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 4,
+     "y": 1,
+     "v": 10
+    },
+    {
+     "x": 4,
+     "y": 2,
+     "v": 20
+    },
+    {
+     "x": 4,
+     "y": 3,
+     "v": 30
+    },
+    {
+     "x": 4,
+     "y": 4,
+     "v": 40
+    },
+    {
+     "x": 4,
+     "y": 5,
+     "v": 50
+    },
+    {
+     "x": 4,
+     "y": 6,
+     "v": 60
+    },
+    {
+     "x": 4,
+     "y": 7,
+     "v": 70
+    },
+    {
+     "x": 4,
+     "y": 8,
+     "v": 80
+    }
+   ],
+   "note": "Mateixa escala que la sortida, a la banda llarga d'atac: llegada 'davant' la sortida vol dir mateix valor."
+  }
+ ],
+ "corrections": [
+  "Llegada davant la sortida: atac a la base 30 (y=3).",
+  "Per cada 10 punts (1 diamant) de desviació de la llegada respecte de la sortida, corregeix l'atac 7,5 punts en sentit contrari.",
+  "Llegada 10 punts més avall que la sortida → atac 7,5 punts més amunt del 30 (punt 22,5).",
+  "Llegada 20 punts més avall → atac 15 punts més amunt (punt 15).",
+  "Llegada 30 punts més avall → atac 22,5 punts més amunt (punt 7,5) (pàg. 17-18).",
+  "Llegada 10 punts més amunt que la sortida → atac 7,5 punts més avall del 30 (punt 37,5).",
+  "Quan s'ataca per sota del 30 amb la bola 2 per fora, la 1 agafa gir favorable: cal menys efecte, però prou per fer la volta al racó curta-llarga. Comprova-ho amb la teoria de diamants: sortida 45 i atac 37,5 donen arribada 7,5 amb efecte 3-4; amb efecte 2 l'arribada és aprox. 2,5 (7,5 − 5); amb efecte 1 és inviable si no s'ataca una mica més amunt.",
+  "Efecte segons la presa: bricole 1-2 (segons el drap); bola 2 per dins, efecte 2; si la bola 1 es desplaça i queda més paral·lela, treu efecte (aprox. 1, no alt per evitar el semicorregut) o cop més sec; amb la 1 i la 2 gairebé paral·leles a la llarga, cop sec i sense efecte; bola 2 per fora, menys efecte que per dins, fins a 0."
+ ],
+ "examples": [
+  {
+   "text": "Principi: des de qualsevol sortida de la llarga, atacant el 30 la bola arriba a la llarga oposada just davant. Tres sortides (y≈5, 5,5, 6,5) i tres llegades a la mateixa alçada. Camí de la sortida vermella.",
+   "page": 1,
+   "path": [
+    {
+     "x": 0.3,
+     "y": 4.7
+    },
+    {
+     "x": 4,
+     "y": 3
+    },
+    {
+     "x": 0.35,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.25
+    },
+    {
+     "x": 4,
+     "y": 5
+    }
+   ]
+  },
+  {
+   "text": "Bricole: cop dolç i allargat, efecte 1 o 2, velocitat moderada. Sortida y≈5,5 → llegada y≈5,5.",
+   "page": 2,
+   "path": [
+    {
+     "x": 0.35,
+     "y": 5.2
+    },
+    {
+     "x": 4,
+     "y": 3
+    },
+    {
+     "x": 0.45,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.35
+    },
+    {
+     "x": 4,
+     "y": 5.55
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.6,
+     "y": 6.0,
+     "c": "red"
+    },
+    {
+     "x": 3.8,
+     "y": 6.1,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Quarta banda: amb velocitat moderada la bola sovint arriba a la curta de baix, a la meitat de la distància entre l'arribada i el racó: arribada a 2 diamants del racó → 1 diamant a la curta. Bola 2 per dins, efecte 2.",
+   "page": 7,
+   "path": [
+    {
+     "x": 1.35,
+     "y": 5.15
+    },
+    {
+     "x": 1.6,
+     "y": 4.8
+    },
+    {
+     "x": 4,
+     "y": 3.2
+    },
+    {
+     "x": 0.6,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.6
+    },
+    {
+     "x": 4,
+     "y": 6
+    },
+    {
+     "x": 3,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.5,
+     "y": 4.65,
+     "c": "yellow"
+    },
+    {
+     "x": 3.0,
+     "y": 7.85,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 50, llegada 60 (10 punts més avall) → atac 22,5 (7,5 per sobre del 30). Bricole, efecte 1-2, cop normal.",
+   "page": 8,
+   "path": [
+    {
+     "x": 0.65,
+     "y": 4.4
+    },
+    {
+     "x": 4,
+     "y": 2.25
+    },
+    {
+     "x": 1.2,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 1.05
+    },
+    {
+     "x": 4,
+     "y": 6
+    }
+   ]
+  },
+  {
+   "text": "Sortida 40, llegada 60 (20 punts més avall) → atac 15 (15 per sobre del 30). Bola 2 per dins, efecte 1-2.",
+   "page": 9,
+   "path": [
+    {
+     "x": 0.75,
+     "y": 3.9
+    },
+    {
+     "x": 1.0,
+     "y": 3.25
+    },
+    {
+     "x": 4,
+     "y": 1.5
+    },
+    {
+     "x": 2.2,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 1.45
+    },
+    {
+     "x": 4,
+     "y": 6
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.95,
+     "y": 3.15,
+     "c": "yellow"
+    },
+    {
+     "x": 3.9,
+     "y": 5.9,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 70, llegada 60 (10 punts més amunt) → atac 37,5 (7,5 per sota del 30). Bola 2 per fora: menys efecte, però prou per fer la volta al racó.",
+   "page": 10,
+   "path": [
+    {
+     "x": 1.15,
+     "y": 5.55
+    },
+    {
+     "x": 1.85,
+     "y": 5.55
+    },
+    {
+     "x": 4,
+     "y": 3.75
+    },
+    {
+     "x": 0.35,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.25
+    },
+    {
+     "x": 4,
+     "y": 6
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.9,
+     "y": 5.7,
+     "c": "yellow"
+    },
+    {
+     "x": 3.9,
+     "y": 5.95,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Protocol (pàg. 11-15): llegada triada a y≈5,2; la línia perpendicular-30 passa per sota de la bola 2; pujant 2 × 10 a la sortida i 2 × 7,5 a l'atac la línia és gairebé tangent a la bola 2 → atac 15. Bola 2 per dins.",
+   "page": 15,
+   "path": [
+    {
+     "x": 0.65,
+     "y": 3.2
+    },
+    {
+     "x": 1.2,
+     "y": 2.6
+    },
+    {
+     "x": 4,
+     "y": 1.5
+    },
+    {
+     "x": 1.2,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.6
+    },
+    {
+     "x": 4,
+     "y": 5.1
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.15,
+     "y": 2.55,
+     "c": "yellow"
+    },
+    {
+     "x": 3.75,
+     "y": 5.4,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Llegada y≈6,5, sortida 10 punts més avall (y≈7,5) → atac 37,5. Bola 2 per fora, efecte suau i bola alta.",
+   "page": 16,
+   "path": [
+    {
+     "x": 0.8,
+     "y": 6.15
+    },
+    {
+     "x": 1.65,
+     "y": 6.1
+    },
+    {
+     "x": 4,
+     "y": 3.75
+    },
+    {
+     "x": 0.8,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.6
+    },
+    {
+     "x": 4,
+     "y": 6.45
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.6,
+     "y": 6.2,
+     "c": "yellow"
+    },
+    {
+     "x": 3.85,
+     "y": 6.45,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 20, llegada 50 (30 punts més avall) → atac 7,5 (3 × 7,5 per sobre del 30). La bola continua cap a la curta de baix, a uns 1,5 diamants del racó.",
+   "page": 17,
+   "path": [
+    {
+     "x": 1.1,
+     "y": 1.35
+    },
+    {
+     "x": 1.65,
+     "y": 1.5
+    },
+    {
+     "x": 4,
+     "y": 0.75
+    },
+    {
+     "x": 2.2,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 1.1
+    },
+    {
+     "x": 4,
+     "y": 5
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.7,
+     "y": 1.6,
+     "c": "yellow"
+    },
+    {
+     "x": 2.55,
+     "y": 7.8,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Sortida 10, llegada 40 (30 punts més avall) → atac 7,5. Una línia de punts indica que, sense la vermella, la bola aniria a la curta de baix a uns 2 diamants del racó (meitat de 4).",
+   "page": 18,
+   "path": [
+    {
+     "x": 1.4,
+     "y": 1.15
+    },
+    {
+     "x": 1.65,
+     "y": 0.85
+    },
+    {
+     "x": 4,
+     "y": 0.75
+    },
+    {
+     "x": 1.65,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.4
+    },
+    {
+     "x": 4,
+     "y": 4
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.7,
+     "y": 0.8,
+     "c": "yellow"
+    },
+    {
+     "x": 3.5,
+     "y": 4.7,
+     "c": "red"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "No cal fer servir numeracions: n'hi ha prou amb distàncies (10 a la sortida, 7,5 a l'atac).",
+  "Per trobar l'atac, fes servir el tac per traçar línies imaginàries de 10 en 10 a la banda de sortida i de 7,5 en 7,5 a la d'atac.",
+  "Serveix per a arribades a la banda llarga; si la bola 3 o la zona de carambola és al centre de la taula, millor la teoria clàssica de diamants.",
+  "Evita situacions límit en què la bola 1 ha de fer el racó massa ajustada; en aquests casos, millor la teoria de diamants.",
+  "Amb la bola 2 per dins, vigila el retruc de la 1 amb la 2: potser cal ajustar presa i efecte.",
+  "L'efecte i el cop depenen de l'estat del drap i de l'experiència de cada jugador; les variacions no són grans i gairebé tot funciona amb cop moderat i efecte lleuger favorable.",
+  "Variant del PDF «Sistema 30» del Club Billar València: per a boles gairebé enfrontades, amb molta bola a la 2 (5/8) i cop fort, de vegades violent, perquè la bola 1 perdi velocitat (el llibre proposa un cop allargat i dolç).",
+  "Al PDF del club l'efecte és un matís natural (efecte 1) pegant per sobre de l'equador, i per sota quan la bola 2 és entre la banda curta i el 2n diamant de la llarga. També hi esmenta arribades cap a una 5a banda."
+ ],
+ "quotes": [
+  "atacando desde \"cualquier\" punto de salida de la banda larga hacia el tercer rombo (30) de la banda larga opuesta, la bola llegará a esa banda justo enfrente del punto de salida.",
+  "La rectificación consiste en compensar el punto de ataque en 7,5 puntos por cada 10 puntos de desviación en la llegada."
+ ],
+ "uncertain": [
+  "El llibre anomena l'arribada 'tercera banda larga' i la curta de baix 'cuarta banda', però el text diu 'larga, corta, larga y larga' i al dibuix la bola toca curta i llarga al racó de dalt: el recompte de bandes no queda clar.",
+  "Els valors d'atac 7,5, 15 i 22,5 no surten rotulats; es dedueixen de les fletxes de 7,5 sobre el 30. Només el 30 i el 37,5 surten amb número.",
+  "La 'sortida 45' de la pàg. 10-11 és de la teoria clàssica de diamants, no d'aquest sistema; al dibuix la sortida és a 1 diamant del racó de baix (y≈7). El llibre no explica aquesta numeració.",
+  "Pàg. 6 (bola 2 per fora): tres posicions de la bola 1 amb tres efectes dibuixats (més efecte com més amunt està la 1 respecte de la 2, gairebé 0 quan hi està alineada), sense valors numèrics.",
+  "Verworst proposa per a la bola 2 un cop sec, relativament fort, una mica per sobre de l'equador i sense efecte; Lazo diu que no s'ha de generalitzar.",
+  "Els valors de sortida/llegada en punts dels exemples (p. ex. 'sortida 50') són lectures del dibuix amb 10 punts per diamant des de dalt, no del text. Coordenades dels camins i de les boles aproximades (±0,1-0,2 diamant).",
+  "Entrenador: la fórmula reprodueix tots els exemples del llibre (50/60→22,5; 40/60→15; 70/60→37,5; 20/50 i 10/40→7,5). Els límits de 'valid' (atac entre 7,5 i 37,5, llegada entre 30 i 70) són una tria prudent a partir dels exemples; el llibre no els fixa amb números."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "S": {
+     "label": "Sortida",
+     "numbering": "Sortida"
+    },
+    "A": {
+     "label": "Atac",
+     "numbering": "Atac (base 30 i correccions)"
+    },
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada"
+    }
+   },
+   "inputs": {
+    "S": [
+     10,
+     20,
+     30,
+     40,
+     50,
+     60,
+     70
+    ],
+    "L": [
+     30,
+     40,
+     50,
+     60,
+     70
+    ],
+    "A": [
+     7.5,
+     15,
+     22.5,
+     30,
+     37.5
+    ]
+   },
+   "relations": [
+    {
+     "solve": "A",
+     "expr": "30 - 0.75*(L - S)",
+     "label": "Trobar l'atac"
+    },
+    {
+     "solve": "L",
+     "expr": "S + (30 - A)/0.75",
+     "label": "On arribarà la bola"
+    },
+    {
+     "solve": "S",
+     "expr": "L - (30 - A)/0.75",
+     "label": "Des d'on cal sortir"
+    }
+   ],
+   "valid": "A >= 7.5 && A <= 37.5 && L >= 30 && L <= 70 && S >= 0 && S <= 80",
+   "round": 1,
+   "note": "Escales en punts (10 per diamant) comptats des de la curta de dalt; atac a la banda llarga oposada. No es dibuixa el recorregut generat perquè el llibre no dona on toca la bola al racó de dalt; només es marquen sortida, atac i llegada."
+  },
+  "quiz": [
+   {
+    "q": "Ataques des de la banda llarga al 30 de la llarga oposada. On arriba la bola?",
+    "options": [
+     "Just davant del punt de sortida",
+     "Al racó de baix",
+     "A la meitat de la curta de baix",
+     "10 punts per sota de la sortida"
+    ],
+    "answer": 0,
+    "explain": "És la base del sistema: des de 'qualsevol' sortida, atacant el 30, la bola arriba a la llarga oposada just davant de la sortida.",
+    "page": 1,
+    "path": [
+     {
+      "x": 0.3,
+      "y": 4.7
+     },
+     {
+      "x": 4,
+      "y": 3
+     },
+     {
+      "x": 0.35,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.25
+     },
+     {
+      "x": 4,
+      "y": 5
+     }
+    ]
+   },
+   {
+    "q": "La llegada és 10 punts més avall que la sortida. On ataques?",
+    "options": [
+     "22,5 (7,5 per sobre del 30)",
+     "37,5 (7,5 per sota del 30)",
+     "20 (10 per sobre del 30)",
+     "30"
+    ],
+    "answer": 0,
+    "explain": "Per cada 10 punts de desviació es corregeix 7,5 en sentit contrari: llegada més avall → atac més amunt, 30 − 7,5 = 22,5.",
+    "page": 8,
+    "path": [
+     {
+      "x": 0.65,
+      "y": 4.4
+     },
+     {
+      "x": 4,
+      "y": 2.25
+     },
+     {
+      "x": 1.2,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 1.05
+     },
+     {
+      "x": 4,
+      "y": 6
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.7,
+      "y": 6.15,
+      "c": "yellow"
+     },
+     {
+      "x": 3.85,
+      "y": 6.25,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Sortida 70, llegada 60 (la llegada és 10 punts més amunt). On ataques?",
+    "options": [
+     "37,5",
+     "22,5",
+     "40",
+     "30"
+    ],
+    "answer": 0,
+    "explain": "Llegada més amunt → atac més avall: 30 + 7,5 = 37,5.",
+    "page": 10,
+    "path": [
+     {
+      "x": 1.15,
+      "y": 5.55
+     },
+     {
+      "x": 1.85,
+      "y": 5.55
+     },
+     {
+      "x": 4,
+      "y": 3.75
+     },
+     {
+      "x": 0.35,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.25
+     },
+     {
+      "x": 4,
+      "y": 6
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.9,
+      "y": 5.7,
+      "c": "yellow"
+     },
+     {
+      "x": 3.9,
+      "y": 5.95,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "La llegada queda 30 punts per sota de la sortida. Quin és el punt d'atac?",
+    "options": [
+     "7,5",
+     "0",
+     "15",
+     "22,5"
+    ],
+    "answer": 0,
+    "explain": "3 × 7,5 = 22,5 per sobre del 30: 30 − 22,5 = 7,5 (pàg. 17-18).",
+    "page": 17,
+    "path": [
+     {
+      "x": 1.1,
+      "y": 1.35
+     },
+     {
+      "x": 1.65,
+      "y": 1.5
+     },
+     {
+      "x": 4,
+      "y": 0.75
+     },
+     {
+      "x": 2.2,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 1.1
+     },
+     {
+      "x": 4,
+      "y": 5
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.7,
+      "y": 1.6,
+      "c": "yellow"
+     },
+     {
+      "x": 2.55,
+      "y": 7.8,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Jugada de bricole amb aquest sistema. Quin cop i efecte recomana Lazo?",
+    "options": [
+     "Cop dolç i allargat sense exagerar, efecte 1-2, velocitat moderada",
+     "Cop sec i fort, sense efecte",
+     "Efecte 3-4 i molta força",
+     "Efecte contrari i cop curt"
+    ],
+    "answer": 0,
+    "explain": "Per al bricole: cop dolç i allargat sense exagerar, efecte entre 1 i 2 segons el drap i velocitat moderada.",
+    "page": 2,
+    "path": [
+     {
+      "x": 0.35,
+      "y": 5.2
+     },
+     {
+      "x": 4,
+      "y": 3
+     },
+     {
+      "x": 0.45,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.35
+     },
+     {
+      "x": 4,
+      "y": 5.55
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.6,
+      "y": 6.0,
+      "c": "red"
+     },
+     {
+      "x": 3.8,
+      "y": 6.1,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Prens la bola 2 per dins ('rodada') amb cop dolç. Quin efecte cal?",
+    "options": [
+     "Efecte 2, una mica més que al bricole",
+     "Efecte 0",
+     "Efecte contrari",
+     "Efecte 4"
+    ],
+    "answer": 0,
+    "explain": "En tocar la 2 per dins, la 1 agafa una mica d'efecte contrari; per això cal arribar a efecte 2.",
+    "page": 3
+   },
+   {
+    "q": "Amb velocitat moderada, la bola arriba a la llarga a 2 diamants del racó de baix. On sol tocar la curta de baix?",
+    "options": [
+     "A 1 diamant del racó",
+     "A 2 diamants del racó",
+     "Al centre de la curta",
+     "Al mateix racó"
+    ],
+    "answer": 0,
+    "explain": "La quarta banda sol ser la meitat de la distància entre l'arribada i el racó: 2 → 1 diamant.",
+    "page": 7,
+    "path": [
+     {
+      "x": 1.35,
+      "y": 5.15
+     },
+     {
+      "x": 1.6,
+      "y": 4.8
+     },
+     {
+      "x": 4,
+      "y": 3.2
+     },
+     {
+      "x": 0.6,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.6
+     },
+     {
+      "x": 4,
+      "y": 6
+     },
+     {
+      "x": 3,
+      "y": 8
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.5,
+      "y": 4.65,
+      "c": "yellow"
+     },
+     {
+      "x": 3.0,
+      "y": 7.85,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Quan és millor NO fer servir la base 30?",
+    "options": [
+     "Quan la bola 3 o la zona de carambola és al centre de la taula",
+     "Quan la bola 3 és a prop del racó de baix",
+     "Quan la sortida és davant de la llegada",
+     "Quan jugues de bricole"
+    ],
+    "answer": 0,
+    "explain": "El mètode serveix per a arribades a la banda llarga; amb la zona de carambola al centre, millor la teoria clàssica de diamants. També cal evitar fer el racó massa ajustat.",
+    "page": 7
+   }
+  ]
+ }
+}

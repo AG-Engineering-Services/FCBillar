@@ -1,0 +1,577 @@
+{
+  "id": "teoria-diamants-sortida-llarga",
+  "name": "Teoria de diamants: sortida de banda llarga i llegada a banda llarga",
+  "group": "Teoria de diamants",
+  "attributed_to": "Juan Villora i Toni Serralta (llibre SISTEMAS), exposat per José Lazo",
+  "pages": [
+    245,
+    248
+  ],
+  "purpose": "Tres bandes llarga-curta-llarga quan la bola surt de la banda llarga (sortida a la llarga esquerra), arribant a la 3a banda llarga.",
+  "shot": {
+    "first_cushion": "llarga",
+    "cushions": "L-K-L",
+    "effect": "efecte 3 per a llegades inferiors a 30; efecte 4 per a superiors",
+    "stroke": null,
+    "ball": null
+  },
+  "formula": "Atac = Sortida − Llegada (+ correcció segons el cas)",
+  "steps": [
+    "Llegeix la sortida a la banda llarga esquerra prenent el diamant (criteri de Villora-Serralta), no el vèrtex.",
+    "Tria l'efecte: 3 si la llegada és menor de 30, 4 si és més gran.",
+    "Calcula Sortida − Llegada i aplica la correcció del cas A, B o C.",
+    "Ataca el resultat a la banda llarga dreta."
+  ],
+  "numberings": [
+    {
+      "name": "Sortida",
+      "role": "sortida",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 15
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 25
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "v": 35
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 7,
+          "v": 45
+        },
+        {
+          "x": 0,
+          "y": 8,
+          "v": 47.5
+        }
+      ],
+      "note": "Dibuix ja vertical: sortida per fora a la llarga esquerra; la cantonada de baix és 47,5."
+    },
+    {
+      "name": "Atac",
+      "role": "atac",
+      "points": [
+        {
+          "x": 4,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 4,
+          "y": 2.5,
+          "v": 25
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 4,
+          "y": 5,
+          "v": 50
+        }
+      ],
+      "note": "Per fora a la llarga dreta; «00» rotulat més enllà de la cantonada de dalt. El dibuix posa un segon «40» al diamant 5 (aquí s'ha escrit 50)."
+    },
+    {
+      "name": "Llegada",
+      "role": "llegada",
+      "points": [
+        {
+          "x": 0,
+          "y": 0,
+          "v": 0
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "v": 10
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "v": 20
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "v": 30
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "v": 40
+        },
+        {
+          "x": 0,
+          "y": 4.5,
+          "v": 50
+        }
+      ],
+      "note": "Per dins a la llarga esquerra (3a banda)."
+    }
+  ],
+  "corrections": [
+    "Cas A: sortides inferiors a 25 → sumar 2 punts a l'atac.",
+    "Cas B: quan la zona de carambola s'allunya de la banda llarga (uns 50 cm) → efecte 4 i restar 1 o 2 punts a l'atac.",
+    "Cas C: recorreguts límit, sortides entre 40 i 47,5 amb llegada del mateix valor que la sortida → atacar cap al 00."
+  ],
+  "examples": [
+    {
+      "text": "Sortida 35, atac 25 → llegada 10 (efecte 3).",
+      "page": 245,
+      "path": [
+        {
+          "x": 1.97,
+          "y": 3.77
+        },
+        {
+          "x": 4,
+          "y": 2.7
+        },
+        {
+          "x": 1.39,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1.05
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.46,
+          "y": 1.36,
+          "c": "red"
+        },
+        {
+          "x": 0.3,
+          "y": 1.5,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Sortida 47,5, atac 7,5 → llegada 40 (efecte 4).",
+      "page": 245,
+      "path": [
+        {
+          "x": 1.65,
+          "y": 4.93
+        },
+        {
+          "x": 4,
+          "y": 1.32
+        },
+        {
+          "x": 3.3,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 4
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.48,
+          "y": 4.29,
+          "c": "red"
+        },
+        {
+          "x": 0.22,
+          "y": 4.38,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Cas A: sortida 20, llegada 10 → atac 20 − 10 + 2 = 12.",
+      "page": 246,
+      "path": [
+        {
+          "x": 1.83,
+          "y": 1.63
+        },
+        {
+          "x": 4,
+          "y": 1.24
+        },
+        {
+          "x": 1.86,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        }
+      ],
+      "balls": [
+        {
+          "x": 0.41,
+          "y": 1.24,
+          "c": "red"
+        },
+        {
+          "x": 0.25,
+          "y": 1.43,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Cas B: sortida 35, llegada 30 → atac 35 − 30 − 2 = 3.",
+      "page": 247,
+      "path": [
+        {
+          "x": 1.46,
+          "y": 3.14
+        },
+        {
+          "x": 4,
+          "y": 0.66
+        },
+        {
+          "x": 3.46,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3
+        }
+      ],
+      "balls": [
+        {
+          "x": 1.31,
+          "y": 4.97,
+          "c": "red"
+        },
+        {
+          "x": 1.11,
+          "y": 5.1,
+          "c": "yellow"
+        }
+      ]
+    },
+    {
+      "text": "Cas C: sortida 40 atacant cap al 00 → llegada 40 (també sortides 45 i 47,5 cap a llegades 45 i 50).",
+      "page": 248,
+      "path": [
+        {
+          "x": 0.39,
+          "y": 4.95
+        },
+        {
+          "x": 3.85,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 4
+        }
+      ]
+    }
+  ],
+  "tips": [
+    "Al cas B la bola continua cap a la zona de carambola allunyada de la banda: per això més efecte i menys atac."
+  ],
+  "quotes": [
+    "para llegadas inferiores a 30 se aplica efecto 3 y para superiores efecto 4"
+  ],
+  "uncertain": [
+    "La numeració d'atac del dibuix repeteix «40» al diamant 5; probablement és 50.",
+    "El llibre no diu què fer amb llegada exactament 30 (efecte 3 o 4).",
+    "Al cas C les llegades 45 i 50 només es veuen al dibuix; el 45 no està rotulat."
+  ],
+  "trainer": {
+    "calc": {
+      "vars": {
+        "S": {
+          "label": "Sortida",
+          "numbering": "Sortida"
+        },
+        "A": {
+          "label": "Atac",
+          "numbering": "Atac"
+        },
+        "L": {
+          "label": "Llegada",
+          "numbering": "Llegada"
+        }
+      },
+      "inputs": {
+        "S": [
+          15,
+          20,
+          25,
+          30,
+          35,
+          40,
+          45,
+          47.5
+        ],
+        "A": [
+          0,
+          7.5,
+          10,
+          12,
+          15,
+          20,
+          25,
+          30
+        ],
+        "L": [
+          0,
+          10,
+          20,
+          30,
+          40
+        ]
+      },
+      "relations": [
+        {
+          "solve": "A",
+          "expr": "S - L + 2",
+          "when": "S < 25",
+          "label": "cas A (sortida < 25)"
+        },
+        {
+          "solve": "A",
+          "expr": "S - L",
+          "when": "S >= 25",
+          "label": "fórmula base"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A + 2",
+          "when": "S < 25",
+          "label": "cas A (sortida < 25)"
+        },
+        {
+          "solve": "L",
+          "expr": "S - A",
+          "when": "S >= 25",
+          "label": "fórmula base"
+        }
+      ],
+      "valid": "A >= 0 && A <= 40 && L >= 0 && L <= 40",
+      "round": 1,
+      "path": [
+        "S",
+        "A",
+        "L"
+      ],
+      "note": "Efecte 3 si la llegada és < 30, efecte 4 si és més gran. El cas B (zona allunyada, −1 o −2) i el cas C (atac al 00) no es generen."
+    },
+    "quiz": [
+      {
+        "q": "Sortida de banda llarga amb llegada inferior a 30. Quin efecte proposen Villora i Serralta?",
+        "options": [
+          "Efecte 4",
+          "Efecte 1",
+          "Efecte 3",
+          "Sense efecte"
+        ],
+        "answer": 2,
+        "explain": "Llegades < 30: efecte 3; superiors: efecte 4.",
+        "page": 245
+      },
+      {
+        "q": "Sortida 20, llegada 10. Atac?",
+        "options": [
+          "10",
+          "30",
+          "8",
+          "12"
+        ],
+        "answer": 3,
+        "explain": "Cas A (sortida < 25): 20 − 10 + 2 = 12.",
+        "page": 246,
+        "path": [
+          {
+            "x": 1.83,
+            "y": 1.63
+          },
+          {
+            "x": 4,
+            "y": 1.24
+          },
+          {
+            "x": 1.86,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "balls": [
+          {
+            "x": 0.41,
+            "y": 1.24,
+            "c": "red"
+          },
+          {
+            "x": 0.25,
+            "y": 1.43,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 35, llegada 30, i la zona de carambola s'allunya uns 50 cm de la banda llarga. Atac?",
+        "options": [
+          "3 (efecte 4 i restar 2)",
+          "5",
+          "7",
+          "0"
+        ],
+        "answer": 0,
+        "explain": "Cas B: 35 − 30 − 2 = 3.",
+        "page": 247,
+        "path": [
+          {
+            "x": 1.46,
+            "y": 3.14
+          },
+          {
+            "x": 4,
+            "y": 0.66
+          },
+          {
+            "x": 3.46,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 3
+          }
+        ],
+        "balls": [
+          {
+            "x": 1.31,
+            "y": 4.97,
+            "c": "red"
+          },
+          {
+            "x": 1.11,
+            "y": 5.1,
+            "c": "yellow"
+          }
+        ]
+      },
+      {
+        "q": "Sortida 45 i vols arribar a la llegada 45. On ataques?",
+        "options": [
+          "Cap al 00",
+          "Al 45",
+          "Al 0",
+          "Al 10"
+        ],
+        "answer": 0,
+        "explain": "Cas C: sortides 40-47,5 amb llegada igual a la sortida → atacar cap al 00.",
+        "page": 248,
+        "path": [
+          {
+            "x": 0.39,
+            "y": 4.95
+          },
+          {
+            "x": 3.85,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 4
+          }
+        ]
+      },
+      {
+        "q": "On es pren el punt de sortida en aquest estudi?",
+        "options": [
+          "A la cantonada",
+          "Al diamant",
+          "Al vèrtex de la banda",
+          "Al centre de la bola"
+        ],
+        "answer": 1,
+        "explain": "«Mantenemos su criterio de tomar como punto de salida el diamante y no el vértice».",
+        "page": 245
+      },
+      {
+        "q": "Sortida 47,5, atac 7,5. Llegada?",
+        "options": [
+          "47,5",
+          "40",
+          "30",
+          "55"
+        ],
+        "answer": 1,
+        "explain": "47,5 − 7,5 = 40 (efecte 4).",
+        "page": 245,
+        "path": [
+          {
+            "x": 1.65,
+            "y": 4.93
+          },
+          {
+            "x": 4,
+            "y": 1.32
+          },
+          {
+            "x": 3.3,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 4
+          }
+        ]
+      }
+    ]
+  }
+}

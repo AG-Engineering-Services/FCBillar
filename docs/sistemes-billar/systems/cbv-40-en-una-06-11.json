@@ -1,0 +1,1188 @@
+{
+ "id": "cbv-40-en-una-06-11",
+ "name": "Les 40 en una: posicions 6–11",
+ "group": "Les 40 en una",
+ "attributed_to": "PDF de Julio A",
+ "pages": null,
+ "source": "PDF «CUARENTA EN UNA 6-11», Club Billar València, pàg. 1–5",
+ "sort": 481,
+ "purpose": "Posicions 6 a 11 de la sèrie de quaranta: pase bola amb poca bola (sistema del racó i Argüello), Plus, teoria de diamants i un sistema de bola 1 vertical cap a la curta.",
+ "shot": {
+  "first_cushion": "bola",
+  "cushions": "bola 2 - C - L - C o bola 2 - L - C - L segons la posició",
+  "effect": "favorable, de +1 a +4; per sota de l'equador a la posició 10",
+  "stroke": "velocitat a arribar (6, 7); allargat i ràpid (10); mai velocitat justa a la 3",
+  "ball": "poca bola als pase bola (6, 9) i al Plus (7); bona quantitat a la 8; entre 1/4 i 1/2 a l'11"
+ },
+ "formula": "Efecte = Llegada + (Sortida − Atac) / 10 (pase bola de la posició 6)",
+ "steps": [
+  "Pase bola de la posició 6: mira a quina distància del racó de dalt a l'esquerra són la bola 1 (Sortida, llarga esquerra: S10, S20, S30) i la bola 2 (Atac, curta de dalt: A10, A20, A30).",
+  "Si són a la mateixa distància, l'efecte dona la llegada a la curta de baix: +4 al racó (L+4), +3, +2, +1 i 0 als punts L+3, L+2, L+1 i L0.",
+  "Si la bola 1 és més a prop del racó que la 2, resta un efecte per cada 10 punts; si ho és la 2, suma'n un.",
+  "Pren poca bola 2: la 2 ha de sortir paral·lela a la curta de dalt; si no, la 1 es frena o fa corregut.",
+  "No arribis amb velocitat justa a la 3: si la 3 queda enganxada a banda, la deixes amagada per a la següent."
+ ],
+ "numberings": [
+  {
+   "name": "Sortida",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 0,
+     "y": 1,
+     "v": 10
+    },
+    {
+     "x": 0,
+     "y": 2,
+     "v": 20
+    },
+    {
+     "x": 0,
+     "y": 3,
+     "v": 30
+    }
+   ],
+   "note": "Posició de la bola 1 a la llarga esquerra, en punts des del racó de dalt a l'esquerra (dibuix patró de la pàg. 1, ja en vertical)."
+  },
+  {
+   "name": "Atac",
+   "role": "atac",
+   "points": [
+    {
+     "x": 1,
+     "y": 0,
+     "v": 10
+    },
+    {
+     "x": 2,
+     "y": 0,
+     "v": 20
+    },
+    {
+     "x": 3,
+     "y": 0,
+     "v": 30
+    }
+   ],
+   "note": "Posició de la bola 2 a la curta de dalt, en punts des del mateix racó."
+  },
+  {
+   "name": "Llegada",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 0,
+     "y": 8,
+     "v": 4
+    },
+    {
+     "x": 1,
+     "y": 8,
+     "v": 3
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 2
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 1
+    },
+    {
+     "x": 4,
+     "y": 8,
+     "v": 0
+    }
+   ],
+   "note": "Punt d'arribada a la curta de baix (tercera banda) segons l'efecte, amb les dues boles a la mateixa distància del racó: L+4 al racó esquerre … L0 al dret."
+  }
+ ],
+ "corrections": [
+  "Pase bola (posició 6): −1 efecte per cada 10 punts que la bola 1 és més a prop del racó que la 2; +1 per cada 10 punts si és la 2 la més propera. Amb les boles molt a prop del racó el sistema és imprecís.",
+  "Argüello (posició 9): efecte = efecte de la llegada a la 3 + 1 per cada diamant que la bola 1 s'aparta del racó de dalt a la dreta + 1 per cada mig diamant que la bola 2 s'aparta cap al centre (al llarg de la taula). A la posició 9: +2 +1 +1 = +4.",
+  "Bola 1 vertical cap a la curta (posició 10): efecte màxim (normalment 4) → primer diamant de la curta; entre 2 i 3 → diamant central; entre 1 i 2 → tercer diamant. Si la zona de sortida es desvia a l'esquerra, la llegada també, i al revés."
+ ],
+ "examples": [
+  {
+   "text": "Posició 6 (pase bola): bola 1 a S10, bola 2 a A20, llegada L+2. La 1 és 10 punts més a prop del racó: 2 − 1 = efecte +1 a la dreta. Poca bola 2.",
+   "page": 1,
+   "path": [
+    {
+     "x": 0.15,
+     "y": 1.01
+    },
+    {
+     "x": 1.86,
+     "y": 0.18
+    },
+    {
+     "x": 1.88,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 4.11
+    },
+    {
+     "x": 1.79,
+     "y": 8
+    },
+    {
+     "x": 0.12,
+     "y": 5.87
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.94,
+     "y": 0.16,
+     "c": "red"
+    },
+    {
+     "x": 0.12,
+     "y": 5.87,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Patró del pase bola: bola 1 a S20 i bola 2 a A20 (mateixa distància): amb efecte +4 la 1 arriba al racó de baix (L+4).",
+   "page": 1,
+   "path": [
+    {
+     "x": 0.12,
+     "y": 1.86
+    },
+    {
+     "x": 1.9,
+     "y": 0.13
+    },
+    {
+     "x": 4,
+     "y": 2.0
+    },
+    {
+     "x": 0,
+     "y": 8
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.99,
+     "y": 0.1,
+     "c": "red"
+    }
+   ],
+   "path_built": true
+  },
+  {
+   "text": "Posició 7 (Plus): sortida S20, atac A30, llegada L50. Relativament poca bola i bon efecte favorable (a la dreta); el tac apunta a l'«aire». Velocitat a arribar; comprova quant llisca la 1 a la tercera banda segons el material.",
+   "page": 2,
+   "path": [
+    {
+     "x": 0.15,
+     "y": 4.95
+    },
+    {
+     "x": 1.7,
+     "y": 0.64
+    },
+    {
+     "x": 2.48,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.56
+    },
+    {
+     "x": 0,
+     "y": 4.84
+    },
+    {
+     "x": 0.69,
+     "y": 5.49
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.65,
+     "y": 0.58,
+     "c": "red"
+    },
+    {
+     "x": 0.69,
+     "y": 5.49,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 8 (teoria de diamants): sortida S41, atac A39, llegada L2, atacant la groga per la dreta. Bona quantitat de bola 2 per dur-la al racó de dalt a l'esquerra tocant primer la curta; velocitat i presa per evitar el retruc 1-2. Efecte a l'esquerra, alt.",
+   "page": 2,
+   "path": [
+    {
+     "x": 0.76,
+     "y": 6.51
+    },
+    {
+     "x": 1.38,
+     "y": 5.37
+    },
+    {
+     "x": 4,
+     "y": 4.03
+    },
+    {
+     "x": 0.44,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.14
+    },
+    {
+     "x": 1.54,
+     "y": 2.44
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.33,
+     "y": 5.28,
+     "c": "yellow"
+    },
+    {
+     "x": 1.54,
+     "y": 2.44,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 9 (pase bola d'Argüello): llegada a la 3 d'efecte 2, bola 1 a 1 diamant del racó (+1), bola 2 mig diamant cap al centre (+1): efecte +4, a l'esquerra. Poca bola perquè la 1 surti neta i ràpida.",
+   "page": 3,
+   "path": [
+    {
+     "x": 3.09,
+     "y": 2.18
+    },
+    {
+     "x": 0.2,
+     "y": 5.46
+    },
+    {
+     "x": 0,
+     "y": 5.42
+    },
+    {
+     "x": 2.37,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 6.99
+    },
+    {
+     "x": 2.04,
+     "y": 4.54
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.2,
+     "y": 5.46,
+     "c": "yellow"
+    },
+    {
+     "x": 2.04,
+     "y": 4.54,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Patró d'Argüello: bola 2 enganxada a la llarga esquerra, bola 1 al racó contrari; cada efecte (0-4) fa arribar la 1 a un punt diferent de la llarga dreta (de mig en mig diamant) i a una posició de la 3. Dibuixat amb efecte 2.",
+   "page": 3,
+   "path": [
+    {
+     "x": 3.83,
+     "y": 7.74
+    },
+    {
+     "x": 0.12,
+     "y": 1.91
+    },
+    {
+     "x": 2.92,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 1.0
+    },
+    {
+     "x": 1.86,
+     "y": 3.3
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.12,
+     "y": 1.91,
+     "c": "yellow"
+    },
+    {
+     "x": 1.86,
+     "y": 3.3,
+     "c": "red"
+    }
+   ],
+   "path_built": true
+  },
+  {
+   "text": "Posició 10: atacar la 2 i fer sortir la 1 vertical cap a la curta de dalt; sense números. Cop allargat i ràpid; la 2 passa primer a les dues zones de retruc. Efecte favorable (esquerra) i per sota de l'equador per tenir una mica de retrocés.",
+   "page": 4,
+   "path": [
+    {
+     "x": 1.42,
+     "y": 4.35
+    },
+    {
+     "x": 2.31,
+     "y": 3.76
+    },
+    {
+     "x": 2.3,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 4.5
+    },
+    {
+     "x": 1.05,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 5.0
+    },
+    {
+     "x": 1.01,
+     "y": 0.22
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.39,
+     "y": 3.77,
+     "c": "red"
+    },
+    {
+     "x": 1.01,
+     "y": 0.22,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Mecànica del sistema vertical: des de qualsevol zona, bola 1 vertical a la curta amb efecte 4 → a prop del primer diamant de la curta. Si la sortida és cap al centre de la taula, la llegada és al primer diamant.",
+   "page": 4,
+   "path": [
+    {
+     "x": 1.89,
+     "y": 6.33
+    },
+    {
+     "x": 1.18,
+     "y": 5.6
+    },
+    {
+     "x": 1.31,
+     "y": 0
+    },
+    {
+     "x": 3.98,
+     "y": 6.22
+    },
+    {
+     "x": 3.18,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 4.66
+    },
+    {
+     "x": 2.99,
+     "y": 0.24
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.18,
+     "y": 5.6,
+     "c": "yellow"
+    },
+    {
+     "x": 2.99,
+     "y": 0.24,
+     "c": "red"
+    }
+   ],
+   "path_built": true
+  },
+  {
+   "text": "Posició 11 (rètols 45 i 45): presa entre 1/4 i 1/2 i efecte 3 o 2 (no 4) per dur la 1 ajustada al racó de baix a la dreta i que quadri cap al diamant 2 de la llarga esquerra (4a banda). Efecte a l'esquerra, alt. Risc de retruc al centre.",
+   "page": 5,
+   "path": [
+    {
+     "x": 1.3,
+     "y": 1.23
+    },
+    {
+     "x": 0.36,
+     "y": 3.17
+    },
+    {
+     "x": 0,
+     "y": 3.26
+    },
+    {
+     "x": 4,
+     "y": 7.81
+    },
+    {
+     "x": 3.67,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 2.0
+    },
+    {
+     "x": 0.91,
+     "y": 0.6
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.31,
+     "y": 3.22,
+     "c": "red"
+    },
+    {
+     "x": 0.91,
+     "y": 0.6,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 11, alternativa: per l'esquerra de la 2 amb el màxim d'efecte, intentant deixar la 2 al centre; no prenguis massa bola. Amb drap nou és potser millor: la 1 arriba a la 4a banda amb molt efecte contrari i la 3 es fa grossa. (Dibuix apaïsat girat a vertical.)",
+   "page": 5,
+   "path": [
+    {
+     "x": 1.3,
+     "y": 1.25
+    },
+    {
+     "x": 0.37,
+     "y": 3.18
+    },
+    {
+     "x": 0,
+     "y": 2.14
+    },
+    {
+     "x": 3.49,
+     "y": 8
+    },
+    {
+     "x": 4,
+     "y": 7.82
+    },
+    {
+     "x": 0.77,
+     "y": 0
+    },
+    {
+     "x": 0.91,
+     "y": 0.62
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.31,
+     "y": 3.24,
+     "c": "red"
+    },
+    {
+     "x": 0.91,
+     "y": 0.62,
+     "c": "yellow"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Als pase bola amb la 2 prop de banda, poca bola: la 1 ha de sortir neta i ràpida.",
+  "Si en augmentar la presa de bola la 1 surt esmorteïda, sobra efecte a la segona banda i quadra massa: falles per l'esquerra de la 3.",
+  "Plus amb poca bola i tac apuntant a l'aire: entrena-ho cada dia (mínim 15 minuts) amb posicions que obliguin a prendre poca bola.",
+  "A la posició 8 és millor atacar la groga per la dreta que la roja per qualsevol costat: el retruc i la preparació són menys controlables.",
+  "Practicar la bola 1 sempre vertical cap a la curta dona una referència i millora el mecanisme i la confiança.",
+  "No abusis de l'efecte 4 quan la 1 toca la 2: pot lliscar de manera irregular."
+ ],
+ "quotes": [
+  "Esto anterior significa que no hay que llegar con velocidad justa la bola 1 a la bola 3.",
+  "Así que de nuevo, MUY IMPORTANTE: poca cantidad de bola."
+ ],
+ "uncertain": [
+  "El PDF no diu qui n'és l'autor; «Julio A» és només a les metadades (pujador). El sistema vertical de la posició 10 l'autor diu que el va descobrir ell.",
+  "A la posició 11 els rètols «45» (llarga esquerra i llarga dreta) no s'expliquen al text.",
+  "Els rètols «A3 0» (pos. 7) i «A3 9» (pos. 8) es llegeixen com atac 30 i 39 (S20 + A30 = L50 al Plus; S41 − L2 = A39 per diamants); el text no ho diu.",
+  "La direcció de l'efecte (dreta/esquerra, alt/baix) s'ha llegit de les icones; el text només dona el número.",
+  "Al patró d'Argüello no s'han mesurat les marques 0-4 de la llarga esquerra; el text només aplica les correccions."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "S": {
+     "label": "Sortida (bola 1)",
+     "numbering": "Sortida"
+    },
+    "A": {
+     "label": "Atac (bola 2)",
+     "numbering": "Atac"
+    },
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada"
+    },
+    "E": {
+     "label": "Efecte",
+     "values": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ]
+    }
+   },
+   "inputs": {
+    "S": [
+     10,
+     20,
+     30
+    ],
+    "A": [
+     10,
+     20,
+     30
+    ],
+    "L": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "E": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ]
+   },
+   "relations": [
+    {
+     "solve": "E",
+     "expr": "L + (S - A) / 10",
+     "label": "efecte per a una llegada"
+    },
+    {
+     "solve": "L",
+     "expr": "E - (S - A) / 10",
+     "label": "llegada amb un efecte"
+    }
+   ],
+   "valid": "E >= 0 && E <= 4 && L >= 0 && L <= 4",
+   "round": 0,
+   "note": "Pase bola de la posició 6, amb poca bola 2 i la 2 sortint paral·lela a la curta de dalt. Comprovat: S10, A20, L+2 → efecte +1; S20, A20 → efecte +4 per al racó."
+  },
+  "quiz": [
+   {
+    "q": "Posició 6: bola 1 a S10, bola 2 a A20, vols arribar a L+2. Quin efecte?",
+    "options": [
+     "+2",
+     "+3",
+     "0",
+     "+1"
+    ],
+    "answer": 3,
+    "explain": "La 1 és 10 punts més a prop del racó: es resta un efecte a la llegada L+2 → +1.",
+    "page": 1,
+    "path": [
+     {
+      "x": 0.15,
+      "y": 1.01
+     },
+     {
+      "x": 1.86,
+      "y": 0.18
+     },
+     {
+      "x": 1.88,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 4.11
+     },
+     {
+      "x": 1.79,
+      "y": 8
+     },
+     {
+      "x": 0.12,
+      "y": 5.87
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.94,
+      "y": 0.16,
+      "c": "red"
+     },
+     {
+      "x": 0.12,
+      "y": 5.87,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 6: com saps que has pres poca bola 2, com cal?",
+    "options": [
+     "La 2 surt paral·lela a la curta de dalt",
+     "La 2 va directa al racó de baix",
+     "La 1 es queda quieta",
+     "La 2 toca dues llargues"
+    ],
+    "answer": 0,
+    "explain": "«La bola 2 debe salir paralela a la banda corta superior.»",
+    "page": 1,
+    "path": [
+     {
+      "x": 0.15,
+      "y": 1.01
+     },
+     {
+      "x": 1.86,
+      "y": 0.18
+     },
+     {
+      "x": 1.88,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 4.11
+     },
+     {
+      "x": 1.79,
+      "y": 8
+     },
+     {
+      "x": 0.12,
+      "y": 5.87
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.94,
+      "y": 0.16,
+      "c": "red"
+     },
+     {
+      "x": 0.12,
+      "y": 5.87,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 7 (Plus, S20-A30-L50): quina presa i quin efecte?",
+    "options": [
+     "Bola plena i cop baix",
+     "Relativament poca bola i bon efecte favorable",
+     "Molta bola i sense efecte",
+     "Mitja bola i efecte contrari"
+    ],
+    "answer": 1,
+    "explain": "«Tenemos que tomar relativamente poca bola e imprimir un buen efecto favorable.» Amb més bola i menys efecte hi ha risc de retruc.",
+    "page": 2,
+    "path": [
+     {
+      "x": 0.15,
+      "y": 4.95
+     },
+     {
+      "x": 1.7,
+      "y": 0.64
+     },
+     {
+      "x": 2.48,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.56
+     },
+     {
+      "x": 0,
+      "y": 4.84
+     },
+     {
+      "x": 0.69,
+      "y": 5.49
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.65,
+      "y": 0.58,
+      "c": "red"
+     },
+     {
+      "x": 0.69,
+      "y": 5.49,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 8: per què ataca la groga per la dreta en lloc de la roja?",
+    "options": [
+     "Perquè així es juga a una banda",
+     "Perquè la groga és la bola del rival",
+     "Atacant la roja el retruc és poc controlable i la preparació menys previsible",
+     "Perquè la roja és massa lluny"
+    ],
+    "answer": 2,
+    "explain": "Atacar la roja dona possibilitats de retruc poc controlables i una preparació molt menys previsible.",
+    "page": 2,
+    "path": [
+     {
+      "x": 0.76,
+      "y": 6.51
+     },
+     {
+      "x": 1.38,
+      "y": 5.37
+     },
+     {
+      "x": 4,
+      "y": 4.03
+     },
+     {
+      "x": 0.44,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.14
+     },
+     {
+      "x": 1.54,
+      "y": 2.44
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.33,
+      "y": 5.28,
+      "c": "yellow"
+     },
+     {
+      "x": 1.54,
+      "y": 2.44,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 8: quanta bola 2 cal prendre?",
+    "options": [
+     "Molt poca, gairebé fina",
+     "Exactament 1/8",
+     "Indiferent",
+     "Una bona quantitat, per dur-la al racó de dalt a l'esquerra tocant primer la curta"
+    ],
+    "answer": 3,
+    "explain": "Bona quantitat de bola 2; menys efecte i menys bola augmenten el risc de retruc.",
+    "page": 2,
+    "path": [
+     {
+      "x": 0.76,
+      "y": 6.51
+     },
+     {
+      "x": 1.38,
+      "y": 5.37
+     },
+     {
+      "x": 4,
+      "y": 4.03
+     },
+     {
+      "x": 0.44,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.14
+     },
+     {
+      "x": 1.54,
+      "y": 2.44
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.33,
+      "y": 5.28,
+      "c": "yellow"
+     },
+     {
+      "x": 1.54,
+      "y": 2.44,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 9 (Argüello): llegada d'efecte 2, bola 1 a un diamant del racó, bola 2 mig diamant cap al centre. Efecte final?",
+    "options": [
+     "+4",
+     "+2",
+     "+3",
+     "+5"
+    ],
+    "answer": 0,
+    "explain": "+2 (llegada) +1 (1 diamant de la bola 1) +1 (mig diamant de la bola 2) = +4.",
+    "page": 3,
+    "path": [
+     {
+      "x": 3.09,
+      "y": 2.18
+     },
+     {
+      "x": 0.2,
+      "y": 5.46
+     },
+     {
+      "x": 0,
+      "y": 5.42
+     },
+     {
+      "x": 2.37,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 6.99
+     },
+     {
+      "x": 2.04,
+      "y": 4.54
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.2,
+      "y": 5.46,
+      "c": "yellow"
+     },
+     {
+      "x": 2.04,
+      "y": 4.54,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 9: què passa si prens més bola 2 i la 1 surt lenta?",
+    "options": [
+     "No canvia res",
+     "Sobra efecte a la segona banda, quadra massa i falles per l'esquerra de la 3",
+     "La 1 arriba més curta i falla per la dreta",
+     "La 2 tapa la 3"
+    ],
+    "answer": 1,
+    "explain": "La 1 surt esmorteïda, hi ha excés d'efecte a la segona banda i un quadratge indesitjat.",
+    "page": 3,
+    "path": [
+     {
+      "x": 3.09,
+      "y": 2.18
+     },
+     {
+      "x": 0.2,
+      "y": 5.46
+     },
+     {
+      "x": 0,
+      "y": 5.42
+     },
+     {
+      "x": 2.37,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 6.99
+     },
+     {
+      "x": 2.04,
+      "y": 4.54
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.2,
+      "y": 5.46,
+      "c": "yellow"
+     },
+     {
+      "x": 2.04,
+      "y": 4.54,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 10 (bola 1 vertical a la curta): amb un efecte entre 1 i 2, on arriba?",
+    "options": [
+     "Al diamant central",
+     "Al racó",
+     "Al tercer diamant de la curta",
+     "Al primer diamant de la curta"
+    ],
+    "answer": 2,
+    "explain": "Efecte 4 → primer diamant; entre 2 i 3 → central; entre 1 i 2 → tercer.",
+    "page": 4,
+    "path": [
+     {
+      "x": 1.42,
+      "y": 4.35
+     },
+     {
+      "x": 2.31,
+      "y": 3.76
+     },
+     {
+      "x": 2.3,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 4.5
+     },
+     {
+      "x": 1.05,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 5.0
+     },
+     {
+      "x": 1.01,
+      "y": 0.22
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.39,
+      "y": 3.77,
+      "c": "red"
+     },
+     {
+      "x": 1.01,
+      "y": 0.22,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 10: quin cop i quin punt de la bola 1?",
+    "options": [
+     "Curt i lent; efecte alt",
+     "Sec i baix amb efecte contrari",
+     "Massé",
+     "Allargat i ràpid; efecte favorable per sota de l'equador"
+    ],
+    "answer": 3,
+    "explain": "«Golpe alargado y rápido»; efecte favorable i per sota de l'equador per tenir una mica de retrocés.",
+    "page": 4,
+    "path": [
+     {
+      "x": 1.42,
+      "y": 4.35
+     },
+     {
+      "x": 2.31,
+      "y": 3.76
+     },
+     {
+      "x": 2.3,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 4.5
+     },
+     {
+      "x": 1.05,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 5.0
+     },
+     {
+      "x": 1.01,
+      "y": 0.22
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.39,
+      "y": 3.77,
+      "c": "red"
+     },
+     {
+      "x": 1.01,
+      "y": 0.22,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 11: quina presa i efecte recomana?",
+    "options": [
+     "Entre 1/4 i 1/2, efecte 3 o 2 en lloc de 4",
+     "Bola plena, efecte 4",
+     "Fina, sense efecte",
+     "Mitja bola, efecte contrari"
+    ],
+    "answer": 0,
+    "explain": "Menys bola possible sense ser fina (1/4-1/2) i efecte 3 o 2: l'efecte 4 pot lliscar irregularment en tocar la 2.",
+    "page": 5,
+    "path": [
+     {
+      "x": 1.3,
+      "y": 1.23
+     },
+     {
+      "x": 0.36,
+      "y": 3.17
+     },
+     {
+      "x": 0,
+      "y": 3.26
+     },
+     {
+      "x": 4,
+      "y": 7.81
+     },
+     {
+      "x": 3.67,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 2.0
+     },
+     {
+      "x": 0.91,
+      "y": 0.6
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.31,
+      "y": 3.22,
+      "c": "red"
+     },
+     {
+      "x": 0.91,
+      "y": 0.6,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 11: quan és millor l'alternativa per l'esquerra de la 2 amb màxim efecte?",
+    "options": [
+     "Mai",
+     "Amb drap nou",
+     "Amb drap gastat",
+     "Amb boles brutes"
+    ],
+    "answer": 1,
+    "explain": "«En un paño nuevo es quizás más recomendable esta solución»: la 1 arriba a la 4a banda amb molt efecte contrari i la 3 es fa grossa.",
+    "page": 5,
+    "path": [
+     {
+      "x": 1.3,
+      "y": 1.25
+     },
+     {
+      "x": 0.37,
+      "y": 3.18
+     },
+     {
+      "x": 0,
+      "y": 2.14
+     },
+     {
+      "x": 3.49,
+      "y": 8
+     },
+     {
+      "x": 4,
+      "y": 7.82
+     },
+     {
+      "x": 0.77,
+      "y": 0
+     },
+     {
+      "x": 0.91,
+      "y": 0.62
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.31,
+      "y": 3.24,
+      "c": "red"
+     },
+     {
+      "x": 0.91,
+      "y": 0.62,
+      "c": "yellow"
+     }
+    ]
+   }
+  ]
+ }
+}

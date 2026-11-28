@@ -1,0 +1,1410 @@
+{
+ "id": "cbv-40-en-una-30-40",
+ "name": "Les 40 en una: posicions 30–40",
+ "group": "Les 40 en una",
+ "attributed_to": "PDF de Julio A",
+ "pages": null,
+ "source": "PDF «CUARENTA EN UNA 30-40», Club Billar València, pàg. 1–6",
+ "sort": 484,
+ "purpose": "Posicions 30 a 40, les últimes de la sèrie de quaranta, comentades: abans banda pel racó, mitja bola cap al 30, pase bola-cabanya, pase bola pel racó, simetria amb efecte 0 i teoria de diamants.",
+ "shot": {
+  "first_cushion": "bola",
+  "cushions": "bola 2 - L - C - L en general; abans banda a la 30; bola 2 - C - L - C al pase bola de la 35",
+  "effect": "favorable en general (4 a la 30, 3 a la 31, 2,5 a la 32, 1 a la 35); 0 a la 37; mínim esquerre a la 39",
+  "stroke": "dolç i suau (30); a arribar (31); curt i ràpid amb tac pla (34); molt penetrat (36); baix però suau (38)",
+  "ball": "mitja bola (31); de mitja a tres quarts (32); molta bola (33, 40); poca bola (35)"
+ },
+ "formula": null,
+ "steps": [
+  "Mira el dibuix: bola 1 blanca, recorregut de la 1 en blanc, de la 2 en el seu color; les boles grises són on van quedar.",
+  "Identifica el tipus de solució (abans banda, pase bola, simetria, teoria) i els rètols de sortida i atac.",
+  "Tria l'efecte, la presa i el cop que indica el text per a aquella posició.",
+  "Comprova la preparació: on havia d'anar la bola 2 i si hi ha risc de retruc."
+ ],
+ "numberings": [],
+ "corrections": [
+  "Pase bola-cabanya (pos. 32): sense efecte, llegada en tercera banda ≈ sortida (25); 1 efecte per cada 10 punts de més: bola 3 cap al 50 → efecte 2,5.",
+  "Pase bola pel racó (pos. 35): amb les boles 1 i 2 a la mateixa distància del racó, efecte 4 → racó de baix a la dreta; cada efecte menys → un rombo de la curta de baix.",
+  "Simetria (pos. 37): si es toca la 2 per l'esquerra, marcar un mil·límetre de desefecte per compensar l'efecte esquerre que agafa la 1.",
+  "Paral·lela rombo 1 de baix → rombo 3 de dalt (pos. 39): normalment s'arriba al racó de dalt a la dreta; un mínim d'efecte esquerre per arribar a la 3."
+ ],
+ "examples": [
+  {
+   "text": "Posició 30 (abans banda coneguda): la 1 toca primer la curta de dalt, després la vermella i el racó de dalt a l'esquerra. Efecte favorable 4 i cop dolç i suau perquè la 1 llisqui per la curta i arribi al racó tan just com es pugui; des d'aquest racó la trajectòria va al rombo 30 de la llarga dreta. Jugar la groga per l'esquerra té risc de retruc 2-3 i la preparació és menys controlable.",
+   "page": 1,
+   "path": [
+    {
+     "x": 3.47,
+     "y": 1.27
+    },
+    {
+     "x": 1.45,
+     "y": 0
+    },
+    {
+     "x": 1.15,
+     "y": 0.13
+    },
+    {
+     "x": 0.27,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 0.05
+    },
+    {
+     "x": 1.55,
+     "y": 1.2
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.22,
+     "y": 0.22,
+     "c": "red"
+    },
+    {
+     "x": 1.62,
+     "y": 1.25,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 31: bola 1 i bola 2 paral·leles i la 2 a la zona central. Mitja bola i efecte favorable 3, més o menys (el 2 o el 4 segons el material), i s'arriba a la zona del 30 en tercera banda. No cal cap càlcul de teoria de diamants. Velocitat a arribar i confiança; vigilar la presa perquè les trajectòries de la 1 i la 2 es poden creuar.",
+   "page": 1,
+   "path": [
+    {
+     "x": 2.35,
+     "y": 1.08
+    },
+    {
+     "x": 2.33,
+     "y": 2.9
+    },
+    {
+     "x": 4,
+     "y": 6.25
+    },
+    {
+     "x": 3.0,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.05
+    },
+    {
+     "x": 0.23,
+     "y": 4.88
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.28,
+     "y": 2.98,
+     "c": "yellow"
+    },
+    {
+     "x": 0.27,
+     "y": 4.8,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 32 (pase bola-cabanya, teoria «sortida doble que atac»): sortida 25. Sense efecte s'arribaria al racó i, en tercera banda, a prop del 25 (igual que la sortida). Comptant des del racó, la 3 és en direcció al 50 (5è rombo): des del 25 són 25 punts, a un efecte per cada 10 punts → efecte 2,5. Presa de mitja a tres quarts, una mica de semicorregut però tac pla.",
+   "page": 2,
+   "path": [
+    {
+     "x": 0.12,
+     "y": 3.65
+    },
+    {
+     "x": 3.05,
+     "y": 6.42
+    },
+    {
+     "x": 4,
+     "y": 6.65
+    },
+    {
+     "x": 1.47,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 7.42
+    },
+    {
+     "x": 2.5,
+     "y": 4.82
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.13,
+     "y": 6.5,
+     "c": "yellow"
+    },
+    {
+     "x": 2.57,
+     "y": 4.75,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 33: molta bola amb efecte favorable, sense abusar de la força perquè no s'obri massa l'angle a la primera banda. La vermella s'ha de fer doblet entre les llargues perquè quedi a prop de la llarga dreta o al centre. La groga es va acostar massa al racó.",
+   "page": 2,
+   "path": [
+    {
+     "x": 2.33,
+     "y": 4.08
+    },
+    {
+     "x": 3.75,
+     "y": 4.45
+    },
+    {
+     "x": 4,
+     "y": 5.38
+    },
+    {
+     "x": 2.6,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.32
+    },
+    {
+     "x": 3.0,
+     "y": 0
+    },
+    {
+     "x": 3.05,
+     "y": 0.25
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.85,
+     "y": 4.45,
+     "c": "red"
+    },
+    {
+     "x": 3.1,
+     "y": 0.18,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 34: bon atac amb sortida 42,5 i atac cap al 22,5, desenvolupant un bon efecte. Risc de retruc de la 1 amb la 2: cal calibrar presa de bola, efecte i punt de retrocés. Si es baixa massa l'atac no hi haurà bon efecte. Tac pla i cop mitjà, millor una mica curt i ràpid. No arribar justa a la 3, per treure la groga del racó.",
+   "page": 3,
+   "path": [
+    {
+     "x": 3.17,
+     "y": 1.47
+    },
+    {
+     "x": 2.1,
+     "y": 3.6
+    },
+    {
+     "x": 4,
+     "y": 5.38
+    },
+    {
+     "x": 2.45,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.92
+    },
+    {
+     "x": 3.7,
+     "y": 0.2
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.03,
+     "y": 3.6,
+     "c": "red"
+    },
+    {
+     "x": 3.78,
+     "y": 0.13,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 35 (pase bola): la bola 1 i la bola 2 són a la mateixa distància del racó. Poca presa de bola perquè la 1 surti ràpida i sense gens de corregut. Amb efecte 4 s'arriba al racó de baix a la dreta i, traient un efecte cada cop, als rombes de la curta de baix. Aquí, efecte 1 i tac pla. Prova que es fa bé: la 2 va cap al racó de dalt a l'esquerra (com al pool).",
+   "page": 3,
+   "path": [
+    {
+     "x": 3.85,
+     "y": 1.8
+    },
+    {
+     "x": 2.27,
+     "y": 0.1
+    },
+    {
+     "x": 2.3,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 5.1
+    },
+    {
+     "x": 0.97,
+     "y": 8
+    },
+    {
+     "x": 1.33,
+     "y": 7.55
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.22,
+     "y": 0.15,
+     "c": "yellow"
+    },
+    {
+     "x": 1.27,
+     "y": 7.48,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 36: cop molt penetrat que porti la 1 tan a prop com es pugui del racó de dalt a l'esquerra. No jugar amb el màxim efecte: s'obriria l'angle a la segona banda i es perdria l'allargament que es busca a la tercera. Molt risc de retruc 1-2 si no es calibra la presa. La vermella fa doblet entre les llargues i passa primer ella, després la 1.",
+   "page": 4,
+   "path": [
+    {
+     "x": 2.12,
+     "y": 7.25
+    },
+    {
+     "x": 1.15,
+     "y": 6.82
+    },
+    {
+     "x": 0,
+     "y": 1.28
+    },
+    {
+     "x": 0.28,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 6.98
+    },
+    {
+     "x": 3.13,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.0
+    },
+    {
+     "x": 2.9,
+     "y": 0.3
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.08,
+     "y": 6.85,
+     "c": "red"
+    },
+    {
+     "x": 2.95,
+     "y": 0.25,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 37: simple simetria amb efecte zero (angle d'incidència = angle de reflexió). Si es toca la 2 per l'esquerra, la 1 agafa un lleuger efecte esquerre i l'angle s'obre una mica a la primera banda: convé marcar un mil·límetre de desefecte. Preparació: la 2 al centre del billar.",
+   "page": 4,
+   "path": [
+    {
+     "x": 3.77,
+     "y": 0.38
+    },
+    {
+     "x": 2.55,
+     "y": 0.48
+    },
+    {
+     "x": 0,
+     "y": 2.8
+    },
+    {
+     "x": 4,
+     "y": 6.5
+    },
+    {
+     "x": 2.77,
+     "y": 8
+    },
+    {
+     "x": 2.55,
+     "y": 7.72
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.5,
+     "y": 0.42,
+     "c": "yellow"
+    },
+    {
+     "x": 2.53,
+     "y": 7.8,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 38: sortida aproximada des del 60 cap al 0 amb efecte favorable. Cop lleugerament baix i allargat però suau, perquè la 1 llisqui bé en tocar la 2 i després a la primera banda. Important: baix però suau, no es busca un retrocés.",
+   "page": 5,
+   "path": [
+    {
+     "x": 2.52,
+     "y": 6.88
+    },
+    {
+     "x": 2.57,
+     "y": 4.0
+    },
+    {
+     "x": 4,
+     "y": 0.68
+    },
+    {
+     "x": 3.83,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 5.0
+    },
+    {
+     "x": 1.7,
+     "y": 8
+    },
+    {
+     "x": 1.8,
+     "y": 7.8
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.5,
+     "y": 3.93,
+     "c": "yellow"
+    },
+    {
+     "x": 1.83,
+     "y": 7.85,
+     "c": "red"
+    }
+   ]
+  },
+  {
+   "text": "Posició 39: es busca la paral·lela del rombo 1 de baix al rombo 3 de dalt; normalment s'arriba al racó de dalt a la dreta. Aquí s'hi posa un mínim d'efecte esquerre per arribar a la 3. Alternativa: amb una mica de desefecte, buscar la quarta banda (curta de dalt) i tocar la 3 per darrere.",
+   "page": 5,
+   "path": [
+    {
+     "x": 2.43,
+     "y": 7.75
+    },
+    {
+     "x": 2.9,
+     "y": 5.5
+    },
+    {
+     "x": 1.55,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 5.9
+    },
+    {
+     "x": 0.45,
+     "y": 8
+    },
+    {
+     "x": 3.7,
+     "y": 1.95
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.0,
+     "y": 5.4,
+     "c": "red"
+    },
+    {
+     "x": 3.75,
+     "y": 1.9,
+     "c": "yellow"
+    }
+   ]
+  },
+  {
+   "text": "Posició 40 (última): execució ben desfogada, penetrada i amb efecte favorable per fer una llegada una mica més enllà del 20 (rètols sortida 44, atac 22, llegada 22). Es pren bona quantitat de bola vermella per evitar retrucs. Torna a quedar la posició de sortida: a fer-ne 40 més.",
+   "page": 6,
+   "path": [
+    {
+     "x": 2.45,
+     "y": 1.55
+    },
+    {
+     "x": 2.87,
+     "y": 4.32
+    },
+    {
+     "x": 4,
+     "y": 5.55
+    },
+    {
+     "x": 2.93,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.8
+    },
+    {
+     "x": 2.8,
+     "y": 1.5
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.87,
+     "y": 4.42,
+     "c": "red"
+    },
+    {
+     "x": 2.85,
+     "y": 1.42,
+     "c": "yellow"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "Als pase bola, poca presa de bola perquè la 1 surti ràpida i sense corregut (pos. 35).",
+  "Prova del pase bola: la 2 se'n va cap al racó de dalt a l'esquerra, com si l'emboquessis al pool (pos. 35).",
+  "Si baixes massa l'atac, no aconseguiràs bon efecte (pos. 34).",
+  "No jugar amb el màxim efecte quan vols allargar a la tercera banda: s'obre l'angle a la segona (pos. 36).",
+  "Baix però suau: es busca lliscament, no retrocés (pos. 38).",
+  "Pren bona quantitat de bola per evitar retrucs (pos. 40)."
+ ],
+ "quotes": [
+  "Recuerdo que los pase bolas deben jugarse con poca toma de bola para que la bola 1 salga rápida.",
+  "Importante: bajo pero suave, no pretendemos un retroceso"
+ ],
+ "uncertain": [
+  "El PDF no diu qui n'és l'autor; «Julio A» és només a les metadades (pujador).",
+  "Coordenades llegides sobre una quadrícula ajustada al morro de les bandes (±0,1 diamants); el punt de contacte amb la bola 2 és aproximat. Les taules del PDF ja són en vertical; no s'ha girat res.",
+  "Les icones de presa d'efecte (cercle amb punt) no s'han interpretat: les preguntes i els textos només fan servir el que diu el text.",
+  "Pos. 32: els rètols «44» i «12,5» de la llarga dreta i les fletxes +0,5 / +1 / +1 no s'expliquen al text més enllà de l'efecte 2,5.",
+  "Pos. 35: el dibuix petit amb el ventall de llegades segons l'efecte no s'ha mesurat.",
+  "Pos. 38: la línia discontínua 60 → 0 té els rètols fora del dibuix; la sortida és la que diu el text.",
+  "Pos. 40: els rètols 44, 22, 22 (i 12,5 a l'extracció de text) es llegeixen com sortida 44, atac 22, llegada 22; el text només diu «una llegada algo más del 20»."
+ ],
+ "trainer": {
+  "quiz": [
+   {
+    "q": "Posició 30: quin efecte i quin cop?",
+    "options": [
+     "Efecte 0 i cop sec",
+     "Efecte contrari i retrocés",
+     "Efecte 2 i cop ràpid",
+     "Efecte favorable 4 i cop dolç i suau"
+    ],
+    "answer": 3,
+    "explain": "«Efecto favorable 4 y golpe dulce y suave para que la bola 1 resbale en la banda corta alcanzando el rincón.»",
+    "page": 1,
+    "path": [
+     {
+      "x": 3.47,
+      "y": 1.27
+     },
+     {
+      "x": 1.45,
+      "y": 0
+     },
+     {
+      "x": 1.15,
+      "y": 0.13
+     },
+     {
+      "x": 0.27,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.05
+     },
+     {
+      "x": 1.55,
+      "y": 1.2
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.22,
+      "y": 0.22,
+      "c": "red"
+     },
+     {
+      "x": 1.62,
+      "y": 1.25,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 30: per què no es juga la groga per l'esquerra?",
+    "options": [
+     "Perquè és impossible",
+     "Perquè cal massé",
+     "Perquè la 1 queda tapada",
+     "Hi ha risc de retruc de la 2 amb la 3 i la preparació és menys controlable"
+    ],
+    "answer": 3,
+    "explain": "«Hay riesgo de retruque de la 2 con la 3 y la preparación es menos controlable.»",
+    "page": 1,
+    "path": [
+     {
+      "x": 3.47,
+      "y": 1.27
+     },
+     {
+      "x": 1.45,
+      "y": 0
+     },
+     {
+      "x": 1.15,
+      "y": 0.13
+     },
+     {
+      "x": 0.27,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 0.05
+     },
+     {
+      "x": 1.55,
+      "y": 1.2
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.22,
+      "y": 0.22,
+      "c": "red"
+     },
+     {
+      "x": 1.62,
+      "y": 1.25,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 31: amb les boles 1 i 2 paral·leles i la 2 al centre, quina presa i quin efecte porten a la zona del 30?",
+    "options": [
+     "Bola plena i efecte 0",
+     "Poca bola i efecte contrari",
+     "Tres quarts i efecte 1",
+     "Mitja bola i efecte favorable 3, més o menys"
+    ],
+    "answer": 3,
+    "explain": "«Tomando media bola y un efecto favorable 3 más o menos (…) se alcanza la zona del 30 en la tercera banda.»",
+    "page": 1,
+    "path": [
+     {
+      "x": 2.35,
+      "y": 1.08
+     },
+     {
+      "x": 2.33,
+      "y": 2.9
+     },
+     {
+      "x": 4,
+      "y": 6.25
+     },
+     {
+      "x": 3.0,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.05
+     },
+     {
+      "x": 0.23,
+      "y": 4.88
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.28,
+      "y": 2.98,
+      "c": "yellow"
+     },
+     {
+      "x": 0.27,
+      "y": 4.8,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 31: cal calcular-la amb la teoria de diamants?",
+    "options": [
+     "Només si la 3 és a banda",
+     "No: velocitat a arribar i confiança",
+     "Sí, amb sortida − atac",
+     "Sí, amb el Plus"
+    ],
+    "answer": 1,
+    "explain": "«Es una posición fácil que no requiere ningún cálculo de teoría de diamantes.»",
+    "page": 1,
+    "path": [
+     {
+      "x": 2.35,
+      "y": 1.08
+     },
+     {
+      "x": 2.33,
+      "y": 2.9
+     },
+     {
+      "x": 4,
+      "y": 6.25
+     },
+     {
+      "x": 3.0,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.05
+     },
+     {
+      "x": 0.23,
+      "y": 4.88
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.28,
+      "y": 2.98,
+      "c": "yellow"
+     },
+     {
+      "x": 0.27,
+      "y": 4.8,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 32: quin efecte cal si la 3 és en direcció al 50 i la sortida és 25?",
+    "options": [
+     "Efecte 2,5",
+     "Efecte 0",
+     "Efecte 5",
+     "Efecte 1"
+    ],
+    "answer": 0,
+    "explain": "Del 25 al 50 hi ha 25 punts, un efecte per cada 10 punts → 2,5.",
+    "page": 2,
+    "path": [
+     {
+      "x": 0.12,
+      "y": 3.65
+     },
+     {
+      "x": 3.05,
+      "y": 6.42
+     },
+     {
+      "x": 4,
+      "y": 6.65
+     },
+     {
+      "x": 1.47,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 7.42
+     },
+     {
+      "x": 2.5,
+      "y": 4.82
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.13,
+      "y": 6.5,
+      "c": "yellow"
+     },
+     {
+      "x": 2.57,
+      "y": 4.75,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 32: quina presa de bola?",
+    "options": [
+     "De mitja a tres quarts, amb una mica de semicorregut i tac pla",
+     "Molt fina",
+     "Bola plena amb retrocés",
+     "Un quart de bola amb tac aixecat"
+    ],
+    "answer": 0,
+    "explain": "«Es una jugada a toma de bola de media a tres cuartos buscando un poco de semicorrido aunque con taco plano.»",
+    "page": 2,
+    "path": [
+     {
+      "x": 0.12,
+      "y": 3.65
+     },
+     {
+      "x": 3.05,
+      "y": 6.42
+     },
+     {
+      "x": 4,
+      "y": 6.65
+     },
+     {
+      "x": 1.47,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 7.42
+     },
+     {
+      "x": 2.5,
+      "y": 4.82
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.13,
+      "y": 6.5,
+      "c": "yellow"
+     },
+     {
+      "x": 2.57,
+      "y": 4.75,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 33: com s'executa?",
+    "options": [
+     "Poca bola i molta força",
+     "Mitja bola sense efecte",
+     "Retrocés amb efecte contrari",
+     "Molta bola amb efecte favorable, sense abusar de la força"
+    ],
+    "answer": 3,
+    "explain": "«Se trata de tomar mucha bola con efecto favorable sin abusar de la fuerza para que no se abra demasiado el ángulo en la primera banda.»",
+    "page": 2,
+    "path": [
+     {
+      "x": 2.33,
+      "y": 4.08
+     },
+     {
+      "x": 3.75,
+      "y": 4.45
+     },
+     {
+      "x": 4,
+      "y": 5.38
+     },
+     {
+      "x": 2.6,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.32
+     },
+     {
+      "x": 3.0,
+      "y": 0
+     },
+     {
+      "x": 3.05,
+      "y": 0.25
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.85,
+      "y": 4.45,
+      "c": "red"
+     },
+     {
+      "x": 3.1,
+      "y": 0.18,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 34: quina sortida i quin atac?",
+    "options": [
+     "Sortida 42,5 i atac cap al 22,5",
+     "Sortida 40 i atac 15",
+     "Sortida 45 i atac 30",
+     "Sortida 25 i atac 12,5"
+    ],
+    "answer": 0,
+    "explain": "«Es una ejecución de buen ataque con salida 42,5 y ataque hacia 22,5.»",
+    "page": 3,
+    "path": [
+     {
+      "x": 3.17,
+      "y": 1.47
+     },
+     {
+      "x": 2.1,
+      "y": 3.6
+     },
+     {
+      "x": 4,
+      "y": 5.38
+     },
+     {
+      "x": 2.45,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.92
+     },
+     {
+      "x": 3.7,
+      "y": 0.2
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.03,
+      "y": 3.6,
+      "c": "red"
+     },
+     {
+      "x": 3.78,
+      "y": 0.13,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 34: quin cop recomana?",
+    "options": [
+     "Tac pla i cop mitjà, millor una mica curt i ràpid",
+     "Allargat i lent",
+     "Cop alt amb tac aixecat",
+     "Massé"
+    ],
+    "answer": 0,
+    "explain": "«Taco plano y golpe medio, preferiblemente algo más corto y rápido.»",
+    "page": 3,
+    "path": [
+     {
+      "x": 3.17,
+      "y": 1.47
+     },
+     {
+      "x": 2.1,
+      "y": 3.6
+     },
+     {
+      "x": 4,
+      "y": 5.38
+     },
+     {
+      "x": 2.45,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.92
+     },
+     {
+      "x": 3.7,
+      "y": 0.2
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.03,
+      "y": 3.6,
+      "c": "red"
+     },
+     {
+      "x": 3.78,
+      "y": 0.13,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 35: quina presa de bola cal al pase bola?",
+    "options": [
+     "Mitja bola",
+     "Bola plena amb retrocés",
+     "Poca bola, perquè la 1 surti ràpida i sense corregut",
+     "Molta bola"
+    ],
+    "answer": 2,
+    "explain": "«Los pase bolas deben jugarse con poca toma de bola para que la bola 1 salga rápida y evitar incluso un mínimo de corrido.»",
+    "page": 3,
+    "path": [
+     {
+      "x": 3.85,
+      "y": 1.8
+     },
+     {
+      "x": 2.27,
+      "y": 0.1
+     },
+     {
+      "x": 2.3,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 5.1
+     },
+     {
+      "x": 0.97,
+      "y": 8
+     },
+     {
+      "x": 1.33,
+      "y": 7.55
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.22,
+      "y": 0.15,
+      "c": "yellow"
+     },
+     {
+      "x": 1.27,
+      "y": 7.48,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 35: quin efecte s'hi posa en aquest cas?",
+    "options": [
+     "Efecte 4",
+     "Efecte 0",
+     "Efecte 3 i tac aixecat",
+     "Efecte 1 i tac pla"
+    ],
+    "answer": 3,
+    "explain": "«En nuestro caso se trata de jugarla con efecto 1, taco plano.» Amb efecte 4 s'arribaria al racó de baix a la dreta.",
+    "page": 3,
+    "path": [
+     {
+      "x": 3.85,
+      "y": 1.8
+     },
+     {
+      "x": 2.27,
+      "y": 0.1
+     },
+     {
+      "x": 2.3,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 5.1
+     },
+     {
+      "x": 0.97,
+      "y": 8
+     },
+     {
+      "x": 1.33,
+      "y": 7.55
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.22,
+      "y": 0.15,
+      "c": "yellow"
+     },
+     {
+      "x": 1.27,
+      "y": 7.48,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 36: per què no s'ha de jugar amb el màxim efecte?",
+    "options": [
+     "Faria retruc segur amb la 3",
+     "La 1 no arribaria a la primera banda",
+     "La vermella quedaria al centre",
+     "S'obriria l'angle a la segona banda i es perdria l'allargament a la tercera"
+    ],
+    "answer": 3,
+    "explain": "«No jugar con máximo efecto porque entonces se abrirá el ángulo en la segunda banda y no lograremos el alargue.»",
+    "page": 4,
+    "path": [
+     {
+      "x": 2.12,
+      "y": 7.25
+     },
+     {
+      "x": 1.15,
+      "y": 6.82
+     },
+     {
+      "x": 0,
+      "y": 1.28
+     },
+     {
+      "x": 0.28,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 6.98
+     },
+     {
+      "x": 3.13,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.0
+     },
+     {
+      "x": 2.9,
+      "y": 0.3
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.08,
+      "y": 6.85,
+      "c": "red"
+     },
+     {
+      "x": 2.95,
+      "y": 0.25,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 36: quin cop demana?",
+    "options": [
+     "Molt penetrat, portant la 1 a prop del racó de dalt",
+     "Curt i sec",
+     "Retrocés suau",
+     "Massé"
+    ],
+    "answer": 0,
+    "explain": "«La jugada requiere un golpe muy penetrado llevando la bola 1 lo más cerca posible del rincón superior.»",
+    "page": 4,
+    "path": [
+     {
+      "x": 2.12,
+      "y": 7.25
+     },
+     {
+      "x": 1.15,
+      "y": 6.82
+     },
+     {
+      "x": 0,
+      "y": 1.28
+     },
+     {
+      "x": 0.28,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 6.98
+     },
+     {
+      "x": 3.13,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.0
+     },
+     {
+      "x": 2.9,
+      "y": 0.3
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.08,
+      "y": 6.85,
+      "c": "red"
+     },
+     {
+      "x": 2.95,
+      "y": 0.25,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 37: quin efecte demana la solució per simetria?",
+    "options": [
+     "Efecte 2 contrari",
+     "Retrocés amb efecte",
+     "Efecte zero (marcant un mil·límetre de desefecte)",
+     "Efecte 4 favorable"
+    ],
+    "answer": 2,
+    "explain": "«Es una jugada resuelta por simple simetría con efecto cero»; tocant la 2 per l'esquerra, un mil·límetre de desefecte.",
+    "page": 4,
+    "path": [
+     {
+      "x": 3.77,
+      "y": 0.38
+     },
+     {
+      "x": 2.55,
+      "y": 0.48
+     },
+     {
+      "x": 0,
+      "y": 2.8
+     },
+     {
+      "x": 4,
+      "y": 6.5
+     },
+     {
+      "x": 2.77,
+      "y": 8
+     },
+     {
+      "x": 2.55,
+      "y": 7.72
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.5,
+      "y": 0.42,
+      "c": "yellow"
+     },
+     {
+      "x": 2.53,
+      "y": 7.8,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 38: com és el cop?",
+    "options": [
+     "Lleugerament baix i allargat però suau, sense buscar retrocés",
+     "Baix i fort per fer retrocés",
+     "Alt i ràpid",
+     "Curt i sec"
+    ],
+    "answer": 0,
+    "explain": "«Golpear ligeramente bajo y alargado pero suave… bajo pero suave, no pretendemos un retroceso.»",
+    "page": 5,
+    "path": [
+     {
+      "x": 2.52,
+      "y": 6.88
+     },
+     {
+      "x": 2.57,
+      "y": 4.0
+     },
+     {
+      "x": 4,
+      "y": 0.68
+     },
+     {
+      "x": 3.83,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 5.0
+     },
+     {
+      "x": 1.7,
+      "y": 8
+     },
+     {
+      "x": 1.8,
+      "y": 7.8
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.5,
+      "y": 3.93,
+      "c": "yellow"
+     },
+     {
+      "x": 1.83,
+      "y": 7.85,
+      "c": "red"
+     }
+    ]
+   },
+   {
+    "q": "Posició 39: quin efecte s'hi posa per arribar a la 3?",
+    "options": [
+     "Efecte 0",
+     "Retrocés",
+     "Un mínim d'efecte esquerre",
+     "Efecte màxim a la dreta"
+    ],
+    "answer": 2,
+    "explain": "«En este caso imprimimos un mínimo efecto izquierdo para alcanzar a la bola 3.»",
+    "page": 5,
+    "path": [
+     {
+      "x": 2.43,
+      "y": 7.75
+     },
+     {
+      "x": 2.9,
+      "y": 5.5
+     },
+     {
+      "x": 1.55,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 5.9
+     },
+     {
+      "x": 0.45,
+      "y": 8
+     },
+     {
+      "x": 3.7,
+      "y": 1.95
+     }
+    ],
+    "balls": [
+     {
+      "x": 3.0,
+      "y": 5.4,
+      "c": "red"
+     },
+     {
+      "x": 3.75,
+      "y": 1.9,
+      "c": "yellow"
+     }
+    ]
+   },
+   {
+    "q": "Posició 40: quina presa de bola i per què?",
+    "options": [
+     "Mitja bola, per preparar",
+     "Bola plena, per fer retrocés",
+     "Bona quantitat de bola vermella, per evitar retrucs",
+     "Molt fina, per no moure la vermella"
+    ],
+    "answer": 2,
+    "explain": "«Se toma buena cantidad de bola roja para evitar fatídicos retruques.»",
+    "page": 6,
+    "path": [
+     {
+      "x": 2.45,
+      "y": 1.55
+     },
+     {
+      "x": 2.87,
+      "y": 4.32
+     },
+     {
+      "x": 4,
+      "y": 5.55
+     },
+     {
+      "x": 2.93,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.8
+     },
+     {
+      "x": 2.8,
+      "y": 1.5
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.87,
+      "y": 4.42,
+      "c": "red"
+     },
+     {
+      "x": 2.85,
+      "y": 1.42,
+      "c": "yellow"
+     }
+    ]
+   }
+  ]
+ }
+}

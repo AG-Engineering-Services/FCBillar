@@ -1,0 +1,1159 @@
+{
+ "id": "cbv-rodades-plus-sense-efecte",
+ "name": "Rodades amb el Sistema Plus (sense efecte)",
+ "group": "Rodades i cabanyes",
+ "attributed_to": "PDF de Julio A",
+ "pages": null,
+ "source": "PDF «Rodadas Sistema Plus (sin efecto)», Club Billar València, pàg. 1–10",
+ "sort": 460,
+ "purpose": "Rodades curta-llarga-curta amb efecte zero (tres o quatre bandes), útils sobretot quan la bola 3 és a prop de la quarta banda.",
+ "shot": {
+  "first_cushion": "curta",
+  "cushions": "K-L-K (i 4a banda llarga)",
+  "effect": "Efecte zero",
+  "stroke": "Tacada normal, tac horitzontal, velocitat justa per fer tres o quatre bandes",
+  "ball": null
+ },
+ "formula": "Atac = Sortida − Llegada",
+ "steps": [
+  "Zona 1 (sortida de la banda llarga): llegeix la sortida a la llarga esquerra (0 al 2n diamant, 40 al 4t, 80 al racó inferior).",
+  "Busca la llegada a la tercera banda (curta inferior, de 20 a 80) amb les línies de connexió de 3a a 4a banda, perquè la bola acabi a prop de la bola 3.",
+  "Resta sortida − llegada i ataca aquest número a la curta superior: positius a la dreta del centre (0 = diamant central), negatius a l'esquerra.",
+  "Zona 2 (sortida de la banda curta): la sortida és a la curta inferior (20 al racó, 15, 10 i 5 a cada diamant); cada sortida té la seva numeració de llegada a la 3a banda i les seves línies cap a la 4a banda.",
+  "Ataca sortida − llegada a la curta superior de la zona 2 (0 al racó dret, 10 al 3r diamant, 20 al centre).",
+  "Juga sense efecte, tac horitzontal, amb la velocitat justa."
+ ],
+ "numberings": [
+  {
+   "name": "Sortida (zona 1)",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 0,
+     "y": 2,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 2.5,
+     "v": 10
+    },
+    {
+     "x": 0,
+     "y": 3,
+     "v": 20
+    },
+    {
+     "x": 0,
+     "y": 3.5,
+     "v": 30
+    },
+    {
+     "x": 0,
+     "y": 4,
+     "v": 40
+    },
+    {
+     "x": 0,
+     "y": 5,
+     "v": 50
+    },
+    {
+     "x": 0,
+     "y": 6,
+     "v": 60
+    },
+    {
+     "x": 0,
+     "y": 7,
+     "v": 70
+    },
+    {
+     "x": 0,
+     "y": 8,
+     "v": 80
+    }
+   ],
+   "note": "Base de la zona 1 ja en vertical (pàg. 1). Les gràfiques apaïsades (pàg. 8–10) s'han girat 90° en sentit horari: la curta dreta passa a ser la curta inferior i la llarga inferior, la llarga esquerra."
+  },
+  {
+   "name": "Atac (zona 1)",
+   "role": "atac",
+   "points": [
+    {
+     "x": 0.5,
+     "y": 0,
+     "v": -80
+    },
+    {
+     "x": 0.67,
+     "y": 0,
+     "v": -70
+    },
+    {
+     "x": 0.83,
+     "y": 0,
+     "v": -60
+    },
+    {
+     "x": 1.0,
+     "y": 0,
+     "v": -50
+    },
+    {
+     "x": 1.17,
+     "y": 0,
+     "v": -40
+    },
+    {
+     "x": 1.33,
+     "y": 0,
+     "v": -30
+    },
+    {
+     "x": 1.5,
+     "y": 0,
+     "v": -20
+    },
+    {
+     "x": 1.75,
+     "y": 0,
+     "v": -10
+    },
+    {
+     "x": 2,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 2.33,
+     "y": 0,
+     "v": 10
+    },
+    {
+     "x": 2.67,
+     "y": 0,
+     "v": 20
+    },
+    {
+     "x": 3,
+     "y": 0,
+     "v": 30
+    },
+    {
+     "x": 3.33,
+     "y": 0,
+     "v": 40
+    },
+    {
+     "x": 3.67,
+     "y": 0,
+     "v": 50
+    },
+    {
+     "x": 4,
+     "y": 0,
+     "v": 60
+    }
+   ],
+   "note": "Curta superior. 0 al diamant central; positius cap a la dreta (60 al racó), negatius cap a l'esquerra. La figura escriu 1…6 i 1…8 «x10»."
+  },
+  {
+   "name": "Llegada (zona 1)",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 1,
+     "y": 8,
+     "v": 20
+    },
+    {
+     "x": 1.5,
+     "y": 8,
+     "v": 30
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 40
+    },
+    {
+     "x": 2.5,
+     "y": 8,
+     "v": 50
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 60
+    },
+    {
+     "x": 3.5,
+     "y": 8,
+     "v": 70
+    },
+    {
+     "x": 3.8,
+     "y": 8,
+     "v": 80
+    }
+   ],
+   "note": "Tercera banda: curta inferior."
+  },
+  {
+   "name": "Quarta banda (zona 1)",
+   "role": "arribada",
+   "points": [
+    {
+     "x": 0,
+     "y": 6.8,
+     "v": 20
+    },
+    {
+     "x": 0,
+     "y": 5.8,
+     "v": 40
+    },
+    {
+     "x": 0,
+     "y": 4.8,
+     "v": 50
+    },
+    {
+     "x": 0,
+     "y": 3.8,
+     "v": 60
+    }
+   ],
+   "note": "Connexions de 3a a 4a banda (pàg. 2): llegada 20 → 4a banda a 6,8; 40 → 5,8; 50 → 4,8; 60 → 3,8."
+  },
+  {
+   "name": "Sortida (zona 2)",
+   "role": "sortida",
+   "points": [
+    {
+     "x": 0,
+     "y": 8,
+     "v": 20
+    },
+    {
+     "x": 1,
+     "y": 8,
+     "v": 15
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 10
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 5
+    }
+   ],
+   "note": "Zona 2: la sortida es llegeix a la curta inferior (la mateixa banda on hi ha la llegada de la 3a banda)."
+  },
+  {
+   "name": "Atac (zona 2)",
+   "role": "atac",
+   "points": [
+    {
+     "x": 4,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 3.5,
+     "y": 0,
+     "v": 5
+    },
+    {
+     "x": 3,
+     "y": 0,
+     "v": 10
+    },
+    {
+     "x": 2.5,
+     "y": 0,
+     "v": 15
+    },
+    {
+     "x": 2,
+     "y": 0,
+     "v": 20
+    }
+   ],
+   "note": "Curta superior, igual per a totes les sortides de la zona 2."
+  },
+  {
+   "name": "Llegada 3a banda (sortida 20)",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 1.5,
+     "y": 8,
+     "v": 20
+    },
+    {
+     "x": 2,
+     "y": 8,
+     "v": 16
+    },
+    {
+     "x": 2.5,
+     "y": 8,
+     "v": 12
+    },
+    {
+     "x": 3,
+     "y": 8,
+     "v": 8
+    },
+    {
+     "x": 3.5,
+     "y": 8,
+     "v": 4
+    },
+    {
+     "x": 3.8,
+     "y": 8,
+     "v": 0
+    }
+   ]
+  },
+  {
+   "name": "Llegada 4a banda (sortida 20)",
+   "role": "arribada",
+   "points": [
+    {
+     "x": 0,
+     "y": 0.5,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 1.5,
+     "v": 4
+    },
+    {
+     "x": 0,
+     "y": 2.5,
+     "v": 8
+    },
+    {
+     "x": 0,
+     "y": 3.5,
+     "v": 12
+    },
+    {
+     "x": 0,
+     "y": 4.5,
+     "v": 16
+    },
+    {
+     "x": 0,
+     "y": 5.5,
+     "v": 20
+    }
+   ]
+  },
+  {
+   "name": "Llegada 3a banda (sortida 15)",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 2.2,
+     "y": 8,
+     "v": 15
+    },
+    {
+     "x": 2.7,
+     "y": 8,
+     "v": 10
+    },
+    {
+     "x": 3.2,
+     "y": 8,
+     "v": 5
+    },
+    {
+     "x": 3.5,
+     "y": 8,
+     "v": 2
+    },
+    {
+     "x": 3.8,
+     "y": 8,
+     "v": 0
+    }
+   ]
+  },
+  {
+   "name": "Llegada 4a banda (sortida 15)",
+   "role": "arribada",
+   "points": [
+    {
+     "x": 0.8,
+     "y": 0,
+     "v": 0
+    },
+    {
+     "x": 0,
+     "y": 0,
+     "v": 2
+    },
+    {
+     "x": 0,
+     "y": 1.5,
+     "v": 5
+    },
+    {
+     "x": 0,
+     "y": 3,
+     "v": 10
+    },
+    {
+     "x": 0,
+     "y": 4.5,
+     "v": 15
+    }
+   ],
+   "note": "La llegada 0 passa el racó i arriba a la curta superior."
+  },
+  {
+   "name": "Llegada 3a banda (sortida 10)",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 3,
+     "y": 8,
+     "v": 10
+    },
+    {
+     "x": 3.4,
+     "y": 8,
+     "v": 5
+    },
+    {
+     "x": 3.8,
+     "y": 8,
+     "v": 0
+    }
+   ]
+  },
+  {
+   "name": "Llegada 4a banda (sortida 10)",
+   "role": "arribada",
+   "points": [
+    {
+     "x": 0,
+     "y": 0.2,
+     "v": 10
+    },
+    {
+     "x": 0.8,
+     "y": 0,
+     "v": 5
+    },
+    {
+     "x": 1.8,
+     "y": 0,
+     "v": 0
+    }
+   ]
+  },
+  {
+   "name": "Llegada 3a banda (sortida 5)",
+   "role": "llegada",
+   "points": [
+    {
+     "x": 3,
+     "y": 8,
+     "v": 5
+    },
+    {
+     "x": 3.8,
+     "y": 8,
+     "v": 0
+    }
+   ]
+  },
+  {
+   "name": "Llegada 4a banda (sortida 5)",
+   "role": "arribada",
+   "points": [
+    {
+     "x": 1.8,
+     "y": 0,
+     "v": 5
+    },
+    {
+     "x": 2.8,
+     "y": 0,
+     "v": 0
+    }
+   ]
+  }
+ ],
+ "corrections": [
+  "Si es juga primer sobre la bola 2 i aquesta és avançada respecte de la bola jugadora, cal un mínim d'efecte contrari.",
+  "Zona 2: la numeració de llegada a la 3a banda canvia segons la sortida (20, 15, 10 o 5); la llegada 0 queda sempre a prop del racó (≈3,8)."
+ ],
+ "examples": [
+  {
+   "text": "Zona 1: sortida 0, llegada 40 → atac 0 − 40 = −40 (també gràfica 33, pàg. 9)",
+   "page": 3,
+   "path": [
+    {
+     "x": 0.37,
+     "y": 0.88
+    },
+    {
+     "x": 0.9,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 3.68
+    },
+    {
+     "x": 2,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.82
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.37,
+     "y": 0.88,
+     "c": "yellow"
+    },
+    {
+     "x": 1.15,
+     "y": 7.3,
+     "c": "red"
+    },
+    {
+     "x": 1.39,
+     "y": 7.14,
+     "c": "white"
+    }
+   ]
+  },
+  {
+   "text": "Zona 1: sortida 60, llegada 40 → atac 60 − 40 = 20 (també gràfica 34, pàg. 9)",
+   "page": 3,
+   "path": [
+    {
+     "x": 0.37,
+     "y": 4.54
+    },
+    {
+     "x": 2.54,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 2.6
+    },
+    {
+     "x": 2,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 5.85
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.37,
+     "y": 4.54,
+     "c": "yellow"
+    },
+    {
+     "x": 1.19,
+     "y": 7.37,
+     "c": "red"
+    },
+    {
+     "x": 1.41,
+     "y": 7.2,
+     "c": "white"
+    }
+   ]
+  },
+  {
+   "text": "Zona 2, gràfica 35: sortida 20, llegada 8 → atac 12",
+   "page": 8,
+   "path": [
+    {
+     "x": 0.37,
+     "y": 6.93
+    },
+    {
+     "x": 2.7,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 3.48
+    },
+    {
+     "x": 3.0,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 3.0
+    }
+   ],
+   "balls": [
+    {
+     "x": 0.37,
+     "y": 6.93,
+     "c": "yellow"
+    },
+    {
+     "x": 1.55,
+     "y": 5.85,
+     "c": "red"
+    },
+    {
+     "x": 1.76,
+     "y": 5.71,
+     "c": "white"
+    }
+   ]
+  },
+  {
+   "text": "Zona 2, gràfica 36: sortida 15, llegada 5 → atac 10",
+   "page": 8,
+   "path": [
+    {
+     "x": 1.36,
+     "y": 6.7
+    },
+    {
+     "x": 2.98,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 3.18
+    },
+    {
+     "x": 3.23,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 1.49
+    }
+   ],
+   "balls": [
+    {
+     "x": 1.36,
+     "y": 6.7,
+     "c": "yellow"
+    },
+    {
+     "x": 2.13,
+     "y": 6.15,
+     "c": "red"
+    },
+    {
+     "x": 2.45,
+     "y": 6.13,
+     "c": "white"
+    }
+   ]
+  },
+  {
+   "text": "Zona 2, gràfica 37: sortida 10, llegada 10 → atac 0 (el racó)",
+   "page": 10,
+   "path": [
+    {
+     "x": 2.23,
+     "y": 7.41
+    },
+    {
+     "x": 3.95,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 0.38
+    },
+    {
+     "x": 3.0,
+     "y": 8
+    },
+    {
+     "x": 0,
+     "y": 0.3
+    }
+   ],
+   "balls": [
+    {
+     "x": 2.23,
+     "y": 7.41,
+     "c": "yellow"
+    },
+    {
+     "x": 2.05,
+     "y": 5.9,
+     "c": "red"
+    },
+    {
+     "x": 2.29,
+     "y": 5.8,
+     "c": "white"
+    }
+   ]
+  },
+  {
+   "text": "Zona 2, gràfica 38: sortida 5, llegada 0 → atac 5",
+   "page": 10,
+   "path": [
+    {
+     "x": 3.1,
+     "y": 6.5
+    },
+    {
+     "x": 3.51,
+     "y": 0
+    },
+    {
+     "x": 4,
+     "y": 7.5
+    },
+    {
+     "x": 3.82,
+     "y": 8
+    },
+    {
+     "x": 2.8,
+     "y": 0
+    }
+   ],
+   "balls": [
+    {
+     "x": 3.1,
+     "y": 6.5,
+     "c": "yellow"
+    },
+    {
+     "x": 2.91,
+     "y": 1.75,
+     "c": "red"
+    },
+    {
+     "x": 3.14,
+     "y": 1.68,
+     "c": "white"
+    }
+   ]
+  }
+ ],
+ "tips": [
+  "A més de les tres bandes, el sistema serveix per a posicions amb la bola 3 a prop de la quarta banda.",
+  "A totes les gràfiques l'efecte és 0: el punt del tac al centre de la bola.",
+  "Fes servir les línies de connexió de 3a a 4a banda per triar la llegada que porta la bola cap a la bola 3."
+ ],
+ "quotes": [
+  "El sistema tiene por fórmula Ataque = Salida-Llegada.",
+  "La tacada debe ser normal con taco horizontal, aplicando efecto cero"
+ ],
+ "uncertain": [
+  "Pàg. 3 escriu «Ataque 40» per a sortida 0 i llegada 40; la gràfica 33 (pàg. 9) diu −40. A la base, −40 és a 1,17 diamants, però als dibuixos dels exemples l'atac cau cap a 1,05.",
+  "Valors negatius de l'atac (−30 a −80) llegits de fletxes molt juntes a la base (±0,05 diamant).",
+  "Les marques de la 4a banda de la zona 1 queden uns 0,2 diamants per sobre dels diamants (3,8; 4,8; 5,8; 6,8); no se sap si volen dir els diamants 4–7.",
+  "Gràfica 35: la llegada 8 de la sortida 20 arriba a la 4a banda a 3,0, però la base (pàg. 4) la posa a 2,5.",
+  "El PDF no diu d'on surten les gràfiques (numerades 29–38, sembla un llibre) ni dona cap autor."
+ ],
+ "trainer": {
+  "calc": {
+   "vars": {
+    "S": {
+     "label": "Sortida",
+     "numbering": "Sortida (zona 1)"
+    },
+    "A": {
+     "label": "Atac",
+     "numbering": "Atac (zona 1)"
+    },
+    "L": {
+     "label": "Llegada",
+     "numbering": "Llegada (zona 1)"
+    }
+   },
+   "inputs": {
+    "S": [
+     0,
+     10,
+     20,
+     30,
+     40,
+     50,
+     60,
+     70,
+     80
+    ],
+    "L": [
+     20,
+     30,
+     40,
+     50,
+     60,
+     70,
+     80
+    ],
+    "A": [
+     -50,
+     -40,
+     -30,
+     -20,
+     -10,
+     0,
+     10,
+     20,
+     30,
+     40,
+     50,
+     60
+    ]
+   },
+   "relations": [
+    {
+     "solve": "A",
+     "expr": "S - L"
+    },
+    {
+     "solve": "L",
+     "expr": "S - A"
+    },
+    {
+     "solve": "S",
+     "expr": "A + L"
+    }
+   ],
+   "valid": "A >= -80 && A <= 60 && L >= 20 && L <= 80 && S >= 0 && S <= 80",
+   "round": 0,
+   "path": [
+    "S",
+    "A",
+    "L"
+   ],
+   "note": "Només zona 1 (sortida de la llarga esquerra). Efecte zero, tac horitzontal. La zona 2 es treballa al qüestionari."
+  },
+  "quiz": [
+   {
+    "q": "Zona 1: sortida 60, llegada 40. On ataques?",
+    "options": [
+     "Al 20",
+     "Al 100",
+     "Al −20",
+     "Al 40"
+    ],
+    "answer": 0,
+    "explain": "Atac = sortida − llegada = 60 − 40 = 20.",
+    "page": 3,
+    "path": [
+     {
+      "x": 0.37,
+      "y": 4.54
+     },
+     {
+      "x": 2.54,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 2.6
+     },
+     {
+      "x": 2,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.85
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.37,
+      "y": 4.54,
+      "c": "yellow"
+     },
+     {
+      "x": 1.19,
+      "y": 7.37,
+      "c": "red"
+     },
+     {
+      "x": 1.41,
+      "y": 7.2,
+      "c": "white"
+     }
+    ]
+   },
+   {
+    "q": "Zona 1: sortida 0, llegada 40. Quin atac surt?",
+    "options": [
+     "−40, a l'esquerra del diamant central",
+     "40, a la dreta del centre",
+     "0, el diamant central",
+     "El racó dret"
+    ],
+    "answer": 0,
+    "explain": "0 − 40 = −40: els negatius són a l'esquerra del 0 central (gràfica 33).",
+    "page": 9,
+    "path": [
+     {
+      "x": 0.37,
+      "y": 0.88
+     },
+     {
+      "x": 0.9,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 3.68
+     },
+     {
+      "x": 2,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.82
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.37,
+      "y": 0.88,
+      "c": "yellow"
+     },
+     {
+      "x": 1.15,
+      "y": 7.3,
+      "c": "red"
+     },
+     {
+      "x": 1.39,
+      "y": 7.14,
+      "c": "white"
+     }
+    ]
+   },
+   {
+    "q": "Quin efecte i tacada demana el sistema?",
+    "options": [
+     "Efecte zero, tacada normal i tac horitzontal",
+     "Efecte màxim a favor",
+     "Efecte contrari i tac alçat",
+     "Efecte baix i tacada seca"
+    ],
+    "answer": 0,
+    "explain": "«La tacada debe ser normal con taco horizontal, aplicando efecto cero».",
+    "page": 2
+   },
+   {
+    "q": "Jugues primer sobre la bola 2 i és avançada respecte de la teva bola. Què cal fer?",
+    "options": [
+     "Un mínim d'efecte contrari",
+     "Efecte màxim a favor",
+     "Res, efecte zero igualment",
+     "Més velocitat"
+    ],
+    "answer": 0,
+    "explain": "El PDF ho avisa: en aquest cas cal un mínim d'efecte contrari.",
+    "page": 2
+   },
+   {
+    "q": "Zona 2: sortida 20 (racó), llegada 8. On ataques?",
+    "options": [
+     "Al 12",
+     "Al 28",
+     "Al 8",
+     "Al 20"
+    ],
+    "answer": 0,
+    "explain": "Gràfica 35: A = S 20 − LL 8 = 12.",
+    "page": 8,
+    "path": [
+     {
+      "x": 0.37,
+      "y": 6.93
+     },
+     {
+      "x": 2.7,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 3.48
+     },
+     {
+      "x": 3.0,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 3.0
+     }
+    ],
+    "balls": [
+     {
+      "x": 0.37,
+      "y": 6.93,
+      "c": "yellow"
+     },
+     {
+      "x": 1.55,
+      "y": 5.85,
+      "c": "red"
+     },
+     {
+      "x": 1.76,
+      "y": 5.71,
+      "c": "white"
+     }
+    ]
+   },
+   {
+    "q": "Zona 2: sortida 10, llegada 10. On ataques?",
+    "options": [
+     "Al racó de la curta superior (atac 0)",
+     "Al centre de la curta (20)",
+     "Al 10, el 3r diamant",
+     "Al 5"
+    ],
+    "answer": 0,
+    "explain": "Gràfica 37: 10 − 10 = 0, i l'atac 0 de la zona 2 és el racó.",
+    "page": 10,
+    "path": [
+     {
+      "x": 2.23,
+      "y": 7.41
+     },
+     {
+      "x": 3.95,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 0.38
+     },
+     {
+      "x": 3.0,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 0.3
+     }
+    ],
+    "balls": [
+     {
+      "x": 2.23,
+      "y": 7.41,
+      "c": "yellow"
+     },
+     {
+      "x": 2.05,
+      "y": 5.9,
+      "c": "red"
+     },
+     {
+      "x": 2.29,
+      "y": 5.8,
+      "c": "white"
+     }
+    ]
+   },
+   {
+    "q": "Zona 2: sortida 15, llegada 5. Atac?",
+    "options": [
+     "10",
+     "20",
+     "5",
+     "15"
+    ],
+    "answer": 0,
+    "explain": "Gràfica 36: 15 − 5 = 10 (3r diamant de la curta superior).",
+    "page": 8,
+    "path": [
+     {
+      "x": 1.36,
+      "y": 6.7
+     },
+     {
+      "x": 2.98,
+      "y": 0
+     },
+     {
+      "x": 4,
+      "y": 3.18
+     },
+     {
+      "x": 3.23,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 1.49
+     }
+    ],
+    "balls": [
+     {
+      "x": 1.36,
+      "y": 6.7,
+      "c": "yellow"
+     },
+     {
+      "x": 2.13,
+      "y": 6.15,
+      "c": "red"
+     },
+     {
+      "x": 2.45,
+      "y": 6.13,
+      "c": "white"
+     }
+    ]
+   },
+   {
+    "q": "Zona 1: amb llegada 40 a la curta inferior, on toca la 4a banda?",
+    "options": [
+     "A la llarga esquerra, cap a 5,8 (uns 2 diamants del racó)",
+     "Al racó inferior esquerre",
+     "A la llarga dreta",
+     "A la curta superior"
+    ],
+    "answer": 0,
+    "explain": "Les línies de connexió de 3a a 4a banda porten la llegada 40 a 5,8 de la llarga esquerra.",
+    "page": 2,
+    "path": [
+     {
+      "x": 2,
+      "y": 8
+     },
+     {
+      "x": 0,
+      "y": 5.8
+     }
+    ],
+    "path_built": true
+   }
+  ]
+ }
+}
