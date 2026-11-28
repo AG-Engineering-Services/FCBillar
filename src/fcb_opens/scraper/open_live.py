@@ -427,10 +427,15 @@ class MatchResult:
     # Columna «Estat» del web nou: «Pendent» o «Finalitzada». None quan la
     # partida no ve del portal (un quadre llegit d'un PDF, una de calculada).
     estat: str | None = None
+    # «Pendent» al portal, però amb les entrades esgotades i un guanyador clar:
+    # el resultat ja no pot canviar (vegeu `_resultats`).
+    entrades_esgotades: bool = False
 
     @property
     def tancada(self) -> bool:
         """El portal la dona per acabada, s'hagi jugat o no."""
+        if self.entrades_esgotades:
+            return True
         return self.estat is not None and self.estat.strip().upper() == "FINALITZADA"
 
     @property
@@ -795,6 +800,10 @@ def parse_group_page(
     )
 
 
+#: Límit d'entrades de totes les fases dels Opens de 3 bandes (reglament 25-26).
+ENTRADES_REGLAMENT = 50
+
+
 def _resultats(
     partides: list[_portal.IndividualPartidaRow],
     punts_oficials: dict[str, int] | None = None,
@@ -811,9 +820,19 @@ def _resultats(
     out: list[MatchResult] = []
     for p in partides:
         estat = p.estat or None
-        acabada = estat is None or normalitza(estat) == "finalitzada"
         entrades = p.entrades or None
         car_a, car_b = p.local_caramboles or 0, p.visitant_caramboles or 0
+        # La federació pot trigar hores a passar a «Finalitzada» una partida ja
+        # jugada, i mentrestant no se n'avisa. Amb les entrades del reglament
+        # esgotades el marcador ja és el final. Amb empat no: a les eliminatòries
+        # es desfà amb un tie break que no es publica.
+        esgotades = (
+            estat is not None
+            and normalitza(estat) != "finalitzada"
+            and (entrades or 0) >= ENTRADES_REGLAMENT
+            and car_a != car_b
+        )
+        acabada = estat is None or normalitza(estat) == "finalitzada" or esgotades
         punts_a = punts_b = 0
         if acabada and entrades:
             if car_a > car_b:
@@ -839,6 +858,7 @@ def _resultats(
             entrades=entrades,
             arbitre=p.arbitre,
             estat=estat,
+            entrades_esgotades=esgotades,
         ))
     return tuple(out)
 
@@ -990,6 +1010,41 @@ def _concilia_noms_ranquing(
     return out
 
 
+def _classificacio_de_les_partides(group: Group, rank_by_name: dict[str, int]) -> Group:
+    """Refà la taula del grup amb les partides, quan n'hi ha alguna que el portal
+    encara no ha tancat però ja té resultat (`entrades_esgotades`).
+
+    La taula del portal no compta una partida fins que és «Finalitzada»: amb
+    aquestes partides diria 0 punts a tothom, i el guanyador quedaria on el
+    posés l'ordre del sorteig. Ordre: punts, mitjana del grup i, entre iguals,
+    el rànquing d'Opens."""
+    punts: dict[str, int] = {}
+    car: dict[str, int] = {}
+    entr: dict[str, int] = {}
+    for m in group.matches:
+        if not m.is_played:
+            continue
+        for nom, p, c in ((m.player_a, m.punts_a, m.caramboles_a), (m.player_b, m.punts_b, m.caramboles_b)):
+            punts[nom] = punts.get(nom, 0) + p
+            car[nom] = car.get(nom, 0) + c
+            entr[nom] = entr.get(nom, 0) + (m.entrades or 0)
+    files = [
+        replace(
+            s,
+            punts=punts.get(s.player_name, 0),
+            mitjana=round(car[s.player_name] / entr[s.player_name], 3)
+            if entr.get(s.player_name)
+            else s.mitjana,
+        )
+        for s in group.standings
+    ]
+    big = 10**9
+    files.sort(
+        key=lambda s: (-s.punts, -s.mitjana, rank_by_name.get(_norm_name(s.player_name), big))
+    )
+    return replace(group, standings=tuple(files))
+
+
 def _seed_unplayed_groups(
     groups: tuple[Group, ...],
     earlier_names: frozenset[str],
@@ -1019,6 +1074,9 @@ def _seed_unplayed_groups(
 
     out: list[Group] = []
     for g in groups:
+        if any(m.entrades_esgotades for m in g.matches):
+            out.append(_classificacio_de_les_partides(g, rank_by_name or {}))
+            continue
         if not g.standings or any(m.is_played for m in g.matches):
             out.append(g)
             continue
