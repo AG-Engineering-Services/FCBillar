@@ -1,0 +1,28 @@
+name: "Avisos: prova d'enviament"
+
+# Envia un avís de prova a cada dispositiu subscrit a la campana de la PWA i
+# escriu al registre què ha respost el servei de push de cadascun (201 = acceptat).
+# Només a mà. Els mateixos secrets que publish-live-opens.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  prova:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Envia l'avís de prova
+        env:
+          NEON_DATA_API_URL: ${{ secrets.NEON_DATA_API_URL }}
+          NEON_SERVICE_ROLE_TOKEN: ${{ secrets.NEON_SERVICE_ROLE_TOKEN }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+        run: uv run --no-dev fcbillar avisa-prova

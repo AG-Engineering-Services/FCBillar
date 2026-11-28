@@ -417,3 +417,67 @@ def test_els_horaris_d_un_bloc_de_dos_dies() -> None:
     assert horaris["A"]["matches"][0] == {"type": "2-3", "time": "09:30"}
     assert horaris["A"]["billar"] == 1
     assert horaris["C"]["billar"] == 3
+
+
+def _fila(car_a: int, car_b: int, entrades: int, estat: str):
+    from fcbillar.scraper.parsers import IndividualPartidaRow
+
+    return IndividualPartidaRow(
+        local_nom="BARGALLO JAUME, JOSEP",
+        local_serie_major=6,
+        local_caramboles=car_a,
+        visitant_nom="CHUECOS ENRIQUEZ, LUIS",
+        visitant_serie_major=3,
+        visitant_caramboles=car_b,
+        entrades=entrades,
+        arbitre="Jiménez",
+        estat=estat,
+    )
+
+
+def test_pendent_amb_marcador_ja_es_resultat() -> None:
+    # Sant Adrià 2026-11-28: el portal tenia «Pendent» i 0 punts a partides ja
+    # jugades. Només publica marcadors acabats; «Pendent» admet correccions.
+    from fcb_opens.scraper.open_live import _resultats
+
+    a_50, a_30, empat = _resultats(
+        [_fila(27, 28, 50, "Pendent"), _fila(23, 30, 38, "Pendent"), _fila(20, 20, 50, "Pendent")]
+    )
+    assert a_50.is_played and a_50.tancada and (a_50.punts_a, a_50.punts_b) == (0, 2)
+    assert a_30.is_played and (a_30.punts_a, a_30.punts_b) == (0, 2)
+    assert empat.is_played and (empat.punts_a, empat.punts_b) == (1, 1)
+
+
+def test_pendent_sense_marcador_o_empat_a_eliminatoria_encara_no() -> None:
+    from fcb_opens.scraper.open_live import _resultats
+
+    (sense,) = _resultats([_fila(0, 0, 0, "Pendent")])
+    assert not sense.is_played
+    # A les eliminatòries l'empat es desfà amb un tie break que no es publica.
+    (ko,) = _resultats([_fila(20, 20, 50, "Pendent")], punts_oficials={})
+    assert not ko.is_played and (ko.punts_a, ko.punts_b) == (0, 0)
+
+
+def test_grup_amb_partida_pendent_es_reordena_per_punts() -> None:
+    # El portal encara té tothom a 0 punts i l'ordre del sorteig: Chuecos, que ha
+    # guanyat, sortia tercer.
+    from fcb_opens.scraper.open_live import (
+        Group,
+        GroupStanding,
+        _resultats,
+        _seed_unplayed_groups,
+    )
+
+    files = tuple(
+        GroupStanding(player_name=n, club="", punts=0, mitjana=0.0)
+        for n in ("BARGALLO JAUME, JOSEP", "GIL PÉREZ, ALBERT", "CHUECOS ENRIQUEZ, LUIS")
+    )
+    g = Group(
+        label="Grup AC", url="", standings=files, matches=_resultats([_fila(27, 28, 50, "Pendent")])
+    )
+    (out,) = _seed_unplayed_groups((g,), frozenset(), {"GIL PÉREZ, ALBERT": 73})
+    assert [(s.player_name, s.punts) for s in out.standings] == [
+        ("CHUECOS ENRIQUEZ, LUIS", 2),
+        ("BARGALLO JAUME, JOSEP", 0),
+        ("GIL PÉREZ, ALBERT", 0),
+    ]

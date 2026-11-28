@@ -427,16 +427,20 @@ class MatchResult:
     # Columna «Estat» del web nou: «Pendent» o «Finalitzada». None quan la
     # partida no ve del portal (un quadre llegit d'un PDF, una de calculada).
     estat: str | None = None
+    # «Pendent» al portal però amb el marcador posat: és el resultat, i
+    # «Finalitzada» només tanca les correccions (vegeu `_resultats`).
+    pendent_amb_resultat: bool = False
 
     @property
     def tancada(self) -> bool:
         """El portal la dona per acabada, s'hagi jugat o no."""
+        if self.pendent_amb_resultat:
+            return True
         return self.estat is not None and self.estat.strip().upper() == "FINALITZADA"
 
     @property
     def is_played(self) -> bool:
-        # Amb «Estat», una partida amb entrades que encara no és «Finalitzada»
-        # és un marcador a mitges i no un resultat.
+        # Amb «Estat», una partida «Pendent» sense marcador encara no s'ha jugat.
         if self.estat is not None and not self.tancada:
             return False
         return self.entrades is not None and self.entrades > 0
@@ -811,9 +815,20 @@ def _resultats(
     out: list[MatchResult] = []
     for p in partides:
         estat = p.estat or None
-        acabada = estat is None or normalitza(estat) == "finalitzada"
         entrades = p.entrades or None
         car_a, car_b = p.local_caramboles or 0, p.visitant_caramboles or 0
+        # El portal només publica marcadors acabats. «Pendent» vol dir que encara
+        # s'hi poden fer correccions, i la federació pot trigar hores a passar-la
+        # a «Finalitzada»: el resultat es dona per bo. Excepte un empat a una
+        # eliminatòria (`punts_oficials` només hi és a les eliminatòries): es
+        # desfà amb un tie break que no es publica.
+        pendent = (
+            estat is not None
+            and normalitza(estat) != "finalitzada"
+            and bool(entrades)
+            and (car_a != car_b or punts_oficials is None)
+        )
+        acabada = estat is None or normalitza(estat) == "finalitzada" or pendent
         punts_a = punts_b = 0
         if acabada and entrades:
             if car_a > car_b:
@@ -839,6 +854,7 @@ def _resultats(
             entrades=entrades,
             arbitre=p.arbitre,
             estat=estat,
+            pendent_amb_resultat=pendent,
         ))
     return tuple(out)
 
@@ -990,6 +1006,41 @@ def _concilia_noms_ranquing(
     return out
 
 
+def _classificacio_de_les_partides(group: Group, rank_by_name: dict[str, int]) -> Group:
+    """Refà la taula del grup amb les partides, quan n'hi ha alguna que el portal
+    encara no ha tancat però ja té resultat (`pendent_amb_resultat`).
+
+    La taula del portal no compta una partida fins que és «Finalitzada»: amb
+    aquestes partides diria 0 punts a tothom, i el guanyador quedaria on el
+    posés l'ordre del sorteig. Ordre: punts, mitjana del grup i, entre iguals,
+    el rànquing d'Opens."""
+    punts: dict[str, int] = {}
+    car: dict[str, int] = {}
+    entr: dict[str, int] = {}
+    for m in group.matches:
+        if not m.is_played:
+            continue
+        for nom, p, c in ((m.player_a, m.punts_a, m.caramboles_a), (m.player_b, m.punts_b, m.caramboles_b)):
+            punts[nom] = punts.get(nom, 0) + p
+            car[nom] = car.get(nom, 0) + c
+            entr[nom] = entr.get(nom, 0) + (m.entrades or 0)
+    files = [
+        replace(
+            s,
+            punts=punts.get(s.player_name, 0),
+            mitjana=round(car[s.player_name] / entr[s.player_name], 3)
+            if entr.get(s.player_name)
+            else s.mitjana,
+        )
+        for s in group.standings
+    ]
+    big = 10**9
+    files.sort(
+        key=lambda s: (-s.punts, -s.mitjana, rank_by_name.get(_norm_name(s.player_name), big))
+    )
+    return replace(group, standings=tuple(files))
+
+
 def _seed_unplayed_groups(
     groups: tuple[Group, ...],
     earlier_names: frozenset[str],
@@ -1019,6 +1070,9 @@ def _seed_unplayed_groups(
 
     out: list[Group] = []
     for g in groups:
+        if any(m.pendent_amb_resultat for m in g.matches):
+            out.append(_classificacio_de_les_partides(g, rank_by_name or {}))
+            continue
         if not g.standings or any(m.is_played for m in g.matches):
             out.append(g)
             continue
